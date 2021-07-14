@@ -1,0 +1,6 @@
+Description,Units,Source,Value
+Average US erosion rate,kg/m2-day,from CalTOX input user guidance,0.00036
+rho of surface soil,kg/m3,from parameter inputs,#NAME?
+porosity of surface soil,,from parameter inputs,#NAME?
+"Enrichment ratio (E), inorganics",,HHRAP,1
+"Enrichment ratio (E), organics",,dioxin reassessment,3

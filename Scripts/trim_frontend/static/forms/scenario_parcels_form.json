@@ -1,0 +1,98 @@
+{
+    "title": "Parcels",
+    "fields": [
+        {
+            "id": "parcels_file",
+            "label": "File for Parcel Layout",
+            "data_type": "file",
+            "required": true,
+            "help": "Indicate the file containing parcel information—either a shapefile containing parcel polygons, or a text or CSV file containing parcel vertex coordinates. These files must also contain fields for parcel name, air designation, land-use designation, farm-food-chain designation, fish-food-web designation, and wetland designation. The text or CSV file must also contain fields for X coordinate and Y coordinate."
+        },
+        {
+            "id": "parcel_coordinates_description",
+            "label": "Description of Coordinate System",
+            "data_type": "string",
+            "help": "Enter the coordinate system of X and Y coordinates you provided in your text or CSV file. Typical options include WGS 1984 or NAD 1983 for latitude/longitude, and UTM zones for metric X and Y coordinates. If you provided a shapefile instead of a text or CSV file, the coordinate system will be automatically detected and displayed here."
+        },
+        {
+            "id": "parcel_names_field",
+            "label": "Field Name for Parcel Names",
+            "data_type": "string",
+            "widget": "select",
+            "choices": [],
+            "default": "ParcelName",
+            "required": true,
+            "help": "Indicate the field name for the names of the parcels from your file. Note: parcel names should not begin with Air, SW, Sed, SurfSoil, RootSoil, VadoseSoil, or GW, as these prefixes will be added to the parcel names to create names of volume elements associated with those parcels. Also note: parcel names should not have any spaces."
+        },
+        {
+            "id": "parcel_air_field",
+            "label": "Field Name for Air Designation",
+            "data_type": "string",
+            "widget": "select",
+            "choices": [],
+            "default": "Air",
+            "required": true,
+            "help": "Indicate the field name showing whether a parcel is an air parcel (valid values are Yes and No). Note: air-parcel boundaries can exactly match parcel boundaries for land and water, such that a parcel can be selected as both air and grasses/herbs, for example."
+        },
+        {
+            "id": "parcel_land_use_field",
+            "label": "Field Name for Land-Use Designation",
+            "data_type": "string",
+            "widget": "select",
+            "choices": [],
+            "default": "LandUse",
+            "required": true,
+            "help": "Indicate the field name showing a parcel's land use (valid values: impervious, tilled soil, untilled soil, agriculture - general, grasses/herbs, deciduous forest, coniferous forest, and water). Note: air parcel boundaries can exactly match parcel boundaries for land and water, such that a parcel with deciduous forest land use can also be selected as an air parcel, for example. Also note: The land-use designation will dictate which areas will be modeled with vegetation (agriculture - general, grasses/herbs, deciduous forest, and coniferous forest) as well as which will be modeled with soil depths reflective of untilled soil (grasses/herbs, deciduous forest, coniferous forest, and untilled soil), and you will later need to provide additional properties about these features."
+        },
+        {
+            "id": "parcel_farm_food_field",
+            "label": "Field Name for Farm-Food-Chain Designation",
+            "data_type": "string",
+            "widget": "select",
+            "choices": [],
+            "default": "FarmFoodChain",
+            "required": true,
+            "help": "Indicate the field name showing whether a parcel will eventually be evaluated with exposure from a farm food chain (a Yes/No field). Note: this is not used in TRIM.FaTE. Also note: farm food chains are only allowed for land uses of tilled soil and untilled soil (where later processing after TRIM.FaTE will use soil-to-plant chemical uptake factors; agriculture land uses are treated like any other vegetative parcel and are not where ingestion exposures should occur)."
+        },
+        {
+            "id": "parcel_fish_food_field",
+            "label": "Field Name for Fish-Food-Web Designation",
+            "data_type": "string",
+            "widget": "select",
+            "choices": [],
+            "default": "FishFoodWeb",
+            "required": true,
+            "help": "Indicate the field name showing whether a parcel will be modeled with a fish food web (i.e., for exposure from fish consumption) (a Yes/No field). Note: fish food webs are only allowed for the water land use; water parcels do not necessarily needfish food webs, but if they do not, they will not be evaluated for exposure through fish consumption. You will later need to provide additional properties about the fish food web and the water bodies overall."
+        },
+        {
+            "id": "parcel_wetland_field",
+            "label": "Field Name for Wetland Designation",
+            "data_type": "string",
+            "widget": "select",
+            "choices": [],
+            "default": "Wetland",
+            "required": true,
+            "help": "Indicate the field name showing whether a parcel will be modeled with wetland characteristics (e.g., modified water percolation and mercury methylation in soil; you will later need to provide information on these wetland characteristics) (a Yes/No field). Note: wetland designations are not allowed for land uses of water and impervious."
+        },
+        {
+            "id": "parcel_x_coordinates_field",
+            "label": "Field Name for X Coordinates",
+            "data_type": "string",
+            "widget": "select",
+            "choices": [],
+            "default": "Xcoordinate",
+            "required": true,
+            "help": "Indicate the field name for the X coordinates of the parcels from your text or CSV file."
+        },
+        {
+            "id": "parcel_y_coordinates_field",
+            "label": "Field Name for Y Coordinates",
+            "data_type": "string",
+            "widget": "select",
+            "choices": [],
+            "default": "Ycoordinate",
+            "required": true,
+            "help": "Indicate the field name for the Y coordinates of the parcels from your text or CSV file."
+        }
+    ]
+}

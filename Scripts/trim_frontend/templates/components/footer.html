@@ -1,0 +1,17 @@
+
+<footer class="container pb-5">
+    <hr class="my-4">
+
+    <div class="float-left">
+        <p>&copy; 2020 ICF</p>
+    </div>
+
+    {% if current_user.has_role('superuser') %}
+        <div class="float-right">
+            <a class="badge badge-primary-accent p-2"
+                href="{{ url_for('admin.index') }}" target="_blank">
+                Admin Panel
+            </a>
+        </div>
+    {% endif %}
+</footer>

@@ -1,0 +1,10 @@
+1. Use qt designer to design GUI
+2. Convert GUI script (.ui) to a py file for edits - pyuic5 -x window.ui -o myapp.py
+3. Make edits (callbacks/routes etc)
+4. Convert .py files to executable using pyinstaller gui
+	*pip install auto-py-to-exe
+	*run autopytoexe.exe found in C:\Users\39492\AppData\Local\Continuum\anaconda3\Scripts
+5. Make a set up file
+	*download http://jrsoftware.org/isdl.php 
+	*Open and follow instructions
+6. Done

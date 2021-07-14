@@ -1,0 +1,64 @@
+
+<form id="abiotic-props-gui"
+    data-async-form="true"
+    data-form-src="scenario_abiotic_props_form"
+>
+    <section class="container px-0">
+        <div class="row py-2">
+            <div class="col-sm">
+                <h5 class="text-center">
+                    Air Compartments
+                </h5>
+            </div>
+        </div>
+        <div class="row mb-1">
+            <div class="col-md">
+                <div data-slot="true" data-target="dust_concentration"></div>
+                <div data-slot="true" data-target="air_density"></div>
+            </div>
+            <div class="col-md">
+                <div data-slot="true" data-target="dust_density"></div>
+                <div data-slot="true" data-target="dust_organic_matter"></div>
+            </div>
+        </div>
+
+        <div class="row py-2">
+            <div class="col-sm">
+                <h5 class="text-center">
+                    Other Volume Elements
+                </h5>
+            </div>
+        </div>
+        <div class="row mb-1">
+            <div class="col-md">
+                <div data-slot="true" data-target="surface_soil_tilled_thickness"></div>
+            </div>
+            <div class="col-md">
+                <div data-slot="true" data-target="surface_soil_untilled_thickness"></div>
+            </div>
+        </div>
+        <div class="row mb-1">
+            <div class="col-md">
+                <div data-slot="true" data-target="root_soil_tilled_thickness"></div>
+            </div>
+            <div class="col-md">
+                <div data-slot="true" data-target="root_soil_untilled_thickness"></div>
+            </div>
+        </div>
+        <div class="row mb-1">
+            <div class="col-md">
+                <div data-slot="true" data-target="vadose_soil_thickness"></div>
+            </div>
+            <div class="col-md">
+                <div data-slot="true" data-target="groundwater_thickness"></div>
+            </div>
+        </div>
+    </section>
+</form>
+<script>
+    onDomLoad(function() {
+        var form = document.getElementById('abiotic-props-gui');
+        form.addEventListener('form:loaded', function() {
+        });
+    });
+</script>

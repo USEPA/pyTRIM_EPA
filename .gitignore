@@ -1,0 +1,8 @@
+# Ignore Office temp files
+**/~$*.*
+
+# Ignore outputs
+**/Output_Files/*
+
+# Ignore executables
+**/*.exe

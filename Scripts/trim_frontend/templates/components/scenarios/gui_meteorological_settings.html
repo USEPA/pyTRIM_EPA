@@ -1,0 +1,251 @@
+{% from 'macros/scenarios/custom_form_macros.html' import dimensionally_varying_subform %}
+
+<form id="met-settings-gui"
+    data-async-form="true"
+    data-form-src="scenario_meteorology_form"
+>
+    <section id="time-varying-values" class="container px-0">
+        <div class="row">
+            <div class="col-sm">
+                <h5 class="text-center">Time-Varying Values</h5>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm">
+                <div data-slot="true" data-target="default_time_varying_file"></div>
+                <div class="form-text mb-2">
+                    <small class="text-muted">
+                        <a href="{{ url_for(
+                            'static',
+                            filename='templates/meteorology_time_varying_inputs.csv'
+                        ) }}">Click here</a> to download the template for creating a time-varying inputs file.
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <div data-slot="true" data-target="ambient_air">
+            {{ dimensionally_varying_subform(
+                is_varying_field='time_varying',
+                use_custom_field='use_custom_file',
+                custom_file_field='custom_file',
+                var_name_fields=['field_name'],
+                static_value_fields=['static_value']
+            ) }}
+        </div>
+        
+        <div data-slot="true" data-target="wind_speed">
+            {{ dimensionally_varying_subform(
+                is_varying_field='time_varying',
+                use_custom_field='use_custom_file',
+                custom_file_field='custom_file',
+                var_name_fields=['field_name'],
+                static_value_fields=['static_value']
+            ) }}
+        </div>
+        
+        <div data-slot="true" data-target="wind_direction">
+            {{ dimensionally_varying_subform(
+                is_varying_field='time_varying',
+                use_custom_field='use_custom_file',
+                custom_file_field='custom_file',
+                var_name_fields=['field_name'],
+                static_value_fields=['static_value']
+            ) }}
+        </div>
+        
+        <div data-slot="true" data-target="mixing_height">
+            {{ dimensionally_varying_subform(
+                is_varying_field='time_varying',
+                use_custom_field='use_custom_file',
+                custom_file_field='custom_file',
+                var_name_fields=['field_name'],
+                static_value_fields=['static_value']
+            ) }}
+        </div>
+        
+        <div data-slot="true" data-target="daytime_indicator">
+            {{ dimensionally_varying_subform(
+                is_varying_field='time_varying',
+                use_custom_field='use_custom_file',
+                custom_file_field='custom_file',
+                var_name_fields=['field_name'],
+                static_value_fields=['static_value']
+            ) }}
+        </div>
+        
+        <div data-slot="true" data-target="precipitation">
+            {{ dimensionally_varying_subform(
+                is_varying_field='time_varying',
+                use_custom_field='use_custom_file',
+                custom_file_field='custom_file',
+                var_name_fields=['field_name_rate', 'field_name_cumulative'],
+                static_value_fields=['static_value_rate', 'static_value_cumulative'],
+                other_fields=['average_annual']
+            ) }}
+        </div>
+
+    </section>
+
+    <section id="spatially-varying-values" class="container px-0">
+        <div class="row">
+            <div class="col-sm">
+                <h5 class="text-center">Spatially-Varying Values</h5>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm">
+                <div data-slot="true" data-target="default_spatially_varying_file"></div>
+            </div>
+        </div>
+        
+        <div data-slot="true" data-target="groundwater_seepage">
+            {{ dimensionally_varying_subform(
+                is_varying_field='spatially_varying',
+                use_custom_field='use_custom_file',
+                custom_file_field='custom_file',
+                var_name_fields=['field_name'],
+                static_value_fields=['static_value']
+            ) }}
+        </div>
+        
+        <div data-slot="true" data-target="runoff">
+            {{ dimensionally_varying_subform(
+                is_varying_field='spatially_varying',
+                use_custom_field='use_custom_file',
+                custom_file_field='custom_file',
+                var_name_fields=['field_name'],
+                static_value_fields=['static_value']
+            ) }}
+        </div>
+    </section>
+
+    <section id="interception-fractions" class="container px-0">
+        <div data-slot="true" data-target="interception_fractions">
+            <div class="row py-2">
+                <div class="col-sm">
+                    <h5 class="text-center" data-slot="true" data-target="title">
+                    </h5>
+                </div>
+            </div>
+            <div class="row mb-1 subform">
+                <div class="col-sm">
+                    <div data-slot="true" data-target="calculated_coniferous"></div>
+                    <div data-slot="true" data-target="static_coniferous"></div>
+
+                    <div data-slot="true" data-target="calculated_deciduous"></div>
+                    <div data-slot="true" data-target="static_deciduous"></div>
+                </div>
+                <div class="col-sm">
+                    <div data-slot="true" data-target="calculated_grass_herbs"></div>
+                    <div data-slot="true" data-target="static_grass_herbs"></div>
+
+                    <div data-slot="true" data-target="calculated_agriculture"></div>
+                    <div data-slot="true" data-target="static_agriculture"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+</form>
+<script>
+    onDomLoad(function(e) {
+        var form = document.getElementById('met-settings-gui');
+        form.addEventListener('form:loaded', function() {
+            enableFieldUpdates();
+        });
+
+        function enableFieldUpdates() {
+            var gui = $('#met-settings-gui');
+            var fileFields = gui.find('[type="file"]');
+            var selects = gui.find('select');
+            var useCustom = gui.find('[type="checkbox"][id$="use_custom_file"]');
+
+            selects.attr('disabled', 'disabled');
+
+            function updateFields(section) {
+                var globalFileFiled = section.find('[type="file"][name^="default_"]');
+                section.find('select').each(function() {
+                    var me = $(this);
+
+                    var subform = me.closest('.subform');
+                    var customized = subform.find(
+                        '[type="checkbox"][id$="use_custom_file"]');
+
+                    var data = globalFileFiled.attr('data-filedata');
+                    if (customized.prop('checked')) {
+                        data = subform.find('[type="file"]').attr('data-filedata');
+                    }
+                    data = data || 'null';
+                    data = JSON.parse(data);
+
+                    me.html('');
+                    if (data) {
+                        var fields = data.fields;
+                        TRIM.forms.updateSelect(this, fields);
+                        me.removeAttr('disabled');
+                    }
+                    else {
+                        me.attr('disabled', 'disabled');
+                    }
+                });
+            }
+
+            useCustom.change(function(e) {
+                updateFields($(this).closest('section'));
+            });
+
+            fileFields.change(function(e) {
+                var me = $(this);
+                var loadingRequest = 'load_' + this.id;
+                LoadingScreen.show(loadingRequest);
+
+                me.removeAttr('data-filedata');
+                TRIM.api.parseFiles(this).on('load', function() {
+                    try {
+                        var data = JSON.parse(this.responseText);
+                        if (data.success) {
+                            var myData = data.files[me.attr('name')];
+                            me.attr(
+                                'data-filedata',
+                                JSON.stringify(myData)
+                            );
+                        }
+                        updateFields(me.closest('section'));
+                    }
+                    finally {
+                        LoadingScreen.hide(loadingRequest);
+                    }
+                });
+            });
+
+            var staticPrecip = $('#precipitation_static_value_rate');
+            var staticCum = $('#precipitation_static_value_cumulative');
+            var precipVaries = $('#precipitation_time_varying');
+            var annualPrecip = $('#precipitation_average_annual');
+
+            var startDate = $('#start_date');
+            var endDate = $('#end_date');
+            staticPrecip.add(precipVaries).change(function() {
+                staticCum.val('');
+                annualPrecip.val('');
+
+                var start = startDate.val();
+                var end = endDate.val();
+                if (!start || !end) {
+                    return;
+                }
+
+                var diff = calculateDateDistance(start, end, ['days']);
+                var days = parseInt(diff[0].split(' ')[0]);
+
+                var staticVal = days * staticPrecip.val()
+                staticCum.val(staticVal);
+                if (!precipVaries.prop('checked')) {
+                    var annualVal = days / 365.2425 * staticPrecip.val()
+                    annualPrecip.val(annualVal);
+                }
+            });
+            staticPrecip.change();
+        }
+    });
+</script>

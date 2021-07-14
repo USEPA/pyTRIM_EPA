@@ -1,0 +1,18 @@
+{
+    "title": "Wind Direction (deg)",
+    "inherits": "subforms/time_varying_input_form.json",
+    "fields": [
+        {
+            "id": "field_name",
+            "default": "WindDirection"
+        },
+        {
+            "id": "static_value",
+            "data_type": "int",
+            "min": 0,
+            "max": 360,
+            "default": 270,
+            "help": "Enter a single value to use throughout your model run. The default value of 270 is health-protective when the modeled watershed is due east of the emission source."
+        }
+    ]
+}

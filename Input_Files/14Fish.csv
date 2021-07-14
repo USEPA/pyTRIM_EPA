@@ -1,0 +1,18 @@
+Lake,Aquatic Biota (Consuming Organism),Location,Aquatic Biota species/notes,Algae,Macrophyte,Zooplankton,Bethic Invertebrate,Water Column Herbivore,Benthic Omnivore,Water Column Omnivore,Benthic Carnivore,Water Column Carnivore,Biomass(kg ww/m2),"Aquatic Species Density 
+(# fish/m2)",Single Organism Body Weight(kg)
+LakeCadillac,Macrophyte,SW,assume they are base for detritus at surface of sediments,0,0,0,0,0,0,0,0,0,0.5,-,
+LakeCadillac,Zooplankton,SW,,1,0,0,0,0,0,0,0,0,0.028912421,507235.4564,0.000000057
+LakeCadillac,Benthic Invertebrate,Sed,,0,0,0,0,0,0,0,0,0,0.010314776,40.45010134,0.000255
+LakeCadillac,Water Column Herbivore,SW,"YOY, minnows",0,0,1,0,0,0,0,0,0,0.003755,0.053642857,0.07
+LakeCadillac,Benthic Omnivore,Sed,"small catfish, rock bass",0,0,0,1,0,0,0,0,0,0.0018775,0.002503333,0.75
+LakeCadillac,Water Column Omnivore,SW,"aka herbivore/ detritivore/ benthivore, e.g., sucker, carp",0,0,0,0,1,0,0,0,0,0.0009763,0.0048815,0.2
+LakeCadillac,Benthic Carnivore,Sed,large catfish,0,0,0,0.5,0,0.5,0,0,0,0.0003755,0.0001502,2.5
+LakeCadillac,Water Column Carnivore,SW,"largemouth bass, walleye",0,0,0,0,0,0.5,0.5,0,0,0.0005257,0.000350467,1.5
+LakeMitchell,Macrophyte,SW,assume they are base for detritus at surface of sediments,0,0,0,0,0,0,0,0,0,0.5,-,
+LakeMitchell,Zooplankton,SW,,1,0,0,0,0,0,0,0,0,0.025563111,448475.6259,0.000000057
+LakeMitchell,Benthic Invertebrate,Sed,,0,0,0,0,0,0,0,0,0,0.007962005,31.22354751,0.000255
+LakeMitchell,Water Column Herbivore,SW,"YOY, minnows",0,0,1,0,0,0,0,0,0,0.00174,0.024857143,0.07
+LakeMitchell,Benthic Omnivore,Sed,"small catfish, rock bass",0,0,0,1,0,0,0,0,0,0.00145,0.001933333,0.75
+LakeMitchell,Water Column Omnivore,SW,"aka herbivore/ detritivore/ benthivore, e.g., sucker, carp",0,0,0,0.5,0.5,0,0,0,0,0.00145,0.0029,0.5
+LakeMitchell,Benthic Carnivore,Sed,large catfish,0,0,0,0.5,0,0.5,0,0,0,0.00029,0.000116,2.5
+LakeMitchell,Water Column Carnivore,SW,"largemouth bass, walleye",0,0,0,0,0.25,0.25,0.5,0,0,0.00087,0.00087,1

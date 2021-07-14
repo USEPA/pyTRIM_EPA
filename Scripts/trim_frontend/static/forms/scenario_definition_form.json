@@ -1,0 +1,19 @@
+{
+    "title": "Scenario Definition",
+    "fields": [
+        {
+            "id": "name",
+            "label": "Scenario Name",
+            "data_type": "string",
+            "required": true,
+            "help": "Enter a short name for your scenario (120 characters or less)"
+        },
+        {
+            "id": "description",
+            "label": "Scenario Description",
+            "data_type": "string",
+            "widget": "textarea",
+            "help": "Enter a description for your scenario"
+        }
+    ]
+}

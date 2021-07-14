@@ -1,0 +1,15 @@
+# Ignore compiled python files
+**/__pycache__/*
+**/*.pyc
+
+# Ignore pytest files
+**/.pytest_cache/*
+
+# Ignore .env files
+**/.env
+
+# Ignore sqlite files
+**/*.db
+
+# Ignore shell files
+**/*.bat

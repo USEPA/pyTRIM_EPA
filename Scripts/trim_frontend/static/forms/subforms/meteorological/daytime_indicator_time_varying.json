@@ -1,0 +1,16 @@
+{
+    "title": "Daytime Indicator",
+    "inherits": "subforms/time_varying_input_form.json",
+    "fields": [
+        {
+            "id": "field_name",
+            "default": "IsDay"
+        },
+        {
+            "id": "static_value",
+            "data_type": "bit",
+            "default": 1,
+            "help": "Enter a single value to use throughout your model run. The default is constant daytime."
+        }
+    ]
+}

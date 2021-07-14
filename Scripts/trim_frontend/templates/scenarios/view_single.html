@@ -1,0 +1,42 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+
+<div class="d-flex pb-1">
+    <h1>{{ scenario.name }}</h1>
+    <div class="ml-auto mt-2">
+        <a href="{{ url_for('scenario.edit_scenario', id=scenario.id) }}"
+            class="btn btn-secondary"
+        >
+            <i class="fa fa-pen"></i>&nbsp;
+            Edit<span class="d-none d-sm-inline"> Scenario</span>
+        </a>
+    </div>
+</div>
+
+<div class="text-muted mb-1">
+    Created: {{ scenario.created.strftime('%Y-%m-%d %I:%M %p') }}
+</div>
+<div class="text-muted mb-1">
+    Last Updated: {{ scenario.updated.strftime('%Y-%m-%d %I:%M %p') }}
+</div>
+
+<p class="lead">
+    {{ scenario.description }}
+</p>
+
+<div class="container text-center">
+    <div class="row">
+        <div class="col-md"></div>
+        <div class="col-md-6 col-lg-4 p-0">
+            <button type="button" class="btn btn-primary btn-lg btn-block">
+                <i class="fa fa-file-download"></i>&nbsp;
+                Export TRIM.FaTE Inputs
+            </button>
+        </div>
+        <div class="col-md"></div>
+    </div>
+</div>
+
+
+{% endblock content %}

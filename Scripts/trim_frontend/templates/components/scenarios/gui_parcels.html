@@ -1,0 +1,123 @@
+
+<form id="parcels-gui"
+    data-async-form="true"
+    data-form-src="scenario_parcels_form"
+>
+    <section class="container px-0">
+        <div class="row mb-1">
+            <div class="col-sm">
+                <div data-slot="true" data-target="parcels_file"></div>
+                <div class="form-text mb-2">
+                    <small class="text-muted">
+                        <a href="{{ url_for(
+                            'static', filename='templates/parcels.csv'
+                        ) }}">Click here</a> to download the template for creating a CSV parcels file.
+                    </small>
+                </div>
+
+                <div data-slot="true" data-target="parcel_coordinates_description"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm">
+                <h5 class="text-center">Parcel Definitions</h5>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm">
+                <div data-slot="true" data-target="parcel_names_field"></div>
+            </div>
+        </div>
+        <div class="row mb-1">
+            <div class="col-sm">
+                <div data-slot="true" data-target="parcel_x_coordinates_field"></div>
+            </div>
+            <div class="col-sm">
+                <div data-slot="true" data-target="parcel_y_coordinates_field"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm">
+                <div data-slot="true" data-target="parcel_air_field"></div>
+                <div data-slot="true" data-target="parcel_land_use_field"></div>
+                <div data-slot="true" data-target="parcel_farm_food_field"></div>
+                <div data-slot="true" data-target="parcel_fish_food_field"></div>
+                <div data-slot="true" data-target="parcel_wetland_field"></div>
+            </div>
+        </div>
+    </section>
+</form>
+<script>
+    onDomLoad(function() {
+        var form = document.getElementById('parcels-gui');
+        form.addEventListener('form:loaded', function() {
+            enableFieldUpdates();
+        });
+
+        function enableFieldUpdates() {
+            var gui = $('#parcels-gui');
+            var fileField = gui.find('[type="file"]');
+            var desc = gui.find('[type="text"]');
+            var selects = gui.find('select');
+
+            desc.attr('disabled', 'disabled');
+            selects.attr('disabled', 'disabled');
+
+            var coords = selects
+                .filter('#parcel_x_coordinates_field').add(
+                    selects.filter('#parcel_y_coordinates_field'))
+                .closest('.form-group').hide();
+
+            function updateFields() {
+                var data = fileField.attr('data-filedata');
+                data = data || 'null';
+                data = JSON.parse(data);
+
+                desc.attr('disabled', 'disabled');
+                selects.html('');
+                coords.hide();
+                if (data) {
+                    var filename = data.filename;
+                    var ext = filename.split('.').slice(-1)[0];
+                    if (ext === 'csv') {
+                        desc.removeAttr('disabled');
+                        coords.show();
+                    }
+                    var fields = data.fields;
+                    selects.each(function() {
+                        var me = $(this);
+                        TRIM.forms.updateSelect(this, fields);
+                        this.removeAttribute('disabled');
+                    });
+                }
+                else {
+                    selects.attr('disabled', 'disabled');
+                }
+            }
+
+            fileField.change(function(e) {
+                var me = $(this);
+                var loadingRequest = 'load_' + this.id;
+                LoadingScreen.show(loadingRequest);
+
+                me.removeAttr('data-filedata');
+                TRIM.api.parseFiles(this).on('load', function() {
+                    try {
+                        var data = JSON.parse(this.responseText);
+                        if (data.success) {
+                            var myData = data.files[me.attr('name')];
+                            fileField.attr(
+                                'data-filedata',
+                                JSON.stringify(myData)
+                            );
+                        }
+                        updateFields();
+                    }
+                    finally {
+                        LoadingScreen.hide(loadingRequest);
+                    }
+                });
+            });
+        }
+    });
+</script>

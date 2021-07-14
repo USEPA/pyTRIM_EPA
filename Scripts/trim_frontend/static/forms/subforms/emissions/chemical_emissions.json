@@ -1,0 +1,21 @@
+{
+    "title": "Chemical Emissions",
+    "fields": [
+        {
+            "id": "chemical",
+            "label": "Name",
+            "data_type": "string",
+            "widget": "select",
+            "choices": ["Arsenic", "Chromium"],
+            "required": true
+        },
+        {
+            "id": "rate",
+            "label": "Emissions (g/day)",
+            "data_type": "float",
+            "min": 0,
+            "required": true,
+            "help": "Enter the emission rate (grams per day) of each chemical released by the emission source."
+        }
+    ]
+}

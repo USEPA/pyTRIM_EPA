@@ -1,0 +1,68 @@
+
+<form id="export-settings-gui"
+    data-async-form="true"
+    data-form-src="scenario_exports_form"
+>
+    <section class="container px-0">
+        <div class="row mb-1">
+            <div class="col-md">
+                <div data-slot="true" data-target="export_html"></div>
+                <div data-slot="true" data-target="html_export_date"></div>
+                <div data-slot="true" data-target="export_duration"></div>
+            </div>
+            <div class="col-md">
+                <div data-slot="true" data-target="average_results"></div>
+                <div data-slot="true" data-target="averaging_interval"></div>
+                <div data-slot="true" data-target="results_significant_digits"></div>
+            </div>
+        </div>
+        <div class="row mb-1">
+            <div class="col-md">
+                <div data-slot="true" data-target="display_time_steps_first"></div>
+                <div data-slot="true" data-target="export_outdoor_environment_defs"></div>
+                <div data-slot="true" data-target="export_properties"></div>
+            </div>
+            <div class="col-md">
+                <div data-slot="true" data-target="export_concentration_results"></div>
+                <div data-slot="true" data-target="export_deposition_results"></div>
+                <div data-slot="true" data-target="export_chemical_mass_results"></div>
+            </div>
+        </div>
+    </section>
+</form>
+<script>
+    onDomLoad(function(e) {
+        var form = document.getElementById('export-settings-gui');
+        form.addEventListener('form:loaded', function() {
+            enableFieldUpdates();
+        });
+
+        function enableFieldUpdates() {
+            var exportDate = $('#html_export_date');
+            var exportDuration = $('#export_duration');
+
+            exportDate.change(function(e) {
+                var endDate = $('#end_date');
+
+                var start = exportDate.val();
+                var end = endDate.val();
+                if (end === undefined) {
+                    return;
+                }
+
+                var disp = calculateDateDistance(start, end);
+
+                if (!disp.length) {
+                    exportDuration.addClass('is-invalid pl-5').val(
+                        'Invalid date range');
+                }
+                else {
+                    exportDuration.removeClass('is-invalid pl-5').val(
+                        disp.join(', '));
+                }
+            });
+            exportDate.change();
+            $('#end_date').change();
+        }
+    });
+</script>

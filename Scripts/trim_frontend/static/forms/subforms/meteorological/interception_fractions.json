@@ -1,0 +1,81 @@
+{
+    "title": "Wet Deposition Interception Fractions",
+    "fields": [
+        {
+            "id": "calculated_coniferous",
+            "label": "Auto-Calculate for Coniferous Forest",
+            "data_type": "boolean",
+            "default": false,
+            "help": "Check the box to allow the model to calculate the fraction of wet deposition that is intercepted by coniferous tree needles. This feature is not typically used."
+        },
+        {
+            "id": "static_coniferous",
+            "label": "Static Value for Coniferous Forest",
+            "data_type": "float",
+            "min": 0,
+            "max": 1,
+            "step": 0.1,
+            "default": 0.2,
+            "required": true,
+            "help": "Enter the fraction of wet deposition that is intercepted by coniferous tree needles. The default value of 0.2 is professional judgement.",
+            "if_false": ["calculated_coniferous"]
+        },
+        {
+            "id": "calculated_deciduous",
+            "label": "Auto-Calculate for Deciduous Forest",
+            "data_type": "boolean",
+            "default": false,
+            "help": "Check the box to allow the model to calculate the fraction of wet deposition that is intercepted by deciduous tree leaves. This feature is not typically used."
+        },
+        {
+            "id": "static_deciduous",
+            "label": "Static Value for Deciduous Forest",
+            "data_type": "float",
+            "min": 0,
+            "max": 1,
+            "step": 0.1,
+            "default": 0.2,
+            "required": true,
+            "help": "Enter the fraction of wet deposition that is intercepted by deciduous tree leaves. The default value of 0.2 is professional judgement.",
+            "if_false": ["calculated_deciduous"]
+        },
+        {
+            "id": "calculated_grass_herbs",
+            "label": "Auto-Calculate for Grasses/Herbs",
+            "data_type": "boolean",
+            "default": false,
+            "help": "Check the box to allow the model to calculate the fraction of wet deposition that is intercepted by grasses/herbs leaves. This feature is not typically used."
+        },
+        {
+            "id": "static_grass_herbs",
+            "label": "Static Value for Grasses/Herbs",
+            "data_type": "float",
+            "min": 0,
+            "max": 1,
+            "step": 0.1,
+            "default": 0.2,
+            "required": true,
+            "help": "Enter the fraction of wet deposition that is intercepted by grasses/herbs leaves. The default value of 0.2 is professional judgement.",
+            "if_false": ["calculated_grass_herbs"]
+        },
+        {
+            "id": "calculated_agriculture",
+            "label": "Auto-Calculate for Agriculture",
+            "data_type": "boolean",
+            "default": false,
+            "help": "Check the box to allow the model to calculate the fraction of wet deposition that is intercepted by agriculture leaves. This feature is not typically used."
+        },
+        {
+            "id": "static_agriculture",
+            "label": "Static Value for Agriculture",
+            "data_type": "float",
+            "min": 0,
+            "max": 1,
+            "step": 0.1,
+            "default": 0.2,
+            "required": true,
+            "help": "Enter the fraction of wet deposition that is intercepted by agriculture leaves. The default value of 0.2 is professional judgement.",
+            "if_false": ["calculated_agriculture"]
+        }
+    ]
+}

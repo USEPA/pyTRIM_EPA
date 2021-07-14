@@ -1,0 +1,49 @@
+Lake parcel,,LakeCadillac,LakeMitchell
+SW_Algae density in water column (g[algae]/L[water]),Based on calculation dependent on total phosphorus (TP),0.012397496,0.010853594
+SW_Chloride concentration (mg/L),USGS 2012,7,7
+SW_Chlorophyll concentration (mg/L),,0.003,0.003
+SW_Evaporation rate (m/yr),see Morton 1986 (probably underestimate),0.7,0.7
+SW_External inflow from other water bodies (m3/yr),,25964580.01,0
+SW_Organic carbon fraction in suspended sediments (unitless),Professional judgment.,0.02,0.02
+SW_pH (unitless),,8.5,8.5
+SW_Suspended sed. conc. (kg[sed] / m3[water]),Concentration of sediment particles in water compartment,0.05,0.05
+SW_Water temperature (degrees K),,286.15,286.15
+SW_Water retention time (d),Taken as flush time (yr) multiplied by 365.25 days,175.32,387.165
+SW_Water depth (m),,3.6,2.59
+SP_Sediment depth (m),,0.05,0.05
+SP_Sediment density / rho (suspended and bed sediment) (kg[sed]/m3[sed]),Sediment particle density,2600,2600
+SP_Sediment porosity (volume[total pore space]/volume[sediment compartment]),Fraction of pores in sediment compartment,0.6,0.6
+SP_Sediment Deposition velocity (m[water]/day),,2,2
+SP_External sediment inflow from other water bodies (kg/yr),,1298229.001,0
+SP_pH (unitless),Professional judgment.,7.3,7.3
+SP_Organic carbon fraction (unitless),McKone et al. 2001 (Table 3).,0.02,0.02
+SP_Runoff watershed area (m2),Portion of surface area whose runoff terminates in this lake,51101198.77,78314013.97
+SP_Watershed:Lake area ratio,,10.61520358,7.343207489
+SP_surface RO from land,,8118713.145,12442154.59
+SP_direct precip to lake,,3774147.104,8361221.856
+SP_non-surface (GW seepage),,7465978.537,11441820.57
+SP_Other external inflow,,25964580.01,0
+SP_Evaporation,,3369774.2,7465376.658
+SP_Annual discharge (m3/yr),,36046956.02,25964580.01
+SP_Discharge rate (m3/s),,1.143041477,0.823331431
+SP_Area (m2),,4813963.143,10664823.8
+SP_Volume (m3),,17330267.32,27621893.63
+SP_Computed depth (m),,3.6,2.59
+SP_Computed flush rate (time in yr for 1 flush),,2.08,0.94
+SP_Erosion watershed area (m2),Portion of surface area whose sediment erodes directly into this lake,10688231.95,18665550.02
+SP_erosion per day (kg[sed]/day),sediment eroded into pond,846.975724,328.134655
+SP_external input per day (kg[sed]/day),,3556.791783,0
+SP_kg[sed]/m2-day,,7.92E-05,1.76E-05
+SP_kg[sed]/m2-yr,,0.028923974,0.006416588
+SP_Sediment bulk density,Concentration of sediment particles in sediment compartment,1040,1040
+SP_kg/yr,,1802347.801,1298229.001
+SP_kg/day,,4937.93918,3556.791783
+SP_Total sediment buried (kg/day),amt that must be buried for sed balance,-534.1716736,-3228.657128
+SP_Burial rate (mass per area) (kg[sed]/m2[interface]-day),,-0.000110963,-0.000302739
+SP_Deposition (volumetric) (m3[sed]/m2[interface]-day),[Dep Vel * TSS ] / (rho-SS),3.85E-05,3.85E-05
+SP_Burial rate (volumetric) (m3[sed]/m2[interface]-day),burial rate / rho-BS,-4.27E-08,-1.16E-07
+SP_Annual bed sediment increment [hypothetical annual rise in sed] (cm[sed cmpt]/m2[interface]-yr),burial rate * (sed density/sed bulk density) * unit conv,-0.003894374,-0.010624971
+SP_Resuspension velocity (m[sed cmpt]/day),Dep = Resus + Burial,9.63E-05,9.64E-05
+,Dep = [ResVel * Bsconc/rhoBS] + Burial,,
+,Dep - Burial = ResVel * BSconc/rhoBS,,
+,ResVel = rhoBS/BSconc * (Dep - Bur),,

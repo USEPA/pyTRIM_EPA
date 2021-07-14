@@ -1,0 +1,88 @@
+{% from 'macros/modal_macros.html' import render_modal %}
+{% from 'macros/form_macros.html' import render_field %}
+
+<h1 class="text-center">Scenarios</h1>
+
+{% set create_modal_id = 'create-scenario-modal' %}
+
+<div class="text-right pb-2">
+    <button type="button"
+        class="btn btn-primary"
+        data-toggle="modal"
+        data-target="#{{ create_modal_id }}"
+    >
+        <i class="fa fa-plus"></i>&nbsp;
+        New<span class="d-none d-sm-inline"> Scenario</span>
+    </button>
+</div>
+
+<div class="row">
+    {% for scenario in scenarios|sort(attribute='updated', reverse = True) %}
+        <div class="col-lg-3 col-md-4 col-sm-6 py-2">
+            <div class="card border-primary">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">{{ scenario.name }}</h5>
+                    <small class="text-muted">
+                        {{ scenario.updated.strftime('%Y-%m-%d %I:%M %p') }}
+                    </small>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        {{ scenario.short_description }}
+                    </p>
+                    <a href="{{ url_for('scenario.view_scenario', id=scenario.id) }}"
+                        class="btn btn-block btn-outline-primary"
+                    >
+                        View
+                    </a>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="col-sm-12 text-center">
+            You haven't started working on any scenarios yet.
+            <button type="button"
+                class="btn btn-link p-0"
+                data-toggle="modal"
+                data-target="#{{ create_modal_id }}"
+            >
+                Start one now!
+            </button>
+        </div>
+    {% endfor %}
+</div>
+
+{% set modal_body %}
+<form id="create-scenario-form"
+    method="POST"
+    action="{{ url_for('scenario.create_scenario') }}"
+>
+    {{ scenario_form.csrf_token }}
+    {{ render_field(scenario_form.name) }}
+    {{ render_field(scenario_form.description) }}
+    <button type="submit" style="display: none;">Submit</button>
+</form>
+{% endset %}
+{% set modal_footer %}
+    <button type="button" class="btn btn-light" data-dismiss="modal">
+        Cancel
+    </button>
+    <button type="button" id="create-scenario-btn" class="btn btn-primary">
+        Create
+    </button>
+    <script>
+        onDomLoad(function(e) {
+            $('#create-scenario-btn').click(function(e) {
+                e.preventDefault();
+                // Forward this click to the ACTUAL submit button for the form
+                // (This lets us get nice browser-handled validation 
+                // for our required fields)
+                $('#create-scenario-form [type="submit"]').click();
+            });
+        });
+    </script>
+{% endset %}
+{{ render_modal(
+    id=create_modal_id, title='New Scenario',
+    body=modal_body, footer=modal_footer
+) }}

@@ -1,0 +1,29 @@
+{% from 'macros/form_macros.html' import render_standard_form %}
+
+{% extends 'layout.html' %}
+
+{% block page_header %}
+
+    <h2 class="text-secondary my-4">
+        Please login
+    </h2>
+
+{% endblock page_header %}
+
+{% block content %}
+
+    {% with form = login_user_form %}
+
+        {{ render_standard_form(form) }}
+
+    {% endwith %}
+
+    <div class="form-group mt-3">
+        <a class="btn btn-outline-dark"
+            href="{{ url_for('security.register') }}">
+            Register
+        </a>
+    </div>
+</div>
+
+{% endblock content %}

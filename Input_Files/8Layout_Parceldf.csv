@@ -1,0 +1,20 @@
+ParcelName,ParcelCategory,LandUse,Points
+E1,Land & Air,grass,p29 p23 p14 p13 p12 p30
+E2,Land & Air,deciduous forest,p28 p29 p30 p31
+E3,Land & Air,deciduous forest,p33 p29 p28
+LakeCadillac,Water & Air,  ,p9 p10 p11 p12 p13 p14
+LakeMitchell,Water & Air,  ,p1 p2 p3 p4 p5 p6 p7 p8
+N1,Land & Air,deciduous forest,p22 p11 p10 p1 p8 p7 p18
+N2,Land & Air,grass,p26 p22 p18 p20 p25 p27
+NE1,Land & Air,grass,p31 p30 p12 p11 p22 p26
+NE2,Land & Air,grass,p32 p26 p27
+NE3,Land & Air,deciduous forest,p28 p31 p26 p32
+NW1,Land & Air,deciduous forest,p18 p7 p6 p5 p17 p19 p20
+NW2,Land & Air,deciduous forest,p20 p19 p17 p24 p25
+S1,Land & Air,grass,p9 p2 p1 p10
+S2,Land & Air,grass,p23 p21 p9 p14
+SE1,Land & Air,grass,p34 p21 p23 p35
+SE2,Land & Air,grass,p33 p35 p23 p29
+SW1,Land & Air,deciduous forest,p2 p9 p21 p15 p5 p4 p3
+SW2,Land & Air,deciduous forest,p15 p21 p34 p36 p16
+W1,Land & Air,deciduous forest,p5 p15 p16 p17

@@ -1,0 +1,74 @@
+
+<form id="scenario-info-gui"
+    data-async-form="true"
+    data-form-src="scenario_info_form"
+>
+    <section class="container px-0">
+        <div class="row mb-1">
+            <div class="col-md">
+                <div data-slot="true" data-target="description"></div>
+            </div>
+            <div class="col-md">
+                <div class="row-fluid">
+                    <div data-slot="true" data-target="time_zone"></div>
+                </div>
+                <div class="row">
+                    <div class="col-md">
+                        <div data-slot="true" data-target="start_date"></div>
+                    </div>
+                    <div class="col-md">
+                        <div data-slot="true" data-target="end_date"></div>
+                    </div>
+                </div>
+                <div class="row-fluid">
+                    <div data-slot="true" data-target="simulation_duration"></div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md">
+                <div data-slot="true" data-target="fraction_concentrations_included"></div>
+                <div data-slot="true" data-target="time_step_duration"></div>
+            </div>
+            <div class="col-md">
+            </div>
+        </div>
+    </section>
+</form>
+<script>
+    onDomLoad(function() {
+        var form = document.getElementById('scenario-info-gui');
+        form.addEventListener('form:loaded', function() {
+            enableDateCalculations();
+        });
+
+        function enableDateCalculations() {
+            var startDate = $('#start_date');
+            var endDate = $('#end_date');
+
+            startDate.add(endDate).change(function(e) {
+                var start = startDate.val();
+                var end = endDate.val();
+
+                var exportDate = $('#html_export_date');
+
+                if (exportDate.length) {
+                    exportDate.attr('min', start + 'T00:00');
+                    exportDate.attr('max', end + 'T12:00');
+                }
+
+                var disp = calculateDateDistance(start, end);
+
+                if (!disp.length) {
+                    $('#simulation_duration').addClass('is-invalid pl-5').val(
+                        'Invalid date range');
+                }
+                else {
+                    $('#simulation_duration').removeClass('is-invalid pl-5').val(
+                        disp.join(', '));
+                }
+            });
+            startDate.change();
+        }
+    });
+</script>

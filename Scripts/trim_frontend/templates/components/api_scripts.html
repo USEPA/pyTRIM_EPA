@@ -1,0 +1,26 @@
+
+<script>
+
+window.TRIM = (function(trim) {
+    var api = trim.api || {};
+
+    var urls = {
+        'scenario_api.get_scenario': '{{ url_for("scenario_api.get_scenario", id=0) }}',
+        'file_api.parse': '{{ url_for("file_api.parse") }}',
+        'file_api.load_json_form': '{{ url_for("file_api.load_json_form") }}',
+        'static': '{{ url_for("static", filename='/') }}'.replace('//', '/')
+    };
+
+    api.getUrl = function(name) {
+        return urls[name];
+    };
+
+    api.getCSRF = function() {
+        return '{{ csrf_token() }}';
+    };
+
+    trim.api = api;
+    return trim;
+})(window.TRIM || {});
+
+</script>

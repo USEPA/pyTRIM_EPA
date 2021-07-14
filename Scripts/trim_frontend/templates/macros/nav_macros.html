@@ -1,0 +1,52 @@
+{% macro render_nav_home(brand_name) %}
+
+<a class="navbar-brand" href="{{ url_for('base.index') }}">
+    {{ brand_name }}
+</a>
+
+{% endmacro %}
+
+{% macro render_nav_toggle() %}
+
+<button class="navbar-toggler" type="button"
+    data-toggle="collapse" data-target="#navbarSupportedContent"
+    aria-controls="navbarSupportedContent" aria-expanded="false"
+    aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+</button>
+
+{% endmacro %}
+
+{% macro render_nav_item(
+    text, url=None, icon=None, class="", title="", active=False
+) %}
+
+{% if url %}
+    <li class="nav-item{% if active %} active{% endif %} {{ class }}">
+        <a href="{{ url }}"
+            class="nav-link"
+            {% if title %}title="{{ title }}"{% endif %}
+        >
+            <span class="lead">
+                {% if icon %}
+                    <i class="fa fa-{{ icon }}"></i>
+                {% endif %}
+                {{ text }}
+            </span>
+        </a>
+    </li>
+{% else %}
+    <li class="nav-item {{ class }}">
+        <span
+            class="navbar-text lead"
+            {% if title %}title="{{ title }}"{% endif %}
+        >
+            {% if icon %}
+                <i class="fa fa-{{ icon }}"></i>
+            {% endif %}
+            {{ text }}
+        </span>
+    </li>
+{% endif %}
+
+{% endmacro %}

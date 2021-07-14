@@ -1,0 +1,47 @@
+{
+    "title": "Spatially-Varying Input",
+    "fields": [
+        {
+            "id": "spatially_varying",
+            "label": "Use Spatially-Varying Value",
+            "data_type": "boolean",
+            "default": true,
+            "help": "Check this box to use values that vary between parcels."
+        },
+        {
+            "id": "use_custom_file",
+            "label": "Use Custom File",
+            "data_type": "boolean",
+            "default": false,
+            "help": "Check this box to load spatially-varying values from a custom file. Uncheck this box to load spatially-varying values from the default file.",
+            "if_true": ["spatially_varying"]
+        },
+        {
+            "id": "custom_file",
+            "label": "File for Spatially-Varying Values",
+            "data_type": "file",
+            "required": true,
+            "help": "Indicate the file of spatially-varying values.",
+            "if_true": ["spatially_varying", "use_custom_file"]
+        },
+        {
+            "id": "field_name",
+            "label": "Field Name for Spatially-Varying Values",
+            "data_type": "string",
+            "widget": "select",
+            "choices": [],
+            "required": true,
+            "help": "Indicate the field name for the spatially-varying values.",
+            "if_true": ["spatially_varying"]
+        },
+        {
+            "id": "static_value",
+            "label": "Static Value",
+            "data_type": "int",
+            "min": 0,
+            "required": true,
+            "help": "Enter a single value to use throughout your model run.",
+            "if_false": ["spatially_varying"]
+        }
+    ]
+}

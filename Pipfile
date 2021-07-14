@@ -1,0 +1,30 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[requires]
+python_version = "3.6"
+
+[dev-packages]
+pipenv = "*"
+pytest = "*"
+
+[packages]
+pandas = "*"
+ipdb = "*"
+sqlalchemy = "*"
+psycopg2-binary = "*"
+alembic = "*"
+python-dotenv = "*"
+flask = "*"
+flask-admin = "*"
+flask-sqlalchemy = "*"
+wtforms-sqlalchemy = "*"
+flask-bcrypt = "*"
+flask-security = "*"
+flask-mail = "*"
+flask-assets = "*"
+libsass = "*"
+cssmin = "*"
+pyscss = "*"

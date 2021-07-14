@@ -1,0 +1,97 @@
+TRIM property scope,TRIM property name,TRIM property form,Formatted value,Description/Source
+,__VBA__first_parameter_prop_value,,Foundries_SS,
+,scenario_name,,Foundries_SS,
+,scenario_description,,"Site-specific scenario for Int Iron Steel Foundries in Wexford County, MI",
+,setupfile_dir,,C:\RTR\Foundries\TRIM,
+Scenario: Foundries_SS,outputDir,Constant,C:\\RTR\\Foundries\\TRIM\\Output,
+Scenario: Foundries_SS,simulationBeginDateTime,Constant,01/01/1990 00:00:00 EST,Consistent with met data.
+Scenario: Foundries_SS,simulationEndDateTime,Constant,01/01/2040 00:00:00 EST,Consistent with met data set; selected to provide a 50-year modeling period.
+Scenario: Foundries_SS,evaluateHTMLPropertiesAtTime,Constant,06/15/2039 12:00:00 EST,Six months before end of simulation.
+,TimeZone,Constant,EST,
+Scenario: Foundries_SS,simulationTimeStep,Constant,1,Selected value.
+Scenario: Foundries_SS,simulationStepsPerOutputStep,Constant,4,Selected value.
+Scenario: Foundries_SS,simulateSteadyState,Constant,FALSE,
+Scenario: Foundries_SS,averageResultsFiles,Constant,TRUE,
+Scenario: Foundries_SS,averagingInterval,Constant,annual,
+Scenario: Foundries_SS,enableBoundaryContributions,Constant,FALSE,
+Scenario: Foundries_SS,exportAllResultsToDB,Constant,FALSE,
+Scenario: Foundries_SS,exportAvgResultsToDB,Constant,FALSE,
+Scenario: Foundries_SS,exportIngestionInputs,Constant,FALSE,
+Scenario: Foundries_SS,exportDeposition,Constant,TRUE,
+Scenario: Foundries_SS,exportBiotaIntakeRates,Constant,FALSE,
+Scenario: Foundries_SS,exportOutdoorEnvironmentBeforeRun,Constant,TRUE,
+Scenario: Foundries_SS,exportPropertiesBeforeRun,Constant,TRUE,
+Scenario: Foundries_SS,exportRiskECOInputs,Constant,FALSE,
+Scenario: Foundries_SS,FractionInitialConcentrations,Constant,0,
+Scenario: Foundries_SS,exportMass,Constant,TRUE,
+Scenario: Foundries_SS,exportConcentration,Constant,TRUE,
+Scenario: Foundries_SS,exportHTML,Constant,TRUE,
+Scenario: Foundries_SS,exportTimeStepsDown,Constant,TRUE,
+Scenario: Foundries_SS,significantDigits,Constant,4,
+,AirTemp,,298,
+,HWindSp,,1.6 From File,
+,VerWindSp,,0,
+,WindD,,"3-days-on, 4-days-off.",
+,PrecipRate,,varies daily,
+,MixHgt,,226,
+Scenario: Foundries_SS,isDay_SteadyState_forAir,Constant,0,
+Scenario: Foundries_SS,isDay_SteadyState_forOther,Constant,0,
+Scenario: Foundries_SS,verticalWindSpeed,Constant,0,Constant 0 m/sec. Professional judgment; vertical wind speed not used by any of the algorithms in the current version of the TRIM.FaTE library.
+,precipitation_rate,,0.784,
+,precip_fraction_evap,,0.35,
+,precip_fraction_seepage,,0.186354372,
+,precip_fraction_runoff,,0.202646938,
+,metdata_file,,C:\\RTR\\Foundries\\TRIM\\ISF_met_MI_20181219.CSV,
+Scenario: Foundries_SS,AirTemperature_K,InputFromFile,"C:\\RTR\\Foundries\\TRIM\\ISF_met_MI_20181219.CSV, AirTemperature, "",""",Site-specific time series met data
+Scenario: Foundries_SS,horizontalWindSpeed,InputFromFile,"C:\\RTR\\Foundries\\TRIM\\ISF_met_MI_20181219.CSV, HorizontalWindSpeed, "",""",Site-specific time series met data
+Scenario: Foundries_SS,windDirection,InputFromFile,"C:\\RTR\\Foundries\\TRIM\\ISF_met_MI_20181219.CSV, WindDirection, "",""",Site-specific time series met data
+Scenario: Foundries_SS,Rain,InputFromFile,"C:\\RTR\\Foundries\\TRIM\\ISF_met_MI_20181219.CSV, Rain, "",""",Site-specific time series met data
+Scenario: Foundries_SS,cumulativeRain,InputFromFile,"C:\\RTR\\Foundries\\TRIM\\ISF_met_MI_20181219.CSV, CumulativeRain, "",""",Site-specific time series met data
+Scenario: Foundries_SS,isDay_Dynamic,InputFromFile,"C:\\RTR\\Foundries\\TRIM\\ISF_met_MI_20181219.CSV, IsDay, "",""",Site-specific time series met data
+VolumeElement: Air_*,top,InputFromFile,"C:\\RTR\\Foundries\\TRIM\\ISF_met_MI_20181219.CSV, MixingHeight, "",""",Site-specific time series met data
+VolumeElement: UpperAir_*,bottom,InputFromFile,"C:\\RTR\\Foundries\\TRIM\\ISF_met_MI_20181219.CSV, MixingHeight, "",""",Site-specific time series met data
+Compartment: Air in *,DustLoad,Constant,6.15E-08,Bidleman 1988
+Compartment: Air in *,AirDensity_g_cm3,Constant,0.0012,U.S. EPA 1997
+Compartment: Air in *,DustDensity,Constant,1400,Bidleman 1988
+Compartment: Air in *,FractionOrganicMatteronParticulates,Constant,0.2,Harner and Bidleman 1998
+,air_height,,800,
+,untilled_surfsoil_thickness,,0.01,
+,tilled_surfsoil_thickness,,0.2,
+,untilled_rootsoil_thickness,,0.79,
+,tilled_rootsoil_thickness,,0.6,
+,vadosesoil_thickness,,1.4,
+,GW_thickness,,3,
+Compartment: * in Coniferous Forest in *,AllowExchange_Dynamic,Constant,1,Coniferous plants assumed to be constantly growing
+Compartment: * in Coniferous Forest in *,AllowExchange_SteadyState_forAir,Constant,1,
+Compartment: * in Coniferous Forest in *,AllowExchange_SteadyState_forOther,Constant,1,
+Compartment: Leaf -* in Coniferous Forest in *,LitterFallRate,Constant,0.0021,value assumes 1st-order relationship and that 99% of leaves fall over 6 years
+Compartment: * in Coniferous Forest in *,CalculateWetDepInterceptionFraction,Constant,FALSE,Professional judgment.
+Compartment: * in Coniferous Forest in *,WetDepInterceptionFraction_UserSupplied,Constant,0.2,"Calculated based on 5 years of local met data, 1987-1991."
+,DFAEDir,,C:\\RTR\\Foundries\\TRIM\\AllowExchange_Foundries.csv  ,
+Compartment: * in Deciduous Forest in *,AllowExchange_Dynamic,InputFromFile,"C:\\RTR\\Foundries\\TRIM\\AllowExchange_Foundries.csv  , AllowExchange, "",""","Begins March 9 (set to 1), ends November 7 (set to 0).  Nation-wide 80th percentile."
+Compartment: * in Deciduous Forest in *,AllowExchange_SteadyState_forAir,Constant,1,
+Compartment: * in Deciduous Forest in *,AllowExchange_SteadyState_forOther,Constant,1,
+,DFLFDir,,C:\\RTR\\Foundries\\TRIM\\LitterFallRate_Foundries.csv,
+Compartment: Leaf -* in Deciduous Forest in *,LitterFallRate,InputFromFile,"C:\\RTR\\Foundries\\TRIM\\LitterFallRate_Foundries.csv, LitterfallRate, "",""","Begins November 7, ends December 6; rate = 0.15/day during this time (value assumes 99 percent of leaves fall in 30 days)."
+Compartment: * in Deciduous Forest in *,CalculateWetDepInterceptionFraction,Constant,FALSE,Professional judgment.
+Compartment: * in Deciduous Forest in *,WetDepInterceptionFraction_UserSupplied,Constant,0.2,
+,GHAEDir,,C:\\RTR\\Foundries\\TRIM\\AllowExchange_Foundries.csv  ,
+Compartment: * in Grasses/Herbs in *,AllowExchange_Dynamic,InputFromFile,"C:\\RTR\\Foundries\\TRIM\\AllowExchange_Foundries.csv  , AllowExchange, "",""","Begins March 9 (set to 1), ends November 7 (set to 0).  Nation-wide 80th percentile."
+Compartment: * in Grasses/Herbs in *,AllowExchange_SteadyState_forAir,Constant,1,
+Compartment: * in Grasses/Herbs in *,AllowExchange_SteadyState_forOther,Constant,1,
+,GHLFDir,,C:\\RTR\\Foundries\\TRIM\\LitterFallRate_Foundries.csv,
+Compartment: Leaf -* in Grasses/Herbs in *,LitterFallRate,InputFromFile,"C:\\RTR\\Foundries\\TRIM\\LitterFallRate_Foundries.csv, LitterfallRate, "",""","Begins November 7, ends December 6; rate = 0.15/day during this time (value assumes 99 percent of leaves fall in 30 days)."
+Compartment: * in Grasses/Herbs in *,CalculateWetDepInterceptionFraction,Constant,FALSE,Professional judgment.
+Compartment: * in Grasses/Herbs in *,WetDepInterceptionFraction_UserSupplied,Constant,0.2,"Calculated based on 5 years of local met data, 1987-1991."
+,AGAEDir,,C:\\RTR\\Foundries\\TRIM\\AllowExchange_Foundries.csv  ,
+Compartment: * in Agriculture - General in *,AllowExchange_Dynamic,InputFromFile,"C:\\RTR\\Foundries\\TRIM\\AllowExchange_Foundries.csv  , AllowExchange, "",""","Begins March 9 (set to 1), ends November 7 (set to 0).  Nation-wide 80th percentile."
+Compartment: * in Agriculture - General in *,AllowExchange_SteadyState_forAir,Constant,1,
+Compartment: * in Agriculture - General in *,AllowExchange_SteadyState_forOther,Constant,1,
+,AGLFDir,,C:\\RTR\\Foundries\\TRIM\\LitterFallRate_Foundries.csv,
+Compartment: * in Agriculture - General in *,LitterFallRate,InputFromFile,"C:\\RTR\\Foundries\\TRIM\\LitterFallRate_Foundries.csv, LitterfallRate, "",""","Begins November 7, ends December 6; rate = 0.15/day during this time (value assumes 99 percent of leaves fall in 30 days)."
+Compartment: * in Agriculture - General in *,CalculateWetDepInterceptionFraction,Constant,FALSE,Professional judgment.
+Compartment: * in Agriculture - General in *,WetDepInterceptionFraction_UserSupplied,Constant,0.2,"Calculated based on 5 years of local met data, 1987-1991."
+Compartment: Leaf -*,IsDay_forAir,Formula,1-0.448,From previous screening setup workbook. Source unknown.
+Compartment: Leaf -*,IsDay_forOther,Formula,1-0.391,From previous screening setup workbook. Source unknown.
+Compartment: Soil - Surface in SurfSoil_source,TotalErosionRate_kg_m2_day,Formula,0,Source parcel erosion disabled
+Compartment: Soil - Surface in SurfSoil_source,TotalRunoffRate_m3_m2_day,Formula,0,Source parcel runoff disabled

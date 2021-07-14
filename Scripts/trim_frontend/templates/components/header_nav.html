@@ -1,0 +1,22 @@
+{% from 'macros/nav_macros.html' import render_nav_home,
+                                        render_nav_item,
+                                        render_nav_toggle %}
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
+    <div class="container">
+        {{ render_nav_home(site_name) }}
+
+        <ul class="navbar-nav navbar-right ml-auto">
+            {% if current_user.is_authenticated %}
+                {{ render_nav_item(
+                    'Logout', url_for('security.logout'), icon='user-circle',
+                    title=("Logout " + current_user.get_preferred_name())
+                ) }}
+            {% else %}
+                {{ render_nav_item(
+                    'Login', url_for('security.login'), icon='user-circle'
+                ) }}
+            {% endif %}
+        </ul>
+    </div>
+</nav>

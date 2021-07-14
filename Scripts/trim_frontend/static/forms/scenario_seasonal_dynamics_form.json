@@ -1,0 +1,40 @@
+{
+    "title": "Seasonal Dynamics",
+    "fields": [
+        {
+            "id": "default_seasonal_file",
+            "label": "Default File for Time-Varying Values",
+            "data_type": "file",
+            "required": true,
+            "help": "Indicate the default file of time-varying values."
+        },
+        {
+            "id": "coniferous_forest",
+            "label": "",
+            "data_type": "form",
+            "form_definition": "subforms/seasonal/coniferous_forest_time_varying.json",
+            "separator": "_"
+        },
+        {
+            "id": "deciduous_forest",
+            "label": "",
+            "data_type": "form",
+            "form_definition": "subforms/seasonal/deciduous_forest_time_varying.json",
+            "separator": "_"
+        },
+        {
+            "id": "grasses_herbs",
+            "label": "",
+            "data_type": "form",
+            "form_definition": "subforms/seasonal/grasses_herbs_time_varying.json",
+            "separator": "_"
+        },
+        {
+            "id": "agriculture",
+            "label": "",
+            "data_type": "form",
+            "form_definition": "subforms/seasonal/agriculture_time_varying.json",
+            "separator": "_"
+        }
+    ]
+}

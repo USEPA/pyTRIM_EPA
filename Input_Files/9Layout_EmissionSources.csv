@@ -1,0 +1,40 @@
+Source_name,Screening_Source
+Location,E1
+Stack elevation (m),80
+Arsenic,0
+2-Methylnaphthalene,0
+Fluorene,0
+Fluoranthene,0
+MethylMercury,0
+Lead,0
+"Indeno(1,2,3-cd)pyrene",0
+Elemental Mercury,0
+Divalent Mercury,0
+"Dibenz(a,h)anthracene",0
+Chrysene,0
+Cadmium,0
+Benzo(k)fluoranthene,0
+"7,12-Dimethylbenz(a)anthracene",0
+Acenaphthene,0
+Acenaphthylene,0
+Benz(a)anthracene,0
+Benzo(A)pyrene,0
+Benzo(b)fluoranthene,0
+"Benzo(g,h,i)perylene",0
+"2,3,7,8-TCDF",0
+"2,3,7,8-TCDD",0
+"2,3,4,7,8-PeCDF",0
+"2,3,4,6,7,8-HxCDF",0
+"1,2,3,7,8-PeCDF",0
+"1,2,3,7,8-PeCDD",0
+"1,2,3,7,8,9-HxCDF",0
+"1,2,3,7,8,9-HxCDD",0
+"1,2,3,6,7,8-HxCDF",0
+"1,2,3,6,7,8-HxCDD",0
+"1,2,3,4,7,8-HxCDF",0
+"1,2,3,4,7,8-HxCDD",0
+"1,2,3,4,7,8,9-HpCDF",0
+"1,2,3,4,6,7,8-HpCDF",0
+"1,2,3,4,6,7,8-HpCDD",0
+"1,2,3,4,6,7,8,9-OCDF",0
+"1,2,3,4,6,7,8,9-OCDD",0

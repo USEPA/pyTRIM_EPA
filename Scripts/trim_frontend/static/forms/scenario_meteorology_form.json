@@ -1,0 +1,82 @@
+{
+    "title": "Meteorology",
+    "fields": [
+        {
+            "id": "default_time_varying_file",
+            "label": "Default File for Time-Varying Values",
+            "data_type": "file",
+            "required": true,
+            "help": "Indicate the default file of time-varying values."
+        },
+        {
+            "id": "default_spatially_varying_file",
+            "label": "Default File for Spatially-Varying Values",
+            "data_type": "file",
+            "required": true,
+            "help": "Indicate the default file of spatially-varying values."
+        },
+        {
+            "id": "ambient_air",
+            "label": "",
+            "data_type": "form",
+            "form_definition": "subforms/meteorological/ambient_air_time_varying.json",
+            "separator": "_"
+        },
+        {
+            "id": "wind_speed",
+            "label": "",
+            "data_type": "form",
+            "form_definition": "subforms/meteorological/wind_speed_time_varying.json",
+            "separator": "_"
+        },
+        {
+            "id": "wind_direction",
+            "label": "",
+            "data_type": "form",
+            "form_definition": "subforms/meteorological/wind_direction_time_varying.json",
+            "separator": "_"
+        },
+        {
+            "id": "mixing_height",
+            "label": "",
+            "data_type": "form",
+            "form_definition": "subforms/meteorological/mixing_height_time_varying.json",
+            "separator": "_"
+        },
+        {
+            "id": "daytime_indicator",
+            "label": "",
+            "data_type": "form",
+            "form_definition": "subforms/meteorological/daytime_indicator_time_varying.json",
+            "separator": "_"
+        },
+        {
+            "id": "groundwater_seepage",
+            "label": "",
+            "data_type": "form",
+            "form_definition": "subforms/meteorological/groundwater_seepage_spatially_varying.json",
+            "separator": "_"
+        },
+        {
+            "id": "runoff",
+            "label": "",
+            "data_type": "form",
+            "form_definition": "subforms/meteorological/runoff_spatially_varying.json",
+            "separator": "_"
+        },
+        {
+            "id": "precipitation",
+            "label": "",
+            "data_type": "form",
+            "form_definition": "subforms/meteorological/precipitation_time_varying.json",
+            "separator": "_"
+        },
+        {
+            "id": "interception_fractions",
+            "label": "",
+            "data_type": "form",
+            "form_definition": "subforms/meteorological/interception_fractions.json",
+            "separator": "_"
+        }
+    ]
+}

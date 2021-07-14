@@ -1,0 +1,39 @@
+
+{% macro dimensionally_varying_subform(
+    heading, is_varying_field, use_custom_field, custom_file_field,
+    var_name_fields, static_value_fields, other_fields=[]
+) %}
+
+    <div class="row py-2">
+        <div class="col-sm">
+            <h6 class="text-center" data-slot="true" data-target="title">
+            </h6>
+        </div>
+    </div>
+    <div class="row mb-1 subform">
+        <div class="col-md">
+            <div data-slot="true" data-target="{{ is_varying_field }}"></div>
+            <div data-slot="true" data-target="{{ use_custom_field }}"></div>
+            <div data-slot="true" data-target="{{ custom_file_field }}"></div>
+        </div>
+        <div class="col-md">
+            {% for var_name_field in var_name_fields %}
+                <div data-slot="true" data-target="{{ var_name_field }}"></div>
+            {% endfor %}
+
+            {% for static_value_field in static_value_fields %}
+                <div data-slot="true" data-target="{{ static_value_field }}"></div>
+            {% endfor %}
+        </div>
+    </div>
+    {% if other_fields|length %}
+        <div class="row mb-1 subform">
+            <div class="col-sm">
+                {% for other_field in other_fields %}
+                    <div data-slot="true" data-target="{{ other_field }}"></div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+{% endmacro %}

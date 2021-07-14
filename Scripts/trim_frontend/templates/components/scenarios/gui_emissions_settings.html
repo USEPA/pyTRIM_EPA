@@ -1,0 +1,68 @@
+{% from 'macros/form_macros.html' import render_field %}
+
+<form id="emissions-settings-gui"
+    data-async-form="true"
+    data-form-src="scenario_emissions_form"
+>
+    <section class="container px-0">
+        <div class="row mb-1">
+            <div class="col-sm">
+                <div data-slot="true" data-target="emissions_source_file"></div>
+                <div class="form-text mb-2">
+                    <small class="text-muted">
+                        <a href="{{ url_for(
+                            'static', filename='templates/source_definitions.csv'
+                        ) }}">Click here</a> to download the template for creating a CSV file containing emissions sources.
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-sm text-right">
+                <button type="button" class="btn btn-dark">
+                    Load Emissions from File
+                </button>
+            </div>
+        </div>
+        <div class="row mb-1">
+            <div class="col-sm">
+                <div data-slot="true" data-target="emissions_sources">
+                    <div class="row mb-1">
+                        <div class="col-sm">
+                            <div data-slot="true" data-target="name"></div>
+                        </div>
+                    </div>
+                    <div class="row mb-1">
+                        <div class="col-sm">
+                            <div data-slot="true" data-target="location"></div>
+                        </div>
+                        <div class="col-sm">
+                            <div data-slot="true" data-target="height"></div>
+                        </div>
+                    </div>
+                    <div class="row mb-1">
+                        <div class="col-sm">
+                            <div data-slot="true" data-target="chemicals">
+                                <div class="row mb-1">
+                                    <div class="col-sm">
+                                        <div data-slot="true" data-target="chemical"></div>
+                                    </div>
+                                    <div class="col-sm">
+                                        <div data-slot="true" data-target="rate"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</form>
+<script>
+    onDomLoad(function(e) {
+        var form = document.getElementById('emissions-settings-gui');
+        form.addEventListener('form:loaded', function() {
+        });
+    });
+</script>

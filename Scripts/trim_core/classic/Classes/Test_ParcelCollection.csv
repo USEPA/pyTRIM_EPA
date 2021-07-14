@@ -1,0 +1,20 @@
+Name,Category,LandUse,Source
+E1,Land & Air,grass,TRUE
+E2,Land & Air,deciduous forest,
+E3,Land,deciduous forest,
+LakeCadillac,Water & Air,  ,
+LakeMitchell,Water,  ,TRUE
+N1,Land & Air,deciduous forest,
+N2,Land & Air,grass,
+NE1,Land & Air,grass,
+NE2,Air Only,grass,
+NE3,Air Only,deciduous forest,
+NW1,Air Only,deciduous forest,
+NW2,Land & Air,deciduous forest,
+S1,Land & Air,grass,
+S2,Land & Air,grass,
+SE1,Land & Air,grass,
+SE2,Land & Air,grass,
+SW1,Land & Air,deciduous forest,
+SW2,Land & Air,deciduous forest,
+W1,Land & Air,deciduous forest,

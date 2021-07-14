@@ -1,0 +1,73 @@
+{
+    "title": "General Info",
+    "inherits": "scenario_definition_form.json",
+    "fields": [
+        {
+            "id": "time_zone",
+            "label": "Time Zone",
+            "data_type": "timezone",
+            "widget": "select",
+            "choices": ["EST"],
+            "required": true,
+            "help": "Indicate the time zone of your simulated location. Should match the time zone indicated in your inputs (e.g., meteorology)."
+        },
+        {
+            "id": "start_date",
+            "label": "First Day of Simulation",
+            "data_type": "date",
+            "format": "%Y-%m-%d",
+            "default": "2001-01-01",
+            "required": true,
+            "help": "Indicate the first day of your simulation (inclusive; i.e., the simulation starts at 0:00)"
+        },
+        {
+            "id": "end_date",
+            "label": "Last Day of Simulation",
+            "data_type": "date",
+            "format": "%Y-%m-%d",
+            "default": "2050-12-31",
+            "required": true,
+            "help": "Indicate the last day of your simulation (inclusive; i.e., the simulation ends at 24:00). Typically this is 50 years after the start date."
+        },
+        {
+            "id": "simulation_duration",
+            "label": "Calculated Length of Simulation",
+            "data_type": "string",
+            "readonly": true
+        },
+        {
+            "id": "fraction_concentrations_included",
+            "label": "Fraction of Initial Environmental Concentrations to Include",
+            "data_type": "float",
+            "min": 0,
+            "max": 1,
+            "step": 0.01,
+            "default": 0,
+            "required": true,
+            "help": "Enter the fraction (0 to 1) of starting (background) concentrations This is typically set to 0."
+        },
+        {
+            "id": "time_step_duration",
+            "label": "Simulation Time-Step (hrs)",
+            "data_type": "int",
+            "min": 1,
+            "default": 1,
+            "required": true,
+            "help": "Enter the interval when the model calculates transfer factors. Typically matches the time-step of your input meteorological data (which is typically 1 hr)."
+        },
+        {
+            "id": "use_steady_state",
+            "label": "Use Steady State Mode",
+            "data_type": "boolean",
+            "default": false,
+            "help": "Check this box to run a steady-state simulation (requires that all inputs and outputs are not time-varying). This feature is not typically used."
+        },
+        {
+            "id": "enable_air_contributions",
+            "label": "Enable Air Boundary Contributions",
+            "data_type": "boolean",
+            "default": false,
+            "help": "Check this box if you want the model to incorporate background air concentrations along the simulation's outer boundaries. This feature is not typically used."
+        }
+    ]
+}

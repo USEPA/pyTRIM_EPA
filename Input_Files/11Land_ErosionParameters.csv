@@ -1,0 +1,18 @@
+land use type,land use,Screening Scenario Setup,grass,untilled soil,tilled soil,coniferous forest,deciduous forest,agriculture
+rainfall/erosivity index,R (100 ft-ton/ac),"Wischmeier and Smith, 1978 SE USA (Figure 1)",300,300,300,300,,
+soil erodibility index,K (ton/ac/(100 ft-ton/acre)),HHRAP,0.39,0.39,0.39,0.39,,
+topographical (LS) factor,LS (USCS),HHRAP,1.5,1.5,1.5,1.5,,
+cover/mgt factor,C (USCS),"Table A1, Appendix A of Perdue Document",0.1,0.2,0.2,0.1,0.1,
+supporting practices factor,P,HHRAP,1,1,1,1,1,
+Unit soil loss,A (ton/ac/yr),Calculated,17.55,35.1,35.1,17.55,0,0
+Unit soil loss,A (kg/m2/d),Calculated,0.010778575,0.021557151,0.021557151,0.010778575,0,0
+Unit soil loss,A (kg/m2-yr),Calculated,3.934180012,7.868360025,7.868360025,3.934180012,0,0
+Height soil Loss:,cm/yr,Calculated,#NAME?,#NAME?,#NAME?,#NAME?,#NAME?,#NAME?
+Compartment characteristics,,,,,,,,
+Property,Description,,,,,,,
+Surface soil tilled?,Whether the surface soil layer is tilled for farming,,FALSE,FALSE,TRUE,FALSE,FALSE,FALSE
+Surface soil thickness,Thickness of the surface soil layer (below ground) (m),,0.01,0.01,0.2,0.01,0.01,0.01
+Root soil thickness,Thickness of the root soil layer (below the surface soil) (m),,0.79,0.79,0.6,0.79,0.79,0.79
+Vadose soil thickness,Thickness of the vadose soil layer (below the root soil) (m),,1.4,1.4,1.4,1.4,1.4,1.4
+Groundwater thickness,Thickness of the groundwater layer (below vadose soil) (m),,3,3,3,3,3,3
+Plant type,"The plant composite comparment present in this type of land. These must match pre-defined compartment types on the ""Plants"" sheet.",,Grasses/Herbs,,,Coniferous Forest,Deciduous Forest,Agriculture - General

@@ -1,0 +1,179 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+
+<h1 class="text-center pb-2">
+    {{ scenario.name }}
+</h1>
+
+{% set tabs = [
+    {
+        'id': 'general-tab',
+        'title': 'General Info',
+        'gui': 'gui_scenario_info.html'
+    }, 
+    {
+        'id': 'parcels-tab',
+        'title': 'Parcels',
+        'gui': 'gui_parcels.html'
+    }, 
+    {
+        'id': 'meteorological-tab',
+        'title': 'Meteorology',
+        'gui': 'gui_meteorological_settings.html'
+    }, 
+    {
+        'id': 'seasonal-tab',
+        'title': 'Seasonal Dynamics',
+        'gui': 'gui_seasonal_dynamics.html'
+    }, 
+    {
+        'id': 'abiotic-props-tab',
+        'title': 'Abiotic Properties',
+        'gui': 'gui_abiotic_properties.html'
+    }, 
+    {
+        'id': 'emissions-tab',
+        'title': 'Emissions',
+        'gui': 'gui_emissions_settings.html'
+    }, 
+    {
+        'id': 'exports-tab',
+        'title': 'Export Settings',
+        'gui': 'gui_export_settings.html'
+    }
+] %}
+
+<div class="card">
+    <div class="card-body container p-0">
+        <div class="row m-0 p-2">
+            <div
+                class="col-sm-4 col-md-3 col-lg-2 px-2 pr-sm-3 pt-2 mb-2 border-sm-right border-bottom border-sm-bottom-0"
+            >
+                <nav id="editor-nav" class="nav flex-column nav-pills mb-3"
+                    role="tablist"
+                    aria-orientation="vertical"
+                >
+                    {% for tab in tabs %}
+
+                        <a id="{{ tab['id'] }}-pill"
+                            data-toggle="pill"
+                            href="#{{ tab['id'] }}"
+                            role="tab"
+                            aria-controls="{{ tab['id'] }}"
+                            class="nav-link"
+                            aria-selected="true"
+                        >{{ tab['title'] }}</a>
+
+                    {% endfor %}
+                </nav>
+            </div>
+            <div class="col-sm p-2 pl-sm-3">
+                <div class="tab-content mb-3">
+                    {% for tab in tabs %}
+
+                        <div id="{{ tab['id'] }}"
+                            class="tab-pane show"
+                            role="tabpanel"
+                            aria-labelledby="{{ tab['id'] }}-pill"
+                        >
+                            <h3 class="text-center pb-3">{{ tab['title'] }}</h3>
+                            {% include 'components/scenarios/' + tab['gui'] %}
+                        </div>
+
+                    {% endfor %}
+                </div>
+                <div class="text-right">
+                    <a id="save-btn"
+                        href="#save"
+                        class="btn btn-secondary"
+                    >
+                        <i class="fas fa-save mr-1"></i>
+                        Save
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    onDomLoad(function() {
+        // Show a loading screen while we pre-load
+        // the current scenario data into editor forms
+        LoadingScreen.show('scenario_loading');
+
+        // Load current scenario values
+        TRIM.api.getScenario('{{ scenario.id }}').on('load', function() {
+            try {
+                if (this.responseJSON) {
+                    populateForms(this.responseJSON.scenario);
+                }
+            }
+            catch {
+                LoadingScreen.hide('scenario_loading');
+            }
+        });
+        function populateForms(scenario) {
+            if (!scenario) {
+                return; // if we didn't get a scenario, just give up
+                // TODO: alert the user that something went wrong
+            }
+
+            // Check if all json-generated forms have loaded
+            var forms = $('form[data-async-form]');
+            if (forms.filter(':not(.form-loaded)').length) {
+                // Some of our forms haven't loaded yet;
+                // wait a bit and try again
+                setTimeout(function() { populateForms(scenario); }, 1000);
+                return;
+            }
+
+            // Populate each form with data from the current scenario
+            forms.each(function() {
+                TRIM.forms.populate(this, scenario);
+            });
+            // And hide the loading screen when we finish
+            LoadingScreen.hide('scenario_loading');
+        }
+
+        // Make tabs linkable in url
+        (function enableHashPills() {
+            var defaultHash = '#{{ tabs[0]["id"] }}';
+            $('#editor-nav [data-toggle="pill"]')
+                .on('shown.bs.tab', function (e) {
+                    var current = document.location.hash;
+                    var next = e.target.hash;
+
+                    if (!current && next == defaultHash) {
+                        history.replaceState({}, '', next);
+                    }
+                    else if (current != next) {
+                        history.pushState({}, '', next);
+                    }
+                });
+            var update = function(e) {
+                var hash = document.location.hash;
+                if (!hash) {
+                    hash = defaultHash;
+                }
+                $('#editor-nav.nav-pills a[href="' + hash + '"]').tab('show');
+            };
+            update();
+            $(window).on('hashchange', update);
+        })();
+
+        // Save new scenario values
+        $('#save-btn').click(function(e) {
+            e.preventDefault();
+            console.log('TODO: save data')
+            alert('TODO')
+        });
+    });
+</script>
+
+{% endblock content %}
+
+{% block scripts %}
+    <script src="{{url_for('static', filename='js/ui/forms.js')}}">
+    </script>
+{% endblock scripts %}

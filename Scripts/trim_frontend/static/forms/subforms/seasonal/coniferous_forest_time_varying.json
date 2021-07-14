@@ -1,0 +1,20 @@
+{
+    "title": "Coniferous Forest",
+    "inherits": "subforms/seasonal/seasonal_time_varying_input_form.json",
+    "fields": [
+        {
+            "id": "time_varying",
+            "help": "Check the box to use values that vary in time for leaf litterfall rate (fraction per day of plant leaves falling to the ground) and whether leaves are exchanging chemical with the air. This feature is not typically used for this plant type. For evergreen leaves, it is typically assumed that the litterfall is slow and constant and that exchange occurs continuously."
+        },
+        {
+            "id": "static_value_litterfall",
+            "label": "Static Value for Litterfall Rate (per day)",
+            "data_type": "float",
+            "min": 0,
+            "step": 0.0001,
+            "default": 0.0021,
+            "required": true,
+            "help": "Enter a single value of litterfall rate to use throughout your model run (the default value of 0.0021 for this plant type assumes 1st-order relationship and that 99% of leaves fall over 6 years)."
+        }
+    ]
+}

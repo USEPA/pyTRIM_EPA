@@ -1,0 +1,152 @@
+{% from 'macros/scenarios/custom_form_macros.html' import dimensionally_varying_subform %}
+
+<form id="seasonal-gui"
+    data-async-form="true"
+    data-form-src="scenario_seasonal_dynamics_form"
+>
+    <section class="container px-0">
+        <div class="row">
+            <div class="col-sm">
+                <div data-slot="true" data-target="default_seasonal_file"></div>
+                <div class="form-text mb-2">
+                    <small class="text-muted">
+                        <a href="{{ url_for(
+                            'static',
+                            filename='templates/seasonal_dynamics_time_varying_inputs.csv'
+                        ) }}">Click here</a> to download the template for creating a time-varying inputs file.
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div data-slot="true" data-target="coniferous_forest">
+            {{ dimensionally_varying_subform(
+                is_varying_field='time_varying',
+                use_custom_field='use_custom_file',
+                custom_file_field='custom_file',
+                var_name_fields=[
+                    'field_name_litterfall', 'field_name_allow_exchange'
+                ],
+                static_value_fields=[
+                    'static_value_litterfall', 'static_value_allow_exchange'
+                ]
+            ) }}
+        </div>
+
+        <div data-slot="true" data-target="deciduous_forest">
+            {{ dimensionally_varying_subform(
+                is_varying_field='time_varying',
+                use_custom_field='use_custom_file',
+                custom_file_field='custom_file',
+                var_name_fields=[
+                    'field_name_litterfall', 'field_name_allow_exchange'
+                ],
+                static_value_fields=[
+                    'static_value_litterfall', 'static_value_allow_exchange'
+                ]
+            ) }}
+        </div>
+
+        <div data-slot="true" data-target="grasses_herbs">
+            {{ dimensionally_varying_subform(
+                is_varying_field='time_varying',
+                use_custom_field='use_custom_file',
+                custom_file_field='custom_file',
+                var_name_fields=[
+                    'field_name_litterfall', 'field_name_allow_exchange'
+                ],
+                static_value_fields=[
+                    'static_value_litterfall', 'static_value_allow_exchange'
+                ]
+            ) }}
+        </div>
+
+        <div data-slot="true" data-target="agriculture">
+            {{ dimensionally_varying_subform(
+                is_varying_field='time_varying',
+                use_custom_field='use_custom_file',
+                custom_file_field='custom_file',
+                var_name_fields=[
+                    'field_name_litterfall', 'field_name_allow_exchange'
+                ],
+                static_value_fields=[
+                    'static_value_litterfall', 'static_value_allow_exchange'
+                ]
+            ) }}
+        </div>
+    </section>
+</form>
+<script>
+    onDomLoad(function(e) {
+        var form = document.getElementById('seasonal-gui');
+        form.addEventListener('form:loaded', function() {
+            enableFieldUpdates();
+        });
+
+        function enableFieldUpdates() {
+            var gui = $('#seasonal-gui');
+            var fileFields = gui.find('[type="file"]');
+            var selects = gui.find('select');
+            var useCustom = gui.find('[type="checkbox"][id$="use_custom_file"]');
+
+            selects.attr('disabled', 'disabled');
+
+            function updateFields() {
+                var globalFileFiled = fileFields.filter('[name^="default_"]');
+                selects.each(function() {
+                    var me = $(this);
+
+                    var subform = me.closest('.subform');
+                    var customized = subform.find(
+                        '[type="checkbox"][id$="use_custom_file"]');
+
+                    var data = globalFileFiled.attr('data-filedata');
+                    if (customized.prop('checked')) {
+                        data = subform.find('[type="file"]').attr('data-filedata');
+                    }
+                    data = data || 'null';
+                    data = JSON.parse(data);
+
+                    me.html('');
+                    if (data) {
+                        var fields = data.fields;
+                        TRIM.forms.updateSelect(this, fields);
+                        me.removeAttr('disabled');
+                    }
+                    else {
+                        me.attr('disabled', 'disabled');
+                    }
+                });
+            }
+
+            useCustom.change(function(e) {
+                updateFields();
+            });
+
+            fileFields.change(function(e) {
+                var me = $(this);
+                var loadingRequest = 'load_' + this.id;
+                LoadingScreen.show(loadingRequest);
+
+                me.removeAttr('data-filedata');
+                TRIM.api.parseFiles(this).on('load', function() {
+                    try {
+                        var data = JSON.parse(this.responseText);
+                        if (data.success) {
+                            var myData = data.files[me.attr('name')];
+                            me.attr(
+                                'data-filedata',
+                                JSON.stringify(myData)
+                            );
+                        }
+                        updateFields();
+                    }
+                    finally {
+                        LoadingScreen.hide(loadingRequest);
+                    }
+                });
+            });
+        }
+    });
+</script>
+

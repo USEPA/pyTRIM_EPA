@@ -1,0 +1,96 @@
+{
+    "title": "Export Settings",
+    "fields": [
+        {
+            "id": "export_html",
+            "label": "Export Scenario Information as HTML",
+            "data_type": "boolean",
+            "default": true,
+            "help": "Check this box to have the model export scenario properties and snapshots of results to linked HTML files. This feature is typically used."
+        },
+        {
+            "id": "html_export_date",
+            "label": "Date/Time for HTML Exports",
+            "data_type": "datetime",
+            "format": "%Y-%m-%dT%H:%M",
+            "default": "2050-07-01T00:00",
+            "required": true,
+            "help": "Indicate the date and time during the simulation when the model will export scenario properties and results snapshots to linked HTML files. Typically this is approximately 6 months before the end date.",
+            "if_true": ["export_html"]
+        },
+        {
+            "id": "export_duration",
+            "label": "Length of Simulation to Export",
+            "data_type": "string",
+            "readonly": true,
+            "if_true": ["export_html"]
+        },
+        {
+            "id": "average_results",
+            "label": "Calculate Averaged Results",
+            "data_type": "boolean",
+            "default": true,
+            "help": "Check this box to have the model calculate time-averaged results. This feature is typically used."
+        },
+        {
+            "id": "averaging_interval",
+            "label": "Averaging Interval for Results",
+            "data_type": "string",
+            "default": "annual",
+            "required": true,
+            "help": "Enter the averaging time for time-averaged results (must be at least as large as the simulation time step). Typically \"annual\"; other options are \"monthly\", or whole numbers (in hours).",
+            "if_true": ["average_results"]
+        },
+        {
+            "id": "results_significant_digits",
+            "label": "Significant Digits for Results",
+            "data_type": "int",
+            "min": 1,
+            "default": 4,
+            "required": true,
+            "help": "Enter the number of significant digits to include in outputs (e.g., a value of 13.0417829 would display as 1.304E1 if set to 4 significant digits)"
+        },
+        {
+            "id": "display_time_steps_first",
+            "label": "Display Time-Steps as the First Results Field",
+            "data_type": "boolean",
+            "default": true,
+            "help": "Check this box to display the time step as the first field in the results files (rather than the compartment names). This feature is typically used."
+        },
+        {
+            "id": "export_outdoor_environment_defs",
+            "label": "Export Outdoor Environment Definitions",
+            "data_type": "boolean",
+            "default": true,
+            "help": "Check this box if you want to export your simulation's volume elements, compartments, and links and their algorithms to delimited files. This feature is typically used."
+        },
+        {
+            "id": "export_properties",
+            "label": "Export Scenario Properties",
+            "data_type": "boolean",
+            "default": true,
+            "help": "Check this box if you want to export your simulation's scenario properties and formulas to delimited files. This feature is typically used."
+        },
+        {
+            "id": "export_concentration_results",
+            "label": "Export Concentration Results",
+            "data_type": "boolean",
+            "default": true,
+            "help": "Check this box to export results of simulated concentrations. This feature is typically used."
+        },
+        {
+            "id": "export_deposition_results",
+            "label": "Export Deposition Results",
+            "data_type": "boolean",
+            "default": true,
+            "help": "Check this box to export simulated deposition results. This feature is typically used."
+        },
+        {
+            "id": "export_chemical_mass_results",
+            "label": "Export Chemical Mass Results",
+            "data_type": "boolean",
+            "default": true,
+            "help": "Check this box to export results of simulated chemical mass. This feature is typically used."
+        }
+    ]
+}

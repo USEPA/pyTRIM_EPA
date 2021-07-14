@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <meta name="description" content="">
+    <link rel="shortcut icon"
+        href="{{ url_for('static', filename='favicon.ico') }}">
+
+    <title>
+        {% if title %}
+            {{ title }} | {{ site_name }}
+        {% else %}
+            {{ site_name }}
+        {% endif %}
+    </title>
+
+    {% assets "site_theme" %}
+        <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}" />
+    {% endassets %}
+</head>
+
+<body>
+    <script>
+        function onDomLoad(func) {
+            document.addEventListener("DOMContentLoaded", func);
+        }
+    </script>
+
+    {% include 'components/header.html' %}
+
+    <div id="root">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
+
+        {% include 'components/flashed_messages.html' %}
+    </div>
+
+    {% include 'components/footer.html' %}
+
+    <script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}">
+    </script>
+    <script src="{{url_for('static', filename='js/lib/popper.min.js')}}">
+    </script>
+    <script src="{{url_for('static', filename='js/lib/bootstrap/bootstrap.min.js')}}">
+    </script>
+    <script src="{{url_for('static', filename='js/lib/moment.min.js')}}">
+    </script>
+
+    <script src="{{url_for('static', filename='js/main.js')}}">
+    </script>
+    <script src="{{url_for('static', filename='js/api.js')}}">
+    </script>
+
+    {% include 'components/api_scripts.html' %}
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>
