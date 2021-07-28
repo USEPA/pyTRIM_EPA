@@ -15,12 +15,12 @@
             "format": "%Y-%m-%dT%H:%M",
             "default": "2050-07-01T00:00",
             "required": true,
-            "help": "Indicate the date and time during the simulation when the model will export scenario properties and results snapshots to linked HTML files. Typically this is approximately 6 months before the end date.",
+            "help": "Indicate the date and time during the simulation when the model will export scenario properties and results snapshots to linked HTML files. Typically this is some time near the end of the simulation, when certain meteorological and abiotic events are occurring (e.g., rainfall so that you can observe wet deposition algorithms; winds are blowing from the emission source toward the watershed so you can observe deposition onto the watershed; it is daytime and during the period of \"allow exchange\" so that you can observe plant leaf interactions with airborne chemical; etc.)",
             "if_true": ["export_html"]
         },
         {
             "id": "export_duration",
-            "label": "Length of Simulation to Export",
+            "label": "Length of Time Before End of Simulation for HTML Exports",
             "data_type": "string",
             "readonly": true,
             "if_true": ["export_html"]
