@@ -1,0 +1,222 @@
+
+
+required_compartments = ["Advection Sink",\
+            "Air",\
+            "Benthic Carnivore",\
+            "Benthic Invertebrate",\
+            "Benthic Omnivore",\
+            "Degradation/Reaction Sink",\
+            "Flush Rate Sink",\
+            "Groundwater",\
+            "Leaf - Agriculture - General in Agriculture - General",\
+            "Leaf - Coniferous Forest in Coniferous Forest",\
+            "Leaf - Deciduous Forest in Deciduous Forest",\
+            "Leaf - Grasses/Herbs in Grasses/Herbs",\
+            "Leaf Particle - Agriculture - General in Agriculture - General",\
+            "Leaf Particle - Coniferous Forest in Coniferous Forest",\
+            "Leaf Particle - Deciduous Forest in Deciduous Forest",\
+            "Leaf Particle - Grasses/Herbs in Grasses/Herbs",\
+            "Macrophyte",\
+            "Root - Agriculture - General in Agriculture - General",\
+            "Root - Grasses/Herbs in Grasses/Herbs",\
+            "Sediment",\
+            "Sediment Burial Sink",\
+            "Soil - Root Zone",\
+            "Soil - Surface",\
+            "Soil - Vadose Zone",\
+            "Soil Advection Sink",\
+            "Stem - Agriculture - General in Agriculture - General",\
+            "Stem - Grasses/Herbs in Grasses/Herbs",\
+            "Surface water",\
+            "Water Column Carnivore",\
+            "Water Column Herbivore",\
+            "Water Column Omnivore",\
+            "Zooplankton"
+            ]
+
+required_algorithms = ["Advection from Air to Air(AlgInstID_4075)",\
+            "Advection from Air to Air, Steady-state Approx",\
+            "Algae Deposition from Surface Water to Sediment, General(AlgInstID_2144)",\
+            "Bulk Advection from Air to Advection Sink, General(AlgInstID_4095)",\
+            "Bulk Advection from Air to Advection Sink, Steady-state Approx",\
+            "Bulk Advection from Surface Water to Flush-rate Advection Sink, General(AlgInstID_4125)",\
+            "Degradation/Reaction Sink in Air(AlgInstID_4675)",\
+            "Degradation/Reaction Sink in Benthic Invertebrate(AlgInstID_4580)",\
+            "Degradation/Reaction Sink in Fish(AlgInstID_4570)",\
+            "Degradation/Reaction Sink in Groundwater(AlgInstID_4145)",\
+            "Degradation/Reaction Sink in Leaf(AlgInstID_4165)",\
+            "Degradation/Reaction Sink in Macrophyte",\
+            "Degradation/Reaction Sink in Root Zone(AlgInstID_4155)",\
+            "Degradation/Reaction Sink in Root(AlgInstID_4175)",\
+            "Degradation/Reaction Sink in Sediment(AlgInstID_4565)",\
+            "Degradation/Reaction Sink in Stem(AlgInstID_4170)",\
+            "Degradation/Reaction Sink in Surface Soil(AlgInstID_4160)",\
+            "Degradation/Reaction Sink in Surface Water(AlgInstID_4585)",\
+            "Degradation/Reaction Sink in Vadose Zone(AlgInstID_4150)",\
+            "Degradation/Reaction Sink in Zooplankton(AlgInstID_4570_Z)",\
+            "Demethylation (MHg->Hg2) in Fish(AlgInstID_1446)",\
+            "Demethylation(MHg -> Hg2) in Abiotic Media, Rate is input(AlgInstID_1892)",\
+            "Demethylation(MHg -> Hg2) in Plant Leaves, Rate is input(AlgInstID_1249)",\
+            "Demethylation(MHg -> Hg2) in Plant Stem, Rate is input(AlgInstID_1271)",\
+            "Diffusion from Air to Plant Leaf, Hg0, Alternative (Bennett 1998)(AlgInstID_2515)",\
+            "Diffusion from Air to Plant Leaf, Hg0, Default(Riederer 1995)",\
+            "Diffusion from Air to Plant Leaf, MHg, Alternative (Bennett 1998)(AlgInstID_2515)",\
+            "Diffusion from Air to Plant Leaf, MHg, Default(Riederer 1995)",\
+            "Diffusion from Air to Plant Leaf, Organics, Alternative (Bennett 1998)(AlgInstID_2515)",\
+            "Diffusion from Air to Plant Leaf, Organics, Default(Riederer 1995)",\
+            "Diffusion from Air to Surface Soil, Hg0(AlgInstID_2507)",\
+            "Diffusion from Air to Surface Soil, MHg(AlgInstID_2509)",\
+            "Diffusion from Air to Surface Soil, Organics(AlgInstID_2505)",\
+            "Diffusion from Air to Surface Water, Hg0, Two Film(AlgInstID_3710)",\
+            "Diffusion from Air to Surface Water, MHg, Two Film(AlgInstID_3710)",\
+            "Diffusion from Air to Surface Water, Organics, Two Film(AlgInstID_3710)",\
+            "Diffusion from Plant Leaf to Air, Hg0, Default (Bennett 1998)(AlgInstID_4005)",\
+            "Diffusion from Plant Leaf to Air, MHg, Default (Bennett 1998)(AlgInstID_4005)",\
+            "Diffusion from Plant Leaf to Air, Organics, Default (Bennett 1998)(AlgInstID_4005)",\
+            "Diffusion from Root Zone to Surface Soil(AlgInstID_1939)",\
+            "Diffusion from Root Zone to Vadose Zone(AlgInstID_1904)",\
+            "Diffusion from Sediment to Surface Water, Fugacity-based(AlgInstID_2195)",\
+            "Diffusion from Surface Soil to Air, Hg0(AlgInstID_3997)",\
+            "Diffusion from Surface Soil to Air, MHg(AlgInstID_3999)",\
+            "Diffusion from Surface Soil to Air, Organics(AlgInstID_3995)",\
+            "Diffusion from Surface Soil to Root Zone(AlgInstID_1919)",\
+            "Diffusion from Surface Water to Air, Two Film(AlgInstID_4080)-Hg",\
+            "Diffusion from Surface Water to Air, Two Film(AlgInstID_4080)-Organic",\
+            "Diffusion from Surface Water to Sediment, Fugacity-based(AlgInstID_2149)",\
+            "Diffusion from Vadose Zone to Root Zone(AlgInstID_1914)",\
+            "Diffusion from Vadose Zone to Vadose Zone(AlgInstID_2445)",\
+            "Dispersive Waterflow from Surface Water to Surface Water, General(AlgInstID_3680)",\
+            "Dry Deposition of Particles from Air to Plants",\
+            "Dry Deposition of Particles from Air to Soil(AlgInstID_2490)",\
+            "Dry Deposition of Particles from Air to Surface Water(AlgInstID_3695)",\
+            "Dry Deposition of Vapor from Air to Plants",\
+            "Dry Deposition of Vapor from Air to Surface Soil(AlgInstID_2488)",\
+            "Dry Deposition of Vapor from Air to Surface Water(AlgInstID_3693)",\
+            "Elimination from Fish to Surface Water(AlgInstID_1512)",\
+            "Elimination from Zooplankton to Surface Water",\
+            "Erosion from Surface Soil to Soil Advection Sink",\
+            "Erosion from Surface Soil to Surface Soil Sink",\
+            "Erosion from Surface Soil to Surface Soil, General(AlgInstID_2460)",\
+            "Erosion from Surface Soil to Surface Water, General(AlgInstID_3515)",\
+            "Exchange from Benthic Invertebrate to Sediment, PAHs",\
+            "Exchange from Benthic Invertebrate to Sediment, dioxins",\
+            "Exchange from Fish to Surface Water, Organics(AlgInstID_1515)",\
+            "Exchange from Macrophyte to Surface Water(AlgInstID_1547)",\
+            "Exchange from Sediment to Benthic Invertebrate, Interacts with Pore Water, PAHs",\
+            "Exchange from Sediment to Benthic Invertebrate, Interacts with Pore Water, dioxins",\
+            "Exchange from Surface Water to Fish, Cd",\
+            "Exchange from Surface Water to Fish, Organics(AlgInstID_1517)",\
+            "Exchange from Surface Water to Fish, Pb",\
+            "Exchange from Surface Water to Macrophyte(AlgInstID_1552)",\
+            "Exchange from Surface Water to Zooplankton, Cd (AlgInstID_CdAbs_Z)",\
+            "Exchange from Surface Water to Zooplankton, Organics(AlgInstID_1517_Z)",\
+            "Exchange from Surface Water to Zooplankton, Pb",\
+            "Fish Bioenergetic Model - Ingestion of Algae by Fish(AlgInstID_1527)",\
+            "Fish Bioenergetic Model - Ingestion of Algae by Zooplankton",\
+            "Fish Bioenergetic Model - Ingestion of Benthic Carnivore by Benthic Omnivore(AlgInstID_1455)",\
+            "Fish Bioenergetic Model - Ingestion of Benthic Carnivore by Water Column Carnivore(AlgInstID_2245)",\
+            "Fish Bioenergetic Model - Ingestion of Benthic Carnivore by Water Column Omnivore(AlgInstID_2277)",\
+            "Fish Bioenergetic Model - Ingestion of Benthic Invertebrate by Benthic Carnivore(ICFID_08-001)",\
+            "Fish Bioenergetic Model - Ingestion of Benthic Invertebrate by Benthic Omnivore(AlgInstID_1467)",\
+            "Fish Bioenergetic Model - Ingestion of Benthic Invertebrate by Water Column Carnivore(AlgInstID_2255)",\
+            "Fish Bioenergetic Model - Ingestion of Benthic Invertebrate by Water Column Herbivore(AlgInstID_2270)",\
+            "Fish Bioenergetic Model - Ingestion of Benthic Invertebrate by Water Column Omnivore(AlgInstID_2287)",\
+            "Fish Bioenergetic Model - Ingestion of Benthic Omnivore by Benthic Carnivore(AlgInstID_1447)",\
+            "Fish Bioenergetic Model - Ingestion of Benthic Omnivore by Water Column Carnivore(AlgInstID_2250)",\
+            "Fish Bioenergetic Model - Ingestion of Benthic Omnivore by Water Column Omnivore(AlgInstID_2282)",\
+            "Fish Bioenergetic Model - Ingestion of Macrophyte by Water Column Herbivore(AlgInstID_1646)",\
+            "Fish Bioenergetic Model - Ingestion of Macrophyte by Water Column Omnivore(AlgInstID_1655)",\
+            "Fish Bioenergetic Model - Ingestion of Water Column Carnivore by Benthic Carnivore(AlgInstID_2158)",\
+            "Fish Bioenergetic Model - Ingestion of Water Column Carnivore by Benthic Omnivore(AlgInstID_2175)",\
+            "Fish Bioenergetic Model - Ingestion of Water Column Carnivore by Water Column Omnivore(AlgInstID_1618)",\
+            "Fish Bioenergetic Model - Ingestion of Water Column Herbivore by Benthic Carnivore(AlgInstID_2163)",\
+            "Fish Bioenergetic Model - Ingestion of Water Column Herbivore by Benthic Omnivore(AlgInstID_2180)",\
+            "Fish Bioenergetic Model - Ingestion of Water Column Herbivore by Water Column Carnivore(AlgInstID_1600)",\
+            "Fish Bioenergetic Model - Ingestion of Water Column Herbivore by Water Column Omnivore(AlgInstID_1638)",\
+            "Fish Bioenergetic Model - Ingestion of Water Column Omnivore by Benthic Carnivore(AlgInstID_2168)",\
+            "Fish Bioenergetic Model - Ingestion of Water Column Omnivore by Benthic Omnivore(AlgInstID_2185)",\
+            "Fish Bioenergetic Model - Ingestion of Water Column Omnivore by Water Column Carnivore(AlgInstID_1610)",\
+            "Fish Bioenergetic Model - Ingestion of Zooplankton by Water Column Herbivore",\
+            "Litterfall from Leaves to Soil(AlgInstID_1088)",\
+            "Litterfall of Leaf Particle to Soil(AlgInstID_1098)",\
+            "Methylation(Hg2 -> MHg) in Abiotic Media, Rate is input(AlgInstID_1891)",\
+            "Methylation(Hg2 -> MHg) in Plant Leaves, Rate is input(AlgInstID_1248)",\
+            "Methylation(Hg2 -> MHg) in Plant Stem, Rate is input(AlgInstID_1270)",\
+            "Oxidation(Hg0 -> Hg2) in Abiotic Media, Rate is input(AlgInstID_1894)",\
+            "Oxidation(Hg0 -> Hg2) in Macrophytes",\
+            "Particles Blown off from Plant Leaf to Air (DRY)(AlgInstID_4010)",\
+            "Particles Washed off Leaf onto Ground(AlgInstID_1103)",\
+            "Percolation from Root Zone to Root Zone(AlgInstID_2455)",\
+            "Percolation from Root Zone to Vadose Zone(AlgInstID_1909)",\
+            "Percolation from Surface Soil to Root Zone(AlgInstID_1924)",\
+            "Percolation from Vadose Zone to Groundwater(AlgInstID_1899)",\
+            "Percolation from Vadose Zone to Vadose Zone(AlgInstID_2450)",\
+            "Pore Water Diffusion from Sediment to Sediment, General(AlgInstID_3505)",\
+            "Recharge from Groundwater to Surface Water, General(AlgInstID_3510)",\
+            "Reduction(Hg2 -> Hg0) in Abiotic Media, Rate is input(AlgInstID_1893)",\
+            "Resuspension from Sediment to Surface Water, General(AlgInstID_2190)",\
+            "Resuspension from Surface Soil to Air, Set to Deposition rate of particles(AlgInstID_4000)",\
+            "Runoff from Surface Soil to Soil Advection Sink",\
+            "Runoff from Surface Soil to Surface Soil Sink",\
+            "Runoff from Surface Soil to Surface Soil, General(AlgInstID_2465)",\
+            "Runoff from Surface Soil to Surface Water, General(AlgInstID_3520)",\
+            "Sediment Burial from Sediment to Sediment Burial Sink, Zero net deposition, General(AlgInstID_4135)",\
+            "Sediment Deposition from Surface Water to Sediment, General(AlgInstID_2139)",\
+            "Time-dependent Partition from Benthic Invertebrate to Bulk Sediment for Dioxins(ICFID_08-003)",\
+            "Time-dependent Partition from Benthic Invertebrate to Sediment(AlgInstID_1433)",\
+            "Time-dependent Partition from Bulk Sediment to Benthic Invertebrate for Dioxins(ICFID_08-002)",\
+            "Time-dependent Partition from Macrophyte to Surface Water(AlgInstID_1544),Cd",\
+            "Time-dependent Partition from Macrophyte to Surface Water(AlgInstID_1544),Hg",\
+            "Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Agriculture, Cd(AlgInstID_1953)",\
+            "Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Agriculture, Hg(AlgInstID_1953)",\
+            "Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Grasses/Herbs,Cd(AlgInstID_1952)",\
+            "Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Grasses/Herbs,Hg(AlgInstID_1952)",\
+            "Time-dependent Partition from Root Zone to Root, Interacts with soil pore water - Agriculture, Organics",\
+            "Time-dependent Partition from Root Zone to Root, Interacts with soil pore water - Grasses/Herbs, Organics(AlgInstID_1949)",\
+            "Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Agriculture, Cd(AlgInstID_1932)",\
+            "Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Agriculture, Hg(AlgInstID_1932)",\
+            "Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Grasses/Herbs, Cd(AlgInstID_1933)",\
+            "Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Grasses/Herbs, Hg(AlgInstID_1933)",\
+            "Time-dependent Partition from Root to Root Zone, Interacts with soil pore water - Agriculture, Organics",\
+            "Time-dependent Partition from Root to Root Zone, Interacts with soil pore water - Grasses/Herbs, Organics(AlgInstID_1929)",\
+            "Time-dependent Partition from Sediment to Benthic Invertebrate(AlgInstID_1438)",\
+            "Time-dependent Partition from Surface Water to Macrophyte, Cd(AlgInstID_1549)",\
+            "Time-dependent Partition from Surface Water to Macrophyte, Hg(AlgInstID_1549)",\
+            "Transfer from Leaf Particle on Surface to Leaf, Cd(AlgInstID_1250)",\
+            "Transfer from Leaf Particle on Surface to Leaf, Hg(AlgInstID_1250)",\
+            "Transfer from Leaf Particle on Surface to Leaf, Organic(AlgInstID_1250)",\
+            "Transfer from Leaf to Leaf Particle on Surface, Cd(AlgInstID_1255)",\
+            "Transfer from Leaf to Leaf Particle on Surface, Hg(AlgInstID_1255)",\
+            "Transfer from Leaf to Leaf Particle on Surface, Organic(AlgInstID_1255)",\
+            "Transfer from Leaf to Stem - Agriculture, Cd(AlgInstID_1265)",\
+            "Transfer from Leaf to Stem - Agriculture, Hg(AlgInstID_1265)",\
+            "Transfer from Leaf to Stem - Agriculture, Organic(AlgInstID_1265)",\
+            "Transfer from Leaf to Stem - Grasses/Herbs, Cd",\
+            "Transfer from Leaf to Stem - Grasses/Herbs, Hg",\
+            "Transfer from Leaf to Stem - Grasses/Herbs, Organic",\
+            "Transfer from Root Zone to Stem - Agriculture, Cd",\
+            "Transfer from Root Zone to Stem - Agriculture, Hg",\
+            "Transfer from Root Zone to Stem - Agriculture, Organic",\
+            "Transfer from Root Zone to Stem - Grasses/Herbs, Cd(AlgInstID_1944)",\
+            "Transfer from Root Zone to Stem - Grasses/Herbs, Hg(AlgInstID_1944)",\
+            "Transfer from Root Zone to Stem - Grasses/Herbs, Organics(AlgInstID_1944)",\
+            "Transfer from Stem to Leaf - Agriculture, Cd",\
+            "Transfer from Stem to Leaf - Agriculture, Hg",\
+            "Transfer from Stem to Leaf - Agriculture, Organic",\
+            "Transfer from Stem to Leaf - Grasses/Herbs, Cd(AlgInstID_1260)",\
+            "Transfer from Stem to Leaf - Grasses/Herbs, Hg(AlgInstID_1260)",\
+            "Transfer from Stem to Leaf - Grasses/Herbs, Organic(AlgInstID_1260)",\
+            "Waterflow from Surface Water to Surface Water, General(AlgInstID_3685)",\
+            "Wet Deposition of Particles from Air to Plants",\
+            "Wet Deposition of Particles from Air to Surface Water(AlgInstID_3700)",\
+            "Wet Deposition of Particles to Surface Soil(AlgInstID_2495)",\
+            "Wet Deposition of Vapor Phase from Air to Surface Soil, Hg0",\
+            "Wet Deposition of Vapor Phase from Air to Surface Soil, Hg2",\
+            "Wet Deposition of Vapor Phase from Air to Surface Soil, Organics",\
+            "Wet Deposition of Vapor Phase from Air to Surface Water, Hg0(AlgInstID_3707)",\
+            "Wet Deposition of Vapor Phase from Air to Surface Water, Hg2(AlgInstID_3708)",\
+            "Wet Deposition of Vapor Phase from Air to Surface Water, Organics(AlgInstID_3705)",\
+            "Wet Deposition of Vapor Phase to Plant Leaf from Air, Hg0(AlgInstID_2512)",\
+            "Wet Deposition of Vapor Phase to Plant Leaf from Air, Hg2",\
+            "Wet Deposition of Vapor Phase to Plant Leaf from Air, Organics(AlgInstID_2510)"
+            ]
