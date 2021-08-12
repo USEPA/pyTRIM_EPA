@@ -21,7 +21,7 @@ import os
 import numpy as np
 import importlib
 import define_comp 
-
+import pandas as pd
 
 def link_check (comp_objects_dict,comp1_name,comp2_name,dict_inputs,chem_list_clean,currentChemical): # function to check if two compartments are potentially linked and to return connecting algorithms
     link=False # does link exist
@@ -35,8 +35,11 @@ def link_check (comp_objects_dict,comp1_name,comp2_name,dict_inputs,chem_list_cl
         cond2=True
     else:
         cond2=False
-    if cond1 or cond2:
-    
+    if ("VaporSource" in comp1.Name or "ParticleSource" in comp1.Name) and ("Surface_water" in comp2.Name or "Surface_soil" in comp2.Name):
+        cond3=True # pseudo source compartment connected to surface water or surface soil
+    else: 
+        cond3=False
+    if cond1 or cond2:    
         df_app=df_alg_mat.loc[(df_alg_mat['sendingCompartmentCategory']==comp1.category) & (df_alg_mat['receivingCompartmentCategory']==comp2.category) & (df_alg_mat['enabled']=='true')]
         if 'Abiotic' in comp1.category and 'Abiotic' in comp2.category:
             df_app2=df_alg_mat.loc[(df_alg_mat['sendingCompartmentCategory']=="Abiotic") & (df_alg_mat['receivingCompartmentCategory']=='Abiotic') & (df_alg_mat['enabled']=='true')]
@@ -53,6 +56,11 @@ def link_check (comp_objects_dict,comp1_name,comp2_name,dict_inputs,chem_list_cl
         if cond1 or cond2:
             link=True
         return(link,app_algs)
+    if cond3: # pseudo source algorithm
+        df_psalgs=dict_inputs['df_psalgs']
+        psalgs=list(df_psalgs['Algorithm'])
+        app_algs=[x for x in psalgs if ('Surface_water' in comp2.Name and 'Surface water' in x)] # Temp -- need to fix
+        return(cond3,[-1]) # Temp -1 indicates pseudo source algs to surface water        
     else:
         return(link, app_algs)
         
@@ -62,22 +70,33 @@ def create_trans_mat(inputs,dict_inputs): # function to create transition matrix
     chem_list_clean=[clean_chem_names(x) for x in chem_list] # cleaned chemical names
     comp_list=list(dict_inputs['comp_dict'].values())# list of compartments in simulation
     ncomp=len(comp_list)
-    mat_dim= ncomp*ncomp # number of rows or cols in the transition matrix
+    nchem=len(chem_list)
+    mat_dim= ncomp*nchem # number of rows or cols in the transition matrix
     tm=np.zeros((mat_dim,mat_dim), dtype=float) # create zero matrix     
+    sm=np.zeros(mat_dim,dtype=float) # create zero sources matrix
     df_alg_mat=dict_inputs['df_alg_mat']      # dataframe of applicable algorithms for combination of sending and receiving compartment types
 
-
+    
+    ind_name=[] # index name for tm, sm dataframes
     for chem_index, chem in enumerate(chem_list_clean): # loop over chemicals
         currentChemical=chem_objects_dict[chem] # current chemical object
         comp_objects_dict=define_comp.define_comp(currentChemical) # create dictionary of compartment objects    
         print ('chemical is ', chem, 'Kd is ',comp_objects_dict['Surface_water_in_SW_LakeCadillac'].Chemical_Kd)
         
         for row_index, comp_row in enumerate(comp_list): # loop over rows (sending compartments)
+            ind_name.append(currentChemical.Name+'_'+comp_objects_dict[comp_row].Name) # index name for this element of the matrix                   
+            if hasattr(comp_objects_dict[comp_row], 'Deposition_Rate'): # if sending compartment has deposition rate
+                if currentChemical.Name in comp_objects_dict[comp_row].Deposition_Rate.keys(): # if there is deposition of the current Chemical:
+                    sm[int(chem_index*ncomp+row_index)]=sm[int(chem_index*ncomp+row_index)]+comp_objects_dict[comp_row].Deposition_Rate[currentChemical.Name] # add depostion rate
+
             for col_index, comp_col in enumerate (comp_list): # loop over columns (sending compartments)
                 link,app_algs=link_check(comp_objects_dict,comp_row,comp_col,dict_inputs,chem_list_clean,currentChemical) # call function to check if compartments are linked and if so what algorithms apply
                 if link: 
                     for alg in app_algs: # loop over applicable algorithms
-                        alg_name=df_alg_mat.loc[df_alg_mat['index']==alg,'Alg_Name_New'].values[0]# lookup alg name by index in df_alg_mat
+                        if alg==-1: # Temp
+                            alg_name='Direct_Transfer_from_PseudoSource_to_Surface_water' # temp
+                        else:    
+                            alg_name=df_alg_mat.loc[df_alg_mat['index']==alg,'Alg_Name_New'].values[0]# lookup alg name by index in df_alg_mat
                         alg_class=eval(alg_name) # temporary -- get rid of eval eventually by placing algorithm objects in a dictionary
                         SendingCompartment=comp_objects_dict[comp_row] # sending compartment object
                         ReceivingCompartment=comp_objects_dict[comp_col] # receiving compartment object                        
@@ -91,14 +110,12 @@ def create_trans_mat(inputs,dict_inputs): # function to create transition matrix
                             receivingChemical_index=chem_list.index(alg_instance.receivingChemicalName) # index of receiving chemical
                             print ('Transforming ',comp_row,comp_col,transfer_factor)
                             tm[int(chem_index*ncomp+row_index)][int(chem_index*ncomp+row_index)]=tm[int(chem_index*ncomp+row_index)][int(chem_index*ncomp+row_index)]-transfer_factor # sending compartment tf is negative
-                            tm[int(receivingChemical_index*ncomp+row_index)][int(chem_index*ncomp+row_index)]=tm[int(receivingChemical_index*ncomp+row_index)][int(chem_index*ncomp+row_index)]+transfer_factor # receiving compartment tf is positive
-                        
-            
-
-
-        
-        
-    return(tm)
+                            tm[int(receivingChemical_index*ncomp+row_index)][int(chem_index*ncomp+row_index)]=tm[int(receivingChemical_index*ncomp+row_index)][int(chem_index*ncomp+row_index)]+transfer_factor # receiving compartment tf is positive                    
+           
+    df_tm=pd.DataFrame(tm,index=ind_name,columns=ind_name)
+    df_sm=pd.DataFrame(sm,index=ind_name,columns=['Deposition_Rate'])
+              
+    return(tm,sm,df_tm,df_sm)
 
 ## FOR QA Only
 #row_index=3
@@ -119,3 +136,10 @@ def create_trans_mat(inputs,dict_inputs): # function to create transition matrix
 #comp_col=comp_list[col_index]
 #comp1_name=comp_row
 #comp2_name=comp_col
+    
+#row_index=5
+#col_index=3
+#comp_row=comp_list[row_index]
+#comp_col=comp_list[col_index]
+#comp1_name=comp_row
+#comp2_name=comp_col    

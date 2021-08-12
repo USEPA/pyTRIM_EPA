@@ -219,13 +219,14 @@ def process_pseudo_library(inputs):
                 
             f.write('class '+str(alg_name)+':'+'\n' +\
                     '\t'+\
-                    'def __init__(self, Constants,containingScenario,currentChemical,SendingCompartment, ReceivingCompartment):\n\t\t'+\
+                    'def __init__(self, Constants,containingScenario,currentChemical,SendingCompartment, ReceivingCompartment,dict_inputs):\n\t\t'+\
                     'self.Name='+"'"+group+"'"+'\n\t\t'+\
                     'self.Constants=Constants\n\t\t'+\
                     'self.containingScenario=containingScenario\n\t\t'+\
                     'self.currentChemical=currentChemical\n\t\t'+\
                     'self.SendingCompartment=SendingCompartment\n\t\t'+\
                     'self.ReceivingCompartment=ReceivingCompartment\n\t\t'+\
+                    'self.doesTransformChemical= "false"\n\t\t'+\
                     'try: \n\t\t\t'
                     'self.transferFactor='+ tf +'\n\t\t'\
                     'except: \n\t\t\t'       

@@ -11,6 +11,7 @@ Auto writes code to add deposition attributes to pseudo source compartments, spe
 import pandas as pd
 import os
 import re
+from util_functions import * 
 
 def define_deposition_rates(inputs):
     
@@ -67,7 +68,7 @@ def define_deposition_rates(inputs):
             c=(ve,comp,prop,chem,dep)
             dr_tuples.append(c)        
     df_dr=pd.DataFrame(dr_tuples,columns=['Volume Element', 'Compartment', 'Property','Chemical','Surface Deposition Rate'])
-    
+    df_dr['Chemical']=df_dr['Chemical'].apply(clean_chem_names)    
     
     #### WRITE SCRIPT TO ADD DEPOSITION RATES AS PROPERTIES OF PSEUDO COMPARTMENTS
     

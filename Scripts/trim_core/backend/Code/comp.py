@@ -16,8 +16,7 @@ import pandas as pd
 import os
 import required_elements_temp as req
 
-
-def define_compartments(inputs,df_parcels,df_ve,df_pve,df_props):
+def define_compartments(inputs,df_parcels,df_ve,df_pve,df_props,df_dr):
 
 
     ifp=inputs['path_inputs']
@@ -349,7 +348,8 @@ def define_comp(currentChemical):
                         '\n\t'+\
                         str(comp_name)+\
                         '.'+\
-                        'Emission_Rate={}')           
+                        'Deposition_Rate={}'
+                        )           
             f.write('\n\t'+str(comp_name)+'.category='+'"'+comp_category+'"')
             
             ### add compartment properties
@@ -372,7 +372,29 @@ def define_comp(currentChemical):
                            str(df_props.loc[i,'Value_New']))
                     f.write('\n'+'\t'+'except:'+'\n\t\t'+'pass') 
                     f.write('\n')            
-            
+
+
+    
+    
+        #### ADD DEPOSITION RATES AS PROPERTIES OF PSEUDO COMPARTMENTS
+        f.write('\n'+'#Add pseudo source dep rates to pseudo compartments'+'\n\n')
+
+        for i in range(len(df_dr)):
+            obj=df_dr.loc[i,'Compartment']
+            f.write('\t'+'try:'+'\n\t\t'+\
+                    str(obj)+\
+                   ".Deposition_Rate['" +\
+                   str(df_dr.loc[i,'Chemical'])+\
+                  "']="+\
+                   str(df_dr.loc[i,'Surface Deposition Rate'])+\
+                   '*'+\
+                   obj+\
+                   ".Parcel_Area"+'\n'\
+                   '\t'+'except:'+'\n\t\t'+\
+                   'pass')
+            f.write('\n')            
+    
+                
                 
         # write compartment objects dictionary        
         f.write('\n\n\t'+'comp_objects_dict={}'+'\n\t')   
@@ -386,4 +408,4 @@ def define_comp(currentChemical):
     return(df_comp,comp_dict)
     
 if __name__ == '__main__':
-    df_comp=define_compartments(inputs,df_parcels,df_ve,df_pve,df_props)
+    df_comp=define_compartments(inputs,df_parcels,df_ve,df_pve,df_props,df_dr)
