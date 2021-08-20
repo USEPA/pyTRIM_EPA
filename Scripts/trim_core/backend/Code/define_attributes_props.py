@@ -19,7 +19,7 @@ def get_met_ave(mfn,mfcol):
         ave=0
     return(ave)
         
-mfp=r"C:\Users\13963\Documents\RTR\PyTRIM\Input_Files"
+mfp=r"C:\Users\13963\Documents\RTR\PyTRIM\HSP_Repo\trim-builder\Scripts\trim_core\backend\Input_Files"
 try:
 	Foundries_SS.WaterTemperature_K=286.15
 except:
