@@ -1,609 +1,609 @@
 ### Note: This is an auto generated script
 try:
-	WetParticleSource_in_WetParticleSource_W1.Emission_Rate['Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_W1.Parcel_Area
+	WetParticleSource_in_WetParticleSource_W1.Emission_Rate['Chem_Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_W1.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_W1.Emission_Rate['Elemental_Mercury']=1.9020762035135754e-12*DryVaporSource_in_DryVaporSource_W1.Parcel_Area
+	DryVaporSource_in_DryVaporSource_W1.Emission_Rate['Chem_Elemental_Mercury']=1.9020762035135754e-12*DryVaporSource_in_DryVaporSource_W1.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_W1.Emission_Rate['Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_W1.Parcel_Area
+	DryParticleSource_in_DryParticleSource_W1.Emission_Rate['Chem_Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_W1.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_W1.Emission_Rate['Elemental_Mercury']=1.7640885238421173e-14*WetVaporSource_in_WetVaporSource_W1.Parcel_Area
+	WetVaporSource_in_WetVaporSource_W1.Emission_Rate['Chem_Elemental_Mercury']=1.7640885238421173e-14*WetVaporSource_in_WetVaporSource_W1.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_SW2.Emission_Rate['Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_SW2.Parcel_Area
+	WetParticleSource_in_WetParticleSource_SW2.Emission_Rate['Chem_Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_SW2.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_SW2.Emission_Rate['Elemental_Mercury']=3.828710098935972e-12*DryVaporSource_in_DryVaporSource_SW2.Parcel_Area
+	DryVaporSource_in_DryVaporSource_SW2.Emission_Rate['Chem_Elemental_Mercury']=3.828710098935972e-12*DryVaporSource_in_DryVaporSource_SW2.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_SW2.Emission_Rate['Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_SW2.Parcel_Area
+	DryParticleSource_in_DryParticleSource_SW2.Emission_Rate['Chem_Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_SW2.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_SW2.Emission_Rate['Elemental_Mercury']=2.0037085433389333e-14*WetVaporSource_in_WetVaporSource_SW2.Parcel_Area
+	WetVaporSource_in_WetVaporSource_SW2.Emission_Rate['Chem_Elemental_Mercury']=2.0037085433389333e-14*WetVaporSource_in_WetVaporSource_SW2.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_NW1.Emission_Rate['Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_NW1.Parcel_Area
+	WetParticleSource_in_WetParticleSource_NW1.Emission_Rate['Chem_Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_NW1.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_NW1.Emission_Rate['Elemental_Mercury']=2.3934431983713296e-12*DryVaporSource_in_DryVaporSource_NW1.Parcel_Area
+	DryVaporSource_in_DryVaporSource_NW1.Emission_Rate['Chem_Elemental_Mercury']=2.3934431983713296e-12*DryVaporSource_in_DryVaporSource_NW1.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_NW1.Emission_Rate['Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_NW1.Parcel_Area
+	DryParticleSource_in_DryParticleSource_NW1.Emission_Rate['Chem_Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_NW1.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_NW1.Emission_Rate['Elemental_Mercury']=1.656750732726092e-14*WetVaporSource_in_WetVaporSource_NW1.Parcel_Area
+	WetVaporSource_in_WetVaporSource_NW1.Emission_Rate['Chem_Elemental_Mercury']=1.656750732726092e-14*WetVaporSource_in_WetVaporSource_NW1.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_NW2.Emission_Rate['Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_NW2.Parcel_Area
+	WetParticleSource_in_WetParticleSource_NW2.Emission_Rate['Chem_Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_NW2.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_NW2.Emission_Rate['Elemental_Mercury']=2.214217268016036e-12*DryVaporSource_in_DryVaporSource_NW2.Parcel_Area
+	DryVaporSource_in_DryVaporSource_NW2.Emission_Rate['Chem_Elemental_Mercury']=2.214217268016036e-12*DryVaporSource_in_DryVaporSource_NW2.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_NW2.Emission_Rate['Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_NW2.Parcel_Area
+	DryParticleSource_in_DryParticleSource_NW2.Emission_Rate['Chem_Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_NW2.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_NW2.Emission_Rate['Elemental_Mercury']=1.2633225774909552e-14*WetVaporSource_in_WetVaporSource_NW2.Parcel_Area
+	WetVaporSource_in_WetVaporSource_NW2.Emission_Rate['Chem_Elemental_Mercury']=1.2633225774909552e-14*WetVaporSource_in_WetVaporSource_NW2.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_NE2.Emission_Rate['Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_NE2.Parcel_Area
+	WetParticleSource_in_WetParticleSource_NE2.Emission_Rate['Chem_Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_NE2.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_NE2.Emission_Rate['Elemental_Mercury']=1.4401095140314853e-11*DryVaporSource_in_DryVaporSource_NE2.Parcel_Area
+	DryVaporSource_in_DryVaporSource_NE2.Emission_Rate['Chem_Elemental_Mercury']=1.4401095140314853e-11*DryVaporSource_in_DryVaporSource_NE2.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_NE2.Emission_Rate['Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_NE2.Parcel_Area
+	DryParticleSource_in_DryParticleSource_NE2.Emission_Rate['Chem_Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_NE2.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_NE2.Emission_Rate['Elemental_Mercury']=5.6062057951174986e-14*WetVaporSource_in_WetVaporSource_NE2.Parcel_Area
+	WetVaporSource_in_WetVaporSource_NE2.Emission_Rate['Chem_Elemental_Mercury']=5.6062057951174986e-14*WetVaporSource_in_WetVaporSource_NE2.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_S1.Emission_Rate['Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_S1.Parcel_Area
+	WetParticleSource_in_WetParticleSource_S1.Emission_Rate['Chem_Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_S1.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_S1.Emission_Rate['Elemental_Mercury']=8.40520191649555e-12*DryVaporSource_in_DryVaporSource_S1.Parcel_Area
+	DryVaporSource_in_DryVaporSource_S1.Emission_Rate['Chem_Elemental_Mercury']=8.40520191649555e-12*DryVaporSource_in_DryVaporSource_S1.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_S1.Emission_Rate['Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_S1.Parcel_Area
+	DryParticleSource_in_DryParticleSource_S1.Emission_Rate['Chem_Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_S1.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_S1.Emission_Rate['Elemental_Mercury']=4.887063655030801e-14*WetVaporSource_in_WetVaporSource_S1.Parcel_Area
+	WetVaporSource_in_WetVaporSource_S1.Emission_Rate['Chem_Elemental_Mercury']=4.887063655030801e-14*WetVaporSource_in_WetVaporSource_S1.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_NE3.Emission_Rate['Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_NE3.Parcel_Area
+	WetParticleSource_in_WetParticleSource_NE3.Emission_Rate['Chem_Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_NE3.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_NE3.Emission_Rate['Elemental_Mercury']=1.603011635865845e-11*DryVaporSource_in_DryVaporSource_NE3.Parcel_Area
+	DryVaporSource_in_DryVaporSource_NE3.Emission_Rate['Chem_Elemental_Mercury']=1.603011635865845e-11*DryVaporSource_in_DryVaporSource_NE3.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_NE3.Emission_Rate['Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_NE3.Parcel_Area
+	DryParticleSource_in_DryParticleSource_NE3.Emission_Rate['Chem_Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_NE3.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_NE3.Emission_Rate['Elemental_Mercury']=5.352498288843258e-14*WetVaporSource_in_WetVaporSource_NE3.Parcel_Area
+	WetVaporSource_in_WetVaporSource_NE3.Emission_Rate['Chem_Elemental_Mercury']=5.352498288843258e-14*WetVaporSource_in_WetVaporSource_NE3.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_LakeCadillac.Emission_Rate['Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_LakeCadillac.Parcel_Area
+	WetParticleSource_in_WetParticleSource_LakeCadillac.Emission_Rate['Chem_Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_LakeCadillac.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_LakeCadillac.Emission_Rate['Elemental_Mercury']=1.9986310746064338e-11*DryVaporSource_in_DryVaporSource_LakeCadillac.Parcel_Area
+	DryVaporSource_in_DryVaporSource_LakeCadillac.Emission_Rate['Chem_Elemental_Mercury']=1.9986310746064338e-11*DryVaporSource_in_DryVaporSource_LakeCadillac.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_LakeCadillac.Emission_Rate['Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_LakeCadillac.Parcel_Area
+	DryParticleSource_in_DryParticleSource_LakeCadillac.Emission_Rate['Chem_Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_LakeCadillac.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_LakeCadillac.Emission_Rate['Elemental_Mercury']=6.519507186858316e-14*WetVaporSource_in_WetVaporSource_LakeCadillac.Parcel_Area
+	WetVaporSource_in_WetVaporSource_LakeCadillac.Emission_Rate['Chem_Elemental_Mercury']=6.519507186858316e-14*WetVaporSource_in_WetVaporSource_LakeCadillac.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_SE1.Emission_Rate['Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_SE1.Parcel_Area
+	WetParticleSource_in_WetParticleSource_SE1.Emission_Rate['Chem_Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_SE1.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_SE1.Emission_Rate['Elemental_Mercury']=5.518898775572286e-12*DryVaporSource_in_DryVaporSource_SE1.Parcel_Area
+	DryVaporSource_in_DryVaporSource_SE1.Emission_Rate['Chem_Elemental_Mercury']=5.518898775572286e-12*DryVaporSource_in_DryVaporSource_SE1.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_SE1.Emission_Rate['Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_SE1.Parcel_Area
+	DryParticleSource_in_DryParticleSource_SE1.Emission_Rate['Chem_Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_SE1.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_SE1.Emission_Rate['Elemental_Mercury']=2.1402388014297667e-14*WetVaporSource_in_WetVaporSource_SE1.Parcel_Area
+	WetVaporSource_in_WetVaporSource_SE1.Emission_Rate['Chem_Elemental_Mercury']=2.1402388014297667e-14*WetVaporSource_in_WetVaporSource_SE1.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_SE2.Emission_Rate['Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_SE2.Parcel_Area
+	WetParticleSource_in_WetParticleSource_SE2.Emission_Rate['Chem_Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_SE2.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_SE2.Emission_Rate['Elemental_Mercury']=3.98631074606434e-12*DryVaporSource_in_DryVaporSource_SE2.Parcel_Area
+	DryVaporSource_in_DryVaporSource_SE2.Emission_Rate['Chem_Elemental_Mercury']=3.98631074606434e-12*DryVaporSource_in_DryVaporSource_SE2.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_SE2.Emission_Rate['Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_SE2.Parcel_Area
+	DryParticleSource_in_DryParticleSource_SE2.Emission_Rate['Chem_Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_SE2.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_SE2.Emission_Rate['Elemental_Mercury']=2.0343672322490008e-14*WetVaporSource_in_WetVaporSource_SE2.Parcel_Area
+	WetVaporSource_in_WetVaporSource_SE2.Emission_Rate['Chem_Elemental_Mercury']=2.0343672322490008e-14*WetVaporSource_in_WetVaporSource_SE2.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_S2.Emission_Rate['Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_S2.Parcel_Area
+	WetParticleSource_in_WetParticleSource_S2.Emission_Rate['Chem_Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_S2.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_S2.Emission_Rate['Elemental_Mercury']=1.0230435774583618e-11*DryVaporSource_in_DryVaporSource_S2.Parcel_Area
+	DryVaporSource_in_DryVaporSource_S2.Emission_Rate['Chem_Elemental_Mercury']=1.0230435774583618e-11*DryVaporSource_in_DryVaporSource_S2.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_S2.Emission_Rate['Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_S2.Parcel_Area
+	DryParticleSource_in_DryParticleSource_S2.Emission_Rate['Chem_Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_S2.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_S2.Emission_Rate['Elemental_Mercury']=3.263153091489848e-14*WetVaporSource_in_WetVaporSource_S2.Parcel_Area
+	WetVaporSource_in_WetVaporSource_S2.Emission_Rate['Chem_Elemental_Mercury']=3.263153091489848e-14*WetVaporSource_in_WetVaporSource_S2.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_SW1.Emission_Rate['Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_SW1.Parcel_Area
+	WetParticleSource_in_WetParticleSource_SW1.Emission_Rate['Chem_Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_SW1.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_SW1.Emission_Rate['Elemental_Mercury']=4.468780895885618e-12*DryVaporSource_in_DryVaporSource_SW1.Parcel_Area
+	DryVaporSource_in_DryVaporSource_SW1.Emission_Rate['Chem_Elemental_Mercury']=4.468780895885618e-12*DryVaporSource_in_DryVaporSource_SW1.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_SW1.Emission_Rate['Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_SW1.Parcel_Area
+	DryParticleSource_in_DryParticleSource_SW1.Emission_Rate['Chem_Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_SW1.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_SW1.Emission_Rate['Elemental_Mercury']=2.8351965928967985e-14*WetVaporSource_in_WetVaporSource_SW1.Parcel_Area
+	WetVaporSource_in_WetVaporSource_SW1.Emission_Rate['Chem_Elemental_Mercury']=2.8351965928967985e-14*WetVaporSource_in_WetVaporSource_SW1.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_N1.Emission_Rate['Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_N1.Parcel_Area
+	WetParticleSource_in_WetParticleSource_N1.Emission_Rate['Chem_Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_N1.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_N1.Emission_Rate['Elemental_Mercury']=6.166370066164728e-12*DryVaporSource_in_DryVaporSource_N1.Parcel_Area
+	DryVaporSource_in_DryVaporSource_N1.Emission_Rate['Chem_Elemental_Mercury']=6.166370066164728e-12*DryVaporSource_in_DryVaporSource_N1.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_N1.Emission_Rate['Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_N1.Parcel_Area
+	DryParticleSource_in_DryParticleSource_N1.Emission_Rate['Chem_Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_N1.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_N1.Emission_Rate['Elemental_Mercury']=4.661282226785306e-14*WetVaporSource_in_WetVaporSource_N1.Parcel_Area
+	WetVaporSource_in_WetVaporSource_N1.Emission_Rate['Chem_Elemental_Mercury']=4.661282226785306e-14*WetVaporSource_in_WetVaporSource_N1.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_N2.Emission_Rate['Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_N2.Parcel_Area
+	WetParticleSource_in_WetParticleSource_N2.Emission_Rate['Chem_Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_N2.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_N2.Emission_Rate['Elemental_Mercury']=7.405119780971937e-12*DryVaporSource_in_DryVaporSource_N2.Parcel_Area
+	DryVaporSource_in_DryVaporSource_N2.Emission_Rate['Chem_Elemental_Mercury']=7.405119780971937e-12*DryVaporSource_in_DryVaporSource_N2.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_N2.Emission_Rate['Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_N2.Parcel_Area
+	DryParticleSource_in_DryParticleSource_N2.Emission_Rate['Chem_Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_N2.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_N2.Emission_Rate['Elemental_Mercury']=4.1026146475017115e-14*WetVaporSource_in_WetVaporSource_N2.Parcel_Area
+	WetVaporSource_in_WetVaporSource_N2.Emission_Rate['Chem_Elemental_Mercury']=4.1026146475017115e-14*WetVaporSource_in_WetVaporSource_N2.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_NE1.Emission_Rate['Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_NE1.Parcel_Area
+	WetParticleSource_in_WetParticleSource_NE1.Emission_Rate['Chem_Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_NE1.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_NE1.Emission_Rate['Elemental_Mercury']=3.531240833088883e-11*DryVaporSource_in_DryVaporSource_NE1.Parcel_Area
+	DryVaporSource_in_DryVaporSource_NE1.Emission_Rate['Chem_Elemental_Mercury']=3.531240833088883e-11*DryVaporSource_in_DryVaporSource_NE1.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_NE1.Emission_Rate['Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_NE1.Parcel_Area
+	DryParticleSource_in_DryParticleSource_NE1.Emission_Rate['Chem_Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_NE1.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_NE1.Emission_Rate['Elemental_Mercury']=1.6006453505426813e-13*WetVaporSource_in_WetVaporSource_NE1.Parcel_Area
+	WetVaporSource_in_WetVaporSource_NE1.Emission_Rate['Chem_Elemental_Mercury']=1.6006453505426813e-13*WetVaporSource_in_WetVaporSource_NE1.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_E1.Emission_Rate['Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_E1.Parcel_Area
+	WetParticleSource_in_WetParticleSource_E1.Emission_Rate['Chem_Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_E1.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_E1.Emission_Rate['Elemental_Mercury']=8.680355920602325e-12*DryVaporSource_in_DryVaporSource_E1.Parcel_Area
+	DryVaporSource_in_DryVaporSource_E1.Emission_Rate['Chem_Elemental_Mercury']=8.680355920602325e-12*DryVaporSource_in_DryVaporSource_E1.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_E1.Emission_Rate['Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_E1.Parcel_Area
+	DryParticleSource_in_DryParticleSource_E1.Emission_Rate['Chem_Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_E1.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_E1.Emission_Rate['Elemental_Mercury']=3.8285420944558525e-14*WetVaporSource_in_WetVaporSource_E1.Parcel_Area
+	WetVaporSource_in_WetVaporSource_E1.Emission_Rate['Chem_Elemental_Mercury']=3.8285420944558525e-14*WetVaporSource_in_WetVaporSource_E1.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_LakeMitchell.Emission_Rate['Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_LakeMitchell.Parcel_Area
+	WetParticleSource_in_WetParticleSource_LakeMitchell.Emission_Rate['Chem_Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_LakeMitchell.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_LakeMitchell.Emission_Rate['Elemental_Mercury']=3.411362080766599e-12*DryVaporSource_in_DryVaporSource_LakeMitchell.Parcel_Area
+	DryVaporSource_in_DryVaporSource_LakeMitchell.Emission_Rate['Chem_Elemental_Mercury']=3.411362080766599e-12*DryVaporSource_in_DryVaporSource_LakeMitchell.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_LakeMitchell.Emission_Rate['Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_LakeMitchell.Parcel_Area
+	DryParticleSource_in_DryParticleSource_LakeMitchell.Emission_Rate['Chem_Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_LakeMitchell.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_LakeMitchell.Emission_Rate['Elemental_Mercury']=2.977052487481538e-14*WetVaporSource_in_WetVaporSource_LakeMitchell.Parcel_Area
+	WetVaporSource_in_WetVaporSource_LakeMitchell.Emission_Rate['Chem_Elemental_Mercury']=2.977052487481538e-14*WetVaporSource_in_WetVaporSource_LakeMitchell.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_E3.Emission_Rate['Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_E3.Parcel_Area
+	WetParticleSource_in_WetParticleSource_E3.Emission_Rate['Chem_Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_E3.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_E3.Emission_Rate['Elemental_Mercury']=3.401627500190128e-12*DryVaporSource_in_DryVaporSource_E3.Parcel_Area
+	DryVaporSource_in_DryVaporSource_E3.Emission_Rate['Chem_Elemental_Mercury']=3.401627500190128e-12*DryVaporSource_in_DryVaporSource_E3.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_E3.Emission_Rate['Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_E3.Parcel_Area
+	DryParticleSource_in_DryParticleSource_E3.Emission_Rate['Chem_Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_E3.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_E3.Emission_Rate['Elemental_Mercury']=2.092934823940984e-14*WetVaporSource_in_WetVaporSource_E3.Parcel_Area
+	WetVaporSource_in_WetVaporSource_E3.Emission_Rate['Chem_Elemental_Mercury']=2.092934823940984e-14*WetVaporSource_in_WetVaporSource_E3.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_E2.Emission_Rate['Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_E2.Parcel_Area
+	WetParticleSource_in_WetParticleSource_E2.Emission_Rate['Chem_Elemental_Mercury']=0.0*WetParticleSource_in_WetParticleSource_E2.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_E2.Emission_Rate['Elemental_Mercury']=6.342853587206769e-12*DryVaporSource_in_DryVaporSource_E2.Parcel_Area
+	DryVaporSource_in_DryVaporSource_E2.Emission_Rate['Chem_Elemental_Mercury']=6.342853587206769e-12*DryVaporSource_in_DryVaporSource_E2.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_E2.Emission_Rate['Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_E2.Parcel_Area
+	DryParticleSource_in_DryParticleSource_E2.Emission_Rate['Chem_Elemental_Mercury']=0.0*DryParticleSource_in_DryParticleSource_E2.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_E2.Emission_Rate['Elemental_Mercury']=3.1410615394188283e-14*WetVaporSource_in_WetVaporSource_E2.Parcel_Area
+	WetVaporSource_in_WetVaporSource_E2.Emission_Rate['Chem_Elemental_Mercury']=3.1410615394188283e-14*WetVaporSource_in_WetVaporSource_E2.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_W1.Emission_Rate['Divalent_Mercury']=1.1440565822496006e-13*WetParticleSource_in_WetParticleSource_W1.Parcel_Area
+	WetParticleSource_in_WetParticleSource_W1.Emission_Rate['Chem_Divalent_Mercury']=1.1440565822496006e-13*WetParticleSource_in_WetParticleSource_W1.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_W1.Emission_Rate['Divalent_Mercury']=2.1733059548254626e-10*DryVaporSource_in_DryVaporSource_W1.Parcel_Area
+	DryVaporSource_in_DryVaporSource_W1.Emission_Rate['Chem_Divalent_Mercury']=2.1733059548254626e-10*DryVaporSource_in_DryVaporSource_W1.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_W1.Emission_Rate['Divalent_Mercury']=7.149258498745152e-11*DryParticleSource_in_DryParticleSource_W1.Parcel_Area
+	DryParticleSource_in_DryParticleSource_W1.Emission_Rate['Chem_Divalent_Mercury']=7.149258498745152e-11*DryParticleSource_in_DryParticleSource_W1.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_W1.Emission_Rate['Divalent_Mercury']=2.2406570841889122e-11*WetVaporSource_in_WetVaporSource_W1.Parcel_Area
+	WetVaporSource_in_WetVaporSource_W1.Emission_Rate['Chem_Divalent_Mercury']=2.2406570841889122e-11*WetVaporSource_in_WetVaporSource_W1.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_SW2.Emission_Rate['Divalent_Mercury']=1.19828262086989e-13*WetParticleSource_in_WetParticleSource_SW2.Parcel_Area
+	WetParticleSource_in_WetParticleSource_SW2.Emission_Rate['Chem_Divalent_Mercury']=1.19828262086989e-13*WetParticleSource_in_WetParticleSource_SW2.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_SW2.Emission_Rate['Divalent_Mercury']=3.744782527534068e-10*DryVaporSource_in_DryVaporSource_SW2.Parcel_Area
+	DryVaporSource_in_DryVaporSource_SW2.Emission_Rate['Chem_Divalent_Mercury']=3.744782527534068e-10*DryVaporSource_in_DryVaporSource_SW2.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_SW2.Emission_Rate['Divalent_Mercury']=1.287486777425176e-10*DryParticleSource_in_DryParticleSource_SW2.Parcel_Area
+	DryParticleSource_in_DryParticleSource_SW2.Emission_Rate['Chem_Divalent_Mercury']=1.287486777425176e-10*DryParticleSource_in_DryParticleSource_SW2.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_SW2.Emission_Rate['Divalent_Mercury']=2.316918673386846e-11*WetVaporSource_in_WetVaporSource_SW2.Parcel_Area
+	WetVaporSource_in_WetVaporSource_SW2.Emission_Rate['Chem_Divalent_Mercury']=2.316918673386846e-11*WetVaporSource_in_WetVaporSource_SW2.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_NW1.Emission_Rate['Divalent_Mercury']=1.1171835237543656e-13*WetParticleSource_in_WetParticleSource_NW1.Parcel_Area
+	WetParticleSource_in_WetParticleSource_NW1.Emission_Rate['Chem_Divalent_Mercury']=1.1171835237543656e-13*WetParticleSource_in_WetParticleSource_NW1.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_NW1.Emission_Rate['Divalent_Mercury']=2.5380578809736924e-10*DryVaporSource_in_DryVaporSource_NW1.Parcel_Area
+	DryVaporSource_in_DryVaporSource_NW1.Emission_Rate['Chem_Divalent_Mercury']=2.5380578809736924e-10*DryVaporSource_in_DryVaporSource_NW1.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_NW1.Emission_Rate['Divalent_Mercury']=8.879060706576106e-11*DryParticleSource_in_DryParticleSource_NW1.Parcel_Area
+	DryParticleSource_in_DryParticleSource_NW1.Emission_Rate['Chem_Divalent_Mercury']=8.879060706576106e-11*DryParticleSource_in_DryParticleSource_NW1.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_NW1.Emission_Rate['Divalent_Mercury']=2.261605152775584e-11*WetVaporSource_in_WetVaporSource_NW1.Parcel_Area
+	WetVaporSource_in_WetVaporSource_NW1.Emission_Rate['Chem_Divalent_Mercury']=2.261605152775584e-11*WetVaporSource_in_WetVaporSource_NW1.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_NW2.Emission_Rate['Divalent_Mercury']=8.817287572113033e-14*WetParticleSource_in_WetParticleSource_NW2.Parcel_Area
+	WetParticleSource_in_WetParticleSource_NW2.Emission_Rate['Chem_Divalent_Mercury']=8.817287572113033e-14*WetParticleSource_in_WetParticleSource_NW2.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_NW2.Emission_Rate['Divalent_Mercury']=2.1593038036569865e-10*DryVaporSource_in_DryVaporSource_NW2.Parcel_Area
+	DryVaporSource_in_DryVaporSource_NW2.Emission_Rate['Chem_Divalent_Mercury']=2.1593038036569865e-10*DryVaporSource_in_DryVaporSource_NW2.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_NW2.Emission_Rate['Divalent_Mercury']=7.56210032267527e-11*DryParticleSource_in_DryParticleSource_NW2.Parcel_Area
+	DryParticleSource_in_DryParticleSource_NW2.Emission_Rate['Chem_Divalent_Mercury']=7.56210032267527e-11*DryParticleSource_in_DryParticleSource_NW2.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_NW2.Emission_Rate['Divalent_Mercury']=1.7444020729441673e-11*WetVaporSource_in_WetVaporSource_NW2.Parcel_Area
+	WetVaporSource_in_WetVaporSource_NW2.Emission_Rate['Chem_Divalent_Mercury']=1.7444020729441673e-11*WetVaporSource_in_WetVaporSource_NW2.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_NE2.Emission_Rate['Divalent_Mercury']=4.035592060232717e-13*WetParticleSource_in_WetParticleSource_NE2.Parcel_Area
+	WetParticleSource_in_WetParticleSource_NE2.Emission_Rate['Chem_Divalent_Mercury']=4.035592060232717e-13*WetParticleSource_in_WetParticleSource_NE2.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_NE2.Emission_Rate['Divalent_Mercury']=1.0431211498973307e-09*DryVaporSource_in_DryVaporSource_NE2.Parcel_Area
+	DryVaporSource_in_DryVaporSource_NE2.Emission_Rate['Chem_Divalent_Mercury']=1.0431211498973307e-09*DryVaporSource_in_DryVaporSource_NE2.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_NE2.Emission_Rate['Divalent_Mercury']=4.945471138489619e-10*DryParticleSource_in_DryParticleSource_NE2.Parcel_Area
+	DryParticleSource_in_DryParticleSource_NE2.Emission_Rate['Chem_Divalent_Mercury']=4.945471138489619e-10*DryParticleSource_in_DryParticleSource_NE2.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_NE2.Emission_Rate['Divalent_Mercury']=8.514715947980836e-11*WetVaporSource_in_WetVaporSource_NE2.Parcel_Area
+	WetVaporSource_in_WetVaporSource_NE2.Emission_Rate['Chem_Divalent_Mercury']=8.514715947980836e-11*WetVaporSource_in_WetVaporSource_NE2.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_S1.Emission_Rate['Divalent_Mercury']=2.830937713894593e-13*WetParticleSource_in_WetParticleSource_S1.Parcel_Area
+	WetParticleSource_in_WetParticleSource_S1.Emission_Rate['Chem_Divalent_Mercury']=2.830937713894593e-13*WetParticleSource_in_WetParticleSource_S1.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_S1.Emission_Rate['Divalent_Mercury']=8.459958932238194e-10*DryVaporSource_in_DryVaporSource_S1.Parcel_Area
+	DryVaporSource_in_DryVaporSource_S1.Emission_Rate['Chem_Divalent_Mercury']=8.459958932238194e-10*DryVaporSource_in_DryVaporSource_S1.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_S1.Emission_Rate['Divalent_Mercury']=2.9185489390828203e-10*DryParticleSource_in_DryParticleSource_S1.Parcel_Area
+	DryParticleSource_in_DryParticleSource_S1.Emission_Rate['Chem_Divalent_Mercury']=2.9185489390828203e-10*DryParticleSource_in_DryParticleSource_S1.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_S1.Emission_Rate['Divalent_Mercury']=5.995893223819301e-11*WetVaporSource_in_WetVaporSource_S1.Parcel_Area
+	WetVaporSource_in_WetVaporSource_S1.Emission_Rate['Chem_Divalent_Mercury']=5.995893223819301e-11*WetVaporSource_in_WetVaporSource_S1.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_NE3.Emission_Rate['Divalent_Mercury']=3.979009810631987e-13*WetParticleSource_in_WetParticleSource_NE3.Parcel_Area
+	WetParticleSource_in_WetParticleSource_NE3.Emission_Rate['Chem_Divalent_Mercury']=3.979009810631987e-13*WetParticleSource_in_WetParticleSource_NE3.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_NE3.Emission_Rate['Divalent_Mercury']=1.8964179785535023e-09*DryVaporSource_in_DryVaporSource_NE3.Parcel_Area
+	DryVaporSource_in_DryVaporSource_NE3.Emission_Rate['Chem_Divalent_Mercury']=1.8964179785535023e-09*DryVaporSource_in_DryVaporSource_NE3.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_NE3.Emission_Rate['Divalent_Mercury']=5.686516084873375e-10*DryParticleSource_in_DryParticleSource_NE3.Parcel_Area
+	DryParticleSource_in_DryParticleSource_NE3.Emission_Rate['Chem_Divalent_Mercury']=5.686516084873375e-10*DryParticleSource_in_DryParticleSource_NE3.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_NE3.Emission_Rate['Divalent_Mercury']=8.494182067077343e-11*WetVaporSource_in_WetVaporSource_NE3.Parcel_Area
+	WetVaporSource_in_WetVaporSource_NE3.Emission_Rate['Chem_Divalent_Mercury']=8.494182067077343e-11*WetVaporSource_in_WetVaporSource_NE3.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_LakeCadillac.Emission_Rate['Divalent_Mercury']=4.181382614647501e-13*WetParticleSource_in_WetParticleSource_LakeCadillac.Parcel_Area
+	WetParticleSource_in_WetParticleSource_LakeCadillac.Emission_Rate['Chem_Divalent_Mercury']=4.181382614647501e-13*WetParticleSource_in_WetParticleSource_LakeCadillac.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_LakeCadillac.Emission_Rate['Divalent_Mercury']=2.3093771389459273e-09*DryVaporSource_in_DryVaporSource_LakeCadillac.Parcel_Area
+	DryVaporSource_in_DryVaporSource_LakeCadillac.Emission_Rate['Chem_Divalent_Mercury']=2.3093771389459273e-09*DryVaporSource_in_DryVaporSource_LakeCadillac.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_LakeCadillac.Emission_Rate['Divalent_Mercury']=6.255304585900068e-10*DryParticleSource_in_DryParticleSource_LakeCadillac.Parcel_Area
+	DryParticleSource_in_DryParticleSource_LakeCadillac.Emission_Rate['Chem_Divalent_Mercury']=6.255304585900068e-10*DryParticleSource_in_DryParticleSource_LakeCadillac.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_LakeCadillac.Emission_Rate['Divalent_Mercury']=9.041752224503764e-11*WetVaporSource_in_WetVaporSource_LakeCadillac.Parcel_Area
+	WetVaporSource_in_WetVaporSource_LakeCadillac.Emission_Rate['Chem_Divalent_Mercury']=9.041752224503764e-11*WetVaporSource_in_WetVaporSource_LakeCadillac.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_SE1.Emission_Rate['Divalent_Mercury']=1.4741805460491293e-13*WetParticleSource_in_WetParticleSource_SE1.Parcel_Area
+	WetParticleSource_in_WetParticleSource_SE1.Emission_Rate['Chem_Divalent_Mercury']=1.4741805460491293e-13*WetParticleSource_in_WetParticleSource_SE1.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_SE1.Emission_Rate['Divalent_Mercury']=8.599893528024944e-10*DryVaporSource_in_DryVaporSource_SE1.Parcel_Area
+	DryVaporSource_in_DryVaporSource_SE1.Emission_Rate['Chem_Divalent_Mercury']=8.599893528024944e-10*DryVaporSource_in_DryVaporSource_SE1.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_SE1.Emission_Rate['Divalent_Mercury']=1.9501102745455928e-10*DryParticleSource_in_DryParticleSource_SE1.Parcel_Area
+	DryParticleSource_in_DryParticleSource_SE1.Emission_Rate['Chem_Divalent_Mercury']=1.9501102745455928e-10*DryParticleSource_in_DryParticleSource_SE1.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_SE1.Emission_Rate['Divalent_Mercury']=2.966613430679139e-11*WetVaporSource_in_WetVaporSource_SE1.Parcel_Area
+	WetVaporSource_in_WetVaporSource_SE1.Emission_Rate['Chem_Divalent_Mercury']=2.966613430679139e-11*WetVaporSource_in_WetVaporSource_SE1.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_SE2.Emission_Rate['Divalent_Mercury']=1.603515976800317e-13*WetParticleSource_in_WetParticleSource_SE2.Parcel_Area
+	WetParticleSource_in_WetParticleSource_SE2.Emission_Rate['Chem_Divalent_Mercury']=1.603515976800317e-13*WetParticleSource_in_WetParticleSource_SE2.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_SE2.Emission_Rate['Divalent_Mercury']=1.0533520659966138e-09*DryVaporSource_in_DryVaporSource_SE2.Parcel_Area
+	DryVaporSource_in_DryVaporSource_SE2.Emission_Rate['Chem_Divalent_Mercury']=1.0533520659966138e-09*DryVaporSource_in_DryVaporSource_SE2.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_SE2.Emission_Rate['Divalent_Mercury']=1.6038041716200148e-10*DryParticleSource_in_DryParticleSource_SE2.Parcel_Area
+	DryParticleSource_in_DryParticleSource_SE2.Emission_Rate['Chem_Divalent_Mercury']=1.6038041716200148e-10*DryParticleSource_in_DryParticleSource_SE2.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_SE2.Emission_Rate['Divalent_Mercury']=3.31164667315105e-11*WetVaporSource_in_WetVaporSource_SE2.Parcel_Area
+	WetVaporSource_in_WetVaporSource_SE2.Emission_Rate['Chem_Divalent_Mercury']=3.31164667315105e-11*WetVaporSource_in_WetVaporSource_SE2.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_S2.Emission_Rate['Divalent_Mercury']=2.1851699749030345e-13*WetParticleSource_in_WetParticleSource_S2.Parcel_Area
+	WetParticleSource_in_WetParticleSource_S2.Emission_Rate['Chem_Divalent_Mercury']=2.1851699749030345e-13*WetParticleSource_in_WetParticleSource_S2.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_S2.Emission_Rate['Divalent_Mercury']=1.1969883641341548e-09*DryVaporSource_in_DryVaporSource_S2.Parcel_Area
+	DryVaporSource_in_DryVaporSource_S2.Emission_Rate['Chem_Divalent_Mercury']=1.1969883641341548e-09*DryVaporSource_in_DryVaporSource_S2.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_S2.Emission_Rate['Divalent_Mercury']=3.403331051791011e-10*DryParticleSource_in_DryParticleSource_S2.Parcel_Area
+	DryParticleSource_in_DryParticleSource_S2.Emission_Rate['Chem_Divalent_Mercury']=3.403331051791011e-10*DryParticleSource_in_DryParticleSource_S2.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_S2.Emission_Rate['Divalent_Mercury']=4.553593429158112e-11*WetVaporSource_in_WetVaporSource_S2.Parcel_Area
+	WetVaporSource_in_WetVaporSource_S2.Emission_Rate['Chem_Divalent_Mercury']=4.553593429158112e-11*WetVaporSource_in_WetVaporSource_S2.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_SW1.Emission_Rate['Divalent_Mercury']=1.8075899307932162e-13*WetParticleSource_in_WetParticleSource_SW1.Parcel_Area
+	WetParticleSource_in_WetParticleSource_SW1.Emission_Rate['Chem_Divalent_Mercury']=1.8075899307932162e-13*WetParticleSource_in_WetParticleSource_SW1.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_SW1.Emission_Rate['Divalent_Mercury']=4.860901969731539e-10*DryVaporSource_in_DryVaporSource_SW1.Parcel_Area
+	DryVaporSource_in_DryVaporSource_SW1.Emission_Rate['Chem_Divalent_Mercury']=4.860901969731539e-10*DryVaporSource_in_DryVaporSource_SW1.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_SW1.Emission_Rate['Divalent_Mercury']=1.6010342991862497e-10*DryParticleSource_in_DryParticleSource_SW1.Parcel_Area
+	DryParticleSource_in_DryParticleSource_SW1.Emission_Rate['Chem_Divalent_Mercury']=1.6010342991862497e-10*DryParticleSource_in_DryParticleSource_SW1.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_SW1.Emission_Rate['Divalent_Mercury']=3.675412578903339e-11*WetVaporSource_in_WetVaporSource_SW1.Parcel_Area
+	WetVaporSource_in_WetVaporSource_SW1.Emission_Rate['Chem_Divalent_Mercury']=3.675412578903339e-11*WetVaporSource_in_WetVaporSource_SW1.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_N1.Emission_Rate['Divalent_Mercury']=3.1660506502395623e-13*WetParticleSource_in_WetParticleSource_N1.Parcel_Area
+	WetParticleSource_in_WetParticleSource_N1.Emission_Rate['Chem_Divalent_Mercury']=3.1660506502395623e-13*WetParticleSource_in_WetParticleSource_N1.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_N1.Emission_Rate['Divalent_Mercury']=6.249235683321927e-10*DryVaporSource_in_DryVaporSource_N1.Parcel_Area
+	DryVaporSource_in_DryVaporSource_N1.Emission_Rate['Chem_Divalent_Mercury']=6.249235683321927e-10*DryVaporSource_in_DryVaporSource_N1.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_N1.Emission_Rate['Divalent_Mercury']=2.3414099931553734e-10*DryParticleSource_in_DryParticleSource_N1.Parcel_Area
+	DryParticleSource_in_DryParticleSource_N1.Emission_Rate['Chem_Divalent_Mercury']=2.3414099931553734e-10*DryParticleSource_in_DryParticleSource_N1.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_N1.Emission_Rate['Divalent_Mercury']=6.815423226100845e-11*WetVaporSource_in_WetVaporSource_N1.Parcel_Area
+	WetVaporSource_in_WetVaporSource_N1.Emission_Rate['Chem_Divalent_Mercury']=6.815423226100845e-11*WetVaporSource_in_WetVaporSource_N1.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_N2.Emission_Rate['Divalent_Mercury']=3.1463381245722094e-13*WetParticleSource_in_WetParticleSource_N2.Parcel_Area
+	WetParticleSource_in_WetParticleSource_N2.Emission_Rate['Chem_Divalent_Mercury']=3.1463381245722094e-13*WetParticleSource_in_WetParticleSource_N2.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_N2.Emission_Rate['Divalent_Mercury']=6.671813826146477e-10*DryVaporSource_in_DryVaporSource_N2.Parcel_Area
+	DryVaporSource_in_DryVaporSource_N2.Emission_Rate['Chem_Divalent_Mercury']=6.671813826146477e-10*DryVaporSource_in_DryVaporSource_N2.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_N2.Emission_Rate['Divalent_Mercury']=2.584312114989732e-10*DryParticleSource_in_DryParticleSource_N2.Parcel_Area
+	DryParticleSource_in_DryParticleSource_N2.Emission_Rate['Chem_Divalent_Mercury']=2.584312114989732e-10*DryParticleSource_in_DryParticleSource_N2.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_N2.Emission_Rate['Divalent_Mercury']=6.64016427104723e-11*WetVaporSource_in_WetVaporSource_N2.Parcel_Area
+	WetVaporSource_in_WetVaporSource_N2.Emission_Rate['Chem_Divalent_Mercury']=6.64016427104723e-11*WetVaporSource_in_WetVaporSource_N2.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_NE1.Emission_Rate['Divalent_Mercury']=1.2354942798474624e-12*WetParticleSource_in_WetParticleSource_NE1.Parcel_Area
+	WetParticleSource_in_WetParticleSource_NE1.Emission_Rate['Chem_Divalent_Mercury']=1.2354942798474624e-12*WetParticleSource_in_WetParticleSource_NE1.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_NE1.Emission_Rate['Divalent_Mercury']=3.7215214627945636e-09*DryVaporSource_in_DryVaporSource_NE1.Parcel_Area
+	DryVaporSource_in_DryVaporSource_NE1.Emission_Rate['Chem_Divalent_Mercury']=3.7215214627945636e-09*DryVaporSource_in_DryVaporSource_NE1.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_NE1.Emission_Rate['Divalent_Mercury']=1.131025716241322e-09*DryParticleSource_in_DryParticleSource_NE1.Parcel_Area
+	DryParticleSource_in_DryParticleSource_NE1.Emission_Rate['Chem_Divalent_Mercury']=1.131025716241322e-09*DryParticleSource_in_DryParticleSource_NE1.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_NE1.Emission_Rate['Divalent_Mercury']=2.710863400801799e-10*WetVaporSource_in_WetVaporSource_NE1.Parcel_Area
+	WetVaporSource_in_WetVaporSource_NE1.Emission_Rate['Chem_Divalent_Mercury']=2.710863400801799e-10*WetVaporSource_in_WetVaporSource_NE1.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_E1.Emission_Rate['Divalent_Mercury']=2.948323066392883e-13*WetParticleSource_in_WetParticleSource_E1.Parcel_Area
+	WetParticleSource_in_WetParticleSource_E1.Emission_Rate['Chem_Divalent_Mercury']=2.948323066392883e-13*WetParticleSource_in_WetParticleSource_E1.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_E1.Emission_Rate['Divalent_Mercury']=2.179671457905544e-09*DryVaporSource_in_DryVaporSource_E1.Parcel_Area
+	DryVaporSource_in_DryVaporSource_E1.Emission_Rate['Chem_Divalent_Mercury']=2.179671457905544e-09*DryVaporSource_in_DryVaporSource_E1.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_E1.Emission_Rate['Divalent_Mercury']=3.233744010951403e-10*DryParticleSource_in_DryParticleSource_E1.Parcel_Area
+	DryParticleSource_in_DryParticleSource_E1.Emission_Rate['Chem_Divalent_Mercury']=3.233744010951403e-10*DryParticleSource_in_DryParticleSource_E1.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_E1.Emission_Rate['Divalent_Mercury']=6.285763175906913e-11*WetVaporSource_in_WetVaporSource_E1.Parcel_Area
+	WetVaporSource_in_WetVaporSource_E1.Emission_Rate['Chem_Divalent_Mercury']=6.285763175906913e-11*WetVaporSource_in_WetVaporSource_E1.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_LakeMitchell.Emission_Rate['Divalent_Mercury']=1.9764400734896788e-13*WetParticleSource_in_WetParticleSource_LakeMitchell.Parcel_Area
+	WetParticleSource_in_WetParticleSource_LakeMitchell.Emission_Rate['Chem_Divalent_Mercury']=1.9764400734896788e-13*WetParticleSource_in_WetParticleSource_LakeMitchell.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_LakeMitchell.Emission_Rate['Divalent_Mercury']=3.8145466335242627e-10*DryVaporSource_in_DryVaporSource_LakeMitchell.Parcel_Area
+	DryVaporSource_in_DryVaporSource_LakeMitchell.Emission_Rate['Chem_Divalent_Mercury']=3.8145466335242627e-10*DryVaporSource_in_DryVaporSource_LakeMitchell.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_LakeMitchell.Emission_Rate['Divalent_Mercury']=1.3242551965128425e-10*DryParticleSource_in_DryParticleSource_LakeMitchell.Parcel_Area
+	DryParticleSource_in_DryParticleSource_LakeMitchell.Emission_Rate['Chem_Divalent_Mercury']=1.3242551965128425e-10*DryParticleSource_in_DryParticleSource_LakeMitchell.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_LakeMitchell.Emission_Rate['Divalent_Mercury']=4.12089772686336e-11*WetVaporSource_in_WetVaporSource_LakeMitchell.Parcel_Area
+	WetVaporSource_in_WetVaporSource_LakeMitchell.Emission_Rate['Chem_Divalent_Mercury']=4.12089772686336e-11*WetVaporSource_in_WetVaporSource_LakeMitchell.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_E3.Emission_Rate['Divalent_Mercury']=1.5106852232108904e-13*WetParticleSource_in_WetParticleSource_E3.Parcel_Area
+	WetParticleSource_in_WetParticleSource_E3.Emission_Rate['Chem_Divalent_Mercury']=1.5106852232108904e-13*WetParticleSource_in_WetParticleSource_E3.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_E3.Emission_Rate['Divalent_Mercury']=1.0020533880903492e-09*DryVaporSource_in_DryVaporSource_E3.Parcel_Area
+	DryVaporSource_in_DryVaporSource_E3.Emission_Rate['Chem_Divalent_Mercury']=1.0020533880903492e-09*DryVaporSource_in_DryVaporSource_E3.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_E3.Emission_Rate['Divalent_Mercury']=1.6621796334322002e-10*DryParticleSource_in_DryParticleSource_E3.Parcel_Area
+	DryParticleSource_in_DryParticleSource_E3.Emission_Rate['Chem_Divalent_Mercury']=1.6621796334322002e-10*DryParticleSource_in_DryParticleSource_E3.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_E3.Emission_Rate['Divalent_Mercury']=3.1181078409004486e-11*WetVaporSource_in_WetVaporSource_E3.Parcel_Area
+	WetVaporSource_in_WetVaporSource_E3.Emission_Rate['Chem_Divalent_Mercury']=3.1181078409004486e-11*WetVaporSource_in_WetVaporSource_E3.Parcel_Area
 except:
 	pass
 try:
-	WetParticleSource_in_WetParticleSource_E2.Emission_Rate['Divalent_Mercury']=2.297305705929936e-13*WetParticleSource_in_WetParticleSource_E2.Parcel_Area
+	WetParticleSource_in_WetParticleSource_E2.Emission_Rate['Chem_Divalent_Mercury']=2.297305705929936e-13*WetParticleSource_in_WetParticleSource_E2.Parcel_Area
 except:
 	pass
 try:
-	DryVaporSource_in_DryVaporSource_E2.Emission_Rate['Divalent_Mercury']=1.6496795470101423e-09*DryVaporSource_in_DryVaporSource_E2.Parcel_Area
+	DryVaporSource_in_DryVaporSource_E2.Emission_Rate['Chem_Divalent_Mercury']=1.6496795470101423e-09*DryVaporSource_in_DryVaporSource_E2.Parcel_Area
 except:
 	pass
 try:
-	DryParticleSource_in_DryParticleSource_E2.Emission_Rate['Divalent_Mercury']=2.8279509675813575e-10*DryParticleSource_in_DryParticleSource_E2.Parcel_Area
+	DryParticleSource_in_DryParticleSource_E2.Emission_Rate['Chem_Divalent_Mercury']=2.8279509675813575e-10*DryParticleSource_in_DryParticleSource_E2.Parcel_Area
 except:
 	pass
 try:
-	WetVaporSource_in_WetVaporSource_E2.Emission_Rate['Divalent_Mercury']=4.864414162155435e-11*WetVaporSource_in_WetVaporSource_E2.Parcel_Area
+	WetVaporSource_in_WetVaporSource_E2.Emission_Rate['Chem_Divalent_Mercury']=4.864414162155435e-11*WetVaporSource_in_WetVaporSource_E2.Parcel_Area
 except:
 	pass

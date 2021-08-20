@@ -34,7 +34,7 @@ def ode_sim(tm,df_tm,sm,df_sm): # need to add start time and end time of simulat
 
     N0 = np.zeros(ndim)  # zero mass initial condition
     Nt = odeint(dN_dt, N0, ts,hmax=24) # Mass at time t
-    print (Nt[1])
+
 
     df_Nt=pd.DataFrame(Nt)
     cols=list(df_sm.index)
