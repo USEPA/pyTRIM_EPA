@@ -9,7 +9,8 @@ TRIM.FaTE backend runner script
 import os
 import time
 
-import mlib,plib,vol_elem,comp,prop,dep_rates # import supporting modules to process inputs and auto generate code to define objects
+import mlib,plib,vol_elem,comp,prop,dep_rates,solve_ode # import supporting modules to process inputs and auto generate code to define objects
+
  
 runner_full_path = os.path.realpath(__file__) # full path to this runner script
 path_code = os.path.dirname(runner_full_path) # directory of the runner script (Code)
@@ -50,4 +51,13 @@ if __name__=='__main__':
     dict_inputs=read_inputs_write_classes(inputs) # call function to read inputs and auto generate code to define objects    
     import create_trans_mat # need to import here because supporting modules are not defined until this point 
     tm,sm,df_tm,df_sm=create_trans_mat.create_trans_mat(inputs,dict_inputs) # call function to generate transition matrix and sources matrix   
+    Nt,df_Nt=solve_ode.ode_sim(tm,df_tm,sm,df_sm)
+    ### output results (temp)
+    ofpn=os.path.join(path_output,'Results.csv')
+    df_Nt.to_csv(ofpn,index=False)
+    ofpn=os.path.join(path_output,'TM.csv')
+    df_tm.to_csv(ofpn,index=True)
+    ofpn=os.path.join(path_output,'SM.csv')
+    df_sm.to_csv(ofpn,index=True)
+    
     print ('Time to run analysis in seconds = ',round((time.time()-start),2))

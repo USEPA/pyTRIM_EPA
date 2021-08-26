@@ -1,5 +1,34 @@
 ### Note: This is an auto generated script
 from find_neighbors import *
+class Bulk_Advection_from_Surface_Water_to_Flush_rate_Advection_Sink_General_AlgInstID_4125:
+	def __init__(self, Constants,containingScenario,currentChemical,SendingCompartment, ReceivingCompartment,dict_inputs):
+		self.Name='Bulk Advection from Surface Water to Flush-rate Advection Sink, General(AlgInstID_4125)'
+		self.Constants=Constants
+		self.containingScenario=containingScenario
+		self.currentChemical=currentChemical
+		self.SendingCompartment=SendingCompartment
+		self.ReceivingCompartment=ReceivingCompartment
+		self.category='Advection'
+		self.chemicalCategory='All'
+		self.doesTransformChemical='false'
+		self.TransportChemical='true'
+		self.enabled='true'
+		self.isDefaultForCategory='true'
+		self.mate='<Unset>'
+		self.receivingChemicalName='ReplaceMe'
+		self.receivingCompartmentCategory='Sink | Abiotic | Surface water | Surface water - Default'
+		self.sendingCompartmentCategory='Abiotic | Surface water | Surface water - Default'
+		self.sendingChemicalName='ReplaceMe'
+		self.dict_inputs=dict_inputs
+		
+		self.compartmentRelationship='IN_SAME_VOLUME_ELEMENT'
+
+
+		try: 
+			self.transferFactor=self.SendingCompartment.Flushes_per_year/365.0
+		except: 
+			self.transferFactor="TF Computation Error"
+
 class Degradation_Reaction_Sink_in_Sediment_AlgInstID_4565:
 	def __init__(self, Constants,containingScenario,currentChemical,SendingCompartment, ReceivingCompartment,dict_inputs):
 		self.Name='Degradation/Reaction Sink in Sediment(AlgInstID_4565)'
@@ -108,9 +137,9 @@ class Diffusion_from_Sediment_to_Surface_Water_Fugacity_based_AlgInstID_2195:
 		self.sendingChemicalName='ReplaceMe'
 		self.dict_inputs=dict_inputs
 		
-		self.MassTransferCoefficient_Sending_to_Receiving=self.ReceivingCompartment.Chemical_D_effective / self.ReceivingCompartment.BoundaryLayerThicknessAboveSediment
-		self.compartmentRelationship='SENDER_BELOW'
 		self.MassTransferCoefficient_Receiving_to_Sending=self.SendingCompartment.Chemical_D_effective / self.SendingCompartment.Chemical_BoundaryLayerThicknessbelowWater
+		self.compartmentRelationship='SENDER_BELOW'
+		self.MassTransferCoefficient_Sending_to_Receiving=self.ReceivingCompartment.Chemical_D_effective / self.ReceivingCompartment.BoundaryLayerThicknessAboveSediment
 
 		self.Diffusiveterm_2=self.MassTransferCoefficient_Sending_to_Receiving
 		self.Diffusiveterm_1=self.MassTransferCoefficient_Receiving_to_Sending * self.ReceivingCompartment.Chemical_Z_Total / self.SendingCompartment.Chemical_Z_Total
@@ -142,9 +171,9 @@ class Diffusion_from_Surface_Water_to_Sediment_Fugacity_based_AlgInstID_2149:
 		self.sendingChemicalName='ReplaceMe'
 		self.dict_inputs=dict_inputs
 		
-		self.MassTransferCoefficient_Sending_to_Receiving=self.SendingCompartment.Chemical_D_effective / self.SendingCompartment.BoundaryLayerThicknessAboveSediment
-		self.compartmentRelationship='SENDER_ABOVE'
 		self.MassTransferCoefficient_Receiving_to_Sending=self.ReceivingCompartment.Chemical_D_effective / self.ReceivingCompartment.Chemical_BoundaryLayerThicknessbelowWater
+		self.compartmentRelationship='SENDER_ABOVE'
+		self.MassTransferCoefficient_Sending_to_Receiving=self.SendingCompartment.Chemical_D_effective / self.SendingCompartment.BoundaryLayerThicknessAboveSediment
 
 		self.Diffusiveterm_2=self.MassTransferCoefficient_Sending_to_Receiving
 		self.Diffusiveterm_1=self.MassTransferCoefficient_Receiving_to_Sending * self.ReceivingCompartment.Chemical_Z_Total / self.SendingCompartment.Chemical_Z_Total
