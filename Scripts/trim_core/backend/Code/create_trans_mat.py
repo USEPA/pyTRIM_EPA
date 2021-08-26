@@ -102,10 +102,10 @@ def create_trans_mat(inputs,dict_inputs): # function to create transition matrix
                         ReceivingCompartment=comp_objects_dict[comp_col] # receiving compartment object                        
                         alg_instance=alg_class(Constants,containingScenario,currentChemical,SendingCompartment,ReceivingCompartment,dict_inputs)# instantiate algorithm class
                         transfer_factor=alg_instance.transferFactor # compute transfer factor
-                        if type(transfer_factor)==float and not np.isnan(transfer_factor) and alg_instance.doesTransformChemical=='false': # if tf is a float (not error) and algorithms does not involved transformation
+                        if (type(transfer_factor)==float or type(transfer_factor)==np.float64 or type(transfer_factor)==np.float32) and not np.isnan(transfer_factor) and alg_instance.doesTransformChemical=='false': # if tf is a float (not error) and algorithms does not involved transformation
                             tm[int(chem_index*ncomp+row_index)][int(chem_index*ncomp+row_index)]=tm[int(chem_index*ncomp+row_index)][int(chem_index*ncomp+row_index)]-transfer_factor # sending compartment tf is negative
                             tm[int(chem_index*ncomp+col_index)][int(chem_index*ncomp+row_index)]=tm[int(chem_index*ncomp+col_index)][int(chem_index*ncomp+row_index)]+transfer_factor # receiving compartment tf is positive                        
-                        if row_index==col_index and type(transfer_factor)==float and not np.isnan(transfer_factor) and alg_instance.doesTransformChemical=='true': # if tf is a float (not error) and algorithms does involve transformation
+                        if row_index==col_index and (type(transfer_factor)==float or type(transfer_factor)==np.float64 or type(transfer_factor)==np.float32) and not np.isnan(transfer_factor) and alg_instance.doesTransformChemical=='true': # if tf is a float (not error) and algorithms does involve transformation
                             receivingChemical_index=chem_list.index(alg_instance.receivingChemicalName) # index of receiving chemical
                             tm[int(chem_index*ncomp+row_index)][int(chem_index*ncomp+row_index)]=tm[int(chem_index*ncomp+row_index)][int(chem_index*ncomp+row_index)]-transfer_factor # sending compartment tf is negative
                             tm[int(receivingChemical_index*ncomp+row_index)][int(chem_index*ncomp+row_index)]=tm[int(receivingChemical_index*ncomp+row_index)][int(chem_index*ncomp+row_index)]+transfer_factor # receiving compartment tf is positive                    
@@ -116,42 +116,12 @@ def create_trans_mat(inputs,dict_inputs): # function to create transition matrix
     return(tm,sm,df_tm,df_sm)
 
 ## FOR QA Only
-#row_index=3
+     
+    
+#row_index=5
 #col_index=4
 #comp_row=comp_list[row_index]
 #comp_col=comp_list[col_index]
-
-#row_index=3
-#col_index=0
-#comp_row=comp_list[row_index]
-#comp_col=comp_list[col_index]
-#comp1_name=comp_row
-#comp2_name=comp_col
-#
-#row_index=3
-#col_index=3
-#comp_row=comp_list[row_index]
-#comp_col=comp_list[col_index]
-#comp1_name=comp_row
-#comp2_name=comp_col
-    
-#row_index=5
-#col_index=3
-#comp_row=comp_list[row_index]
-#comp_col=comp_list[col_index]
-#comp1_name=comp_row
-#comp2_name=comp_col    
-    
-#row_index=3
-#col_index=1
-#comp_row=comp_list[row_index]
-#comp_col=comp_list[col_index]
 #comp1_name=comp_row
 #comp2_name=comp_col        
-#    
-#row_index=4
-#col_index=3
-#comp_row=comp_list[row_index]
-#comp_col=comp_list[col_index]
-#comp1_name=comp_row
-#comp2_name=comp_col        
+    
