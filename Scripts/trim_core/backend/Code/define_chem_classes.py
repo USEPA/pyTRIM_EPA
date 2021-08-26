@@ -30,6 +30,7 @@ class Chem_Divalent_Mercury:
 		self.molecularWeight=201.0
 		self.Z_pureair=1 / (self.Constants.IdealGasConstant * self.containingScenario.AirTemperature_K)
 		self.Z_purewater=1 / self.HenryLawConstant
+		self.VaporWashoutRatio=1600000.0
 
 class Chem_Elemental_Mercury:
 	def __init__(self,Constants,containingScenario):
@@ -56,6 +57,7 @@ class Chem_Elemental_Mercury:
 		self.molecularWeight=201.0
 		self.Z_pureair=1 / (self.Constants.IdealGasConstant * self.containingScenario.AirTemperature_K)
 		self.Z_purewater=1 / self.HenryLawConstant
+		self.VaporWashoutRatio=1200.0
 
 class Chem_MethylMercury:
 	def __init__(self,Constants,containingScenario):
@@ -82,6 +84,10 @@ class Chem_MethylMercury:
 		self.molecularWeight=216.0
 		self.Z_pureair=1 / (self.Constants.IdealGasConstant * self.containingScenario.AirTemperature_K)
 		self.Z_purewater=1 / self.HenryLawConstant
+		self.VaporWashoutRatio=0.0
+		self.reportAsOtherChemical='Hg'
+		self.molesOfReportingChemicalPerMolesOfThisChemical=1
+		self.reportingChemicalMW=201.0
 
 chem_objects_dict={}
 Chem_Divalent_Mercury=Chem_Divalent_Mercury(Constants,containingScenario)

@@ -6,6 +6,7 @@ required_compartments = ["Advection Sink",\
             "Sediment",\
             "Sediment Burial Sink",\
             "Surface water",\
+            "Air",\
             ]
 
 required_algorithms = [\
@@ -21,4 +22,6 @@ required_algorithms = [\
             "Sediment Burial from Sediment to Sediment Burial Sink, Zero net deposition, General(AlgInstID_4135)",\
             "Sediment Deposition from Surface Water to Sediment, General(AlgInstID_2139)",\
 	    "Bulk Advection from Surface Water to Flush-rate Advection Sink, General(AlgInstID_4125)",\
+	    "Diffusion from Surface Water to Air, Two Film(AlgInstID_4080)-Hg",\
+        "Algae Deposition from Surface Water to Sediment, General(AlgInstID_2144)",
 ]

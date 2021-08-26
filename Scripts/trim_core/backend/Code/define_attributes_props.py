@@ -57,7 +57,7 @@ try:
 except:
 	pass
 try:
-	Surface_water_in_SW_LakeCadillac.Flushes_per_year=1.17313794554605
+	Surface_water_in_SW_LakeCadillac.Flushes_per_year=0.48
 except:
 	pass
 try:
