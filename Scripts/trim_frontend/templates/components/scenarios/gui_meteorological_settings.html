@@ -246,6 +246,12 @@
                 }
             });
             staticPrecip.change();
+
+            var daytimeVaries = $('#daytime_indicator_time_varying');
+            var daytimeIndicator = $('#daytime_indicator_static_value');
+            daytimeVaries.change(function() {
+                daytimeIndicator.removeAttr('disabled');
+            });
         }
     });
 </script>

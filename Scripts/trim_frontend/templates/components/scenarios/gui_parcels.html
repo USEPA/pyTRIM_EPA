@@ -8,14 +8,18 @@
             <div class="col-sm">
                 <div data-slot="true" data-target="parcels_file"></div>
                 <div class="form-text mb-2">
-                    <small class="text-muted">
+                    <small class="text-muted"
                         <a href="{{ url_for(
                             'static', filename='templates/parcels.csv'
                         ) }}">Click here</a> to download the template for creating a CSV parcels file.
                     </small>
                 </div>
-
                 <div data-slot="true" data-target="parcel_coordinates_description"></div>
+            </div>
+        </div>
+        <div class="row mb-2">
+            <div class="col-sm">
+                <div class="text-center" id="mapid" style="width: 100%; height: 600px;" ></div>
             </div>
         </div>
         <div class="row">
@@ -119,5 +123,89 @@
                 });
             });
         }
+
+    // LEAFLET Functions
+	var map = L.map('mapid', { drawControl: false }).setView([35.99, -78.90], 12);
+
+	var StreetBM = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+		maxZoom: 18,
+		attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ' +
+			'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+		id: 'mapbox/streets-v11',
+		tileSize: 512,
+		zoomOffset: -1
+	}).addTo(map);
+
+    var Esri_WorldTopoMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+	    attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community'
+    });
+
+
+    var Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+	    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+    });
+
+    var wmsNLCD2016 = L.tileLayer.wms('https://www.mrlc.gov/geoserver/mrlc_display/NLCD_2016_Land_Cover_L48/ows?SERVICE=WMS&', {
+        layers: 'NLCD_2016_Land_Cover_L48'
+    });
+
+    var wmsFlowLine = L.tileLayer.wms('https://hydro.nationalmap.gov/arcgis/services/NHDPlus_HR/MapServer/WMSServer?',{
+        layers: "7",
+        transparent: true,
+        format: 'image/png'
+    });
+
+
+    var togglelayers = L.layerGroup([wmsNLCD2016])
+
+
+    var overlayMaps= {
+        "NLCD" : togglelayers,
+        "Flowline - Large Scale" : wmsFlowLine
+    }
+    var baseMaps = {
+        "Streets Basemap" : StreetBM,
+        "Topography" : Esri_WorldTopoMap,
+        "Imagery" : Esri_WorldImagery,
+    }
+
+    L.control.layers(baseMaps,overlayMaps).addTo(map);
+
+
+    map.pm.addControls({
+        position: 'topleft',
+        drawMarker: false,
+        drawPolyline: false,
+        drawCircle  : false,
+        drawCircleMarker : false,
+        drawRectangle: false,
+        dragMode: false,
+        cutPolygon : false,
+        rotateMode : false
+    });
+
+    map.pm.enableDraw(
+        'Polygon',{ snappable: true, allowSelfIntersection : false
+    });
+
+
+    function addLabel(layer) {
+        var label = new L.tooltip({permanent: true,interactive: true});
+        label.setLatLng(layer.getBounds().getCenter());
+        label.setContent(layer.ParcelName)
+        label.addTo(map);
+    }
+
+    map.on('pm:create', e=>{
+        var layers = L.PM.Utils.findLayers(map);
+        var group = L.featureGroup();
+        layers.forEach((layer, index)=>{
+            indexNum = (index + 1).toString()
+            layer.ParcelName = "Parcel" + indexNum
+            addLabel(layer)
+            group.addLayer(layer);
+        });
+        shapes = group.toGeoJSON();
+    });
     });
 </script>

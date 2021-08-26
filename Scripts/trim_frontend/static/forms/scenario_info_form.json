@@ -64,7 +64,7 @@
         },
         {
             "id": "enable_air_contributions",
-            "label": "Enable Air Boundary Contributions",
+            "label": "Enable Boundary Contributions",
             "data_type": "boolean",
             "default": false,
             "help": "Check this box if you want the model to incorporate background air concentrations along the simulation's outer boundaries. This feature is not typically used."

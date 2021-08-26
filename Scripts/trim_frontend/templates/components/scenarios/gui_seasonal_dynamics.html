@@ -87,9 +87,11 @@
             var gui = $('#seasonal-gui');
             var fileFields = gui.find('[type="file"]');
             var selects = gui.find('select');
+            var static_allow_exchange_selects = $('[id$=static_value_allow_exchange]')
             var useCustom = gui.find('[type="checkbox"][id$="use_custom_file"]');
 
             selects.attr('disabled', 'disabled');
+            static_allow_exchange_selects.removeAttr('disabled');
 
             function updateFields() {
                 var globalFileFiled = fileFields.filter('[name^="default_"]');

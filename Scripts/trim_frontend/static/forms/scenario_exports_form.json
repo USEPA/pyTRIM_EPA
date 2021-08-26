@@ -33,6 +33,14 @@
             "help": "Check this box to have the model calculate time-averaged results. This feature is typically used."
         },
         {
+            "id": "simulation_time_steps",
+            "label": "Number of Simulation Time Steps in Each Output Time Step",
+            "data_type": "int",
+            "default": 4,
+            "required": true,
+            "help": "Enter the frequency of simulation time steps when outputs will be exported."
+        },
+        {
             "id": "averaging_interval",
             "label": "Averaging Interval for Results",
             "data_type": "string",

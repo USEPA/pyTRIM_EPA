@@ -1,10 +1,10 @@
 {
-    "title": "Precipitation and Movement",
+    "title": "Precipitation",
     "inherits": "subforms/time_varying_input_form.json",
     "fields": [
         {
             "id": "field_name_rate",
-            "label": "Field Name for Values of Precipitation Rate",
+            "label": "Field Name for Values of Precipitation Rate (m/day)",
             "data_type": "string",
             "widget": "select",
             "choices": [],
@@ -18,6 +18,7 @@
             "label": "Static Value for Precipitation Rate (m/day)",
             "data_type": "float",
             "min": 0,
+            "max": 2,
             "step": 0.0001,
             "default": 0.0041,
             "required": true,
@@ -26,7 +27,7 @@
         },
         {
             "id": "field_name_cumulative",
-            "label": "Field Name for Values of Cumulative Precipitation",
+            "label": "Field Name for Values of Cumulative Precipitation (m)",
             "data_type": "string",
             "widget": "select",
             "choices": [],

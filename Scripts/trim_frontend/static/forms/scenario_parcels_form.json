@@ -62,7 +62,7 @@
             "choices": [],
             "default": "FishFoodWeb",
             "required": true,
-            "help": "Indicate the field name showing whether a parcel will be modeled with a fish food web (i.e., for exposure from fish consumption) (a Yes/No field). Note: fish food webs are only allowed for the water land use; water parcels do not necessarily needfish food webs, but if they do not, they will not be evaluated for exposure through fish consumption. You will later need to provide additional properties about the fish food web and the water bodies overall."
+            "help": "Indicate the field name showing whether a parcel will be modeled with a fish food web (i.e., for exposure from fish consumption) (a Yes/No field). Note: fish food webs are only allowed for the water land use; water parcels do not necessarily need fish food webs, but if they do not, they will not be evaluated for exposure through fish consumption. You will later need to provide additional properties about the fish food web and the water bodies overall."
         },
         {
             "id": "parcel_wetland_field",

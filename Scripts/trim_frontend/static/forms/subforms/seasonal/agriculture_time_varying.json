@@ -2,5 +2,15 @@
     "title": "Agriculture",
     "inherits": "subforms/seasonal/seasonal_time_varying_input_form.json",
     "fields": [
+        {
+            "id": "static_value_allow_exchange",
+            "label": "Static value for 'allow exchange'",
+            "data_type": "int",
+            "widget": "select",
+            "choices": ["0" ,"1"],
+            "default": "1",
+            "required": true,
+            "help": "Select a single value of 'allow exchange' to use throughout your model run. The default value is to allow exchange (1)."
+        }
     ]
 }
