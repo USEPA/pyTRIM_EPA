@@ -20,4 +20,5 @@ required_algorithms = [\
             "Resuspension from Sediment to Surface Water, General(AlgInstID_2190)",\
             "Sediment Burial from Sediment to Sediment Burial Sink, Zero net deposition, General(AlgInstID_4135)",\
             "Sediment Deposition from Surface Water to Sediment, General(AlgInstID_2139)",\
-            ]
+	    "Bulk Advection from Surface Water to Flush-rate Advection Sink, General(AlgInstID_4125)",\
+]

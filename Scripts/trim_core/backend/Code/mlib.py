@@ -60,9 +60,11 @@ def process_master_library(inputs):
         prop=prop.replace('containingScenario','self.containingScenario')
         prop=prop.replace('ReceivingCompartment','self.ReceivingCompartment')
         prop=prop.replace('SendingCompartment','self.SendingCompartment')
+        prop=prop.replace('Sendingcompartment','self.SendingCompartment')
         prop=prop.replace('Algorithm.','self.')
         prop=prop.replace('Chemical.','Chemical_')
         prop=prop.replace('Z_total','Z_Total')
+#        prop-prop.replace('self.Sendingcompartment.Flushes_per_year','self.SendingCompartment.Flushes_per_year')
 
         if 'TheLink.InterfacialArea' in prop: # replace TheLink interfacial area custom function with Python function
             prop=prop.replace('TheLink.InterfacialArea','check_neighbor(self.SendingCompartment,self.ReceivingCompartment,self.dict_inputs).is_neighbor()[1]')           
@@ -523,6 +525,10 @@ def Function_ChemicalTransferEfficiencyinFish(BW,log10_K_ow):
                             'self.'+prop_cl+'='+'()')   
                     ch_name='nan'
                     prop_val=df_prop_val['PropertyValue'].values[0]
+
+                    if prop=="SedimentResuspensionVelocity": # temp hack to deal with sediment resuspension issue 
+                        prop_val="9.64763202734353e-05"
+                        
                     if type(prop_val)==float:
                         if isnan(prop_val):
                             prop_val='nan'
