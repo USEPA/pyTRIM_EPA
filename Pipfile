@@ -11,8 +11,10 @@ pipenv = "*"
 pytest = "*"
 
 [packages]
+shapely = "*"
 pandas = "*"
 ipdb = "*"
+
 sqlalchemy = "*"
 psycopg2-binary = "*"
 alembic = "*"

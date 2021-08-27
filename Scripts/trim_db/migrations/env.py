@@ -20,7 +20,7 @@ def import_base_model():
         try:
             implement_users_roles()
         except Exception as e:
-            print(f'Unable to create Users/Roles.\n{e}')
+            print(f'-- Unable to create Users/Roles.\n{e}')
     return Model.metadata
 
 
