@@ -70,10 +70,6 @@ def run_dev_processes(is_main):
             app_proc.terminate()
 
 
-def application():
-    run_dev_processes(True)
-
-
 if __name__ == '__main__':
     is_main = os.environ.get('WERKZEUG_RUN_MAIN') != 'true'
 
