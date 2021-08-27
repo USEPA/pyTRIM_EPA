@@ -7,3 +7,4 @@ from .utils.base import Model  # noqa
 # 2. Import all model files
 from .users.models import *  # noqa
 from .scenarios.models import *  # noqa
+from .environment.models import *  # noqa

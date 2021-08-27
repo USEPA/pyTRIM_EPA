@@ -59,12 +59,16 @@ class Team(Model):
     scenario_id = sa.Column(
         sa.Integer(), sa.ForeignKey('scenario.id'), primary_key=True
     )
-    scenario = sa.orm.relationship('Scenario')
+    scenario = sa.orm.relationship(
+        'Scenario', overlaps='joined_scenarios, team_members'
+    )
 
     member_id = sa.Column(
         sa.Integer(), sa.ForeignKey('user.id'), primary_key=True
     )
-    member = sa.orm.relationship('User')
+    member = sa.orm.relationship(
+        'User', overlaps='joined_scenarios, team_members'
+    )
 
     # Each user should have only one position per project
     __table_args__ = (
