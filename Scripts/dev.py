@@ -13,7 +13,7 @@ def print_header(msg):
 
 
 def run_webapp():
-    print_header("Starting WebApp")
+    print_header("Starting WebApp Now")
 
     webapp_command = f"pipenv run webapp.py -p {WEBAPP_PORT}"
     if EXPOSE:
