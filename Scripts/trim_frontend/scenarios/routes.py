@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, redirect, url_for
 from flask_security import login_required, current_user
-from custom.flask_api import ApiResult
-from trim_db import Scenario
-from trim_frontend import api
+from Scripts.custom.flask_api import ApiResult
+from Scripts.trim_db import Scenario
+from Scripts.trim_frontend import api
 from .forms import *
 
 

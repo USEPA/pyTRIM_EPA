@@ -1,25 +1,12 @@
 {
-    "title": "Emissions",
+    "title": "Erosion Settings",
     "fields": [
         {
-            "id": "emissions_source_file",
-            "label": "Emissions Source File",
+            "id": "erosion_params_file",
+            "label": "Erosion Parameters File",
             "data_type": "file",
             "required": true,
-            "help": "Indicate the file of emissions data."
-        },
-        {
-            "id": "emissions_sources",
-            "label": "Emissions Sources",
-            "data_type": "field_list",
-            "field": {
-                "id": "source",
-                "label": "Source",
-                "data_type": "form",
-                "form_definition": "subforms/emissions/emissions_source.json",
-                "separator": "_"
-            },
-            "min_entries": 1
+            "help": "Indicate the file of erosion parameters."
         }
     ]
 }

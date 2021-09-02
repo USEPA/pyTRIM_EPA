@@ -8,7 +8,7 @@ from flask_wtf import FlaskForm
 from werkzeug.security import check_password_hash
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired, Length, Regexp
-from trim_frontend import security, db
+from Scripts.trim_frontend import security, db
 from ..utils.forms import OrderableForm
 
 

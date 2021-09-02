@@ -1,8 +1,8 @@
 {% from 'macros/form_macros.html' import render_field %}
 
-<form id="emissions-settings-gui"
+<form id="erosion-settings-gui"
     data-async-form="true"
-    data-form-src="scenario_emissions_form"
+    data-form-src="scenario_erosion_form"
 >
     <section class="container px-0">
         <div class="row mb-1">
@@ -12,7 +12,7 @@
                     <small class="text-muted">
                         <a href="{{ url_for(
                             'static', filename='templates/source_definitions.csv'
-                        ) }}">Click here</a> to download the template for creating a CSV file containing emissions sources.
+                        ) }}">Click here</a> to download the template for creating a CSV file containing erosion parameters.
                     </small>
                 </div>
             </div>
@@ -20,7 +20,7 @@
         <div class="row mb-3">
             <div class="col-sm text-right">
                 <button type="button" class="btn btn-dark">
-                    Load Emissions from File
+                    Load Erosion Parameters from File
                 </button>
             </div>
         </div>

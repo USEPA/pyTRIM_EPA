@@ -4,8 +4,8 @@ import traceback
 from flask import Blueprint, request
 from flask_security import login_required
 from werkzeug.utils import secure_filename
-from custom.flask_api import ApiException, ApiResult
-from trim_frontend import api
+from Scripts.custom.flask_api import ApiException, ApiResult
+from Scripts.trim_frontend import api
 from ..utils.file_io import csv_to_df
 from ..utils.forms import assemble_json_form
 from ..utils.logging import make_logger
