@@ -26,6 +26,7 @@ security = Security()
 def create_app(testing=False):
     # Create app and load configuration
     app = Flask(__name__)
+    app.secret_key = b'cBB#I_c[x3]F2'
     app.logger.info("Initializing a new TRIM.Builder-WebApp")
     init_config(app, testing=testing)
 
