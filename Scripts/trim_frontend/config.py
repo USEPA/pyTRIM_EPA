@@ -76,7 +76,7 @@ class TestConfig(DevConfig):
 
 def init_config(app, testing=False):
     env = os.getenv('FLASK_ENV', 'production')
-    print(f'************ Env is {env} ********************')
+    app.logger.info(f'************ Env is {env} ********************')
     if env == 'development':
         if testing:
             app.config.from_object(TestConfig)
