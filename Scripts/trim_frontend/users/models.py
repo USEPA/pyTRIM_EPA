@@ -1,6 +1,6 @@
 from flask_login import AnonymousUserMixin
 from flask_security import UserMixin, RoleMixin
-import trim_db as db
+import Scripts.trim_db as db
 
 
 class Role(db.RoleMixin, db.Model, RoleMixin):

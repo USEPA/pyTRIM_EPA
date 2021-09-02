@@ -6,7 +6,7 @@ from flask_mail import Mail
 from flask_security import Security
 from flask_sqlalchemy import SQLAlchemy
 from Scripts.custom.flask_api import FlaskApi
-from trim_db import Model as ModelClass
+from Scripts.trim_db import Model as ModelClass
 from .config import init_config
 from .utils.admin_views import init_admin_views
 from .utils.auth import init_auth

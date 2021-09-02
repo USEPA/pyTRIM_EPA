@@ -7,7 +7,7 @@ __all__ = [
     'ScenarioDefinitionForm', 'ScenarioInfoForm',
     'ScenarioParcelsForm', 'ScenarioMeteorologicalSettingsForm',
     'ScenarioSeasonalDynamicsForm', 'ScenarioAbioticPropertiesForm',
-    'ScenarioEmissionsForm',
+    'ScenarioEmissionsForm', 'ScenarioErosionForm',
     'ScenarioExportSettingsForm'
 ]
 
@@ -62,6 +62,13 @@ class ScenarioSeasonalDynamicsForm(FlaskForm):
     f'{forms}/scenario_parcels_form.json'
 ))
 class ScenarioParcelsForm(FlaskForm):
+    pass
+
+
+@json_form(os.path.abspath(
+    f'{forms}/scenario_erosion_form.json'
+))
+class ScenarioErosionForm(FlaskForm):
     pass
 
 
