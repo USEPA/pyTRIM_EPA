@@ -45,7 +45,7 @@ def create_scenario():
     s.creator = current_user
 
     # Save the scenario
-    from trim_frontend import db
+    from Scripts.trim_frontend import db
     db.session.add(s)
     db.session.commit()
 
