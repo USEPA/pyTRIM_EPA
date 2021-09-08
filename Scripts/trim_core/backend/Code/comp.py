@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """
 
-Created on Wed Mar 31 21:15:14 2021
+created on wed mar 31 21:15:14 2021
 @author: 13963
 
-## Added a few temporary if conditions to limit to sediment and surface water system
+## added a few temporary if conditions to limit to sediment and surface water system
 
-1) Parses compartments text file and stores as dataframe
-2) Auto write script to instantiate comparment objects, specifically define_comp.py
+1) parses compartments text file and stores as DataFrame
+2) auto write script to instantiate comparment objects, specifically define_comp.py
 
 
 """
@@ -29,29 +29,29 @@ def define_compartments(inputs,df_parcels,df_ve,df_pve,df_props,df_dr):
     
     comp_dict={}
     counter=0
-    #### Read Compartments
+    #### read compartments
     
     comp_tuples=[] # initialize list for storing point lines
     
     for line in comp_lines: # loop over lines 
         line=line.strip()        
         line_nc=line.split("//")[0] # line stripped of comment
-        if line_nc[:14]=="VolumeElement:":
+        if line_nc[:14]=="volumeelement:":
             ve=line_nc.split(":")[1].strip()
-        elif line_nc[:12]=="Compartment:":   
+        elif line_nc[:12]=="compartment:":   
             comp=line_nc.split(":")[1].strip()
             c=(ve,comp,'')
             comp_tuples.append(c)
-        elif line_nc[:21]=="CompositeCompartment:":   
+        elif line_nc[:21]=="compositecompartment:":   
             ccomp=line_nc.split(":")[1].strip()
             c=(ve,'',ccomp)
             comp_tuples.append(c)        
-    df_comp=pd.DataFrame(comp_tuples,columns=['VE_Name', 'Compartment', 'CompositeCompartment'])
-    df_comp=df_comp.merge(df_ve,how='left',on='VE_Name') # merge in ve_fields
+    df_comp=pd.DataFrame(comp_tuples,columns=['ve_name', 'compartment', 'compositecompartment'])
+    df_comp=df_comp.merge(df_ve,how='left',on='ve_name') # merge in ve_fields
 
     
     
-    ################################# WRITE PYTHON SCRIPT TO INSTANTIATE COMPARTMENTS 
+    ################################# write python script to instantiate compartments 
     
     required_comp_classes=req.required_compartments      
     required_comp_classes=[x.lower() for x in required_comp_classes]  
@@ -71,38 +71,38 @@ from define_chem_classes import *
 from define_comp_classes import *
 from define_attributes_props import *
 
-def define_comp(currentChemical):
+def define_comp(currentchemical):
 
     ''')
         
         for i in range(len(df_comp)):
-            if str(df_comp.loc[i,'Primary_Abiotic']).lower() not in required_comp_classes or str(df_comp.loc[i,'Parcel_Name']) !='LakeCadillac': # temp
+            if str(df_comp.loc[i,'primary_abiotic']).lower() not in required_comp_classes or str(df_comp.loc[i,'parcel_name']) !='lakecadillac': # temp
                continue
-            ve_name=df_comp.loc[i,'VE_Name'] # volume element name
+            ve_name=df_comp.loc[i,'ve_name'] # volume element name
             parcel_name=ve_name.split('_')[1] # parcel name
-            parcel_points=df_parcels['Point_IDs'].loc[df_parcels['Parcel_Name']==parcel_name].values[0] # parcel points
-            parcel_area=df_parcels['Parcel_Area'].loc[df_parcels['Parcel_Name']==parcel_name].values[0] # parcel area
-            exterior_boundary=df_parcels['External_Boundary'].loc[df_parcels['Parcel_Name']==parcel_name].values[0] # parcel exterior boundary
+            parcel_points=df_parcels['point_ids'].loc[df_parcels['parcel_name']==parcel_name].values[0] # parcel points
+            parcel_area=df_parcels['parcel_area'].loc[df_parcels['parcel_name']==parcel_name].values[0] # parcel area
+            exterior_boundary=df_parcels['external_boundary'].loc[df_parcels['parcel_name']==parcel_name].values[0] # parcel exterior boundary
             comp_names=[]
-            if df_comp.loc[i,'Compartment']!='':
-                if str(df_comp.loc[i,'Compartment']).lower() not in required_comp_classes: # temp
+            if df_comp.loc[i,'compartment']!='':
+                if str(df_comp.loc[i,'compartment']).lower() not in required_comp_classes: # temp
                    continue
 
-                comp_name=str(df_comp.loc[i,'Compartment']).replace(r'/','_').replace(r'-','_').replace(' ','_')+'_in_'+str(df_comp.loc[i,'VE_Name'])
-                comp_class=str(df_comp.loc[i,'Compartment']).replace(r'/','_').replace(r'-','_').replace(' ','_')
+                comp_name=str(df_comp.loc[i,'compartment']).replace(r'/','_').replace(r'-','_').replace(' ','_')+'_in_'+str(df_comp.loc[i,'ve_name'])
+                comp_class=str(df_comp.loc[i,'compartment']).replace(r'/','_').replace(r'-','_').replace(' ','_')
                 comp_name_class=(comp_name,comp_class)
                 comp_names.append(comp_name_class)
                 
 #                print (comp_name_class)
-            elif df_comp.loc[i,'CompositeCompartment']!='':
-                compo=str(df_comp.loc[i,'CompositeCompartment']).replace(r'/','_').replace(r'-','_').replace(' ','_')
-                if compo in ['Deciduous_Forest','Coniferous_Forest']:
-                    plant_parts=['Leaf','Leaf_Particle'] # no root or stem -- not sure why this is so in TRIM
+            elif df_comp.loc[i,'compositecompartment']!='':
+                compo=str(df_comp.loc[i,'compositecompartment']).replace(r'/','_').replace(r'-','_').replace(' ','_')
+                if compo in ['deciduous_forest','coniferous_forest']:
+                    plant_parts=['leaf','leaf_particle'] # no root or stem -- not sure why this is so in trim
                 else:
-                    plant_parts=['Leaf','Leaf_Particle','Root','Stem']
+                    plant_parts=['leaf','leaf_particle','root','stem']
     
                 for part in plant_parts:
-                    comp_name=part+'_'+compo+'_in_'+str(df_comp.loc[i,'VE_Name'])
+                    comp_name=part+'_'+compo+'_in_'+str(df_comp.loc[i,'ve_name'])
                     comp_class=part+'_'+compo+'_in_'+compo
                     comp_name_class=(comp_name,comp_class)
                     comp_names.append(comp_name_class)
@@ -119,59 +119,59 @@ def define_comp(currentChemical):
                     str(comp_name)+\
                     '=' +\
                     comp_class+\
-                    '(Constants,containingScenario,currentChemical,'+\
+                    '(constants,containingscenario,currentchemical,'+\
                     str(ve_name)+\
                     ')')
                 f.write('\n\t'+\
                         str(comp_name)+\
                         '.'+\
-                        'Name='+\
+                        'name='+\
                         '"'+ comp_name+'"'+\
                         '\n\t'+\
                         str(comp_name)+\
                         '.'+\
-                        'containingVolumeElement='+\
+                        'containingvolumeelementname='+\
                          '"'+ve_name+'"'+\
                         '\n\t'+\
                         str(comp_name)+\
                         '.'+\
-                        'Parcel_Name='+\
+                        'parcel_name='+\
                         '"'+parcel_name+'"'+\
                         '\n\t'+\
                         str(comp_name)+\
                         '.'+\
-                        'Parcel_Points='+\
+                        'parcel_points='+\
                         '"'+parcel_points+'"'+\
                         '\n\t'+\
                         str(comp_name)+\
                         '.'+\
-                        'Parcel_Area='+\
+                        'parcel_area='+\
                         str(parcel_area)+\
                         '\n\t'+\
                         str(comp_name)+\
                         '.'+\
-                        'Exterior_Boundary='+\
+                        'exterior_boundary='+\
                         str(exterior_boundary))
                 f.write('\n\t')
     
             
     
-    ################################# APPEND TO PYTHON SCRIPT TO INSTANTIATE PRIMARY ABIOTIC COMPARTMENTS -- must first have df_ve in memory (run vol_elem.py)
+    ################################# append to python script to instantiate primary abiotic compartments -- must first have df_ve in memory (run vol_elem.py)
     
     with open(ofpn, 'a') as f:
-        f.write('### Note: This is an auto generated script' +'\n')        
+        f.write('### note: this is an auto generated script' +'\n')        
         for i in range(len(df_ve)):
-            ve_name=str(df_ve.loc[i,'VE_Name'].replace(r'/','_').replace(r'-','_').replace(' ','_'))
+            ve_name=str(df_ve.loc[i,'ve_name'].replace(r'/','_').replace(r'-','_').replace(' ','_'))
             parcel_name=ve_name.split('_')[1] # parcel name
-            parcel_points=df_parcels['Point_IDs'].loc[df_parcels['Parcel_Name']==parcel_name].values[0] # parcel points
-            parcel_area=df_parcels['Parcel_Area'].loc[df_parcels['Parcel_Name']==parcel_name].values[0] # parcel area
-            exterior_boundary=df_parcels['External_Boundary'].loc[df_parcels['Parcel_Name']==parcel_name].values[0] # parcel exterior boundary
-            primary_abiotic=str(df_ve.loc[i,'Primary_Abiotic']).lower() # temp
-            if primary_abiotic not in required_comp_classes or str(df_ve.loc[i,'Parcel_Name']) !='LakeCadillac': # temp: #  temp
+            parcel_points=df_parcels['point_ids'].loc[df_parcels['parcel_name']==parcel_name].values[0] # parcel points
+            parcel_area=df_parcels['parcel_area'].loc[df_parcels['parcel_name']==parcel_name].values[0] # parcel area
+            exterior_boundary=df_parcels['external_boundary'].loc[df_parcels['parcel_name']==parcel_name].values[0] # parcel exterior boundary
+            primary_abiotic=str(df_ve.loc[i,'primary_abiotic']).lower() # temp
+            if primary_abiotic not in required_comp_classes or str(df_ve.loc[i,'parcel_name']) !='lakecadillac': # temp: #  temp
                continue # temp           
-            comp_name=str(df_ve.loc[i,'Primary_Abiotic'].replace(r'/','_').replace(r'-','_').replace(' ','_')) + '_in_' + str(df_ve.loc[i,'VE_Name'].replace(r'/','_').replace(r'-','_').replace(' ','_')) 
+            comp_name=str(df_ve.loc[i,'primary_abiotic'].replace(r'/','_').replace(r'-','_').replace(' ','_')) + '_in_' + str(df_ve.loc[i,'ve_name'].replace(r'/','_').replace(r'-','_').replace(' ','_')) 
             comp_name=str(comp_name.replace('___','_').replace('__','_'))
-            comp_class=str(df_ve.loc[i,'Primary_Abiotic'].replace(r'/','_').replace(r'-','_').replace(' ','_'))
+            comp_class=str(df_ve.loc[i,'primary_abiotic'].replace(r'/','_').replace(r'-','_').replace(' ','_'))
             comp_class=str(comp_class.replace('___','_').replace('__','_'))
             comp_dict[counter]=comp_name
             counter+=1
@@ -180,38 +180,38 @@ def define_comp(currentChemical):
                 str(comp_name)+\
                 '=' +\
                 comp_class+\
-                '(Constants,containingScenario,currentChemical,'+\
+                '(constants,containingscenario,currentchemical,'+\
                 str(ve_name)+\
                 ')')
             f.write('\n\t'+\
                         str(comp_name)+\
                         '.'+\
-                        'Name='+\
+                        'name='+\
                         '"'+ comp_name+'"'+\
                         '\n\t'+\
                         str(comp_name)+\
                         '.'+\
-                        'containingVolumeElement='+\
+                        'containingvolumeelementname='+\
                          '"'+ve_name+'"'+\
                         '\n\t'+\
                         str(comp_name)+\
                         '.'+\
-                        'Parcel_Name='+\
+                        'parcel_name='+\
                         '"'+parcel_name+'"'+\
                         '\n\t'+\
                         str(comp_name)+\
                         '.'+\
-                        'Parcel_Points='+\
+                        'parcel_points='+\
                         '"'+parcel_points+'"'+\
                         '\n\t'+\
                         str(comp_name)+\
                         '.'+\
-                        'Parcel_Area='+\
+                        'parcel_area='+\
                         str(parcel_area)+\
                         '\n\t'+\
                         str(comp_name)+\
                         '.'+\
-                        'Exterior_Boundary='+\
+                        'exterior_boundary='+\
                         str(exterior_boundary))
             f.write('\n\t')
     
@@ -219,177 +219,177 @@ def define_comp(currentChemical):
     
     
     
-    ###### APPEND CODE TO AUTO DEFINE ADVECTION SINKS
+    ###### append code to auto define advection sinks
     
-    df_sinks=df_ve.loc[((df_ve.Primary_Abiotic=='Air')|(df_ve.Primary_Abiotic=='Soil - Surface'))&(df_ve.External_Boundary>0) & (df_ve.Parcel_Name=='LakeCadillac')] # only air and surface soil compartments with an outer boundary need sinks
+    df_sinks=df_ve.loc[((df_ve.primary_abiotic=='air')|(df_ve.primary_abiotic=='soil - surface'))&(df_ve.external_boundary>0) & (df_ve.parcel_name=='lakecadillac')] # only air and surface soil compartments with an outer boundary need sinks
     
     with open(ofpn, 'a') as f:
         for i in df_sinks.index:
-            primary_abiotic=str(df_sinks.loc[i,'Primary_Abiotic']).lower() # temp
+            primary_abiotic=str(df_sinks.loc[i,'primary_abiotic']).lower() # temp
             if primary_abiotic not in required_comp_classes: #  temp
                continue # temp    
-            ve_name=str(df_sinks.loc[i,'VE_Name'].replace(r'/','_').replace(r'-','_').replace(' ','_'))
+            ve_name=str(df_sinks.loc[i,'ve_name'].replace(r'/','_').replace(r'-','_').replace(' ','_'))
             parcel_name=ve_name.split('_')[1] # parcel name
-            parcel_points=df_parcels['Point_IDs'].loc[df_parcels['Parcel_Name']==parcel_name].values[0] # parcel points
-            parcel_area=df_parcels['Parcel_Area'].loc[df_parcels['Parcel_Name']==parcel_name].values[0] # parcel area
-            exterior_boundary=df_parcels['External_Boundary'].loc[df_parcels['Parcel_Name']==parcel_name].values[0] # parcel exterior boundary
-            comp_name='Sink_in_Sink_for_'+str(df_ve.loc[i,'Primary_Abiotic'].replace(r'/','_').replace(r'-','_').replace(' ','_')) + '_in_' + str(df_ve.loc[i,'VE_Name'].replace(r'/','_').replace(r'-','_').replace(' ','_')) 
+            parcel_points=df_parcels['point_ids'].loc[df_parcels['parcel_name']==parcel_name].values[0] # parcel points
+            parcel_area=df_parcels['parcel_area'].loc[df_parcels['parcel_name']==parcel_name].values[0] # parcel area
+            exterior_boundary=df_parcels['external_boundary'].loc[df_parcels['parcel_name']==parcel_name].values[0] # parcel exterior boundary
+            comp_name='sink_in_sink_for_'+str(df_ve.loc[i,'primary_abiotic'].replace(r'/','_').replace(r'-','_').replace(' ','_')) + '_in_' + str(df_ve.loc[i,'ve_name'].replace(r'/','_').replace(r'-','_').replace(' ','_')) 
             comp_name=str(comp_name.replace('___','_').replace('__','_'))
-            primary_abiotic=df_sinks.loc[i,'Primary_Abiotic']
-            if primary_abiotic=='Air':
-                comp_class='Advection_Sink'
-            elif primary_abiotic=='Soil - Surface':
-                comp_class='Soil_Advection_Sink'
+            primary_abiotic=df_sinks.loc[i,'primary_abiotic']
+            if primary_abiotic=='air':
+                comp_class='advection_sink'
+            elif primary_abiotic=='soil - surface':
+                comp_class='soil_advection_sink'
             comp_dict[counter]=comp_name
             counter+=1
             f.write('\n\t'+\
                 str(comp_name)+\
                 '=' +\
                 comp_class+\
-                '(Constants,containingScenario,currentChemical,'+\
+                '(constants,containingscenario,currentchemical,'+\
                 str(ve_name)+\
                 ')')
             f.write('\n\t'+\
                         str(comp_name)+\
                         '.'+\
-                        'Name='+\
+                        'name='+\
                         '"'+ comp_name+'"'+\
                         '\n\t'+\
                         str(comp_name)+\
                         '.'+\
-                        'containingVolumeElement='+\
+                        'containingvolumeelementname='+\
                          '"'+ve_name+'"'+\
                         '\n\t'+\
                         str(comp_name)+\
                         '.'+\
-                        'Parcel_Name='+\
+                        'parcel_name='+\
                         '"'+parcel_name+'"'+\
                         '\n\t'+\
                         str(comp_name)+\
                         '.'+\
-                        'Parcel_Points='+\
+                        'parcel_points='+\
                         '"'+parcel_points+'"'+\
                         '\n\t'+\
                         str(comp_name)+\
                         '.'+\
-                        'Parcel_Area='+\
+                        'parcel_area='+\
                         str(parcel_area)+\
                         '\n\t'+\
                         str(comp_name)+\
                         '.'+\
-                        'Exterior_Boundary='+\
+                        'exterior_boundary='+\
                         str(exterior_boundary))
             f.write('\n\t')
     
     
     
     
-    ################################# APPEND PYTHON SCRIPT TO INSTANTIATE PSEUDO PRIMARY ABIOTIC COMPARTMENTS -- must first have df_pve in memory (run vol_elem.py)
+    ################################# append python script to instantiate pseudo primary abiotic compartments -- must first have df_pve in memory (run vol_elem.py)
     
     with open(ofpn, 'a') as f:
-        f.write('\n\t' + 'class Pseudo_Compartment:')
+        f.write('\n\t' + 'class pseudo_compartment:')
         f.write('\n\t\t' + 'pass' +'\n')
 
         for i in range(len(df_pve)):
-            if str(df_pve.loc[i,'Parcel_Name'])!="LakeCadillac":  # temp
+            if str(df_pve.loc[i,'parcel_name'])!="lakecadillac":  # temp
                 continue
         
-            pve_name=str(df_pve.loc[i,'VE_Name'].replace(r'/','_').replace(r'-','_').replace(' ','_'))
+            pve_name=str(df_pve.loc[i,'ve_name'].replace(r'/','_').replace(r'-','_').replace(' ','_'))
             parcel_name=pve_name.split('_')[1] # parcel name
-            parcel_points=df_parcels['Point_IDs'].loc[df_parcels['Parcel_Name']==parcel_name].values[0] # parcel points
-            parcel_area=df_parcels['Parcel_Area'].loc[df_parcels['Parcel_Name']==parcel_name].values[0] # parcel area
-            exterior_boundary=df_parcels['External_Boundary'].loc[df_parcels['Parcel_Name']==parcel_name].values[0] # parcel exterior boundary
-            comp_name=str(df_pve.loc[i,'Primary_Abiotic'].replace(r'/','_').replace(r'-','_').replace(' ','_')) + '_in_' + str(df_pve.loc[i,'VE_Name'].replace(r'/','_').replace(r'-','_').replace(' ','_')) 
+            parcel_points=df_parcels['point_ids'].loc[df_parcels['parcel_name']==parcel_name].values[0] # parcel points
+            parcel_area=df_parcels['parcel_area'].loc[df_parcels['parcel_name']==parcel_name].values[0] # parcel area
+            exterior_boundary=df_parcels['external_boundary'].loc[df_parcels['parcel_name']==parcel_name].values[0] # parcel exterior boundary
+            comp_name=str(df_pve.loc[i,'primary_abiotic'].replace(r'/','_').replace(r'-','_').replace(' ','_')) + '_in_' + str(df_pve.loc[i,'ve_name'].replace(r'/','_').replace(r'-','_').replace(' ','_')) 
             comp_name=str(comp_name.replace('___','_').replace('__','_'))
             comp_dict[counter]=comp_name
             counter+=1
             
-            prim_abiotic_name=str(df_pve.loc[i,'Primary_Abiotic'].replace(r'/','_').replace(r'-','_').replace(' ','_'))
-            if prim_abiotic_name=="DryVaporSource":
-                comp_category="Deposition | Dry | Vapor"
-            if prim_abiotic_name=="WetVaporSource":
-                comp_category="Deposition | Wet | Vapor"
-            if prim_abiotic_name=="DryParticleSource":
-                comp_category="Deposition | Dry | Particle"
-            if prim_abiotic_name=="WetParticleSource":
-                comp_category="Deposition | Wet | Particle"
+            prim_abiotic_name=str(df_pve.loc[i,'primary_abiotic'].replace(r'/','_').replace(r'-','_').replace(' ','_'))
+            if prim_abiotic_name=="dryvaporsource":
+                comp_category="deposition | dry | vapor"
+            if prim_abiotic_name=="wetvaporsource":
+                comp_category="deposition | wet | vapor"
+            if prim_abiotic_name=="dryparticlesource":
+                comp_category="deposition | dry | particle"
+            if prim_abiotic_name=="wetparticlesource":
+                comp_category="deposition | wet | particle"
 
             f.write('\n\t'+\
-                        str(comp_name)+'=Pseudo_Compartment()'+'\n\t'+\
+                        str(comp_name)+'=pseudo_compartment()'+'\n\t'+\
                         str(comp_name)+\
                         '.'+\
-                        'Name='+\
+                        'name='+\
                         '"'+ comp_name+'"'+\
                         '\n\t'+\
                         str(comp_name)+\
                         '.'+\
-                        'containingVolumeElement='+\
+                        'containingvolumeelementname='+\
                          '"'+pve_name+'"'+\
                         '\n\t'+\
                         str(comp_name)+\
                         '.'+\
-                        'Parcel_Name='+\
+                        'parcel_name='+\
                         '"'+parcel_name+'"'+\
                         '\n\t'+\
                         str(comp_name)+\
                         '.'+\
-                        'Parcel_Points='+\
+                        'parcel_points='+\
                         '"'+parcel_points+'"'+\
                         '\n\t'+\
                         str(comp_name)+\
                         '.'+\
-                        'Parcel_Area='+\
+                        'parcel_area='+\
                         str(parcel_area)+\
                         '\n\t'+\
                         str(comp_name)+\
                         '.'+\
-                        'Exterior_Boundary='+\
+                        'exterior_boundary='+\
                         str(exterior_boundary)+\
                         '\n\t'+\
                         str(comp_name)+\
                         '.'+\
-                        'Deposition_Rate={}'
+                        'deposition_rate={}'
                         )           
             f.write('\n\t'+str(comp_name)+'.category='+'"'+comp_category+'"')
             
             ### add compartment properties
             f.write('\n\n')
             for i in range(len(df_props)):
-                if str(df_props.loc[i,'Prop_Type'])!='Compartment':
+                if str(df_props.loc[i,'prop_type'])!='compartment':
                     continue                
-                if str(df_props.loc[i,'Prop_Owner']).split(' in ')[0].strip().lower() not in required_comp_classes: # temp
+                if str(df_props.loc[i,'prop_owner']).split(' in ')[0].strip().lower() not in required_comp_classes: # temp
                    continue                
                 
-                obj=df_props.loc[i,'Prop_Owner_New']
+                obj=df_props.loc[i,'prop_owner_new']
                 if True: # temporary. use condition below later.
         #        if obj in locals(): # may miss a few objects owing to name cleaning?
         #            print (obj)
                     f.write('\t'+'try:'+'\n\t\t')
                     f.write(str(obj)+\
                            "." +\
-                           str(df_props.loc[i,'Property_New'])+\
+                           str(df_props.loc[i,'property_new'])+\
                            "="+\
-                           str(df_props.loc[i,'Value_New']))
+                           str(df_props.loc[i,'value_new']))
                     f.write('\n'+'\t'+'except:'+'\n\t\t'+'pass') 
                     f.write('\n')            
 
 
     
     
-        #### ADD DEPOSITION RATES AS PROPERTIES OF PSEUDO COMPARTMENTS
-        f.write('\n'+'#Add pseudo source dep rates to pseudo compartments'+'\n\n')
+        #### add deposition rates as properties of pseudo compartments
+        f.write('\n'+'#add pseudo source dep rates to pseudo compartments'+'\n\n')
 
         for i in range(len(df_dr)):
-            obj=df_dr.loc[i,'Compartment']
+            obj=df_dr.loc[i,'compartment']
             f.write('\t'+'try:'+'\n\t\t'+\
                     str(obj)+\
-                   ".Deposition_Rate['" +\
-                   str(df_dr.loc[i,'Chemical'])+\
+                   ".deposition_rate['" +\
+                   str(df_dr.loc[i,'chemical'])+\
                   "']="+\
-                   str(df_dr.loc[i,'Surface Deposition Rate'])+\
+                   str(df_dr.loc[i,'surface deposition rate'])+\
                    '*'+\
                    obj+\
-                   ".Parcel_Area"+'\n'\
+                   ".parcel_area"+'\n'\
                    '\t'+'except:'+'\n\t\t'+\
                    'pass')
             f.write('\n')            

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Apr 12 21:46:07 2021
+created on mon apr 12 21:46:07 2021
 @author: 13963
 
-Parses pseudo source library objects text file and auto writes code to define pseudo source algorithm classes, specifically define_ps_algs.py
+parses pseudo source library objects text file and auto writes code to define pseudo source algorithm classes, specifically define_ps_algs.py
 
 """
 
@@ -21,131 +21,131 @@ def process_pseudo_library(inputs):
     plib_lines=plib_file.readlines()
     
     
-    #### Read Algorithhms
+    #### read algorithhms
     
     alg_tuples=[] # initialize list for storing point lines
-    Alg_Flag=False # initialize copy condition
-    Prop_Flag=False # initialize copy condition
-    Val_Flag=False # initialize copy condition
+    alg_flag=False # initialize copy condition
+    prop_flag=False # initialize copy condition
+    val_flag=False # initialize copy condition
     
     
     for line in plib_lines: # loop over lines
         line_nc=line.strip()     # strip space and new line    
         line_nc=line_nc.split("//")[0] # line stripped of comment
         ptype=line_nc.split(":")[0].strip() # if line has a :, get text to left
-        if ptype=="Algorithm": # get algorithm name (assumed to be on single line)
-            Alg_Flag=True
+        if ptype=="algorithm": # get algorithm name (assumed to be on single line)
+            alg_flag=True
             alg_name=line_nc.split(":")[1].strip()
 #            print ('*******************************************')
 #            print (alg_name)
             continue
-        if Alg_Flag==True and ptype=="Property": # get property name (assumed to be on single line) 
-            Prop_Flag=True
+        if alg_flag==True and ptype=="property": # get property name (assumed to be on single line) 
+            prop_flag=True
             prop_name=line_nc.split(":")[1].strip()        
             # print (prop_name)
             continue
-        if Alg_Flag==True and Prop_Flag==True and ptype=="Value": # get value name (NOT assumed to be on single line)
-            Val_Flag=True
+        if alg_flag==True and prop_flag==True and ptype=="value": # get value name (not assumed to be on single line)
+            val_flag=True
             val_name=line_nc.split(":")[1:]
             val_name=[x.strip() for x in val_name]
             val_name=':'.join(val_name)   
             continue        
             # print (val_name) 
-        if Alg_Flag==True and Prop_Flag==True and Val_Flag==True and (':' not in line_nc): # get remainder of value ( NOT assumed to be on single line)
+        if alg_flag==True and prop_flag==True and val_flag==True and (':' not in line_nc): # get remainder of value ( not assumed to be on single line)
             val_name=val_name+line_nc  # join multiline values
             # print (val_name) 
             continue
-        if Alg_Flag==True and Prop_Flag==True and Val_Flag==True and (ptype=='Property'or ptype=='Description' or line[:10]=="Algorithm:"): # condition to determine when value reading is over
+        if alg_flag==True and prop_flag==True and val_flag==True and (ptype=='property'or ptype=='description' or line[:10]=="algorithm:"): # condition to determine when value reading is over
             r=(alg_name,prop_name,val_name)
 #            print (r)
             alg_tuples.append(r)
-            Prop_Flag=False # reinitialize copy condition
-            Val_Flag=False # reinitialize copy condition
+            prop_flag=False # reinitialize copy condition
+            val_flag=False # reinitialize copy condition
             prop_name=""; val_name=""; 
             continue
-        if Alg_Flag==True and (ptype=='PointSource'or ptype=='PType'or ptype=='Compartment'):
-            Alg_Flag=False
-    df_psalgs=pd.DataFrame(alg_tuples,columns=['Algorithm','Property','Value']) # convert to dataframe
+        if alg_flag==True and (ptype=='pointsource'or ptype=='ptype'or ptype=='compartment'):
+            alg_flag=False
+    df_psalgs=pd.DataFrame(alg_tuples,columns=['algorithm','property','value']) # convert to DataFrame
     
-    ofpn=os.path.join(ifp,"PseudoAlgs.csv")
+    ofpn=os.path.join(ifp,"pseudoalgs.csv")
     df_psalgs.to_csv(ofpn,index=False)
     
     
-    #### Read Point Sources
+    #### read point sources
     
     ps_tuples=[] # initialize list for storing point lines
-    PS_Flag=False # initialize copy condition
-    Prop_Flag=False # initialize copy condition
-    Val_Flag=False # initialize copy condition
+    ps_flag=False # initialize copy condition
+    prop_flag=False # initialize copy condition
+    val_flag=False # initialize copy condition
     
     
     for line in plib_lines: # loop over lines
         line_nc=line.strip()     # strip space and new line    
         line_nc=line_nc.split("//")[0] # line stripped of comment
         ptype=line_nc.split(":")[0].strip() # if line has a :, get text to left
-        if ptype=="PointSource": # get algorithm name (assumed to be on single line)
-            PS_Flag=True
+        if ptype=="pointsource": # get algorithm name (assumed to be on single line)
+            ps_flag=True
             ps_name=line_nc.split(":")[1].strip()
 #            print ('*******************************************')
 #            print (ps_name)
             continue
-        if PS_Flag==True and ptype=="Property": # get property name (assumed to be on single line) 
-            Prop_Flag=True
+        if ps_flag==True and ptype=="property": # get property name (assumed to be on single line) 
+            prop_flag=True
             prop_name=line_nc.split(":")[1].strip()        
             # print (prop_name)
             continue
-        if PS_Flag==True and Prop_Flag==True and ptype=="Value": # get value name (assumed to be on single line)
-            Val_Flag=True
+        if ps_flag==True and prop_flag==True and ptype=="value": # get value name (assumed to be on single line)
+            val_flag=True
             val_name=line_nc.split(":")[1].strip()
             r=(ps_name,prop_name,val_name)
 #            print (r)
             ps_tuples.append(r)        
             continue        
-    df_ps=pd.DataFrame(ps_tuples,columns=['PointSource','Property','Value'])
+    df_ps=pd.DataFrame(ps_tuples,columns=['pointsource','property','value'])
     
     
-    #### Read Ptypes -- Not perfect -- order is different across 6 ptypes so script below doesnt grab all descriptions. May not be necessary because this is basically variable declaration.
+    #### read ptypes -- not perfect -- order is different across 6 ptypes so script below doesnt grab all descriptions. may not be necessary because this is basically variable declaration.
     
     pt_tuples=[] # initialize list for storing point lines
     
-    PT_Flag=False # initialize copy condition
-    Desc_Flag=False # initialize copy condition
-    DT_Flag=False
-    Units_Flag=False # initialize copy condition
+    pt_flag=False # initialize copy condition
+    desc_flag=False # initialize copy condition
+    dt_flag=False
+    units_flag=False # initialize copy condition
     pt_name='';desc_name='';dt_name='';unit_name=''; dv_name="";
     
     for line in plib_lines: # loop over lines
         line_nc=line.strip()     # strip space and new line    
         line_nc=line_nc.split("//")[0] # line stripped of comment
         ptype=line_nc.split(":")[0].strip() # if line has a :, get text to left
-        if ptype=="Ptype" or ptype=="PType": # get algorithm name (assumed to be on single line)
-            PT_Flag=True
+        if ptype=="ptype" or ptype=="ptype": # get algorithm name (assumed to be on single line)
+            pt_flag=True
             pt_name=line_nc.split(":")[1].strip()
 #            print ('*******************************************')
 #            print (pt_name)
             continue
-        if PT_Flag==True and ptype=="Description": # get property name (assumed NOT to be on single line) 
-            Desc_Flag=True
+        if pt_flag==True and ptype=="description": # get property name (assumed not to be on single line) 
+            desc_flag=True
             desc_name=line_nc.split(":")[1].strip()        
             # print (prop_name)
             continue
-        if PT_Flag==True and Desc_Flag==True and (':' not in line_nc): # get remainder of value ( NOT assumed to be on single line)
+        if pt_flag==True and desc_flag==True and (':' not in line_nc): # get remainder of value ( not assumed to be on single line)
             desc_name=desc_name+line_nc  # join multiline values
             continue
-        if PT_Flag==True and ptype=='DataType':
-            Desc_Flag=False
+        if pt_flag==True and ptype=='datatype':
+            desc_flag=False
             dt_name=line_nc.split(":")[1].strip()
             continue
-        if PT_Flag==True and ptype=='DefaultValue':
+        if pt_flag==True and ptype=='defaultvalue':
             dv_name=line_nc.split(":")[1].strip()
             continue
-        if PT_Flag==True and ptype=='Units':
-            DT_Flag=False
+        if pt_flag==True and ptype=='units':
+            dt_flag=False
             unit_name=line_nc.split(":")[1].strip()
             r=(pt_name,desc_name,dt_name,dv_name,unit_name)
             pt_tuples.append(r)
-            Units_Flag=False
-            PT_Flag=False
+            units_flag=False
+            pt_flag=False
             pt_name='';desc_name='';dt_name='';unit_name=''; dv_name="";
             continue
             
@@ -153,14 +153,14 @@ def process_pseudo_library(inputs):
     
     
     
-    ############ WRITE PYTHON SCRIPT TO DEFINE PSEUDO ALGORITHM CLASSES 
+    ############ write python script to define pseudo algorithm classes 
     
     
     ofp=inputs['path_code']
     ofn=r'define_ps_algs.py'
     ofpn=os.path.join(ofp,ofn)
     
-    algs=df_psalgs["Algorithm"].tolist()
+    algs=df_psalgs["algorithm"].tolist()
     
     
     
@@ -170,48 +170,48 @@ def process_pseudo_library(inputs):
         except:
             pass
         if type(name)==str:
-            cname = re.sub('[^0-9a-zA-Z]+', '_', name)
+            cname = re.sub('[^0-9a-za-z]+', '_', name)
             return(cname)
         return(name)  
     
-    def clean_props(prop): # function to convert properties to Pythonic syntax, 
+    def clean_props(prop): # function to convert properties to pythonic syntax, 
         prop=prop.replace('[','')
         prop=prop.replace(']','')
     
-        if '?' in prop: # change Java if then else syntax to Pythonic syntax
+        if '?' in prop: # change java if then else syntax to pythonic syntax
             cond=prop.split('?')[0].strip()
             v1=prop.split('?')[1].strip().split(':')[0].strip()
             v2=prop.split('?')[1].strip().split(':')[1].strip()
             prop= v1+' if ' +cond.replace('&&',' and ')+' else ' +v2
-        prop=prop.replace('Constants','self.Constants')
-        prop=prop.replace('containingScenario','self.containingScenario')
-        prop=prop.replace('ReceivingCompartment','self.ReceivingCompartment')
-        prop=prop.replace('SendingCompartment','self.SendingCompartment')
-        prop=prop.replace('Algorithm.','self.')
-        if 'TheLink.InterfacialArea' in prop: # replace TheLink interfacial area custom function with Python function
-            prop=prop.replace('TheLink.InterfacialArea','check_neighbor(self.SendingCompartment,self.ReceivingCompartment).is_neighbor()[1]')           
-        if 'TheLink.FractionSpecificcompartmentDiet' in prop: # replace TheLink.FractionSpecificcompartmentDiet with 1. I believe this okay but check UG.
-            prop=prop.replace('TheLink.FractionSpecificcompartmentDiet','1')          
+        prop=prop.replace('constants','self.constants')
+        prop=prop.replace('containingscenario','self.containingscenario')
+        prop=prop.replace('receivingcompartment','self.receivingcompartment')
+        prop=prop.replace('sendingcompartment','self.sendingcompartment')
+        prop=prop.replace('algorithm.','self.')
+        if 'thelink.interfacialarea' in prop: # replace thelink interfacial area custom function with python function
+            prop=prop.replace('thelink.interfacialarea','check_neighbor(self.sendingcompartment,self.receivingcompartment).is_neighbor()[1]')           
+        if 'thelink.fractionspecificcompartmentdiet' in prop: # replace thelink.fractionspecificcompartmentdiet with 1. i believe this okay but check ug.
+            prop=prop.replace('thelink.fractionspecificcompartmentdiet','1')          
         return (prop)
     
     
-    grouped_alg = df_psalgs.groupby("Algorithm")
+    grouped_alg = df_psalgs.groupby("algorithm")
     
     
     
     with open(ofpn, 'w') as f:  
-        f.write('### Note: This is an auto generated script' +'\n')                
+        f.write('### note: this is an auto generated script' +'\n')                
         f.write('from numpy import nan' + '\n\n')
         for index,group in enumerate(grouped_alg.groups):
-            if "Surface water" not in group: # temp
+            if "surface water" not in group: # temp
                 continue
 #            print (group)
 #            print(grouped_alg.get_group(group))
     
             alg_name=clean_names(group)
-            alg_props=list(grouped_alg.get_group(group)['Property'].unique())
+            alg_props=list(grouped_alg.get_group(group)['property'].unique())
             try:
-                tf=grouped_alg.get_group(group).loc[grouped_alg.get_group(group)['Property']=='transferFactor']['Value'].values[0]#.replace('SendingCompartment','self.SendingCompartment').replace('ReceivingCompartment','self.ReceivingCompartment')
+                tf=grouped_alg.get_group(group).loc[grouped_alg.get_group(group)['property']=='transferfactor']['value'].values[0]#.replace('sendingcompartment','self.sendingcompartment').replace('receivingcompartment','self.receivingcompartment')
             except:
                 tf="nan"
             tf=clean_props(tf)
@@ -219,24 +219,24 @@ def process_pseudo_library(inputs):
                 
             f.write('class '+str(alg_name)+':'+'\n' +\
                     '\t'+\
-                    'def __init__(self, Constants,containingScenario,currentChemical,SendingCompartment, ReceivingCompartment,dict_inputs):\n\t\t'+\
-                    'self.Name='+"'"+group+"'"+'\n\t\t'+\
-                    'self.Constants=Constants\n\t\t'+\
-                    'self.containingScenario=containingScenario\n\t\t'+\
-                    'self.currentChemical=currentChemical\n\t\t'+\
-                    'self.SendingCompartment=SendingCompartment\n\t\t'+\
-                    'self.ReceivingCompartment=ReceivingCompartment\n\t\t'+\
-                    'self.doesTransformChemical= "false"\n\t\t'+\
+                    'def __init__(self, constants,containingscenario,currentchemical,sendingcompartment, receivingcompartment,dict_inputs):\n\t\t'+\
+                    'self.name='+"'"+group+"'"+'\n\t\t'+\
+                    'self.constants=constants\n\t\t'+\
+                    'self.containingscenario=containingscenario\n\t\t'+\
+                    'self.currentchemical=currentchemical\n\t\t'+\
+                    'self.sendingcompartment=sendingcompartment\n\t\t'+\
+                    'self.receivingcompartment=receivingcompartment\n\t\t'+\
+                    'self.doestransformchemical= "False"\n\t\t'+\
                     'try: \n\t\t\t'
-                    'self.transferFactor='+ tf +'\n\t\t'\
+                    'self.transferfactor='+ tf +'\n\t\t'\
                     'except: \n\t\t\t'       
-                    'self.transferFactor="TF Computation Error"')     
+                    'self.transferfactor="tf computation error"')     
             
-            residual_props=set(alg_props)-set(['category','chemicalCategory','doesTransformChemical','doesTransportChemical','enabled','isDefaultForCategory','mate','receivingChemicalName','receivingCompartmentCategory','sendingCompartmentCategory','sendingChemicalName','transferFactor'])
+            residual_props=set(alg_props)-set(['category','chemicalcategory','doestransformchemical','doestransportchemical','enabled','isdefaultforcategory','mate','receivingchemicalname','receivingcompartmentcategory','sendingcompartmentcategory','sendingchemicalname','transferfactor'])
             for prop in residual_props:
-                prop_val=grouped_alg.get_group(group).loc[grouped_alg.get_group(group)['Property']==prop]['Value'].values[0] #property value
+                prop_val=grouped_alg.get_group(group).loc[grouped_alg.get_group(group)['property']==prop]['value'].values[0] #property value
                 prop_val=clean_props(prop_val)
-                if prop=='compartmentRelationship':
+                if prop=='compartmentrelationship':
                     f.write('\n\t\t'
                             'self.'+prop+'='+"'"+prop_val+"'")                
                 else:

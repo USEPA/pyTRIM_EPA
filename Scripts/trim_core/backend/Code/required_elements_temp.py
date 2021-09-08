@@ -1,27 +1,27 @@
 ## for two compartment test case
 
-required_compartments = ["Advection Sink",\
-            "Degradation/Reaction Sink",\
-            "Flush Rate Sink",\
-            "Sediment",\
-            "Sediment Burial Sink",\
-            "Surface water",\
-            "Air",\
+required_compartments = ["advection sink",\
+            "degradation/reaction sink",\
+            "flush rate sink",\
+            "sediment",\
+            "sediment burial sink",\
+            "surface water",\
+            "air",\
             ]
 
 required_algorithms = [\
-            "Degradation/Reaction Sink in Sediment(AlgInstID_4565)",\
-            "Degradation/Reaction Sink in Surface Water(AlgInstID_4585)",\
-            "Demethylation(MHg -> Hg2) in Abiotic Media, Rate is input(AlgInstID_1892)",\
-            "Diffusion from Sediment to Surface Water, Fugacity-based(AlgInstID_2195)",\
-            "Diffusion from Surface Water to Sediment, Fugacity-based(AlgInstID_2149)",\
-            "Methylation(Hg2 -> MHg) in Abiotic Media, Rate is input(AlgInstID_1891)",\
-            "Oxidation(Hg0 -> Hg2) in Abiotic Media, Rate is input(AlgInstID_1894)",\
-            "Reduction(Hg2 -> Hg0) in Abiotic Media, Rate is input(AlgInstID_1893)",\
-            "Resuspension from Sediment to Surface Water, General(AlgInstID_2190)",\
-            "Sediment Burial from Sediment to Sediment Burial Sink, Zero net deposition, General(AlgInstID_4135)",\
-            "Sediment Deposition from Surface Water to Sediment, General(AlgInstID_2139)",\
-	    "Bulk Advection from Surface Water to Flush-rate Advection Sink, General(AlgInstID_4125)",\
-	    "Diffusion from Surface Water to Air, Two Film(AlgInstID_4080)-Hg",\
-        "Algae Deposition from Surface Water to Sediment, General(AlgInstID_2144)",
+            "degradation/reaction sink in sediment(alginstid_4565)",\
+            "degradation/reaction sink in surface water(alginstid_4585)",\
+            "demethylation(mhg -> hg2) in abiotic media, rate is input(alginstid_1892)",\
+            "diffusion from sediment to surface water, fugacity-based(alginstid_2195)",\
+            "diffusion from surface water to sediment, fugacity-based(alginstid_2149)",\
+            "methylation(hg2 -> mhg) in abiotic media, rate is input(alginstid_1891)",\
+            "oxidation(hg0 -> hg2) in abiotic media, rate is input(alginstid_1894)",\
+            "reduction(hg2 -> hg0) in abiotic media, rate is input(alginstid_1893)",\
+            "resuspension from sediment to surface water, general(alginstid_2190)",\
+            "sediment burial from sediment to sediment burial sink, zero net deposition, general(alginstid_4135)",\
+            "sediment deposition from surface water to sediment, general(alginstid_2139)",\
+	    "bulk advection from surface water to flush-rate advection sink, general(alginstid_4125)",\
+	    "diffusion from surface water to air, two film(alginstid_4080)-hg",\
+        "algae deposition from surface water to sediment, general(alginstid_2144)",
 ]
