@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Apr 27 15:34:02 2021
+created on tue apr 27 15:34:02 2021
 @author: 13963
 
-Defines class to determine if compartments are neighboring based on coordinates
+defines class to determine if compartments are neighboring based on coordinates
 
 """
 from shapely.geometry import Polygon,LineString
@@ -15,58 +15,58 @@ from define_pve import *
 from define_attributes_props import *
 
 
-def look_up_coords(point_name,df_points): # function to look up coordinates of a point from pre-defined df_points dataframe. support function for polygon_area function
-    x=float(df_points['x'].loc[df_points['Point_ID']==point_name].values[0])
-    y=float(df_points['y'].loc[df_points['Point_ID']==point_name].values[0])
+def look_up_coords(point_name,df_points): # function to look up coordinates of a point from pre-defined df_points DataFrame. support function for Polygon_area function
+    x=float(df_points['x'].loc[df_points['point_id']==point_name].values[0])
+    y=float(df_points['y'].loc[df_points['point_id']==point_name].values[0])
     return (x,y)
 
 
 
 class check_neighbor:
-    def __init__(self, SendingCompartment, ReceivingCompartment,dict_inputs):
-        self.SendingCompartment=SendingCompartment
-        self.ReceivingCompartment=ReceivingCompartment
+    def __init__(self, sendingcompartment, receivingcompartment,dict_inputs):
+        self.sendingcompartment=sendingcompartment
+        self.receivingcompartment=receivingcompartment
         self.dict_inputs=dict_inputs
         self.df_points=self.dict_inputs['df_points']
     def is_neighbor(self):
-        VE_SC=self.SendingCompartment.containingVolumeElement
-        Top_SC=float(eval(VE_SC).Top)  
-        Bottom_SC=float(eval(VE_SC).Bottom) 
-        PIDs_SC=eval(VE_SC).Point_IDs  
-        PIDs_SC=PIDs_SC.split(' ')         
-        VE_RC=self.ReceivingCompartment.containingVolumeElement
-        Top_RC=float(eval(VE_RC).Top)  
-        Bottom_RC=float(eval(VE_RC).Bottom)  
-        PIDs_RC=eval(VE_RC).Point_IDs         
-        PIDs_RC=PIDs_RC.split(' ')  
+        ve_sc=self.sendingcompartment.containingvolumeelementname
+        top_sc=float(eval(ve_sc).top)  
+        bottom_sc=float(eval(ve_sc).bottom) 
+        pids_sc=eval(ve_sc).point_ids  
+        pids_sc=pids_sc.split(' ')         
+        ve_rc=self.receivingcompartment.containingvolumeelementname
+        top_rc=float(eval(ve_rc).top)  
+        bottom_rc=float(eval(ve_rc).bottom)  
+        pids_rc=eval(ve_rc).point_ids         
+        pids_rc=pids_rc.split(' ')  
         
-        coords_SC=[look_up_coords(p,self.df_points) for p in PIDs_SC]        
-        coords_RC=[look_up_coords(p,self.df_points) for p in PIDs_RC]   
-        polygon_SC = Polygon(coords_SC)
-        polygon_RC = Polygon(coords_RC)
-        parcel_neighbor=polygon_SC.intersects(polygon_RC)
-        parcel_not_neighbor=polygon_SC.disjoint(polygon_RC)
+        coords_sc=[look_up_coords(p,self.df_points) for p in pids_sc]        
+        coords_rc=[look_up_coords(p,self.df_points) for p in pids_rc]   
+        Polygon_sc = Polygon(coords_sc)
+        Polygon_rc = Polygon(coords_rc)
+        parcel_neighbor=Polygon_sc.intersects(Polygon_rc)
+        parcel_not_neighbor=Polygon_sc.disjoint(Polygon_rc)
         chk_overlap=False
         interfacial_area=0
         if parcel_neighbor:
-            intersection_length=polygon_SC.intersection(polygon_RC).length
+            intersection_length=Polygon_sc.intersection(Polygon_rc).length
                 
-            if Top_SC >= Top_RC and Top_RC > Bottom_SC:
-                z_overlap=Top_RC-Bottom_SC
+            if top_sc >= top_rc and top_rc > bottom_sc:
+                z_overlap=top_rc-bottom_sc
                 chk_overlap=True
                 interfacial_area=z_overlap*intersection_length
                 return(chk_overlap,interfacial_area)
 
-            if Top_RC >=Top_SC and Top_SC > Bottom_RC: 
+            if top_rc >=top_sc and top_sc > bottom_rc: 
                 chk_overlap=True
-                z_overlap=Top_SC-Bottom_RC
+                z_overlap=top_sc-bottom_rc
                 interfacial_area=z_overlap*intersection_length
                 return(chk_overlap,interfacial_area)
 
-            if Top_SC == Bottom_RC or Top_RC == Bottom_SC: # overlying parcels
+            if top_sc == bottom_rc or top_rc == bottom_sc: # overlying parcels
                 z_overlap=1
                 chk_overlap=True
-                interfacial_area=z_overlap*polygon_SC.area
+                interfacial_area=z_overlap*Polygon_sc.area
                 return(chk_overlap,interfacial_area)
                         
 
