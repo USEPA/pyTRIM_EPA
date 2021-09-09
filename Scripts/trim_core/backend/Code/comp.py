@@ -221,7 +221,7 @@ def define_comp(currentChemical):
     
     ###### APPEND CODE TO AUTO DEFINE ADVECTION SINKS
     
-    df_sinks=df_ve.loc[((df_ve.Primary_Abiotic=='Air')|(df_ve.Primary_Abiotic=='Soil - Surface'))&(df_ve.External_Boundary)>0] # only air and surface soil compartments with an outer boundary need sinks
+    df_sinks=df_ve.loc[((df_ve.Primary_Abiotic=='Air')|(df_ve.Primary_Abiotic=='Soil - Surface'))&(df_ve.External_Boundary>0) & (df_ve.Parcel_Name=='LakeCadillac')] # only air and surface soil compartments with an outer boundary need sinks
     
     with open(ofpn, 'a') as f:
         for i in df_sinks.index:
@@ -408,4 +408,4 @@ def define_comp(currentChemical):
     return(df_comp,comp_dict)
     
 if __name__ == '__main__':
-    df_comp=define_compartments(inputs,df_parcels,df_ve,df_pve,df_props,df_dr)
+    df_comp,comp_dict=define_compartments(inputs,df_parcels,df_ve,df_pve,df_props,df_dr)

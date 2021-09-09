@@ -1,5 +1,35 @@
 ### Note: This is an auto generated script
 from find_neighbors import *
+from numpy import sqrt
+class Algae_Deposition_from_Surface_Water_to_Sediment_General_AlgInstID_2144:
+	def __init__(self, Constants,containingScenario,currentChemical,SendingCompartment, ReceivingCompartment,dict_inputs):
+		self.Name='Algae Deposition from Surface Water to Sediment, General(AlgInstID_2144)'
+		self.Constants=Constants
+		self.containingScenario=containingScenario
+		self.currentChemical=currentChemical
+		self.SendingCompartment=SendingCompartment
+		self.ReceivingCompartment=ReceivingCompartment
+		self.category='Advection'
+		self.chemicalCategory='All'
+		self.doesTransformChemical='false'
+		self.TransportChemical='true'
+		self.enabled='true'
+		self.isDefaultForCategory='true'
+		self.mate='<Unset>'
+		self.receivingChemicalName='ReplaceMe'
+		self.receivingCompartmentCategory='Abiotic | Sediment | Sediment - Default'
+		self.sendingCompartmentCategory='Abiotic | Surface water | Surface water - Default'
+		self.sendingChemicalName='ReplaceMe'
+		self.dict_inputs=dict_inputs
+		
+		self.compartmentRelationship='SENDER_ABOVE'
+
+
+		try: 
+			self.transferFactor=self.SendingCompartment.AlgaeSedimentationRate_m3_m2_day * (self.SendingCompartment.Chemical_FractionMass_Algae/self.SendingCompartment.VolumeFraction_Algae) * (check_neighbor(self.SendingCompartment,self.ReceivingCompartment,self.dict_inputs).is_neighbor()[1]) / self.SendingCompartment.Volume
+		except: 
+			self.transferFactor="TF Computation Error"
+
 class Bulk_Advection_from_Surface_Water_to_Flush_rate_Advection_Sink_General_AlgInstID_4125:
 	def __init__(self, Constants,containingScenario,currentChemical,SendingCompartment, ReceivingCompartment,dict_inputs):
 		self.Name='Bulk Advection from Surface Water to Flush-rate Advection Sink, General(AlgInstID_4125)'
@@ -137,16 +167,53 @@ class Diffusion_from_Sediment_to_Surface_Water_Fugacity_based_AlgInstID_2195:
 		self.sendingChemicalName='ReplaceMe'
 		self.dict_inputs=dict_inputs
 		
-		self.MassTransferCoefficient_Receiving_to_Sending=self.SendingCompartment.Chemical_D_effective / self.SendingCompartment.Chemical_BoundaryLayerThicknessbelowWater
 		self.compartmentRelationship='SENDER_BELOW'
 		self.MassTransferCoefficient_Sending_to_Receiving=self.ReceivingCompartment.Chemical_D_effective / self.ReceivingCompartment.BoundaryLayerThicknessAboveSediment
+		self.MassTransferCoefficient_Receiving_to_Sending=self.SendingCompartment.Chemical_D_effective / self.SendingCompartment.Chemical_BoundaryLayerThicknessbelowWater
 
-		self.Diffusiveterm_2=self.MassTransferCoefficient_Sending_to_Receiving
 		self.Diffusiveterm_1=self.MassTransferCoefficient_Receiving_to_Sending * self.ReceivingCompartment.Chemical_Z_Total / self.SendingCompartment.Chemical_Z_Total
+		self.Diffusiveterm_2=self.MassTransferCoefficient_Sending_to_Receiving
 
 		self.DiffusiveTerm=(1 / self.Diffusiveterm_1 + 1 / self.Diffusiveterm_2) ** (-1)
 		try: 
 			self.transferFactor=self.Diffusiveterm * (check_neighbor(self.SendingCompartment,self.ReceivingCompartment,self.dict_inputs).is_neighbor()[1] / self.SendingCompartment.Volume)
+		except: 
+			self.transferFactor="TF Computation Error"
+
+class Diffusion_from_Surface_Water_to_Air_Two_Film_AlgInstID_4080_Hg:
+	def __init__(self, Constants,containingScenario,currentChemical,SendingCompartment, ReceivingCompartment,dict_inputs):
+		self.Name='Diffusion from Surface Water to Air, Two Film(AlgInstID_4080)-Hg'
+		self.Constants=Constants
+		self.containingScenario=containingScenario
+		self.currentChemical=currentChemical
+		self.SendingCompartment=SendingCompartment
+		self.ReceivingCompartment=ReceivingCompartment
+		self.category='Diffusion'
+		self.chemicalCategory='Metals | Mercury'
+		self.doesTransformChemical='false'
+		self.TransportChemical='true'
+		self.enabled='true'
+		self.isDefaultForCategory='true'
+		self.mate='<Unset>'
+		self.receivingChemicalName='ReplaceMe'
+		self.receivingCompartmentCategory='Abiotic | Air | Air - Default'
+		self.sendingCompartmentCategory='Abiotic | Surface water | Surface water - Default'
+		self.sendingChemicalName='ReplaceMe'
+		self.dict_inputs=dict_inputs
+		
+		self.GasPhaseTransferCoefficient=(self.SendingCompartment.ShearVelocity_m_per_day)*((self.Constants.vonKarmensConstant**(0.33))/self.SendingCompartment.DimensionlessViscousSublayerThickness) * self.ReceivingCompartment.Chemical_AirSchmidtNumber**(-0.67)
+		self.LiquidPhaseTransferCoefficient_Lake=(self.SendingCompartment.ShearVelocity_m_per_day)*((self.ReceivingCompartment.AirDensity_kg_m3/self.SendingCompartment.WaterDensity)**(0.5))*((self.Constants.vonKarmensConstant**(0.33))/self.SendingCompartment.DimensionlessViscousSublayerThickness) * self.SendingCompartment.Chemical_WaterSchmidtNumber**(-0.67)
+		self.ReaerationVelocity_ChurchillFormula=5.049 * (self.SendingCompartment.CurrentVelocity**0.969)/ (self.SendingCompartment.Depth**0.673)
+		self.RatioofVolatilizationRatetoReaerationRate=sqrt(32/currentChemical.molecularWeight)
+		self.ReaerationVelocity_OwensFormula=5.349 * (self.SendingCompartment.CurrentVelocity**0.67)/ (self.SendingCompartment.Depth**0.85)
+
+		self.LiquidPhaseTransferCoefficient_FlowingWaterbody=self.ReaerationVelocity_OwensFormula * self.RatioofVolatilizationRatetoReaerationRate
+		self.GasPhaseResistance=1/  ( self.GasPhaseTransferCoefficient * (currentChemical.H_over_R_T) )
+
+		self.LiquidPhaseResistance=1/self.LiquidPhaseTransferCoefficient_Lake if  not (self.SendingCompartment.isFlowing) else 1/self.LiquidPhaseTransferCoefficient_FlowingWaterbody
+		self.VolatilizationTransferRate=1/(self.LiquidPhaseResistance + self.GasPhaseResistance)
+		try: 
+			self.transferFactor=self.VolatilizationTransferRate * (self.SendingCompartment.Chemical_FractionMass_Dissolved /self.SendingCompartment.VolumeFraction_Liquid)*(check_neighbor(self.SendingCompartment,self.ReceivingCompartment,self.dict_inputs).is_neighbor()[1] / self.SendingCompartment.Volume)
 		except: 
 			self.transferFactor="TF Computation Error"
 
@@ -171,12 +238,12 @@ class Diffusion_from_Surface_Water_to_Sediment_Fugacity_based_AlgInstID_2149:
 		self.sendingChemicalName='ReplaceMe'
 		self.dict_inputs=dict_inputs
 		
-		self.MassTransferCoefficient_Receiving_to_Sending=self.ReceivingCompartment.Chemical_D_effective / self.ReceivingCompartment.Chemical_BoundaryLayerThicknessbelowWater
 		self.compartmentRelationship='SENDER_ABOVE'
 		self.MassTransferCoefficient_Sending_to_Receiving=self.SendingCompartment.Chemical_D_effective / self.SendingCompartment.BoundaryLayerThicknessAboveSediment
+		self.MassTransferCoefficient_Receiving_to_Sending=self.ReceivingCompartment.Chemical_D_effective / self.ReceivingCompartment.Chemical_BoundaryLayerThicknessbelowWater
 
-		self.Diffusiveterm_2=self.MassTransferCoefficient_Sending_to_Receiving
 		self.Diffusiveterm_1=self.MassTransferCoefficient_Receiving_to_Sending * self.ReceivingCompartment.Chemical_Z_Total / self.SendingCompartment.Chemical_Z_Total
+		self.Diffusiveterm_2=self.MassTransferCoefficient_Sending_to_Receiving
 
 		self.DiffusiveTerm=(1 / self.Diffusiveterm_1 + 1 / self.Diffusiveterm_2) ** (-1)
 		try: 

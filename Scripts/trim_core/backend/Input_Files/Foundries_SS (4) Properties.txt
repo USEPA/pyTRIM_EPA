@@ -1,3 +1,5 @@
+//changed flush rate to reflect HTML files
+
 // TRIM.FaTE scenario properties
 
 // Foundries_SS
@@ -48,7 +50,7 @@ Form: Constant
 Value: 286.15
 Property: Flushes_per_year
 Form: Constant
-Value: 1.17313794554605
+Value: 0.48
 // Flowing water bodies currently unsupported in this workbook.
 Property: IsFlowing
 Form: Constant

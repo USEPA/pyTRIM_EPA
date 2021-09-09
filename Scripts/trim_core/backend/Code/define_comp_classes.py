@@ -64,6 +64,833 @@ class Advection_Sink:
 		except:
 			self.Chemical_GenericDenominatorforCalculatingFractioninPhases=nan
 
+class Air:
+	def __init__(self,Constants,containingScenario,currentChemical,containingVolumeElement):
+		self.containingScenario=containingScenario
+		self.currentChemical=currentChemical
+		self.Constants=Constants
+		self.containingVolumeElement=containingVolumeElement
+		
+		self.acceptableAbiotic=()
+		self.acceptableAbiotic='nan'
+
+		self.category=()
+		self.category='Abiotic | Air | Air - Default'
+
+		self.concentrationOutputUnits=()
+		self.concentrationOutputUnits='ug/m3'
+
+		self.isBiotic=()
+		self.isBiotic=False
+
+		self.AirDensity_g_cm3=()
+		self.AirDensity_g_cm3=0.0012
+
+		self.DemethylationRate={}
+		self.DemethylationRate["Chem_MethylMercury"]=0.0
+		try:
+			self.Chemical_DemethylationRate=self.DemethylationRate[self.currentChemical.Name]
+		except:
+			self.Chemical_DemethylationRate=nan
+
+		self.DustDensity=()
+		self.DustDensity=1400.0
+
+		self.DustLoad=()
+		self.DustLoad=6.15E-8
+
+		self.FractionOrganicMatteronParticulates=()
+		self.FractionOrganicMatteronParticulates=0.2
+
+		self.HalfLife={}
+		self.HalfLife["Chem_1_2_3_4_6_7_8_9_OCDD"]=162.0
+		self.HalfLife["Chem_1_2_3_4_6_7_8_9_OCDF"]=321.0
+		self.HalfLife["Chem_1_2_3_4_6_7_8_HpCDD"]=64.0
+		self.HalfLife["Chem_1_2_3_4_6_7_8_HpCDF"]=137.0
+		self.HalfLife["Chem_1_2_3_4_7_8_9_HpCDF"]=122.0
+		self.HalfLife["Chem_1_2_3_4_7_8_HxCDD"]=42.0
+		self.HalfLife["Chem_1_2_3_4_7_8_HxCDF"]=78.0
+		self.HalfLife["Chem_1_2_3_6_7_8_HxCDD"]=28.0
+		self.HalfLife["Chem_1_2_3_6_7_8_HxCDF"]=55.0
+		self.HalfLife["Chem_1_2_3_7_8_9_HxCDD"]=28.0
+		self.HalfLife["Chem_1_2_3_7_8_9_HxCDF"]=51.0
+		self.HalfLife["Chem_1_2_3_7_8_PeCDD"]=18.0
+		self.HalfLife["Chem_1_2_3_7_8_PeCDF"]=31.0
+		self.HalfLife["Chem_2_3_4_6_7_8_HxCDF"]=59.0
+		self.HalfLife["Chem_2_3_4_7_8_PeCDF"]=33.0
+		self.HalfLife["Chem_2_3_7_8_TCDD"]=12.0
+		self.HalfLife["Chem_2_3_7_8_TCDF"]=19.0
+		self.HalfLife["Chem_2_Methylnaphthalene"]=0.154
+		self.HalfLife["Chem_7_12_Dimethylbenz_a_anthracene"]=0.092
+		self.HalfLife["Chem_Acenaphthene"]=0.3
+		self.HalfLife["Chem_Acenaphthylene"]=0.208
+		self.HalfLife["Chem_Benz_a_anthracene"]=0.125
+		self.HalfLife["Chem_Benzo_A_Pyrene"]=0.046
+		self.HalfLife["Chem_Benzo_b_fluoranthene"]=0.596
+		self.HalfLife["Chem_Benzo_g_h_i_perylene"]=0.215
+		self.HalfLife["Chem_Benzo_k_fluoranthene"]=0.458
+		self.HalfLife["Chem_Chrysene"]=0.334
+		self.HalfLife["Chem_Dibenz_a_h_anthracene"]=0.178
+		self.HalfLife["Chem_Fluoranthene"]=0.46
+		self.HalfLife["Chem_Fluorene"]=0.46
+		self.HalfLife["Chem_Indeno_1_2_3_cd_pyrene"]=0.262
+		try:
+			self.Chemical_HalfLife=self.HalfLife[self.currentChemical.Name]
+		except:
+			self.Chemical_HalfLife=nan
+
+		self.MethylationRate={}
+		self.MethylationRate["Chem_Divalent_Mercury"]=0.0
+		try:
+			self.Chemical_MethylationRate=self.MethylationRate[self.currentChemical.Name]
+		except:
+			self.Chemical_MethylationRate=nan
+
+		self.OxidationRate={}
+		self.OxidationRate["Chem_Elemental_Mercury"]=0.00385081766977747
+		try:
+			self.Chemical_OxidationRate=self.OxidationRate[self.currentChemical.Name]
+		except:
+			self.Chemical_OxidationRate=nan
+
+		self.ReductionRate={}
+		self.ReductionRate["Chem_Divalent_Mercury"]=0.0
+		try:
+			self.Chemical_ReductionRate=self.ReductionRate[self.currentChemical.Name]
+		except:
+			self.Chemical_ReductionRate=nan
+
+		self.WashoutRatio={}
+		self.WashoutRatio["Chem_1_2_3_4_6_7_8_9_OCDD"]=91000.0
+		self.WashoutRatio["Chem_1_2_3_4_6_7_8_9_OCDF"]=22000.0
+		self.WashoutRatio["Chem_1_2_3_4_6_7_8_HpCDD"]=64000.0
+		self.WashoutRatio["Chem_1_2_3_4_6_7_8_HpCDF"]=32000.0
+		self.WashoutRatio["Chem_1_2_3_4_7_8_9_HpCDF"]=32000.0
+		self.WashoutRatio["Chem_1_2_3_4_7_8_HxCDD"]=9000.0
+		self.WashoutRatio["Chem_1_2_3_4_7_8_HxCDF"]=10000.0
+		self.WashoutRatio["Chem_1_2_3_6_7_8_HxCDD"]=9000.0
+		self.WashoutRatio["Chem_1_2_3_6_7_8_HxCDF"]=10000.0
+		self.WashoutRatio["Chem_1_2_3_7_8_9_HxCDD"]=9000.0
+		self.WashoutRatio["Chem_1_2_3_7_8_9_HxCDF"]=10000.0
+		self.WashoutRatio["Chem_1_2_3_7_8_PeCDD"]=18000.0
+		self.WashoutRatio["Chem_1_2_3_7_8_PeCDF"]=13000.0
+		self.WashoutRatio["Chem_2_3_4_6_7_8_HxCDF"]=10000.0
+		self.WashoutRatio["Chem_2_3_4_7_8_PeCDF"]=14000.0
+		self.WashoutRatio["Chem_2_3_7_8_TCDD"]=18000.0
+		self.WashoutRatio["Chem_2_3_7_8_TCDF"]=19000.0
+		self.WashoutRatio["Chem_2_Methylnaphthalene"]=200000.0
+		self.WashoutRatio["Chem_7_12_Dimethylbenz_a_anthracene"]=200000.0
+		self.WashoutRatio["Chem_Acenaphthene"]=200000.0
+		self.WashoutRatio["Chem_Acenaphthylene"]=200000.0
+		self.WashoutRatio["Chem_Arsenic"]=200000.0
+		self.WashoutRatio["Chem_Benz_a_anthracene"]=200000.0
+		self.WashoutRatio["Chem_Benzo_A_Pyrene"]=200000.0
+		self.WashoutRatio["Chem_Benzo_b_fluoranthene"]=200000.0
+		self.WashoutRatio["Chem_Benzo_g_h_i_perylene"]=200000.0
+		self.WashoutRatio["Chem_Benzo_k_fluoranthene"]=200000.0
+		self.WashoutRatio["Chem_Cadmium"]=200000.0
+		self.WashoutRatio["Chem_Chrysene"]=200000.0
+		self.WashoutRatio["Chem_Dibenz_a_h_anthracene"]=200000.0
+		self.WashoutRatio["Chem_Divalent_Mercury"]=200000.0
+		self.WashoutRatio["Chem_Elemental_Mercury"]=200000.0
+		self.WashoutRatio["Chem_Fluoranthene"]=200000.0
+		self.WashoutRatio["Chem_Fluorene"]=200000.0
+		self.WashoutRatio["Chem_Indeno_1_2_3_cd_pyrene"]=200000.0
+		self.WashoutRatio["Chem_Lead"]=330000.0
+		self.WashoutRatio["Chem_MethylMercury"]=200000.0
+		try:
+			self.Chemical_WashoutRatio=self.WashoutRatio[self.currentChemical.Name]
+		except:
+			self.Chemical_WashoutRatio=nan
+
+		self.concentrationOutputFactor=()
+		self.concentrationOutputFactor=1000000.0
+
+		self.initialConcentration_g_per_m3_UserSupplied={}
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_1_2_3_4_6_7_8_9_OCDD"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_1_2_3_4_6_7_8_9_OCDF"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_1_2_3_4_6_7_8_HpCDD"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_1_2_3_4_6_7_8_HpCDF"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_1_2_3_4_7_8_9_HpCDF"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_1_2_3_4_7_8_HxCDD"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_1_2_3_4_7_8_HxCDF"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_1_2_3_6_7_8_HxCDD"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_1_2_3_6_7_8_HxCDF"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_1_2_3_7_8_9_HxCDD"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_1_2_3_7_8_9_HxCDF"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_1_2_3_7_8_PeCDD"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_1_2_3_7_8_PeCDF"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_2_3_4_6_7_8_HxCDF"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_2_3_4_7_8_PeCDF"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_2_3_7_8_TCDD"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_2_3_7_8_TCDF"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_2_Methylnaphthalene"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_7_12_Dimethylbenz_a_anthracene"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_Acenaphthene"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_Acenaphthylene"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_Arsenic"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_Benz_a_anthracene"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_Benzo_A_Pyrene"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_Benzo_b_fluoranthene"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_Benzo_g_h_i_perylene"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_Benzo_k_fluoranthene"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_Cadmium"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_Chrysene"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_Dibenz_a_h_anthracene"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_Divalent_Mercury"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_Elemental_Mercury"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_Fluoranthene"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_Fluorene"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_Indeno_1_2_3_cd_pyrene"]=0.0
+		self.initialConcentration_g_per_m3_UserSupplied["Chem_MethylMercury"]=0.0
+		try:
+			self.Chemical_initialConcentration_g_per_m3_UserSupplied=self.initialConcentration_g_per_m3_UserSupplied[self.currentChemical.Name]
+		except:
+			self.Chemical_initialConcentration_g_per_m3_UserSupplied=nan
+
+		self.vdep={}
+		self.vdep["Chem_1_2_3_4_6_7_8_9_OCDD"]=500.0
+		self.vdep["Chem_1_2_3_4_6_7_8_9_OCDF"]=500.0
+		self.vdep["Chem_1_2_3_4_6_7_8_HpCDD"]=500.0
+		self.vdep["Chem_1_2_3_4_6_7_8_HpCDF"]=500.0
+		self.vdep["Chem_1_2_3_4_7_8_9_HpCDF"]=500.0
+		self.vdep["Chem_1_2_3_4_7_8_HxCDD"]=500.0
+		self.vdep["Chem_1_2_3_4_7_8_HxCDF"]=500.0
+		self.vdep["Chem_1_2_3_6_7_8_HxCDD"]=500.0
+		self.vdep["Chem_1_2_3_6_7_8_HxCDF"]=500.0
+		self.vdep["Chem_1_2_3_7_8_9_HxCDD"]=500.0
+		self.vdep["Chem_1_2_3_7_8_9_HxCDF"]=500.0
+		self.vdep["Chem_1_2_3_7_8_PeCDD"]=500.0
+		self.vdep["Chem_1_2_3_7_8_PeCDF"]=500.0
+		self.vdep["Chem_2_3_4_6_7_8_HxCDF"]=500.0
+		self.vdep["Chem_2_3_4_7_8_PeCDF"]=500.0
+		self.vdep["Chem_2_3_7_8_TCDD"]=500.0
+		self.vdep["Chem_2_3_7_8_TCDF"]=500.0
+		self.vdep["Chem_2_Methylnaphthalene"]=500.0
+		self.vdep["Chem_7_12_Dimethylbenz_a_anthracene"]=500.0
+		self.vdep["Chem_Acenaphthene"]=500.0
+		self.vdep["Chem_Acenaphthylene"]=500.0
+		self.vdep["Chem_Arsenic"]=500.0
+		self.vdep["Chem_Benz_a_anthracene"]=500.0
+		self.vdep["Chem_Benzo_A_Pyrene"]=500.0
+		self.vdep["Chem_Benzo_b_fluoranthene"]=500.0
+		self.vdep["Chem_Benzo_g_h_i_perylene"]=500.0
+		self.vdep["Chem_Benzo_k_fluoranthene"]=500.0
+		self.vdep["Chem_Cadmium"]=260.0
+		self.vdep["Chem_Chrysene"]=500.0
+		self.vdep["Chem_Dibenz_a_h_anthracene"]=500.0
+		self.vdep["Chem_Divalent_Mercury"]=500.0
+		self.vdep["Chem_Elemental_Mercury"]=500.0
+		self.vdep["Chem_Fluoranthene"]=500.0
+		self.vdep["Chem_Fluorene"]=500.0
+		self.vdep["Chem_Indeno_1_2_3_cd_pyrene"]=500.0
+		self.vdep["Chem_Lead"]=500.0
+		self.vdep["Chem_MethylMercury"]=500.0
+		try:
+			self.Chemical_vdep=self.vdep[self.currentChemical.Name]
+		except:
+			self.Chemical_vdep=nan
+
+		self.AirDensity_kg_m3=()
+		self.AirDensity_kg_m3=self.AirDensity_g_cm3 * 1000.0
+
+		self.AirTemperature_C=()
+		self.AirTemperature_C=self.containingScenario.AirTemperature_K - 273
+
+		self.GeneralDegradationRate={}
+		self.GeneralDegradationRate["Chem_1_2_3_4_6_7_8_9_OCDD"]=log(2)/ self.Chemical_HalfLife
+		self.GeneralDegradationRate["Chem_1_2_3_4_6_7_8_9_OCDF"]=log(2)/ self.Chemical_HalfLife
+		self.GeneralDegradationRate["Chem_1_2_3_4_6_7_8_HpCDD"]=log(2)/ self.Chemical_HalfLife
+		self.GeneralDegradationRate["Chem_1_2_3_4_6_7_8_HpCDF"]=log(2)/ self.Chemical_HalfLife
+		self.GeneralDegradationRate["Chem_1_2_3_4_7_8_9_HpCDF"]=log(2)/ self.Chemical_HalfLife
+		self.GeneralDegradationRate["Chem_1_2_3_4_7_8_HxCDD"]=log(2)/ self.Chemical_HalfLife
+		self.GeneralDegradationRate["Chem_1_2_3_4_7_8_HxCDF"]=log(2)/ self.Chemical_HalfLife
+		self.GeneralDegradationRate["Chem_1_2_3_6_7_8_HxCDD"]=log(2)/ self.Chemical_HalfLife
+		self.GeneralDegradationRate["Chem_1_2_3_6_7_8_HxCDF"]=log(2)/ self.Chemical_HalfLife
+		self.GeneralDegradationRate["Chem_1_2_3_7_8_9_HxCDD"]=log(2)/ self.Chemical_HalfLife
+		self.GeneralDegradationRate["Chem_1_2_3_7_8_9_HxCDF"]=log(2)/ self.Chemical_HalfLife
+		self.GeneralDegradationRate["Chem_1_2_3_7_8_PeCDD"]=log(2)/ self.Chemical_HalfLife
+		self.GeneralDegradationRate["Chem_1_2_3_7_8_PeCDF"]=log(2)/ self.Chemical_HalfLife
+		self.GeneralDegradationRate["Chem_2_3_4_6_7_8_HxCDF"]=log(2)/ self.Chemical_HalfLife
+		self.GeneralDegradationRate["Chem_2_3_4_7_8_PeCDF"]=log(2)/ self.Chemical_HalfLife
+		self.GeneralDegradationRate["Chem_2_3_7_8_TCDD"]=log(2)/ self.Chemical_HalfLife
+		self.GeneralDegradationRate["Chem_2_3_7_8_TCDF"]=log(2)/ self.Chemical_HalfLife
+		self.GeneralDegradationRate["Chem_2_Methylnaphthalene"]=log(2)/ self.Chemical_HalfLife
+		self.GeneralDegradationRate["Chem_7_12_Dimethylbenz_a_anthracene"]=log(2)/ self.Chemical_HalfLife
+		self.GeneralDegradationRate["Chem_Acenaphthene"]=log(2)/ self.Chemical_HalfLife
+		self.GeneralDegradationRate["Chem_Acenaphthylene"]=log(2)/ self.Chemical_HalfLife
+		self.GeneralDegradationRate["Chem_Benz_a_anthracene"]=log(2)/ self.Chemical_HalfLife
+		self.GeneralDegradationRate["Chem_Benzo_A_Pyrene"]=log(2)/ self.Chemical_HalfLife
+		self.GeneralDegradationRate["Chem_Benzo_b_fluoranthene"]=log(2)/ self.Chemical_HalfLife
+		self.GeneralDegradationRate["Chem_Benzo_g_h_i_perylene"]=log(2)/ self.Chemical_HalfLife
+		self.GeneralDegradationRate["Chem_Benzo_k_fluoranthene"]=log(2)/ self.Chemical_HalfLife
+		self.GeneralDegradationRate["Chem_Chrysene"]=log(2)/ self.Chemical_HalfLife
+		self.GeneralDegradationRate["Chem_Dibenz_a_h_anthracene"]=log(2)/ self.Chemical_HalfLife
+		self.GeneralDegradationRate["Chem_Fluoranthene"]=log(2)/ self.Chemical_HalfLife
+		self.GeneralDegradationRate["Chem_Fluorene"]=log(2)/ self.Chemical_HalfLife
+		self.GeneralDegradationRate["Chem_Indeno_1_2_3_cd_pyrene"]=log(2)/ self.Chemical_HalfLife
+		try:
+			self.Chemical_GeneralDegradationRate=self.GeneralDegradationRate[self.currentChemical.Name]
+		except:
+			self.Chemical_GeneralDegradationRate=nan
+
+		self.GenericDenominatorforCalculatingFractioninPhases={}
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Indeno_1_2_3_cd_pyrene"]=log(2)/ self.Chemical_HalfLife
+		try:
+			self.Chemical_GenericDenominatorforCalculatingFractioninPhases=self.GenericDenominatorforCalculatingFractioninPhases[self.currentChemical.Name]
+		except:
+			self.Chemical_GenericDenominatorforCalculatingFractioninPhases=nan
+
+		self.ParticleGasPartitionCoefficient={}
+		self.ParticleGasPartitionCoefficient["Chem_1_2_3_4_6_7_8_9_OCDD"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_1_2_3_4_6_7_8_9_OCDF"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_1_2_3_4_6_7_8_HpCDD"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_1_2_3_4_6_7_8_HpCDF"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_1_2_3_4_7_8_9_HpCDF"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_1_2_3_4_7_8_HxCDD"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_1_2_3_4_7_8_HxCDF"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_1_2_3_6_7_8_HxCDD"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_1_2_3_6_7_8_HxCDF"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_1_2_3_7_8_9_HxCDD"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_1_2_3_7_8_9_HxCDF"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_1_2_3_7_8_PeCDD"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_1_2_3_7_8_PeCDF"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_2_3_4_6_7_8_HxCDF"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_2_3_4_7_8_PeCDF"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_2_3_7_8_TCDD"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_2_3_7_8_TCDF"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_2_Methylnaphthalene"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_7_12_Dimethylbenz_a_anthracene"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_Acenaphthene"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_Acenaphthylene"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_Benz_a_anthracene"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_Benzo_A_Pyrene"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_Benzo_b_fluoranthene"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_Benzo_g_h_i_perylene"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_Benzo_k_fluoranthene"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_Chrysene"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_Dibenz_a_h_anthracene"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_Divalent_Mercury"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_Elemental_Mercury"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_Fluoranthene"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_Fluorene"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_Indeno_1_2_3_cd_pyrene"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_Lead"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		self.ParticleGasPartitionCoefficient["Chem_MethylMercury"]=10** ( self.currentChemical.log10_K_OA  + log(self.FractionOrganicMatteronParticulates+1.0e-10)/log(10) - 11.91)
+		try:
+			self.Chemical_ParticleGasPartitionCoefficient=self.ParticleGasPartitionCoefficient[self.currentChemical.Name]
+		except:
+			self.Chemical_ParticleGasPartitionCoefficient=nan
+
+		self.ParticleVolumetricDRYDepositionRate={}
+		self.ParticleVolumetricDRYDepositionRate["Chem_1_2_3_4_6_7_8_9_OCDD"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_1_2_3_4_6_7_8_9_OCDF"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_1_2_3_4_6_7_8_HpCDD"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_1_2_3_4_6_7_8_HpCDF"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_1_2_3_4_7_8_9_HpCDF"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_1_2_3_4_7_8_HxCDD"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_1_2_3_4_7_8_HxCDF"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_1_2_3_6_7_8_HxCDD"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_1_2_3_6_7_8_HxCDF"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_1_2_3_7_8_9_HxCDD"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_1_2_3_7_8_9_HxCDF"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_1_2_3_7_8_PeCDD"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_1_2_3_7_8_PeCDF"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_2_3_4_6_7_8_HxCDF"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_2_3_4_7_8_PeCDF"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_2_3_7_8_TCDD"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_2_3_7_8_TCDF"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_2_Methylnaphthalene"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_7_12_Dimethylbenz_a_anthracene"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_Acenaphthene"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_Acenaphthylene"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_Arsenic"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_Benz_a_anthracene"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_Benzo_A_Pyrene"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_Benzo_b_fluoranthene"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_Benzo_g_h_i_perylene"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_Benzo_k_fluoranthene"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_Cadmium"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_Chrysene"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_Dibenz_a_h_anthracene"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_Divalent_Mercury"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_Elemental_Mercury"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_Fluoranthene"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_Fluorene"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_Indeno_1_2_3_cd_pyrene"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_Lead"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricDRYDepositionRate["Chem_MethylMercury"]=self.Chemical_vdep * (self.DustLoad / self.DustDensity)
+		try:
+			self.Chemical_ParticleVolumetricDRYDepositionRate=self.ParticleVolumetricDRYDepositionRate[self.currentChemical.Name]
+		except:
+			self.Chemical_ParticleVolumetricDRYDepositionRate=nan
+
+		self.ParticleVolumetricWetDepositionRate={}
+		self.ParticleVolumetricWetDepositionRate["Chem_1_2_3_4_6_7_8_9_OCDD"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_1_2_3_4_6_7_8_9_OCDF"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_1_2_3_4_6_7_8_HpCDD"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_1_2_3_4_6_7_8_HpCDF"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_1_2_3_4_7_8_9_HpCDF"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_1_2_3_4_7_8_HxCDD"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_1_2_3_4_7_8_HxCDF"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_1_2_3_6_7_8_HxCDD"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_1_2_3_6_7_8_HxCDF"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_1_2_3_7_8_9_HxCDD"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_1_2_3_7_8_9_HxCDF"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_1_2_3_7_8_PeCDD"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_1_2_3_7_8_PeCDF"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_2_3_4_6_7_8_HxCDF"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_2_3_4_7_8_PeCDF"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_2_3_7_8_TCDD"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_2_3_7_8_TCDF"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_2_Methylnaphthalene"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_7_12_Dimethylbenz_a_anthracene"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_Acenaphthene"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_Acenaphthylene"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_Arsenic"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_Benz_a_anthracene"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_Benzo_A_Pyrene"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_Benzo_b_fluoranthene"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_Benzo_g_h_i_perylene"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_Benzo_k_fluoranthene"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_Cadmium"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_Chrysene"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_Dibenz_a_h_anthracene"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_Divalent_Mercury"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_Elemental_Mercury"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_Fluoranthene"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_Fluorene"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_Indeno_1_2_3_cd_pyrene"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_Lead"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		self.ParticleVolumetricWetDepositionRate["Chem_MethylMercury"]=self.Chemical_WashoutRatio * self.containingScenario.Rain * (self.DustLoad / self.DustDensity)
+		try:
+			self.Chemical_ParticleVolumetricWetDepositionRate=self.ParticleVolumetricWetDepositionRate[self.currentChemical.Name]
+		except:
+			self.Chemical_ParticleVolumetricWetDepositionRate=nan
+
+		self.VolumetricAirAirContent=()
+		self.VolumetricAirAirContent=1 - self.DustLoad / self.DustDensity
+
+		self.VolumetricAirParticleContent=()
+		self.VolumetricAirParticleContent=self.DustLoad / self.DustDensity
+
+		self.Z_Liquid={}
+		self.Z_Liquid["Chem_1_2_3_4_6_7_8_9_OCDD"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_1_2_3_4_6_7_8_9_OCDF"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_1_2_3_4_6_7_8_HpCDD"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_1_2_3_4_6_7_8_HpCDF"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_1_2_3_4_7_8_9_HpCDF"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_1_2_3_4_7_8_HxCDD"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_1_2_3_4_7_8_HxCDF"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_1_2_3_6_7_8_HxCDD"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_1_2_3_6_7_8_HxCDF"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_1_2_3_7_8_9_HxCDD"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_1_2_3_7_8_9_HxCDF"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_1_2_3_7_8_PeCDD"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_1_2_3_7_8_PeCDF"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_2_3_4_6_7_8_HxCDF"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_2_3_4_7_8_PeCDF"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_2_3_7_8_TCDD"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_2_3_7_8_TCDF"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_2_Methylnaphthalene"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_7_12_Dimethylbenz_a_anthracene"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_Acenaphthene"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_Acenaphthylene"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_Benz_a_anthracene"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_Benzo_A_Pyrene"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_Benzo_b_fluoranthene"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_Benzo_g_h_i_perylene"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_Benzo_k_fluoranthene"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_Chrysene"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_Dibenz_a_h_anthracene"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_Divalent_Mercury"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_Elemental_Mercury"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_Fluoranthene"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_Fluorene"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_Indeno_1_2_3_cd_pyrene"]=self.currentChemical.Z_purewater
+		self.Z_Liquid["Chem_MethylMercury"]=self.currentChemical.Z_purewater
+		try:
+			self.Chemical_Z_Liquid=self.Z_Liquid[self.currentChemical.Name]
+		except:
+			self.Chemical_Z_Liquid=nan
+
+		self.Z_Vapor={}
+		self.Z_Vapor["Chem_1_2_3_4_6_7_8_9_OCDD"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_1_2_3_4_6_7_8_9_OCDF"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_1_2_3_4_6_7_8_HpCDD"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_1_2_3_4_6_7_8_HpCDF"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_1_2_3_4_7_8_9_HpCDF"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_1_2_3_4_7_8_HxCDD"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_1_2_3_4_7_8_HxCDF"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_1_2_3_6_7_8_HxCDD"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_1_2_3_6_7_8_HxCDF"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_1_2_3_7_8_9_HxCDD"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_1_2_3_7_8_9_HxCDF"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_1_2_3_7_8_PeCDD"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_1_2_3_7_8_PeCDF"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_2_3_4_6_7_8_HxCDF"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_2_3_4_7_8_PeCDF"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_2_3_7_8_TCDD"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_2_3_7_8_TCDF"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_2_Methylnaphthalene"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_7_12_Dimethylbenz_a_anthracene"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_Acenaphthene"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_Acenaphthylene"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_Benz_a_anthracene"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_Benzo_A_Pyrene"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_Benzo_b_fluoranthene"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_Benzo_g_h_i_perylene"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_Benzo_k_fluoranthene"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_Chrysene"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_Dibenz_a_h_anthracene"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_Divalent_Mercury"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_Elemental_Mercury"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_Fluoranthene"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_Fluorene"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_Indeno_1_2_3_cd_pyrene"]=self.currentChemical.Z_pureair
+		self.Z_Vapor["Chem_MethylMercury"]=self.currentChemical.Z_pureair
+		try:
+			self.Chemical_Z_Vapor=self.Z_Vapor[self.currentChemical.Name]
+		except:
+			self.Chemical_Z_Vapor=nan
+
+		self.DynamicAirViscosity_cm2_per_sec=()
+		self.DynamicAirViscosity_cm2_per_sec=(1.32 + 0.009 * self.AirTemperature_C)/10.0
+
+		self.FractionMass_Sorbed={}
+		self.FractionMass_Sorbed["Chem_1_2_3_4_6_7_8_9_OCDD"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_1_2_3_4_6_7_8_9_OCDF"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_1_2_3_4_6_7_8_HpCDD"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_1_2_3_4_6_7_8_HpCDF"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_1_2_3_4_7_8_9_HpCDF"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_1_2_3_4_7_8_HxCDD"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_1_2_3_4_7_8_HxCDF"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_1_2_3_6_7_8_HxCDD"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_1_2_3_6_7_8_HxCDF"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_1_2_3_7_8_9_HxCDD"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_1_2_3_7_8_9_HxCDF"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_1_2_3_7_8_PeCDD"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_1_2_3_7_8_PeCDF"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_2_3_4_6_7_8_HxCDF"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_2_3_4_7_8_PeCDF"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_2_3_7_8_TCDD"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_2_3_7_8_TCDF"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_2_Methylnaphthalene"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_7_12_Dimethylbenz_a_anthracene"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_Acenaphthene"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_Acenaphthylene"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_Arsenic"]=0.999999
+		self.FractionMass_Sorbed["Chem_Benz_a_anthracene"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_Benzo_A_Pyrene"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_Benzo_b_fluoranthene"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_Benzo_g_h_i_perylene"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_Benzo_k_fluoranthene"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_Cadmium"]=0.999999
+		self.FractionMass_Sorbed["Chem_Chrysene"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_Dibenz_a_h_anthracene"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_Divalent_Mercury"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_Elemental_Mercury"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_Fluoranthene"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_Fluorene"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_Indeno_1_2_3_cd_pyrene"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_Lead"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		self.FractionMass_Sorbed["Chem_MethylMercury"]=1 - 1/(1+self.Chemical_ParticleGasPartitionCoefficient * self.DustLoad* self.Constants.ug_per_kg)
+		try:
+			self.Chemical_FractionMass_Sorbed=self.FractionMass_Sorbed[self.currentChemical.Name]
+		except:
+			self.Chemical_FractionMass_Sorbed=nan
+
+		self.VolumeFraction_Liquid={}
+		try:
+			self.Chemical_VolumeFraction_Liquid=self.VolumeFraction_Liquid[self.currentChemical.Name]
+		except:
+			self.Chemical_VolumeFraction_Liquid=nan
+
+		self.VolumeFraction_Solid=()
+		self.VolumeFraction_Solid=self.VolumetricAirParticleContent
+
+		self.GenericDenominatorforCalculatingFractioninPhases={}
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Indeno_1_2_3_cd_pyrene"]=log(2)/ self.Chemical_HalfLife
+		try:
+			self.Chemical_GenericDenominatorforCalculatingFractioninPhases=self.GenericDenominatorforCalculatingFractioninPhases[self.currentChemical.Name]
+		except:
+			self.Chemical_GenericDenominatorforCalculatingFractioninPhases=nan
+
+		self.DynamicAirViscosity_m2_per_sec=()
+		self.DynamicAirViscosity_m2_per_sec=self.DynamicAirViscosity_cm2_per_sec/1e4
+
+		self.FractionMass_vapor={}
+		self.FractionMass_vapor["Chem_1_2_3_4_6_7_8_9_OCDD"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_1_2_3_4_6_7_8_9_OCDF"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_1_2_3_4_6_7_8_HpCDD"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_1_2_3_4_6_7_8_HpCDF"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_1_2_3_4_7_8_9_HpCDF"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_1_2_3_4_7_8_HxCDD"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_1_2_3_4_7_8_HxCDF"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_1_2_3_6_7_8_HxCDD"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_1_2_3_6_7_8_HxCDF"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_1_2_3_7_8_9_HxCDD"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_1_2_3_7_8_9_HxCDF"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_1_2_3_7_8_PeCDD"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_1_2_3_7_8_PeCDF"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_2_3_4_6_7_8_HxCDF"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_2_3_4_7_8_PeCDF"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_2_3_7_8_TCDD"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_2_3_7_8_TCDF"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_2_Methylnaphthalene"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_7_12_Dimethylbenz_a_anthracene"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_Acenaphthene"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_Acenaphthylene"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_Arsenic"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_Benz_a_anthracene"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_Benzo_A_Pyrene"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_Benzo_b_fluoranthene"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_Benzo_g_h_i_perylene"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_Benzo_k_fluoranthene"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_Cadmium"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_Chrysene"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_Dibenz_a_h_anthracene"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_Divalent_Mercury"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_Elemental_Mercury"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_Fluoranthene"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_Fluorene"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_Indeno_1_2_3_cd_pyrene"]=1 -self.Chemical_FractionMass_Sorbed
+		self.FractionMass_vapor["Chem_MethylMercury"]=1 -self.Chemical_FractionMass_Sorbed
+		try:
+			self.Chemical_FractionMass_vapor=self.FractionMass_vapor[self.currentChemical.Name]
+		except:
+			self.Chemical_FractionMass_vapor=nan
+
+		self.AirSchmidtNumber={}
+		self.AirSchmidtNumber["Chem_1_2_3_4_6_7_8_9_OCDD"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_1_2_3_4_6_7_8_9_OCDF"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_1_2_3_4_6_7_8_HpCDD"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_1_2_3_4_6_7_8_HpCDF"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_1_2_3_4_7_8_9_HpCDF"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_1_2_3_4_7_8_HxCDD"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_1_2_3_4_7_8_HxCDF"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_1_2_3_6_7_8_HxCDD"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_1_2_3_6_7_8_HxCDF"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_1_2_3_7_8_9_HxCDD"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_1_2_3_7_8_9_HxCDF"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_1_2_3_7_8_PeCDD"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_1_2_3_7_8_PeCDF"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_2_3_4_6_7_8_HxCDF"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_2_3_4_7_8_PeCDF"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_2_3_7_8_TCDD"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_2_3_7_8_TCDF"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_2_Methylnaphthalene"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_7_12_Dimethylbenz_a_anthracene"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_Acenaphthene"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_Acenaphthylene"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_Arsenic"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_Benz_a_anthracene"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_Benzo_A_Pyrene"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_Benzo_b_fluoranthene"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_Benzo_g_h_i_perylene"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_Benzo_k_fluoranthene"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_Cadmium"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_Chrysene"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_Dibenz_a_h_anthracene"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_Divalent_Mercury"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_Elemental_Mercury"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_Fluoranthene"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_Fluorene"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_Indeno_1_2_3_cd_pyrene"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_Lead"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		self.AirSchmidtNumber["Chem_MethylMercury"]=self.DynamicAirViscosity_m2_per_sec/self.currentChemical.D_pureair_m2_s
+		try:
+			self.Chemical_AirSchmidtNumber=self.AirSchmidtNumber[self.currentChemical.Name]
+		except:
+			self.Chemical_AirSchmidtNumber=nan
+
+		self.Area=()
+		self.Area=containingVolumeElement.Area
+
+		self.DustResuspensionRate={}
+		self.DustResuspensionRate["Chem_1_2_3_4_6_7_8_9_OCDD"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_1_2_3_4_6_7_8_9_OCDF"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_1_2_3_4_6_7_8_HpCDD"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_1_2_3_4_6_7_8_HpCDF"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_1_2_3_4_7_8_9_HpCDF"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_1_2_3_4_7_8_HxCDD"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_1_2_3_4_7_8_HxCDF"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_1_2_3_6_7_8_HxCDD"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_1_2_3_6_7_8_HxCDF"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_1_2_3_7_8_9_HxCDD"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_1_2_3_7_8_9_HxCDF"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_1_2_3_7_8_PeCDD"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_1_2_3_7_8_PeCDF"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_2_3_4_6_7_8_HxCDF"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_2_3_4_7_8_PeCDF"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_2_3_7_8_TCDD"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_2_3_7_8_TCDF"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_2_Methylnaphthalene"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_7_12_Dimethylbenz_a_anthracene"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_Acenaphthene"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_Acenaphthylene"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_Arsenic"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_Benz_a_anthracene"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_Benzo_A_Pyrene"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_Benzo_b_fluoranthene"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_Benzo_g_h_i_perylene"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_Benzo_k_fluoranthene"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_Cadmium"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_Chrysene"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_Dibenz_a_h_anthracene"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_Divalent_Mercury"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_Elemental_Mercury"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_Fluoranthene"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_Fluorene"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_Indeno_1_2_3_cd_pyrene"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_Lead"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		self.DustResuspensionRate["Chem_MethylMercury"]=self.Chemical_ParticleVolumetricDRYDepositionRate
+		try:
+			self.Chemical_DustResuspensionRate=self.DustResuspensionRate[self.currentChemical.Name]
+		except:
+			self.Chemical_DustResuspensionRate=nan
+
+		self.Height=()
+		self.Height=containingVolumeElement.Height
+
+		self.VaporWashoutRatio={}
+		self.VaporWashoutRatio["Chem_Divalent_Mercury"]=self.currentChemical.VaporWashoutRatio
+		self.VaporWashoutRatio["Chem_Elemental_Mercury"]=self.currentChemical.VaporWashoutRatio
+		self.VaporWashoutRatio["Chem_MethylMercury"]=self.currentChemical.VaporWashoutRatio
+		try:
+			self.Chemical_VaporWashoutRatio=self.VaporWashoutRatio[self.currentChemical.Name]
+		except:
+			self.Chemical_VaporWashoutRatio=nan
+
+		self.Volume=()
+		self.Volume=containingVolumeElement.Volume
+
+		self.VolumeFraction_Solid=()
+		self.VolumeFraction_Solid=self.VolumetricAirParticleContent
+
+		self.VolumeFraction_vapor=()
+		self.VolumeFraction_vapor=self.VolumetricAirAirContent
+
+		self.Z_Solid={}
+		self.Z_Solid["Chem_1_2_3_4_6_7_8_9_OCDD"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_1_2_3_4_6_7_8_9_OCDF"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_1_2_3_4_6_7_8_HpCDD"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_1_2_3_4_6_7_8_HpCDF"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_1_2_3_4_7_8_9_HpCDF"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_1_2_3_4_7_8_HxCDD"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_1_2_3_4_7_8_HxCDF"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_1_2_3_6_7_8_HxCDD"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_1_2_3_6_7_8_HxCDF"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_1_2_3_7_8_9_HxCDD"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_1_2_3_7_8_9_HxCDF"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_1_2_3_7_8_PeCDD"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_1_2_3_7_8_PeCDF"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_2_3_4_6_7_8_HxCDF"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_2_3_4_7_8_PeCDF"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_2_3_7_8_TCDD"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_2_3_7_8_TCDF"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_2_Methylnaphthalene"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_7_12_Dimethylbenz_a_anthracene"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_Acenaphthene"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_Acenaphthylene"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_Benz_a_anthracene"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_Benzo_A_Pyrene"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_Benzo_b_fluoranthene"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_Benzo_g_h_i_perylene"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_Benzo_k_fluoranthene"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_Chrysene"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_Dibenz_a_h_anthracene"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_Divalent_Mercury"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_Elemental_Mercury"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_Fluoranthene"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_Fluorene"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_Indeno_1_2_3_cd_pyrene"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		self.Z_Solid["Chem_MethylMercury"]=self.Chemical_Z_Vapor * (self.Chemical_FractionMass_Sorbed/self.VolumetricAirParticleContent)/(self.Chemical_FractionMass_vapor/self.VolumetricAirAirContent)
+		try:
+			self.Chemical_Z_Solid=self.Z_Solid[self.currentChemical.Name]
+		except:
+			self.Chemical_Z_Solid=nan
+
+		self.Z_Total={}
+		self.Z_Total["Chem_1_2_3_4_6_7_8_9_OCDD"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_1_2_3_4_6_7_8_9_OCDF"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_1_2_3_4_6_7_8_HpCDD"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_1_2_3_4_6_7_8_HpCDF"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_1_2_3_4_7_8_9_HpCDF"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_1_2_3_4_7_8_HxCDD"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_1_2_3_4_7_8_HxCDF"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_1_2_3_6_7_8_HxCDD"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_1_2_3_6_7_8_HxCDF"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_1_2_3_7_8_9_HxCDD"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_1_2_3_7_8_9_HxCDF"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_1_2_3_7_8_PeCDD"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_1_2_3_7_8_PeCDF"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_2_3_4_6_7_8_HxCDF"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_2_3_4_7_8_PeCDF"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_2_3_7_8_TCDD"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_2_3_7_8_TCDF"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_2_Methylnaphthalene"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_7_12_Dimethylbenz_a_anthracene"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_Acenaphthene"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_Acenaphthylene"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_Benz_a_anthracene"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_Benzo_A_Pyrene"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_Benzo_b_fluoranthene"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_Benzo_g_h_i_perylene"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_Benzo_k_fluoranthene"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_Chrysene"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_Dibenz_a_h_anthracene"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_Divalent_Mercury"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_Elemental_Mercury"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_Fluoranthene"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_Fluorene"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_Indeno_1_2_3_cd_pyrene"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		self.Z_Total["Chem_MethylMercury"]=self.Chemical_Z_Solid * (self.DustLoad /self.DustDensity) +self.Chemical_Z_Vapor * (1 - (self.DustLoad /self.DustDensity))
+		try:
+			self.Chemical_Z_Total=self.Z_Total[self.currentChemical.Name]
+		except:
+			self.Chemical_Z_Total=nan
+
+		self.initialConcentration_g_per_m3={}
+		self.initialConcentration_g_per_m3["Chem_1_2_3_4_6_7_8_9_OCDD"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_1_2_3_4_6_7_8_9_OCDF"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_1_2_3_4_6_7_8_HpCDD"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_1_2_3_4_6_7_8_HpCDF"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_1_2_3_4_7_8_9_HpCDF"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_1_2_3_4_7_8_HxCDD"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_1_2_3_4_7_8_HxCDF"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_1_2_3_6_7_8_HxCDD"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_1_2_3_6_7_8_HxCDF"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_1_2_3_7_8_9_HxCDD"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_1_2_3_7_8_9_HxCDF"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_1_2_3_7_8_PeCDD"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_1_2_3_7_8_PeCDF"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_2_3_4_6_7_8_HxCDF"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_2_3_4_7_8_PeCDF"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_2_3_7_8_TCDD"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_2_3_7_8_TCDF"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_2_Methylnaphthalene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_7_12_Dimethylbenz_a_anthracene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_Acenaphthene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_Acenaphthylene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_Benz_a_anthracene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_Benzo_A_Pyrene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_Benzo_b_fluoranthene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_Benzo_g_h_i_perylene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_Benzo_k_fluoranthene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_Chrysene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_Dibenz_a_h_anthracene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_Divalent_Mercury"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_Elemental_Mercury"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_Fluoranthene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_Fluorene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_Indeno_1_2_3_cd_pyrene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		self.initialConcentration_g_per_m3["Chem_MethylMercury"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
+		try:
+			self.Chemical_initialConcentration_g_per_m3=self.initialConcentration_g_per_m3[self.currentChemical.Name]
+		except:
+			self.Chemical_initialConcentration_g_per_m3=nan
+
 class Degradation_Reaction_Sink:
 	def __init__(self,Constants,containingScenario,currentChemical,containingVolumeElement):
 		self.containingScenario=containingScenario
@@ -650,8 +1477,51 @@ class Sediment:
 		except:
 			self.Chemical_Z_Total=nan
 
-		self.totalMass=()
-		self.totalMass=self.containingVolumeElement.Volume*(self.VolumeFraction_Solid*self.rho + self.VolumeFraction_Liquid*self.Constants.kg_per_m3_Water)
+		self.Area=()
+		self.Area=containingVolumeElement.Area
+
+		self.Depth=()
+		self.Depth=self.containingVolumeElement.Height
+
+		self.FractionMass_Dissolved={}
+		self.FractionMass_Dissolved["Chem_1_2_3_4_6_7_8_9_OCDD"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_1_2_3_4_6_7_8_9_OCDF"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_1_2_3_4_6_7_8_HpCDD"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_1_2_3_4_6_7_8_HpCDF"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_1_2_3_4_7_8_9_HpCDF"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_1_2_3_4_7_8_HxCDD"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_1_2_3_4_7_8_HxCDF"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_1_2_3_6_7_8_HxCDD"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_1_2_3_6_7_8_HxCDF"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_1_2_3_7_8_9_HxCDD"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_1_2_3_7_8_9_HxCDF"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_1_2_3_7_8_PeCDD"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_1_2_3_7_8_PeCDF"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_2_3_4_6_7_8_HxCDF"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_2_3_4_7_8_PeCDF"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_2_3_7_8_TCDD"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_2_3_7_8_TCDF"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_2_Methylnaphthalene"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_7_12_Dimethylbenz_a_anthracene"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_Acenaphthene"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_Acenaphthylene"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_Benz_a_anthracene"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_Benzo_A_Pyrene"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_Benzo_b_fluoranthene"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_Benzo_g_h_i_perylene"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_Benzo_k_fluoranthene"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_Chrysene"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_Dibenz_a_h_anthracene"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_Divalent_Mercury"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_Elemental_Mercury"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_Fluoranthene"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_Fluorene"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_Indeno_1_2_3_cd_pyrene"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_MethylMercury"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		try:
+			self.Chemical_FractionMass_Dissolved=self.FractionMass_Dissolved[self.currentChemical.Name]
+		except:
+			self.Chemical_FractionMass_Dissolved=nan
 
 		self.FractionMass_Sorbed={}
 		self.FractionMass_Sorbed["Chem_1_2_3_4_6_7_8_9_OCDD"]=self.containingVolumeElement.Volume * self.VolumeFraction_Solid * self.Chemical_Kd * self.rho * self.Constants.m3_per_L  /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
@@ -696,49 +1566,6 @@ class Sediment:
 		except:
 			self.Chemical_FractionMass_Sorbed=nan
 
-		self.FractionMass_Dissolved={}
-		self.FractionMass_Dissolved["Chem_1_2_3_4_6_7_8_9_OCDD"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_1_2_3_4_6_7_8_9_OCDF"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_1_2_3_4_6_7_8_HpCDD"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_1_2_3_4_6_7_8_HpCDF"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_1_2_3_4_7_8_9_HpCDF"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_1_2_3_4_7_8_HxCDD"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_1_2_3_4_7_8_HxCDF"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_1_2_3_6_7_8_HxCDD"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_1_2_3_6_7_8_HxCDF"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_1_2_3_7_8_9_HxCDD"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_1_2_3_7_8_9_HxCDF"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_1_2_3_7_8_PeCDD"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_1_2_3_7_8_PeCDF"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_2_3_4_6_7_8_HxCDF"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_2_3_4_7_8_PeCDF"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_2_3_7_8_TCDD"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_2_3_7_8_TCDF"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_2_Methylnaphthalene"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_7_12_Dimethylbenz_a_anthracene"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_Acenaphthene"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_Acenaphthylene"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_Benz_a_anthracene"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_Benzo_A_Pyrene"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_Benzo_b_fluoranthene"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_Benzo_g_h_i_perylene"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_Benzo_k_fluoranthene"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_Chrysene"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_Dibenz_a_h_anthracene"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_Divalent_Mercury"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_Elemental_Mercury"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_Fluoranthene"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_Fluorene"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_Indeno_1_2_3_cd_pyrene"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_MethylMercury"]=self.containingVolumeElement.Volume * self.VolumeFraction_Liquid /self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		try:
-			self.Chemical_FractionMass_Dissolved=self.FractionMass_Dissolved[self.currentChemical.Name]
-		except:
-			self.Chemical_FractionMass_Dissolved=nan
-
-		self.Height=()
-		self.Height=containingVolumeElement.Height
-
 		self.GenericDenominatorforCalculatingFractioninPhases={}
 		self.GenericDenominatorforCalculatingFractioninPhases["Chem_1_2_3_4_6_7_8_9_OCDD"]=self.containingVolumeElement.Volume * self.VolumeFraction_Solid * self.Chemical_Kd * self.rho * self.Constants.m3_per_L + self.containingVolumeElement.Volume * self.VolumeFraction_Liquid
 		self.GenericDenominatorforCalculatingFractioninPhases["Chem_1_2_3_4_6_7_8_9_OCDF"]=self.containingVolumeElement.Volume * self.VolumeFraction_Solid * self.Chemical_Kd * self.rho * self.Constants.m3_per_L + self.containingVolumeElement.Volume * self.VolumeFraction_Liquid
@@ -782,17 +1609,17 @@ class Sediment:
 		except:
 			self.Chemical_GenericDenominatorforCalculatingFractioninPhases=nan
 
+		self.Height=()
+		self.Height=containingVolumeElement.Height
+
 		self.Volume=()
 		self.Volume=containingVolumeElement.Volume
 
-		self.wetConcOutputFactor=()
-		self.wetConcOutputFactor=(self.VolumeFraction_Solid * self.rho) / (self.VolumeFraction_Solid * self.rho + self.VolumeFraction_Liquid * self.Constants.kg_per_m3_Water)
+		self.VolumeFraction_Solid=()
+		self.VolumeFraction_Solid=1 - self.VolumeFraction_Liquid
 
 		self.concentrationOutputFactor=()
 		self.concentrationOutputFactor=1000/(self.VolumeFraction_Solid * self.rho)
-
-		self.Area=()
-		self.Area=containingVolumeElement.Area
 
 		self.initialConcentration_g_per_m3={}
 		self.initialConcentration_g_per_m3["Chem_1_2_3_4_6_7_8_9_OCDD"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_m3_UserSupplied
@@ -834,11 +1661,11 @@ class Sediment:
 		except:
 			self.Chemical_initialConcentration_g_per_m3=nan
 
-		self.VolumeFraction_Solid=()
-		self.VolumeFraction_Solid=1 - self.VolumeFraction_Liquid
+		self.totalMass=()
+		self.totalMass=self.containingVolumeElement.Volume*(self.VolumeFraction_Solid*self.rho + self.VolumeFraction_Liquid*self.Constants.kg_per_m3_Water)
 
-		self.Depth=()
-		self.Depth=self.containingVolumeElement.Height
+		self.wetConcOutputFactor=()
+		self.wetConcOutputFactor=(self.VolumeFraction_Solid * self.rho) / (self.VolumeFraction_Solid * self.rho + self.VolumeFraction_Liquid * self.Constants.kg_per_m3_Water)
 
 class Sediment_Burial_Sink:
 	def __init__(self,Constants,containingScenario,currentChemical,containingVolumeElement):
@@ -900,7 +1727,7 @@ class Surface_water:
 		self.isBiotic=False
 
 		self.isFlowing=()
-		self.isFlowing=0.01
+		self.isFlowing=False
 
 		self.AlgaeCarbonContentDryWt=()
 		self.AlgaeCarbonContentDryWt=0.465
@@ -1350,7 +2177,7 @@ class Surface_water:
 		self.WaterDensity=1000
 
 		self.WaterViscosity=()
-		self.WaterViscosity=25
+		self.WaterViscosity=1.197E-02
 
 		self.Z_Liquid={}
 		self.Z_Liquid["Chem_1_2_3_4_6_7_8_9_OCDD"]=self.currentChemical.Z_purewater
@@ -1668,238 +2495,11 @@ class Surface_water:
 		except:
 			self.Chemical_Z_Algae=nan
 
-		self.MeanDepth_m=()
-		self.MeanDepth_m=(containingVolumeElement.Top + containingVolumeElement.Bottom)/2.0
-
-		self.TotalAlgaeMass=()
-		self.TotalAlgaeMass=self.containingVolumeElement.Volume*self.VolumeFraction_Algae*self.AlgaeDensity_g_m3 * self.Constants.kg_per_g
-
-		self.FractionMass_Sorbed={}
-		self.FractionMass_Sorbed["Chem_1_2_3_4_6_7_8_9_OCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_1_2_3_4_6_7_8_9_OCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_1_2_3_4_6_7_8_HpCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_1_2_3_4_6_7_8_HpCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_1_2_3_4_7_8_9_HpCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_1_2_3_4_7_8_HxCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_1_2_3_4_7_8_HxCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_1_2_3_6_7_8_HxCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_1_2_3_6_7_8_HxCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_1_2_3_7_8_9_HxCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_1_2_3_7_8_9_HxCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_1_2_3_7_8_PeCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_1_2_3_7_8_PeCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_2_3_4_6_7_8_HxCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_2_3_4_7_8_PeCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_2_3_7_8_TCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_2_3_7_8_TCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_2_Methylnaphthalene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_7_12_Dimethylbenz_a_anthracene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_Acenaphthene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_Acenaphthylene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_Arsenic"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_Benz_a_anthracene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_Benzo_A_Pyrene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_Benzo_b_fluoranthene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_Benzo_g_h_i_perylene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_Benzo_k_fluoranthene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_Cadmium"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_Chrysene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_Dibenz_a_h_anthracene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_Divalent_Mercury"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_Elemental_Mercury"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_Fluoranthene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_Fluorene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_Indeno_1_2_3_cd_pyrene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_Lead"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Sorbed["Chem_MethylMercury"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		try:
-			self.Chemical_FractionMass_Sorbed=self.FractionMass_Sorbed[self.currentChemical.Name]
-		except:
-			self.Chemical_FractionMass_Sorbed=nan
-
-		self.FractionMass_Dissolved={}
-		self.FractionMass_Dissolved["Chem_1_2_3_4_6_7_8_9_OCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_1_2_3_4_6_7_8_9_OCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_1_2_3_4_6_7_8_HpCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_1_2_3_4_6_7_8_HpCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_1_2_3_4_7_8_9_HpCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_1_2_3_4_7_8_HxCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_1_2_3_4_7_8_HxCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_1_2_3_6_7_8_HxCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_1_2_3_6_7_8_HxCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_1_2_3_7_8_9_HxCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_1_2_3_7_8_9_HxCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_1_2_3_7_8_PeCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_1_2_3_7_8_PeCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_2_3_4_6_7_8_HxCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_2_3_4_7_8_PeCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_2_3_7_8_TCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_2_3_7_8_TCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_2_Methylnaphthalene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_7_12_Dimethylbenz_a_anthracene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_Acenaphthene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_Acenaphthylene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_Arsenic"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_Benz_a_anthracene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_Benzo_A_Pyrene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_Benzo_b_fluoranthene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_Benzo_g_h_i_perylene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_Benzo_k_fluoranthene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_Cadmium"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_Chrysene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_Dibenz_a_h_anthracene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_Divalent_Mercury"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_Elemental_Mercury"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_Fluoranthene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_Fluorene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_Indeno_1_2_3_cd_pyrene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_Lead"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		self.FractionMass_Dissolved["Chem_MethylMercury"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
-		try:
-			self.Chemical_FractionMass_Dissolved=self.FractionMass_Dissolved[self.currentChemical.Name]
-		except:
-			self.Chemical_FractionMass_Dissolved=nan
-
-		self.Height=()
-		self.Height=containingVolumeElement.Height
-
 		self.AlgaeSedimentationRate_m3_m2_day=()
 		self.AlgaeSedimentationRate_m3_m2_day=self.AlgaeSedimentationRate_g_m2_day/self.AlgaeDensity_g_m3
 
-		self.GenericDenominatorforCalculatingFractioninPhases={}
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_1_2_3_4_6_7_8_9_OCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_1_2_3_4_6_7_8_9_OCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_1_2_3_4_6_7_8_HpCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_1_2_3_4_6_7_8_HpCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_1_2_3_4_7_8_9_HpCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_1_2_3_4_7_8_HxCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_1_2_3_4_7_8_HxCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_1_2_3_6_7_8_HxCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_1_2_3_6_7_8_HxCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_1_2_3_7_8_9_HxCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_1_2_3_7_8_9_HxCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_1_2_3_7_8_PeCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_1_2_3_7_8_PeCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_2_3_4_6_7_8_HxCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_2_3_4_7_8_PeCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_2_3_7_8_TCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_2_3_7_8_TCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_2_Methylnaphthalene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_7_12_Dimethylbenz_a_anthracene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Acenaphthene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Acenaphthylene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Arsenic"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Benz_a_anthracene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Benzo_A_Pyrene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Benzo_b_fluoranthene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Benzo_g_h_i_perylene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Benzo_k_fluoranthene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Cadmium"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Chrysene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Dibenz_a_h_anthracene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Divalent_Mercury"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Elemental_Mercury"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Fluoranthene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Fluorene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Indeno_1_2_3_cd_pyrene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Lead"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		self.GenericDenominatorforCalculatingFractioninPhases["Chem_MethylMercury"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
-		try:
-			self.Chemical_GenericDenominatorforCalculatingFractioninPhases=self.GenericDenominatorforCalculatingFractioninPhases[self.currentChemical.Name]
-		except:
-			self.Chemical_GenericDenominatorforCalculatingFractioninPhases=nan
-
-		self.Volume=()
-		self.Volume=containingVolumeElement.Volume
-
-		self.WaterTemperature_C=()
-		self.WaterTemperature_C=containingVolumeElement.WaterTemperature_K - 273
-
-		self.Z_Total={}
-		self.Z_Total["Chem_1_2_3_4_6_7_8_9_OCDD"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_1_2_3_4_6_7_8_9_OCDF"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_1_2_3_4_6_7_8_HpCDD"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_1_2_3_4_6_7_8_HpCDF"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_1_2_3_4_7_8_9_HpCDF"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_1_2_3_4_7_8_HxCDD"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_1_2_3_4_7_8_HxCDF"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_1_2_3_6_7_8_HxCDD"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_1_2_3_6_7_8_HxCDF"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_1_2_3_7_8_9_HxCDD"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_1_2_3_7_8_9_HxCDF"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_1_2_3_7_8_PeCDD"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_1_2_3_7_8_PeCDF"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_2_3_4_6_7_8_HxCDF"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_2_3_4_7_8_PeCDF"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_2_3_7_8_TCDD"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_2_3_7_8_TCDF"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_2_Methylnaphthalene"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_7_12_Dimethylbenz_a_anthracene"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_Acenaphthene"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_Acenaphthylene"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_Arsenic"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_Benz_a_anthracene"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_Benzo_A_Pyrene"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_Benzo_b_fluoranthene"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_Benzo_g_h_i_perylene"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_Benzo_k_fluoranthene"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_Cadmium"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_Chrysene"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_Dibenz_a_h_anthracene"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_Divalent_Mercury"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_Elemental_Mercury"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_Fluoranthene"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_Fluorene"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_Indeno_1_2_3_cd_pyrene"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_Lead"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		self.Z_Total["Chem_MethylMercury"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
-		try:
-			self.Chemical_Z_Total=self.Z_Total[self.currentChemical.Name]
-		except:
-			self.Chemical_Z_Total=nan
-
 		self.Area=()
 		self.Area=containingVolumeElement.Area
-
-		self.initialConcentration_g_per_L={}
-		self.initialConcentration_g_per_L["Chem_1_2_3_4_6_7_8_9_OCDD"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_1_2_3_4_6_7_8_9_OCDF"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_1_2_3_4_6_7_8_HpCDD"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_1_2_3_4_6_7_8_HpCDF"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_1_2_3_4_7_8_9_HpCDF"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_1_2_3_4_7_8_HxCDD"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_1_2_3_4_7_8_HxCDF"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_1_2_3_6_7_8_HxCDD"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_1_2_3_6_7_8_HxCDF"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_1_2_3_7_8_9_HxCDD"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_1_2_3_7_8_9_HxCDF"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_1_2_3_7_8_PeCDD"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_1_2_3_7_8_PeCDF"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_2_3_4_6_7_8_HxCDF"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_2_3_4_7_8_PeCDF"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_2_3_7_8_TCDD"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_2_3_7_8_TCDF"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_2_Methylnaphthalene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_7_12_Dimethylbenz_a_anthracene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_Acenaphthene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_Acenaphthylene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_Benz_a_anthracene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_Benzo_A_Pyrene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_Benzo_b_fluoranthene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_Benzo_g_h_i_perylene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_Benzo_k_fluoranthene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_Chrysene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_Dibenz_a_h_anthracene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_Divalent_Mercury"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_Elemental_Mercury"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_Fluoranthene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_Fluorene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_Indeno_1_2_3_cd_pyrene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		self.initialConcentration_g_per_L["Chem_MethylMercury"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
-		try:
-			self.Chemical_initialConcentration_g_per_L=self.initialConcentration_g_per_L[self.currentChemical.Name]
-		except:
-			self.Chemical_initialConcentration_g_per_L=nan
 
 		self.Depth=()
 		self.Depth=self.containingVolumeElement.Height
@@ -1947,5 +2547,232 @@ class Surface_water:
 		except:
 			self.Chemical_FractionMass_Algae=nan
 
+		self.FractionMass_Dissolved={}
+		self.FractionMass_Dissolved["Chem_1_2_3_4_6_7_8_9_OCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_1_2_3_4_6_7_8_9_OCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_1_2_3_4_6_7_8_HpCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_1_2_3_4_6_7_8_HpCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_1_2_3_4_7_8_9_HpCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_1_2_3_4_7_8_HxCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_1_2_3_4_7_8_HxCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_1_2_3_6_7_8_HxCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_1_2_3_6_7_8_HxCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_1_2_3_7_8_9_HxCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_1_2_3_7_8_9_HxCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_1_2_3_7_8_PeCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_1_2_3_7_8_PeCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_2_3_4_6_7_8_HxCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_2_3_4_7_8_PeCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_2_3_7_8_TCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_2_3_7_8_TCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_2_Methylnaphthalene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_7_12_Dimethylbenz_a_anthracene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_Acenaphthene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_Acenaphthylene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_Arsenic"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_Benz_a_anthracene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_Benzo_A_Pyrene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_Benzo_b_fluoranthene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_Benzo_g_h_i_perylene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_Benzo_k_fluoranthene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_Cadmium"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_Chrysene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_Dibenz_a_h_anthracene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_Divalent_Mercury"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_Elemental_Mercury"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_Fluoranthene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_Fluorene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_Indeno_1_2_3_cd_pyrene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_Lead"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Dissolved["Chem_MethylMercury"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Liquid) / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		try:
+			self.Chemical_FractionMass_Dissolved=self.FractionMass_Dissolved[self.currentChemical.Name]
+		except:
+			self.Chemical_FractionMass_Dissolved=nan
+
+		self.FractionMass_Sorbed={}
+		self.FractionMass_Sorbed["Chem_1_2_3_4_6_7_8_9_OCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_1_2_3_4_6_7_8_9_OCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_1_2_3_4_6_7_8_HpCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_1_2_3_4_6_7_8_HpCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_1_2_3_4_7_8_9_HpCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_1_2_3_4_7_8_HxCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_1_2_3_4_7_8_HxCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_1_2_3_6_7_8_HxCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_1_2_3_6_7_8_HxCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_1_2_3_7_8_9_HxCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_1_2_3_7_8_9_HxCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_1_2_3_7_8_PeCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_1_2_3_7_8_PeCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_2_3_4_6_7_8_HxCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_2_3_4_7_8_PeCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_2_3_7_8_TCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_2_3_7_8_TCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_2_Methylnaphthalene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_7_12_Dimethylbenz_a_anthracene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_Acenaphthene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_Acenaphthylene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_Arsenic"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_Benz_a_anthracene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_Benzo_A_Pyrene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_Benzo_b_fluoranthene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_Benzo_g_h_i_perylene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_Benzo_k_fluoranthene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_Cadmium"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_Chrysene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_Dibenz_a_h_anthracene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_Divalent_Mercury"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_Elemental_Mercury"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_Fluoranthene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_Fluorene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_Indeno_1_2_3_cd_pyrene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_Lead"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		self.FractionMass_Sorbed["Chem_MethylMercury"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Solid) * self.Chemical_Kd * self.Constants.m3_per_L * self.rho / self.Chemical_GenericDenominatorforCalculatingFractioninPhases
+		try:
+			self.Chemical_FractionMass_Sorbed=self.FractionMass_Sorbed[self.currentChemical.Name]
+		except:
+			self.Chemical_FractionMass_Sorbed=nan
+
+		self.GenericDenominatorforCalculatingFractioninPhases={}
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_1_2_3_4_6_7_8_9_OCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_1_2_3_4_6_7_8_9_OCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_1_2_3_4_6_7_8_HpCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_1_2_3_4_6_7_8_HpCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_1_2_3_4_7_8_9_HpCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_1_2_3_4_7_8_HxCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_1_2_3_4_7_8_HxCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_1_2_3_6_7_8_HxCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_1_2_3_6_7_8_HxCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_1_2_3_7_8_9_HxCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_1_2_3_7_8_9_HxCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_1_2_3_7_8_PeCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_1_2_3_7_8_PeCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_2_3_4_6_7_8_HxCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_2_3_4_7_8_PeCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_2_3_7_8_TCDD"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_2_3_7_8_TCDF"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_2_Methylnaphthalene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_7_12_Dimethylbenz_a_anthracene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Acenaphthene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Acenaphthylene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Arsenic"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Benz_a_anthracene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Benzo_A_Pyrene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Benzo_b_fluoranthene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Benzo_g_h_i_perylene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Benzo_k_fluoranthene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Cadmium"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Chrysene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Dibenz_a_h_anthracene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Divalent_Mercury"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Elemental_Mercury"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Fluoranthene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Fluorene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Indeno_1_2_3_cd_pyrene"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_Lead"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		self.GenericDenominatorforCalculatingFractioninPhases["Chem_MethylMercury"]=self.containingVolumeElement.Volume * (self.VolumeFraction_Algae * self.Chemical_RatioOfConcInAlgaeToConcDissolvedInWater * self.AlgaeDensity_g_m3 * (self.Constants.m3_per_L)  + self.VolumeFraction_Solid * self.Chemical_Kd * self.Constants.m3_per_L * self.rho + self.VolumeFraction_Liquid )
+		try:
+			self.Chemical_GenericDenominatorforCalculatingFractioninPhases=self.GenericDenominatorforCalculatingFractioninPhases[self.currentChemical.Name]
+		except:
+			self.Chemical_GenericDenominatorforCalculatingFractioninPhases=nan
+
+		self.Height=()
+		self.Height=containingVolumeElement.Height
+
+		self.MeanDepth_m=()
+		self.MeanDepth_m=(containingVolumeElement.Top + containingVolumeElement.Bottom)/2.0
+
+		self.TotalAlgaeMass=()
+		self.TotalAlgaeMass=self.containingVolumeElement.Volume*self.VolumeFraction_Algae*self.AlgaeDensity_g_m3 * self.Constants.kg_per_g
+
+		self.Volume=()
+		self.Volume=containingVolumeElement.Volume
+
 		self.VolumeFraction_Liquid=()
 		self.VolumeFraction_Liquid=1 - self.VolumeFraction_Solid - self.VolumeFraction_Algae
+
+		self.WaterTemperature_C=()
+		self.WaterTemperature_C=containingVolumeElement.WaterTemperature_K - 273
+
+		self.Z_Total={}
+		self.Z_Total["Chem_1_2_3_4_6_7_8_9_OCDD"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_1_2_3_4_6_7_8_9_OCDF"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_1_2_3_4_6_7_8_HpCDD"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_1_2_3_4_6_7_8_HpCDF"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_1_2_3_4_7_8_9_HpCDF"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_1_2_3_4_7_8_HxCDD"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_1_2_3_4_7_8_HxCDF"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_1_2_3_6_7_8_HxCDD"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_1_2_3_6_7_8_HxCDF"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_1_2_3_7_8_9_HxCDD"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_1_2_3_7_8_9_HxCDF"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_1_2_3_7_8_PeCDD"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_1_2_3_7_8_PeCDF"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_2_3_4_6_7_8_HxCDF"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_2_3_4_7_8_PeCDF"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_2_3_7_8_TCDD"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_2_3_7_8_TCDF"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_2_Methylnaphthalene"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_7_12_Dimethylbenz_a_anthracene"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_Acenaphthene"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_Acenaphthylene"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_Arsenic"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_Benz_a_anthracene"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_Benzo_A_Pyrene"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_Benzo_b_fluoranthene"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_Benzo_g_h_i_perylene"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_Benzo_k_fluoranthene"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_Cadmium"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_Chrysene"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_Dibenz_a_h_anthracene"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_Divalent_Mercury"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_Elemental_Mercury"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_Fluoranthene"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_Fluorene"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_Indeno_1_2_3_cd_pyrene"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_Lead"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		self.Z_Total["Chem_MethylMercury"]=self.Chemical_Z_Liquid *self.VolumeFraction_Liquid +self.Chemical_Z_Solid *self.VolumeFraction_Solid + self.Chemical_Z_Algae*self.VolumeFraction_Algae
+		try:
+			self.Chemical_Z_Total=self.Z_Total[self.currentChemical.Name]
+		except:
+			self.Chemical_Z_Total=nan
+
+		self.initialConcentration_g_per_L={}
+		self.initialConcentration_g_per_L["Chem_1_2_3_4_6_7_8_9_OCDD"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_1_2_3_4_6_7_8_9_OCDF"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_1_2_3_4_6_7_8_HpCDD"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_1_2_3_4_6_7_8_HpCDF"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_1_2_3_4_7_8_9_HpCDF"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_1_2_3_4_7_8_HxCDD"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_1_2_3_4_7_8_HxCDF"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_1_2_3_6_7_8_HxCDD"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_1_2_3_6_7_8_HxCDF"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_1_2_3_7_8_9_HxCDD"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_1_2_3_7_8_9_HxCDF"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_1_2_3_7_8_PeCDD"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_1_2_3_7_8_PeCDF"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_2_3_4_6_7_8_HxCDF"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_2_3_4_7_8_PeCDF"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_2_3_7_8_TCDD"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_2_3_7_8_TCDF"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_2_Methylnaphthalene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_7_12_Dimethylbenz_a_anthracene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_Acenaphthene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_Acenaphthylene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_Benz_a_anthracene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_Benzo_A_Pyrene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_Benzo_b_fluoranthene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_Benzo_g_h_i_perylene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_Benzo_k_fluoranthene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_Chrysene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_Dibenz_a_h_anthracene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_Divalent_Mercury"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_Elemental_Mercury"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_Fluoranthene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_Fluorene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_Indeno_1_2_3_cd_pyrene"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		self.initialConcentration_g_per_L["Chem_MethylMercury"]=self.containingScenario.FractionInitialConcentrations * self.Chemical_initialConcentration_g_per_L_UserSupplied
+		try:
+			self.Chemical_initialConcentration_g_per_L=self.initialConcentration_g_per_L[self.currentChemical.Name]
+		except:
+			self.Chemical_initialConcentration_g_per_L=nan
