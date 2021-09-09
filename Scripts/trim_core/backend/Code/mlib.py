@@ -64,7 +64,13 @@ def process_master_library(inputs):
         prop=prop.replace('Algorithm.','self.')
         prop=prop.replace('Chemical.','Chemical_')
         prop=prop.replace('Z_total','Z_Total')
+        prop=prop.replace ('!',' not ')
+        prop=prop.replace('SendingChemical_','currentChemical.')
+        prop=prop.replace('MolecularWeight','molecularWeight')
+        
 #        prop-prop.replace('self.Sendingcompartment.Flushes_per_year','self.SendingCompartment.Flushes_per_year')
+        if 'self.ReaerationVelocity_OwensFormula' in prop: # temporary till ternary convertor
+            prop='self.ReaerationVelocity_OwensFormula * self.RatioofVolatilizationRatetoReaerationRate'
 
         if 'TheLink.InterfacialArea' in prop: # replace TheLink interfacial area custom function with Python function
             prop=prop.replace('TheLink.InterfacialArea','check_neighbor(self.SendingCompartment,self.ReceivingCompartment,self.dict_inputs).is_neighbor()[1]')           
@@ -77,6 +83,8 @@ def process_master_library(inputs):
     with open(ofpn, 'w') as f:  
         f.write('### Note: This is an auto generated script' +'\n')        
         f.write('from find_neighbors import *' +'\n')
+        f.write('from numpy import sqrt' +'\n')
+        
         for index,group in enumerate(grouped_alg.groups):
             if group not in required_algs:
                 continue
@@ -168,7 +176,7 @@ def process_master_library(inputs):
                             'self.'+prop+'='+prop_val)                
             f.write('\n')    
 
-            for prop in dep_rp_2:
+            for prop in sorted(list(dep_rp_2)):
                 prop_val=grouped_alg.get_group(group).loc[grouped_alg.get_group(group)['PropertyName']==prop]['PropertyValue'].values[0] #property value
                 prop_val=clean_props(prop_val)
                 if prop=='compartmentRelationship':
@@ -246,7 +254,7 @@ def process_master_library(inputs):
     
     
     desired_order=['Original_Chemical_Name','CAS','category','D_pureair','D_pureair_m2_s','D_purewater','D_purewater_m2_per_s','doesTransform','enabled','HenryLawConstant','H_over_R_T','AirWaterPartitionCoefficient','K_ow','K_OA','K_oc','log10_K_OA','log10_K_ow','MeltingPoint','molecularWeight','ReferenceBird_BodyWeight','ReferenceBird_EliminationRate','ReferenceBird_GeneralDegradationRate','ReferenceMammal_BodyWeight','ReferenceMammal_EliminationRate','ReferenceMammal_GeneralDegradationRate','Z_pureair','Z_purewater']
-    formula_props=['D_pureair','D_pureair_m2_s','D_purewater','D_purewater_m2_per_s','HenryLawConstant','H_over_R_T','AirWaterPartitionCoefficient','K_ow','K_OA','K_oc','log10_K_OA','log10_K_ow','MeltingPoint','molecularWeight','ReferenceBird_BodyWeight','ReferenceBird_EliminationRate','ReferenceBird_GeneralDegradationRate','ReferenceMammal_BodyWeight','ReferenceMammal_EliminationRate','ReferenceMammal_GeneralDegradationRate','Z_pureair','Z_purewater']
+    formula_props=['D_pureair','D_pureair_m2_s','D_purewater','D_purewater_m2_per_s','HenryLawConstant','H_over_R_T','AirWaterPartitionCoefficient','K_ow','K_OA','K_oc','log10_K_OA','log10_K_ow','MeltingPoint','molecularWeight','ReferenceBird_BodyWeight','ReferenceBird_EliminationRate','ReferenceBird_GeneralDegradationRate','ReferenceMammal_BodyWeight','ReferenceMammal_EliminationRate','ReferenceMammal_GeneralDegradationRate','Z_pureair','Z_purewater','VaporWashoutRatio','molesOfReportingChemicalPerMolesOfThisChemical','reportingChemicalMW']
     
     chem_dict={}
     sim_chem_list=inputs['simulation_Chemicals']
@@ -272,6 +280,7 @@ from define_attributes_props import *
             chem_name_strip=chem_name.strip('_') # for use as cleaned original chem name
             chem_props=list(grouped_chem.get_group(group)['PropertyName'].unique())
             chem_props_ordered=[x for x in desired_order if x in chem_props]
+            chem_props_residual=list(set(chem_props)-set(chem_props_ordered)) # residual chem props not in ordered list
             
             f.write('class '+str(chem_name)+':'+'\n' +\
                     '\t'+\
@@ -288,6 +297,16 @@ from define_attributes_props import *
                 else:
                     f.write('\n\t\t'
                             'self.'+prop+'='+"'"+prop_val+"'")                
+            for prop in chem_props_residual:
+                prop_val=grouped_chem.get_group(group).loc[grouped_chem.get_group(group)['PropertyName']==prop]['PropertyValue'].values[0] #property value
+                if prop in formula_props:
+                    prop_val=clean_props(prop_val)
+                    f.write('\n\t\t'
+                            'self.'+prop+'='+prop_val)                
+                else:
+                    f.write('\n\t\t'
+                            'self.'+prop+'='+"'"+prop_val+"'")                
+  
             f.write('\n\n')    
 
         f.write('chem_objects_dict={}'+'\n')   
@@ -337,6 +356,7 @@ from define_attributes_props import *
         prop=prop.replace('currentChemical','self.currentChemical')
         prop=prop.replace('<Unset>','"<Unset>"')
         prop=prop.replace('Halflife','HalfLife')
+        prop=prop.replace('Z_vapor','Z_Vapor')
         prop=prop.replace('D_Purewater','D_purewater')
         prop=prop.replace('FractionMass_Vapor','FractionMass_vapor')
         if 'currentChemical' not in prop and 'Chemical.' in prop:
@@ -366,15 +386,33 @@ from define_attributes_props import *
     df_comp_lib=df_lib.loc[df_lib['ObjectType']=='Compartment']
     grouped_comp = df_comp_lib.groupby("ObjectName")
 
-    def hack_func(value): # temporary hack -- fix later
+#    def hack_func(value): # temporary hack -- fix later
+#        if type(value)!=float and 'Max(linked' in value:
+#            value='0.01'
+#        if type(value)!=float and 'pH' in value:
+#            value='0.01'
+#        if type(value)!=float and 'Chloride' in value:
+#            value='0.01'
+#        if value=='<Unset>':
+#            value='0.01' 
+#        if type(value)!=float and 'WaterTemperature_C' in value:
+#            value='25'
+
+
+    def hack_func(value,name): # temporary hack -- fix later
         if type(value)!=float and 'Max(linked' in value:
             value='0.01'
         if type(value)!=float and 'pH' in value:
             value='0.01'
         if type(value)!=float and 'Chloride' in value:
             value='0.01'
+        if value=='<Unset>' and name=='isFlowing':
+            value='False' 
         if value=='<Unset>':
-            value='0.01'
+            value='0.01' 
+        if name=='WaterViscosity':
+            value='1.197E-02' 
+
         if type(value)!=float and 'WaterTemperature_C' in value:
             value='25'
 
@@ -382,7 +420,8 @@ from define_attributes_props import *
         
         return(value)
     
-    df_comp_lib['PropertyValue']=df_comp_lib['PropertyValue'].apply(hack_func) # temporary hack -- fix later
+#    df_comp_lib['PropertyValue']=df_comp_lib['PropertyValue'].apply(hack_func) # temporary hack -- fix later
+    df_comp_lib['PropertyValue']=df_comp_lib.apply(lambda x: hack_func(x['PropertyValue'], x['PropertyName']), axis=1)
 
 
     required_comps=req.required_compartments # look up list of required algorithms
@@ -510,7 +549,7 @@ def Function_ChemicalTransferEfficiencyinFish(BW,log10_K_ow):
     
             special_cases=['VolumeFraction_Liquid','VolumeFraction_Solid','GenericDenominatorforCalculatingFractioninPhases']
     
-            comp_props_ordered=sorted(list(non_formula_props))+sorted(list(bool_props))+sorted(list(constant_props_2))+sorted(list(formula_props_dep_constant))+sorted(list(formula_props_dep_prop_c))+special_cases+sorted(list(formula_props_dep_prop_f1))+(list(formula_props_dep_prop_f2))
+            comp_props_ordered=sorted(list(non_formula_props))+sorted(list(bool_props))+sorted(list(constant_props_2))+sorted(list(formula_props_dep_constant))+sorted(list(formula_props_dep_prop_c))+special_cases+sorted(list(formula_props_dep_prop_f1))+sorted((list(formula_props_dep_prop_f2)))
      
 #            print (comp_props_ordered)
 #            print()
