@@ -8,3 +8,4 @@ from .utils.base import Model  # noqa
 from .users.models import *  # noqa
 from .scenarios.models import *  # noqa
 from .environment.models import *  # noqa
+from .chemicals.models import *  # noqa
