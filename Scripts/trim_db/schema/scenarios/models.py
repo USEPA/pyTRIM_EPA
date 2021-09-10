@@ -1,4 +1,5 @@
 import sqlalchemy as sa
+from ..parameters.utils import use_linked_parameters
 from ..utils.base import Model
 from ..utils.mixins import TrackUpdatesMixin
 
@@ -8,6 +9,7 @@ __all__ = [
 ]
 
 
+@use_linked_parameters
 class Scenario(Model, TrackUpdatesMixin):
     name = sa.Column(sa.String(120), nullable=False)
     description = sa.Column(sa.String(255))
@@ -47,12 +49,27 @@ class Scenario(Model, TrackUpdatesMixin):
         all_members = [self.creator, *self.team_members]
         return all_members
 
+    @property
+    def volume_elements(self):
+        return [
+            ve
+            for p in self.parcels
+            for ve in p.volume_elements
+        ]
+
     def as_serializable(self):
         return {
             'id': self.id,
             'name': self.name,
             'description': self.description
         }
+
+    def __repr__(self):
+        return (
+            f'{self.__class__.__qualname__}('
+            f'{self.id}, "{self.name}"'
+            ')'
+        )
 
 
 class Team(Model):

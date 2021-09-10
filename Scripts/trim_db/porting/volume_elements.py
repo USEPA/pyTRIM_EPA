@@ -3,7 +3,7 @@ from ..schema.environment.models import *
 __all__ = ['parse_volume_elements']
 
 
-def parse_volume_elements(scenario_id, volume_elements_file):
+def parse_volume_elements(volume_elements_file):
     with open(volume_elements_file, 'r') as f:
         lines = f.readlines()
 
@@ -42,7 +42,9 @@ def parse_volume_elements(scenario_id, volume_elements_file):
     parcels = {}
     for line in parsed_lines['parcels']:
         line = line.split()
-        p = Parcel(name=line[0], scenario_id=scenario_id)
+        if line[0] in parcels:
+            continue
+        p = Parcel(name=line[0])
         p.vertices = [points[pid] for pid in line[2:]]
         parcels[p.name] = p
 
@@ -64,7 +66,9 @@ def parse_volume_elements(scenario_id, volume_elements_file):
         )
         volume_elements.append(v)
 
-    # Add models to db
-    # TODO
+        c = Compartment(
+            name=primary_abiotic
+        )
+        v.compartments.append(c)
 
     return volume_elements

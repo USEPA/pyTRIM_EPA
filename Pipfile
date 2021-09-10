@@ -14,6 +14,8 @@ pytest = "*"
 shapely = "*"
 pandas = "*"
 ipdb = "*"
+pint = "*"
+simpleeval = "*"
 
 sqlalchemy = "*"
 psycopg2-binary = "*"
