@@ -78,6 +78,7 @@ def create_trans_mat(inputs,dict_inputs): # function to create transition matrix
 
     
     ind_name=[] # index name for tm, sm DataFrames
+#    for chem_index, chem in enumerate(chem_list_clean[:1]): # loop over chemicals
     for chem_index, chem in enumerate(chem_list_clean): # loop over chemicals
         currentchemical=chem_objects_dict[chem] # current chemical object
         comp_objects_dict=define_comp.define_comp(currentchemical) # create dictionary of compartment objects    
@@ -125,3 +126,28 @@ def create_trans_mat(inputs,dict_inputs): # function to create transition matrix
 #comp1_name=comp_row
 #comp2_name=comp_col        
 #    
+#
+#row_index=6 
+#col_index=3
+#comp_row=comp_list[row_index]
+#comp_col=comp_list[col_index]
+#comp1_name=comp_row
+#comp2_name=comp_col        
+    
+#row_index=1 
+#col_index=7
+#comp_row=comp_list[row_index]
+#comp_col=comp_list[col_index]
+#comp1_name=comp_row
+#comp2_name=comp_col        
+#    
+
+#row_index=9 
+#col_index=10
+#comp_row=comp_list[row_index]
+#comp_col=comp_list[col_index]
+#comp1_name=comp_row
+#comp2_name=comp_col        
+#    
+#  
+  
