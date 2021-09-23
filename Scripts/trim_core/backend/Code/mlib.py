@@ -17,6 +17,28 @@ from numpy import nan
 import required_elements_temp as req
 from util_functions import * 
 
+
+def linkcomp(txt):
+
+    s=txt.split('(linkedcompartment')
+    e1=s[0]
+    e2=s[1].split(']')[0].strip('[').split('|')[1].strip().replace(' ','_')
+    e3=s[1].split(']')[1].split(')')[0].strip().strip('.')
+    
+    rem_list=s[1].split(']')[1].split(')')[1:]
+    if rem_list[-1]==['']:
+        rem_list=rem_list[:-1]
+        rem_list=[x+')' for x in rem_list]
+    else:
+        last=rem_list[-1:]
+        rem_list=[x+')' for x in rem_list[:-1]] +last
+    
+    e4=''.join(rem_list)
+    
+    exp=e1+'linkedCompartmentvalue(self.containingvolumeelement,self.comp_objects_dict,"'+e2+'","'+e3+'")'+e4
+    return (exp)
+
+
 def process_master_library(inputs):
 
     ifp=inputs['path_inputs']
@@ -66,7 +88,8 @@ def process_master_library(inputs):
         prop=prop.replace ('!',' not ')
         prop=prop.replace('sendingchemical_','self.currentchemical.')
         prop=prop.replace('molecularweight','molecularweight')        
-
+        prop=prop.replace('ln','log')
+        
         if 'thelink.interfacialarea' in prop: # replace thelink interfacial area custom function with python function
             prop=prop.replace('thelink.interfacialarea','check_neighbor(self.sendingcompartment,self.receivingcompartment,self.dict_inputs).is_neighbor()[1]')           
         if 'thelink.fractionspecificcompartmentdiet' in prop: # replace thelink.fractionspecificcompartmentdiet with 1. i believe this okay but check ug.
@@ -78,7 +101,7 @@ def process_master_library(inputs):
     with open(ofpn, 'w') as f:  
         f.write('### note: this is an auto generated script' +'\n')        
         f.write('from find_neighbors import *' +'\n')
-        f.write('from numpy import sqrt,nan' +'\n')
+        f.write('from numpy import sqrt,nan,log' +'\n')
         
         for index,group in enumerate(grouped_alg.groups):
             if group not in required_algs:
@@ -322,6 +345,8 @@ from define_attributes_props import *
         prop=prop.replace('z_vapor','z_vapor')
         prop=prop.replace('d_purewater','d_purewater')
         prop=prop.replace('fractionmass_vapor','fractionmass_vapor')
+        if 'linkedcompartment' in prop:
+            prop=linkcomp(prop)
         if 'currentchemical' not in prop and 'chemical.' in prop:
             prop=prop.replace('chemical.','chemical_')
         if 'self.chemical.' in prop:
@@ -377,12 +402,24 @@ from define_attributes_props import *
     from numpy import isnan
     with open(ofpn, 'w') as f:  
         f.write('### note: this is an auto generated script' +'\n')        
-        f.write('from math import log' + '\n')
-        f.write('from math import log10' + '\n')
-        f.write('from numpy import nan' + '\n')
-        f.write('from numpy import sqrt' + '\n')
+        f.write('from math import log, log10' + '\n')
+        f.write('from numpy import nan, sqrt, exp' + '\n')
  
- 
+        f.write('''\
+
+def linkedCompartmentvalue(containingvolumeelement,comp_objects_dict,primary_abiotic,prop_name):
+    ve_name=containingvolumeelement.ve_name
+    if primary_abiotic==containingvolumeelement.primary_abiotic.replace(' ','_'): # if else is a dirty hack in place of a robust link checking process       
+        comp_name=primary_abiotic+'_in_'+ve_name
+    else:
+        if containingvolumeelement.primary_abiotic=='sediment' and primary_abiotic=='surface_water':
+             comp_name='surface_water'+'_in_sw_'+containingvolumeelement.parcel_name    
+    val_str='comp_objects_dict["'+comp_name+'"].'+prop_name
+    val=eval(val_str)
+    return(val)  
+    ''')
+            
+    
 # method decorator approach 
 
         for index,group in enumerate(grouped_comp.groups): # loop over compartments
@@ -392,11 +429,12 @@ from define_attributes_props import *
             comp_name=clean_names(group)
             f.write('\n'+'class '+str(comp_name)+':'+'\n' +\
                     '\t'+\
-                    'def __init__(self,constants,containingscenario,currentchemical,containingvolumeelement):\n\t\t'+\
+                    'def __init__(self,constants,containingscenario,currentchemical,containingvolumeelement,comp_objects_dict):\n\t\t'+\
                                     'self.containingscenario=containingscenario\n\t\t'+\
                                     'self.currentchemical=currentchemical\n\t\t'+\
                                     'self.constants=constants\n\t\t'+\
-                                    'self.containingvolumeelement=containingvolumeelement\n\t\t')
+                                    'self.containingvolumeelement=containingvolumeelement\n\t\t'+\
+                                    'self.comp_objects_dict=comp_objects_dict')
 #            comp_props=list(grouped_comp.get_group(group)['propertyname'].unique()) # unique properties
     
             all_props=list(grouped_comp.get_group(group)['propertyname']) # all property names 
