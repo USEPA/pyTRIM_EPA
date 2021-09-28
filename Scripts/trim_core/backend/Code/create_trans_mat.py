@@ -40,10 +40,17 @@ def link_check (comp_objects_dict,comp1_name,comp2_name,dict_inputs,chem_list_cl
     else: 
         cond3=False
     if cond1 or cond2:    
-        df_app=df_alg_mat.loc[(df_alg_mat['sendingcompartmentcategory']==comp1.category) & (df_alg_mat['receivingcompartmentcategory']==comp2.category) & (df_alg_mat['enabled']=='True')]
-        if 'abiotic' in comp1.category and 'abiotic' in comp2.category:
+        df_app=df_alg_mat.loc[(df_alg_mat['sendingcompartmentcategory']==comp1.category) & (df_alg_mat['receivingcompartmentcategory']==comp2.category) & (df_alg_mat['enabled']=='True')] # if the algorithm's compartment categories equal the sending and receiving compartment categories and alg is enabled, then include
+        if 'abiotic' in comp1.category and 'abiotic' in comp2.category: # to cover exception where comp1 category is abiotic | something but alg sending category is just abiotic
             df_app2=df_alg_mat.loc[(df_alg_mat['sendingcompartmentcategory']=="abiotic") & (df_alg_mat['receivingcompartmentcategory']=='abiotic') & (df_alg_mat['enabled']=='True')]
             df_app=df_app.append(df_app2)
+        if 'fish' in comp1.category and 'abiotic' in comp2.category: # to cover cases where comp1 category = fish | something but sending algorithm category is just fish
+            df_app2=df_alg_mat.loc[(df_alg_mat['sendingcompartmentcategory']=="fish") & (df_alg_mat['receivingcompartmentcategory']==comp2.category) & (df_alg_mat['enabled']=='True')]
+            df_app=df_app.append(df_app2)
+        if 'fish' in comp2.category and 'abiotic' in comp1.category: # to cover cases where comp2 category = fish | something but algorithm receiving comp category is just fish
+            df_app2=df_alg_mat.loc[(df_alg_mat['receivingcompartmentcategory']=="fish") & (df_alg_mat['sendingcompartmentcategory']==comp2.category) & (df_alg_mat['enabled']=='True')]
+            df_app=df_app.append(df_app2)
+            
         if len (df_app)==0:
             return(link,app_algs)
         algs_non_chem=list(df_app.loc[(df_app['sendingchemicalname']=='replaceme')]['index']) # algorithms that are not chemical specific
@@ -52,7 +59,8 @@ def link_check (comp_objects_dict,comp1_name,comp2_name,dict_inputs,chem_list_cl
         df_app['receivingchemicalname']=df_app['receivingchemicalname'].apply(clean_chem_names) # clean chem names
         algs_chem=list(df_app.loc[(df_app['sendingchemicalname']==currentchemical.name)&(df_app['receivingchemicalname'].isin(chem_list_clean))]['index']) # chemical specific algorithms 
         app_algs.append(algs_chem) # list of applicable algorithms (indices)
-        app_algs=[y for x in app_algs for y in x]
+        app_algs=[y for x in app_algs for y in x] # flatten list
+        app_algs=list(set(app_algs)) # unique algorithm list in case of double counts
         if cond1 or cond2:
             link=True
         return(link,app_algs)
@@ -151,3 +159,19 @@ def create_trans_mat(inputs,dict_inputs): # function to create transition matrix
 #    
 #  
   
+#row_index=10 
+#col_index=1
+#comp_row=comp_list[row_index]
+#comp_col=comp_list[col_index]
+#comp1_name=comp_row
+#comp2_name=comp_col        
+#    
+#  
+    
+#row_index=6 
+#col_index=1
+#comp_row=comp_list[row_index]
+#comp_col=comp_list[col_index]
+#comp1_name=comp_row
+#comp2_name=comp_col        
+#        
