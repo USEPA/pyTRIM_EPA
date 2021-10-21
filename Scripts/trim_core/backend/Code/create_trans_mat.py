@@ -35,10 +35,23 @@ def link_check (comp_objects_dict,comp1_name,comp2_name,dict_inputs,chem_list_cl
         cond2=True
     else:
         cond2=False
-    if ("vaporsource" in comp1.name or "particlesource" in comp1.name) and ("surface_water" in comp2.name or "surface_soil" in comp2.name):
+#    if ("vaporsource" in comp1.name or "particlesource" in comp1.name) and ("surface_water" in comp2.name or "surface_soil" in comp2.name):
+    if ("vaporsource" in comp1.name or "particlesource" in comp1.name) and ("surface_water" in comp2.name or "surface_soil" in comp2.name) and (comp1.name.split('_')[-1]==comp2.name.split('_')[-1]): # final and condition tests for identical parcel names
+
         cond3=True # pseudo source compartment connected to surface water or surface soil
     else: 
         cond3=False
+
+
+    if cond3: # check if pseudo source algorithm -- mutually exclusive from conditions 1,2 and 4
+        df_psalgs=dict_inputs['df_psalgs']
+        psalgs=list(df_psalgs['algorithm'])
+        app_algs=[x for x in psalgs if ('surface_water' in comp2.name and 'surface water' in x)] # temp -- need to fix
+        return(cond3,[-1]) # temp -1 indicates pseudo source algs to surface water        
+
+
+    ### make list of applicable algorithms based on conditions 1 and 2 
+
     if cond1 or cond2:    
         df_app=df_alg_mat.loc[(df_alg_mat['sendingcompartmentcategory']==comp1.category) & (df_alg_mat['receivingcompartmentcategory']==comp2.category) & (df_alg_mat['enabled']=='True')] # if the algorithm's compartment categories equal the sending and receiving compartment categories and alg is enabled, then include
         if 'abiotic' in comp1.category and 'abiotic' in comp2.category: # to cover exception where comp1 category is abiotic | something but alg sending category is just abiotic
@@ -49,28 +62,52 @@ def link_check (comp_objects_dict,comp1_name,comp2_name,dict_inputs,chem_list_cl
             df_app=df_app.append(df_app2)
         if 'fish' in comp2.category and 'abiotic' in comp1.category: # to cover cases where comp2 category = fish | something but algorithm receiving comp category is just fish
             df_app2=df_alg_mat.loc[(df_alg_mat['receivingcompartmentcategory']=="fish") & (df_alg_mat['sendingcompartmentcategory']==comp2.category) & (df_alg_mat['enabled']=='True')]
-            df_app=df_app.append(df_app2)
-            
-        if len (df_app)==0:
-            return(link,app_algs)
-        algs_non_chem=list(df_app.loc[(df_app['sendingchemicalname']=='replaceme')]['index']) # algorithms that are not chemical specific
-        app_algs.append(algs_non_chem)
-        df_app['sendingchemicalname']=df_app['sendingchemicalname'].apply(clean_chem_names) # clean chem names
-        df_app['receivingchemicalname']=df_app['receivingchemicalname'].apply(clean_chem_names) # clean chem names
-        algs_chem=list(df_app.loc[(df_app['sendingchemicalname']==currentchemical.name)&(df_app['receivingchemicalname'].isin(chem_list_clean))]['index']) # chemical specific algorithms 
-        app_algs.append(algs_chem) # list of applicable algorithms (indices)
-        app_algs=[y for x in app_algs for y in x] # flatten list
-        app_algs=list(set(app_algs)) # unique algorithm list in case of double counts
-        if cond1 or cond2:
-            link=True
-        return(link,app_algs)
-    if cond3: # pseudo source algorithm
-        df_psalgs=dict_inputs['df_psalgs']
-        psalgs=list(df_psalgs['algorithm'])
-        app_algs=[x for x in psalgs if ('surface_water' in comp2.name and 'surface water' in x)] # temp -- need to fix
-        return(cond3,[-1]) # temp -1 indicates pseudo source algs to surface water        
+            df_app=df_app.append(df_app2)   
+        
+        if len (df_app)>0:
+            algs_non_chem=list(df_app.loc[(df_app['sendingchemicalname']=='replaceme')]['index']) # algorithms that are not chemical specific
+            app_algs.append(algs_non_chem)
+            df_app['sendingchemicalname']=df_app['sendingchemicalname'].apply(clean_chem_names) # clean chem names
+            df_app['receivingchemicalname']=df_app['receivingchemicalname'].apply(clean_chem_names) # clean chem names
+            algs_chem=list(df_app.loc[(df_app['sendingchemicalname']==currentchemical.name)&(df_app['receivingchemicalname'].isin(chem_list_clean))]['index']) # chemical specific algorithms 
+            app_algs.append(algs_chem) # list of applicable algorithms (indices)
+            app_algs=[y for x in app_algs for y in x] # flatten list
+            app_algs=list(set(app_algs)) # unique algorithm list in case of double counts
+
+    ## check if there are manual links
+    
+    df_mlinks=df_links.loc[(df_links['sending_compartment_new']==comp1_name) & (df_links['receiving_compartment_new']==comp2_name)] # filter links dataframe to see if any rows correspond
+    if len(df_mlinks)>0: # if there are connecting algorithms
+        man_alg_names=list(df_mlinks['algorithm_new'].unique()) # get list of unique connecting algorithms names
+        print (man_alg_names)
+        man_algs=[] # list of manual algorithm indices
+        for al in man_alg_names:
+            alg_ind=df_alg_mat.loc[(df_alg_mat['alg_name_new']==al) & (df_alg_mat['enabled']=='True'),'index'].values[0]
+            man_algs.append(alg_ind)       
+        cond4=True 
     else:
-        return(link, app_algs)
+        cond4=False
+
+    if cond4: # if there are manual connections
+        app_algs=app_algs+man_algs # add manual connections
+        print (app_algs)
+        app_algs=list(set(app_algs)) # unique algorithm list in case of double counts
+
+    if len(app_algs)>0: 
+        return(True,app_algs)
+    else:
+        return(False, app_algs)        
+
+#        if cond1 or cond2:
+#            link=True
+#        return(link,app_algs)
+#    if cond3: # pseudo source algorithm -- mutually exclusive from conditions 1,2 and 4
+#        df_psalgs=dict_inputs['df_psalgs']
+#        psalgs=list(df_psalgs['algorithm'])
+#        app_algs=[x for x in psalgs if ('surface_water' in comp2.name and 'surface water' in x)] # temp -- need to fix
+#        return(cond3,[-1]) # temp -1 indicates pseudo source algs to surface water        
+#    else:
+#        return(link, app_algs)
         
 
 def create_trans_mat(inputs,dict_inputs): # function to create transition matrix
@@ -175,3 +212,11 @@ def create_trans_mat(inputs,dict_inputs): # function to create transition matrix
 #comp1_name=comp_row
 #comp2_name=comp_col        
 #        
+#    
+#row_index=4 
+#col_index=2
+#comp_row=comp_list[row_index]
+#comp_col=comp_list[col_index]
+#comp1_name=comp_row
+#comp2_name=comp_col        
+#            

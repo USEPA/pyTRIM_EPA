@@ -79,5 +79,6 @@ required_algorithms = [\
             "bulk advection from surface water to flush-rate advection sink, general(alginstid_4125)",\
     	    "diffusion from surface water to air, two film(alginstid_4080)-hg",\
             "algae deposition from surface water to sediment, general(alginstid_2144)",\
-           
-]
+
+            'waterflow from surface water to surface water, general(alginstid_3685)',\
+            ]

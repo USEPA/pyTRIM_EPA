@@ -87,7 +87,8 @@ def define_comp(currentchemical):
             parcel_area=df_parcels['parcel_area'].loc[df_parcels['parcel_name']==parcel_name].values[0] # parcel area
             exterior_boundary=df_parcels['external_boundary'].loc[df_parcels['parcel_name']==parcel_name].values[0] # parcel exterior boundary
             primary_abiotic=str(df_ve.loc[i,'primary_abiotic']).lower() # temp
-            if primary_abiotic not in required_comp_classes or str(df_ve.loc[i,'parcel_name']) !='lakecadillac': # temp: #  temp
+            if primary_abiotic not in required_comp_classes or (str(df_ve.loc[i,'parcel_name']) !='lakecadillac' and str(df_ve.loc[i,'parcel_name']) !='lakemitchell'): # temp: #  temp
+#            if primary_abiotic not in required_comp_classes or str(df_ve.loc[i,'parcel_name']) !='lakecadillac': # temp: #  temp
                continue # temp           
             comp_name=str(df_ve.loc[i,'primary_abiotic'].replace(r'/','_').replace(r'-','_').replace(' ','_')) + '_in_' + str(df_ve.loc[i,'ve_name'].replace(r'/','_').replace(r'-','_').replace(' ','_')) 
             comp_name=str(comp_name.replace('___','_').replace('__','_'))
@@ -146,7 +147,9 @@ def define_comp(currentchemical):
 
         
         for i in range(len(df_comp)):
-            if str(df_comp.loc[i,'primary_abiotic']).lower() not in required_comp_classes or str(df_comp.loc[i,'parcel_name']) !='lakecadillac': # temp
+#            if str(df_comp.loc[i,'primary_abiotic']).lower() not in required_comp_classes or str(df_comp.loc[i,'parcel_name']) !='lakecadillac': # temp
+            if str(df_comp.loc[i,'primary_abiotic']).lower() not in required_comp_classes or (str(df_comp.loc[i,'parcel_name']) !='lakecadillac' and str(df_comp.loc[i,'parcel_name']) !='lakemitchell'): # temp
+
                continue
             ve_name=df_comp.loc[i,'ve_name'] # volume element name
             parcel_name=ve_name.split('_')[1] # parcel name
@@ -234,7 +237,9 @@ def define_comp(currentchemical):
     
     ###### append code to auto define advection sinks
     
-    df_sinks=df_ve.loc[((df_ve.primary_abiotic=='air')|(df_ve.primary_abiotic=='soil - surface'))&(df_ve.external_boundary>0) & (df_ve.parcel_name=='lakecadillac')] # only air and surface soil compartments with an outer boundary need sinks
+#    df_sinks=df_ve.loc[((df_ve.primary_abiotic=='air')|(df_ve.primary_abiotic=='soil - surface'))&(df_ve.external_boundary>0) & (df_ve.parcel_name=='lakecadillac')] # only air and surface soil compartments with an outer boundary need sinks
+    df_sinks=df_ve.loc[((df_ve.primary_abiotic=='air')|(df_ve.primary_abiotic=='soil - surface'))&(((df_ve.external_boundary>0) & (df_ve.parcel_name=='lakecadillac'))|((df_ve.external_boundary>0) & (df_ve.parcel_name=='lakemitchell'))) ] # only air and surface soil compartments with an outer boundary need sinks
+
     
     with open(ofpn, 'a') as f:
         for i in df_sinks.index:
@@ -306,7 +311,9 @@ def define_comp(currentchemical):
 
 
         for i in range(len(df_pve)):
-            if str(df_pve.loc[i,'parcel_name'])!="lakecadillac":  # temp
+#            if str(df_pve.loc[i,'parcel_name'])!="lakecadillac":  # temp
+            if str(df_pve.loc[i,'parcel_name'])!="lakecadillac" and str(df_pve.loc[i,'parcel_name'])!="lakemitchell":  # temp
+
                 continue
         
             pve_name=str(df_pve.loc[i,'ve_name'].replace(r'/','_').replace(r'-','_').replace(' ','_'))
