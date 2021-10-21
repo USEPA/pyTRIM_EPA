@@ -94,6 +94,10 @@ def process_master_library(inputs):
             prop=prop.replace('thelink.interfacialarea','check_neighbor(self.sendingcompartment,self.receivingcompartment,self.dict_inputs).is_neighbor()[1]')           
         if 'thelink.fractionspecificcompartmentdiet' in prop: # replace thelink.fractionspecificcompartmentdiet with 1. i believe this okay but check ug.
             prop=prop.replace('thelink.fractionspecificcompartmentdiet','1')          
+
+        if 'thelink.bulkwaterflowrate_volumetric' in prop: # hack to deal with interconnected water bodies
+            prop=prop.replace('thelink.bulkwaterflowrate_volumetric',"float(self.dict_inputs['df_links'].loc[(self.dict_inputs['df_links']['receiving_compartment_new']==self.receivingcompartment.name)&(self.dict_inputs['df_links']['sending_compartment_new']==self.sendingcompartment.name)&(self.dict_inputs['df_links']['property']=='bulkwaterflowrate_volumetric'),'value'].values[0])")          
+
         return (prop)
    
     required_algs=req.required_algorithms # look up list of required algorithms
