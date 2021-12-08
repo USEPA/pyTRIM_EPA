@@ -1,0 +1,21474 @@
+### note: this is an auto generated script
+import pandas as pd
+import os
+from constants import *
+from define_scenario import *
+from define_ve import *
+from define_pve import *
+from define_algs import *
+from define_ps_algs import *
+
+
+mfp=r'' # update
+def get_met_ave(mfn,mfcol):
+    mfpn=os.path.join(mfp,mfn)
+    df=pd.read_csv(mfpn) 
+    try:
+        ave=pd.to_numeric(df[mfcol], errors='coerce').mean()
+    except:
+        ave=0
+    return(ave)
+        
+mfp=r"C:\Users\13963\Documents\RTR\PyTRIM\HSP_Repo\trim-builder\Scripts\trim_core\backend\input_files"
+try:
+	foundries_ss.watertemperature_k=286.15
+except:
+	pass
+try:
+	sw_lakecadillac.watertemperature_k=286.15
+except:
+	pass
+try:
+	surface_water_in_sw_lakecadillac.algaedensityinwatercolumn_g_l=1.23974964219194e-02
+except:
+	pass
+try:
+	surface_water_in_sw_lakecadillac.chlorideconcentration_mg_l=7
+except:
+	pass
+try:
+	surface_water_in_sw_lakecadillac.chlorophyllconcentration_mg_l=0.003
+except:
+	pass
+try:
+	surface_water_in_sw_lakecadillac.organiccarboncontent=0.02
+except:
+	pass
+try:
+	surface_water_in_sw_lakecadillac.ph=8.5
+except:
+	pass
+try:
+	surface_water_in_sw_lakecadillac.suspendedsedimentconcentration=0.05
+except:
+	pass
+try:
+	surface_water_in_sw_lakecadillac.watertemperature_k=286.15
+except:
+	pass
+try:
+	surface_water_in_sw_lakecadillac.flushes_per_year=0.48
+except:
+	pass
+try:
+	surface_water_in_sw_lakecadillac.isflowing=False
+except:
+	pass
+try:
+	surface_water_in_sw_lakecadillac.currentvelocity=0
+except:
+	pass
+try:
+	sw_lakemitchell.watertemperature_k=286.15
+except:
+	pass
+try:
+	surface_water_in_sw_lakemitchell.algaedensityinwatercolumn_g_l=1.08535940990977e-02
+except:
+	pass
+try:
+	surface_water_in_sw_lakemitchell.chlorideconcentration_mg_l=7
+except:
+	pass
+try:
+	surface_water_in_sw_lakemitchell.chlorophyllconcentration_mg_l=0.003
+except:
+	pass
+try:
+	surface_water_in_sw_lakemitchell.organiccarboncontent=0.02
+except:
+	pass
+try:
+	surface_water_in_sw_lakemitchell.ph=8.5
+except:
+	pass
+try:
+	surface_water_in_sw_lakemitchell.suspendedsedimentconcentration=0.05
+except:
+	pass
+try:
+	surface_water_in_sw_lakemitchell.watertemperature_k=286.15
+except:
+	pass
+try:
+	surface_water_in_sw_lakemitchell.flushes_per_year=0.276267295275431
+except:
+	pass
+try:
+	surface_water_in_sw_lakemitchell.isflowing=False
+except:
+	pass
+try:
+	surface_water_in_sw_lakemitchell.currentvelocity=0
+except:
+	pass
+try:
+	sediment_in_sed_lakecadillac.organiccarboncontent=0.02
+except:
+	pass
+try:
+	sediment_in_sed_lakecadillac.ph=7.3
+except:
+	pass
+try:
+	sediment_in_sed_lakecadillac.rho=2600
+except:
+	pass
+try:
+	sediment_in_sed_lakecadillac.sedimentresuspensionvelocity=9.64763202734353e-05
+except:
+	pass
+try:
+	sediment_in_sed_lakemitchell.organiccarboncontent=0.02
+except:
+	pass
+try:
+	sediment_in_sed_lakemitchell.ph=7.3
+except:
+	pass
+try:
+	sediment_in_sed_lakemitchell.rho=2600
+except:
+	pass
+try:
+	sediment_in_sed_lakemitchell.sedimentresuspensionvelocity=9.62414088491511e-05
+except:
+	pass
+try:
+	macrophyte_in_sw_lakecadillac.biomassperarea_kg_m2=0.5
+except:
+	pass
+try:
+	macrophyte_in_sw_lakecadillac.fractiondietalgae=0
+except:
+	pass
+try:
+	macrophyte_in_sw_lakecadillac.fractiondietmacrophyte=0
+except:
+	pass
+try:
+	macrophyte_in_sw_lakecadillac.fractiondietzooplankton=0
+except:
+	pass
+try:
+	macrophyte_in_sw_lakecadillac.fractiondietbenthicinvertebrate=0
+except:
+	pass
+try:
+	macrophyte_in_sw_lakecadillac.fractiondietfishherbivore=0
+except:
+	pass
+try:
+	macrophyte_in_sw_lakecadillac.fractiondietfishbenthicomnivore=0
+except:
+	pass
+try:
+	macrophyte_in_sw_lakecadillac.fractiondietfishomnivore=0
+except:
+	pass
+try:
+	macrophyte_in_sw_lakecadillac.fractiondietfishbenthiccarnivore=0
+except:
+	pass
+try:
+	macrophyte_in_sw_lakecadillac.fractiondietfishcarnivore=0
+except:
+	pass
+try:
+	zooplankton_in_sw_lakecadillac.biomassperarea_kg_m2=2.89124210149242e-02
+except:
+	pass
+try:
+	zooplankton_in_sw_lakecadillac.bw=0.000000057
+except:
+	pass
+try:
+	zooplankton_in_sw_lakecadillac.fractiondietalgae=1
+except:
+	pass
+try:
+	zooplankton_in_sw_lakecadillac.fractiondietmacrophyte=0
+except:
+	pass
+try:
+	zooplankton_in_sw_lakecadillac.fractiondietzooplankton=0
+except:
+	pass
+try:
+	zooplankton_in_sw_lakecadillac.fractiondietbenthicinvertebrate=0
+except:
+	pass
+try:
+	zooplankton_in_sw_lakecadillac.fractiondietfishherbivore=0
+except:
+	pass
+try:
+	zooplankton_in_sw_lakecadillac.fractiondietfishbenthicomnivore=0
+except:
+	pass
+try:
+	zooplankton_in_sw_lakecadillac.fractiondietfishomnivore=0
+except:
+	pass
+try:
+	zooplankton_in_sw_lakecadillac.fractiondietfishbenthiccarnivore=0
+except:
+	pass
+try:
+	zooplankton_in_sw_lakecadillac.fractiondietfishcarnivore=0
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_lakecadillac.biomassperarea_kg_m2=1.03147758416518e-02
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_lakecadillac.bw=0.000255
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_lakecadillac.fractiondietalgae=0
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_lakecadillac.fractiondietmacrophyte=0
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_lakecadillac.fractiondietzooplankton=0
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_lakecadillac.fractiondietbenthicinvertebrate=0
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_lakecadillac.fractiondietfishherbivore=0
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_lakecadillac.fractiondietfishbenthicomnivore=0
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_lakecadillac.fractiondietfishomnivore=0
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_lakecadillac.fractiondietfishbenthiccarnivore=0
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_lakecadillac.fractiondietfishcarnivore=0
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_lakecadillac.biomassperarea_kg_m2=0.003755
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_lakecadillac.bw=0.07
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_lakecadillac.fractiondietalgae=0
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_lakecadillac.fractiondietmacrophyte=0
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_lakecadillac.fractiondietzooplankton=1
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_lakecadillac.fractiondietbenthicinvertebrate=0
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_lakecadillac.fractiondietfishherbivore=0
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_lakecadillac.fractiondietfishbenthicomnivore=0
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_lakecadillac.fractiondietfishomnivore=0
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_lakecadillac.fractiondietfishbenthiccarnivore=0
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_lakecadillac.fractiondietfishcarnivore=0
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_lakecadillac.biomassperarea_kg_m2=0.0018775
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_lakecadillac.bw=0.75
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_lakecadillac.fractiondietalgae=0
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_lakecadillac.fractiondietmacrophyte=0
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_lakecadillac.fractiondietzooplankton=0
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_lakecadillac.fractiondietbenthicinvertebrate=1
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_lakecadillac.fractiondietfishherbivore=0
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_lakecadillac.fractiondietfishbenthicomnivore=0
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_lakecadillac.fractiondietfishomnivore=0
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_lakecadillac.fractiondietfishbenthiccarnivore=0
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_lakecadillac.fractiondietfishcarnivore=0
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_lakecadillac.biomassperarea_kg_m2=0.0009763
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_lakecadillac.bw=0.2
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_lakecadillac.fractiondietalgae=0
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_lakecadillac.fractiondietmacrophyte=0
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_lakecadillac.fractiondietzooplankton=0
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_lakecadillac.fractiondietbenthicinvertebrate=0
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_lakecadillac.fractiondietfishherbivore=1
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_lakecadillac.fractiondietfishbenthicomnivore=0
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_lakecadillac.fractiondietfishomnivore=0
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_lakecadillac.fractiondietfishbenthiccarnivore=0
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_lakecadillac.fractiondietfishcarnivore=0
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_lakecadillac.biomassperarea_kg_m2=0.0003755
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_lakecadillac.bw=2.5
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_lakecadillac.fractiondietalgae=0
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_lakecadillac.fractiondietmacrophyte=0
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_lakecadillac.fractiondietzooplankton=0
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_lakecadillac.fractiondietbenthicinvertebrate=0.5
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_lakecadillac.fractiondietfishherbivore=0
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_lakecadillac.fractiondietfishbenthicomnivore=0.5
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_lakecadillac.fractiondietfishomnivore=0
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_lakecadillac.fractiondietfishbenthiccarnivore=0
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_lakecadillac.fractiondietfishcarnivore=0
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_lakecadillac.biomassperarea_kg_m2=0.0005257
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_lakecadillac.bw=1.5
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_lakecadillac.fractiondietalgae=0
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_lakecadillac.fractiondietmacrophyte=0
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_lakecadillac.fractiondietzooplankton=0
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_lakecadillac.fractiondietbenthicinvertebrate=0
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_lakecadillac.fractiondietfishherbivore=0
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_lakecadillac.fractiondietfishbenthicomnivore=0.5
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_lakecadillac.fractiondietfishomnivore=0.5
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_lakecadillac.fractiondietfishbenthiccarnivore=0
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_lakecadillac.fractiondietfishcarnivore=0
+except:
+	pass
+try:
+	macrophyte_in_sw_lakemitchell.biomassperarea_kg_m2=0.5
+except:
+	pass
+try:
+	macrophyte_in_sw_lakemitchell.fractiondietalgae=0
+except:
+	pass
+try:
+	macrophyte_in_sw_lakemitchell.fractiondietmacrophyte=0
+except:
+	pass
+try:
+	macrophyte_in_sw_lakemitchell.fractiondietzooplankton=0
+except:
+	pass
+try:
+	macrophyte_in_sw_lakemitchell.fractiondietbenthicinvertebrate=0
+except:
+	pass
+try:
+	macrophyte_in_sw_lakemitchell.fractiondietfishherbivore=0
+except:
+	pass
+try:
+	macrophyte_in_sw_lakemitchell.fractiondietfishbenthicomnivore=0
+except:
+	pass
+try:
+	macrophyte_in_sw_lakemitchell.fractiondietfishomnivore=0
+except:
+	pass
+try:
+	macrophyte_in_sw_lakemitchell.fractiondietfishbenthiccarnivore=0
+except:
+	pass
+try:
+	macrophyte_in_sw_lakemitchell.fractiondietfishcarnivore=0
+except:
+	pass
+try:
+	zooplankton_in_sw_lakemitchell.biomassperarea_kg_m2=2.55631106787131e-02
+except:
+	pass
+try:
+	zooplankton_in_sw_lakemitchell.bw=0.000000057
+except:
+	pass
+try:
+	zooplankton_in_sw_lakemitchell.fractiondietalgae=1
+except:
+	pass
+try:
+	zooplankton_in_sw_lakemitchell.fractiondietmacrophyte=0
+except:
+	pass
+try:
+	zooplankton_in_sw_lakemitchell.fractiondietzooplankton=0
+except:
+	pass
+try:
+	zooplankton_in_sw_lakemitchell.fractiondietbenthicinvertebrate=0
+except:
+	pass
+try:
+	zooplankton_in_sw_lakemitchell.fractiondietfishherbivore=0
+except:
+	pass
+try:
+	zooplankton_in_sw_lakemitchell.fractiondietfishbenthicomnivore=0
+except:
+	pass
+try:
+	zooplankton_in_sw_lakemitchell.fractiondietfishomnivore=0
+except:
+	pass
+try:
+	zooplankton_in_sw_lakemitchell.fractiondietfishbenthiccarnivore=0
+except:
+	pass
+try:
+	zooplankton_in_sw_lakemitchell.fractiondietfishcarnivore=0
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_lakemitchell.biomassperarea_kg_m2=7.96200461607151e-03
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_lakemitchell.bw=0.000255
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_lakemitchell.fractiondietalgae=0
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_lakemitchell.fractiondietmacrophyte=0
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_lakemitchell.fractiondietzooplankton=0
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_lakemitchell.fractiondietbenthicinvertebrate=0
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_lakemitchell.fractiondietfishherbivore=0
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_lakemitchell.fractiondietfishbenthicomnivore=0
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_lakemitchell.fractiondietfishomnivore=0
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_lakemitchell.fractiondietfishbenthiccarnivore=0
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_lakemitchell.fractiondietfishcarnivore=0
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_lakemitchell.biomassperarea_kg_m2=0.00174
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_lakemitchell.bw=0.07
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_lakemitchell.fractiondietalgae=0
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_lakemitchell.fractiondietmacrophyte=0
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_lakemitchell.fractiondietzooplankton=1
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_lakemitchell.fractiondietbenthicinvertebrate=0
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_lakemitchell.fractiondietfishherbivore=0
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_lakemitchell.fractiondietfishbenthicomnivore=0
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_lakemitchell.fractiondietfishomnivore=0
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_lakemitchell.fractiondietfishbenthiccarnivore=0
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_lakemitchell.fractiondietfishcarnivore=0
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_lakemitchell.biomassperarea_kg_m2=0.00145
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_lakemitchell.bw=0.75
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_lakemitchell.fractiondietalgae=0
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_lakemitchell.fractiondietmacrophyte=0
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_lakemitchell.fractiondietzooplankton=0
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_lakemitchell.fractiondietbenthicinvertebrate=1
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_lakemitchell.fractiondietfishherbivore=0
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_lakemitchell.fractiondietfishbenthicomnivore=0
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_lakemitchell.fractiondietfishomnivore=0
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_lakemitchell.fractiondietfishbenthiccarnivore=0
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_lakemitchell.fractiondietfishcarnivore=0
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_lakemitchell.biomassperarea_kg_m2=0.00145
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_lakemitchell.bw=0.5
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_lakemitchell.fractiondietalgae=0
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_lakemitchell.fractiondietmacrophyte=0
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_lakemitchell.fractiondietzooplankton=0
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_lakemitchell.fractiondietbenthicinvertebrate=0.5
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_lakemitchell.fractiondietfishherbivore=0.5
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_lakemitchell.fractiondietfishbenthicomnivore=0
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_lakemitchell.fractiondietfishomnivore=0
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_lakemitchell.fractiondietfishbenthiccarnivore=0
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_lakemitchell.fractiondietfishcarnivore=0
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_lakemitchell.biomassperarea_kg_m2=0.00029
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_lakemitchell.bw=2.5
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_lakemitchell.fractiondietalgae=0
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_lakemitchell.fractiondietmacrophyte=0
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_lakemitchell.fractiondietzooplankton=0
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_lakemitchell.fractiondietbenthicinvertebrate=0.5
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_lakemitchell.fractiondietfishherbivore=0
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_lakemitchell.fractiondietfishbenthicomnivore=0.5
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_lakemitchell.fractiondietfishomnivore=0
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_lakemitchell.fractiondietfishbenthiccarnivore=0
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_lakemitchell.fractiondietfishcarnivore=0
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_lakemitchell.biomassperarea_kg_m2=0.00087
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_lakemitchell.bw=1
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_lakemitchell.fractiondietalgae=0
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_lakemitchell.fractiondietmacrophyte=0
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_lakemitchell.fractiondietzooplankton=0
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_lakemitchell.fractiondietbenthicinvertebrate=0
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_lakemitchell.fractiondietfishherbivore=0.25
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_lakemitchell.fractiondietfishbenthicomnivore=0.25
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_lakemitchell.fractiondietfishomnivore=0.5
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_lakemitchell.fractiondietfishbenthiccarnivore=0
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_lakemitchell.fractiondietfishcarnivore=0
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e1.volumefraction_vapor=0.28
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e1.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e1.airsoilboundarythickness=0.005
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e1.rho=2600
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e1.fractionofareaavailableforerosion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e1.fractionofareaavailableforrunoff=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e1.fractionofareaavailableforverticaldiffusion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e1.fractionsand=0.875677688246735
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e1.organiccarboncontent=9.95936071689534e-02
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e1.ph=5.3370195424655
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e1.totalrunoffrate_m3_m2_day=8.59178082191781e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e1.totalerosionrate_kg_m2_day=7.45071714305368e-05
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e1.volumefraction_liquid=0.127076845111951
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e2.volumefraction_vapor=0.28
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e2.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e2.airsoilboundarythickness=0.005
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e2.rho=2600
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e2.fractionofareaavailableforerosion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e2.fractionofareaavailableforrunoff=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e2.fractionofareaavailableforverticaldiffusion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e2.fractionsand=0.882808936621586
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e2.organiccarboncontent=0.107067217295322
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e2.ph=5.38213338636966
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e2.totalrunoffrate_m3_m2_day=8.59178082191781e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e2.totalerosionrate_kg_m2_day=7.56951017078808e-05
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e2.volumefraction_liquid=0.128625204582651
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e3.volumefraction_vapor=0.28
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e3.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e3.airsoilboundarythickness=0.005
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e3.rho=2600
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e3.fractionofareaavailableforerosion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e3.fractionofareaavailableforrunoff=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e3.fractionofareaavailableforverticaldiffusion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e3.fractionsand=0.896154951217639
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e3.organiccarboncontent=0.163507970793113
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e3.ph=5.17673811170009
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e3.totalrunoffrate_m3_m2_day=8.59178082191781e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e3.totalerosionrate_kg_m2_day=8.15452675084683e-05
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_e3.volumefraction_liquid=0.14657678420527
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n1.volumefraction_vapor=0.28
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n1.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n1.airsoilboundarythickness=0.005
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n1.rho=2600
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n1.fractionofareaavailableforerosion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n1.fractionofareaavailableforrunoff=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n1.fractionofareaavailableforverticaldiffusion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n1.fractionsand=0.745587498638789
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n1.organiccarboncontent=0.224422166933961
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n1.ph=5.97824128149508
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n1.totalrunoffrate_m3_m2_day=8.59178082191781e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n1.totalerosionrate_kg_m2_day=1.13246070372563e-05
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n1.volumefraction_liquid=0.201968523988999
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n2.volumefraction_vapor=0.28
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n2.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n2.airsoilboundarythickness=0.005
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n2.rho=2600
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n2.fractionofareaavailableforerosion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n2.fractionofareaavailableforrunoff=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n2.fractionofareaavailableforverticaldiffusion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n2.fractionsand=0.862759037980857
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n2.organiccarboncontent=0.106878530812446
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n2.ph=5.59917390903786
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n2.totalrunoffrate_m3_m2_day=8.59178082191781e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n2.totalerosionrate_kg_m2_day=2.09008782917429e-05
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n2.volumefraction_liquid=0.124994377895384
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne1.volumefraction_vapor=0.28
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne1.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne1.airsoilboundarythickness=0.005
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne1.rho=2600
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne1.fractionofareaavailableforerosion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne1.fractionofareaavailableforrunoff=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne1.fractionofareaavailableforverticaldiffusion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne1.fractionsand=0.896886891653821
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne1.organiccarboncontent=4.98441380983597e-02
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne1.ph=5.5196570138736
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne1.totalrunoffrate_m3_m2_day=8.59178082191781e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne1.totalerosionrate_kg_m2_day=2.08226404614695e-05
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne1.volumefraction_liquid=9.49532041400573e-02
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne2.volumefraction_vapor=0.28
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne2.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne2.airsoilboundarythickness=0.005
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne2.rho=2600
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne2.fractionofareaavailableforerosion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne2.fractionofareaavailableforrunoff=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne2.fractionofareaavailableforverticaldiffusion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne2.fractionsand=0.836005220746794
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne2.organiccarboncontent=0.042739189649302
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne2.ph=5.81046419248666
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne2.totalrunoffrate_m3_m2_day=8.59178082191781e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne2.totalerosionrate_kg_m2_day=1.39265594423113e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne2.volumefraction_liquid=0.115179888775394
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne3.volumefraction_vapor=0.28
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne3.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne3.airsoilboundarythickness=0.005
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne3.rho=2600
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne3.fractionofareaavailableforerosion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne3.fractionofareaavailableforrunoff=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne3.fractionofareaavailableforverticaldiffusion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne3.fractionsand=0.888000873913677
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne3.organiccarboncontent=6.61893991868192e-02
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne3.ph=5.46223721901248
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne3.totalrunoffrate_m3_m2_day=8.59178082191781e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne3.totalerosionrate_kg_m2_day=5.83166494219695e-05
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_ne3.volumefraction_liquid=0.111774154993546
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_nw1.volumefraction_vapor=0.28
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_nw1.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_nw1.airsoilboundarythickness=0.005
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_nw1.rho=2600
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_nw1.fractionofareaavailableforerosion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_nw1.fractionofareaavailableforrunoff=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_nw1.fractionofareaavailableforverticaldiffusion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_nw1.fractionsand=0.744100055366606
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_nw1.organiccarboncontent=0.293445501253844
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_nw1.ph=5.63950779131782
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_nw1.totalrunoffrate_m3_m2_day=8.59178082191781e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_nw1.totalerosionrate_kg_m2_day=1.02315639723442e-05
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_nw1.volumefraction_liquid=0.256941183308148
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_nw2.volumefraction_vapor=0.28
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_nw2.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_nw2.airsoilboundarythickness=0.005
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_nw2.rho=2600
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_nw2.fractionofareaavailableforerosion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_nw2.fractionofareaavailableforrunoff=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_nw2.fractionofareaavailableforverticaldiffusion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_nw2.fractionsand=0.878318130585299
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_nw2.organiccarboncontent=0.079861167942013
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_nw2.ph=5.66735451919108
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_nw2.totalrunoffrate_m3_m2_day=8.59178082191781e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_nw2.totalerosionrate_kg_m2_day=1.90835967823157e-05
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_nw2.volumefraction_liquid=0.115911750844396
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s1.volumefraction_vapor=0.28
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s1.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s1.airsoilboundarythickness=0.005
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s1.rho=2600
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s1.fractionofareaavailableforerosion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s1.fractionofareaavailableforrunoff=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s1.fractionofareaavailableforverticaldiffusion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s1.fractionsand=0.917049217002237
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s1.organiccarboncontent=0.197305513254007
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s1.ph=5.38531390134529
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s1.totalrunoffrate_m3_m2_day=8.59178082191781e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s1.totalerosionrate_kg_m2_day=2.79883279488988e-05
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s1.volumefraction_liquid=0.137058823529412
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s2.volumefraction_vapor=0.28
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s2.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s2.airsoilboundarythickness=0.005
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s2.rho=2600
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s2.fractionofareaavailableforerosion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s2.fractionofareaavailableforrunoff=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s2.fractionofareaavailableforverticaldiffusion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s2.fractionsand=0.79545176947653
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s2.organiccarboncontent=7.89023586184307e-02
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s2.ph=5.87811540630286
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s2.totalrunoffrate_m3_m2_day=8.59178082191781e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s2.totalerosionrate_kg_m2_day=1.0065165534125e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s2.volumefraction_liquid=0.142901894123361
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_se1.volumefraction_vapor=0.28
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_se1.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_se1.airsoilboundarythickness=0.005
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_se1.rho=2600
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_se1.fractionofareaavailableforerosion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_se1.fractionofareaavailableforrunoff=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_se1.fractionofareaavailableforverticaldiffusion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_se1.fractionsand=0.77768087906045
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_se1.organiccarboncontent=4.98018094850875e-02
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_se1.ph=5.95643785299577
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_se1.totalrunoffrate_m3_m2_day=8.59178082191781e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_se1.totalerosionrate_kg_m2_day=2.67648865608705e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_se1.volumefraction_liquid=0.136805589979219
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_se2.volumefraction_vapor=0.28
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_se2.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_se2.airsoilboundarythickness=0.005
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_se2.rho=2600
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_se2.fractionofareaavailableforerosion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_se2.fractionofareaavailableforrunoff=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_se2.fractionofareaavailableforverticaldiffusion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_se2.fractionsand=0.785539251568569
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_se2.organiccarboncontent=8.77066744420524e-02
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_se2.ph=5.82203549552379
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_se2.totalrunoffrate_m3_m2_day=8.59178082191781e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_se2.totalerosionrate_kg_m2_day=3.28891177761097e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_se2.volumefraction_liquid=0.15430710631465
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_sw1.volumefraction_vapor=0.28
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_sw1.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_sw1.airsoilboundarythickness=0.005
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_sw1.rho=2600
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_sw1.fractionofareaavailableforerosion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_sw1.fractionofareaavailableforrunoff=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_sw1.fractionofareaavailableforverticaldiffusion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_sw1.fractionsand=0.716627943410558
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_sw1.organiccarboncontent=0.198783418787768
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_sw1.ph=5.68239830458586
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_sw1.totalrunoffrate_m3_m2_day=8.59178082191781e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_sw1.totalerosionrate_kg_m2_day=3.89366492595725e-05
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_sw1.volumefraction_liquid=0.234200270420743
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_sw2.volumefraction_vapor=0.28
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_sw2.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_sw2.airsoilboundarythickness=0.005
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_sw2.rho=2600
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_sw2.fractionofareaavailableforerosion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_sw2.fractionofareaavailableforrunoff=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_sw2.fractionofareaavailableforverticaldiffusion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_sw2.fractionsand=0.818696250846188
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_sw2.organiccarboncontent=0.132839751660647
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_sw2.ph=5.7816414907267
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_sw2.totalrunoffrate_m3_m2_day=8.59178082191781e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_sw2.totalerosionrate_kg_m2_day=1.0975445697612e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_sw2.volumefraction_liquid=0.165472270592581
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_w1.volumefraction_vapor=0.28
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_w1.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_w1.airsoilboundarythickness=0.005
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_w1.rho=2600
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_w1.fractionofareaavailableforerosion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_w1.fractionofareaavailableforrunoff=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_w1.fractionofareaavailableforverticaldiffusion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_w1.fractionsand=0.755947154001734
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_w1.organiccarboncontent=0.19494501710742
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_w1.ph=6.01071695406593
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_w1.totalrunoffrate_m3_m2_day=8.59178082191781e-04
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_w1.totalerosionrate_kg_m2_day=2.46185117382204e-05
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_w1.volumefraction_liquid=0.206256222227618
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_e1.volumefraction_vapor=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_e1.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_e1.rho=2600
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_e1.fractionsand=0.877045148806781
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_e1.organiccarboncontent=1.44559108080715e-02
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_e1.ph=5.5059200221137
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_e1.volumefraction_liquid=8.38689763199116e-02
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_e2.volumefraction_vapor=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_e2.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_e2.rho=2600
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_e2.fractionsand=0.875425597381342
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_e2.organiccarboncontent=1.73234499295855e-02
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_e2.ph=5.558441898527
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_e2.volumefraction_liquid=8.43882160392799e-02
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_e3.volumefraction_vapor=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_e3.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_e3.rho=2600
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_e3.fractionsand=0.918583390950296
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_e3.organiccarboncontent=1.03735097752313e-02
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_e3.ph=5.3735653376354
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_e3.volumefraction_liquid=7.53660597679957e-02
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n1.volumefraction_vapor=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n1.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n1.rho=2600
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n1.fractionsand=0.739686564123459
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n1.organiccarboncontent=0.13803872790674
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n1.ph=6.23628097885385
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n1.volumefraction_liquid=0.162298563716003
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n2.volumefraction_vapor=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n2.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n2.rho=2600
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n2.fractionsand=0.857577802431748
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n2.organiccarboncontent=4.49271192196484e-02
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n2.ph=5.8227878879408
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n2.volumefraction_liquid=9.84649405556139e-02
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_ne1.volumefraction_vapor=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_ne1.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_ne1.rho=2600
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_ne1.fractionsand=0.900648893415547
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_ne1.organiccarboncontent=1.04687620030421e-02
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_ne1.ph=5.79147489539749
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_ne1.volumefraction_liquid=7.47373926447919e-02
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_ne2.volumefraction_vapor=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_ne2.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_ne2.rho=2600
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_ne2.fractionsand=0.812664737260243
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_ne2.organiccarboncontent=2.68178386952884e-02
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_ne2.ph=5.88358869594825
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_ne2.volumefraction_liquid=0.100317784587448
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_ne3.volumefraction_vapor=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_ne3.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_ne3.rho=2600
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_ne3.fractionsand=0.881875221112014
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_ne3.organiccarboncontent=1.47266827583216e-02
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_ne3.ph=5.62868002103552
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_ne3.volumefraction_liquid=8.26805947315581e-02
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_nw1.volumefraction_vapor=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_nw1.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_nw1.rho=2600
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_nw1.fractionsand=0.723536440776474
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_nw1.organiccarboncontent=0.205206236647212
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_nw1.ph=6.22094091255397
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_nw1.volumefraction_liquid=0.209534077259871
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_nw2.volumefraction_vapor=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_nw2.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_nw2.rho=2600
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_nw2.fractionsand=0.861841921294478
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_nw2.organiccarboncontent=4.84232431183359e-02
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_nw2.ph=5.82176257545271
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_nw2.volumefraction_liquid=9.92696960175948e-02
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s1.volumefraction_vapor=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s1.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s1.rho=2600
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s1.fractionsand=0.90622641509434
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s1.organiccarboncontent=1.46652298479725e-02
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s1.ph=5.9559510567297
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s1.volumefraction_liquid=7.52164261931188e-02
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s2.volumefraction_vapor=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s2.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s2.rho=2600
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s2.fractionsand=0.752960964060223
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s2.organiccarboncontent=3.13920204264884e-02
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s2.ph=6.0553382434858
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s2.volumefraction_liquid=0.115125667799903
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_se1.volumefraction_vapor=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_se1.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_se1.rho=2600
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_se1.fractionsand=0.752132428361709
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_se1.organiccarboncontent=4.14711626754184e-02
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_se1.ph=6.10096413716432
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_se1.volumefraction_liquid=0.122789841947723
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_se2.volumefraction_vapor=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_se2.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_se2.rho=2600
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_se2.fractionsand=0.775261137458456
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_se2.organiccarboncontent=3.94475235280682e-02
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_se2.ph=5.91188410349024
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_se2.volumefraction_liquid=0.115343739497367
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_sw1.volumefraction_vapor=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_sw1.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_sw1.rho=2600
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_sw1.fractionsand=0.70207400779448
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_sw1.organiccarboncontent=0.16522804496161
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_sw1.ph=5.96950495989368
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_sw1.volumefraction_liquid=0.189500516980832
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_sw2.volumefraction_vapor=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_sw2.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_sw2.rho=2600
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_sw2.fractionsand=0.795147446045064
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_sw2.organiccarboncontent=7.75976869049065e-02
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_sw2.ph=5.89602182526448
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_sw2.volumefraction_liquid=0.131109703973405
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_w1.volumefraction_vapor=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_w1.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_w1.rho=2600
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_w1.fractionsand=0.731535415098463
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_w1.organiccarboncontent=0.154564705237937
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_w1.ph=6.1852750162362
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_w1.volumefraction_liquid=0.178999101571037
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_e1.volumefraction_vapor=0.22
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_e1.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_e1.rho=2600
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_e1.fractionsand=0.837682530175988
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_e1.organiccarboncontent=5.62756466436244e-03
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_e1.ph=6.07324702847139
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_e1.volumefraction_liquid=7.32405786418502e-02
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_e2.volumefraction_vapor=0.22
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_e2.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_e2.rho=2600
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_e2.fractionsand=0.829590441898527
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_e2.organiccarboncontent=8.85647623035055e-03
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_e2.ph=6.12389525368249
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_e2.volumefraction_liquid=7.50245499181669e-02
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_e3.volumefraction_vapor=0.22
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_e3.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_e3.rho=2600
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_e3.fractionsand=0.933569178766229
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_e3.organiccarboncontent=2.25878591680647e-03
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_e3.ph=5.93766612890835
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_e3.volumefraction_liquid=5.95767073826535e-02
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n1.volumefraction_vapor=0.22
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n1.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n1.rho=2600
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n1.fractionsand=0.851404858918203
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n1.organiccarboncontent=7.00027035446342e-02
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n1.ph=6.45699069984933
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n1.volumefraction_liquid=0.106972089232963
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n2.volumefraction_vapor=0.22
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n2.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n2.rho=2600
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n2.fractionsand=0.886746420593394
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n2.organiccarboncontent=2.16442136950633e-02
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n2.ph=6.0889360416824
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n2.volumefraction_liquid=7.63402347790888e-02
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_ne1.volumefraction_vapor=0.22
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_ne1.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_ne1.rho=2600
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_ne1.fractionsand=0.92773601629597
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_ne1.organiccarboncontent=2.51055627538243e-03
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_ne1.ph=5.97669566174851
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_ne1.volumefraction_liquid=6.26379101519489e-02
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_ne2.volumefraction_vapor=0.22
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_ne2.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_ne2.rho=2600
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_ne2.fractionsand=0.735324026784701
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_ne2.organiccarboncontent=9.12899573207909e-03
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_ne2.ph=6.24413800930655
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_ne2.volumefraction_liquid=8.61979344001816e-02
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_ne3.volumefraction_vapor=0.22
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_ne3.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_ne3.rho=2600
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_ne3.fractionsand=0.845038772290481
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_ne3.organiccarboncontent=8.93914319164004e-03
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_ne3.ph=6.01642204905101
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_ne3.volumefraction_liquid=7.54615862695415e-02
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_nw1.volumefraction_vapor=0.22
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_nw1.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_nw1.rho=2600
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_nw1.fractionsand=0.767569820605215
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_nw1.organiccarboncontent=0.171150069788167
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_nw1.ph=6.48811690510455
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_nw1.volumefraction_liquid=0.179809175093959
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_nw2.volumefraction_vapor=0.22
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_nw2.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_nw2.rho=2600
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_nw2.fractionsand=0.868725060875029
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_nw2.organiccarboncontent=3.11969421372113e-02
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_nw2.ph=6.10976861167002
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_nw2.volumefraction_liquid=8.19670489356688e-02
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s1.volumefraction_vapor=0.22
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s1.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s1.rho=2600
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s1.fractionsand=0.913433962264151
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s1.organiccarboncontent=6.12484835970369e-03
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s1.ph=6.37864293659622
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s1.volumefraction_liquid=5.48057713651498e-02
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s2.volumefraction_vapor=0.22
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s2.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s2.rho=2600
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s2.fractionsand=0.642071211753278
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s2.organiccarboncontent=1.98045344036956e-02
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s2.ph=6.67197499535805
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s2.volumefraction_liquid=0.102882467217096
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_se1.volumefraction_vapor=0.22
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_se1.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_se1.rho=2600
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_se1.fractionsand=0.698925168252273
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_se1.organiccarboncontent=2.42928172606725e-02
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_se1.ph=6.65889287151866
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_se1.volumefraction_liquid=0.105523631579951
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_se2.volumefraction_vapor=0.22
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_se2.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_se2.rho=2600
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_se2.fractionsand=0.714820568355801
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_se2.organiccarboncontent=2.89675483305645e-02
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_se2.ph=6.39526912959837
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_se2.volumefraction_liquid=0.104006871055678
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_sw1.volumefraction_vapor=0.22
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_sw1.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_sw1.rho=2600
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_sw1.fractionsand=0.666094209814682
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_sw1.organiccarboncontent=0.153790167745945
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_sw1.ph=6.10308510133371
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_sw1.volumefraction_liquid=0.179415811659906
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_sw2.volumefraction_vapor=0.22
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_sw2.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_sw2.rho=2600
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_sw2.fractionsand=0.796203564455702
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_sw2.organiccarboncontent=5.38593862936606e-02
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_sw2.ph=6.14868794941234
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_sw2.volumefraction_liquid=0.110055669885494
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_w1.volumefraction_vapor=0.22
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_w1.averageverticalvelocity=4.2958904109589e-04
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_w1.rho=2600
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_w1.fractionsand=0.763091105553262
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_w1.organiccarboncontent=0.106513148346941
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_w1.ph=6.30777589049308
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_w1.volumefraction_liquid=0.14471043877328
+except:
+	pass
+try:
+	groundwater_in_gw_e1.fractionsand=0.4
+except:
+	pass
+try:
+	groundwater_in_gw_e1.organiccarboncontent=0.004
+except:
+	pass
+try:
+	groundwater_in_gw_e1.ph=6.8
+except:
+	pass
+try:
+	groundwater_in_gw_e1.porosity=0.2
+except:
+	pass
+try:
+	groundwater_in_gw_e1.rho=2600
+except:
+	pass
+try:
+	groundwater_in_gw_e2.fractionsand=0.4
+except:
+	pass
+try:
+	groundwater_in_gw_e2.organiccarboncontent=0.004
+except:
+	pass
+try:
+	groundwater_in_gw_e2.ph=6.8
+except:
+	pass
+try:
+	groundwater_in_gw_e2.porosity=0.2
+except:
+	pass
+try:
+	groundwater_in_gw_e2.rho=2600
+except:
+	pass
+try:
+	groundwater_in_gw_e3.fractionsand=0.4
+except:
+	pass
+try:
+	groundwater_in_gw_e3.organiccarboncontent=0.004
+except:
+	pass
+try:
+	groundwater_in_gw_e3.ph=6.8
+except:
+	pass
+try:
+	groundwater_in_gw_e3.porosity=0.2
+except:
+	pass
+try:
+	groundwater_in_gw_e3.rho=2600
+except:
+	pass
+try:
+	groundwater_in_gw_n1.fractionsand=0.4
+except:
+	pass
+try:
+	groundwater_in_gw_n1.organiccarboncontent=0.004
+except:
+	pass
+try:
+	groundwater_in_gw_n1.ph=6.8
+except:
+	pass
+try:
+	groundwater_in_gw_n1.porosity=0.2
+except:
+	pass
+try:
+	groundwater_in_gw_n1.rho=2600
+except:
+	pass
+try:
+	groundwater_in_gw_n2.fractionsand=0.4
+except:
+	pass
+try:
+	groundwater_in_gw_n2.organiccarboncontent=0.004
+except:
+	pass
+try:
+	groundwater_in_gw_n2.ph=6.8
+except:
+	pass
+try:
+	groundwater_in_gw_n2.porosity=0.2
+except:
+	pass
+try:
+	groundwater_in_gw_n2.rho=2600
+except:
+	pass
+try:
+	groundwater_in_gw_ne1.fractionsand=0.4
+except:
+	pass
+try:
+	groundwater_in_gw_ne1.organiccarboncontent=0.004
+except:
+	pass
+try:
+	groundwater_in_gw_ne1.ph=6.8
+except:
+	pass
+try:
+	groundwater_in_gw_ne1.porosity=0.2
+except:
+	pass
+try:
+	groundwater_in_gw_ne1.rho=2600
+except:
+	pass
+try:
+	groundwater_in_gw_ne2.fractionsand=0.4
+except:
+	pass
+try:
+	groundwater_in_gw_ne2.organiccarboncontent=0.004
+except:
+	pass
+try:
+	groundwater_in_gw_ne2.ph=6.8
+except:
+	pass
+try:
+	groundwater_in_gw_ne2.porosity=0.2
+except:
+	pass
+try:
+	groundwater_in_gw_ne2.rho=2600
+except:
+	pass
+try:
+	groundwater_in_gw_ne3.fractionsand=0.4
+except:
+	pass
+try:
+	groundwater_in_gw_ne3.organiccarboncontent=0.004
+except:
+	pass
+try:
+	groundwater_in_gw_ne3.ph=6.8
+except:
+	pass
+try:
+	groundwater_in_gw_ne3.porosity=0.2
+except:
+	pass
+try:
+	groundwater_in_gw_ne3.rho=2600
+except:
+	pass
+try:
+	groundwater_in_gw_nw1.fractionsand=0.4
+except:
+	pass
+try:
+	groundwater_in_gw_nw1.organiccarboncontent=0.004
+except:
+	pass
+try:
+	groundwater_in_gw_nw1.ph=6.8
+except:
+	pass
+try:
+	groundwater_in_gw_nw1.porosity=0.2
+except:
+	pass
+try:
+	groundwater_in_gw_nw1.rho=2600
+except:
+	pass
+try:
+	groundwater_in_gw_nw2.fractionsand=0.4
+except:
+	pass
+try:
+	groundwater_in_gw_nw2.organiccarboncontent=0.004
+except:
+	pass
+try:
+	groundwater_in_gw_nw2.ph=6.8
+except:
+	pass
+try:
+	groundwater_in_gw_nw2.porosity=0.2
+except:
+	pass
+try:
+	groundwater_in_gw_nw2.rho=2600
+except:
+	pass
+try:
+	groundwater_in_gw_s1.fractionsand=0.4
+except:
+	pass
+try:
+	groundwater_in_gw_s1.organiccarboncontent=0.004
+except:
+	pass
+try:
+	groundwater_in_gw_s1.ph=6.8
+except:
+	pass
+try:
+	groundwater_in_gw_s1.porosity=0.2
+except:
+	pass
+try:
+	groundwater_in_gw_s1.rho=2600
+except:
+	pass
+try:
+	groundwater_in_gw_s2.fractionsand=0.4
+except:
+	pass
+try:
+	groundwater_in_gw_s2.organiccarboncontent=0.004
+except:
+	pass
+try:
+	groundwater_in_gw_s2.ph=6.8
+except:
+	pass
+try:
+	groundwater_in_gw_s2.porosity=0.2
+except:
+	pass
+try:
+	groundwater_in_gw_s2.rho=2600
+except:
+	pass
+try:
+	groundwater_in_gw_se1.fractionsand=0.4
+except:
+	pass
+try:
+	groundwater_in_gw_se1.organiccarboncontent=0.004
+except:
+	pass
+try:
+	groundwater_in_gw_se1.ph=6.8
+except:
+	pass
+try:
+	groundwater_in_gw_se1.porosity=0.2
+except:
+	pass
+try:
+	groundwater_in_gw_se1.rho=2600
+except:
+	pass
+try:
+	groundwater_in_gw_se2.fractionsand=0.4
+except:
+	pass
+try:
+	groundwater_in_gw_se2.organiccarboncontent=0.004
+except:
+	pass
+try:
+	groundwater_in_gw_se2.ph=6.8
+except:
+	pass
+try:
+	groundwater_in_gw_se2.porosity=0.2
+except:
+	pass
+try:
+	groundwater_in_gw_se2.rho=2600
+except:
+	pass
+try:
+	groundwater_in_gw_sw1.fractionsand=0.4
+except:
+	pass
+try:
+	groundwater_in_gw_sw1.organiccarboncontent=0.004
+except:
+	pass
+try:
+	groundwater_in_gw_sw1.ph=6.8
+except:
+	pass
+try:
+	groundwater_in_gw_sw1.porosity=0.2
+except:
+	pass
+try:
+	groundwater_in_gw_sw1.rho=2600
+except:
+	pass
+try:
+	groundwater_in_gw_sw2.fractionsand=0.4
+except:
+	pass
+try:
+	groundwater_in_gw_sw2.organiccarboncontent=0.004
+except:
+	pass
+try:
+	groundwater_in_gw_sw2.ph=6.8
+except:
+	pass
+try:
+	groundwater_in_gw_sw2.porosity=0.2
+except:
+	pass
+try:
+	groundwater_in_gw_sw2.rho=2600
+except:
+	pass
+try:
+	groundwater_in_gw_w1.fractionsand=0.4
+except:
+	pass
+try:
+	groundwater_in_gw_w1.organiccarboncontent=0.004
+except:
+	pass
+try:
+	groundwater_in_gw_w1.ph=6.8
+except:
+	pass
+try:
+	groundwater_in_gw_w1.porosity=0.2
+except:
+	pass
+try:
+	groundwater_in_gw_w1.rho=2600
+except:
+	pass
+try:
+	foundries_ss.outputdir='c\\users\\13963\\documents\\rtr\\foundries\\dryrun\\output'
+except:
+	pass
+try:
+	foundries_ss.simulationbegindatetime='01_01_1990_000000_est'
+except:
+	pass
+try:
+	foundries_ss.simulationenddatetime='01_01_2040_000000_est'
+except:
+	pass
+try:
+	foundries_ss.evaluatehtmlpropertiesattime='06_15_2039_120000_est'
+except:
+	pass
+try:
+	foundries_ss.simulationtimestep=1
+except:
+	pass
+try:
+	foundries_ss.simulationstepsperoutputstep=4
+except:
+	pass
+try:
+	foundries_ss.simulatesteadystate=False
+except:
+	pass
+try:
+	foundries_ss.averageresultsfiles=True
+except:
+	pass
+try:
+	foundries_ss.averaginginterval='annual'
+except:
+	pass
+try:
+	foundries_ss.enableboundarycontributions=False
+except:
+	pass
+try:
+	foundries_ss.exportallresultstodb=False
+except:
+	pass
+try:
+	foundries_ss.exportavgresultstodb=False
+except:
+	pass
+try:
+	foundries_ss.exportingestioninputs=False
+except:
+	pass
+try:
+	foundries_ss.exportdeposition=True
+except:
+	pass
+try:
+	foundries_ss.exportbiotaintakerates=False
+except:
+	pass
+try:
+	foundries_ss.exportoutdoorenvironmentbeforerun=True
+except:
+	pass
+try:
+	foundries_ss.exportpropertiesbeforerun=True
+except:
+	pass
+try:
+	foundries_ss.exportriskecoinputs=False
+except:
+	pass
+try:
+	foundries_ss.fractioninitialconcentrations=0
+except:
+	pass
+try:
+	foundries_ss.exportmass=True
+except:
+	pass
+try:
+	foundries_ss.exportconcentration=True
+except:
+	pass
+try:
+	foundries_ss.exporthtml=True
+except:
+	pass
+try:
+	foundries_ss.exporttimestepsdown=True
+except:
+	pass
+try:
+	foundries_ss.significantdigits=4
+except:
+	pass
+try:
+	foundries_ss.isday_steadystate_forair=0
+except:
+	pass
+try:
+	foundries_ss.isday_steadystate_forother=0
+except:
+	pass
+try:
+	foundries_ss.verticalwindspeed=0
+except:
+	pass
+try:
+	foundries_ss.airtemperature_k=get_met_ave("isf_met_mi_20181219.csv","airtemperature")
+except:
+	pass
+try:
+	foundries_ss.horizontalwindspeed=get_met_ave("isf_met_mi_20181219.csv","horizontalwindspeed")
+except:
+	pass
+try:
+	foundries_ss.winddirection=get_met_ave("isf_met_mi_20181219.csv","winddirection")
+except:
+	pass
+try:
+	foundries_ss.rain=get_met_ave("isf_met_mi_20181219.csv","rain")
+except:
+	pass
+try:
+	foundries_ss.cumulativerain=get_met_ave("isf_met_mi_20181219.csv","cumulativerain")
+except:
+	pass
+try:
+	foundries_ss.isday_dynamic=get_met_ave("isf_met_mi_20181219.csv","isday")
+except:
+	pass
+try:
+	air_e1.top=get_met_ave("isf_met_mi_20181219.csv","mixingheight")
+except:
+	pass
+try:
+	air_e2.top=get_met_ave("isf_met_mi_20181219.csv","mixingheight")
+except:
+	pass
+try:
+	air_e3.top=get_met_ave("isf_met_mi_20181219.csv","mixingheight")
+except:
+	pass
+try:
+	air_lakecadillac.top=get_met_ave("isf_met_mi_20181219.csv","mixingheight")
+except:
+	pass
+try:
+	air_lakemitchell.top=get_met_ave("isf_met_mi_20181219.csv","mixingheight")
+except:
+	pass
+try:
+	air_n1.top=get_met_ave("isf_met_mi_20181219.csv","mixingheight")
+except:
+	pass
+try:
+	air_n2.top=get_met_ave("isf_met_mi_20181219.csv","mixingheight")
+except:
+	pass
+try:
+	air_ne1.top=get_met_ave("isf_met_mi_20181219.csv","mixingheight")
+except:
+	pass
+try:
+	air_ne2.top=get_met_ave("isf_met_mi_20181219.csv","mixingheight")
+except:
+	pass
+try:
+	air_ne3.top=get_met_ave("isf_met_mi_20181219.csv","mixingheight")
+except:
+	pass
+try:
+	air_nw1.top=get_met_ave("isf_met_mi_20181219.csv","mixingheight")
+except:
+	pass
+try:
+	air_nw2.top=get_met_ave("isf_met_mi_20181219.csv","mixingheight")
+except:
+	pass
+try:
+	air_s1.top=get_met_ave("isf_met_mi_20181219.csv","mixingheight")
+except:
+	pass
+try:
+	air_s2.top=get_met_ave("isf_met_mi_20181219.csv","mixingheight")
+except:
+	pass
+try:
+	air_se1.top=get_met_ave("isf_met_mi_20181219.csv","mixingheight")
+except:
+	pass
+try:
+	air_se2.top=get_met_ave("isf_met_mi_20181219.csv","mixingheight")
+except:
+	pass
+try:
+	air_sw1.top=get_met_ave("isf_met_mi_20181219.csv","mixingheight")
+except:
+	pass
+try:
+	air_sw2.top=get_met_ave("isf_met_mi_20181219.csv","mixingheight")
+except:
+	pass
+try:
+	air_w1.top=get_met_ave("isf_met_mi_20181219.csv","mixingheight")
+except:
+	pass
+try:
+	upperair_e1.bottom=get_met_ave("isf_met_mi_20181219.csv","mixingheight")
+except:
+	pass
+try:
+	air_in_air_e1.dustload=0.0000000615
+except:
+	pass
+try:
+	air_in_air_e2.dustload=0.0000000615
+except:
+	pass
+try:
+	air_in_air_e3.dustload=0.0000000615
+except:
+	pass
+try:
+	air_in_air_lakecadillac.dustload=0.0000000615
+except:
+	pass
+try:
+	air_in_air_lakemitchell.dustload=0.0000000615
+except:
+	pass
+try:
+	air_in_air_n1.dustload=0.0000000615
+except:
+	pass
+try:
+	air_in_air_n2.dustload=0.0000000615
+except:
+	pass
+try:
+	air_in_air_ne1.dustload=0.0000000615
+except:
+	pass
+try:
+	air_in_air_ne2.dustload=0.0000000615
+except:
+	pass
+try:
+	air_in_air_ne3.dustload=0.0000000615
+except:
+	pass
+try:
+	air_in_air_nw1.dustload=0.0000000615
+except:
+	pass
+try:
+	air_in_air_nw2.dustload=0.0000000615
+except:
+	pass
+try:
+	air_in_air_s1.dustload=0.0000000615
+except:
+	pass
+try:
+	air_in_air_s2.dustload=0.0000000615
+except:
+	pass
+try:
+	air_in_air_se1.dustload=0.0000000615
+except:
+	pass
+try:
+	air_in_air_se2.dustload=0.0000000615
+except:
+	pass
+try:
+	air_in_air_sw1.dustload=0.0000000615
+except:
+	pass
+try:
+	air_in_air_sw2.dustload=0.0000000615
+except:
+	pass
+try:
+	air_in_air_w1.dustload=0.0000000615
+except:
+	pass
+try:
+	air_in_air_e1.airdensity_g_cm3=0.0012
+except:
+	pass
+try:
+	air_in_air_e2.airdensity_g_cm3=0.0012
+except:
+	pass
+try:
+	air_in_air_e3.airdensity_g_cm3=0.0012
+except:
+	pass
+try:
+	air_in_air_lakecadillac.airdensity_g_cm3=0.0012
+except:
+	pass
+try:
+	air_in_air_lakemitchell.airdensity_g_cm3=0.0012
+except:
+	pass
+try:
+	air_in_air_n1.airdensity_g_cm3=0.0012
+except:
+	pass
+try:
+	air_in_air_n2.airdensity_g_cm3=0.0012
+except:
+	pass
+try:
+	air_in_air_ne1.airdensity_g_cm3=0.0012
+except:
+	pass
+try:
+	air_in_air_ne2.airdensity_g_cm3=0.0012
+except:
+	pass
+try:
+	air_in_air_ne3.airdensity_g_cm3=0.0012
+except:
+	pass
+try:
+	air_in_air_nw1.airdensity_g_cm3=0.0012
+except:
+	pass
+try:
+	air_in_air_nw2.airdensity_g_cm3=0.0012
+except:
+	pass
+try:
+	air_in_air_s1.airdensity_g_cm3=0.0012
+except:
+	pass
+try:
+	air_in_air_s2.airdensity_g_cm3=0.0012
+except:
+	pass
+try:
+	air_in_air_se1.airdensity_g_cm3=0.0012
+except:
+	pass
+try:
+	air_in_air_se2.airdensity_g_cm3=0.0012
+except:
+	pass
+try:
+	air_in_air_sw1.airdensity_g_cm3=0.0012
+except:
+	pass
+try:
+	air_in_air_sw2.airdensity_g_cm3=0.0012
+except:
+	pass
+try:
+	air_in_air_w1.airdensity_g_cm3=0.0012
+except:
+	pass
+try:
+	air_in_air_e1.dustdensity=1400
+except:
+	pass
+try:
+	air_in_air_e2.dustdensity=1400
+except:
+	pass
+try:
+	air_in_air_e3.dustdensity=1400
+except:
+	pass
+try:
+	air_in_air_lakecadillac.dustdensity=1400
+except:
+	pass
+try:
+	air_in_air_lakemitchell.dustdensity=1400
+except:
+	pass
+try:
+	air_in_air_n1.dustdensity=1400
+except:
+	pass
+try:
+	air_in_air_n2.dustdensity=1400
+except:
+	pass
+try:
+	air_in_air_ne1.dustdensity=1400
+except:
+	pass
+try:
+	air_in_air_ne2.dustdensity=1400
+except:
+	pass
+try:
+	air_in_air_ne3.dustdensity=1400
+except:
+	pass
+try:
+	air_in_air_nw1.dustdensity=1400
+except:
+	pass
+try:
+	air_in_air_nw2.dustdensity=1400
+except:
+	pass
+try:
+	air_in_air_s1.dustdensity=1400
+except:
+	pass
+try:
+	air_in_air_s2.dustdensity=1400
+except:
+	pass
+try:
+	air_in_air_se1.dustdensity=1400
+except:
+	pass
+try:
+	air_in_air_se2.dustdensity=1400
+except:
+	pass
+try:
+	air_in_air_sw1.dustdensity=1400
+except:
+	pass
+try:
+	air_in_air_sw2.dustdensity=1400
+except:
+	pass
+try:
+	air_in_air_w1.dustdensity=1400
+except:
+	pass
+try:
+	air_in_air_e1.fractionorganicmatteronparticulates=0.2
+except:
+	pass
+try:
+	air_in_air_e2.fractionorganicmatteronparticulates=0.2
+except:
+	pass
+try:
+	air_in_air_e3.fractionorganicmatteronparticulates=0.2
+except:
+	pass
+try:
+	air_in_air_lakecadillac.fractionorganicmatteronparticulates=0.2
+except:
+	pass
+try:
+	air_in_air_lakemitchell.fractionorganicmatteronparticulates=0.2
+except:
+	pass
+try:
+	air_in_air_n1.fractionorganicmatteronparticulates=0.2
+except:
+	pass
+try:
+	air_in_air_n2.fractionorganicmatteronparticulates=0.2
+except:
+	pass
+try:
+	air_in_air_ne1.fractionorganicmatteronparticulates=0.2
+except:
+	pass
+try:
+	air_in_air_ne2.fractionorganicmatteronparticulates=0.2
+except:
+	pass
+try:
+	air_in_air_ne3.fractionorganicmatteronparticulates=0.2
+except:
+	pass
+try:
+	air_in_air_nw1.fractionorganicmatteronparticulates=0.2
+except:
+	pass
+try:
+	air_in_air_nw2.fractionorganicmatteronparticulates=0.2
+except:
+	pass
+try:
+	air_in_air_s1.fractionorganicmatteronparticulates=0.2
+except:
+	pass
+try:
+	air_in_air_s2.fractionorganicmatteronparticulates=0.2
+except:
+	pass
+try:
+	air_in_air_se1.fractionorganicmatteronparticulates=0.2
+except:
+	pass
+try:
+	air_in_air_se2.fractionorganicmatteronparticulates=0.2
+except:
+	pass
+try:
+	air_in_air_sw1.fractionorganicmatteronparticulates=0.2
+except:
+	pass
+try:
+	air_in_air_sw2.fractionorganicmatteronparticulates=0.2
+except:
+	pass
+try:
+	air_in_air_w1.fractionorganicmatteronparticulates=0.2
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.litterfallrate=get_met_ave("litterfallrate_foundries.csv","litterfallrate")
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.litterfallrate=get_met_ave("litterfallrate_foundries.csv","litterfallrate")
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.litterfallrate=get_met_ave("litterfallrate_foundries.csv","litterfallrate")
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.litterfallrate=get_met_ave("litterfallrate_foundries.csv","litterfallrate")
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.litterfallrate=get_met_ave("litterfallrate_foundries.csv","litterfallrate")
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.litterfallrate=get_met_ave("litterfallrate_foundries.csv","litterfallrate")
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.litterfallrate=get_met_ave("litterfallrate_foundries.csv","litterfallrate")
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.litterfallrate=get_met_ave("litterfallrate_foundries.csv","litterfallrate")
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.litterfallrate=get_met_ave("litterfallrate_foundries.csv","litterfallrate")
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_particle_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.allowexchange_dynamic=get_met_ave("allowexchange_foundries.csv","allowexchange")
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.litterfallrate=get_met_ave("litterfallrate_foundries.csv","litterfallrate")
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.litterfallrate=get_met_ave("litterfallrate_foundries.csv","litterfallrate")
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.litterfallrate=get_met_ave("litterfallrate_foundries.csv","litterfallrate")
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.litterfallrate=get_met_ave("litterfallrate_foundries.csv","litterfallrate")
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.litterfallrate=get_met_ave("litterfallrate_foundries.csv","litterfallrate")
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.litterfallrate=get_met_ave("litterfallrate_foundries.csv","litterfallrate")
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.litterfallrate=get_met_ave("litterfallrate_foundries.csv","litterfallrate")
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.litterfallrate=get_met_ave("litterfallrate_foundries.csv","litterfallrate")
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.isday_forair=1-0.448
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.isday_forair=1-0.448
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.isday_forair=1-0.448
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.isday_forair=1-0.448
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.isday_forair=1-0.448
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.isday_forair=1-0.448
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.isday_forair=1-0.448
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.isday_forair=1-0.448
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.isday_forair=1-0.448
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.isday_forair=1-0.448
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.isday_forair=1-0.448
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.isday_forair=1-0.448
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.isday_forair=1-0.448
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.isday_forair=1-0.448
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.isday_forair=1-0.448
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.isday_forair=1-0.448
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.isday_forair=1-0.448
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.isday_forother=1-0.391
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.isday_forother=1-0.391
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.isday_forother=1-0.391
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.isday_forother=1-0.391
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.isday_forother=1-0.391
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.isday_forother=1-0.391
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.isday_forother=1-0.391
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.isday_forother=1-0.391
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.isday_forother=1-0.391
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.isday_forother=1-0.391
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.isday_forother=1-0.391
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.isday_forother=1-0.391
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.isday_forother=1-0.391
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.isday_forother=1-0.391
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.isday_forother=1-0.391
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.isday_forother=1-0.391
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.isday_forother=1-0.391
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.166316379431134
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.166316379431134
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.166316379431134
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.166316379431134
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.166316379431134
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.166316379431134
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.166316379431134
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.166316379431134
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.166316379431134
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.166316379431134
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.166316379431134
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.166316379431134
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.166316379431134
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.166316379431134
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.166316379431134
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.166316379431134
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.166316379431134
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.166316379431134
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.166316379431134
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.166316379431134
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.166316379431134
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.166316379431134
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.166316379431134
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.166316379431134
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.166316379431134
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.166316379431134
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.166316379431134
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.166316379431134
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.166316379431134
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.166316379431134
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.166316379431134
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.166316379431134
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.166316379431134
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.166316379431134
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=6.05996917472327e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.193148381672972
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.193148381672972
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.193148381672972
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.193148381672972
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.193148381672972
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.193148381672972
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.193148381672972
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.193148381672972
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.193148381672972
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.193148381672972
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.193148381672972
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.193148381672972
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.193148381672972
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.193148381672972
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.193148381672972
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.193148381672972
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.193148381672972
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.193148381672972
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.193148381672972
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.193148381672972
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.193148381672972
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.193148381672972
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.193148381672972
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.193148381672972
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.193148381672972
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.193148381672972
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.193148381672972
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.193148381672972
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.193148381672972
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.193148381672972
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.193148381672972
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.193148381672972
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.193148381672972
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.193148381672972
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.360655737704918
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.360655737704918
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.360655737704918
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.360655737704918
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.360655737704918
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.360655737704918
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.360655737704918
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.360655737704918
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.360655737704918
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.360655737704918
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.360655737704918
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.360655737704918
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.360655737704918
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.360655737704918
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.360655737704918
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.360655737704918
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.360655737704918
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.360655737704918
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.360655737704918
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.360655737704918
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.360655737704918
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.360655737704918
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.360655737704918
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.360655737704918
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.360655737704918
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.360655737704918
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.360655737704918
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.360655737704918
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.360655737704918
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.360655737704918
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.360655737704918
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.360655737704918
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.360655737704918
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.360655737704918
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.219279809443744
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.219279809443744
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.219279809443744
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.219279809443744
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.219279809443744
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.219279809443744
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.219279809443744
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.219279809443744
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.219279809443744
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.219279809443744
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.219279809443744
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.219279809443744
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.219279809443744
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.219279809443744
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.219279809443744
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.219279809443744
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.219279809443744
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.219279809443744
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.219279809443744
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.219279809443744
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.219279809443744
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.219279809443744
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.219279809443744
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.219279809443744
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.219279809443744
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.219279809443744
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.219279809443744
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.219279809443744
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.219279809443744
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.219279809443744
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.219279809443744
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.219279809443744
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.219279809443744
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.219279809443744
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=1.11022302462516e-16
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.227723454069687
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.227723454069687
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.227723454069687
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.227723454069687
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.227723454069687
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.227723454069687
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.227723454069687
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.227723454069687
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.227723454069687
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.227723454069687
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.227723454069687
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.227723454069687
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.227723454069687
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.227723454069687
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.227723454069687
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.227723454069687
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.227723454069687
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.227723454069687
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.227723454069687
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.227723454069687
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.227723454069687
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.227723454069687
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.227723454069687
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.227723454069687
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.227723454069687
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.227723454069687
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.227723454069687
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.227723454069687
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.227723454069687
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.227723454069687
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.227723454069687
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.227723454069687
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.227723454069687
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.227723454069687
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.325299545517146
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.325299545517146
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.325299545517146
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.325299545517146
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.325299545517146
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.325299545517146
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.325299545517146
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.325299545517146
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.325299545517146
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.325299545517146
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.325299545517146
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.325299545517146
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.325299545517146
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.325299545517146
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.325299545517146
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.325299545517146
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.325299545517146
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.325299545517146
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.325299545517146
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.325299545517146
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.325299545517146
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.325299545517146
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.325299545517146
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.325299545517146
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.325299545517146
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.325299545517146
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.325299545517146
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.325299545517146
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.325299545517146
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.325299545517146
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.325299545517146
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.325299545517146
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.325299545517146
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.325299545517146
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.425354634347886
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.425354634347886
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.425354634347886
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.425354634347886
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.425354634347886
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.425354634347886
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.425354634347886
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.425354634347886
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.425354634347886
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.425354634347886
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.425354634347886
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.425354634347886
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.425354634347886
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.425354634347886
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.425354634347886
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.425354634347886
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.425354634347886
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.425354634347886
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.425354634347886
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.425354634347886
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.425354634347886
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.425354634347886
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.425354634347886
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.425354634347886
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.425354634347886
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.425354634347886
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.425354634347886
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.425354634347886
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.425354634347886
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.425354634347886
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.425354634347886
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.425354634347886
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.425354634347886
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.425354634347886
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=2.16223660652803e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.183145895883161
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.183145895883161
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.183145895883161
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.183145895883161
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.183145895883161
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.183145895883161
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.183145895883161
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.183145895883161
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.183145895883161
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.183145895883161
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.183145895883161
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.183145895883161
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.183145895883161
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.183145895883161
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.183145895883161
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.183145895883161
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.183145895883161
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.183145895883161
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.183145895883161
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.183145895883161
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.183145895883161
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.183145895883161
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.183145895883161
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.183145895883161
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.183145895883161
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.183145895883161
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.183145895883161
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.183145895883161
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.183145895883161
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.183145895883161
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.183145895883161
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.183145895883161
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.183145895883161
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.183145895883161
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.193018167014401
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.193018167014401
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.193018167014401
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.193018167014401
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.193018167014401
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.193018167014401
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.193018167014401
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.193018167014401
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.193018167014401
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.193018167014401
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.193018167014401
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.193018167014401
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.193018167014401
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.193018167014401
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.193018167014401
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.193018167014401
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.193018167014401
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.193018167014401
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.193018167014401
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.193018167014401
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.193018167014401
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.193018167014401
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.193018167014401
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.193018167014401
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.193018167014401
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.193018167014401
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.193018167014401
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.193018167014401
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.193018167014401
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.193018167014401
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.193018167014401
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.193018167014401
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.193018167014401
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.193018167014401
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.623835937102438
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.623835937102438
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.623835937102438
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.623835937102438
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.623835937102438
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.623835937102438
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.623835937102438
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.623835937102438
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.623835937102438
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.623835937102438
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.623835937102438
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.623835937102438
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.623835937102438
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.623835937102438
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.623835937102438
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.623835937102438
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.623835937102438
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.623835937102438
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.623835937102438
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.623835937102438
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.623835937102438
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.623835937102438
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.623835937102438
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.623835937102438
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.623835937102438
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.623835937102438
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.623835937102438
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.623835937102438
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.623835937102438
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.623835937102438
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.623835937102438
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.623835937102438
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.623835937102438
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.623835937102438
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.314574994113492
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.314574994113492
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.314574994113492
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.314574994113492
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.314574994113492
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.314574994113492
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.314574994113492
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.314574994113492
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.314574994113492
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.314574994113492
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.314574994113492
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.314574994113492
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.314574994113492
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.314574994113492
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.314574994113492
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.314574994113492
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.314574994113492
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.314574994113492
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.314574994113492
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.314574994113492
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.314574994113492
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.314574994113492
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.314574994113492
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.314574994113492
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.314574994113492
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.314574994113492
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.314574994113492
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.314574994113492
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.314574994113492
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.314574994113492
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.314574994113492
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.314574994113492
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.314574994113492
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.314574994113492
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=5.10948905109489e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.206263244643278
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.206263244643278
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.206263244643278
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.206263244643278
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.206263244643278
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.206263244643278
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.206263244643278
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.206263244643278
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.206263244643278
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.206263244643278
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.206263244643278
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.206263244643278
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.206263244643278
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.206263244643278
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.206263244643278
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.206263244643278
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.206263244643278
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.206263244643278
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.206263244643278
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.206263244643278
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.206263244643278
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.206263244643278
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.206263244643278
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.206263244643278
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.206263244643278
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.206263244643278
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.206263244643278
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.206263244643278
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.206263244643278
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.206263244643278
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.206263244643278
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.206263244643278
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.206263244643278
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.206263244643278
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.294796326818931
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.294796326818931
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.294796326818931
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.294796326818931
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.294796326818931
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.294796326818931
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.294796326818931
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.294796326818931
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.294796326818931
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.294796326818931
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.294796326818931
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.294796326818931
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.294796326818931
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.294796326818931
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.294796326818931
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.294796326818931
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.294796326818931
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.294796326818931
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.294796326818931
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.294796326818931
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.294796326818931
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.294796326818931
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.294796326818931
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.294796326818931
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.294796326818931
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.294796326818931
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.294796326818931
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.294796326818931
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.294796326818931
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.294796326818931
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.294796326818931
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.294796326818931
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.294796326818931
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.294796326818931
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.108311749470214
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.108311749470214
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.108311749470214
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.108311749470214
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.108311749470214
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.108311749470214
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.108311749470214
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.108311749470214
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.108311749470214
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.108311749470214
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.108311749470214
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.108311749470214
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.108311749470214
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.108311749470214
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.108311749470214
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.108311749470214
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.108311749470214
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.108311749470214
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.108311749470214
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.108311749470214
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.108311749470214
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.108311749470214
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.108311749470214
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.108311749470214
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.108311749470214
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.108311749470214
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.108311749470214
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.108311749470214
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.108311749470214
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.108311749470214
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.108311749470214
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.108311749470214
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.108311749470214
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.108311749470214
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=2.49587944431363e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.251383343839742
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.251383343839742
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.251383343839742
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.251383343839742
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.251383343839742
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.251383343839742
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.251383343839742
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.251383343839742
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.251383343839742
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.251383343839742
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.251383343839742
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.251383343839742
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.251383343839742
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.251383343839742
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.251383343839742
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.251383343839742
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.251383343839742
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.251383343839742
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.251383343839742
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.251383343839742
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.251383343839742
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.251383343839742
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.251383343839742
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.251383343839742
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.251383343839742
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.251383343839742
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.251383343839742
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.251383343839742
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.251383343839742
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.251383343839742
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.251383343839742
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.251383343839742
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.251383343839742
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.251383343839742
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.157666176367584
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.157666176367584
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.157666176367584
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.157666176367584
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.157666176367584
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.157666176367584
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.157666176367584
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.157666176367584
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.157666176367584
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.157666176367584
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.157666176367584
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.157666176367584
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.157666176367584
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.157666176367584
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.157666176367584
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.157666176367584
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.157666176367584
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.157666176367584
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.157666176367584
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.157666176367584
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.157666176367584
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.157666176367584
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.157666176367584
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.157666176367584
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.157666176367584
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.157666176367584
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.157666176367584
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.157666176367584
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.157666176367584
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.157666176367584
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.157666176367584
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.157666176367584
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.157666176367584
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.157666176367584
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.299082440288576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.299082440288576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.299082440288576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.299082440288576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.299082440288576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.299082440288576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.299082440288576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.299082440288576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.299082440288576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.299082440288576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.299082440288576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.299082440288576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.299082440288576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.299082440288576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.299082440288576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.299082440288576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.299082440288576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.299082440288576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.299082440288576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.299082440288576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.299082440288576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.299082440288576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.299082440288576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.299082440288576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.299082440288576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.299082440288576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.299082440288576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.299082440288576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.299082440288576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.299082440288576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.299082440288576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.299082440288576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.299082440288576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.299082440288576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=7.02528542410871e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.118232121594172
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.118232121594172
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.118232121594172
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.118232121594172
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.118232121594172
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.118232121594172
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.118232121594172
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.118232121594172
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.118232121594172
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.118232121594172
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.118232121594172
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.118232121594172
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.118232121594172
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.118232121594172
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.118232121594172
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.118232121594172
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.118232121594172
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.118232121594172
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.118232121594172
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.118232121594172
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.118232121594172
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.118232121594172
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.118232121594172
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.118232121594172
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.118232121594172
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.118232121594172
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.118232121594172
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.118232121594172
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.118232121594172
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.118232121594172
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.118232121594172
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.118232121594172
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.118232121594172
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.118232121594172
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.103383063668838
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.103383063668838
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.103383063668838
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.103383063668838
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.103383063668838
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.103383063668838
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.103383063668838
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.103383063668838
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.103383063668838
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.103383063668838
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.103383063668838
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.103383063668838
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.103383063668838
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.103383063668838
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.103383063668838
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.103383063668838
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.103383063668838
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.103383063668838
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.103383063668838
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.103383063668838
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.103383063668838
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.103383063668838
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.103383063668838
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.103383063668838
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.103383063668838
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.103383063668838
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.103383063668838
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.103383063668838
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.103383063668838
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.103383063668838
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.103383063668838
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.103383063668838
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.103383063668838
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.103383063668838
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.046303862286866
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.046303862286866
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.046303862286866
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.046303862286866
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.046303862286866
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.046303862286866
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.046303862286866
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.046303862286866
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.046303862286866
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.046303862286866
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.046303862286866
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.046303862286866
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.046303862286866
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.046303862286866
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.046303862286866
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.046303862286866
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.046303862286866
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.046303862286866
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.046303862286866
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.046303862286866
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.046303862286866
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.046303862286866
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.046303862286866
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.046303862286866
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.046303862286866
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.046303862286866
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.046303862286866
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.046303862286866
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.046303862286866
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.046303862286866
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.046303862286866
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.046303862286866
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.046303862286866
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.046303862286866
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.662145230702184
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.662145230702184
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.662145230702184
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.662145230702184
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.662145230702184
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.662145230702184
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.662145230702184
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.662145230702184
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.662145230702184
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.662145230702184
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.662145230702184
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.662145230702184
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.662145230702184
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.662145230702184
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.662145230702184
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.662145230702184
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.662145230702184
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.662145230702184
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.662145230702184
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.662145230702184
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.662145230702184
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.662145230702184
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.662145230702184
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.662145230702184
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.662145230702184
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.662145230702184
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.662145230702184
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.662145230702184
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.662145230702184
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.662145230702184
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.662145230702184
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.662145230702184
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.662145230702184
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.662145230702184
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=7.73546875851174e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=3.78602168110258e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=7.28332516206352e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.103502750994171
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.103502750994171
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.103502750994171
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.103502750994171
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.103502750994171
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.103502750994171
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.103502750994171
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.103502750994171
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.103502750994171
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.103502750994171
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.103502750994171
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.103502750994171
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.103502750994171
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.103502750994171
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.103502750994171
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.103502750994171
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.103502750994171
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.103502750994171
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.103502750994171
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.103502750994171
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.103502750994171
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.103502750994171
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.103502750994171
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.103502750994171
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.103502750994171
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.103502750994171
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.103502750994171
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.103502750994171
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.103502750994171
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.103502750994171
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.103502750994171
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.103502750994171
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.103502750994171
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.103502750994171
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.670849330461654
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.670849330461654
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.670849330461654
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.670849330461654
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.670849330461654
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.670849330461654
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.670849330461654
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.670849330461654
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.670849330461654
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.670849330461654
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.670849330461654
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.670849330461654
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.670849330461654
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.670849330461654
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.670849330461654
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.670849330461654
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.670849330461654
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.670849330461654
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.670849330461654
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.670849330461654
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.670849330461654
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.670849330461654
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.670849330461654
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.670849330461654
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.670849330461654
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.670849330461654
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.670849330461654
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.670849330461654
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.670849330461654
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.670849330461654
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.670849330461654
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.670849330461654
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.670849330461654
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.670849330461654
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.201142429066392
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.201142429066392
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.201142429066392
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.201142429066392
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.201142429066392
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.201142429066392
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.201142429066392
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.201142429066392
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.201142429066392
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.201142429066392
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.201142429066392
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.201142429066392
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.201142429066392
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.201142429066392
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.201142429066392
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.201142429066392
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.201142429066392
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.201142429066392
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.201142429066392
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.201142429066392
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.201142429066392
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.201142429066392
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.201142429066392
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.201142429066392
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.201142429066392
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.201142429066392
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.201142429066392
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.201142429066392
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.201142429066392
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.201142429066392
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.201142429066392
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.201142429066392
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.201142429066392
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.201142429066392
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.128008240471954
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.128008240471954
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.128008240471954
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.128008240471954
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.128008240471954
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.128008240471954
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.128008240471954
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.128008240471954
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.128008240471954
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.128008240471954
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.128008240471954
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.128008240471954
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.128008240471954
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.128008240471954
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.128008240471954
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.128008240471954
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.128008240471954
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.128008240471954
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.128008240471954
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.128008240471954
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.128008240471954
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.128008240471954
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.128008240471954
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.128008240471954
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.128008240471954
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.128008240471954
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.128008240471954
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.128008240471954
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.128008240471954
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.128008240471954
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.128008240471954
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.128008240471954
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.128008240471954
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.128008240471954
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.545410082768999
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.545410082768999
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.545410082768999
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.545410082768999
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.545410082768999
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.545410082768999
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.545410082768999
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.545410082768999
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.545410082768999
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.545410082768999
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.545410082768999
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.545410082768999
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.545410082768999
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.545410082768999
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.545410082768999
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.545410082768999
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.545410082768999
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.545410082768999
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.545410082768999
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.545410082768999
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.545410082768999
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.545410082768999
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.545410082768999
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.545410082768999
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.545410082768999
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.545410082768999
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.545410082768999
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.545410082768999
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.545410082768999
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.545410082768999
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.545410082768999
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.545410082768999
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.545410082768999
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.545410082768999
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.178668171557562
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.178668171557562
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.178668171557562
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.178668171557562
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.178668171557562
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.178668171557562
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.178668171557562
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.178668171557562
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.178668171557562
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.178668171557562
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.178668171557562
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.178668171557562
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.178668171557562
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.178668171557562
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.178668171557562
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.178668171557562
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.178668171557562
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.178668171557562
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.178668171557562
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.178668171557562
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.178668171557562
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.178668171557562
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.178668171557562
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.178668171557562
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.178668171557562
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.178668171557562
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.178668171557562
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.178668171557562
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.178668171557562
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.178668171557562
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.178668171557562
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.178668171557562
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.178668171557562
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.178668171557562
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.260835214446953
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.260835214446953
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.260835214446953
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.260835214446953
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.260835214446953
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.260835214446953
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.260835214446953
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.260835214446953
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.260835214446953
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.260835214446953
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.260835214446953
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.260835214446953
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.260835214446953
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.260835214446953
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.260835214446953
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.260835214446953
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.260835214446953
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.260835214446953
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.260835214446953
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.260835214446953
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.260835214446953
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.260835214446953
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.260835214446953
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.260835214446953
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.260835214446953
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.260835214446953
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.260835214446953
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.260835214446953
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.260835214446953
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.260835214446953
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.260835214446953
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.260835214446953
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.260835214446953
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.260835214446953
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=1.50865312264861e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.120812621569051
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.120812621569051
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.120812621569051
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.120812621569051
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.120812621569051
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.120812621569051
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.120812621569051
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.120812621569051
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.120812621569051
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.120812621569051
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.120812621569051
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.120812621569051
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.120812621569051
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.120812621569051
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.120812621569051
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.120812621569051
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.120812621569051
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.120812621569051
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.120812621569051
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.120812621569051
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.120812621569051
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.120812621569051
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.120812621569051
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.120812621569051
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.120812621569051
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.120812621569051
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.120812621569051
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.120812621569051
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.120812621569051
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.120812621569051
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.120812621569051
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.120812621569051
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.120812621569051
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.120812621569051
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.107845256105468
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.107845256105468
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.107845256105468
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.107845256105468
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.107845256105468
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.107845256105468
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.107845256105468
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.107845256105468
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.107845256105468
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.107845256105468
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.107845256105468
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.107845256105468
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.107845256105468
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.107845256105468
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.107845256105468
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.107845256105468
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.107845256105468
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.107845256105468
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.107845256105468
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.107845256105468
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.107845256105468
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.107845256105468
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.107845256105468
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.107845256105468
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.107845256105468
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.107845256105468
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.107845256105468
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.107845256105468
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.107845256105468
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.107845256105468
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.107845256105468
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.107845256105468
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.107845256105468
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.107845256105468
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.114869245731576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.114869245731576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.114869245731576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.114869245731576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.114869245731576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.114869245731576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.114869245731576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.114869245731576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.114869245731576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.114869245731576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.114869245731576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.114869245731576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.114869245731576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.114869245731576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.114869245731576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.114869245731576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.114869245731576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.114869245731576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.114869245731576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.114869245731576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.114869245731576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.114869245731576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.114869245731576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.114869245731576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.114869245731576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.114869245731576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.114869245731576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.114869245731576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.114869245731576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.114869245731576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.114869245731576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.114869245731576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.114869245731576
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.114869245731576
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.278798357467041
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.278798357467041
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.278798357467041
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.278798357467041
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.278798357467041
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.278798357467041
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.278798357467041
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.278798357467041
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.278798357467041
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.278798357467041
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.278798357467041
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.278798357467041
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.278798357467041
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.278798357467041
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.278798357467041
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.278798357467041
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.278798357467041
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.278798357467041
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.278798357467041
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.278798357467041
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.278798357467041
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.278798357467041
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.278798357467041
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.278798357467041
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.278798357467041
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.278798357467041
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.278798357467041
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.278798357467041
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.278798357467041
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.278798357467041
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.278798357467041
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.278798357467041
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.278798357467041
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.278798357467041
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.377674519126864
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.377674519126864
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.377674519126864
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.377674519126864
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.377674519126864
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.377674519126864
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.377674519126864
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.377674519126864
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.377674519126864
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.377674519126864
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.377674519126864
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.377674519126864
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.377674519126864
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.377674519126864
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.377674519126864
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.377674519126864
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.377674519126864
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.377674519126864
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.377674519126864
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.377674519126864
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.377674519126864
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.377674519126864
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.377674519126864
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.377674519126864
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.377674519126864
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.377674519126864
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.377674519126864
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.377674519126864
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.377674519126864
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.377674519126864
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.377674519126864
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.377674519126864
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.377674519126864
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.377674519126864
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.387168649038304
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.387168649038304
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.387168649038304
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.387168649038304
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.387168649038304
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.387168649038304
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.387168649038304
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.387168649038304
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.387168649038304
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.387168649038304
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.387168649038304
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.387168649038304
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.387168649038304
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.387168649038304
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.387168649038304
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.387168649038304
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.387168649038304
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.387168649038304
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.387168649038304
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.387168649038304
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.387168649038304
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.387168649038304
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.387168649038304
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.387168649038304
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.387168649038304
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.387168649038304
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.387168649038304
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.387168649038304
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.387168649038304
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.387168649038304
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.387168649038304
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.387168649038304
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.387168649038304
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.387168649038304
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.044595170221829
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.044595170221829
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.044595170221829
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.044595170221829
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.044595170221829
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.044595170221829
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.044595170221829
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.044595170221829
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.044595170221829
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.044595170221829
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.044595170221829
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.044595170221829
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.044595170221829
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.044595170221829
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.044595170221829
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.044595170221829
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.044595170221829
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.044595170221829
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.044595170221829
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.044595170221829
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.044595170221829
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.044595170221829
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.044595170221829
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.044595170221829
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.044595170221829
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.044595170221829
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.044595170221829
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.044595170221829
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.044595170221829
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.044595170221829
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.044595170221829
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.044595170221829
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.044595170221829
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.044595170221829
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.568236180739867
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.568236180739867
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.568236180739867
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.568236180739867
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.568236180739867
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.568236180739867
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.568236180739867
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.568236180739867
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.568236180739867
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.568236180739867
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.568236180739867
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.568236180739867
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.568236180739867
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.568236180739867
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.568236180739867
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.568236180739867
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.568236180739867
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.568236180739867
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.568236180739867
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.568236180739867
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.568236180739867
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.568236180739867
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.568236180739867
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.568236180739867
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.568236180739867
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.568236180739867
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.568236180739867
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.568236180739867
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.568236180739867
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.568236180739867
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.568236180739867
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.568236180739867
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.568236180739867
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.568236180739867
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=3.03951367781155e-03
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.088145896656535
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.088145896656535
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.088145896656535
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.088145896656535
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.088145896656535
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.088145896656535
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.088145896656535
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.088145896656535
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.088145896656535
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.088145896656535
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.088145896656535
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.088145896656535
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.088145896656535
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.088145896656535
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.088145896656535
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.088145896656535
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.088145896656535
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.088145896656535
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.088145896656535
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.088145896656535
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.088145896656535
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.088145896656535
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.088145896656535
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.088145896656535
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.088145896656535
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.088145896656535
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.088145896656535
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.088145896656535
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.088145896656535
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.088145896656535
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.088145896656535
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.088145896656535
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.088145896656535
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.088145896656535
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.189969604863222
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.189969604863222
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.189969604863222
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.189969604863222
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.189969604863222
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.189969604863222
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.189969604863222
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.189969604863222
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.189969604863222
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.189969604863222
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.189969604863222
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.189969604863222
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.189969604863222
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.189969604863222
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.189969604863222
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.189969604863222
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.189969604863222
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.189969604863222
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.189969604863222
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.189969604863222
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.189969604863222
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.189969604863222
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.189969604863222
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.189969604863222
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.189969604863222
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.189969604863222
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.189969604863222
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.189969604863222
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.189969604863222
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.189969604863222
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.189969604863222
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.189969604863222
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.189969604863222
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.189969604863222
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.718844984802432
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.718844984802432
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.718844984802432
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.718844984802432
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.718844984802432
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.718844984802432
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.718844984802432
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.718844984802432
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.718844984802432
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.718844984802432
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.718844984802432
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.718844984802432
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.718844984802432
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.718844984802432
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.718844984802432
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.718844984802432
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.718844984802432
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.718844984802432
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.718844984802432
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.718844984802432
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.718844984802432
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.718844984802432
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.718844984802432
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.718844984802432
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.718844984802432
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.718844984802432
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.718844984802432
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.718844984802432
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.718844984802432
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.718844984802432
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.718844984802432
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.718844984802432
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.718844984802432
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.718844984802432
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.282801613494683
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.282801613494683
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.282801613494683
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.282801613494683
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.282801613494683
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.282801613494683
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.282801613494683
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.282801613494683
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.282801613494683
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.282801613494683
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.282801613494683
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.282801613494683
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.282801613494683
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.282801613494683
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.282801613494683
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.282801613494683
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.282801613494683
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.282801613494683
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.282801613494683
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.282801613494683
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.282801613494683
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.282801613494683
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.282801613494683
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.282801613494683
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.282801613494683
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.282801613494683
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.282801613494683
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.282801613494683
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.282801613494683
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.282801613494683
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.282801613494683
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.282801613494683
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.282801613494683
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.282801613494683
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=4.22442244224422e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.468866886688669
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.468866886688669
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.468866886688669
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.468866886688669
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.468866886688669
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.468866886688669
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.468866886688669
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.468866886688669
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.468866886688669
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.468866886688669
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.468866886688669
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.468866886688669
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.468866886688669
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.468866886688669
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.468866886688669
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.468866886688669
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.468866886688669
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.468866886688669
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.468866886688669
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.468866886688669
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.468866886688669
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.468866886688669
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.468866886688669
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.468866886688669
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.468866886688669
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.468866886688669
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.468866886688669
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.468866886688669
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.468866886688669
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.468866886688669
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.468866886688669
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.468866886688669
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.468866886688669
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.468866886688669
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.206087275394206
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.206087275394206
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.206087275394206
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.206087275394206
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.206087275394206
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.206087275394206
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.206087275394206
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.206087275394206
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.206087275394206
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.206087275394206
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.206087275394206
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.206087275394206
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.206087275394206
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.206087275394206
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.206087275394206
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.206087275394206
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.206087275394206
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.206087275394206
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.206087275394206
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.206087275394206
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.206087275394206
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.206087275394206
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.206087275394206
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.206087275394206
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.206087275394206
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.206087275394206
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.206087275394206
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.206087275394206
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.206087275394206
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.206087275394206
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.206087275394206
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.206087275394206
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.206087275394206
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.206087275394206
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.329257163716007
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.329257163716007
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.329257163716007
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.329257163716007
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.329257163716007
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.329257163716007
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.329257163716007
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.329257163716007
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.329257163716007
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.329257163716007
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.329257163716007
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.329257163716007
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.329257163716007
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.329257163716007
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.329257163716007
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.329257163716007
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.329257163716007
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.329257163716007
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.329257163716007
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.329257163716007
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.329257163716007
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.329257163716007
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.329257163716007
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.329257163716007
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.329257163716007
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.329257163716007
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.329257163716007
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.329257163716007
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.329257163716007
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.329257163716007
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.329257163716007
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.329257163716007
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.329257163716007
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.329257163716007
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.272129950720934
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.272129950720934
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.272129950720934
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.272129950720934
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.272129950720934
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.272129950720934
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.272129950720934
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.272129950720934
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.272129950720934
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.272129950720934
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.272129950720934
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.272129950720934
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.272129950720934
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.272129950720934
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.272129950720934
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.272129950720934
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.272129950720934
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.272129950720934
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.272129950720934
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.272129950720934
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.272129950720934
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.272129950720934
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.272129950720934
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.272129950720934
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.272129950720934
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.272129950720934
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.272129950720934
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.272129950720934
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.272129950720934
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.272129950720934
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.272129950720934
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.272129950720934
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.272129950720934
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.272129950720934
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.197116262091623
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.197116262091623
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.197116262091623
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.197116262091623
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.197116262091623
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.197116262091623
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.197116262091623
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.197116262091623
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.197116262091623
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.197116262091623
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.197116262091623
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.197116262091623
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.197116262091623
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.197116262091623
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.197116262091623
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.197116262091623
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.197116262091623
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.197116262091623
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.197116262091623
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.197116262091623
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.197116262091623
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.197116262091623
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.197116262091623
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.197116262091623
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.197116262091623
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.197116262091623
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.197116262091623
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.197116262091623
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.197116262091623
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.197116262091623
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.197116262091623
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.197116262091623
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.197116262091623
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.197116262091623
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.201496623471436
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.201496623471436
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.201496623471436
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.201496623471436
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.201496623471436
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.201496623471436
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.201496623471436
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.201496623471436
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.201496623471436
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.201496623471436
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.201496623471436
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.201496623471436
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.201496623471436
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.201496623471436
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.201496623471436
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.201496623471436
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.201496623471436
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.201496623471436
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.201496623471436
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.201496623471436
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.201496623471436
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.201496623471436
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.201496623471436
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.201496623471436
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.201496623471436
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.201496623471436
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.201496623471436
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.201496623471436
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.201496623471436
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.201496623471436
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.201496623471436
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.201496623471436
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.201496623471436
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.201496623471436
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=8.15358627858627e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.195621101871102
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.195621101871102
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.195621101871102
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.195621101871102
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.195621101871102
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.195621101871102
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.195621101871102
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.195621101871102
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.195621101871102
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.195621101871102
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.195621101871102
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.195621101871102
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.195621101871102
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.195621101871102
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.195621101871102
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.195621101871102
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.195621101871102
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.195621101871102
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.195621101871102
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.195621101871102
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.195621101871102
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.195621101871102
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.195621101871102
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.195621101871102
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.195621101871102
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.195621101871102
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.195621101871102
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.195621101871102
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.195621101871102
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.195621101871102
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.195621101871102
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.195621101871102
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.195621101871102
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.195621101871102
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.590566528066528
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.590566528066528
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.590566528066528
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.590566528066528
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.590566528066528
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.590566528066528
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.590566528066528
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.590566528066528
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.590566528066528
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.590566528066528
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.590566528066528
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.590566528066528
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.590566528066528
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.590566528066528
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.590566528066528
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.590566528066528
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.590566528066528
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.590566528066528
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.590566528066528
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.590566528066528
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.590566528066528
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.590566528066528
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.590566528066528
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.590566528066528
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.590566528066528
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.590566528066528
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.590566528066528
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.590566528066528
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.590566528066528
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.590566528066528
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.590566528066528
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.590566528066528
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.590566528066528
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.590566528066528
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.132276507276507
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.132276507276507
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.132276507276507
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.132276507276507
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.132276507276507
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.132276507276507
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.132276507276507
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.132276507276507
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.132276507276507
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.132276507276507
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.132276507276507
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.132276507276507
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.132276507276507
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.132276507276507
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.132276507276507
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.132276507276507
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.132276507276507
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.132276507276507
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.132276507276507
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.132276507276507
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.132276507276507
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.132276507276507
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.132276507276507
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.132276507276507
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.132276507276507
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.132276507276507
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.132276507276507
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.132276507276507
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.132276507276507
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.132276507276507
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.132276507276507
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.132276507276507
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.132276507276507
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.132276507276507
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=False
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.101020767335445
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.101020767335445
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.101020767335445
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.101020767335445
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.101020767335445
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.101020767335445
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.101020767335445
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.101020767335445
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.101020767335445
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.101020767335445
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.101020767335445
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.101020767335445
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.101020767335445
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.101020767335445
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.101020767335445
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.101020767335445
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.101020767335445
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.101020767335445
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.101020767335445
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.101020767335445
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.101020767335445
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.101020767335445
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.101020767335445
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.101020767335445
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.101020767335445
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.101020767335445
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.101020767335445
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.101020767335445
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.101020767335445
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.101020767335445
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.101020767335445
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.101020767335445
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.101020767335445
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.101020767335445
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=2.82764284876217e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=3.36735891118151e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.715241112284407
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.715241112284407
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.715241112284407
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.715241112284407
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.715241112284407
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.715241112284407
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.715241112284407
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.715241112284407
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.715241112284407
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.715241112284407
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.715241112284407
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.715241112284407
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.715241112284407
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.715241112284407
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.715241112284407
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.715241112284407
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.715241112284407
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.715241112284407
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.715241112284407
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.715241112284407
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.715241112284407
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.715241112284407
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.715241112284407
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.715241112284407
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.715241112284407
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.715241112284407
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.715241112284407
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.715241112284407
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.715241112284407
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.715241112284407
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.715241112284407
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.715241112284407
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.715241112284407
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.715241112284407
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.121788102780711
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.121788102780711
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.121788102780711
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.121788102780711
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.121788102780711
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.121788102780711
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.121788102780711
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.121788102780711
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.121788102780711
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.121788102780711
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.121788102780711
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.121788102780711
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.121788102780711
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.121788102780711
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.121788102780711
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.121788102780711
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.121788102780711
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.121788102780711
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.121788102780711
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.121788102780711
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.121788102780711
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.121788102780711
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.121788102780711
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.121788102780711
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.121788102780711
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.121788102780711
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.121788102780711
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.121788102780711
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.121788102780711
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.121788102780711
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.121788102780711
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.121788102780711
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.121788102780711
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.121788102780711
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.804482279360667
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.804482279360667
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.804482279360667
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.804482279360667
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.804482279360667
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.804482279360667
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.804482279360667
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.804482279360667
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.804482279360667
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.804482279360667
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.804482279360667
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.804482279360667
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.804482279360667
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.804482279360667
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.804482279360667
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.804482279360667
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.804482279360667
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.804482279360667
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.804482279360667
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.804482279360667
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.804482279360667
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.804482279360667
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.804482279360667
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.804482279360667
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.804482279360667
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.804482279360667
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.804482279360667
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.804482279360667
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.804482279360667
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.804482279360667
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.804482279360667
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.804482279360667
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.804482279360667
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.804482279360667
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=3.70743571924948e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.063724808895066
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.063724808895066
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.063724808895066
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.063724808895066
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.063724808895066
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.063724808895066
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.063724808895066
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.063724808895066
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.063724808895066
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.063724808895066
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.063724808895066
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.063724808895066
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.063724808895066
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.063724808895066
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.063724808895066
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.063724808895066
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.063724808895066
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.063724808895066
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.063724808895066
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.063724808895066
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.063724808895066
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.063724808895066
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.063724808895066
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.063724808895066
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.063724808895066
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.063724808895066
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.063724808895066
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.063724808895066
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.063724808895066
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.063724808895066
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.063724808895066
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.063724808895066
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.063724808895066
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.063724808895066
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=9.47185545517721e-02
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.184183568940791
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.184183568940791
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.184183568940791
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.184183568940791
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.184183568940791
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.184183568940791
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.184183568940791
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.184183568940791
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.184183568940791
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.184183568940791
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.184183568940791
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.184183568940791
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.184183568940791
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.184183568940791
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.184183568940791
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.184183568940791
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.184183568940791
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.184183568940791
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.184183568940791
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.184183568940791
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.184183568940791
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.184183568940791
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.184183568940791
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.184183568940791
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.184183568940791
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.184183568940791
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.184183568940791
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.184183568940791
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.184183568940791
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.184183568940791
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.184183568940791
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.184183568940791
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.184183568940791
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.184183568940791
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.164925220241754
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.164925220241754
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.164925220241754
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.164925220241754
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.164925220241754
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.164925220241754
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.164925220241754
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.164925220241754
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.164925220241754
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.164925220241754
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.164925220241754
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.164925220241754
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.164925220241754
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.164925220241754
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.164925220241754
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.164925220241754
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.164925220241754
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.164925220241754
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.164925220241754
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.164925220241754
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.164925220241754
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.164925220241754
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.164925220241754
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.164925220241754
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.164925220241754
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.164925220241754
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.164925220241754
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.164925220241754
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.164925220241754
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.164925220241754
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.164925220241754
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.164925220241754
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.164925220241754
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.164925220241754
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.145564433517722
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.145564433517722
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.145564433517722
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.145564433517722
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.145564433517722
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.145564433517722
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.145564433517722
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.145564433517722
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.145564433517722
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.145564433517722
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.145564433517722
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.145564433517722
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.145564433517722
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.145564433517722
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.145564433517722
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.145564433517722
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.145564433517722
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.145564433517722
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.145564433517722
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.145564433517722
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.145564433517722
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.145564433517722
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.145564433517722
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.145564433517722
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.145564433517722
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.145564433517722
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.145564433517722
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.145564433517722
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.145564433517722
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.145564433517722
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.145564433517722
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.145564433517722
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.145564433517722
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.145564433517722
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalerosion=0.505326777299734
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalerosion=0.505326777299734
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalerosion=0.505326777299734
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalerosion=0.505326777299734
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalerosion=0.505326777299734
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalerosion=0.505326777299734
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalerosion=0.505326777299734
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalerosion=0.505326777299734
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalerosion=0.505326777299734
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalerosion=0.505326777299734
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalerosion=0.505326777299734
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalerosion=0.505326777299734
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalerosion=0.505326777299734
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalerosion=0.505326777299734
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalerosion=0.505326777299734
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalerosion=0.505326777299734
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalerosion=0.505326777299734
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.fractionoftotalrunoff=0.505326777299734
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.fractionoftotalrunoff=0.505326777299734
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.fractionoftotalrunoff=0.505326777299734
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.fractionoftotalrunoff=0.505326777299734
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.fractionoftotalrunoff=0.505326777299734
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.fractionoftotalrunoff=0.505326777299734
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.fractionoftotalrunoff=0.505326777299734
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.fractionoftotalrunoff=0.505326777299734
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.fractionoftotalrunoff=0.505326777299734
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.fractionoftotalrunoff=0.505326777299734
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.fractionoftotalrunoff=0.505326777299734
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.fractionoftotalrunoff=0.505326777299734
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.fractionoftotalrunoff=0.505326777299734
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.fractionoftotalrunoff=0.505326777299734
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.fractionoftotalrunoff=0.505326777299734
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.fractionoftotalrunoff=0.505326777299734
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.fractionoftotalrunoff=0.505326777299734
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_e1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_e3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_n1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_ne2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_ne3.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_nw2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s2.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se1.enabled=True
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_se2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw1.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_sw2.enabled=True
+except:
+	pass
+try:
+	leaf_deciduous_forest_in_deciduous_forest_in_surfsoil_w1.enabled=True
+except:
+	pass
+try:
+	surface_water_in_sw_lakecadillac.flushes_per_year=0.48
+except:
+	pass
+try:
+	surface_water_in_sw_lakemitchell.flushes_per_year=0.0
+except:
+	pass
