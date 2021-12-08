@@ -45,7 +45,7 @@ class check_neighbor:
         Polygon_sc = Polygon(coords_sc)
         Polygon_rc = Polygon(coords_rc)
         parcel_neighbor=Polygon_sc.intersects(Polygon_rc)
-        parcel_not_neighbor=Polygon_sc.disjoint(Polygon_rc)
+#        parcel_not_neighbor=Polygon_sc.disjoint(Polygon_rc)
         chk_overlap=False
         interfacial_area=0
         if parcel_neighbor:
