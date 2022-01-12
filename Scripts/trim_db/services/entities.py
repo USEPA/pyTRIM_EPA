@@ -63,7 +63,11 @@ class CompartmentService(GenericService):
         __model__ = CompartmentLink
 
 
-@with_cache('link-tps-')
+class TransportProcessService(GenericService):
+    __model__ = TransportProcess
+
+
+@with_cache('link-tps::')
 def get_transport_processes(link, chemical):
     tfs = TransportProcessService.get_all()
     s = link.sender
@@ -78,7 +82,3 @@ def get_transport_processes(link, chemical):
 
 setattr(CompartmentLink, 'transport_processes', get_transport_processes)
 setattr(DummyLink, 'transport_processes', get_transport_processes)
-
-
-class TransportProcessService(GenericService):
-    __model__ = TransportProcess
