@@ -133,7 +133,7 @@ def print_scenario_compartment_info(scenario):
         print('\n==========================\n')
 
 
-def print_transition_matrix(scenario):
+def make_transition_matrix(scenario):
     import pandas as pd
     import numpy as np
 
@@ -269,8 +269,9 @@ def print_transition_matrix(scenario):
                                     transfer_factor
                                 )
 
-                    for ln in print_vals:
-                        print(ln)
+                    if len(print_vals) > 1:
+                        for ln in print_vals:
+                            print(ln)
 
     except KeyboardInterrupt:
         pass
@@ -284,11 +285,18 @@ def print_transition_matrix(scenario):
         columns=['deposition_rate_g_day-1']
     )
 
-    import os
-    if not os.path.isdir('./.output'):
-        os.makedirs('./.output')
-    df_tm.to_csv('./.output/tm_new.csv')
-    df_sm.to_csv('./.output/sm_new.csv')
+    return df_tm, df_sm
+
+
+def safe_output(df_tm, df_sm):
+    try:
+        import os
+        if not os.path.isdir('./.output'):
+            os.makedirs('./.output')
+        df_sm.to_csv('./.output/sm_new.csv')
+        df_tm.to_csv('./.output/tm_new.csv')
+    except Exception:
+        pass
 
 
 def check_alg_values(scenario, chemical, alg, sender, receiver):
@@ -414,9 +422,10 @@ def run_tests():
 
     print('creating tm ...')
     start = time.time()
-    print_transition_matrix(scenario)
+    df_tm, df_sm = make_transition_matrix(scenario)
     end = time.time()
     print('time to create tm = ', round((end - start), 2), ' seconds')
+    safe_output(df_tm, df_sm)
 
     print('\n==========================\n')
 

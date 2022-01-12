@@ -64,7 +64,7 @@ def as_function(equation, with_caching=True, **default_kwargs):
             eq = eq.replace(k, non_func)
         return eq
 
-    @with_cache(f'equation["{equation}"]')
+    @with_cache(f'equation::"{equation}"')
     def func(**kwargs):
         custom_arg_map = dict(arg_map)
         custom_arg_map.update(dict(kwargs))

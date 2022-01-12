@@ -2,6 +2,7 @@ import numpy as np
 import sqlalchemy as sa
 from ..parameters.equations import as_function
 from ..utils.base import Model
+from ..utils.caching import with_cache
 
 
 __all__ = [
@@ -39,15 +40,20 @@ class TransportProcess(Model):
         return self._validator(**kwargs) or False
 
     def evaluate(self, **kwargs):
-        if not self.applies_to(**kwargs):
-            raise TypeError(f'Invalid arguments for "{self.name}": {kwargs}')
-        try:
-            return self.algorithm.evaluate(IGNORE_EXTRA=True, **kwargs)
-        except Exception as e:
-            if 'Missing argument' in str(e):
-                raise
-            # raise
-            return np.nan
+        @with_cache(f'transport_process::{self.id}')
+        def cached_eval(**kwargs):
+            if not self.applies_to(**kwargs):
+                raise TypeError(
+                    f'Invalid arguments for "{self.name}": {kwargs}'
+                )
+            try:
+                return self.algorithm.evaluate(IGNORE_EXTRA=True, **kwargs)
+            except Exception as e:
+                if 'Missing argument' in str(e):
+                    raise
+                # raise
+                return np.nan
+        return cached_eval(**kwargs)
 
     def eval(self, **kwargs):
         return self.evaluate(**kwargs)
