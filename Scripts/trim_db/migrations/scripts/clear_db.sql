@@ -1,0 +1,14 @@
+DELETE FROM custom_parameter;
+DELETE FROM parameter_definition;
+DELETE FROM transport_process;
+DELETE FROM formula_argument;
+DELETE FROM formula;
+DELETE FROM parameter_domain;
+DELETE FROM compartment_link;
+DELETE FROM compartment;
+DELETE FROM media;
+DELETE FROM volume_element;
+DELETE FROM parcel;
+DELETE FROM scenario_chemicals;
+DELETE FROM chemical;
+DELETE FROM scenario;

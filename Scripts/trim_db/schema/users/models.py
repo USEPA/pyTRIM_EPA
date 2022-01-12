@@ -74,8 +74,10 @@ class UserMixin(ActiveFlagMixin):
 
     @property
     def is_admin(self):
-        return (self.is_superuser() or
-                False)
+        return (
+            self.is_superuser()
+            or False
+        )
 
     def get_preferred_name(self):
         if self.first_name:
