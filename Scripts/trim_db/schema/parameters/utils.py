@@ -1,280 +1,235 @@
+import ast
+import math
+import operator as op
 import numpy as np
-import sqlalchemy as sa
-from pint import UnitRegistry
-from simpleeval import simple_eval
-from sqlalchemy.ext.declarative import declared_attr
-from ..utils.base import Model
+import pint
+import re
+import simpleeval
+from functools import wraps
+
+__all__ = ['ureg', 'as_quantity', 'is_number']
 
 
-__all__ = [
-    'use_linked_parameters'
-]
+ureg = pint.UnitRegistry(autoconvert_offset_to_baseunit=True)
 
 
-ureg = UnitRegistry()
+BRACKETED = re.compile('\[.*?\]')  # noqa
+
+
+def is_number(val):
+    check = str(val).strip()
+    if not check:
+        return False
+    check = check.replace('.', '').replace('-', '').split('e')
+    for part in check:
+        if not part.isnumeric():
+            return False
+    return True
 
 
 def as_quantity(val, unit=''):
-    try:
-        if val is None or not str(val) or np.isnan(val):
-            return None
-        if not unit:
-            return val
-        quantity = val * ureg(unit)
-
-        if quantity.units == ureg.Unit(''):
-            return val
-        return quantity
-    except TypeError:
+    if val is None or np.isnan(val):
         return None
 
+    unit = str(unit or '')
+    if '[' in unit:
+        unit = BRACKETED.sub('', unit)
 
-def use_linked_parameters(cls):
-    tbl = cls.__tablename__
-    cls_nm = cls.__name__
+    if not unit:
+        return val
 
-    if cls_nm != 'Scenario':
-        class ParameterMixin:
-            @declared_attr
-            def scenario_id(cls):
-                return sa.Column(
-                    sa.Integer(), sa.ForeignKey(f'scenario.id'),
-                    nullable=False
-                )
+    unit = unit.split(' or ')[0]
+
+    try:
+        return val.to(unit)
+    except AttributeError:
+        pass
+
+    if not is_number(val):
+        raise TypeError(f'Invalid magnitude: "{val}"')
+
+    quantity = val * ureg(unit)
+
+    if quantity.units == ureg.Unit(''):
+        return val
+
+    return quantity
+
+
+def auto_sync_emperical_with_quantity(f):
+    @wraps(f)
+    def synced(a, b, strict_dimensions=False, strict_offset=False):
+        try:
+            return f(a, b)
+        except pint.errors.DimensionalityError as e:
+            if strict_dimensions or "'dimensionless'" not in str(e):
+                raise
+            if hasattr(a, 'dimensionality'):
+                b = b * a.units
+            elif hasattr(b, 'dimensionality'):
+                a = a * b.units
+            return synced(
+                a, b,
+                strict_dimensions=True, strict_offset=strict_offset
+            )
+        except pint.errors.OffsetUnitCalculusError as e:
+            if strict_offset:
+                raise
+            unit = str(e).split('with offset unit (', 1)[-1].split(')')[0]
+            unit = unit.split(', ')[0]
+            if hasattr(a, 'dimensionality'):
+                a = a.magnitude
+            if hasattr(b, 'dimensionality'):
+                b = b.magnitude
+            return synced(
+                a, b,
+                strict_dimensions=strict_dimensions, strict_offset=True
+            ) * ureg(unit)
+        raise AssertionError('How did we get here??')
+    return synced
+
+
+@auto_sync_emperical_with_quantity
+def safe_mult_quantity(a, b):
+    try:
+        return simpleeval.safe_mult(a, b)
+    except TypeError as e:
+        if 'no len()' in str(e):
+            return a * b
+        raise
+
+
+@auto_sync_emperical_with_quantity
+def safe_add_quantity(a, b):
+    try:
+        return simpleeval.safe_add(a, b)
+    except TypeError as e:
+        if 'no len()' in str(e):
+            return a + b
+        raise
+
+
+@auto_sync_emperical_with_quantity
+def safe_sub_quantity(a, b):
+    return op.sub(a, b)
+
+
+@auto_sync_emperical_with_quantity
+def safe_div_quantity(a, b):
+    return op.truediv(a, b)
+
+
+simpleeval.MAX_POWER = 100_000_000
+
+
+def safe_power_quantity(a, b):
+    a_mag = a.magnitude if hasattr(a, 'dimensionality') else a
+    b_mag = b.magnitude if hasattr(b, 'dimensionality') else b
+    if a_mag != a:
+        unit = a.units
     else:
-        class ParameterMixin:
+        unit = ''
+    return as_quantity(simpleeval.safe_power(a_mag, b_mag), unit)
+
+
+def safe_gt(a, b):
+    try:
+        return op.gt(a, b)
+    except ValueError as e:
+        if 'Cannot compare Quantity' not in str(e):
+            raise
+        try:
+            a = a.magnitude
+        except AttributeError:
             pass
-
-    class Parameter(ParameterMixin, Model):
-        __tablename__ = f'{tbl}_parameters'
-
-        model_id = sa.Column(
-            f'{tbl}_id', sa.Integer(), sa.ForeignKey(f'{tbl}.id'),
-            nullable=False
-        )
-
-        scenario = sa.orm.relationship('Scenario', viewonly=True)
-
-        name = sa.Column(sa.String(120), nullable=False)
-        variable = sa.Column(sa.String(36), nullable=True)
-
-        unique = sa.Column(sa.Boolean(), nullable=False, default=True)
-
-        _val = sa.Column(sa.JSON(), nullable=False)
-
-        @property
-        def value(self):
-            return (self._val or {}).get('value')
-
-        @value.setter
-        def value(self, v):
-            if not self._val:
-                self._val = {}
-            if v is not None:
-                try:
-                    float(v)
-                except (ValueError):
-                    raise TypeError(
-                        f'Invalid value type: {type(v)} ({v})'
-                    ) from None
-            self._val['value'] = v
-
-        @property
-        def unit(self):
-            return (self._val or {}).get('unit')
-
-        @unit.setter
-        def unit(self, u):
-            if not self._val:
-                self._val = {}
-            if u is not None:
-                if not isinstance(u, str):
-                    raise TypeError(
-                        f'Invalid unit type: {type(u)} ({u})'
-                    ) from None
-            self._val['unit'] = u
-
-        @property
-        def quantity(self):
-            return as_quantity(self.value, self.unit)
-
-        @property
-        def equation(self):
-            alg = (self._val or {}).get('equation')
-            if not alg:
-                return None
-
-            if not hasattr(self, '_func'):
-                equation = deconstruct_equation(str(alg))
-
-                var_map = {}
-                for el in equation:
-                    varname = el.split('.', 1)[-1]
-                    if el.startswith('self.'):
-                        param = self.model.parameters(
-                            self.scenario
-                        ).by_name(varname)
-                    elif el.startswith('environment.'):
-                        param = self.scenario.parameters.by_name(
-                            varname
-                        )
-                    else:
-                        continue
-
-                    try:
-                        if param.quantity:
-                            param = param.quantity
-                        elif param.equation:
-                            param = param.equation(self.scenario)
-                        else:
-                            param = None
-                    except AttributeError:
-                        param = None
-                    var_map[el] = param
-
-                equation = ' '.join(equation)
-
-                for el in list(var_map):
-                    if '.' not in el:
-                        continue
-                    new_el = el.replace('.', '___')
-                    equation = equation.replace(el, new_el)
-                    var_map[new_el] = var_map[el]
-
-                var_map = {k: v for k, v in var_map.items() if '.' not in k}
-                var_map.update({'True': True, 'False': False})
-
-                def func(scenario):
-                    try:
-                        ans = simple_eval(equation, names=var_map)
-                    except TypeError:
-                        # Replace longest keys first to avoid substring issues
-                        eq = equation
-                        keys = sorted(list(var_map), key=lambda x: len(x))
-                        for k in reversed(keys):
-                            v = var_map[k]
-                            eq = eq.replace(str(k), str(v))
-                        raise TypeError(
-                            f'Invalid equation! "{eq}"'
-                        )
-                    return ans
-
-                self._func = func
-
-            return self._func
-
-        @equation.setter
-        def equation(self, eq):
-            if not self._val:
-                self._val = {}
-            if eq is not None:
-                eq = str(eq)
-            self._val['equation'] = eq
-
-        def __repr__(self):
-            return (
-                f'{cls_nm}Parameters('
-                f'"{self.scenario.name}", "{self.name}", {self.quantity}'
-                ')'
-            )
-
-    cls._parameters = sa.orm.relationship(
-        Parameter,
-        cascade='all, delete-orphan',
-        backref=sa.orm.backref('model')
-    )
-
-    class ParameterManager:
-        def __init__(self, model, scenario):
-            self.model = model
-            self.scenario = scenario
-
-        def __getattr__(self, name):
-            return self.by_name(name)
-
-        @property
-        def _parameters(self):
-            if cls.__name__ == 'Scenario':
-                k = 'model_id'
-            else:
-                k = 'scenario_id'
-            if self.scenario is None:
-                return list(sorted(
-                    self.model._parameters, key=lambda x: getattr(x, k)
-                ))
-            return [
-                x for x in self.model._parameters
-                if getattr(x, k) == self.scenario.id
-            ]
-
-        def by_name(self, name):
-            val = [
-                x for x in self._parameters
-                if x.name == name
-            ]
-            if not val:
-                return None
-            if val[0].unique:
-                return val[0]
-            return val
-
-        def by_variable(self, variable):
-            val = [
-                x for x in self._parameters
-                if x.variable == variable
-            ]
-            if not val:
-                return None
-            if val[0].unique:
-                return val[0]
-            return val
-
-        def add(
-            self, name, value=None, unit=None, equation=None,
-            variable=None,
-            unique=True
-        ):
-            if self.scenario is None:
-                raise TypeError(
-                    'Cannot add a parameter without specifying a scenario!'
-                )
-            param = Parameter(
-                model=self.model,
-                model_id=self.model.id,
-                name=name, variable=variable, unique=unique
-            )
-            if cls.__name__ != 'Scenario':
-                param.scenario_id = self.scenario.id
-                param.scenario = self.scenario
-            param.value = value
-            param.unit = unit
-            param.equation = equation
-
-        def __repr__(self):
-            if not self._parameters:
-                return '[]'
-            return (
-                '[\n\t'
-                + '\n\t'.join([str(x) for x in self._parameters])
-                + '\n]'
-            )
-
-    if cls.__name__ == 'Scenario':
-        cls.parameters = property(lambda x: ParameterManager(x, x))
-    else:
-        cls.parameters = lambda x, scenario=None: ParameterManager(x, scenario)
-
-    return cls
+        try:
+            b = b.magnitude
+        except AttributeError:
+            pass
+        return op.gt(a, b)
 
 
-def deconstruct_equation(equation):
-    for char in '()+-*/=!':
-        equation = equation.replace(char, f' {char} ')
+def safe_lt(a, b):
+    try:
+        return op.lt(a, b)
+    except ValueError as e:
+        if 'Cannot compare Quantity' not in str(e):
+            raise
+        try:
+            a = a.magnitude
+        except AttributeError:
+            pass
+        try:
+            b = b.magnitude
+        except AttributeError:
+            pass
+        return op.lt(a, b)
 
-    for double in ['**', '+=', '!=', '==']:
-        d1 = double[0]
-        d2 = double[1]
-        equation.replace(f' {d1} {d2} ', f' {double} ')
 
-    deconstructed = equation.split()
-    return deconstructed
+def safe_ge(a, b):
+    try:
+        return op.ge(a, b)
+    except ValueError as e:
+        if 'Cannot compare Quantity' not in str(e):
+            raise
+        try:
+            a = a.magnitude
+        except AttributeError:
+            pass
+        try:
+            b = b.magnitude
+        except AttributeError:
+            pass
+        return op.ge(a, b)
+
+
+def safe_le(a, b):
+    try:
+        return op.le(a, b)
+    except ValueError as e:
+        if 'Cannot compare Quantity' not in str(e):
+            raise
+        try:
+            a = a.magnitude
+        except AttributeError:
+            pass
+        try:
+            b = b.magnitude
+        except AttributeError:
+            pass
+        return op.le(a, b)
+
+
+UREG_CUSTOM_OPERATORS = {
+    **simpleeval.DEFAULT_OPERATORS,
+    ast.Mult: safe_mult_quantity,
+    ast.Add: safe_add_quantity,
+    ast.Sub: safe_sub_quantity,
+    ast.Div: safe_div_quantity,
+    ast.Pow: safe_power_quantity,
+    ast.Gt: safe_gt,
+    ast.Lt: safe_lt,
+    ast.GtE: safe_ge,
+    ast.LtE: safe_le,
+}
+
+
+def exp_quantity(x):
+    try:
+        return math.exp(x.magnitude)
+    except AttributeError:
+        return math.exp(x)
+
+
+def log_quantity(x, *args, **kwargs):
+    try:
+        return math.log(x.magnitude, *args, **kwargs)
+    except AttributeError:
+        return math.log(x, *args, **kwargs)
+
+
+UREG_CUSTOM_FUNCTIONS = {
+    **simpleeval.DEFAULT_FUNCTIONS,
+    'safe_exp': exp_quantity,
+    'safe_log': log_quantity
+}

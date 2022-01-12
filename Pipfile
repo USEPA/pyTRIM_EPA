@@ -16,6 +16,7 @@ pandas = "*"
 ipdb = "*"
 pint = "*"
 simpleeval = "*"
+scipy = "*"
 
 sqlalchemy = "*"
 psycopg2-binary = "*"
