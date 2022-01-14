@@ -1,5 +1,5 @@
-'### Note: This is an auto generated script'                
+'### note: this is an auto generated script'                
 
-class Scenario:()
-Foundries_SS=Scenario()
-containingScenario=Foundries_SS
+class scenario:()
+foundries_ss=scenario()
+containingscenario=foundries_ss

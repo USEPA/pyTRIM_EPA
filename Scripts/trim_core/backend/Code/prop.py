@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Mar 31 21:15:14 2021
+created on wed mar 31 21:15:14 2021
 @author: 13963
 
-Parses properties text file  and stores as dataframes of properties, links, including pseudo links
-Auto writes scripts to define attributes of scenario and various objects, specifically define_scenario.py and define_attributes_props.py
+parses properties text file  and stores as DataFrames of properties, links, including pseudo links
+auto writes scripts to define attributes of scenario and various objects, specifically define_scenario.py and define_attributes_props.py
 
 """
 import pandas as pd
 import os
+import re
 
 
 
@@ -24,10 +25,10 @@ def define_properties(inputs):
 
     prop_file=open(ifpn,'r') 
     prop_lines=prop_file.readlines()
-    Val_End_Flag=False
-    #### Read Volume Element & Compartment Properties 
+    val_end_flag=False
+    #### read volume element & compartment properties 
     
-    prop_owner_types=['VolumeElement','Compartment','Scenario']# list of property owners for which we are gathering inputs          
+    prop_owner_types=['volumeelement','compartment','scenario']# list of property owners for which we are gathering inputs          
     prop_tuples=[] # initialize list for storing point lines
     prop_owner_list=[] # initialize list of property owners    
     
@@ -36,18 +37,18 @@ def define_properties(inputs):
         if line[:2]==r'//' or line=='': # if a comment or if blank, move on to next line
             continue # move to next line
         line_nc=line.split("//")[0] # line stripped of comment    
-        prop_type=line_nc.split(':')[0].strip() # split on : . Text to the left is the property type 
+        prop_type=line_nc.split(':')[0].strip() # split on : . text to the left is the property type 
         if prop_type in prop_owner_types: # if volume element or compartment
-            Prop_Type_Flag=True # flag indicates that a new VE or comp has begun
-            if Val_End_Flag and Prop_Type_Flag: # if value reading has ended AND a new property type has begun: 
-                prop_owner_list=[]; prop="";form="";value="";Val_End_Flag=False         # initialize list and values    
+            prop_type_flag=True # flag indicates that a new ve or comp has begun
+            if val_end_flag and prop_type_flag: # if value reading has ended and a new property type has begun: 
+                prop_owner_list=[]; prop="";form="";value="";val_end_flag=False         # initialize list and values    
             prop_owner=line_nc.split(":")[1].strip()
             prop_owner_list.append((prop_type,prop_owner)) 
-        elif line_nc[:9]=="Property:":        
+        elif line_nc[:9]=="property:":        
             prop=line_nc.split(":")[1].strip()
-        elif line_nc[:5]=="Form:":   
+        elif line_nc[:5]=="form:":   
             form=line_nc.split(":")[1].strip()
-        elif line_nc[:6]=="Value:":  
+        elif line_nc[:6]=="value:":  
     #        value=line_nc.split(":")[1].strip()
             value="".join(line_nc.split(":")[1:])
             value=value.strip()
@@ -55,13 +56,13 @@ def define_properties(inputs):
                 p=(p_owner[0],p_owner[1],prop,form,value)
     #            print (p)
                 prop_tuples.append(p)
-                Val_End_Flag=True      
+                val_end_flag=True      
             
-    df_props=pd.DataFrame(prop_tuples,columns=['Prop_Type', 'Prop_Owner', 'Property','Form','Value'])
+    df_props=pd.DataFrame(prop_tuples,columns=['prop_type', 'prop_owner', 'property','form','value'])
     
     
-    #### Read Links
-    Val_End_Flag=False 
+    #### read links
+    val_end_flag=False 
     link_tuples=[]
     algs=[]
     for line in prop_lines: # loop over lines 
@@ -69,25 +70,25 @@ def define_properties(inputs):
         if line[:2]==r'//' or line=='': # if a comment or if blank, move on to next line
             continue # move to next line
         line_nc=line.split("//")[0] # line stripped of comment    
-        prop_type=line_nc.split(':')[0].strip() # split on : . Text to the left is the property type 
-        if prop_type=='New Link': # if volume element or compartment        
-            New_Link_Flag=True # flag indicates that a new link has begun
-            if Val_End_Flag and New_Link_Flag: # if value reading has ended AND a new property type has begun: 
-                algs=[]; sc="";rc="";prop="";form="";value="";Val_End_Flag=False         # initialize list and values    
-        elif prop_type=="SendingCompartment":
+        prop_type=line_nc.split(':')[0].strip() # split on : . text to the left is the property type 
+        if prop_type=='new link': # if volume element or compartment        
+            new_link_flag=True # flag indicates that a new link has begun
+            if val_end_flag and new_link_flag: # if value reading has ended and a new property type has begun: 
+                algs=[]; sc="";rc="";prop="";form="";value="";val_end_flag=False         # initialize list and values    
+        elif prop_type=="sendingcompartment":
             sc=line_nc.split(':')[1].strip()
-        elif prop_type=="ReceivingCompartment":
+        elif prop_type=="receivingcompartment":
             rc=line_nc.split(':')[1].strip()
-        elif prop_type=="Algorithm":
+        elif prop_type=="algorithm":
             al=line_nc.split(':')[1].strip()
             algs.append(al)
-        elif prop_type=="Property":
+        elif prop_type=="property":
             prop=line_nc.split(':')[1].strip()
-        elif prop_type=="Form":
+        elif prop_type=="form":
             form=line_nc.split(':')[1].strip()
-        elif prop_type=="Value":
+        elif prop_type=="value":
             val=line_nc.split(':')[1].strip()
-            Val_End_Flag=True      
+            val_end_flag=True      
             if algs!=[] and sc!="" and rc!="": 
                 for alg in algs:
                      lp=(sc,rc,alg,prop,form,val)
@@ -95,10 +96,201 @@ def define_properties(inputs):
     
             
         
-    df_links=pd.DataFrame(link_tuples,columns=['Sending_Compartment', 'Receiving_Compartment', 'Algorithm','Property','Form','Value'])
+    df_links=pd.DataFrame(link_tuples,columns=['sending_compartment', 'receiving_compartment', 'algorithm','property','form','value'])
+    df_links=df_links.drop_duplicates()
+
+
+
+    #### read other properties  file
     
+
+#    ifp=inputs['path_inputs']
+#    ifn=inputs['prop_file_2']    
+#    ifpn=os.path.join(ifp,ifn)
+#    
+#
+#    prop_file=open(ifpn,'r') 
+#    prop_lines=prop_file.readlines()
+#    val_end_flag=False
+#
+#    
+#    prop_owner_types=['volumeelement','compartment','scenario']# list of property owners for which we are gathering inputs          
+#    prop_tuples=[] # initialize list for storing point lines
+#    prop_owner_list=[] # initialize list of property owners    
+#    
+#    for line in prop_lines: # loop over lines 
+#        line=line.strip() # strip /n and space       
+#        if line[:2]==r'//' or line=='': # if a comment or if blank, move on to next line
+#            continue # move to next line
+#        line_nc=line.split("//")[0] # line stripped of comment    
+#        prop_type=line_nc.split(':')[0].strip() # split on : . text to the left is the property type 
+#        if prop_type in prop_owner_types: # if volume element or compartment
+#            prop_type_flag=True # flag indicates that a new ve or comp has begun
+#            if val_end_flag and prop_type_flag: # if value reading has ended and a new property type has begun: 
+#                prop_owner_list=[]; prop="";form="";value="";val_end_flag=False         # initialize list and values    
+#            prop_owner=line_nc.split(":")[1].strip()
+#            prop_owner_list.append((prop_type,prop_owner)) 
+#        elif line_nc[:9]=="property:":        
+#            prop=line_nc.split(":")[1].strip()
+#        elif line_nc[:5]=="form:":   
+#            form=line_nc.split(":")[1].strip()
+#        elif line_nc[:6]=="value:":  
+#    #        value=line_nc.split(":")[1].strip()
+#            value="".join(line_nc.split(":")[1:])
+#            value=value.strip()
+#            for p_owner in prop_owner_list:                
+#                p=(p_owner[0],p_owner[1],prop,form,value)
+#    #            print (p)
+#                prop_tuples.append(p)
+#                val_end_flag=True      
+#            
+#    try:           
+#        df_props_2=pd.DataFrame(prop_tuples,columns=['prop_type', 'prop_owner', 'property','form','value'])
+#    except:
+#        df_props_2=pd.DataFrame(columns=['prop_type', 'prop_owner', 'property','form','value'])
+#    
+#    val_end_flag=False 
+#    link_tuples=[]
+#    algs=[]
+#    for line in prop_lines: # loop over lines 
+#        line=line.strip() # strip /n and space       
+#        if line[:2]==r'//' or line=='': # if a comment or if blank, move on to next line
+#            continue # move to next line
+#        line_nc=line.split("//")[0] # line stripped of comment    
+#        prop_type=line_nc.split(':')[0].strip() # split on : . text to the left is the property type 
+#        if prop_type=='new link': # if volume element or compartment        
+#            new_link_flag=True # flag indicates that a new link has begun
+#            if val_end_flag and new_link_flag: # if value reading has ended and a new property type has begun: 
+#                algs=[]; sc="";rc="";prop="";form="";value="";val_end_flag=False         # initialize list and values    
+#        elif prop_type=="sendingcompartment":
+#            sc=line_nc.split(':')[1].strip()
+#        elif prop_type=="receivingcompartment":
+#            rc=line_nc.split(':')[1].strip()
+#        elif prop_type=="algorithm":
+#            al=line_nc.split(':')[1].strip()
+#            algs.append(al)
+#        elif prop_type=="property":
+#            prop=line_nc.split(':')[1].strip()
+#        elif prop_type=="form":
+#            form=line_nc.split(':')[1].strip()
+#        elif prop_type=="value":
+#            val=line_nc.split(':')[1].strip()
+#            val_end_flag=True      
+#            if algs!=[] and sc!="" and rc!="": 
+#                for alg in algs:
+#                     lp=(sc,rc,alg,prop,form,val)
+#                     link_tuples.append(lp)
+#    
+#            
+#    try:    
+#        df_links_2=pd.DataFrame(link_tuples,columns=['sending_compartment', 'receiving_compartment', 'algorithm','property','form','value'])
+#    except:
+#        df_links_2=pd.DataFrame(columns=['sending_compartment', 'receiving_compartment', 'algorithm','property','form','value'])
+#
+#    
+   
+    #### read custom links  file. Note this part of the code is specific to the way inputs were specified for the Foundries run. May not have generic value.
     
-    #### Read pseudo volume element links
+
+    ifp=inputs['path_inputs']
+    ifn=inputs['prop_file_3']    
+    ifpn=os.path.join(ifp,ifn)
+    
+
+    prop_file=open(ifpn,'r') 
+    prop_lines=prop_file.readlines()
+    val_end_flag=False
+    
+    prop_owner_types=['compartment','link']# list of property owners for which we are gathering inputs          
+    prop_tuples=[] # initialize list for storing point lines
+    prop_owner_list=[] # initialize list of property owners    
+    
+    for line in prop_lines: # loop over lines 
+        line=line.strip() # strip /n and space       
+        if line[:2]==r'//' or line=='': # if a comment or if blank, move on to next line
+            continue # move to next line
+        line_nc=line.split("//")[0] # line stripped of comment    
+        prop_type=line_nc.split(':')[0].strip() # split on : . text to the left is the property type 
+        if prop_type in prop_owner_types: # if volume element or compartment
+            prop_type_flag=True # flag indicates that a new ve or comp has begun
+            if val_end_flag and prop_type_flag: # if value reading has ended and a new property type has begun: 
+                prop_owner_list=[]; prop="";form="";value="";val_end_flag=False         # initialize list and values    
+            prop_owner=line_nc.split(":")[1].strip()
+            prop_owner_list.append((prop_type,prop_owner)) 
+        elif line_nc[:9]=="property:":        
+            prop=line_nc.split(":")[1].strip()
+        elif line_nc[:5]=="form:":   
+            form=line_nc.split(":")[1].strip()
+        elif line_nc[:6]=="value:":  
+    #        value=line_nc.split(":")[1].strip()
+            value="".join(line_nc.split(":")[1:])
+            value=value.strip()
+            for p_owner in prop_owner_list:                
+                p=(p_owner[0],p_owner[1],prop,form,value)
+    #            print (p)
+                prop_tuples.append(p)
+                val_end_flag=True      
+    
+    try:        
+        df_props_3=pd.DataFrame(prop_tuples,columns=['prop_type', 'prop_owner', 'property','form','value'])
+    except:
+        df_props_3=pd.DataFrame(columns=['prop_type', 'prop_owner', 'property','form','value'])
+    
+#    df_link_props=df_props_3.loc[df_props_3['prop_type']=='link'] # not required because same information in df_links_3
+#    
+    df_non_link_props=df_props_3.loc[df_props_3['prop_type']!='link']
+    
+    df_props=df_props.append(df_non_link_props) # append the non link props to the main df_props
+    df_props=df_props.reset_index(drop=True) # reset index from zero
+    
+    val_end_flag=False 
+    link_tuples=[]
+    algs=[]; sc="";rc="";prop="";form="";value="";
+    for line in prop_lines: # loop over lines 
+        line=line.strip() # strip /n and space       
+        if line[:2]==r'//' or line=='': # if a comment or if blank, move on to next line
+            continue # move to next line
+        line_nc=line.split("//")[0] # line stripped of comment    
+        prop_type=line_nc.split(':')[0].strip() # split on : . text to the left is the property type 
+        if prop_type=='new link': # if new link        
+            new_link_flag=True # flag indicates that a new link has begun
+            if val_end_flag and new_link_flag: # if value reading has ended and a new property type has begun: 
+                algs=[]; sc="";rc="";prop="";form="";value="";val_end_flag=False         # initialize list and values    
+        elif prop_type=="sendingcompartment":
+            sc=line_nc.split(':')[1].strip()
+        elif prop_type=="receivingcompartment":
+            rc=line_nc.split(':')[1].strip()
+        elif prop_type=="algorithm":
+            al=line_nc.split(':')[1].strip()
+            algs.append(al)
+        elif prop_type=="property":
+            prop=line_nc.split(':')[1].strip()
+        elif prop_type=="form":
+            form=line_nc.split(':')[1].strip()
+        elif prop_type=="value":
+            val=line_nc.split(':')[1].strip()
+            val_end_flag=True      
+            if algs!=[] and sc!="" and rc!="": 
+                for alg in algs:
+                     lp=(sc,rc,alg,prop,form,val)
+                     link_tuples.append(lp)
+            
+        
+    try:
+        df_links_3=pd.DataFrame(link_tuples,columns=['sending_compartment', 'receiving_compartment', 'algorithm','property','form','value'])
+        df_links_3=df_links_3.drop_duplicates()
+    except:
+        df_links_3=pd.DataFrame(columns=['sending_compartment', 'receiving_compartment', 'algorithm','property','form','value'])
+
+#    df_props=df_props.append(df_props_2)
+#    df_props=df_props.append(df_props_3)
+#
+##    df_links=df_props.append(df_links_2)
+    df_links=df_links.append(df_links_3) # append links in df_links_3 to main df_links
+    df_links=df_links.reset_index(drop=True) # reset index from zero
+#
+#    
+    #### read pseudo volume element links
     
      
     ifn=inputs['plink_file']
@@ -113,21 +305,21 @@ def define_properties(inputs):
         if line[:2]==r'//' or line=='': # if a comment or if blank, move on to next line
             continue # move to next line
         line_nc=line.split("//")[0] # line stripped of comment    
-        prop_type=line_nc.split(':')[0].strip() # split on : . Text to the left is the property type 
-        if prop_type=="SendingCompartment":
+        prop_type=line_nc.split(':')[0].strip() # split on : . text to the left is the property type 
+        if prop_type=="sendingcompartment":
             sc=line_nc.split(':')[1].strip()
-        elif prop_type=="ReceivingCompartment":
+        elif prop_type=="receivingcompartment":
             rc=line_nc.split(':')[1].strip()
-        elif prop_type=="Algorithm":
+        elif prop_type=="algorithm":
             al=line_nc.split(':')[1].strip()
             lp=(sc,rc,al)
             link_tuples.append(lp)
     
             
         
-    df_plinks=pd.DataFrame(link_tuples,columns=['Sending_Compartment', 'Receiving_Compartment', 'Algorithm'])
+    df_plinks=pd.DataFrame(link_tuples,columns=['sending_compartment', 'receiving_compartment', 'algorithm'])
     
-    ############# AUTOWRITE DEFINE_SCENARIO CODEFILE
+    ############# autowrite define_scenario codefile
     
     ofp=inputs['path_code']        
     ofn=r'define_scenario.py'
@@ -138,23 +330,23 @@ def define_properties(inputs):
         cname=name.replace(r'/','_').replace(r'-','_').replace(' ','_').replace('___','_').replace('__','_')
         return (cname)
     
-    sc_name=df_props.loc[df_props['Prop_Type']=='Scenario']['Prop_Owner'].values[0]
+    sc_name=df_props.loc[df_props['prop_type']=='scenario']['prop_owner'].values[0]
     
     sc_name_new=clean_names(sc_name)
     
     with open(ofpn, 'w') as f:
         f.write('''\
-'### Note: This is an auto generated script'                
+'### note: this is an auto generated script'                
 
-class Scenario:()
+class scenario:()
 ''')   
     
     with open(ofpn, 'a') as f:    
         f.write(str(sc_name_new)+\
-                            "=Scenario()"+'\n'+\
-                 'containingScenario='+ str(sc_name_new)          )
+                            "=scenario()"+'\n'+\
+                 'containingscenario='+ str(sc_name_new)          )
         
-    ### AUTOWRITE ADD_ATTRIBUTES_PROP.PY CODEFILE
+    ### autowrite add_attributes_prop.py codefile
         
     
     ### assumes df_prop in memory
@@ -166,9 +358,9 @@ class Scenario:()
     def clean_values(name): # function to replace certain special characters with underscore
         if type(name)==str:
             cname=str(name.replace(r'/','_').replace(' ','_').replace('___','_').replace('__','_'))
-            cname=cname.replace('FALSE','False')
-            cname=cname.replace('TRUE','True')
-            if r'C\\' in cname:
+            cname=cname.replace('False','False')
+            cname=cname.replace('True','True')
+            if r'c\\' in cname:
                 try:
                     metfile=cname.split('\\')[-1].split(',')[0].strip('_') 
                     metfile=metfile[:-4]+'.csv'
@@ -178,23 +370,38 @@ class Scenario:()
                     pass                
         return (cname)
     
-    def add_quotes(name): # function to add quotes to strings containing \ or / ## This is very hacky for now
+    def add_quotes(name): # function to add quotes to strings containing \ or / ## this is very hacky for now
         if type(name)==str and (r'\\' in name or '_' in name or name=='annual') and ('get_met_ave' not in name):
             cname="'"+name+"'"
             return (cname)
         return(name)
     
-    df_props['Prop_Owner_New']=df_props['Prop_Owner'].apply(clean_names)
-    df_props['Property_New']=df_props['Property'].apply(clean_names)
-    df_props['Value_New']=df_props['Value'].apply(clean_values)
-    df_props['Value_New']=df_props['Value_New'].apply(add_quotes)
-    
+    df_props['prop_owner_new']=df_props['prop_owner'].apply(clean_names)
+    df_props['property_new']=df_props['property'].apply(clean_names)
+    df_props['value_new']=df_props['value'].apply(clean_values)
+    df_props['value_new']=df_props['value_new'].apply(add_quotes)
+
+    def clean_names_algs(name): # not sure if this same function could be applied to props above -- clean up later. function to replace certain special characters with underscore; leaves float values alone
+        try:
+            name=float(name) 
+        except:
+            pass
+        if type(name)==str:
+            cname = re.sub('[^0-9a-za-z]+', '_', name)
+            cname=cname.strip('_')
+            return(cname)            
+        return(name)  
+
+    df_links['sending_compartment_new']=df_links['sending_compartment'].apply(clean_names_algs)    
+    df_links['receiving_compartment_new']=df_links['receiving_compartment'].apply(clean_names_algs)    
+    df_links['algorithm_new']=df_links['algorithm'].apply(clean_names_algs)    
+
     
     ofn=r'define_attributes_props.py'
     ofpn=os.path.join(ofp,ofn)
     
     with open(ofpn, 'w') as f:
-        f.write('### Note: This is an auto generated script' +'\n')        
+        f.write('### note: this is an auto generated script' +'\n')        
         f.write('''\
 import pandas as pd
 import os
@@ -221,16 +428,16 @@ def get_met_ave(mfn,mfcol):
         'mfp=r"'+str(inputs['path_inputs'])+'"'+'\n'        )    
 
         for i in range(len(df_props)):
-            obj=df_props.loc[i,'Prop_Owner_New']
+            obj=df_props.loc[i,'prop_owner_new']
             if True: # temporary. use condition below later.
     #        if obj in locals(): # may miss a few objects owing to name cleaning?
     #            print (obj)
                 f.write('try:'+'\n\t')
                 f.write(str(obj)+\
                        "." +\
-                       str(df_props.loc[i,'Property_New'])+\
+                       str(df_props.loc[i,'property_new'])+\
                        "="+\
-                       str(df_props.loc[i,'Value_New']))
+                       str(df_props.loc[i,'value_new']))
                 f.write('\n'+'except:'+'\n\t'+'pass') 
                 f.write('\n')            
             
