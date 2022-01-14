@@ -10,7 +10,7 @@ def implement_users_roles():
         from Scripts.trim_db.schema import Model, RoleMixin, UserMixin
     except Exception:
         from schema import Model, RoleMixin, UserMixin
-    print("Creating dummy User/Role ORM")
+    print("-- Creating dummy User/Role ORM")
 
     class Role(RoleMixin, Model):
         pass
