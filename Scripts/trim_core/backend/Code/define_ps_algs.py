@@ -1,17 +1,17 @@
-### Note: This is an auto generated script
+### note: this is an auto generated script
 from numpy import nan
 
-class Direct_Transfer_from_PseudoSource_to_Surface_water:
-	def __init__(self, Constants,containingScenario,currentChemical,SendingCompartment, ReceivingCompartment,dict_inputs):
-		self.Name='Direct Transfer from PseudoSource to Surface water'
-		self.Constants=Constants
-		self.containingScenario=containingScenario
-		self.currentChemical=currentChemical
-		self.SendingCompartment=SendingCompartment
-		self.ReceivingCompartment=ReceivingCompartment
-		self.doesTransformChemical= "false"
+class direct_transfer_from_pseudosource_to_surface_water:
+	def __init__(self, constants,containingscenario,currentchemical,sendingcompartment, receivingcompartment,dict_inputs):
+		self.name='direct transfer from pseudosource to surface water'
+		self.constants=constants
+		self.containingscenario=containingscenario
+		self.currentchemical=currentchemical
+		self.sendingcompartment=sendingcompartment
+		self.receivingcompartment=receivingcompartment
+		self.doestransformchemical= "False"
 		try: 
-			self.transferFactor=1.0
+			self.transferfactor=1.0
 		except: 
-			self.transferFactor="TF Computation Error"
+			self.transferfactor="tf computation error"
 
