@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, redirect, url_for
 from flask_security import login_required, current_user
-from Scripts.custom.flask_api import ApiResult
-from Scripts.trim_db import Scenario
-from Scripts.trim_frontend import api
+from custom.flask_api import ApiResult
+from trim_db import ScenarioService
+from trim_frontend import api
 from .forms import *
 
 
@@ -36,7 +36,7 @@ def create_scenario():
         redirect(url_for('scenario.view_scenarios'))
 
     # Create a new scenario with the form data
-    s = Scenario()
+    s = ScenarioService.create(no_commit=True)
     form.populate_obj(s)
     if not s.name:
         raise AssertionError("Scenario name cannot be blank.")
@@ -45,9 +45,7 @@ def create_scenario():
     s.creator = current_user
 
     # Save the scenario
-    from Scripts.trim_frontend import db
-    db.session.add(s)
-    db.session.commit()
+    ScenarioService.commit()
 
     return redirect(url_for('scenario.edit_scenario', id=s.id))
 
@@ -55,7 +53,7 @@ def create_scenario():
 @scenario.route('/scenario/<int:id>/edit')
 @login_required
 def edit_scenario(id):
-    s = Scenario.query.filter_by(id=id).first()
+    s = ScenarioService.get(id)
 
     return render_template('scenarios/editor.html', scenario=s)
 
@@ -67,7 +65,7 @@ api.use_api_errors(scenario_api)
 @scenario_api.route('/api/scenario/<int:id>')
 @login_required
 def get_scenario(id):
-    s = Scenario.query.filter_by(id=id).first()
+    s = ScenarioService.get(id)
 
     if s is not None:
         s = s.as_serializable()

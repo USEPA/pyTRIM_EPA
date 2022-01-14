@@ -4,13 +4,53 @@ from ..utils.mixins import TrackUpdatesMixin
 
 
 __all__ = [
-    'Scenario', 'Team'
+    'Scenario'
 ]
 
 
 class Scenario(Model, TrackUpdatesMixin):
     name = sa.Column(sa.String(120), nullable=False)
     description = sa.Column(sa.String(255))
+
+    @property
+    def chemicals(self):
+        for c in self._chemicals:
+            c.current_scenario(self)
+        return self._chemicals
+
+    @chemicals.setter
+    def chemicals(self, value):
+        self._chemicals = value
+
+    @property
+    def volume_elements(self):
+        volume_els = []
+        for p in self.parcels:
+            for ve in p.volume_elements:
+                ve.current_scenario(self)
+                volume_els.append(ve)
+        return list(sorted(volume_els, key=lambda x: x.name))
+
+    def get_volume_element(self, name):
+        for ve in self.volume_elements:
+            if ve.name == name or ve.standard_name == name:
+                return ve
+        return None
+
+    @property
+    def compartments(self):
+        comps = []
+        for ve in self.volume_elements:
+            for c in ve.compartments:
+                c.current_scenario(self)
+                comps.append(c)
+        return list(sorted(comps, key=lambda x: x.name))
+
+    def get_compartment(self, name):
+        for c in self.compartments:
+            if c.name == name or c.standard_name == name:
+                return c
+        return None
 
     @property
     def safe_name(self):
@@ -33,19 +73,9 @@ class Scenario(Model, TrackUpdatesMixin):
     creator_id = sa.Column(
         sa.Integer(), sa.ForeignKey('user.id'), nullable=False
     )
-    creator = sa.orm.relationship(
-        'User', backref=sa.orm.backref('created_scenarios', lazy='dynamic')
-    )
-
-    team_members = sa.orm.relationship(
-        'User', secondary='team',
-        backref=sa.orm.backref('joined_scenarios', lazy='dynamic')
-    )
-
-    @property
-    def team(self):
-        all_members = [self.creator, *self.team_members]
-        return all_members
+    # creator = sa.orm.relationship(
+    #     'User', backref=sa.orm.backref('created_scenarios', lazy='dynamic')
+    # )
 
     def as_serializable(self):
         return {
@@ -54,19 +84,9 @@ class Scenario(Model, TrackUpdatesMixin):
             'description': self.description
         }
 
-
-class Team(Model):
-    scenario_id = sa.Column(
-        sa.Integer(), sa.ForeignKey('scenario.id'), primary_key=True
-    )
-    scenario = sa.orm.relationship('Scenario')
-
-    member_id = sa.Column(
-        sa.Integer(), sa.ForeignKey('user.id'), primary_key=True
-    )
-    member = sa.orm.relationship('User')
-
-    # Each user should have only one position per project
-    __table_args__ = (
-        sa.UniqueConstraint('scenario_id', 'member_id'),
-    )
+    def __repr__(self):
+        return (
+            f'{self.__class__.__qualname__}('
+            f'"{self.name}"'
+            ')'
+        )
