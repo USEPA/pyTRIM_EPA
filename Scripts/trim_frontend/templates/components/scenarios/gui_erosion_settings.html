@@ -1,4 +1,4 @@
-{% from 'macros/form_macros.html' import render_field %}
+{% from 'macros/scenarios/erosion/erosion_macros.html' import conditional_erosion_subform %}
 
 <form id="erosion-settings-gui"
     data-async-form="true"
@@ -7,62 +7,783 @@
     <section class="container px-0">
         <div class="row mb-1">
             <div class="col-sm">
-                <div data-slot="true" data-target="emissions_source_file"></div>
-                <div class="form-text mb-2">
-                    <small class="text-muted">
-                        <a href="{{ url_for(
-                            'static', filename='templates/source_definitions.csv'
-                        ) }}">Click here</a> to download the template for creating a CSV file containing erosion parameters.
-                    </small>
-                </div>
-            </div>
-        </div>
-        <div class="row mb-3">
-            <div class="col-sm text-right">
-                <button type="button" class="btn btn-dark">
-                    Load Erosion Parameters from File
-                </button>
+                <div data-slot="true" data-target="erosion_input_options"></div>
             </div>
         </div>
         <div class="row mb-1">
             <div class="col-sm">
-                <div data-slot="true" data-target="emissions_sources">
-                    <div class="row mb-1">
-                        <div class="col-sm">
-                            <div data-slot="true" data-target="name"></div>
-                        </div>
-                    </div>
-                    <div class="row mb-1">
-                        <div class="col-sm">
-                            <div data-slot="true" data-target="location"></div>
-                        </div>
-                        <div class="col-sm">
-                            <div data-slot="true" data-target="height"></div>
-                        </div>
-                    </div>
-                    <div class="row mb-1">
-                        <div class="col-sm">
-                            <div data-slot="true" data-target="chemicals">
-                                <div class="row mb-1">
-                                    <div class="col-sm">
-                                        <div data-slot="true" data-target="chemical"></div>
-                                    </div>
-                                    <div class="col-sm">
-                                        <div data-slot="true" data-target="rate"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div id="option_1_form" data-slot="true" data-target="erosion_inputs_opt1">
+                     {{ conditional_erosion_subform(
+                    file_input='erosion_params_file_opt1',
+                    have_user_file=['have_user_file_opt1_PN','have_user_file_opt1_ER'],
+                    optionNum = 1
+                    ) }}
+                </div>
+                <div id="option_2_form" data-slot="true" data-target="erosion_inputs_opt2">
+                     {{ conditional_erosion_subform(
+                    file_input='erosion_params_file_opt2',
+                    have_user_file=['have_user_file_opt2_PN','have_user_file_opt2_USL','have_user_file_opt2_SDR'],
+                    optionNum = 2
+                    ) }}
+                </div>
+                <div id="option_3_form" data-slot="true" data-target="erosion_inputs_opt3">
+                     {{ conditional_erosion_subform(
+                    file_input='erosion_params_file_opt3',
+                    have_user_file=['have_user_file_opt3_PN','have_user_file_opt3_R','have_user_file_opt3_K','have_user_file_opt3_S','have_user_file_opt3_L','have_user_file_opt3_LS','have_user_file_opt3_C','have_user_file_opt3_P','have_user_file_opt3_USL','have_user_file_opt3_SDR'],
+                    optionNum = 3
+                    ) }}
                 </div>
             </div>
         </div>
     </section>
 </form>
-<script>
-    onDomLoad(function(e) {
-        var form = document.getElementById('emissions-settings-gui');
-        form.addEventListener('form:loaded', function() {
-        });
-    });
+<script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}">
 </script>
+<script src="{{ url_for('static', filename='js/lib/dataTables/jquery.dataTables.min.js') }}">
+</script>
+<script src="{{ url_for('static', filename='js/lib/dataTables/dataTables.bootstrap4.min.js') }}">
+</script>
+<script>
+    onDomLoad(function (e) {
+        $('[data-toggle="tooltip"]').tooltip()
+        var form = document.getElementById('erosion-settings-gui');
+        form.addEventListener('form:loaded', function () {
+            $('.div_checkbox').hide()
+            enableFieldUpdates()
+            default_data = {
+                "parcel": "",
+                "area": 1,
+                "cover": "grass",
+                "A": "",
+                "ER": "3.30E-03"
+            }
+            parcels = [
+                {
+                    "parcel_name": "E1",
+                    "parcel_area": 10,
+                    "parcel_cover": "grass"
+                },
+                {
+                    "parcel_name": "E2",
+                    "parcel_area": 12,
+                    "parcel_cover": "deciduous forest"
+                }
+            ]
+            data1 = [{
+                "parcel": "E1",
+                "area": 10,
+                "cover": "grass",
+                "ER": "7.45E-05"
+            },
+                {
+                    "parcel": "E2",
+                    "area": 12,
+                    "cover": "deciduous forest",
+                    "ER": "7.57E-05"
+                },
+                {
+                    "parcel": "E3",
+                    "area": 18,
+                    "cover": "deciduous forest",
+                    "ER": "8.15E-05"
+                },
+                {
+                    "parcel": "N1",
+                    "area": 16,
+                    "cover": "deciduous forest",
+                    "ER": "1.13E-05"
+                }]
+
+            data2 = [{
+                "parcel": "E1",
+                "area": 10,
+                "cover": "grass",
+                "A": "7.45E-05",
+                "a": "0.5",
+                "b": "3",
+                "SD": 1.5,
+                "ER": "7.45E-05"
+            },
+                {
+                    "parcel": "E2",
+                    "area": 12,
+                    "cover": "deciduous forest",
+                    "A": "7.57E-05",
+                    "a": "0.5",
+                    "b": "3",
+                    "SD": 1.5,
+                    "ER": "7.45E-05"
+                },
+                {
+                    "parcel": "E3",
+                    "area": 18,
+                    "cover": "deciduous forest",
+                    "A": "8.15E-05",
+                    "a": "0.5",
+                    "b": "3",
+                    "SD": 1.5,
+                    "ER": "7.45E-05"
+                },
+                {
+                    "parcel": "N1",
+                    "area": 16,
+                    "cover": "deciduous forest",
+                    "A": "1.13E-05",
+                    "a": "0.5",
+                    "b": "3",
+                    "SD": 1.5,
+                    "ER": "7.45E-05"
+                }]
+
+            data3 = [{
+                "parcel": "E1",
+                "area": 10,
+                "cover": "grass",
+                "R": "7.45E-05",
+                "K": "2.3E-2",
+                "S": "2",
+                "L": "500",
+                "LS": "0.2",
+                "C": 1,
+                "P": 1,
+                "A": "1.13E-05",
+                "a": "0.5",
+                "b": "3",
+                "SD": 1.5,
+                "ER": "7.45E-05"
+            },
+                {
+                    "parcel": "E2",
+                    "area": 12,
+                    "cover": "deciduous forest",
+                    "R": "7.57E-05",
+                    "K": "2.3E-2",
+                    "S": "2",
+                    "L": "500",
+                    "LS": "0.2",
+                    "C": 1,
+                    "P": 1,
+                    "A": "1.13E-05",
+                    "a": "0.5",
+                    "b": "3",
+                    "SD": 1.5,
+                    "ER": "7.45E-05"
+                },
+                {
+                    "parcel": "E3",
+                    "area": 18,
+                    "cover": "deciduous forest",
+                    "R": "8.15E-05",
+                    "K": "2.3E-2",
+                    "S": "2",
+                    "L": "500",
+                    "LS": "0.2",
+                    "C": 1,
+                    "P": 1,
+                    "A": "1.13E-05",
+                    "a": "0.5",
+                    "b": "3",
+                    "SD": 1.5,
+                    "ER": "7.45E-05"
+                },
+                {
+                    "parcel": "N1",
+                    "area": 16,
+                    "cover": "deciduous forest",
+                    "R": "1.13E-05",
+                    "K": "2.3E-2",
+                    "S": "2",
+                    "L": "500",
+                    "LS": "0.2",
+                    "C": 1,
+                    "P": 1,
+                    "A": "1.13E-05",
+                    "a": "0.5",
+                    "b": "3",
+                    "SD": 1.5,
+                    "ER": "7.45E-05"
+                }]
+
+            fieldMapping = {
+                "PN": "Surface Parcel",
+                "ER": "Total Effective Erosion Rate",
+                "USL": "A",
+                "SDR": "SD",
+                "R": "R",
+                "K": "K",
+                "S": "S",
+                "L": "L",
+                "LS": "LS",
+                "C": "C",
+                "P": "P"
+            }
+
+            data_source_select = $('#erosion_input_options')
+
+            have_file_cb = $("input[id*='have_user_file']")
+
+            field_name_dd = $("select[id*='field_name_']").filter((i,e)=>$(e).attr("id").startsWith("erosion_inputs"))
+
+            optionNum = 1
+            $('#option_2_form').hide()
+            $('#option_3_form').hide()
+
+            $(data_source_select).change(function (e) {
+                have_file_cb = $("input[id*='have_user_file']")
+                field_name_dd = $("select[id*='field_name_']")
+                optionNum = $(data_source_select).children("option:selected").index() + 1
+                if (optionNum == 1) {
+                    $('#option_1_form').show()
+                    $('#option_2_form').hide()
+                    $('#option_3_form').hide()
+                } else if (optionNum == 2) {
+                    $('#option_1_form').hide()
+                    $('#option_2_form').show()
+                    $('#option_3_form').hide()
+                } else {
+                    $('#option_1_form').hide()
+                    $('#option_2_form').hide()
+                    $('#option_3_form').show()
+                }
+            })
+
+            $('#erosionTable_opt1').DataTable(
+                {
+                    data: data1,
+                    bAutoWidth: false,
+                    columns: [
+                        {
+                            "data": "parcel",
+                            "render": function (data, type, row) {
+                                return "<label class='lb_parcel' data-thisrow="+ JSON.stringify(row) + ">" + data + "</label>"
+                            }
+                        },
+                        {"data": "cover"},
+                        {"data": "area"},
+                        {
+                            "data": "ER",
+                            "className":"td_ER",
+                            "render": function (data, type, row) {
+                                return "<input class='editableCell form-control form-control-sm' type='text' value='" +
+                                    data +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell'>" + data + "</label>"
+                            }
+                        }
+                    ]
+                });
+
+            $('#erosionTable_opt2').DataTable(
+                {
+                    data: data2,
+                    "bAutoWidth": false,
+                    columns: [
+                        {"data": "parcel",
+                            "render": function (data, type, row) {
+                                return "<label class='lb_parcel' data-thisrow="+ JSON.stringify(row) + ">" + data + "</label>"
+                            }
+                        },
+                        {"data": "cover"},
+                        {"data": "area"},
+                        {
+                            "data": "A",
+                            "render": function (data, type, row) {
+                                return "<input class='editableCell form-control form-control-sm erosion_inp_opt2 inp_A' type='text' value='" +
+                                    data +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell lb_A'>" + data + "</label>"
+                            }
+                        },
+                        {
+                            "data": "a",
+                            "className":"td_ASD",
+                            "render": function (data, type, row) {
+                                return "<input class='editableCell form-control form-control-sm erosion_inp_opt2 inp_a' type='text' value='" +
+                                    data +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell lb_a'>" + data + "</label>"
+                            }
+                        },
+                        {
+                            "data": "b",
+                            "className":"td_ASD",
+                            "render": function (data, type, row) {
+                                return "<input class='editableCell form-control form-control-sm erosion_inp_opt2 inp_b' type='text' value='" +
+                                    data +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell lb_b'>" + data + "</label>"
+                            }
+                        },
+                        {
+                            "data": "SD",
+                            "className":"td_ASD",
+                            "render": function (data, type, row) {
+                                return "<input data-toggle='tooltip' data-placement='top' data-html='true' title='SD = a * (Area)<sup>-b</sup>' class='editableCell form-control form-control-sm erosion_inp_opt2 inp_SD' type='text' value='" +
+                                    calculate_SD(row) +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell lb_SD'>" + calculate_SD(row) + "</label>"
+                            }
+                        },
+                        {
+                            "data": "ER",
+                            "className":"td_ER",
+                            "render": function (data, type, row) {
+                                return "<input data-toggle='tooltip' data-placement='top' data-html='true' title='ER = A * SD' class='editableCell form-control form-control-sm erosion_inp_opt2 inp_ER' type='text' value='" +
+                                    calculate_ER_ASD(row) +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell lb_ER'>" + calculate_ER_ASD(row) + "</label>"
+                            }
+                        }
+                    ],
+                    initComplete: function (settings, json) {
+                        $('[data-toggle="tooltip"]').tooltip()
+                        $("#erosionTable_opt2").wrap("<div style='overflow:auto; width:100%;position:relative;'></div>");
+                    }
+                });
+
+            $('#erosionTable_opt3').removeAttr('width').DataTable(
+                {
+                    data: data3,
+                    "bAutoWidth": false,
+                    columns: [
+                         {"data": "parcel",
+                            "render": function (data, type, row) {
+                                return "<label class='lb_parcel' data-thisrow="+ JSON.stringify(row) + ">" + data + "</label>"
+                            }
+                        },
+                        {"data": "cover"},
+                        {"data": "area"},
+                        {
+                            "data": "R",
+                            "render": function (data, type, row) {
+                                return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_R' type='text' value='" +
+                                    data +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell lb_R'>" + data + "</label>"
+                            }
+                        },
+                        {
+                            "data": "K",
+                            "render": function (data, type, row) {
+                                return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_K' type='text' value='" +
+                                    data +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell lb_K'>" + data + "</label>"
+                            }
+                        },
+                        {
+                            "data": "S",
+                            "className":"td_LS",
+                            "render": function (data, type, row) {
+                                return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_S' type='text' value='" +
+                                    data +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell lb_S'>" + data + "</label>"
+                            }
+                        },
+                        {
+                            "data": "L",
+                            "className":"td_LS",
+                            "render": function (data, type, row) {
+                                return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_L' type='text' value='" +
+                                    data +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell lb_L'>" + data + "</label>"
+                            }
+                        },
+                        {
+                            "data": "LS",
+                            "className":"td_LS",
+                            "render": function (data, type, row) {
+                                return "<input data-toggle='tooltip' data-placement='top' data-html='true' title='LS = L * S' class='editableCell form-control form-control-sm erosion_inp_opt3 inp_LS' type='text' value='" +
+                                    calculate_LS(row) +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell lb_LS'>" + calculate_LS(row) + "</label>"
+                            }
+                        },
+                        {
+                            "data": "C",
+                            "render": function (data, type, row) {
+                                return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_C' type='text' value='" +
+                                    data +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell lb_C'>" + data + "</label>"
+                            }
+                        },
+                        {
+                            "data": "P",
+                            "render": function (data, type, row) {
+                                return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_P' type='text' value='" +
+                                    data +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell lb_P'>" + data + "</label>"
+                            }
+                        },
+                        {
+                            "data": "A",
+                            "className":"td_ASD",
+                            "render": function (data, type, row) {
+                                return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_A' type='text' value='" +
+                                    data +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell lb_A'>" + data + "</label>"
+                            }
+                        },
+                        {
+                            "data": "a",
+                            "className":"td_ASD",
+                            "render": function (data, type, row) {
+                                return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_a' type='text' value='" +
+                                    data +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell lb_a'>" + data + "</label>"
+                            }
+                        },
+                        {
+                            "data": "b",
+                            "className":"td_ASD",
+                            "render": function (data, type, row) {
+                                return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_b' type='text' value='" +
+                                    data +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell lb_b'>" + data + "</label>"
+                            }
+                        },
+                        {
+                            "data": "SD",
+                            "className":"td_ASD",
+                            "render": function (data, type, row) {
+                                return "<input data-toggle='tooltip' data-placement='top' data-html='true' title=\"SD = a * (Area)<sup>-b</sup>\" class='editableCell form-control form-control-sm erosion_inp_opt3 inp_SD' type='text' value='" +
+                                    calculate_SD(row) +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell lb_SD'>" + calculate_SD(row) + "</label>"
+                            }
+                        },
+                        {
+                            "data": "ER",
+                            "className":"td_ER",
+                            "render": function (data, type, row) {
+                                return "<input data-toggle='tooltip' data-placement='top' data-html='true' title='ER = R*K*LS*C*P\n or\nER = A * SD' class='editableCell form-control form-control-sm erosion_inp_opt3 inp_ER' type='text' value='" +
+                                    calculate_ER_USLE(row) +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell lb_ER'>" + calculate_ER_USLE(row) + "</label>"
+                            }
+                        }
+                    ],
+                    initComplete: function (settings, json) {
+                        $("#erosionTable_opt3").wrap("<div style='overflow:auto; width:100%;position:relative;'></div>");
+                        $('[data-toggle="tooltip"]').tooltip()
+                        let rows=$("#erosionTable_opt3").find("tr");
+                        $(rows).each((i,row)=>update_cell_format(row,["label.lb_A","label.lb_a","label.lb_b","label.lb_SD"],true))
+                    }
+                });
+
+            /* const tables = ['#tableDiv_opt1', '#tableDiv_opt2', '#tableDiv_opt3'];
+            $(have_file_cb).each(function (i, el) {
+                this_opt = el.id.split("_")[2]
+                var this_tableDiv = '#tableDiv_' + this_opt
+                if (!$(el).is(":checked")) {
+                    $(this_tableDiv).show()
+                } else {
+                    $(this_tableDiv).hide()
+                }
+                $(el).click(function () {
+                    this_element_opt = el.id.split("_")[2]
+                    id_part = 'have_user_file_' + this_element_opt
+                    opt_group = $('input[id*=' + id_part + ']')
+                    if ($(opt_group).is((ii, elm) => !$(elm).is(":checked"))) {
+                        $(this_tableDiv).show()
+                    } else {
+                        $(this_tableDiv).hide()
+                    }
+                })
+            }) */
+
+            $(field_name_dd).each(function (i, el) {
+                $(el).change( function(){
+                    if ($(el).attr("id").endsWith("_PN") && $(el).find("option:selected").text() != "") {
+                        this_opt = $(el).attr("id").split("_")[2]
+                        search_pattern = "erosion_inputs_" + this_opt + "_field_name_" + this_opt + "_"
+                        this_opt_dd = field_name_dd.filter((i,e)=>$(e).attr("id").startsWith(search_pattern))
+                        $(this_opt_dd).each(function () {
+                            $(this).removeAttr('disabled')
+                        })
+                    } else {
+                        Parcel_Name_select_id = "#erosion_inputs_opt" + optionNum.toString() + "_field_name_opt" + optionNum.toString() + "_PN"
+                        let ParcelNameColumn = $(Parcel_Name_select_id).find("option:selected").text();
+                        let SelectedColumn = $(el).find("option:selected").text();
+                        // find current option
+                        this_opt_table_id = '#erosionTable_opt' + optionNum.toString()
+                        // using opt # find the
+                        var displayed_data = {
+                            "data": get_Data_from_table(this_opt_table_id)
+                        };
+                        displayed_parcels = displayed_data.data.map(e => e["Surface Parcel"])
+                        // get the data from the file input data-filedata attr
+                        this_file_input_id = "#erosion_inputs_opt" + optionNum.toString() + "_erosion_params_file_opt" + optionNum.toString()
+                        file_data = $(this_file_input_id).data("filedata")["file_data"]
+                        file_parcels = file_data.map(e => e[ParcelNameColumn])
+                        // find the column for the corresponding selected field
+                        col_name = $(el).attr("id").split("_")[$(el).attr("id").split("_").length-1]
+                        col_idx = Object.keys(displayed_data.data[0]).indexOf(fieldMapping[col_name])
+                        // for each parcel in data
+                        file_data.forEach(function (e, i) {
+                            // find the row in the current table with parcel name == Parcel Name selection
+                            row_idx = displayed_parcels.indexOf(e[ParcelNameColumn]) + 1
+                            if (row_idx > -1) {
+                                this_tr = 'tr:eq(' + row_idx.toString() + ')'
+                                this_td = 'td:eq(' + col_idx.toString() + ')'
+                                $(this_opt_table_id).find(this_tr).find(this_td).find('label.editableCell').text(e[SelectedColumn])
+                                $(this_opt_table_id).find(this_tr).find(this_td).find('input.editableCell').val(e[SelectedColumn])
+                            }
+                        })
+                    }
+                })
+            })
+
+            $('label.editableCell').click(function () {
+                $(this).prev("input").show()
+                $(this).prev("input").focus()
+                $(this).hide();
+            })
+            $('input.editableCell').focusout(function () {
+                const data = $(this).val()
+                $(this).hide()
+                $(this).next("label").show().text(data)
+            })
+            $('input.erosion_inp_opt2,input.erosion_inp_opt3').change(function () {
+                const cls = $(this).attr('class').split(' ')
+                const row = $(this).parents('tr')
+                // reset decorations
+                update_cell_calc(row,cls)
+            })
+        });
+
+        function get_Data_from_table(thisTableID){
+            var myRows = [];
+            var headersText = [];
+            var head_section = thisTableID + ' thead th'
+            var $headers = $(head_section);
+
+            // Loop through grabbing everything
+            thisRows = thisTableID + ' tbody tr'
+            var $rows = $(thisRows).each(function(index) {
+                $cells = $(this).find("td");
+                myRows[index] = {};
+                $cells.each(function(cellIndex) {
+                    // Set the header text
+                    if(headersText[cellIndex] === undefined) {
+                        headersText[cellIndex] = $($headers[cellIndex]).text();
+                    }
+                    // Update the row object with the header/cell combo
+                    myRows[index][headersText[cellIndex]] = $(this).text();
+                });
+            });
+            return myRows
+        }
+
+        function update_cell_calc(row, cls) {
+            let this_row = $(row).find("label.lb_parcel")
+            let this_row_data = $(this_row).data("thisrow")
+            let R = ($(row).find("label.lb_R").text() != $(row).find("input.inp_R").val()) ? $(row).find("input.inp_R").val() : $(row).find("label.lb_R").text()
+            let K = ($(row).find("label.lb_K").text() != $(row).find("input.inp_K").val()) ? $(row).find("input.inp_K").val() : $(row).find("label.lb_K").text()
+            let C = ($(row).find("label.lb_C").text() != $(row).find("input.inp_C").val()) ? $(row).find("input.inp_C").val() : $(row).find("label.lb_C").text()
+            let P = ($(row).find("label.lb_P").text() != $(row).find("input.inp_P").val()) ? $(row).find("input.inp_P").val() : $(row).find("label.lb_P").text()
+            let L = ($(row).find("label.lb_L").text() != $(row).find("input.inp_L").val()) ? $(row).find("input.inp_L").val() : $(row).find("label.lb_L").text()
+            let S = ($(row).find("label.lb_S").text() != $(row).find("input.inp_S").val()) ? $(row).find("input.inp_S").val() : $(row).find("label.lb_S").text()
+            let LS = ($(row).find("label.lb_LS").text() != $(row).find("input.inp_LS").val()) ? $(row).find("input.inp_LS").val() : $(row).find("label.lb_LS").text()
+            let A = ($(row).find("label.lb_A").text() != $(row).find("input.inp_A").val()) ? $(row).find("input.inp_A").val() : $(row).find("label.lb_A").text()
+            let a = ($(row).find("label.lb_a").text() != $(row).find("input.inp_a").val()) ? $(row).find("input.inp_a").val() : $(row).find("label.lb_a").text()
+            let b = ($(row).find("label.lb_b").text() != $(row).find("input.inp_b").val()) ? $(row).find("input.inp_b").val() : $(row).find("label.lb_b").text()
+            let SD = ($(row).find("label.lb_SD").text() != $(row).find("input.inp_SD").val()) ? $(row).find("input.inp_SD").val() : $(row).find("label.lb_SD").text()
+            let ER = ($(row).find("label.lb_ER").text() != $(row).find("input.inp_ER").val()) ? $(row).find("input.inp_ER").val() : $(row).find("label.lb_ER").text()
+            if (cls.indexOf("inp_SD") > -1) {
+                // Gray out a and b
+                update_cell_format(row, ["label.lb_A", "label.lb_SD"], false)
+                update_cell_format(row,["label.lb_a", "label.lb_b","label.lb_R","label.lb_K","label.lb_S","label.lb_L","label.lb_LS","label.lb_C","label.lb_P"],true)
+                // Update Row data
+                this_row_data.SD = SD
+                $(this_row).data("thisrow", this_row_data)
+                // Calculate ER
+                ER = calculate_ER_ASD(this_row_data)
+                $(row).find("label.lb_ER").text(ER)
+                $(row).find("input.inp_ER").val(ER)
+            } else if (cls.indexOf("inp_LS") > -1) {
+                 // Gray out L and S
+                update_cell_format(row, ["label.lb_R","label.lb_K","label.lb_LS","label.lb_C",,"label.lb_P"], false)
+                update_cell_format(row, ["label.lb_L", "label.lb_S","label.lb_A","label.lb_a","label.lb_b","label.lb_SD"], true)
+                // Update Row data
+                this_row_data.LS = LS
+                $(this_row).data("thisrow", this_row_data)
+                // Calculate ER
+                ER = calculate_ER_USLE(this_row_data)
+                $(row).find("label.lb_ER").text(ER)
+                $(row).find("input.inp_ER").val(ER)
+            } else if (cls.indexOf("inp_A") > -1) {
+                // No gray out, keep existing
+                update_cell_format(row,["label.lb_A","label.lb_SD"],false)
+                update_cell_format(row,["label.lb_R","label.lb_K","label.lb_S","label.lb_L","label.lb_LS","label.lb_C","label.lb_P"],true)
+                // Update Row data
+                this_row_data.A = A
+                $(this_row).data("thisrow",this_row_data)
+                // calculate ER
+                ER = calculate_ER_ASD(this_row_data)
+                $(row).find("label.lb_ER").text(ER)
+                $(row).find("input.inp_ER").val(ER)
+            } else if (cls.indexOf("inp_L") > -1 || cls.indexOf("inp_S") > -1) {
+               // Update Row data
+                this_row_data.L = L
+                this_row_data.S = S
+                LS = calculate_LS(this_row_data)
+                this_row_data.LS = LS
+                $(this_row).data("thisrow",this_row_data)
+                update_cell_format(row,["label.lb_R","label.lb_K","label.lb_S","label.lb_L","label.lb_LS","label.lb_C","label.lb_P"],false)
+                update_cell_format(row,["label.lb_A","label.lb_a","label.lb_b","label.lb_SD"],true)
+                $(row).find("label.lb_LS").text(LS)
+                $(row).find("input.inp_LS").val(LS)
+                // Calculate ER
+                ER = calculate_ER_USLE(this_row_data)
+                $(row).find("label.lb_ER").text(ER)
+                $(row).find("input.inp_ER").val(ER)
+            } else if (cls.indexOf("inp_a") > -1 || cls.indexOf("inp_b") > -1 ) { // Case when a or b is modified
+                // Update Row data
+                this_row_data.a = a
+                this_row_data.b = b
+                SD = calculate_SD(this_row_data)
+                this_row_data.SD = SD
+                $(this_row).data("thisrow",this_row_data)
+                update_cell_format(row,["label.lb_A","label.lb_a","label.lb_b","label.lb_SD"],false)
+                update_cell_format(row,["label.lb_R","label.lb_K","label.lb_S","label.lb_L","label.lb_LS","label.lb_C","label.lb_P"],true)
+                $(row).find("label.lb_SD").text(SD)
+                $(row).find("input.inp_SD").val(SD)
+                // Calculate ER
+                ER = calculate_ER_ASD(this_row_data)
+                $(row).find("label.lb_ER").text(ER)
+                $(row).find("input.inp_ER").val(ER)
+            } else if (cls.indexOf("inp_ER") > -1) {
+                // Gray out everything
+                update_cell_format(row,["label.lb_R","label.lb_K","label.lb_S","label.lb_L","label.lb_LS","label.lb_C","label.lb_P","label.lb_A","label.lb_a","label.lb_b","label.lb_SD"],true)
+                // No calculation of ER
+            } else { // any of the R, K, C or P is clicked and edited
+                // Update Row data
+                this_row_data.R = R
+                this_row_data.K = K
+                this_row_data.C = C
+                this_row_data.P = P
+                $(this_row).data("thisrow",this_row_data)
+                // Gray out A, a, b and SD and activate everything else
+                update_cell_format(row,["label.lb_A","label.lb_a","label.lb_b","label.lb_SD"],true)
+                update_cell_format(row,["label.lb_R","label.lb_K","label.lb_LS","label.lb_C","label.lb_P"],false)
+                // Calculate ER using USLE
+                ER = calculate_ER_USLE(this_row_data)
+                $(row).find("label.lb_ER").text(ER)
+                $(row).find("input.inp_ER").val(ER)
+            }
+            this_row_data.ER = ER
+            $(this_row).data("thisrow",this_row_data)
+        }
+
+        function update_cell_format(row,labels,is_grayed) {
+            if (is_grayed) {
+                labels.forEach((e,i)=>$(row).find(e).css({'color': 'gray', 'text-decoration': 'line-through'}))
+            } else {
+                labels.forEach((e,i)=>$(row).find(e).css({'color': 'black', 'text-decoration': 'none'}))
+            }
+
+        }
+
+        function calculate_SD(row) {
+            let SD = new Intl.NumberFormat('en-US', {notation: "scientific"}).format(row.a * (row.area ** (-1 * row.b)))
+            return SD
+        }
+
+        function calculate_LS(row) {
+            let ER = new Intl.NumberFormat('en-US', {notation: "scientific"}).format(row.L * row.S)
+            return ER
+        }
+
+        function calculate_ER_ASD(row) {
+            let ER = new Intl.NumberFormat('en-US', {notation: "scientific"}).format(row.A * row.SD)
+            return ER
+        }
+
+        function calculate_ER_USLE(row) {
+            let ER = new Intl.NumberFormat('en-US', {notation: "scientific"}).format(row.R * row.K * row.LS * row.C * row.P)
+            return ER
+        }
+
+        function enableFieldUpdates() {
+            var gui = $('#erosion-settings-gui');
+            var fileFields = gui.find('[type="file"]');
+            var selects = gui.find('select[id^="erosion_inputs_"]');
+
+            selects.attr('disabled', 'disabled');
+
+            function updateFields(section, opt) {
+                search_str_ff = "erosion_inputs_" + opt + "_"
+                var FileField = section.find('[type="file"][name^="erosion_inputs_"]').filter(function () {
+                    return this.id.match(search_str_ff)
+                });
+                search_str_dd = "_field_name_" + opt
+                section.find('select[id*="_field_name_opt"]').filter(function () {
+                    return this.id.match(search_str_dd)
+                }).each(function () {
+                    var me = $(this);
+                    var data = FileField.attr('data-filedata');
+                    data = data || 'null';
+                    data = JSON.parse(data);
+                    me.html('');
+                    if (data) {
+                        var fields = data.fields;
+                        if (!me.closest('.div_checkbox').is(":visible")) {
+                            me.closest('.div_checkbox').show()
+                        }
+                        TRIM.forms.updateSelect(this, fields);
+                        // ** Enable only the _PN and add event to enable rest when value for _PN selected
+                        if (me.attr("id").endsWith("_PN")) {
+                            me.removeAttr('disabled');
+                        }
+                    } else {
+                        me.attr('disabled', 'disabled');
+                    }
+                });
+            }
+
+            fileFields.change(function (e) {
+                var me = $(this);
+                var loadingRequest = 'load_' + this.id;
+                LoadingScreen.show(loadingRequest);
+
+                me.removeAttr('data-filedata');
+                TRIM.api.parseFiles(this).on('load', function () {
+                    try {
+                        var data = JSON.parse(this.responseText);
+                        if (data.success) {
+                            var myData = data.files[me.attr('name')];
+                            me.attr(
+                                'data-filedata',
+                                JSON.stringify(myData)
+                            );
+                        }
+                        var opt = (me.attr('id')).split("_").pop()
+                        updateFields(me.closest('section'), opt);
+                    } finally {
+                        LoadingScreen.hide(loadingRequest);
+                    }
+                });
+            });
+        }
+    });
+
+</script>
+<style>
+    .td_ER {
+        background-color: #f8caca80;
+    }
+    td.td_ASD {
+        background-color: #e9ecef80;
+    }
+    td.td_LS {
+        background-color: #fcf8e380;
+    }
+</style>
