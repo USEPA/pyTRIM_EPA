@@ -98,7 +98,7 @@
             "data_type": "float",
             "min": 0.01,
             "step": 0.01,
-            "default": 0.79,
+            "default": 1.4,
             "required": true,
             "help": "Enter the thickness of the vadose zone. Valid values are > 0. The default value of 1.4 is from Table 17 - U.S. Average from McKone, T.E., A. Bodnar, and E. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. University of California at Berkeley. Supported by U.S. Environmental Protection Agency (Sustainable Technology Division, National Risk Management Research Laboratory) and Environmental Defense Fund. July. LBNL-43722. Available online at: <a href='https://escholarship.org/uc/item/9f1164rk' target='_blank'>https://escholarship.org/uc/item/9f1164rk</a>."
         },
