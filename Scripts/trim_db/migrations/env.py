@@ -14,9 +14,9 @@ def import_base_model():
         os.path.join(os.path.dirname(__file__), '..')
     )
     sys.path.insert(0, root)
-    from schema import Model
+    from ..schema import Model
     if 'user' not in Model.metadata.tables:
-        from utils.users_roles import implement_users_roles
+        from ..utils.users_roles import implement_users_roles
         try:
             implement_users_roles()
         except Exception as e:
