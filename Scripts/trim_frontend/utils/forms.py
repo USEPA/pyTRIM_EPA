@@ -6,11 +6,12 @@ from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
 from wtforms import BooleanField, StringField, FloatField, IntegerField, \
     FormField, FieldList, SelectField, SelectMultipleField
-from wtforms.fields.html5 import DateField, DateTimeLocalField
+from wtforms.fields import DateField, DateTimeLocalField  # html5 is removed from wtforms 3.0 and later
 from wtforms.validators import DataRequired, NumberRange
-from wtforms.widgets import TextArea, ListWidget, CheckboxInput, HTMLString
+from wtforms.widgets import TextArea, ListWidget, CheckboxInput  # HTMLString is replaced by Markup starting wtforms 2.4 and later
+from markupsafe import Markup
 from wtforms.widgets.core import html_params
-from wtforms.widgets.html5 import NumberInput
+from wtforms.widgets import NumberInput  # html5 is removed from wtforms 3.0 and later
 
 
 root = os.path.dirname(os.path.abspath(__file__))
@@ -252,10 +253,12 @@ class InlineButtonWidget(object):
         kwargs['name'] = field.name
         kwargs.setdefault('id', field.id)
         kwargs.setdefault('type', self.input_type)
-        return HTMLString(
-            self.html % (self.html_params(**kwargs), field.label.text)
+        # return HTMLString(
+        #     self.html % (self.html_params(**kwargs), field.label.text)
+        # )
+        return Markup(
+             self.html % (self.html_params(**kwargs), field.label.text)
         )
-
 
 class InlineSubmitField(BooleanField):
     """

@@ -46,6 +46,12 @@ class AppConfig:
     # You need to EXPLICITLY set this to avoid a bug
     SECURITY_EMAIL_SENDER = MAIL_DEFAULT_SENDER
 
+    # BOTO config
+    BOTO_AWS_KEY = ''
+    BOTO_AWS_SECRET = ''
+    BOTO_S3_BUCKET = ''
+    BOTO_AWS_REGION = 'us-east-1'
+
 
 class ProdConfig(AppConfig):
     SECRET_KEY = os.getenv('SECRET_KEY', '')
@@ -82,5 +88,7 @@ def init_config(app, testing=False):
             app.config.from_object(TestConfig)
         else:
             app.config.from_object(DevConfig)
+            app.logger.info(
+                f'************ DB file is {app.config["SQLALCHEMY_DATABASE_URI"]} ***************')
     else:
         app.config.from_object(ProdConfig)

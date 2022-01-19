@@ -101,7 +101,7 @@ class AdminBaseView(AdminAuthMixin, AuthBaseView):
                 _wrap_view(exposed)
             )
 
-            if fname is not 'index':
+            if fname != 'index':
                 self._urls.append((route, fname, methods))
 
         super().__init__(*args, **kwargs)
@@ -115,7 +115,7 @@ def init_admin_views(app, admin):
     for view in admin_views:
         admin.add_view(view)
 
-    add_s3_admin_view(app, admin)
+    # add_s3_admin_view(app, admin)
 
 
 def add_s3_admin_view(app, admin):
