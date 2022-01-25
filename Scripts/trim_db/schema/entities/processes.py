@@ -2,7 +2,7 @@ import numpy as np
 import sqlalchemy as sa
 from ..parameters.equations import as_function
 from ..utils.base import Model
-from ..utils.caching import with_cache
+from ..utils.caching import CacheManager
 
 
 __all__ = [
@@ -40,7 +40,7 @@ class TransportProcess(Model):
         return self._validator(**kwargs) or False
 
     def evaluate(self, **kwargs):
-        @with_cache(f'transport_process::{self.id}')
+        @CacheManager.with_caching(f'transport_process::{self.id}')
         def cached_eval(**kwargs):
             if not self.applies_to(**kwargs):
                 raise TypeError(

@@ -1,7 +1,7 @@
 import math
 from simpleeval import EvalWithCompoundTypes
 from trim_db.utils import iter_by_longest_key
-from ..utils.caching import with_cache
+from ..utils.caching import CacheManager
 from .utils import is_number, UREG_CUSTOM_OPERATORS, UREG_CUSTOM_FUNCTIONS
 
 __all__ = ['as_function', 'find_arguments', 'deconstruct_equation']
@@ -64,7 +64,7 @@ def as_function(equation, with_caching=True, **default_kwargs):
             eq = eq.replace(k, non_func)
         return eq
 
-    @with_cache(f'equation::"{equation}"')
+    @CacheManager.with_caching(f'equation::"{equation}"')
     def func(**kwargs):
         custom_arg_map = dict(arg_map)
         custom_arg_map.update(dict(kwargs))

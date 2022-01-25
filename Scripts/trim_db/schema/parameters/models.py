@@ -1,6 +1,6 @@
 import sqlalchemy as sa
 from ..utils.base import Model
-from ..utils.caching import with_cache
+from ..utils.caching import CacheManager
 from .equations import *
 from .utils import *
 
@@ -90,7 +90,7 @@ class Formula(Model):
     def evaluate(
         self_, *args, IGNORE_EXTRA=False, **kwargs
     ):
-        @with_cache(f'formula::{self_.id}')
+        @CacheManager.with_caching(f'formula::{self_.id}')
         def cached_eval(IGNORE_EXTRA, *args, **kwargs):
             positional_args = list(args)
             combined_args = dict(kwargs)
