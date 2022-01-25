@@ -296,10 +296,11 @@ class Compartment(Model):
 
     _linked_compartment_cache = {}
 
-    def linked_compartments(self, media=None):
+    def linked_compartments(self, media=None, same_parcel=False):
         # Check cache
-        if media in self._linked_compartment_cache:
-            return self._linked_compartment_cache[media]
+        cache_k = f'{media}--{same_parcel}'
+        if cache_k in self._linked_compartment_cache:
+            return self._linked_compartment_cache[cache_k]
 
         linked = {
             c.id: c for c in self.custom_linked_compartments
@@ -316,7 +317,7 @@ class Compartment(Model):
         linked = list(linked.values())
 
         # Set cache
-        self._linked_compartment_cache[media] = linked
+        self._linked_compartment_cache[cache_k] = linked
 
         return linked
 
