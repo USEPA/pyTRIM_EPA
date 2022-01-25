@@ -88,7 +88,7 @@ class UserMixin(ActiveFlagMixin):
 
     @property
     def active_scenarios(self):
-        all_scenarios = [*self.created_scenarios, *self.joined_scenarios]
+        all_scenarios = [*self.created_scenarios]
         return all_scenarios
 
     def __repr__(self):
