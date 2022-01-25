@@ -2,7 +2,7 @@ import numpy as np
 from ..schema.scenarios.models import Scenario
 from ..schema.parameters.models import *
 from ..schema.parameters.utils import as_quantity
-from ..schema.utils.caching import with_cache
+from ..schema.utils.caching import CacheManager
 from .generic import GenericService
 
 __all__ = ['FormulaService', 'ParameterService']
@@ -372,7 +372,7 @@ def parameterize(cls):
         return wrapped
 
     # A method to get the VALUE of a parameter
-    @with_cache(f'entity_param::{cls_name}')
+    @CacheManager.with_caching(f'entity_param::{cls_name}')
     def get_parameter(
         entity, name, strict_units=False, default=NoneParameter.instance()
     ):

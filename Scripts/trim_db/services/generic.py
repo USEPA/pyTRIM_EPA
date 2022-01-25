@@ -1,12 +1,21 @@
-import os
-from .engine import DataBase
 from flask_sqlalchemy import SQLAlchemy
 from ..schema import Model
+from ..schema.utils.caching import CacheManager
 
 
 __all__ = ['db', 'GenericService', 'PermissionsMixin']
 
+
 db = SQLAlchemy(model_class=Model)
+
+# import os
+# from .engine import DataBase
+# db_path = (
+#     'sqlite:///'
+#     f'{os.path.dirname(os.path.abspath(__file__))}/../'
+#     'temp.db'
+# )
+# db = DataBase(db_path, model_base=Model)
 
 
 def make_key(**opts):
@@ -56,6 +65,7 @@ class GenericService(metaclass=ServiceMetaClass):
         cls.db.session.commit()
 
     @classmethod
+    @CacheManager.without_caching
     def create(cls, *, no_commit=False, check_unique=True, **kwargs):
         opts = dict(kwargs)
 

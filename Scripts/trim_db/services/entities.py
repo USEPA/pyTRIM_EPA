@@ -1,6 +1,6 @@
 from ..schema.entities.models import *
 from ..schema.entities.environment import DummyLink
-from ..schema.utils.caching import with_cache
+from ..schema.utils.caching import CacheManager
 from .generic import GenericService
 from .parameters import parameterize
 
@@ -67,7 +67,7 @@ class TransportProcessService(GenericService):
     __model__ = TransportProcess
 
 
-@with_cache('link-tps::')
+@CacheManager.with_caching('link-tps::')
 def get_transport_processes(link, chemical):
     tfs = TransportProcessService.get_all()
     s = link.sender
