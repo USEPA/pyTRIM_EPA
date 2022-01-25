@@ -15,7 +15,6 @@ def with_cache(base_key=None):
     def decorated(base_key, f):
         if base_key is None:
             base_key = str(f)
-        # print(f'Making cache with "{base_key}"')
         f_cache = GLOBAL_CACHE.setdefault(base_key, {})
 
         @wraps(f)

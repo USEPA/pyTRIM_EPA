@@ -1,17 +1,12 @@
 import os
 from .engine import DataBase
+from flask_sqlalchemy import SQLAlchemy
 from ..schema import Model
 
 
 __all__ = ['db', 'GenericService', 'PermissionsMixin']
 
-
-db_path = (
-    'sqlite:///'
-    f'{os.path.dirname(os.path.abspath(__file__))}/../'
-    'temp.db'
-)
-db = DataBase(db_path, model_base=Model)
+db = SQLAlchemy(model_class=Model)
 
 
 def make_key(**opts):

@@ -88,7 +88,5 @@ def init_config(app, testing=False):
             app.config.from_object(TestConfig)
         else:
             app.config.from_object(DevConfig)
-            app.logger.info(
-                f'************ DB file is {app.config["SQLALCHEMY_DATABASE_URI"]} ***************')
     else:
         app.config.from_object(ProdConfig)

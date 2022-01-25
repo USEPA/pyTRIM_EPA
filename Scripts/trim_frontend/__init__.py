@@ -4,9 +4,8 @@ from flask_assets import Environment
 from flask_bcrypt import Bcrypt
 from flask_mail import Mail
 from flask_security import Security
-from flask_sqlalchemy import SQLAlchemy
-from Scripts.custom.flask_api import FlaskApi
-from Scripts.trim_db import Model as ModelClass
+from custom.flask_api import FlaskApi
+from trim_db import db
 from .config import init_config
 from .utils.admin_views import init_admin_views
 from .utils.auth import init_auth
@@ -18,7 +17,6 @@ admin = Admin(template_mode='bootstrap3')
 api = FlaskApi()
 assets = Environment()
 bcrypt = Bcrypt()
-db = SQLAlchemy(model_class=ModelClass)
 mail = Mail()
 security = Security()
 

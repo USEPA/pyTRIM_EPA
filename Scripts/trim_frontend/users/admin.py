@@ -1,6 +1,6 @@
 from flask_security.utils import hash_password
 from wtforms.widgets import PasswordInput
-from Scripts.trim_frontend import db
+from trim_frontend import db
 from .models import User, Role
 from ..utils.admin_views import AdminModelView
 
