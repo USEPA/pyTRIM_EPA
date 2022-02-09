@@ -1,4 +1,7 @@
+## adding surface soil test case
 ## for two compartment test case
+
+# required compartments refer to primary abiotic types 
 
 required_compartments = ["advection sink",\
             "degradation/reaction sink",\
@@ -15,7 +18,15 @@ required_compartments = ["advection sink",\
             "water column carnivore",\
             "water column herbivore",\
             "water column omnivore",\
-            ]
+            "soil - surface",\
+            "leaf - deciduous forest in deciduous forest",\
+            "leaf particle - deciduous forest in deciduous forest",\
+            "leaf - deciduous forest",\
+            "leaf particle - deciduous forest",\
+            "soil - root zone",\
+            "soil - vadose zone",\
+            "groundwater",\
+                ]
 
 required_algorithms = [\
             "degradation/reaction sink in sediment(alginstid_4565)",\
@@ -81,4 +92,68 @@ required_algorithms = [\
             "algae deposition from surface water to sediment, general(alginstid_2144)",\
 
             'waterflow from surface water to surface water, general(alginstid_3685)',\
-            ]
+                
+            'runoff from surface soil to soil advection sink',\
+            'erosion from surface soil to surface soil, general(alginstid_2460)',\
+            'runoff from surface soil to surface soil, general(alginstid_2465)',\
+            'erosion from surface soil to surface water, general(alginstid_3515)',\
+            'runoff from surface soil to surface water, general(alginstid_3520)',\
+            'erosion from surface soil to soil advection sink',\
+
+            "diffusion from surface soil to air, hg0(alginstid_3997)",\
+            "diffusion from surface soil to air, mhg(alginstid_3999)",\
+                
+            "litterfall from leaves to soil(alginstid_1088)",\
+            "litterfall of leaf particle to soil(alginstid_1098)",\
+                
+            "diffusion from plant leaf to air, hg0, default (bennett 1998)(alginstid_4005)",\
+            "diffusion from plant leaf to air, mhg, default (bennett 1998)(alginstid_4005)",\
+            "diffusion from plant leaf to air, organics, default (bennett 1998)(alginstid_4005)",\
+            "demethylation(mhg -> hg2) in plant leaves, rate is input(alginstid_1249)",\
+            "demethylation(mhg -> hg2) in plant stem, rate is input(alginstid_1271)",\
+            "methylation(hg2 -> mhg) in plant leaves, rate is input(alginstid_1248)",\
+            "methylation(hg2 -> mhg) in plant stem, rate is input(alginstid_1270)",\
+            "particles blown off from plant leaf to air (dry)(alginstid_4010)",\
+            "particles washed off leaf onto ground(alginstid_1103)",\
+            "transfer from leaf particle on surface to leaf, cd(alginstid_1250)",\
+            "transfer from leaf particle on surface to leaf, hg(alginstid_1250)",\
+            "transfer from leaf particle on surface to leaf, organic(alginstid_1250)",\
+            "transfer from leaf to leaf particle on surface, cd(alginstid_1255)",\
+            "transfer from leaf to leaf particle on surface, hg(alginstid_1255)",\
+            "transfer from leaf to leaf particle on surface, organic(alginstid_1255)",\
+            "transfer from leaf to stem - agriculture, cd(alginstid_1265)",\
+            "transfer from leaf to stem - agriculture, hg(alginstid_1265)",\
+            "transfer from leaf to stem - agriculture, organic(alginstid_1265)",\
+            "transfer from leaf to stem - grasses/herbs, cd",\
+            "transfer from leaf to stem - grasses/herbs, hg",\
+            "transfer from leaf to stem - grasses/herbs, organic",\
+            "transfer from root zone to stem - agriculture, cd",\
+            "transfer from root zone to stem - agriculture, hg",\
+            "transfer from root zone to stem - agriculture, organic",\
+            "transfer from root zone to stem - grasses/herbs, cd(alginstid_1944)",\
+            "transfer from root zone to stem - grasses/herbs, hg(alginstid_1944)",\
+            "transfer from root zone to stem - grasses/herbs, organics(alginstid_1944)",\
+            "transfer from stem to leaf - agriculture, cd",\
+            "transfer from stem to leaf - agriculture, hg",\
+            "transfer from stem to leaf - agriculture, organic",\
+            "transfer from stem to leaf - grasses/herbs, cd(alginstid_1260)",\
+            "transfer from stem to leaf - grasses/herbs, hg(alginstid_1260)",\
+            "transfer from stem to leaf - grasses/herbs, organic(alginstid_1260)",\
+                
+            "diffusion from root zone to surface soil(alginstid_1939)",\
+            "diffusion from surface soil to root zone(alginstid_1919)",\
+            "percolation from surface soil to root zone(alginstid_1924)",\
+            "degradation/reaction sink in root zone(alginstid_4155)",\
+                
+            "diffusion from vadose zone to root zone(alginstid_1914)",\
+            "degradation/reaction sink in vadose zone(alginstid_4150)",\
+            "diffusion from root zone to vadose zone(alginstid_1904)",\
+            "diffusion from vadose zone to vadose zone(alginstid_2445)",\
+            "diffusion from vadose zone to root zone(alginstid_1914)",\
+                
+            "percolation from vadose zone to groundwater(alginstid_1899)",\
+            "recharge from groundwater to surface water, general(alginstid_3510)",\
+            "degradation/reaction sink in groundwater(alginstid_4145)",\
+                
+                ]
+                

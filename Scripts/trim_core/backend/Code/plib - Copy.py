@@ -51,8 +51,7 @@ def process_pseudo_library(inputs):
         line_nc=line.strip()     # strip space and new line    
         line_nc=line_nc.split("//")[0] # line stripped of comment
         ptype=line_nc.split(":")[0].strip() # if line has a :, get text to left
-        # if ptype=="algorithm": # get algorithm name (assumed to be on single line)
-        if ptype=="algorithm" and line[:9]=='algorithm': # get algorithm name (assumed to be on single line) -- new and condition makes sure that only true algorithms are flagged (some mentions are in indented comments) 
+        if ptype=="algorithm": # get algorithm name (assumed to be on single line)
             alg_flag=True
             alg_name=line_nc.split(":")[1].strip()
 #            print ('*******************************************')
@@ -156,8 +155,8 @@ def process_pseudo_library(inputs):
     cols=['index','group','alg_name_new','category','chemical_category','enabled','isdefaultforcategory','receivingchemicalname','receivingcompartmentcategory','sendingcompartmentcategory','sendingchemicalname']   
     df_psalg_mat=pd.DataFrame(alg_mat,columns=cols)
     df_psalg_mat=df_psalg_mat.loc[df_psalg_mat['category']=='abstract transfer'] # limit to pseudo source abstract transfer algorithms
-    df_psalg_mat['index']=df_psalg_mat['index']+1 # avoid zero index to prevent later problems distinguishing pseudo from non-pseudo
-   
+    
+           
     
     #### read point sources
     
@@ -285,7 +284,6 @@ def process_pseudo_library(inputs):
             prop=prop.replace('thelink.fractionspecificcompartmentdiet','1')          
         if 'currentchemical' not in prop and 'chemical.' in prop:
             prop=prop.replace('chemical.','chemical_')
-        prop=prop.replace('.chemical.','.chemical_') # to cover cases where both current chemical and chemical are in the same property
         return (prop)
     
     
@@ -322,58 +320,22 @@ def process_pseudo_library(inputs):
                     'self.currentchemical=currentchemical\n\t\t'+\
                     'self.sendingcompartment=sendingcompartment\n\t\t'+\
                     'self.receivingcompartment=receivingcompartment\n\t\t'+\
-                    'self.dict_inputs=dict_inputs'+'\n\t\t')
-                #     'self.category='+"'"+grouped_alg.get_group(group).loc[grouped_alg.get_group(group)['property']=='category']['value'].values[0]+"'"+'\n\t\t'
-                #     'self.chemicalcategory='+"'"+grouped_alg.get_group(group).loc[grouped_alg.get_group(group)['property']=='chemicalcategory']['value'].values[0]+"'"+'\n\t\t'
-                #     'self.doestransformchemical='+"'"+grouped_alg.get_group(group).loc[grouped_alg.get_group(group)['property']=='doestransformchemical']['value'].values[0]+"'"+'\n\t\t'
-                #     'self.transportchemical='+"'"+grouped_alg.get_group(group).loc[grouped_alg.get_group(group)['property']=='doestransportchemical']['value'].values[0]+"'"+'\n\t\t'
-                #     'self.enabled='+"'"+grouped_alg.get_group(group).loc[grouped_alg.get_group(group)['property']=='enabled']['value'].values[0]+"'"+'\n\t\t'
-                #     'self.isdefaultforcategory='+"'"+grouped_alg.get_group(group).loc[grouped_alg.get_group(group)['property']=='isdefaultforcategory']['value'].values[0]+"'"+'\n\t\t'
-                #     'self.receivingcompartmentcategory='+"'"+grouped_alg.get_group(group).loc[grouped_alg.get_group(group)['property']=='receivingcompartmentcategory']['value'].values[0]+"'"+'\n\t\t'
-                #     'self.sendingcompartmentcategory='+"'"+grouped_alg.get_group(group).loc[grouped_alg.get_group(group)['property']=='sendingcompartmentcategory']['value'].values[0]+"'"+'\n\t\t')
+                    'self.doestransformchemical= "False"\n\t\t'+\
+                    'try: \n\t\t\t'
+                    'self.transferfactor='+ tf +'\n\t\t'\
+                    'except: \n\t\t\t'       
+                    'self.transferfactor="tf computation error"')     
             
-            # residual_props=set(alg_props)-set(['category','chemicalcategory','doestransformchemical','doestransportchemical','enabled','isdefaultforcategory','mate','receivingcompartmentcategory','sendingcompartmentcategory','transferfactor'])
-
-            residual_props=set(alg_props)-set(['transferfactor'])
-
-### testing method decorator approach
-
+            residual_props=set(alg_props)-set(['category','chemicalcategory','doestransformchemical','doestransportchemical','enabled','isdefaultforcategory','mate','receivingchemicalname','receivingcompartmentcategory','sendingcompartmentcategory','sendingchemicalname','transferfactor'])
             for prop in residual_props:
                 prop_val=grouped_alg.get_group(group).loc[grouped_alg.get_group(group)['property']==prop]['value'].values[0] #property value
                 prop_val=clean_props(prop_val)
-                if type(prop_val)==float or is_number(prop_val):
-                    f.write('\n\t'+\
-                            '_'+prop+'='+prop_val +'\n\t' +\
-                            '@property'+'\n\t' +\
-                            'def '+prop+'(self):'+'\n\t\t' +\
-                            'return self._'+prop+'\n\n\t' +\
-                            '@'+prop+'.setter''\n\t' +\
-                            'def '+prop+'(self,value):'+'\n\t\t' +\
-                            'self._'+prop+'=value\n')             
+                if prop=='compartmentrelationship':
+                    f.write('\n\t\t'
+                            'self.'+prop+'='+"'"+prop_val+"'")                
                 else:
-                    if prop in ['category','receivingcompartmentcategory','sendingchemicalname','sendingcompartmentcategory','receivingchemicalname','compartmentrelationship','chemicalcategory','doestransformchemical','doestransportchemical','enabled','isdefaultforcategory','receivingchemicalname','receivingcompartmentcategory','sendingcompartmentcategory','sendingchemicalname','transferfactor']: # write as string
-                        f.write('\n\t'+\
-                                '@property'+'\n\t' +\
-                                'def '+prop+'(self):'+'\n\t\t' +\
-                                'return ("'+prop_val+'")\n\t') 
-                    else:
-                        f.write('\n\t'+\
-                                '@property'+'\n\t' +\
-                                'def '+prop+'(self):'+'\n\t\t' +\
-                                'return ('+prop_val+')\n\t') 
-
-
-            f.write('\n\t'+\
-                    '@property'+'\n\t' +\
-                    'def transferfactor(self):'+'\n\t\t' +\
-                    'try:'+'\n\t\t\t' +\
-                    'r='+tf+'\n\t\t' +\
-                    'except:'+'\n\t\t\t' +\
-                    'r=nan'+'\n\t\t'+\
-                    'return (r)') 
-
-            f.write('\n\n')    
-
+                    f.write('\n\t\t'
+                            'self.'+prop+'='+prop_val)                
             f.write('\n\n')    
             
     return(df_psalgs,df_psalg_mat,df_ps,df_pt)

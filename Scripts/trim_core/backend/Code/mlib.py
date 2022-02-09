@@ -87,8 +87,10 @@ def process_master_library(inputs):
         prop=prop.replace('z_total','z_total')
         prop=prop.replace ('!',' not ')
         prop=prop.replace('sendingchemical_','self.currentchemical.')
+        prop=prop.replace('receivingchemical_','self.currentchemical.')
         prop=prop.replace('molecularweight','molecularweight')        
         prop=prop.replace('ln','log')
+        prop=prop.replace('if (self.containingscenario.rain==0 and self.sendingcompartment.volume>0) else 0',' * frac_time_rain(mfp,mfn) if self.sendingcompartment.volume>0 else 0')   ## important: replace rain time dependent switch with fraction of time rain for static non time series analysis. affects two algorithms -- blowing particles of leaf to ground and air    
         
         if 'thelink.interfacialarea' in prop: # replace thelink interfacial area custom function with python function
             prop=prop.replace('thelink.interfacialarea','check_neighbor(self.sendingcompartment,self.receivingcompartment,self.dict_inputs).is_neighbor()[1]')           
@@ -98,6 +100,15 @@ def process_master_library(inputs):
         if 'thelink.bulkwaterflowrate_volumetric' in prop: # hack to deal with interconnected water bodies
             prop=prop.replace('thelink.bulkwaterflowrate_volumetric',"float(self.dict_inputs['df_links'].loc[(self.dict_inputs['df_links']['receiving_compartment_new']==self.receivingcompartment.name)&(self.dict_inputs['df_links']['sending_compartment_new']==self.sendingcompartment.name)&(self.dict_inputs['df_links']['property']=='bulkwaterflowrate_volumetric'),'value'].values[0])")          
 
+        if 'thelink.fractionoftotalrunoff' in prop: # hack to deal with runoff link
+            prop=prop.replace('thelink.fractionoftotalrunoff',"float(self.dict_inputs['df_links'].loc[(self.dict_inputs['df_links']['receiving_compartment_new']==self.receivingcompartment.name)&(self.dict_inputs['df_links']['sending_compartment_new']==self.sendingcompartment.name)&(self.dict_inputs['df_links']['property']=='fractionoftotalrunoff'),'value'].values[0])")          
+        if 'thelink.fractionoftotalerosion' in prop: # hack to deal with erosion link
+            prop=prop.replace('thelink.fractionoftotalerosion',"float(self.dict_inputs['df_links'].loc[(self.dict_inputs['df_links']['receiving_compartment_new']==self.receivingcompartment.name)&(self.dict_inputs['df_links']['sending_compartment_new']==self.sendingcompartment.name)&(self.dict_inputs['df_links']['property']=='fractionoftotalerosion'),'value'].values[0])")          
+        
+        if 'sendingwithincompositecompartment[terrestrial plant | leaf]'in prop:
+            prop=prop.replace('sendingwithincompositecompartment[terrestrial plant | leaf].','self.sendingcompartment.associated_leaf_comp.')
+
+
         return (prop)
    
     required_algs=req.required_algorithms # look up list of required algorithms
@@ -106,6 +117,12 @@ def process_master_library(inputs):
         f.write('### note: this is an auto generated script' +'\n')        
         f.write('from find_neighbors import *' +'\n')
         f.write('from numpy import sqrt,nan,log' +'\n')
+        f.write('from util_functions import *' +'\n')
+        f.write('mfp=r"'+str(inputs['path_inputs'])+'"'+'   # path to met file'+'\n') 
+        f.write('mfn=r"'+str(inputs['met_file'])+'"'+'   # met file name'+'\n\n\n') 
+
+        # f.write('print("Fraction Time Rain = ", frac_time_rain(mfp,mfn))'+'\n\n\n') # test 
+
         
         for index,group in enumerate(grouped_alg.groups):
             if group not in required_algs:
@@ -332,6 +349,7 @@ from define_attributes_props import *
     
     
     def clean_props(prop): # function to convert properties to pythonic syntax, 
+        prop=prop.replace('(compartment.allowexchange_forother > 0 ? compartment.wetvolumeperarea * containingvolumeelement.area : 0)','compartment.allowexchange_forother > 0 ? compartment.wetvolumeperarea * containingvolumeelement.area : 0') # ternary convertor doesnt handle props enclosed in paranthesis 
         if '?' in prop: # change ternary if then else syntax to pythonic syntax
             prop=ternary2python(prop)
             
@@ -349,6 +367,10 @@ from define_attributes_props import *
         prop=prop.replace('z_vapor','z_vapor')
         prop=prop.replace('d_purewater','d_purewater')
         prop=prop.replace('fractionmass_vapor','fractionmass_vapor')
+        prop=prop.replace('(compartment.allowexchange_forother > 0 ? compartment.wetvolumeperarea * containingvolumeelement.area : 0)','compartment.allowexchange_forother > 0 ? compartment.wetvolumeperarea * containingvolumeelement.area : 0') 
+        prop=prop.replace('withincompositecompartment[terrestrial plant | leaf | leaf - deciduous forest].','self.associated_leaf_comp.')
+        prop=prop.replace('withincompositecompartment[terrestrial plant | leaf].','self.associated_leaf_comp.')  
+
         if 'linkedcompartment' in prop:
             prop=linkcomp(prop)
         if 'currentchemical' not in prop and 'chemical.' in prop:
