@@ -4,6 +4,7 @@
 created on wed mar 31 21:15:14 2021
 @author: 13963
 
+## added a single surface soil compartment n1
 ## added a few temporary if conditions to limit to sediment and surface water system
 
 1) parses compartments text file and stores as DataFrame
@@ -80,14 +81,14 @@ def define_comp(currentchemical):
 
         f.write('\n\t'+'comp_objects_dict={}'+'\n\t')               
         
-        for i in range(len(df_ve)):
+        for i in range(len(df_ve)): # first write the primary abiotic compartments of each volume element
             ve_name=str(df_ve.loc[i,'ve_name'].replace(r'/','_').replace(r'-','_').replace(' ','_'))
             parcel_name=ve_name.split('_')[1] # parcel name
             parcel_points=df_parcels['point_ids'].loc[df_parcels['parcel_name']==parcel_name].values[0] # parcel points
             parcel_area=df_parcels['parcel_area'].loc[df_parcels['parcel_name']==parcel_name].values[0] # parcel area
             exterior_boundary=df_parcels['external_boundary'].loc[df_parcels['parcel_name']==parcel_name].values[0] # parcel exterior boundary
             primary_abiotic=str(df_ve.loc[i,'primary_abiotic']).lower() # temp
-            if primary_abiotic not in required_comp_classes or (str(df_ve.loc[i,'parcel_name']) !='lakecadillac' and str(df_ve.loc[i,'parcel_name']) !='lakemitchell'): # temp: #  temp
+            if primary_abiotic not in required_comp_classes or (str(df_ve.loc[i,'parcel_name']) !='lakecadillac' and str(df_ve.loc[i,'parcel_name']) !='lakemitchell' and str(df_ve.loc[i,'parcel_name']) !='n1'): # temp: #  temp
 #            if primary_abiotic not in required_comp_classes or str(df_ve.loc[i,'parcel_name']) !='lakecadillac': # temp: #  temp
                continue # temp           
             comp_name=str(df_ve.loc[i,'primary_abiotic'].replace(r'/','_').replace(r'-','_').replace(' ','_')) + '_in_' + str(df_ve.loc[i,'ve_name'].replace(r'/','_').replace(r'-','_').replace(' ','_')) 
@@ -148,8 +149,7 @@ def define_comp(currentchemical):
         
         for i in range(len(df_comp)):
 #            if str(df_comp.loc[i,'primary_abiotic']).lower() not in required_comp_classes or str(df_comp.loc[i,'parcel_name']) !='lakecadillac': # temp
-            if str(df_comp.loc[i,'primary_abiotic']).lower() not in required_comp_classes or (str(df_comp.loc[i,'parcel_name']) !='lakecadillac' and str(df_comp.loc[i,'parcel_name']) !='lakemitchell'): # temp
-
+            if str(df_comp.loc[i,'primary_abiotic']).lower() not in required_comp_classes or (str(df_comp.loc[i,'parcel_name']) !='lakecadillac' and str(df_comp.loc[i,'parcel_name']) !='lakemitchell'and str(df_comp.loc[i,'parcel_name']) !='n1'):# or str(df_comp.loc[i,'compositecompartment'])!="": # temp
                continue
             ve_name=df_comp.loc[i,'ve_name'] # volume element name
             parcel_name=ve_name.split('_')[1] # parcel name
@@ -157,7 +157,7 @@ def define_comp(currentchemical):
             parcel_area=df_parcels['parcel_area'].loc[df_parcels['parcel_name']==parcel_name].values[0] # parcel area
             exterior_boundary=df_parcels['external_boundary'].loc[df_parcels['parcel_name']==parcel_name].values[0] # parcel exterior boundary
             comp_names=[]
-            if df_comp.loc[i,'compartment']!='':
+            if df_comp.loc[i,'compartment']!='': # if not a composite compartment
                 if str(df_comp.loc[i,'compartment']).lower() not in required_comp_classes: # temp
                    continue
 
@@ -227,9 +227,49 @@ def define_comp(currentchemical):
                         'exterior_boundary='+\
                         str(exterior_boundary))
                 f.write('\n\t')
-    
-                f.write('\n\t'+'comp_objects_dict['+'"'+str(comp_name)+'"'+']='+comp_name+'\n')
-            
+
+## adding artefact to handle associated compartments for plant composites
+
+                if 'leaf' in comp_name and 'particle' not in comp_name: # applies to leaf composites only
+                    soil_comp_name='soil_surface_in_'+comp_name.split('_in_')[1] # infer associated surface soil compartment name
+                    f.write('\n\t'+\
+                                    str(comp_name)+\
+                                    '.'+\
+                                    'associated_soil_comp='+\
+                        			'comp_objects_dict['+'"'+str(soil_comp_name)+'"]'+'\n') 
+                        
+                if 'particle' in comp_name: # applies to leaf particle composites only
+                    soil_comp_name='soil_surface_in_'+comp_name.split('_in_')[1]
+                    f.write('\n\t'+\
+                        str(comp_name)+\
+                        '.'+\
+                        'associated_soil_comp='+\
+             			'comp_objects_dict['+'"'+str(soil_comp_name)+'"]'+'\n')
+
+
+                    leaf_comp_name=comp_name.split('_particle')[0]+comp_name.split('_particle')[1]
+                    f.write('\n\t'+\
+                        str(comp_name)+\
+                        '.'+\
+                        'associated_leaf_comp='+\
+             			'comp_objects_dict['+'"'+str(leaf_comp_name)+'"]'+'\n')
+
+
+                        
+##     
+                f.write('\n\t'+'comp_objects_dict['+'"'+str(comp_name)+'"'+']='+comp_name+'\n')    
+
+### add leaf as associated compartment property of previously defined soil compartment
+
+                if 'leaf' in comp_name and 'particle' not in comp_name: # applies to leaf composites only
+                    soil_comp_name='soil_surface_in_'+comp_name.split('_in_')[1] # infer associated surface soil compartment name
+                    f.write('\n\t'+\
+                                    str(soil_comp_name)+\
+                                    '.'+\
+                                    'associated_leaf_comp='+\
+                        			'comp_objects_dict['+'"'+str(comp_name)+'"]'+'\n') 
+
+                    f.write('\n\t'+'comp_objects_dict['+'"'+str(soil_comp_name)+'"'+']='+soil_comp_name+'\n')    
     
     
     
@@ -238,7 +278,7 @@ def define_comp(currentchemical):
     ###### append code to auto define advection sinks
     
 #    df_sinks=df_ve.loc[((df_ve.primary_abiotic=='air')|(df_ve.primary_abiotic=='soil - surface'))&(df_ve.external_boundary>0) & (df_ve.parcel_name=='lakecadillac')] # only air and surface soil compartments with an outer boundary need sinks
-    df_sinks=df_ve.loc[((df_ve.primary_abiotic=='air')|(df_ve.primary_abiotic=='soil - surface'))&(((df_ve.external_boundary>0) & (df_ve.parcel_name=='lakecadillac'))|((df_ve.external_boundary>0) & (df_ve.parcel_name=='lakemitchell'))) ] # only air and surface soil compartments with an outer boundary need sinks
+    df_sinks=df_ve.loc[((df_ve.primary_abiotic=='air')|(df_ve.primary_abiotic=='soil - surface'))&(((df_ve.external_boundary>0) & (df_ve.parcel_name=='lakecadillac'))|((df_ve.external_boundary>0) & (df_ve.parcel_name=='lakemitchell'))|((df_ve.external_boundary>0) & (df_ve.parcel_name=='n1'))) ] # only air and surface soil compartments with an outer boundary need sinks
 
     
     with open(ofpn, 'a') as f:
@@ -312,7 +352,7 @@ def define_comp(currentchemical):
 
         for i in range(len(df_pve)):
 #            if str(df_pve.loc[i,'parcel_name'])!="lakecadillac":  # temp
-            if str(df_pve.loc[i,'parcel_name'])!="lakecadillac" and str(df_pve.loc[i,'parcel_name'])!="lakemitchell":  # temp
+            if str(df_pve.loc[i,'parcel_name'])!="lakecadillac" and str(df_pve.loc[i,'parcel_name'])!="lakemitchell" and str(df_pve.loc[i,'parcel_name'])!="n1":  # temp
 
                 continue
         
@@ -328,13 +368,13 @@ def define_comp(currentchemical):
             
             prim_abiotic_name=str(df_pve.loc[i,'primary_abiotic'].replace(r'/','_').replace(r'-','_').replace(' ','_'))
             if prim_abiotic_name=="dryvaporsource":
-                comp_category="deposition | dry | vapor"
+                comp_category="pseudosource | dry | vapor"
             if prim_abiotic_name=="wetvaporsource":
-                comp_category="deposition | wet | vapor"
+                comp_category="pseudosource | wet | vapor"
             if prim_abiotic_name=="dryparticlesource":
-                comp_category="deposition | dry | particle"
+                comp_category="pseudosource | dry | particle"
             if prim_abiotic_name=="wetparticlesource":
-                comp_category="deposition | wet | particle"
+                comp_category="pseudosource | wet | particle"
 
             f.write('\n\t'+\
                         str(comp_name)+'=pseudo_compartment()'+'\n\t'+\
@@ -381,7 +421,7 @@ def define_comp(currentchemical):
             for i in range(len(df_props)):
                 if str(df_props.loc[i,'prop_type'])!='compartment':
                     continue                
-                if str(df_props.loc[i,'prop_owner']).split(' in ')[0].strip().lower() not in required_comp_classes: # temp
+                if str(df_props.loc[i,'prop_owner']).split(' in ')[0].strip().lower() not in required_comp_classes: # temp -- this doesnt work for leaf composites because two " in " so added hack fix to required comps list
                    continue                
                 
                 obj=df_props.loc[i,'prop_owner_new']

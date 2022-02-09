@@ -62,7 +62,7 @@ def define_properties(inputs):
     
     
     #### read links
-    val_end_flag=False 
+
     link_tuples=[]
     algs=[]
     for line in prop_lines: # loop over lines 
@@ -71,10 +71,8 @@ def define_properties(inputs):
             continue # move to next line
         line_nc=line.split("//")[0] # line stripped of comment    
         prop_type=line_nc.split(':')[0].strip() # split on : . text to the left is the property type 
-        if prop_type=='new link': # if volume element or compartment        
-            new_link_flag=True # flag indicates that a new link has begun
-            if val_end_flag and new_link_flag: # if value reading has ended and a new property type has begun: 
-                algs=[]; sc="";rc="";prop="";form="";value="";val_end_flag=False         # initialize list and values    
+        if prop_type=='newlink': # if new link reinitialize algs list   
+                algs=[]; sc="";rc="";prop="";form="";value=""         # initialize list and values
         elif prop_type=="sendingcompartment":
             sc=line_nc.split(':')[1].strip()
         elif prop_type=="receivingcompartment":
@@ -87,9 +85,8 @@ def define_properties(inputs):
         elif prop_type=="form":
             form=line_nc.split(':')[1].strip()
         elif prop_type=="value":
-            val=line_nc.split(':')[1].strip()
-            val_end_flag=True      
-            if algs!=[] and sc!="" and rc!="": 
+            val=line_nc.split(':')[1].strip()  
+            if algs!=[] and sc!="" and rc!="": # as soon as value is read, associate it with all linked algorithms and add tuples to list 
                 for alg in algs:
                      lp=(sc,rc,alg,prop,form,val)
                      link_tuples.append(lp)
@@ -353,6 +350,11 @@ class scenario:()
     
     def clean_names(name): # function to replace certain special characters with underscore
         cname=name.replace(r'/','_').replace(r'-','_').replace(' ','_').replace('___','_').replace('__','_')
+        # standardize plant composite compartment names to avoid double mention of component as implemented in comp.py
+        plant_types=['deciduous_forest_in_','coniferous_forest_in','grasses_herbs_in'] 
+        for plant in plant_types:
+            if plant in cname:
+                cname=cname.replace(plant+plant,plant) # replace double occurrence with single mention
         return (cname)
     
     def clean_values(name): # function to replace certain special characters with underscore
