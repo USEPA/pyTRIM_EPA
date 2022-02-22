@@ -366,14 +366,20 @@ class scenario:()
                 try:
                     metfile=cname.split('\\')[-1].split(',')[0].strip('_') 
                     metfile=metfile[:-4]+'.csv'
-                    metcol=cname.split('\\')[-1].split(',')[1].strip('_')
-                    cname='get_met_ave('+'"'+metfile+'"'+','+'"'+metcol+'"'+')' # use met averages to replace time series
+                    metcol=cname.split('\\')[-1].split(',')[1].strip('_')                    
+                    # cname='get_met_ave('+'"'+metfile+'"'+','+'"'+metcol+'"'+')' # use met averages to replace time series
+                    # cname='get_met_wt_ave(mfp,mfn,'+'"'+metcol+'"'+')' # use wt met averages to replace time series (doesnt work)
+                    met_key_name="wt_av_"+metcol
+                    # cname='dict_inputs["met_dict"]["'+str(met_key_name)+'"]'
+                    cname=str(met_key_name)
                 except:
                     pass                
         return (cname)
     
     def add_quotes(name): # function to add quotes to strings containing \ or / ## this is very hacky for now
-        if type(name)==str and (r'\\' in name or '_' in name or name=='annual') and ('get_met_ave' not in name):
+        # if type(name)==str and (r'\\' in name or '_' in name or name=='annual') and ('get_met_ave' not in name):
+        # if type(name)==str and (r'\\' in name or '_' in name or name=='annual') and ('get_met_wt_ave' not in name):
+        if type(name)==str and (r'\\' in name or '_' in name or name=='annual') and (name not in inputs['met_dict'].keys()):
             cname="'"+name+"'"
             return (cname)
         return(name)
@@ -413,9 +419,9 @@ from define_ve import *
 from define_pve import *
 from define_algs import *
 from define_ps_algs import *
+from util_functions import *
 
 
-mfp=r'' # update
 def get_met_ave(mfn,mfcol):
     mfpn=os.path.join(mfp,mfn)
     df=pd.read_csv(mfpn) 
@@ -426,8 +432,12 @@ def get_met_ave(mfn,mfcol):
     return(ave)
         
 ''')
-        f.write(
-        'mfp=r"'+str(inputs['path_inputs'])+'"'+'\n'        )    
+
+        # f.write('mfp=r"'+str(inputs['path_inputs'])+'"'+'   # path to met file'+'\n') 
+        # f.write('mfn=r"'+str(inputs['met_file'])+'"'+'   # met file name'+'\n\n\n') 
+        for k,v in inputs['met_dict'].items():
+            f.write(k+'='+str(v)+'\n')
+        f.write('\n')    
 
         for i in range(len(df_props)):
             obj=df_props.loc[i,'prop_owner_new']
