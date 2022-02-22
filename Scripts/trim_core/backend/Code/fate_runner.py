@@ -10,6 +10,7 @@ import os
 import time
 
 import convert_lc,mlib,plib,vol_elem,comp,prop,dep_rates,solve_ode # import supporting modules to process inputs and auto generate code to define objects
+from util_functions import process_met
 
 runner_full_path = os.path.realpath(__file__) # full path to this runner script
 path_code = os.path.dirname(runner_full_path) # directory of the runner script (code)
@@ -32,6 +33,8 @@ inputs['simulation_name']='foundries_ss'
 inputs['master_library_file']=r'icf_master_library_03212016_propertyexporter.txt'
 inputs['pseudo_library_file']=r'foundries_ss_1_pseudo_library_objects.txt'
 inputs['met_file']=r'isf_met_mi_20181219.csv'
+inputs['allowexchange_file']=r'allowexchange_foundries.csv'
+inputs['litterfall_file']=r'litterfallrate_foundries.csv'
 inputs['ve_file']=r'foundries_ss (2) volume elements.txt'
 inputs['pseudo_ve_file']=r'foundries_ss_2_pseudo_volume_elements.txt'
 inputs['comp_file']=r'foundries_ss (3) compartments.txt'
@@ -42,6 +45,8 @@ inputs['plink_file']=r'foundries_ss_3_pseudo_link_properties.txt'
 inputs['dep_rates_file']=r'foundries_ps_deprates_properties.txt'
 inputs['simulation_chemicals']=['elemental mercury','divalent mercury','methylmercury']
 
+met_dict=process_met(inputs) # get processed average met values    
+inputs['met_dict']=met_dict # add processed met values to inputs
 
 def read_inputs_write_classes(inputs): # function to to read inputs and auto generate code to define objects    
     df_lib,df_alg,df_alg_mat,df_chem=mlib.process_master_library(inputs) # reads master lib into these DataFrames and writes define_algs.py, define_chem_classes.py, define_comp_classes.py into code
@@ -50,7 +55,7 @@ def read_inputs_write_classes(inputs): # function to to read inputs and auto gen
     df_props,df_links,df_plinks=prop.define_properties(inputs) # read properties files into these DataFrames and writes define_scenario.py and define_attributes_props.py
     df_dr=dep_rates.define_deposition_rates(inputs) # reads deposition rates into DataFrame and writes define_attributes_dep_rates.py
     df_comp,comp_dict=comp.define_compartments(inputs,df_parcels,df_ve,df_pve,df_props,df_dr) # reads compartments inputs into DataFrame and writes define_comp.py
-    dict_inputs={'df_lib':df_lib,'df_alg':df_alg,'df_alg_mat':df_alg_mat,'df_chem':df_chem,'df_psalgs':df_psalgs,'df_psalg_mat':df_psalg_mat,'df_ps':df_ps,'df_pt':df_pt,'df_points':df_points,'df_parcels':df_parcels,'df_ve':df_ve,'df_comp':df_comp,'comp_dict':comp_dict,'df_props':df_props,'df_links':df_links,'df_plinks':df_plinks,'df_dr':df_dr}
+    dict_inputs={'met_dict':inputs['met_dict'],'df_lib':df_lib,'df_alg':df_alg,'df_alg_mat':df_alg_mat,'df_chem':df_chem,'df_psalgs':df_psalgs,'df_psalg_mat':df_psalg_mat,'df_ps':df_ps,'df_pt':df_pt,'df_points':df_points,'df_parcels':df_parcels,'df_ve':df_ve,'df_comp':df_comp,'comp_dict':comp_dict,'df_props':df_props,'df_links':df_links,'df_plinks':df_plinks,'df_dr':df_dr}
     return(dict_inputs)
 
   

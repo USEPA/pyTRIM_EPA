@@ -52,7 +52,7 @@ for k,v in cross_walk.items():
         head='chem_'+v+'_'+hd.replace(' ','_').replace('/','_').replace('-','_').replace('__','_').replace('___','_') # convert to new trim convention
         head=head.replace('__','_').replace('___','_') # convert to new trim convention
         head=head.lower()
-        plant_types=['deciduous_forest_in_','coniferous_forest_in','grasses_herbs_in'] 
+        plant_types=['deciduous_forest_in_','coniferous_forest_in_','grasses_herbs_in_'] 
         for plant in plant_types:
             if plant in head:
                 head=head.replace(plant+plant,plant) # replace double occurrence with single mention
@@ -101,6 +101,8 @@ for var in pyvars[1:]: # loop over py variables and find ratio of corresponding 
         else:
             ratio=py_val/leg_val
             ratio=round(ratio,2)
+            if ratio>1e6:
+                ratio=1
         tup=(var_name,ratio)
         op_dic[chem_name].append(tup)
         
@@ -128,3 +130,4 @@ for k,v in op_dic.items():
 
 
 writer.save()     
+writer.close()

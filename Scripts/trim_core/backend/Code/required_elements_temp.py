@@ -26,6 +26,10 @@ required_compartments = ["advection sink",\
             "soil - root zone",\
             "soil - vadose zone",\
             "groundwater",\
+            "leaf - grasses/herbs in grasses/herbs",\
+            "leaf particle - grasses/herbs in grasses/herbs",\
+            "root - grasses/herbs in grasses/herbs",\
+            "stem - grasses/herbs in grasses/herbs",\
                 ]
 
 required_algorithms = [\

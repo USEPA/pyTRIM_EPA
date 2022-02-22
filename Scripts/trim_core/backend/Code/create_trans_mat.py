@@ -133,7 +133,7 @@ def link_check (comp_objects_dict,comp1_name,comp2_name,dict_inputs,chem_list_cl
     else:
         cond1=check_neighbor(comp1,comp2,dict_inputs).is_neighbor()[0] # are the compartments in neighboring volume elements?
         if cond1:
-            if ('leaf' in comp1.name or 'soil' in comp1.name) and 'air' in comp2.name and  (comp1.name.split('_')[-1]!=comp2.name.split('_')[-1]): # leaf components should connect only to overlying air parcels not neighboring air parcels. This may be too restrictive.
+            if ('leaf' in comp1.name or 'soil' in comp1.name or 'surface_water' in comp1.name) and 'air' in comp2.name and  (comp1.name.split('_')[-1]!=comp2.name.split('_')[-1]): # leaf components should connect only to overlying air parcels not neighboring air parcels. This may be too restrictive -- replace with is above approach
                 cond1=False
 
     ### make list of applicable algorithms based on conditions 1 and 2 
@@ -171,22 +171,48 @@ def link_check (comp_objects_dict,comp1_name,comp2_name,dict_inputs,chem_list_cl
 
 
         
+        # if len (df_app)>0:
+        #     algs_non_chem=list(df_app.loc[(df_app['sendingchemicalname']=='replaceme') | (df_app['chemical_category']=='all')]['index']) # algorithms that are not chemical specific --not a robust filter
+        #     app_algs.append(algs_non_chem)
+        #     df_app['sendingchemicalname']=df_app['sendingchemicalname'].apply(clean_chem_names) # clean chem names
+        #     df_app['receivingchemicalname']=df_app['receivingchemicalname'].apply(clean_chem_names) # clean chem names
+        #     algs_chem=list(df_app.loc[(df_app['sendingchemicalname']==currentchemical.name)&(df_app['receivingchemicalname'].isin(chem_list_clean))]['index']) # chemical specific algorithms 
+        #     app_algs.append(algs_chem) # list of applicable algorithms (indices)
+        #     chemcat_parse=currentchemical.category.split('|') # parse chemical category
+        #     if len(chemcat_parse)>1:
+        #         chemcat_filter1=currentchemical.category
+        #         algs_chem1=list(df_app.loc[df_app['chemical_category']==chemcat_filter1]['index']) # chemical category specific algorithms e.g. metals
+        #         app_algs.append(algs_chem1) # list of applicable algorithms (indices)
+        #     if len(chemcat_parse)>2:
+        #         chemcat_filter2=chemcat_parse[0]+" | "+ chemcat_parse[0] #(e.g. to get 'metals | mercury')
+        #         algs_chem2=list(df_app.loc[df_app['chemical_category']==chemcat_filter2]['index']) # chemical category specific algorithms e.g. metals | mercury
+        #         app_algs.append(algs_chem2) # list of applicable algorithms (indices) 
+        #     app_algs=[y for x in app_algs for y in x] # flatten list
+        #     app_algs=list(set(app_algs)) # unique algorithm list in case of double counts
+
+        # reworking chemical specific filter above -- needs more robust approach
+
         if len (df_app)>0:
-            algs_non_chem=list(df_app.loc[(df_app['sendingchemicalname']=='replaceme') | (df_app['chemical_category']=='all')]['index']) # algorithms that are not chemical specific
+            algs_non_chem=list(df_app.loc[(df_app['sendingchemicalname']=='replaceme') & (df_app['chemical_category']=='all')]['index']) # algorithms that are not chemical specific --not a robust filter
             app_algs.append(algs_non_chem)
             df_app['sendingchemicalname']=df_app['sendingchemicalname'].apply(clean_chem_names) # clean chem names
             df_app['receivingchemicalname']=df_app['receivingchemicalname'].apply(clean_chem_names) # clean chem names
-            algs_chem=list(df_app.loc[(df_app['sendingchemicalname']==currentchemical.name)&(df_app['receivingchemicalname'].isin(chem_list_clean))]['index']) # chemical specific algorithms 
+            algs_chem=list(df_app.loc[(df_app['sendingchemicalname']==currentchemical.name)&(df_app['receivingchemicalname'].isin(chem_list_clean))]['index']) # chemical specific algorithms  filtered by receiving and sending categories
             app_algs.append(algs_chem) # list of applicable algorithms (indices)
             chemcat_parse=currentchemical.category.split('|') # parse chemical category
-            if len(chemcat_parse)>1:
-                chemcat_filter1=currentchemical.category
-                algs_chem1=list(df_app.loc[df_app['chemical_category']==chemcat_filter1]['index']) # chemical category specific algorithms e.g. metals
+            chemcat_parse=[c.strip() for c in chemcat_parse]
+            if len(chemcat_parse)>1: # if multiple terms separated by |
+                chemcat_filter1=currentchemical.category # first filter on the whole category as is
+                algs_chem1=list(df_app.loc[df_app['chemical_category']==chemcat_parse[0]]['index']) # Filter on first term e.g. metals
                 app_algs.append(algs_chem1) # list of applicable algorithms (indices)
-            if len(chemcat_parse)>2:
-                chemcat_filter2=chemcat_parse[0]+" | "+ chemcat_parse[0] #(e.g. to get 'metals | mercury')
-                algs_chem2=list(df_app.loc[df_app['chemical_category']==chemcat_filter2]['index']) # chemical category specific algorithms e.g. metals | mercury
+            if len(chemcat_parse)>=2: # e.g. metals | mercury
+                chemcat_filter2=chemcat_parse[0]+" | "+ chemcat_parse[1] #(e.g. to get 'metals | mercury')
+                algs_chem2=list(df_app.loc[df_app['chemical_category']==chemcat_filter2]['index']) # filter on first and second terms e.g. metals | mercury
                 app_algs.append(algs_chem2) # list of applicable algorithms (indices) 
+            
+            algs_chem3=list(df_app.loc[df_app['chemical_category']==currentchemical.category]['index']) #   filter on the whole category e.g. metals | mercury | elemental mercury  
+            app_algs.append(algs_chem3)
+            
             app_algs=[y for x in app_algs for y in x] # flatten list
             app_algs=list(set(app_algs)) # unique algorithm list in case of double counts
 
@@ -303,3 +329,17 @@ def create_trans_mat(inputs,dict_inputs): # function to create transition matrix
 # comp_col=comp_list[col_index]
 # comp1_name=comp_row
 # comp2_name=comp_col    
+
+# row_index=10 
+# col_index=3
+# comp_row=comp_list[row_index]
+# comp_col=comp_list[col_index]
+# comp1_name=comp_row
+# comp2_name=comp_col   
+
+# row_index=40
+# col_index=42
+# comp_row=comp_list[row_index]
+# comp_col=comp_list[col_index]
+# comp1_name=comp_row
+# comp2_name=comp_col   
