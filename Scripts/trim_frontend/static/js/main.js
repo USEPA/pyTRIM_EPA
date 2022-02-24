@@ -201,12 +201,14 @@ window.LoadingScreen = (function(loader) {
 onDomLoad(function() {
     // Register actions on body click
     document.body.addEventListener('click', function(e) {
-        var classes = e.target.className.split(' ');
+        if (typeof(e.target.className)=="string") {
+            var classes = e.target.className.split(' ');
 
-        // Form text (in labels, specifically) shouldn't highlight
-        // the field when clicked
-        if (classes.indexOf('form-text') > -1) {
-            e.preventDefault();
+            // Form text (in labels, specifically) shouldn't highlight
+            // the field when clicked
+            if (classes.indexOf('form-text') > -1) {
+                e.preventDefault();
+            }
         }
     });
 });

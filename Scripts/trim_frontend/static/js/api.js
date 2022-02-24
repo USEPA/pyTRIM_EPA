@@ -50,6 +50,13 @@ window.TRIM = (function(trim) {
             if (field.type === 'file') {
                 formData.append(field.name, field.files[0])
             }
+            else if (field.type === 'Feature') {
+                let GIS_data = field.properties
+                GIS_data.geom = field.geometry.coordinates[0]
+                for (var key in GIS_data) {
+                    formData.append(key, (key === 'geom') ? JSON.stringify(GIS_data[key]) : GIS_data[key])
+                }
+            }
             else {
                 formData.append(field.name, field.value)
             }
@@ -71,6 +78,31 @@ window.TRIM = (function(trim) {
             method: 'POST',
             url: url,
             data: data
+        });
+    };
+
+    api.getSoilData = function(tillage) {
+        var url = api.getUrl('external_api.get_soil_data').replace('/both', '/' + tillage);
+
+        return AJAX.call({
+            url: url
+        });
+    };
+
+    api.createParcels = function(parcels) {
+        var url = api.getUrl('parcels_api.create');
+        var data = makeFormData(parcels);
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: data
+        });
+    };
+
+    api.getParcels = function() {
+        let url = api.getUrl('parcels_api.get');
+        return AJAX.call({
+            url: url
         });
     };
 

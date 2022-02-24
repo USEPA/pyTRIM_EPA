@@ -12,8 +12,8 @@ db = SQLAlchemy(model_class=Model)
 # from .engine import DataBase
 # db_path = (
 #     'sqlite:///'
-#     f'{os.path.dirname(os.path.abspath(__file__))}/../'
-#     'temp.db'
+#     f'{os.path.dirname(os.path.abspath(__file__))}/../../'
+#     'database.db'
 # )
 # db = DataBase(db_path, model_base=Model)
 
