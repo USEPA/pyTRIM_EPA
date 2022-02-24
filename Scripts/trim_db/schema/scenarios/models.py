@@ -73,9 +73,9 @@ class Scenario(Model, TrackUpdatesMixin):
     creator_id = sa.Column(
         sa.Integer(), sa.ForeignKey('user.id'), nullable=False
     )
-    # creator = sa.orm.relationship(
-    #     'User', backref=sa.orm.backref('created_scenarios', lazy='dynamic')
-    # )
+    creator = sa.orm.relationship(
+        'User', backref=sa.orm.backref('created_scenarios', lazy='dynamic')
+    )
 
     def as_serializable(self):
         return {

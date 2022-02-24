@@ -17,46 +17,452 @@
                 <div data-slot="true" data-target="parcel_coordinates_description"></div>
             </div>
         </div>
+        <div id="parcel_file_fields_div">
+            <div class="row">
+                <div class="col-sm">
+                    <h5 class="text-center">Parcel Definitions</h5>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm">
+                    <div data-slot="true" data-target="parcel_names_field"></div>
+                </div>
+            </div>
+            <div class="row mb-1">
+                <div class="col-sm">
+                    <div data-slot="true" data-target="parcel_x_coordinates_field"></div>
+                </div>
+                <div class="col-sm">
+                    <div data-slot="true" data-target="parcel_y_coordinates_field"></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm">
+                    <div data-slot="true" data-target="parcel_air_field"></div>
+                    <div data-slot="true" data-target="parcel_land_use_field"></div>
+                    <div data-slot="true" data-target="parcel_farm_food_field"></div>
+                    <div data-slot="true" data-target="parcel_fish_food_field"></div>
+                    <div data-slot="true" data-target="parcel_wetland_field"></div>
+                </div>
+            </div>
+        </div>
         <div class="row mb-2">
             <div class="col-sm">
                 <div class="text-center" id="mapid" style="width: 100%; height: 600px;" ></div>
             </div>
         </div>
         <div class="row">
-            <div class="col-sm">
-                <h5 class="text-center">Parcel Definitions</h5>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-sm">
-                <div data-slot="true" data-target="parcel_names_field"></div>
-            </div>
-        </div>
-        <div class="row mb-1">
-            <div class="col-sm">
-                <div data-slot="true" data-target="parcel_x_coordinates_field"></div>
-            </div>
-            <div class="col-sm">
-                <div data-slot="true" data-target="parcel_y_coordinates_field"></div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-sm">
-                <div data-slot="true" data-target="parcel_air_field"></div>
-                <div data-slot="true" data-target="parcel_land_use_field"></div>
-                <div data-slot="true" data-target="parcel_farm_food_field"></div>
-                <div data-slot="true" data-target="parcel_fish_food_field"></div>
-                <div data-slot="true" data-target="parcel_wetland_field"></div>
+            <div class="col-md">
+                <div class="pill pill-alert col-sm">
+                    <small>
+                        <strong>
+                            <u>Click on the table cells to edit properties.</u>Please note that the values displayed in the table at the time of the "Save" operation are the values that will be incorporated into the calculations
+                        </strong>
+                    </small>
+                </div>
+                <table class="hover" id="mapTable">
+                    <thead>
+                        <tr>
+                            <th data-toggle="tooltip" data-placement="top" data-html="true" title="">Parcel Name</th>
+                            <th data-toggle="tooltip" data-placement="top" data-html="true" title="">Description</th>
+                            <th data-toggle="tooltip" data-placement="top" data-html="true" title="(km<sup>2</sup>)">Area</th>
+                            <th data-toggle="tooltip" data-placement="top" data-html="true" title="">Air</th>
+                            <th data-toggle="tooltip" data-placement="top" data-html="true" title="">Land Use</th>
+                            <th data-toggle="tooltip" data-placement="top" data-html="true" title="">Food Farm Chain</th>
+                            <th data-toggle="tooltip" data-placement="top" data-html="true" title="">Fish Food Web</th>
+                            <th data-toggle="tooltip" data-placement="top" data-html="true" title="">Wetland</th>
+                        </tr>
+                    </thead>
+                </table>
             </div>
         </div>
     </section>
 </form>
+<script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}">
+</script>
+<script src="{{ url_for('static', filename='js/lib/dataTables/jquery.dataTables.min.js') }}">
+</script>
+<script src="{{ url_for('static', filename='js/lib/dataTables/dataTables.bootstrap4.min.js') }}">
+</script>
+<script src="{{ url_for('static', filename='js/lib/FileSaver.min.js') }}">
+</script>
+<script src="{{ url_for('static', filename='js/lib/leaflet.shpfile.js') }}">
+</script>
+<script src="{{ url_for('static', filename='js/lib/shp.js') }}">
+</script>
 <script>
     onDomLoad(function() {
         var form = document.getElementById('parcels-gui');
+        loadParceldata()
         form.addEventListener('form:loaded', function() {
+            $('#parcel_file_fields_div').hide()
             enableFieldUpdates();
+            // windrows
+            // HUCs
+            var map = L.map('mapid', { drawControl: false }).setView([35.99, -78.90], 12);
+
+            var StreetBM = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+                maxZoom: 18,
+                attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ' +
+                    'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+                id: 'mapbox/streets-v11',
+                tileSize: 512,
+                zoomOffset: -1
+            }).addTo(map);
+
+            var Esri_WorldTopoMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community'
+            });
+
+
+            var Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+            });
+
+            var wmsNLCD2016 = L.tileLayer.wms('https://www.mrlc.gov/geoserver/mrlc_display/NLCD_2016_Land_Cover_L48/ows?SERVICE=WMS&', {
+                layers: 'NLCD_2016_Land_Cover_L48'
+            });
+
+            var wmsFlowLine = L.tileLayer.wms('https://hydro.nationalmap.gov/arcgis/services/NHDPlus_HR/MapServer/WMSServer?',{
+                layers: "7",
+                transparent: true,
+                format: 'image/png'
+            });
+
+
+            var togglelayers = L.layerGroup([wmsNLCD2016])
+
+
+            var overlayMaps= {
+                "NLCD" : togglelayers,
+                "Flowline - Large Scale" : wmsFlowLine
+            }
+            var baseMaps = {
+                "Streets Basemap" : StreetBM,
+                "Topography" : Esri_WorldTopoMap,
+                "Imagery" : Esri_WorldImagery,
+            }
+
+            L.control.layers(baseMaps,overlayMaps).addTo(map);
+
+            map.pm.addControls({
+                position: 'topleft',
+                drawMarker: false,
+                drawPolyline: false,
+                drawCircle  : false,
+                drawCircleMarker : false,
+                drawRectangle: false,
+                dragMode: false,
+                cutPolygon : false,
+                rotateMode : false,
+                editMode  : false
+            });
+
+            map.pm.enableDraw(
+                'Polygon',{ snappable: true, allowSelfIntersection : false
+            });
+
+            // CREATING A NEW PARCEL //
+            var shapes = L.geoJSON()
+            var parcels = L.layerGroup()
+
+            map.on('pm:create', ({layer})=>{
+                newLayer(layer)
+            });
+
+            // Map and Parcel Table Functions
+            function newLayer(l) {
+                var idIW = L.popup();
+                parcel = l;
+                var feature = parcel.feature = parcel.feature || {};
+                feature.type = "Feature";
+                feature.properties = feature.properties || {};
+                var content = '<span><b>Parcel Name</b></span><br/><input id="shapeName" type="text"/><br/><br/><span><b>Parcel Description<b/></span><br/><textarea id="shapeDesc" cols="25" rows="5"></textarea><br/><br/><input type="button" id="okBtn" value="Save"/>';
+                idIW.setContent(content);
+                idIW.setLatLng(l.getBounds().getCenter());
+                idIW.openOn(map);
+                $('#okBtn').on('click',null,{parcel: parcel},saveIdIW)
+            };
+
+            function addLabel(layer) {
+                var label = new L.tooltip({permanent: true,interactive: true});
+                label.setLatLng(layer.getBounds().getCenter());
+                label.setContent(layer.name)
+                label.addTo(map);
+            }
+
+            function plotLoadedParcel(parcel) {
+                let new_parcel = new L.polygon(parcel.vertices.map(e=>[e[1],e[0]]))
+                let feature = new_parcel.feature = new_parcel.feature || {};
+                feature.type = "Feature";
+                feature.properties = feature.properties || {};
+                new_parcel.feature.properties.name = parcel.name;
+                new_parcel.feature.properties.desc = parcel.description;
+                new_parcel.feature.properties.area = parcel.area;
+                new_parcel.feature.properties.air = "No";
+                new_parcel.feature.properties.landuse = "No"; // we will need NLCD data here?
+                new_parcel.feature.properties.foodfarmchain = "No";
+                new_parcel.feature.properties.fishfoodweb = "No";
+                new_parcel.feature.properties.wetland = "No";
+                parcels.addLayer(new_parcel).addTo(map)
+                shapes = parcels.toGeoJSON()
+            }
+
+            function saveIdIW(event) {
+                let parcel = event.data.parcel
+                var sName = $('#shapeName').val();
+                var sDesc = $('#shapeDesc').val();
+                var Area = L.GeometryUtil.geodesicArea(parcel.getLatLngs()[0]);
+                var sArea = L.GeometryUtil.readableArea(Area, isMetric = 'km')
+                parcel.feature.properties.name = sName;
+                parcel.feature.properties.desc = sDesc;
+                parcel.feature.properties.area = sArea;
+                parcel.feature.properties.air = "No";
+                parcel.feature.properties.landuse = "No"; // we will need NLCD data here?
+                parcel.feature.properties.foodfarmchain = "No";
+                parcel.feature.properties.fishfoodweb = "No";
+                parcel.feature.properties.wetland = "No";
+                map.closePopup();
+
+                parcels.addLayer(parcel);
+                shapes = parcels.toGeoJSON()
+                mapTableRedraw()
+                parcel.bindTooltip(parcel.feature.properties.name, {permanent: false}).addTo(map);
+                // WRITE TO DATABASE
+                TRIM.api.createParcels(shapes.features.reverse()[0])
+            };
+
+            // SAVING GEOJSON FILE //
+            function saveToFile(content, filename) {
+                //content = content.toGeoJSON()
+                var file = filename + '.geojson';
+                saveAs(new File([JSON.stringify(content)], file, {
+                type: "text/plain;charset=utf-8"
+              }), file);
+            }
+
+            // REMOVE A PARCEL//
+            map.on('pm:remove', ({layer})=>{
+                parcels.removeLayer(layer._leaflet_id)
+                shapes = parcels.toGeoJSON()
+                // console.log("Removing: ", shapes)
+                mapTableRedraw()
+            });
+
+            L.easyButton('<span class = DownArrowBar style = "font-size: 1.5em;">&DownArrowBar;</span>', function(btn, map){
+                saveToFile(shapes, "Test")
+            }).addTo(map);
+
+            L.easyButton('<span class = UpArrowBar style = "font-size: 1.5em;">&UpArrowBar;</span>', function(btn, map){
+                var input = document.createElement('input');
+                input.type = 'file';
+
+                input.onchange = e => {
+
+                // getting a hold of the file reference
+                var file = e.target.files[0];
+                if (file.name.split('.').pop() == "geojson"){
+
+                // setting up the reader
+                var reader = new FileReader();
+                reader.readAsText(file,'UTF-8');
+
+                // here we tell the reader what to do when it's done reading...
+                reader.onload = readerEvent => {
+                    var fileContent = readerEvent.target.result; // this is the content!
+                    shapesJson = JSON.parse(fileContent);
+                    parcels.clearLayers()
+                    parcels = L.geoJSON(shapesJson).addTo(map);
+                    shapes = parcels.toGeoJSON()
+                    mapTableRedraw()}}
+                else if (file.name.split('.').pop() == "shp"){
+                    console.log("This is a ShapeFile")
+                    var shpfile = new L.Shapefile('shpFile/Durham.zip', {
+                    onEachFeature: function(feature, layer) {
+                        if (feature.properties) {
+                            layer.bindPopup(Object.keys(feature.properties).map(function(k) {
+                                return k + ": " + feature.properties[k];
+                            }).join("<br />"), {
+                                maxHeight: 200
+                            });
+                        }
+                    }
+                });
+                shpfile.addTo(map);
+
+                }
+                // else if (file.name.split('.').pop() == "kml"){
+                //     console.log("This is a KML")
+                // }
+                // else if (file.name.split('.').pop() == "kmz"){
+                //     console.log("This is a KMZ")
+                // }
+                // else {console.log("Unsupported File")}
+                }
+                input.click();
+            }).addTo(map);
+
+            let mapTable = $('#mapTable').removeAttr('width').DataTable()
+            function mapTableRedraw() {
+                mapTable.clear().draw();
+                mapTable.destroy()
+                mapTable =  $('#mapTable').removeAttr('width').DataTable({
+                    data : shapes.features,
+                    paging: false,
+                    bFilter: false,
+                    info: false,
+                    bAutoWidth: false,
+                    columns: [
+                        {
+                            data: "properties.name",
+                            render: function (data, type, row) {
+                                return "<input class='editableCell form-control form-control-sm' type='text' value='" +  data + "' style='display:none'>" +
+                                    "<label class='editableCell'>" + data + "</label>"
+                            }
+                        },
+                        {
+                            data: "properties.desc",
+                            render: function (data, type, row) {
+                                return "<input class='editableCell form-control form-control-sm' type='text' value='" +  data + "' style='display:none'>" +
+                                    "<label class='editableCell'>" + data + "</label>"
+                            }
+                        },
+                        {
+                            data: "properties.area",
+                            render: function (data, type, row) {
+                                return "<label>" + (data/1E6).toFixed(2) + "</label>"
+                            }
+                        },
+                        {
+                            data: "properties.air",
+                            render: function (data, type, row) {
+                                return "<select class='editableCell form-control form-control-sm' name='select' style='display:none'>" +
+                                            "<option value='Yes'>Yes</option>" +
+                                            "<option value='No'>No</option>" +
+                                        "</select>" +
+                                       "<label class='editableCell'>" + data + "</label>"
+                            }
+                        },
+                        {
+                            data: "properties.landuse",
+                            render: function (data, type, row) {
+                                return "<input class='editableCell form-control form-control-sm' type='text' value='" +  data + "' style='display:none'>" +
+                                    "<label class='editableCell'>" + data + "</label>"
+                            }
+                        },
+                        {
+                            data: "properties.foodfarmchain",
+                            render: function (data, type, row) {
+                                return "<select class='editableCell form-control form-control-sm' name='select' style='display:none'>" +
+                                            "<option value='Yes'>Yes</option>" +
+                                            "<option value='No'>No</option>" +
+                                        "</select>" +
+                                       "<label class='editableCell'>" + data + "</label>"
+                            }
+                        },
+                        {
+                            data: "properties.fishfoodweb",
+                            render: function (data, type, row) {
+                                return "<select class='editableCell form-control form-control-sm' name='select' style='display:none'>" +
+                                            "<option value='Yes'>Yes</option>" +
+                                            "<option value='No'>No</option>" +
+                                        "</select>" +
+                                       "<label class='editableCell'>" + data + "</label>"
+                            }
+                        },
+                        {
+                            data: "properties.wetland",
+                            render: function (data, type, row) {
+                                return "<select class='editableCell form-control form-control-sm' name='select' style='display:none'>" +
+                                            "<option value='Yes'>Yes</option>" +
+                                            "<option value='No'>No</option>" +
+                                        "</select>" +
+                                       "<label class='editableCell'>" + data + "</label>"
+                            }
+                        }
+                    ],
+                    initComplete: function (settings, json) {
+                        $("#mapTable").wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                        $('[data-toggle="tooltip"]').tooltip()
+                    }
+                });
+                $('label.editableCell').click(function () {
+                    $(this).prev("input").show()
+                    $(this).prev("select").show()
+                    $(this).prev("input").focus()
+                    $(this).prev("select").focus()
+                    $(this).hide();
+                })
+                $('input.editableCell,select.editableCell').blur(function () {
+                    let data = $(this).val()
+                    $(this).hide()
+                    $(this).next("label").show().text(data)
+                    let this_table_id = "#" + $(this).closest("table").attr("id")
+                    update_data(this_table_id)
+                })
+            }
+
+            function retrieveSavedParcels() {
+                let loadedData = $('#mapid').data('loadedParcels')
+                if (loadedData && loadedData.success) {
+                    let lat_means = []
+                    let lon_means = []
+                    loadedData['scenario'].forEach(function(e,i) {
+                        plotLoadedParcel(e)
+                        lon_means.push(e.vertices.map((c, i, arr) => c[0] / arr.length).reduce ((p, c) => c + p))
+                        lat_means.push(e.vertices.map((c, i, arr) => c[1] / arr.length).reduce ((p, c) => c + p))
+                    })
+                    let mean_lat = lat_means.map((c, i, arr) => c/ arr.length).reduce ((p, c) => c + p)
+                    let mean_lon = lon_means.map((c, i, arr) => c/ arr.length).reduce ((p, c) => c + p)
+                    map.setView([mean_lat, mean_lon], 12);
+                }
+                mapTableRedraw()
+            }
+
+            function update_data(this_table_id) {
+                let new_table_data = get_Data_from_table(this_table_id)
+                new_table_data.forEach(function (e) {
+                    let i = 0, ii = shapes.features.length;
+                    for(i; i < ii; i++) if(shapes.features[i].properties.name === e["Parcel Name"]){break};
+                    shapes.features[i].properties.desc = e["Description"]
+                    shapes.features[i].properties.air = e["Air"]
+                    shapes.features[i].properties.landuse = e["Land Use"]
+                    shapes.features[i].properties.foodfarmchain = e["Food Farm Chain"]
+                    shapes.features[i].properties.fishfoodweb = e["Fish Food Web"]
+                    shapes.features[i].properties.wetland = e["Wetland"]
+                })
+            }
+
+            function get_Data_from_table(thisTableID){
+                let myRows = [];
+                let headersText = [];
+                let head_section = thisTableID + ' thead th'
+                let $headers = $(head_section);
+
+                // Loop through grabbing everything
+                let thisRows = thisTableID + ' tbody tr'
+                let $rows = $(thisRows).each(function(index) {
+                    $cells = $(this).find("td");
+                    myRows[index] = {};
+                    $cells.each(function(cellIndex) {
+                        // Set the header text
+                        if(headersText[cellIndex] === undefined) {
+                            headersText[cellIndex] = $($headers[cellIndex]).text();
+                        }
+                        // Update the row object with the header/cell combo
+                        myRows[index][headersText[cellIndex]] = $(this).find('label').text();
+                    });
+                });
+                return myRows
+            }
+            map.whenReady(retrieveSavedParcels)
         });
+
+        function loadParceldata() {
+                TRIM.api.getParcels().on('load', function() {
+                     $('#mapid').data('loadedParcels',JSON.parse(this.responseText));
+                })
+        }
 
         function enableFieldUpdates() {
             var gui = $('#parcels-gui');
@@ -109,6 +515,9 @@
                     try {
                         var data = JSON.parse(this.responseText);
                         if (data.success) {
+                            if (!$('#parcel_file_fields_div').is(":visible")) {
+                                $('#parcel_file_fields_div').show()
+                            }
                             var myData = data.files[me.attr('name')];
                             fileField.attr(
                                 'data-filedata',
@@ -123,89 +532,5 @@
                 });
             });
         }
-
-    // LEAFLET Functions
-	var map = L.map('mapid', { drawControl: false }).setView([35.99, -78.90], 12);
-
-	var StreetBM = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
-		maxZoom: 18,
-		attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ' +
-			'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-		id: 'mapbox/streets-v11',
-		tileSize: 512,
-		zoomOffset: -1
-	}).addTo(map);
-
-    var Esri_WorldTopoMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
-	    attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community'
-    });
-
-
-    var Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-	    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-    });
-
-    var wmsNLCD2016 = L.tileLayer.wms('https://www.mrlc.gov/geoserver/mrlc_display/NLCD_2016_Land_Cover_L48/ows?SERVICE=WMS&', {
-        layers: 'NLCD_2016_Land_Cover_L48'
-    });
-
-    var wmsFlowLine = L.tileLayer.wms('https://hydro.nationalmap.gov/arcgis/services/NHDPlus_HR/MapServer/WMSServer?',{
-        layers: "7",
-        transparent: true,
-        format: 'image/png'
-    });
-
-
-    var togglelayers = L.layerGroup([wmsNLCD2016])
-
-
-    var overlayMaps= {
-        "NLCD" : togglelayers,
-        "Flowline - Large Scale" : wmsFlowLine
-    }
-    var baseMaps = {
-        "Streets Basemap" : StreetBM,
-        "Topography" : Esri_WorldTopoMap,
-        "Imagery" : Esri_WorldImagery,
-    }
-
-    L.control.layers(baseMaps,overlayMaps).addTo(map);
-
-
-    map.pm.addControls({
-        position: 'topleft',
-        drawMarker: false,
-        drawPolyline: false,
-        drawCircle  : false,
-        drawCircleMarker : false,
-        drawRectangle: false,
-        dragMode: false,
-        cutPolygon : false,
-        rotateMode : false
-    });
-
-    map.pm.enableDraw(
-        'Polygon',{ snappable: true, allowSelfIntersection : false
-    });
-
-
-    function addLabel(layer) {
-        var label = new L.tooltip({permanent: true,interactive: true});
-        label.setLatLng(layer.getBounds().getCenter());
-        label.setContent(layer.ParcelName)
-        label.addTo(map);
-    }
-
-    map.on('pm:create', e=>{
-        var layers = L.PM.Utils.findLayers(map);
-        var group = L.featureGroup();
-        layers.forEach((layer, index)=>{
-            indexNum = (index + 1).toString()
-            layer.ParcelName = "Parcel" + indexNum
-            addLabel(layer)
-            group.addLayer(layer);
-        });
-        shapes = group.toGeoJSON();
-    });
     });
 </script>

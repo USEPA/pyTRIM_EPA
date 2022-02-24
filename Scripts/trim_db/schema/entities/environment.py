@@ -1,6 +1,8 @@
 import json
 import sqlalchemy as sa
 from shapely.geometry import Polygon
+from pyproj import Geod
+from shapely import wkt
 from ..parameters.utils import ureg
 from ..utils.base import Model
 
@@ -13,6 +15,7 @@ __all__ = [
 
 class Parcel(Model):
     name = sa.Column(sa.String(120), nullable=False)
+    description = sa.Column(sa.String(250), nullable=True)
 
     scenario_id = sa.Column(
         sa.Integer(), sa.ForeignKey('scenario.id'), nullable=False
@@ -46,7 +49,12 @@ class Parcel(Model):
     @property
     def area(self):
         # CAREFUL: we assume dimensions are in meters ...
-        return self.polygon.area * ureg('m^2')
+        # return self.polygon.area * ureg('m^2')
+        # CAREFUL-2: we assume ellipsoid is WGS84 ...
+        geod = Geod(ellps="WGS84")
+        poly = wkt.loads(
+            f'''POLYGON (({", ".join([str(tpl[0]) + " " + str(tpl[1]) for tpl in self.vertices])}))''')
+        return abs(geod.geometry_area_perimeter(poly)[0])
 
     def get_volume_element(self, name):
         for ve in self.volume_elements:
@@ -85,6 +93,7 @@ class Parcel(Model):
         return {
             'id': self.id,
             'name': self.name,
+            'description': self.description,
             'vertices': self.vertices,
             'area': self.area
         }

@@ -6,8 +6,11 @@ window.TRIM = (function(trim) {
 
     var urls = {
         'scenario_api.get_scenario': '{{ url_for("scenario_api.get_scenario", id=0) }}',
+        'parcels_api.create':'{{ url_for("parcels_api.create_parcels") }}',
+        'parcels_api.get':'{{ url_for("parcels_api.get_parcels") }}',
         'file_api.parse': '{{ url_for("file_api.parse") }}',
         'file_api.load_json_form': '{{ url_for("file_api.load_json_form") }}',
+        'external_api.get_soil_data' : '{{ url_for("external_api.get_soil_data", tillage="both") }}',
         'static': '{{ url_for("static", filename='/') }}'.replace('//', '/')
     };
 
