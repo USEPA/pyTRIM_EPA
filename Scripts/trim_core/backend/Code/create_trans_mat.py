@@ -135,6 +135,9 @@ def link_check (comp_objects_dict,comp1_name,comp2_name,dict_inputs,chem_list_cl
         if cond1:
             if ('leaf' in comp1.name or 'soil' in comp1.name or 'surface_water' in comp1.name) and 'air' in comp2.name and  (comp1.name.split('_')[-1]!=comp2.name.split('_')[-1]): # leaf components should connect only to overlying air parcels not neighboring air parcels. This may be too restrictive -- replace with is above approach
                 cond1=False
+            if ('leaf' in comp1.name or 'particle' in comp1.name) and 'soil_surface' in comp2.name and  (comp1.name.split('_')[-1]!=comp2.name.split('_')[-1]): # leaf components should connect only to underlying surface soil parcels not neighboring air parcels. This may be too restrictive -- replace with is above approach
+                cond1=False
+
 
     ### make list of applicable algorithms based on conditions 1 and 2 
 
@@ -193,6 +196,9 @@ def link_check (comp_objects_dict,comp1_name,comp2_name,dict_inputs,chem_list_cl
         # reworking chemical specific filter above -- needs more robust approach
 
         if len (df_app)>0:
+            df_app['sendingchemicalname'] = df_app['sendingchemicalname'].str.replace(r'benzo\(a\)pyrene','replaceme')# fix to handle litterfall algorithm which for some reason is limited to BaP
+            df_app['receivingchemicalname'] = df_app['receivingchemicalname'].str.replace(r'benzo\(a\)pyrene','replaceme')# fix to handle litterfall algorithm which for some reason is limited to BaP
+
             algs_non_chem=list(df_app.loc[(df_app['sendingchemicalname']=='replaceme') & (df_app['chemical_category']=='all')]['index']) # algorithms that are not chemical specific --not a robust filter
             app_algs.append(algs_non_chem)
             df_app['sendingchemicalname']=df_app['sendingchemicalname'].apply(clean_chem_names) # clean chem names
@@ -268,7 +274,7 @@ def create_trans_mat(inputs,dict_inputs): # function to create transition matrix
                         alg_class=eval(alg_name) # temporary -- get rid of eval eventually by placing algorithm objects in a dictionary
                         sendingcompartment=comp_objects_dict[comp_row] # sending compartment object
                         receivingcompartment=comp_objects_dict[comp_col] # receiving compartment object     
-                        print (sendingcompartment.name,receivingcompartment.name)
+                        # print (sendingcompartment.name,receivingcompartment.name)
                         alg_instance=alg_class(constants,containingscenario,currentchemical,sendingcompartment,receivingcompartment,dict_inputs)# instantiate algorithm class
                         transfer_factor=alg_instance.transferfactor # compute transfer factor
                         if (type(transfer_factor)==float or type(transfer_factor)==np.float64 or type(transfer_factor)==np.float32) and not np.isnan(transfer_factor) and alg_instance.doestransformchemical=='False': # if tf is a float (not error) and algorithms does not involved transformation
@@ -286,60 +292,24 @@ def create_trans_mat(inputs,dict_inputs): # function to create transition matrix
 
 ## for qa only
      
-   
 
-# row_index=7 
-# col_index=3
-# comp_row=comp_list[row_index]
-# comp_col=comp_list[col_index]
-# comp1_name=comp_row
-# comp2_name=comp_col             
-
-# row_index=7 
-# col_index=7
-# comp_row=comp_list[row_index]
-# comp_col=comp_list[col_index]
-# comp1_name=comp_row
-# comp2_name=comp_col             
-
-# row_index=34 
-# col_index=35
+# row_index=27
+# col_index=24
 # comp_row=comp_list[row_index]
 # comp_col=comp_list[col_index]
 # comp1_name=comp_row
 # comp2_name=comp_col   
 
-# row_index=35 
-# col_index=2
+# row_index=56
+# col_index=52
 # comp_row=comp_list[row_index]
 # comp_col=comp_list[col_index]
 # comp1_name=comp_row
-# comp2_name=comp_col
+# comp2_name=comp_col  
 
-# row_index=37 
-# col_index=34
+# row_index=125
+# col_index=22
 # comp_row=comp_list[row_index]
 # comp_col=comp_list[col_index]
 # comp1_name=comp_row
-# comp2_name=comp_col      
-
-# row_index=36 
-# col_index=34
-# comp_row=comp_list[row_index]
-# comp_col=comp_list[col_index]
-# comp1_name=comp_row
-# comp2_name=comp_col    
-
-# row_index=10 
-# col_index=3
-# comp_row=comp_list[row_index]
-# comp_col=comp_list[col_index]
-# comp1_name=comp_row
-# comp2_name=comp_col   
-
-# row_index=40
-# col_index=42
-# comp_row=comp_list[row_index]
-# comp_col=comp_list[col_index]
-# comp1_name=comp_row
-# comp2_name=comp_col   
+# comp2_name=comp_col  

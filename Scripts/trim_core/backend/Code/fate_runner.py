@@ -57,7 +57,7 @@ def read_inputs_write_classes(inputs): # function to to read inputs and auto gen
     df_comp,comp_dict=comp.define_compartments(inputs,df_parcels,df_ve,df_pve,df_props,df_dr) # reads compartments inputs into DataFrame and writes define_comp.py
     dict_inputs={'met_dict':inputs['met_dict'],'df_lib':df_lib,'df_alg':df_alg,'df_alg_mat':df_alg_mat,'df_chem':df_chem,'df_psalgs':df_psalgs,'df_psalg_mat':df_psalg_mat,'df_ps':df_ps,'df_pt':df_pt,'df_points':df_points,'df_parcels':df_parcels,'df_ve':df_ve,'df_comp':df_comp,'comp_dict':comp_dict,'df_props':df_props,'df_links':df_links,'df_plinks':df_plinks,'df_dr':df_dr}
     return(dict_inputs)
-
+  
   
 
 if __name__=='__main__':

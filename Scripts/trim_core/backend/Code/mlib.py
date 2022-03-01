@@ -110,6 +110,10 @@ def process_master_library(inputs):
         if 'sendingwithincompositecompartment[terrestrial plant | leaf]'in prop:
             prop=prop.replace('sendingwithincompositecompartment[terrestrial plant | leaf].','self.sendingcompartment.associated_leaf_comp.')
 
+        if 'thelink.rechargerate'in prop: ## default value -- find a way to read default values when properties are not defined in properties file
+            prop=prop.replace('thelink.rechargerate','default_rechargerate')
+
+
         return (prop)
    
     required_algs=req.required_algorithms # look up list of required algorithms
@@ -120,8 +124,8 @@ def process_master_library(inputs):
         f.write('from numpy import sqrt,nan,log,exp' +'\n')
         f.write('from util_functions import *' +'\n')
         f.write('mfp=r"'+str(inputs['path_inputs'])+'"'+'   # path to met file'+'\n') 
-        f.write('mfn=r"'+str(inputs['met_file'])+'"'+'   # met file name'+'\n\n\n') 
-
+        f.write('mfn=r"'+str(inputs['met_file'])+'"'+'   # met file name'+'\n') 
+        f.write('default_rechargerate=1.42e-04'+'\n\n\n')
         # f.write('print("Fraction Time Rain = ", frac_time_rain(mfp,mfn))'+'\n\n\n') # test 
 
         
