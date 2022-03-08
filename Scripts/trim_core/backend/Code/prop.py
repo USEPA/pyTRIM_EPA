@@ -400,8 +400,16 @@ class scenario:()
             return(cname)            
         return(name)  
 
+    def standardize_adv_sinks(cname):        
+            cname=cname.replace('soil_advection_sink','sink_in_sink_for_soil_surface') # fix different names for advection sinks in input files and compartment names 
+            return(cname)            
+
+
     df_links['sending_compartment_new']=df_links['sending_compartment'].apply(clean_names_algs)    
     df_links['receiving_compartment_new']=df_links['receiving_compartment'].apply(clean_names_algs)    
+    df_links['sending_compartment_new']=df_links['sending_compartment_new'].apply(standardize_adv_sinks)    
+    df_links['receiving_compartment_new']=df_links['receiving_compartment_new'].apply(standardize_adv_sinks)    
+
     df_links['algorithm_new']=df_links['algorithm'].apply(clean_names_algs)    
 
     
