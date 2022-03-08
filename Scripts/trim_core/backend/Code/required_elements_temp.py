@@ -106,6 +106,8 @@ required_algorithms = [\
 
             "diffusion from surface soil to air, hg0(alginstid_3997)",\
             "diffusion from surface soil to air, mhg(alginstid_3999)",\
+
+            "resuspension from surface soil to air, set to deposition rate of particles(alginstid_4000)",\
                 
             "litterfall from leaves to soil(alginstid_1088)",\
             "litterfall of leaf particle to soil(alginstid_1098)",\
@@ -152,7 +154,8 @@ required_algorithms = [\
             "diffusion from vadose zone to root zone(alginstid_1914)",\
             "degradation/reaction sink in vadose zone(alginstid_4150)",\
             "diffusion from root zone to vadose zone(alginstid_1904)",\
-            "diffusion from vadose zone to vadose zone(alginstid_2445)",\
+            "percolation from root zone to vadose zone(alginstid_1909)",\
+          # "diffusion from vadose zone to vadose zone(alginstid_2445)",\ #turning this off because we dont accommodate above or below relationshipts
             "diffusion from vadose zone to root zone(alginstid_1914)",\
                 
             "percolation from vadose zone to groundwater(alginstid_1899)",\

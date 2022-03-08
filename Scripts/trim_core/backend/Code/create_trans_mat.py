@@ -124,9 +124,9 @@ def link_check (comp_objects_dict,comp1_name,comp2_name,dict_inputs,chem_list_cl
     else:
         cond4=False
     if cond4: # if there are manual connections determine algorithms that apply
-        app_algs=app_algs+man_algs # add manual connections
-        app_algs=list(set(app_algs)) # unique algorithm list in case of double counts
-
+        # app_algs=app_algs+man_algs # add manual connections
+        # app_algs=list(set(app_algs)) # unique algorithm list in case of double counts
+        app_algs.append(man_algs)
 
     if cond2 or cond3 or cond4: # only if cond2,3,4 do not apply, check if compartments are in neighboring vol elements. (in some cases, physically contiguous compartments wont be checked because they are already manually connected -- not sure if this is restrictive)
         cond1=False
@@ -222,8 +222,16 @@ def link_check (comp_objects_dict,comp1_name,comp2_name,dict_inputs,chem_list_cl
             app_algs=[y for x in app_algs for y in x] # flatten list
             app_algs=list(set(app_algs)) # unique algorithm list in case of double counts
 
-    ## check if there are manual links
+
+
+## check if there are embedded lists and unembed
     
+    for element in app_algs:
+        if isinstance(element, list):
+            list_element=element
+            app_algs.remove(element)
+            for x in list_element:
+                app_algs.append(x)
 
     if len(app_algs)>0: 
         return(True,app_algs)
@@ -293,13 +301,6 @@ def create_trans_mat(inputs,dict_inputs): # function to create transition matrix
 ## for qa only
      
 
-# row_index=27
-# col_index=24
-# comp_row=comp_list[row_index]
-# comp_col=comp_list[col_index]
-# comp1_name=comp_row
-# comp2_name=comp_col   
-
 # row_index=56
 # col_index=52
 # comp_row=comp_list[row_index]
@@ -309,6 +310,20 @@ def create_trans_mat(inputs,dict_inputs): # function to create transition matrix
 
 # row_index=125
 # col_index=22
+# comp_row=comp_list[row_index]
+# comp_col=comp_list[col_index]
+# comp1_name=comp_row
+# comp2_name=comp_col  
+
+# row_index=31 # rootzone e3
+# col_index=32 # vadosezone e3
+# comp_row=comp_list[row_index]
+# comp_col=comp_list[col_index]
+# comp1_name=comp_row
+# comp2_name=comp_col  
+
+# row_index=54 # elemental nw2 soil
+# col_index=234 # elemental nw2 advection sink
 # comp_row=comp_list[row_index]
 # comp_col=comp_list[col_index]
 # comp1_name=comp_row

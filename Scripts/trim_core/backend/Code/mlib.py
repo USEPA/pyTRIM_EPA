@@ -113,6 +113,10 @@ def process_master_library(inputs):
         if 'thelink.rechargerate'in prop: ## default value -- find a way to read default values when properties are not defined in properties file
             prop=prop.replace('thelink.rechargerate','default_rechargerate')
 
+        if 'sendingvolumeelementsumof[terrestrial plant | leaf]'in prop:
+            prop=prop.replace('sendingvolumeelementsumof[terrestrial plant | leaf].','self.sendingcompartment.associated_leaf_comp.')
+
+
 
         return (prop)
    
@@ -487,7 +491,13 @@ def linkedCompartmentvalue(containingvolumeelement,comp_objects_dict,primary_abi
             all_props=list(grouped_comp.get_group(group)['propertyname']) # all property names 
             all_vals=list(grouped_comp.get_group(group)['propertyvalue']) # all property values 
             all_types=list(grouped_comp.get_group(group)['datatype']) # # all property types 
-    
+
+            if group=="advection sink":                 # hack to fix default category name in advection sinks which is set to air in library
+                cat_index=all_props.index('category') # index of category property
+                del all_props[cat_index]
+                del all_vals[cat_index]
+                del all_types[cat_index]
+            
             c_p=tuple(zip(all_props,all_vals,all_types))
     
             constant_props=[] # properties that depend on constant number     
@@ -509,6 +519,7 @@ def linkedCompartmentvalue(containingvolumeelement,comp_objects_dict,primary_abi
                 df_prop_val=grouped_comp.get_group(group).loc[grouped_comp.get_group(group)['propertyname']==prop]# data frame of property values (multi line if chemical specific)
                 chems=list(df_prop_val['specificchemical'])
                 prop_cl=clean_props(prop)
+
 
                 if len(chems)==1 and type(chems[0])== float:#isnan(chems[0]): # if only nan:
                     ch_name='nan'

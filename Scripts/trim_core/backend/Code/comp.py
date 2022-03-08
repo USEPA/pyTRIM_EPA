@@ -402,9 +402,11 @@ def define_comp(currentchemical):
             primary_abiotic=df_sinks.loc[i,'primary_abiotic']
             if primary_abiotic=='air':
                 comp_class='advection_sink'
+                comp_ct= 'sink | abiotic | air | air - default' # compartment category
             elif primary_abiotic=='soil - surface':
                 # comp_class='soil_advection_sink'
                 comp_class='advection_sink'
+                comp_ct= 'sink | abiotic | soil | surface soil | soil advection sink' # compartment category
 
             comp_dict[counter]=comp_name
             counter+=1
@@ -445,7 +447,18 @@ def define_comp(currentchemical):
                         str(comp_name)+\
                         '.'+\
                         'exterior_boundary='+\
-                        str(exterior_boundary))
+                        str(exterior_boundary)+\
+                        '\n\t'+\
+                        str(comp_name)+\
+                        '.'+\
+                        'category='+\
+                        '"'+str(comp_ct)+'"')
+                        # '\n\t'+\
+                        #  '@property'+\
+                        # '\n\t'+\
+                        # 'def category(self):'+\
+                        #  '\n\t\t'+\
+                        #  'return '+'"'+str(comp_ct)+'"')
             f.write('\n\t')
         
             f.write('\n\t'+'comp_objects_dict['+'"'+str(comp_name)+'"'+']='+comp_name+'\n')    
