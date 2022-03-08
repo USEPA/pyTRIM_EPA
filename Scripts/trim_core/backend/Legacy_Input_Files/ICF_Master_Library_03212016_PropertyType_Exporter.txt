@@ -1,0 +1,395 @@
+Property Type	Data Type	Units	Default	Min	Max	Description
+AbsorptionRateConstant	FloatingPoint	L[water]/kg[fish wet wt]-day				Fish uptake rate of chemical via absorption in surface water	
+Air_Z_Total	FloatingPoint	mol/Pa-m3				Fugacity of total air compartment	
+AirDensity_g_cm3	FloatingPoint	g/cm3		0.0		Mass of air per unit volume of air, in g/cm3	
+AirDensity_kg_m3	FloatingPoint	kg/m3		0.0		Mass of air per unit volume of air, in kg/m3	
+AirSchmidtNumber	FloatingPoint	unitless				Equal to viscosity of air divided by diffusivity of chemical in air; used to calculate gas phase transfer coefficient	
+AirSoilBoundaryThickness	FloatingPoint	m				Thickness of air above soil surface soil within which molecular diffusion between media can be significant (defines boundary between the well-mixed portion, where turbulent mixing is rapid and continuous, and the stable portion at the very edge of the interface)	
+AirTemperature_C	FloatingPoint	degrees C				Temperature of the air, C	
+AirTemperature_K	FloatingPoint	degrees K		0.0		Temperature of the air, K	
+AirWaterPartitionCoefficient	FloatingPoint	g[chemical]/m3[air] per g[chemical]/m3[water]				Equilibrium ratio of concentration of vapor-phase chemical in air to concentration of chemical dissolved in water	
+AlgaeCarbonContentDryWt	FloatingPoint	g[carbon]/g[algae wet wt]		0.0	1.0	Mass fraction of algae that is carbon (dry wt basis)	
+AlgaeDensity_g_m3	FloatingPoint	g[algae]/m3[algae]		0.0		Mass of algae per unit volume of algae cells, in g/m3	
+AlgaeDensity_g_um3	FloatingPoint	g[algae]/um3[algae]		0.0		Mass of algae per unit volume of algae cells, in g/um3	
+AlgaeDensityinWaterColumn_g_L	FloatingPoint	g[algae wet wt]/L[water]		0.0		Mass of algae per unit volume of surface water	
+AlgaeGrowthRate	FloatingPoint	1/day				First-order rate constant for increase of algae mass per day	
+AlgaeRadius	FloatingPoint	um		0.0		Average radius of algae cell	
+AlgaeSedimentationRate_g_m2_day	FloatingPoint	g[algae]/m2/day		0.0		Mass algae deposition rate to benthic sediments	
+AlgaeSedimentationRate_m3_m2_day	FloatingPoint	m3[algae]/m2/day		0.0		Volumetric algae deposition rate to benthic sediments	
+AlgaeUptakeRate	FloatingPoint	nmol/[um2 - day - nmol]		0.0		Surface-area-specific rate constant for uptake into algae of a chemical in water	
+AlgaeWaterContent	FloatingPoint	unitless		0.0	1.0	Mass fraction of algae that is water	
+algorithmDirection	String						
+AllowExchange_Dynamic	FloatingPoint	N/A		0.0	1.0	Used for dynamic simulations in some algorithms involving terrestrial plants to indicate whether it is the growing season for plants.  This property is only used for dynamic simulations, but must be defined for both dynamic and steady-state simulations.  This property is set to 1 if it is the growing season for a non-evergreen plant compartment and 0 if it is not.	
+AllowExchange_forAir	FloatingPoint	N/A		0.0	1.0	Used in some algorithms involving transport of chemical mass from air to terrestrial plants to indicate whether it is the growing season for plants.	
+AllowExchange_forOther	FloatingPoint	N/A		0.0	1.0	Used in some algorithms involving terrestrial plants (but not those involving transport of chemical mass from air to terrestrial plants) to indicate whether it is the growing season for plants.	
+AllowExchange_SteadyState_forAir	FloatingPoint	N/A		0.0	1.0	Used for steady-state simulations in algorithms involving transport of chemical mass from air to terrestrial plants to indicate whether it is the growing season for plants.  This property is only used for steady-state simulations, but must be defined for both dynamic and steady-state simulations.  This property can be set to any floating point number between 0.0 and 1.0 to indicate the fraction of each year made up by the growing season (1.0 = 100% of the year would be the growing season, 0.0 = 0% of the year, 0.5 = 50% of the year).	
+AllowExchange_SteadyState_forOther	FloatingPoint	N/A		0.0	1.0	Used for steady-state simulations in some algorithms involving terrestrial plants (but not those involving transport of chemical mass from air to terrestrial plants) to indicate whether it is the growing season for plants. This property is only used for steady-state simulations, but must be defined for both dynamic and steady-state simulations.  This property can be set to any floating point number between 0.0 and 1.0 to indicate the fraction of each year made up by the growing season (1.0 = 100% of the year would be the growing season, 0.0 = 0% of the year, 0.5 = 50% of the year).	
+Area	FloatingPoint	m2		0.0		Area	
+ArealDensity_Freshweight	FloatingPoint	kg[worm wet wt]/m2[soil]		0.0		Mass of worm per unit surface area of soil, deciduous	
+ArealErosionRate	FloatingPoint	kg[soil]/m2[surface soil]-day		0.0		Portion of the TotalErosionRate going to a specific receiving compartment	
+Arthropod_SoilPartitionCoefficient	FloatingPoint	kg[soil wet wt]/kg[arthropod wet wt]		0.0		Equilibrium ratio of concentration of chemical in arthropod (wet wt basis) to concentration in bulk soil (wet wt basis)	
+ArthropodSoilPartitioning_AlphaofEquilibrium	FloatingPoint	unitless				Proportion of equilibrium value reached	
+ArthropodSoilPartitioning_TimetoReachAlphaofEquilibrium	FloatingPoint	day		0.0		Time to reach 100? percent of equilibrium	
+AssimilationEfficiencyFromAlgae	FloatingPoint	unitless		0.0	1.0	Fraction of amount of chemical in algae eaten that is actually absorbed by the animal	
+AssimilationEfficiencyFromArthropods	FloatingPoint	unitless		0.0	1.0	Fraction of amount of chemical in arthropods eaten that is actually absorbed by the animal	
+AssimilationEfficiencyFromFood	FloatingPoint	unitless		0.0	1.0	Fraction of amount of chemical in food eaten that is actually absorbed by the animal	
+AssimilationEfficiencyFromPlankton	FloatingPoint	unitless		0.0	1.0	Fraction of amount of chemical in zooplankton eaten that is actually absorbed by the animal	
+AssimilationEfficiencyFromPlants	FloatingPoint	unitless		0.0	1.0	Fraction of amount of chemical in terrestrial plants eaten that is actually absorbed by the animal	
+AssimilationEfficiencyFromSoils	FloatingPoint	unitless		0.0	1.0	Fraction of amount of chemical in soils eaten that is actually absorbed by the animal	
+AssimilationEfficiencyFromWater	FloatingPoint	unitless		0.0	1.0	Fraction of amount of chemical in drinking water that is actually absorbed by the animal	
+AssimilationEfficiencyFromWorms	FloatingPoint	unitless		0.0	1.0	Fraction of amount of chemical in worms eaten that is actually absorbed by the animal	
+AttenuationFactor	FloatingPoint	m2/kg				Effective attenuation by plant leaves of dry depositing particles per unit dry weight of the plant species; used to calculate interception fraction	
+AverageLeafAreaIndex_No_Time_Dependence	FloatingPoint	m2[total leaf area]/m2[underlying soil area]		0.0		Average one-sided surface area of leaves per unit area surface soil (no time dependence)	
+AveragePorosityAtInterface	FloatingPoint	volume[total pore space]/volume[compartment]		0.0		Average porosity, or percentage of total soil volume that is pore space, at compartment interface	
+AverageVerticalVelocity	FloatingPoint	m3[water]/m2[surface soil]-day (or m/day)		0.0		Average speed of water movement downward through soil column (i.e., percolation)	
+Benthic_Solids_Concentration	FloatingPoint	kg[sediment particles]/m3[sediment compartment]				Mass of dry sediment per volume of bulk (wet) sediment	
+BioaccumulationRate	FloatingPoint	1/day				First-order bioaccumulation rate constant of chemical in organism	
+BiomassPerArea_kg_m2	FloatingPoint	kg/m2		0.0		Mass of macrophytes per unit surface water area (wet wt basis)	
+BoundaryLayerConductance	FloatingPoint	m/day				Conductance of the air boundary layer (with respect to diffusion of vapor-phase chemical between air and leaf)	
+BoundaryLayerThicknessAboveSediment	FloatingPoint	m		0.0		Thickness of surface water above sediment within which molecular diffusion between media can be significant (defines boundary between the well mixed portion, where turbulent mixing is rapid and continuous, and the stable portion at the very edge of the interface)	
+BoundaryLayerThicknessbelowWater	FloatingPoint	m				Thickness of sediment below surface water within which molecular diffusion between media can be significant (defines boundary between the well mixed portion, where turbulent mixing is rapid and continuous, and the stable portion at the very edge of the interface)	
+BulkWaterFlowRate_Volumetric	FloatingPoint	m3[water]/day		0.0		Volume of water movement per unit time across a link (i.e., at a compartment-compartment interface)	
+BW	FloatingPoint	kg		0.0		Fresh body weight of individual animal (i.e., wet weight)	
+CalculateWetDepInterceptionFraction	Boolean					Switch used to allow use of user-supplied value or model calculations	
+CarbonSedimentationRate_g_m2_day	FloatingPoint	g[carbon]/m2[sediment/surface water interface]-day		0.0		Mass carbon deposition rate to benthic sediments	
+CharacteristicMixingLength	FloatingPoint	m				Characteristic mixing length between surface water compartments	
+ChemicalTransferEfficiencyinFish	FloatingPoint	unitless		0.0	1.0	Chemical-specific uptake efficiency by gills	
+ChemicalTransferEfficiencyInZooplankton	FloatingPoint	unitless		0.0	1.0	Chemical-specific uptake efficiency for zooplankton	
+ChlorideConcentration_mg_L	FloatingPoint	mg[chloride]/L[surface water]		0.0		Concentration of chloride ion in surface water compartment	
+ChlorideConcentration_mg_m3	FloatingPoint	mg[chloride]/m3[surface water]				Concentration of chloride ion in surface water compartment	
+ChlorophyllConcentration_mg_L	FloatingPoint	mg[chlorophyll]/L[surface water]		0.0		Concentration of chlorophyll in surface water compartment	
+ChlorophyllConcentration_mg_m3	FloatingPoint	mg[chlorophyll]/m3[surface water]				Concentration of chlorophyll in surface water compartment	
+ClearanceConstant	FloatingPoint	L[water cleared]/kg[benthic invertebrate wet wt]-hr				Rate of water passing over respiratory surface scaled to benthic invertebrate mass	
+conc_colloid	FloatingPoint	kg/m3					
+CorrectionExponent	FloatingPoint	unitless				Correction exponent for the differences between octanol and lipids	
+CumulativeRain	FloatingPoint	m		0.0		Total rainfall during each rain event.	
+CurrentVelocity	FloatingPoint	m/s				Average speed of moving water in flowing surface water compartments	
+CuticularConductance	FloatingPoint	m/sec				Rate at which chemical is conducted through plant leaf cuticle	
+D_effective	FloatingPoint	m2/day				Effective diffusion coefficient, used for diffusive transfers between various compartment types	
+D_ow	FloatingPoint	L[water]/kg[octanol]				Weighted (by mass fraction) sum of individual K_ow values for all mercury species present	
+D_owforHg2_ph4	FloatingPoint	L[water]/kg[octanol]				D_ow for divalent mercury, where pH is 4	
+D_owforHg2_ph5	FloatingPoint	L[water]/kg[octanol]				D_ow for divalent mercury, where ph is 5	
+D_owforHg2_ph6	FloatingPoint	L[water]/kg[octanol]				D_ow for divalent mercury, where ph is 6	
+D_owforHg2_ph7	FloatingPoint	L[water]/kg[octanol]				D_ow for divalent mercury, where pH is 7	
+D_owforHg2_ph8	FloatingPoint	L[water]/kg[octanol]				D_ow for divalent mercury, where pH is 8	
+D_owforMHg_ph4	FloatingPoint	L[water]/kg[octanol]				D_ow for methyl mercury, where pH is 4	
+D_owforMHg_ph5	FloatingPoint	L[water]/kg[octanol]				D_ow for methyl mercury, where pH is 5	
+D_owforMHg_ph6	FloatingPoint	L[water]/kg[octanol]				D_ow for methyl mercury, where pH is 6	
+D_owforMHg_ph7	FloatingPoint	L[water]/kg[octanol]				D_ow for methyl mercury, where pH is 7	
+D_owforMHg_ph8	FloatingPoint	L[water]/kg[octanol]				D_ow for methyl mercury, where pH is 8	
+D_pureair	FloatingPoint	m2[air]/day				Coefficient that (when combined with chemical concentration) predicts how quickly a chemical spreads out in gas phase due to diffusion, in m2/day	
+D_pureair_m2_s	FloatingPoint	m2/sec				Coefficient that (when combined with chemical concentration) predicts how quickly a chemical spreads out in gas phase due to diffusion, in m2/second	
+D_purewater	FloatingPoint	m2[water]/day				Coefficient that (when combined with chemical concentration) predicts how quickly a chemical spreads out in aqueous phase due to diffusion, in m2/day	
+D_purewater_m2_per_s	FloatingPoint	m2/sec				Coefficient that (when combined with chemical concentration) predicts how quickly a chemical spreads out in aqueous phase due to diffusion, in m2/second	
+D_times_Gamma	FloatingPoint	unitless				Intermediate term for diffusion algorithms, D * Gamma, where D equals effective diffusion coefficient and Gamma equals gradient of soil concentration change per unit depth	
+DegreeStomatalOpening	FloatingPoint	unitless	1.0	0.0	1.0	Mean degree of opening of stomatal pores (greater than or equal to 0 and less than or equal to 1)	
+DemethylationRate	FloatingPoint	1/day		0.0		First-order rate constant for demethylation of methyl- to divalent mercury (MHg->Hg2)	
+Density	FloatingPoint	kg[wet wt]/L		0.0		Mass of plant matter (wet weight) per unit volume of plant	
+Density_Freshweight	FloatingPoint	kg[worm wet wt]/L[worm]		0.0		Density of worm (wet wt basis); used to calculate compartment volume	
+Density_kg_m3	FloatingPoint	kg[worm wet wt]/m3[worm]		0.0		Density of worm (wet wt basis)	
+Depth	FloatingPoint	m				Depth (i.e., vertical dimension) of volume element; calculated from top and bottom	
+Depth_times_Gamma	FloatingPoint	unitless [m/m]				Intermediate term for diffusion algorithms, Depth (of compartment) * Gamma, where Gamma equals gradient of soil concentration change per unit depth	
+Depth_times_Z_Total	FloatingPoint	mol/m2-Pa				Intermediate term for diffusion algorithms, Depth (of compartment) * Z_total, where Z_total equals total fugacity of chemical in compartment	
+Depurationrate	FloatingPoint	1/day				Rate of chemical loss from macrophytes to the surface water	
+DiffusiveExchangeCoefficient	FloatingPoint	m2/day	2.25e-04			Coefficient used to calculate dispersive transport between two horizontally adjacent surface water compartments	
+DiffusiveTerm	FloatingPoint	m/day				Intermediate term in fugacity-based diffusion equation between surface water and sediment	
+Diffusiveterm_1	FloatingPoint	m/day				Intermediate term in fugacity-based diffusion equation between surface water and sediment	
+Diffusiveterm_2	FloatingPoint	m/day				Intermediate term in fugacity-based diffusion equation between surface water and sediment	
+DimensionlessViscousSublayerThickness	FloatingPoint	unitless				Parameter used in calculating gas- and liquid-phase transfer coefficients, which are used to calculate diffusion from air to surface water and volatilization from surface water to air	
+DispersionCoefficient	FloatingPoint	m2/day				Set equal to diffusive exchange coefficient for modeling dispersive exchange between horizontally adjacent surface water compartments, and for modeling diffusive exchange between adjacent sediment compartments	
+DistanceBetweenMidpoints	FloatingPoint	m				Linear distance between the midpoints of two connected surface water compartments; used as characteristic mixing length for dispersion calculations	
+DragCoefficient	FloatingPoint	unitless				Coefficient used to calculate the shear velocity of wind, which is used in calculating volatilization transfers between surface water and air	
+DryDepInterceptionFraction	FloatingPoint	unitless		0.0	1.0	Fraction of dry deposition from air to soil that is intercepted by plants	
+DryDepositionVelocity	FloatingPoint	m/day				Velocity of deposition from air to soil	
+DryMassPerArea	FloatingPoint	kg[dry leaf]/m2[area]		0.0		Dry mass per unit surface soil area	
+DryVolumePerArea	FloatingPoint	m3[dry]/m2		0.0		Dry volume per unit surface soil area	
+DustDensity	FloatingPoint	kg[dust particles]/m3[dust particles]		0.0		Mass of atmospheric particulate per unit volume of atmospheric particulate	
+DustLoad	FloatingPoint	kg[dust particles]/m3[air compartment]		0.0		Concentration of atmospheric dust particles in the air compartment	
+DustResuspensionRate	FloatingPoint	kg[dust particles]/m2[surface soil]-day				Resuspension rate of dust from soil surface to air compartment	
+DX1	FloatingPoint	m				Damkoehler distance; the distance at which the soil concentration falls by 1/e based on the aggregate results of diffusion, advection, and reaction	
+DX2	FloatingPoint	m				Damkoehler distance; the depth that establishes the concentration gradient in soil in the absence of any reaction or transformation processes	
+DynamicAirViscosity_cm2_per_sec	FloatingPoint	cm2/sec				A coeffecient defined as the shearing stress of air to the shear of the motion (aka coefficient of molecular viscosity), in units of cm2/sec	
+DynamicAirViscosity_m2_per_sec	FloatingPoint	m2/sec				A coeffecient defined as the shearing stress of air to the shear of the motion (aka coefficient of molecular viscosity), in units of m2/sec	
+EffectiveAdvectionVelocity	FloatingPoint	m/day				Effective downward velocity of chemical via percolation of soil pore water	
+EliminationRateConstant	FloatingPoint	1/day				Rate of chemical excretion from fish to surface water	
+exp_NEG_Depth_times_Gamma	FloatingPoint	unitless				Intermediate term for diffusion algorithms, exp(-gamma*depth), where Depth equals depth of compartment and Gamma equals gradient of soil concentration change with unit depth	
+FeedingRate	FloatingPoint	kg[food]/day				Food ingestion rate; amount of food (wet wt) ingested per day	
+FishChemicalUptakeRateviaGill	FloatingPoint	L[water]/kg[fish wet wt]-day				Fish uptake rate of chemical via gill (equivalent to fish ventilation rate)	
+FishLipidFraction	FloatingPoint	kg[lipid]/kg[fish wet wt]		0.0	0.2	Mass fraction of fish that is lipid (wet wt basis)	
+FlowRateofTranspiredWater	FloatingPoint	m3[water]/day				Flow rate of water transpired from plant	
+FlowRateofTranspiredWaterperAreaofLeafSurface	FloatingPoint	m3[water]/m2[leaf]-day				Empirical factor used to estimate total flow of transpired water based on leaf surface area	
+Flushes_per_year	FloatingPoint	1/year		0.0		Number of times surface water compartment volume is completely turned over (flushed) in a year	
+FoodIngestionRate	FloatingPoint	kg[diet wet wt]/kg[body wet wt]-day		0.0		Total amount of food eaten per day, normalized to body weight	
+fractionDepositionToSoil	FloatingPoint	unitless		0.0	1.0	Fraction of depositing air particles that is not intercepted by plants	
+FractionDietAlgae	FloatingPoint	unitless		0.0	1.0	Fraction of diet comprised of algae	
+FractionDietBenthicInvertebrate	FloatingPoint	unitless		0.0	1.0	Fraction of diet comprised of benthic invertebrate	
+FractionDietChickadee	FloatingPoint	unitless		0.0	1.0	Fraction of diet comprised of black-capped chickadee	
+FractionDietEmergingBenthicInsects	FloatingPoint	unitless		0.0	1.0	Fraction of diet comprised of emerging benthic insects	
+FractionDietFishbenthiccarnivore	FloatingPoint	unitless		0.0	1.0	Fraction of diet comprised of benthic carnivore	
+FractionDietFishbenthicomnivore	FloatingPoint	unitless		0.0	1.0	Fraction of diet comprised of benthic omnivore	
+FractionDietFishcarnivore	FloatingPoint	unitless		0.0	1.0	Fraction of diet comprised of water-column carnivore	
+FractionDietFishherbivore	FloatingPoint	unitless		0.0	1.0	Fraction of diet comprised of water-column herbivore	
+FractionDietFishomnivore	FloatingPoint	unitless		0.0	1.0	Fraction of diet comprised of water-column omnivore	
+FractionDietMacrophyte	FloatingPoint	unitless		0.0	1.0	Fraction of diet comprised of macrophyte	
+FractionDietMouse	FloatingPoint	unitless		0.0	1.0	Fraction of diet comprised of mouse	
+FractionDietPlant	FloatingPoint	unitless		0.0	1.0	Fraction of diet comprised of terrestrial plant	
+FractionDietshorttailedshrew	FloatingPoint	unitless		0.0	1.0	Fraction of diet comprised of short-tailed shrew	
+FractionDietSoilArthropod	FloatingPoint	unitless		0.0	1.0	Fraction of diet comprised of soil arthropod	
+FractionDietvole	FloatingPoint	unitless		0.0	1.0	Fraction of diet comprised of vole	
+FractionDietWorm	FloatingPoint	unitless		0.0	1.0	Fraction of diet comprised of worm	
+FractionDietZooplankton	FloatingPoint	unitless		0.0	1.0	Fraction of diet comprised of zooplankton	
+FractionExcretiontoSoil	FloatingPoint	unitless		0.0	1.0	Fraction of total wildlife elimination in urine and feces that goes to surface soil	
+FractionExcretiontoWater	FloatingPoint	unitless		0.0	1.0	Fraction of total wildlife elimination in urine and feces that goes to surface water	
+FractionInitialConcentrations	FloatingPoint	unitless	1.0	0.0		Fraction of initial concentration in each compartment to be included in model simulation	
+FractionMass_Algae	FloatingPoint	unitless (kg/kg[algae])		0.0	1.0	Fraction of total chemical mass in surface water compartment that is in algae	
+FractionMass_ColloidSorbed	FloatingPoint	unitless					
+FractionMass_Dissolved	FloatingPoint	unitless		0.0	1.0	Fraction of total chemical mass in compartment that is dissolved in the liquid phase (i.e., in water)	
+FractionMass_Sorbed	FloatingPoint	unitless		0.0	1.0	Fraction of total chemical mass in compartment that is sorbed to solids	
+FractionMass_vapor	FloatingPoint	unitless		0.0	1.0	Fraction of total chemical mass in compartment that is in vapor phase	
+Fractionofareaavailableforerosion	FloatingPoint	m2[area available]/m2[total]		0.0	1.0	Fraction of the total surface area for which erosion can occur	
+FractionofAreaAvailableforRunoff	FloatingPoint	m2[area available]/m2[total]		0.0	1.0	Fraction of the total surface area for which runoff can occur	
+Fractionofareaavailableforverticaldiffusion	FloatingPoint	m2[area available]/m2[total]		0.0	1.0	Fraction of the total surface area for which vertical diffusion can occur	
+FractionofTotalErosion	FloatingPoint	unitless	0.0	0.0	1.0	Fraction of total eroded soil mass moving from a given sending compartment to a given receiving compartment or sink	
+FractionofTotalRunoff	FloatingPoint	unitless	0.0	0.0	1.0	Fraction of total runoff volume moving from a given sending compartment to a given receiving compartment or sink	
+FractionOrganicMatteronParticulates	FloatingPoint	unitless (wet wt)		0.0	1.0	Mass fraction of air particulates that is organic material	
+FractionPartitionwithSurfSoil	FloatingPoint	unitless	1.0	0.0	1.0	Fraction of total partitioning between arthropod and soil that occurs with surface soil (remainder with root zone soil).	
+FractionPhloemRatewithTranspirationFlowRate	FloatingPoint	unitless		0.0	1.0	Phloem flow rate from leaves to stem or from stem to fruit expressed as a fraction of the transpiration flow rate	
+FractionSand	FloatingPoint	unitless		0.0	1.0	fraction of soil content which is sand	
+FractionSpecificcompartmentDiet	FloatingPoint	unitless	1	0.0	1.0	Fraction of diet originating from a specific compartment; for a given compartment, must sum to 1.0 across all links	
+Gamma_fish	FloatingPoint	unitless				Allometric scaling factor used in estimating gill uptake	
+Gamma_Zooplankton	FloatingPoint	unitless				Allometric scaling factor used in estimating zooplankton uptake	
+GasPhaseResistance	FloatingPoint	day/m				Intermediate term used in calculating volatilization transfer rate between surface water and air	
+GasPhaseTransferCoefficient	FloatingPoint	m/day				Gas phase transfer coefficient for volatilization of chemical from water to air	
+GeneralDegradationRate	FloatingPoint	1/day				Rate constant for general degradation of chemical in compartment	
+GenericDenominatorforCalculatingFractioninPhases	FloatingPoint	m3				Denominator in equation for estimating the distribution of chemical mass among solid, liquid, and vapor phases in a compartment	
+GillEliminationRate	FloatingPoint	1/day				Rate constant for chemical elimination from fish to water via gills	
+GradientofSoilConcentrationChange	FloatingPoint	1/m				Gradient of the change in chemical concentration per unit depth, equal to the inverse of the normalized or characteristic depth X* input by the user	
+GradientofSoilConcentrationChange_Calculated	FloatingPoint	1/m				Gradient of the change in chemical concentration per unit depth calculated as described in Section 5.3.1 of TSD Vol II	
+H_over_R_T	FloatingPoint	g[chemical]/m3[air] per g[chemical]/m3[water]				Henry's Law Constant divided by Universal Gas Constant times temperature (K) (also referred to as the air-water partition coefficient)	
+Halflife	FloatingPoint	day		0.0		Length of time for chemical amount to be reduced by one-half by degradation reactions	
+Height	FloatingPoint	m		0.0		Height (i.e., vertical dimension) of a volume element	
+HenryLawConstant	FloatingPoint	Pa-m3/mol				Ratio of the aqueous-phase concentration of a chemical to its equilibrium partial pressure in the gas phase	
+horizontalWindSpeed	FloatingPoint	m/sec		0.0	100.0	Wind speed horizontally between air volume elements	
+HowMuchFasterHgEliminationIsThanForMHg	FloatingPoint	unitless				Factor used to adjust experimental data on elimination rate for MHg to estimate elimination rates for Hg0 and Hg2	
+InhalationAssimilationEfficiency	FloatingPoint	unitless				Fraction of amount of chemical breathed that is actually absorbed by the animal	
+InhalationProps_A	FloatingPoint	unitless				Allometric scaling constant used to calculate inhalation rate based on body weight	
+InhalationProps_B	FloatingPoint	unitless				Allometric scaling constant used to calculate inhalation rate based on body weight	
+InhalationRate	FloatingPoint	m3[air]/kg[body wet wt]-day				Inhalation rate, normalized to body weight (wet wt basis)	
+initialConcentration_g_per_kg_UserSupplied	FloatingPoint	g/kg		0.0		Initial concentration in the compartment, provided by the user	
+initialConcentration_g_per_L_UserSupplied	FloatingPoint	g/L[water]		0.0		Initial concentration in the compartment, provided by the user	
+initialConcentration_g_per_m3_UserSupplied	FloatingPoint	g/m3		0.0		Initial concentration in the compartment, provided by the user	
+InputCharacteristicDepth_m	FloatingPoint	m				Distance from top of the soil compartment at which soil concentration has dropped to 36.79% (1/e * 100%) of the concentration at top of compartment	
+isDay_forAir	FloatingPoint	N/A		0.0	1.0	Used for particular plant algorithms involving transport of chemical mass from air to terrestrial plants to indicate whether it is daytime or nighttime	
+isDay_forOther	FloatingPoint	N/A		0.0	1.0	Used for particular plant algorithms (but not those involving transport of chemical mass from air to terrestrial plants) to indicate whether it is daytime or nighttime	
+isDay_SteadyState_forAir	FloatingPoint	N/A		0.0	1.0	Used for particular plant algorithms involving transport of chemical mass from air to terrestrial plants to indicate whether it is daytime or nighttime.  This property is used only for steady-state simulations, but must be defined for both dynamic and steady-state simulations.  It can be set to any floating point number between 0 and 1.0 to indicate the average amount of daylight for the simulations (1.0 = 100% day, 0.0 = 100% night, 0.5 = 50% day/50% night).	
+isDay_SteadyState_forOther	FloatingPoint	N/A		0.0	1.0	Used for particular plant algorithms (but not those involving transport of chemical mass from air to terrestrial plants) to indicate whether it is daytime or nighttime.  This property is used only for steady-state simulations, but must be defined for both dynamic and steady-state simulations.  It can be set to any floating point number between 0 and 1.0 to indicate the average amount of daylight for the simulations (1.0 = 100% day, 0.0 = 100% night, 0.5 = 50% day/50% night).	
+isFlowing	Boolean					Switch used to indicate whether a water body is flowing or not	
+K_OA	FloatingPoint	m3[air]/m3[octanol]				Equilibrium ratio of concentration dissolved in octanol to vapor concentration in air	
+K_oc	FloatingPoint	L[water]/kg[organic carbon]				Organic carbon/water partition coefficient	
+K_ow	FloatingPoint	L[water]/kg[octanol]				Equilibrium ratio of concentration dissolved in octanol to concentration dissolved in water	
+k1	FloatingPoint	1/day				Rate constant for loss of chemical from compartment 1	
+k2	FloatingPoint	1/day				Rate constant for gain of chemical by compartment 1 from compartment 2	
+Kd	FloatingPoint	L[liquid phase]/kg[solid phase]				Equilibrium ratio of concentration sorbed to solids and concentration dissolved	
+Kd_colloid	FloatingPoint	L/kg					
+LeafArea	FloatingPoint	m2[area]		0.0		Total area of leaves in compartment	
+LeafAreaIndex	FloatingPoint	m2[total leaf area]/m2[underlying soil area]		0.0		Average one-sided surface area of leaves per unit area surface soil (with AllowExchange factored in)	
+LeafWettingFactor	FloatingPoint	m				Vegetation-dependent leaf-wetting factor (retention coefficient)	
+LengthofLeaf	FloatingPoint	m		0.0		Average length of flat leaf	
+LipidContent	FloatingPoint	kg[lipid]/kg[leaf wet wt]		0.0	1.0	Mass fraction of leaf that is lipid (wet wt basis)	
+LiquidArealPhaseVelocity	FloatingPoint	m/day				Velocity of water across an interface	
+LiquidPhaseResistance	FloatingPoint	day/m				Intermediate term used in calculating volatilization transfer rate between surface water and air	
+LiquidPhaseTransferCoefficient_FlowingWaterbody	FloatingPoint	m/day				Intermediate term used in calculating volatilization transfer rate between surface water and air, where water body is flowing	
+LiquidPhaseTransferCoefficient_Lake	FloatingPoint	m/day				Intermediate term used in calculating volatilization transfer rate between surface water and air, where water body is a lake	
+LitterFallRate	FloatingPoint	1/day		0.0		First-order rate constant for fall of plant leaves (and particles on leaves) to soil (can be made seasonal by setting litter fall start and stop dates)	
+log10_K_OA	FloatingPoint	m3[air]/m3[octanol]				Log base 10 of octanol-air partition coefficient	
+log10_K_ow	FloatingPoint	kg[water]/kg[octanol]				Log base 10 of octonal-water partition coefficient	
+MassTransferCoefficient	FloatingPoint	m/day				Mass transfer coefficient for diffusion of chemical between air and surface soil compartments; root zone soil and surface soil compartments; root zone soil and vadose zone soil compartments; and within the vadoze zone soil compartment	
+MassTransferCoefficient_Receiving_to_Sending	FloatingPoint	m/day				Mass transfer coefficient for diffusion of chemical between sediment and surface water; equal to the effective diffusivity of the chemical in the sediment compartment divided by the boundary layer thickness below the sediment-water interface in which diffusion is significant	
+MassTransferCoefficient_Sending_to_Receiving	FloatingPoint	m/day				Mass transfer coefficient for diffusion of chemical between sediment and surface water; equal to the effective diffusivity of the chemical in the surface water compartment divided by the boundary layer thickness above the sediment-water interface in which diffusion is significant	
+MassTransferCoefficientOnAirSideofAirSoilBoundary	FloatingPoint	m/day				Mass transfer coefficient for diffusion from air to surface soil; equal to the vapor dry deposition velocity	
+MeanDepth_m	FloatingPoint	m				Mean depth of compartment	
+MeltingPoint	FloatingPoint	degrees K				Temperature at which a solid becomes a liquid at standard atmospheric pressure	
+MesophyllConductance	FloatingPoint	m/day				Rate at which chemical is conducted through mesophyll	
+MethylationRate	FloatingPoint	1/day		0.0		First-order rate constant for methylation (Hg2->MHg)	
+MultipliertoConvertBackgroundConcentrationtoGrams	FloatingPoint	Kg				This term multiplied by a background concentration will yield the background mass of chemical in g.  For groundwater, the units of background concentration are g_chemical/ kg_groundwater	
+NumberofFishperSquareMeter	FloatingPoint	#/m2		0.0		Number of fish per unit surface water area	
+NumberofIndividualsPerSquareMeter	FloatingPoint	#/m2		0.0		Number of individuals per unit surface area	
+NumberofZooplanktonPerSquareMeter	FloatingPoint	#/m2		0.0		Number of zooplankton per unit surface area	
+One_minus_exp_NEG_Depth_times_Gamma	FloatingPoint	unitless				Intermediate term for diffusion algorithms, 1 - exp(-gamma*depth), where Depth equals depth of compartment and Gamma equals gradient of soil concentration change with depth	
+OrganicCarbonContent	FloatingPoint	kg[organic carbon]/kg[solids wet wt]				Mass fraction of soil or sediment solids that consists of organic carbon	
+OxidationRate	FloatingPoint	1/day		0.0		First-order rate constant for oxidation of elemental to divalent mercury  (Hg0->Hg2)	
+ParticleGasPartitionCoefficient	FloatingPoint	m3[air]/ug[particles]				Equilibrium ratio of chemical concentration in particles to chemical concentration in gas (air)	
+ParticleVolumetricDRYDepositionRate	FloatingPoint	m/day				Volumetric deposition rate of air particles to volume element, when not raining	
+ParticleVolumetricWetDepositionRate	FloatingPoint	m/day				Volumetric deposition rate of air particles to volume element, when raining	
+PartitionCoefficientBetweenLeavesandPhloemWater	FloatingPoint	m3[phloem fluid]/ m3[leaf]				Equilibrium ratio of concentration of chemical in leaves to concentration in phloem fluid; used to calculate transfer factor	
+PartitionCoefficientBetweenStemandXylemWater	FloatingPoint	m3[xylem fluid]/m3[stem]				Equilibrium ratio of concentration of chemical in stem to concentration in xylem fluid; used to calculate transfer factor	
+pH	FloatingPoint	unitless				Negative logarithm (base 10) of concentration of hydrogen ion in surface water	
+PhloemDensity	FloatingPoint	kg[phloem]/m3[phloem]				Density of phloem fluid	
+PhloemFlowRate	FloatingPoint	m3[phloem]/day				Rate at which chemical flows from phloem into fruit, due to advection	
+PopulationSize	FloatingPoint	#		0.0		Number of individuals in population	
+Porosity	FloatingPoint	L[total pore space]/L[total compartment]				Volume fraction of soil, ground water, or sediment compartment that is pore space (i.e., fraction liquid phase plus fraction gas phase in soil compartments or fraction liquid phase in groundwater and sediment compartments)	
+Rain	FloatingPoint	m3[rain]/m2[surface area]-day		0.0	2.0	Amount of precipitation per unit surface area and unit time	
+RatioOfConcInAlgaeToConcDissolvedInWater	FloatingPoint	L[water]/g[algae wet wt]				1,000 times the ratio of concentration in algae to the concentration dissolved in surface water.  Note: At equilibrium, this property divided by 1,000 equals the bioconcentration factor (BCF).	
+RatioofVolatilizationRatetoReaerationRate	FloatingPoint	unitless				Ratio of volatilization rate to reaeration rate, where reaeration is a function of water and current velocity	
+ReaerationVelocity	FloatingPoint	m/day				Function of current velocity and depth, calculated by Owens Formula	
+ReaerationVelocity_ChurchillFormula	FloatingPoint	m/day				Function of current velocity and depth, calculated by Churchill Formula	
+ReaerationVelocity_OwensFormula	FloatingPoint	m/day				Function of current velocity and depth, calculated by Owens Formula	
+RechargeRate	FloatingPoint	m3[water]/m2[interface]-day	1.42e-04			Volume of ground water moving into surface water per unit interfacial area per day	
+ReductionRate	FloatingPoint	1/day		0.0		First-order rate constant for reduction (Hg2->Hg0)	
+ReferenceBird_BodyWeight	FloatingPoint	kg				Mass of individual reference bird used for allometric scaling of degradation rate	
+ReferenceBird_EliminationRate	FloatingPoint	1/day				First-order rate constant for elimination of chemical from the body (terrestrial birds)	
+ReferenceBird_GeneralDegradationRate	FloatingPoint	1/day				First-order rate constant for chemical degradation in reference bird used for allometric scaling of degradation rate	
+ReferenceMammal_BodyWeight	FloatingPoint	kg				Mass of individual reference mammal used for allometric scaling of degradation rate	
+ReferenceMammal_EliminationRate	FloatingPoint	1/day				First-order rate constant for elimination of chemical from the body (terrestrial mammals)	
+ReferenceMammal_GeneralDegradationRate	FloatingPoint	1/day				First-order rate constant for chemical degradation in reference mammal used for allometric scaling of degradation rate	
+rho	FloatingPoint	kg[solid]/m3[solid]				Density (mass per unit volume) of solid materials (e.g., dry soil, dry sediment particles)	
+rho_colloid	FloatingPoint	kg/m3					
+Root_RootZonePartitioningBulkSoil_AlphaofSteadyState	FloatingPoint	unitless				Proportion of equilibrium value reached	
+Root_RootZonePartitioningBulkSoil_PartitionCoefficient	FloatingPoint	m3[bulk soil]/m3[root]				Equilibrium ratio of concentration in root to concentration in bulk (i.e., wet) root zone soil	
+Root_RootZonePartitioningBulkSoil_TimetoReachAlphaofSteadyState	FloatingPoint	day				Time to reach 100? percent of equilibrium	
+RootSoilWaterInteraction_Alpha	FloatingPoint	unitless				Proportion of equilibrium value reached	
+RootSoilWaterInteraction_t_alpha	FloatingPoint	day				Time to reach 100? percent of equilibrium	
+SedimentBurialRateToHaveZeroNetDeposition_m3_m2_day	FloatingPoint	m3[sediment particles]/m2[sediment]-day				Volumetric sediment deposition rate minus volumetric sediment resuspension rate	
+SedimentDepositionRate_kg_m2_day	FloatingPoint	kg[sediment]/ m2[interface]-day				Mass deposition rate of suspended sediment to sediment bed	
+SedimentDepositionRate_m3_m2_day	FloatingPoint	m3[sediment]/ m2[interface]-day				Volumetric deposition rate of sediments suspended in water column to sediment bed	
+SedimentDepositionVelocity	FloatingPoint	m/day				Speed of suspended sediments moving downward through the water column to the sediment bed	
+SedimentPartitioning_AlphaofEquilibrium	FloatingPoint	unitless				Proportion of equilibrium value reached	
+SedimentPartitioning_PartitionCoefficient	FloatingPoint	kg[bulk sediment]/kg[benthic invertebrate wet wt] or L[sediment pore water]/kg[benthic invertebrate wet wt]		0.0		Equilibrium ratio of concentration in benthic invertebrate to concentration in either bulk sediment (i.e., wet wt sediment) or sediment pore water, depending on whether the partition coefficient is based on bulk sediment or sediment pore water (user must select corresponding algorithm)	
+SedimentPartitioning_TimeToReachAlphaofEquilibrium	FloatingPoint	day		0.0		Time to reach 100? percent of equilibrium	
+SedimentResuspensionRate_kg_m2_day	FloatingPoint	kg[sediment]/m2[interface]-day				Mass resuspension rate of benthic sediment particles to water column	
+SedimentResuspensionRate_m3_m2_day	FloatingPoint	m3[sediment]/m2[interface]-day				Volumetric resuspension rate of benthic sediment particles to water column	
+SedimentResuspensionVelocity	FloatingPoint	m/day				Speed of sediment resuspension upward from sediment bed to surface water column	
+ShearVelocity	FloatingPoint	m/sec				Function of horizontal wind velocity and the air drag coefficient	
+ShearVelocity_m_per_day	FloatingPoint	m/day				Function of horizontal wind velocity and the air drag coefficient, in units of m/day	
+SoilFractionofDryDiet	FloatingPoint	unitless	0.0			Fraction of total dry wt intake comprised of soil.  When UseSoilFractionofDryDietToCalculateSoilIngestionRate is set to TRUE, this property is used to calculate soil ingestion rate.	
+SoilIngestionRate	FloatingPoint	kg[soil dry wt]/kg[wet body wt]-day		0.0		Total amount of soil eaten per day by birds or mammals, normalized to body weight (may be user-supplied or calculated from value for FractionDiet_Soil (dry wt basis) and food ingestion rate)	
+SoilIngestionRate_UserSupplied	FloatingPoint	kg[soil dry wt]/kg[wet body wt]-day	0.0			Total amount of soil eaten per day by birds or mammals, normalized to body weight (calculated from value for FractionDiet_Soil (dry wt basis) and food ingestion rate)	
+SolidArealPhaseVelocity	FloatingPoint	m3[soil particles]/ m2[surface soil]-day				ArealErosionRate expressed for calculation purposes on a volumetric basis	
+SteadyState_AdvectiveTransfer	FloatingPoint	1/day				This value replaces the transfer factor equation for advective transport.  It should only be used when calculating steady-state solutions.  If it is used, the normal advective transport algorithms should be disabled.	
+StomataConductance	FloatingPoint	m/day				Rate at which chemical is conducted through stomata	
+StomatalAreaNormalizedEffectiveDiffusionPathLength	FloatingPoint	1/m				Portion of total leaf surface area comprised of stomatal pores divided by the effective path length for a diffusing molecule through a pore; value is relatively similar across plant species	
+StomatalWaterConductance	FloatingPoint	m/day				Rate at which water is conducted through stomata	
+SurfaceAreaperVolumeofParticles	FloatingPoint	m2[area]/m3[particles]				Surface area per unit volume of atmospheric dust particulates	
+SuspendedSedimentconcentration	FloatingPoint	kg[sediment]/m3[water]				Total suspended sediments (TSS) concentration (i.e., mass of suspended sediment particles per unit volume water)	
+SuspendedSedimentconcentration_mg_L	FloatingPoint	mg[sediment]/L[water]				Concentration of suspended sediment in water column	
+ThicknessofBoundaryLayerThicknessThroughStillAir	FloatingPoint	m				Thickness of "still" air above leaf surfaces within which diffusion between air and leaf is significant (function of leaf length and wind speed)	
+TotalAlgaeMass	FloatingPoint	kg[algae wet wt]		0.0		Total wet mass of algae in surface water compartment	
+TotalCuticularConductance	FloatingPoint	m/day				Total conductance of cuticular pathway, including the air boundary layer	
+TotalErosionRate_kg_m2_day	FloatingPoint	kg[soil]/m2[surface soil]-day		0.0		Total mass of eroded surface soil particles per unit surface area per day	
+TotalExcretionRate	FloatingPoint	1/day		0.0		First-order rate constant for elimination of chemical from the body (in urine, feces, feathers, fur)	
+TotalRunoffRate_m3_m2_day	FloatingPoint	m3[water]/m2[surface soil]-day		0.0		Total volume of liquid runoff from surface soil per unit surface area per day	
+TotalStomatalConductance	FloatingPoint	m/day				Total conductance of stomatal pathway, including mesophyll and air boundary layer	
+TotalTransformationRate	FloatingPoint	1/day		0.0		Total first-order rate constant of transformation in compartment	
+TransferFactortoLeaf	FloatingPoint	1/day				First-order rate constant for chemical transfer from leaf particle to leaf	
+TransferFactortoLeafParticle	FloatingPoint	1/day				First-order rate constant for chemical transfer from leaf to leaf particle	
+TSCF	FloatingPoint	m3[soil pore water]/m3[xylem fluid]				Transpiration stream concentration factor; the ratio of concentration dissolved in xylem fluid to concentration dissolved in soil pore water	
+UptakeConstant	FloatingPoint	1/day				Chemical uptake rate constant for transfer from sediment to benthic invertebrate	
+UseInputCharacteristicDepth_0_MeansNo_ElseYes	FloatingPoint	Boolean				If = 0, use model-calculated characteristic depth, else use user-provided characteristic depth	
+UseSoilFractionofDryDietToCalculateSoilIngestionRate	Boolean					Specifies whether to use calculated or user-supplied soil ingestion rate.  If true, SoilIngestionRate is calculated based on SoilFractionofDryDiet.  If false, SoilIngestionRate is user-supplied.	
+V_d	FloatingPoint	L[water]/kg[benthic invertebrate wet wt]				Ratio of concentration in benthic invertebrates to concentration in water	
+VaporDryDepositionVelocity_m_day	FloatingPoint	m/day				Speed at which chemical in vapor form in air moves downward; used in estimating dry deposition and/or diffusion of chemical vapors to soil and surface water	
+VaporPressure	FloatingPoint	Pascals (Pa)				Pressure exerted by a vapor in equilibrium with its solid or liquid phase	
+VaporWashoutRatio	FloatingPoint	m3[air]/m3[rain]				Precipitation scavenging ratio for vapors (ratio of concentration in rain to concentration in vapor form in air); used in estimating wet deposition of vapors	
+vdep	FloatingPoint	m/day				Speed at which chemical in particle form in air moves downward; used in estimating dry deposition of particles	
+verticalWindSpeed	FloatingPoint	m/sec		-100.0	100.0	Wind speed vertically between air compartments	
+VolatilizationTransferRate	FloatingPoint	m/day				Inverse of liquid-phase plus gas-phase resistances	
+Volume	FloatingPoint	m3		0.0		Total volume of volume element	
+VolumeFraction_Algae	FloatingPoint	m3[algae]/m3[surface water]		0.0	1.0	Volumetric fraction of surface water compartment that is algae	
+VolumeFraction_colloid	FloatingPoint	m3[colloid]/m3[compartment]					
+VolumeFraction_Liquid	FloatingPoint	m3[liquid]/m3[compartment]		0.0	1.0	Fraction of total compartment volume that is in liquid phase (e.g., soil or sediment pore space occupied by water)	
+VolumeFraction_LiquidColloid	FloatingPoint	unitless		0.0	1.0		
+VolumeFraction_Solid	FloatingPoint	m3[solid]/m3[compartment]		0.0	1.0	Fraction of total compartment volume that is occupied by solids (e.g., sediment particles in the sediment bed)	
+VolumeFraction_vapor	FloatingPoint	m3[vapor]/m3[compartment]		0.0	1.0	Fraction of total compartment volume that is in vapor/gas phase (e.g., soil pore space occupied by air instead of water)	
+VolumeParticlePerAreaLeaf	FloatingPoint	m3[leaf particles]/m2[leaf]				Volume of leaf particles per unit area of leaf; used to calculate compartment volume	
+VolumetricAirAirContent	FloatingPoint	m3[air]/m3[total]		0.0	1.0	Fraction of total air compartment volume that is gas-phase (i.e., not aerosol or solid-phase particles)	
+VolumetricAirParticleContent	FloatingPoint	m3[solid]/m3[total]		0.0	1.0	Fraction of total air compartment volume that is aerosol or solid-phase particles (i.e., is particles)	
+WashoutRatio	FloatingPoint	m3[air]/m3[rain]		0.0	1000000.0	Precipitation scavenging ratio for particles in air (ratio of concentration of particles in rain to concentration of particles in air); used in estimating wet deposition of particles	
+Water_content	FloatingPoint	kg[water]/kg[worm wet wt]		0.0	1.0	Mass fraction of worm that is water	
+WaterColumnDissolvedPartitioning_AlphaofEquilibrium	FloatingPoint	unitless				Proportion of equilibrium value reached	
+WaterColumnDissolvedPartitioning_PartitionCoefficient	FloatingPoint	L[water]/kg[macrophyte wet wt]		0.0		Equilibrium ratio of concentration in macrophyte to concentration dissolved in water	
+WaterColumnDissolvedPartitioning_TimeToReachAlphaofEquilibrium	FloatingPoint	day		0.0		Time to reach 100? percent of equilibrium	
+WaterContent	FloatingPoint	kg[water]/kg[leaf wet wt]		0.0	1.0	Mass fraction of leaf that is water (wet wt basis)	
+WaterDensity	FloatingPoint	kg/m3				Density of water in compartment	
+WaterIngestionRate	FloatingPoint	L[water]/kg BW-day				Water ingestion rate, normalized to body weight	
+WaterIngProps_A	FloatingPoint	unitless				Allometric scaling constant used to calculate water ingestion rate based on body weight	
+WaterIngProps_B	FloatingPoint	unitless				Allometric scaling constant used to calculate water ingestion rate based on body weight	
+WaterSchmidtNumber	FloatingPoint	unitless				Used to calculate liquid phase transfer coefficient, and is equal to viscosity of water divided by (density of water times diffusivity of chemical in water)	
+WaterTemperature_C	FloatingPoint	degrees C				Average water temperature of the surface water compartment	
+WaterTemperature_K	FloatingPoint	degrees K				Average water temperature of the surface water compartment	
+WaterViscosity	FloatingPoint	kg/m-sec				Viscosity of water	
+WetDensity	FloatingPoint	kg[leaf wet wt]/m3[leaf wet]		0.0		Density of fresh (i.e., wet) plant leaf	
+WetDepInterceptionFraction	FloatingPoint	unitless		0.0	1.0	Fraction of wet deposition intercepted by leaves	
+WetDepInterceptionFraction_Calculated	FloatingPoint	unitless		0.0	1.0	Fraction of wet deposition intercepted by leaves as calculated by an equation	
+WetDepInterceptionFraction_UserSupplied	FloatingPoint	unitless		0.0	1.0	Fraction of wet deposition intercepted by leaves (input used only if option set)	
+WetMassperArea	FloatingPoint	kg [plant part wet wt]/ m2[surface soil]		0.0		Fresh mass of plant part (leaf, root, or stem) per unit surface soil area	
+WetVolumePerArea	FloatingPoint	m3[fresh plant part]/m2[surface soil]		0.0		Volume of fresh plant part (leaf, root, or stem) per unit surface soil area	
+windDirection	FloatingPoint	degrees clockwise from N (blowing from)		-360.0	360.0	Direction from which the wind is blowing (degrees clockwise from due north)	
+WormSoilInteraction_alpha	FloatingPoint	unitless				Proportion of equilibrium value reached	
+WormSoilInteraction_t_alpha	FloatingPoint	day				Time to reach 100? percent of equilibrium	
+WormSoilPartitionCoefficient_dryweight	FloatingPoint	kg[dry soil]/kg[dry worm]				Equilibrium ratio of concentration in earthworm to concentration in soil (dry wt basis)	
+WormSoilPartitionCoefficient_wetweight	FloatingPoint	kg[wet soil]/kg[wet worm]				Equilibrium ratio of concentration in earthworm to concentration in soil (wet wt basis)	
+WormSoilWaterInteraction_alpha	FloatingPoint	unitless	0.95			Proportion of equilibrium value reached	
+WormSoilWaterInteraction_t_alpha	FloatingPoint	day				Time to reach 100? percent of equilibrium	
+WormSoilWaterPartitionCoefficient_organics	FloatingPoint	L[soil pore water]/kg[wet worm]				Equilibrium ratio of chemical in fresh worm to chemical in soil pore water	
+XylemDensity	FloatingPoint	kg[xylem fluid]/ m3[xylem fluid]		0.0		Density of xylem fluid	
+Z_Algae	FloatingPoint	mol/Pa-m3				Fugacity capacity of chemical in algal phase of surface water	
+Z_colloid	FloatingPoint	mol/Pa-m3					
+Z_Liquid	FloatingPoint	mol/Pa-m3				Fugacity capacity of chemical in liquid phase	
+Z_LiquidColloid	FloatingPoint	mol/Pa-m3					
+Z_pureair	FloatingPoint	mol/Pa-m3				Fugacity capacity of chemical in gas phase of air	
+Z_purewater	FloatingPoint	mol/Pa-m3				Fugacity capacity of chemical in liquid phase of water	
+Z_Solid	FloatingPoint	mol/Pa-m3				Fugacity capacity of chemical in solids	
+Z_times_D_times_Gamma	FloatingPoint	mol/Pa-m3				Intermediate term for diffusion algorithms, Fugacity * D * Gamma, where D equals effective diffusion coefficient and Gamma equals gradient of soil concentration change with unit depth	
+Z_Total	FloatingPoint	mol/Pa-m3				Fugacity of total compartment	
+Z_Vapor	FloatingPoint	mol/Pa-m3				Fugacity capacity of vapor phase chemical in compartment	
+ZooplanktonLipidFraction	FloatingPoint	kg[lipid]/kg[plankton wet wt]		0.0	0.2	Mass fraction of plankton that is lipid (wet wt basis)	
+abbreviation	String					A short abbreviation for the name of this Object.  This abbreviation replaces the name of the compartment or chemical in the output files.	
+appendNumberToRun	Boolean		true			Whether a number should be added to the end of results file names	
+averageResultsFiles	Boolean		false			Whether to average the results files after completing a Simulation. If true, the averagingInterval property must be added to the Scenario.	
+averagingInterval	String					The interval over which results files will be averaged. Must be either an integer that is the number of hours to average over or 'monthly' or 'annual'.	
+boundaryConcentration_g_per_m3	FloatingPoint	g/m3		0.0		Air concentration at the outer boundary of the modeling region (i.e., concentration in air flowing into the modeling region)	
+boundaryContribution	FloatingPoint	g/day	boundaryContribution(compartment.chemical.boundaryConcentration_g_per_m3, containingScenario.horizontalWindSpeed, containingScenario.windDirection)	0.0		The contribution of chemical mass to a compartment through the boundary	
+CAS	String					A unique Chemical Abstract Service (CAS) number for this Chemical;  used in downstream TRIM modules	
+color	String		0,0,0			The color to use when showing this object graphically	
+compartmentRelationship	String		ANY			The relationship between the compartments required for this algorithm to be applied.  Valid values are: ANY, SAME, SENDER_ABOVE, SENDER_BELOW, NEXT_TO, IN_SAME_VOLUME_ELEMENT, IN_SAME_COMPOSITE, ABOVE_OR_BELOW, or ADJACENT.	
+concentration_g_per_kg	FloatingPoint	g[chemical]/kg		0.0		The specified (fixed) concentration of the chemical in g/kg	
+concentration_g_per_L	FloatingPoint	g[chemical]/L[water]		0.0		The specified (i.e. fixed) concentration of the chemical in g/L	
+concentration_g_per_m3	FloatingPoint	g[chemical]/m3		0.0		The specified (i.e. fixed) concentration of the chemical in g/m3	
+concentrationOutputFactor	FloatingPoint	n/a	1.0			A factor that the concentration in this Compartment will be multiplied by when they are written to a file. Use this Property in conjunction with the concentrationOutputUnits Property to change the reported units for concentration.	
+concentrationOutputUnits	String					The units string to use when concentrations are written to a file. Use this Property in conjunction with the concentrationOutputFactor Property to modify the units used to report this Compartment's concentration.	
+doesTransform	Boolean		false			Whether this chemical transforms to another chemical	
+elasticityThreshold	FloatingPoint	N/A	0.1	0.0	1.0	For a Sensitivity Analysis: the elasticity below which the sensitivity results should be set to 0.	
+emissionRate	FloatingPoint	g/day		0.0		Quantity of chemical emitted from teh source per unit time	
+exportAllResultsToDB	Boolean		false			Whether to export the instantaneous result files from FaTE to the database	
+exportAvgResultsToDB	Boolean		false			Whether to export the averaged result files from FaTE to the database	
+exportBiotaIntakeRates	Boolean		true			Indicates whether the intake rate files for biota used by Risk-Eco should be output at the end of a Simulation	
+exportConcentration	Boolean		true			Indicates whether the Concentration files should be output at the end of a Simulation	
+exportDeposition	Boolean		false			Whether to export the deposition from air to surface soil	
+exportHTML	Boolean		false			Indicates whether an HTML export of the Scenario should be performed at the end of a Simulation	
+exportIngestionInputs	Boolean		false			Whether to export the inputs needed for the TRIM ingestion model	
+exportMass	Boolean		true			Indicates whether the Mass files should be output at the end of a Simulation	
+exportMoles	Boolean		true			Indicates whether the Moles files should be output at the end of a Simulation	
+exportOutdoorEnvironmentBeforeRun	Boolean		true			Whether to export the Outdoor Environment before the run executes	
+exportPropertiesBeforeRun	Boolean		true			Whether to export all of the Properties in the Scenario before the run executes	
+exportRiskEcoInputs	Boolean		false			Whether to export the RISK inputs needed from FaTE	
+exportTimeStepsDown	Boolean		true			Indicates whether the time steps (as opposed to the compartments) will be listed down the leftmost column of the results files	
+image	String					The image to use when showing this object graphically	
+initialConcentration_g_per_kg	FloatingPoint	g/kg		0.0		The initial concentration of chemical in the compartment (in g/kg)	
+initialConcentration_g_per_L	FloatingPoint	g/L[water]		0.0		The initial concentration of chemical in the compartment (in g/L)	
+initialConcentration_g_per_m3	FloatingPoint	g/m3		0.0		The initial concentration of chemical in the compartment (in g/m3)	
+isDay_Dynamic	FloatingPoint	N/A	1.0	0.0	1.0	Used for particular plant algorithms to indicate whether it is daytime or nighttime.  This property is used only for dynamic simulations, but must be defined for both dynamic and steady state simulations.  It is set to 1 if it is daytime, 0 if it is nighttime	
+molesOfReportingChemicalPerMolesOfThisChemical	Integer	moles/mole chemical	1	1		When using reportAsOtherChemical, this Property will indicate how many moles of the reporting Chemical there are in the main Chemical.	
+mySQLDataDir	String		C:\mysql\data			The full path to the data directory used by MySQL	
+outputAdvectionFactorsFile	String					If filled in, indicates the file to which the advection factors should be written	
+outputDatabaseName	String					The name of the FaTE output database for use by downstream modules. This will be located in the FaTE output directory.	
+outputDir	String		C:\Models\TRIM\data			The directory where Simulation results should be written	
+reportAsOtherChemical	String					The name of another Chemical in the Scenario that will be used to report the mass and concentration of this Chemical when writing values to a file. Use this property in conjunction with the molesOfReportingChemicalPerMolesOfThisChemical property.	
+reportingChemicalMW	FloatingPoint	g/mol	0	0.0		When using reportAsOtherChemical, this Property will contain the molecular weight of the reporting Chemical.	
+RiskECODatabase	String					The name of the Risk.ECO toxicity benchmarks database to be used when mapping FaTE biota to Risk.ECO	
+significantDigits	Integer	unitless	8	1	16	The number of significant digits to use when writing results to a file (e.g. A value of 4 causes results to have the form 9.999E9)	
+T3_Fish_Recipe	String					A set of fractions and fish compartments to use to construct a T3 fish (needed by TRIM.Expo-Ingestion) for this surface water compartment.	
+T4_Fish_Recipe	String					A set of fractions and fish compartments to use to construct a T4 fish (needed by TRIM.Expo-Ingestion) for this surface water compartment.	
+totalMass	FloatingPoint	kg		0.0		The total mass of the compartment (all phases)	
+useSpecifiedConcentration	Boolean		true			Indicate if the compartment's concentration(s) should be determined by the user-specified concentration properties	
+wetConcOutputFactor	FloatingPoint	n/a				The factor by which the output concentration should be multplied to get wet weight concentration for this Compartment	
+wetConcOutputUnits	String					The units to use for the wet concentration of this Compartment. These should be set to the same units as the outputConcentrationUnits but with the words 'wet weight' at the end.	

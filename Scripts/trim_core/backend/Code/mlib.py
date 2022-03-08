@@ -87,8 +87,12 @@ def process_master_library(inputs):
         prop=prop.replace('z_total','z_total')
         prop=prop.replace ('!',' not ')
         prop=prop.replace('sendingchemical_','self.currentchemical.')
+        prop=prop.replace('receivingchemical_','self.currentchemical.')
         prop=prop.replace('molecularweight','molecularweight')        
         prop=prop.replace('ln','log')
+        prop=prop.replace('if (self.containingscenario.rain==0 and self.sendingcompartment.volume>0) else 0',' * (1-self.dict_inputs["met_dict"]["frac_time_rain"]) if self.sendingcompartment.volume>0 else 0')   ## important: replace rain time dependent switch with fraction of time rain for static non time series analysis. affects algorithm -- blowing particles of leaf to air    (when not raining)
+        prop=prop.replace('if (self.containingscenario.rain>0 and self.sendingcompartment.volume>0) else 0','*self.dict_inputs["met_dict"]["frac_time_rain"]') ## important: replace rain time dependent switch with fraction of time rain for static non time series analysis. affects algorithm -- blowing particles of leaf to ground    (when raining)
+
         
         if 'thelink.interfacialarea' in prop: # replace thelink interfacial area custom function with python function
             prop=prop.replace('thelink.interfacialarea','check_neighbor(self.sendingcompartment,self.receivingcompartment,self.dict_inputs).is_neighbor()[1]')           
@@ -98,6 +102,18 @@ def process_master_library(inputs):
         if 'thelink.bulkwaterflowrate_volumetric' in prop: # hack to deal with interconnected water bodies
             prop=prop.replace('thelink.bulkwaterflowrate_volumetric',"float(self.dict_inputs['df_links'].loc[(self.dict_inputs['df_links']['receiving_compartment_new']==self.receivingcompartment.name)&(self.dict_inputs['df_links']['sending_compartment_new']==self.sendingcompartment.name)&(self.dict_inputs['df_links']['property']=='bulkwaterflowrate_volumetric'),'value'].values[0])")          
 
+        if 'thelink.fractionoftotalrunoff' in prop: # hack to deal with runoff link
+            prop=prop.replace('thelink.fractionoftotalrunoff',"float(self.dict_inputs['df_links'].loc[(self.dict_inputs['df_links']['receiving_compartment_new']==self.receivingcompartment.name)&(self.dict_inputs['df_links']['sending_compartment_new']==self.sendingcompartment.name)&(self.dict_inputs['df_links']['property']=='fractionoftotalrunoff'),'value'].values[0])")          
+        if 'thelink.fractionoftotalerosion' in prop: # hack to deal with erosion link
+            prop=prop.replace('thelink.fractionoftotalerosion',"float(self.dict_inputs['df_links'].loc[(self.dict_inputs['df_links']['receiving_compartment_new']==self.receivingcompartment.name)&(self.dict_inputs['df_links']['sending_compartment_new']==self.sendingcompartment.name)&(self.dict_inputs['df_links']['property']=='fractionoftotalerosion'),'value'].values[0])")          
+        
+        if 'sendingwithincompositecompartment[terrestrial plant | leaf]'in prop:
+            prop=prop.replace('sendingwithincompositecompartment[terrestrial plant | leaf].','self.sendingcompartment.associated_leaf_comp.')
+
+        if 'thelink.rechargerate'in prop: ## default value -- find a way to read default values when properties are not defined in properties file
+            prop=prop.replace('thelink.rechargerate','default_rechargerate')
+
+
         return (prop)
    
     required_algs=req.required_algorithms # look up list of required algorithms
@@ -105,7 +121,13 @@ def process_master_library(inputs):
     with open(ofpn, 'w') as f:  
         f.write('### note: this is an auto generated script' +'\n')        
         f.write('from find_neighbors import *' +'\n')
-        f.write('from numpy import sqrt,nan,log' +'\n')
+        f.write('from numpy import sqrt,nan,log,exp' +'\n')
+        f.write('from util_functions import *' +'\n')
+        f.write('mfp=r"'+str(inputs['path_inputs'])+'"'+'   # path to met file'+'\n') 
+        f.write('mfn=r"'+str(inputs['met_file'])+'"'+'   # met file name'+'\n') 
+        f.write('default_rechargerate=1.42e-04'+'\n\n\n')
+        # f.write('print("Fraction Time Rain = ", frac_time_rain(mfp,mfn))'+'\n\n\n') # test 
+
         
         for index,group in enumerate(grouped_alg.groups):
             if group not in required_algs:
@@ -332,6 +354,7 @@ from define_attributes_props import *
     
     
     def clean_props(prop): # function to convert properties to pythonic syntax, 
+        prop=prop.replace('(compartment.allowexchange_forother > 0 ? compartment.wetvolumeperarea * containingvolumeelement.area : 0)','compartment.allowexchange_forother > 0 ? compartment.wetvolumeperarea * containingvolumeelement.area : 0') # ternary convertor doesnt handle props enclosed in paranthesis 
         if '?' in prop: # change ternary if then else syntax to pythonic syntax
             prop=ternary2python(prop)
             
@@ -342,6 +365,7 @@ from define_attributes_props import *
         prop=prop.replace('True','True')
         prop=prop.replace('constants','self.constants')
         prop=prop.replace('containingscenario','self.containingscenario')
+        prop=prop.replace('withincontainingvolumeelement[abiotic | soil | surface soil].area','self.associated_soil_comp.area')
         prop=prop.replace('containingvolumeelement','self.containingvolumeelement')
         prop=prop.replace('currentchemical','self.currentchemical')
         prop=prop.replace('<unset>','"<unset>"')
@@ -349,6 +373,14 @@ from define_attributes_props import *
         prop=prop.replace('z_vapor','z_vapor')
         prop=prop.replace('d_purewater','d_purewater')
         prop=prop.replace('fractionmass_vapor','fractionmass_vapor')
+        prop=prop.replace('(compartment.allowexchange_forother > 0 ? compartment.wetvolumeperarea * containingvolumeelement.area : 0)','compartment.allowexchange_forother > 0 ? compartment.wetvolumeperarea * containingvolumeelement.area : 0') 
+        prop=prop.replace('withincompositecompartment[terrestrial plant | leaf | leaf - deciduous forest].','self.associated_leaf_comp.')
+        prop=prop.replace('withincompositecompartment[terrestrial plant | leaf].','self.associated_leaf_comp.')  
+        prop=prop.replace('withincompositecompartment[terrestrial plant | leaf | leaf - grasses/herbs].','self.associated_leaf_comp.')
+        prop=prop.replace('withincontainingvolumeelement[abiotic | soil | surface soil].area','self.associated_soil_comp.area')
+        prop=prop.replace('self.allowexchange_dynamic','wt_av_allowexchange') # Call dynamic allow exchange defined at top of script
+
+
         if 'linkedcompartment' in prop:
             prop=linkcomp(prop)
         if 'currentchemical' not in prop and 'chemical.' in prop:
@@ -381,6 +413,11 @@ from define_attributes_props import *
 
     
         return (prop)
+
+
+       
+   
+       
     
     df_comp_lib=df_lib.loc[df_lib['objecttype']=='compartment']
     grouped_comp = df_comp_lib.groupby("objectname")
@@ -422,7 +459,13 @@ def linkedCompartmentvalue(containingvolumeelement,comp_objects_dict,primary_abi
     val=eval(val_str)
     return(val)  
     ''')
-            
+ 
+
+        
+        f.write('\n')  # implement a cleaner way of giving comp classes access to met dict (e.g. make inputs or dict_inputs a parameter in comp class definition? ORM approach may supercede all this)
+        for k,v in inputs['met_dict'].items():
+            f.write(k+'='+str(v)+'\n')
+        f.write('\n')               
     
 # method decorator approach 
 
