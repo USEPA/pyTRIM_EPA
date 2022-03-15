@@ -566,41 +566,160 @@ def linkedCompartmentvalue(containingvolumeelement,comp_objects_dict,primary_abi
                                 'return ('+prop_val+')\n\t')   
 
 
+                # else: # multiple chems
+                #     schems=[x for x in chems if x in inputs['simulation_chemicals']] #simulation chems only
+                #     f.write('\n\t'+\
+                #         '@property'+'\n\t' +\
+                #         'def '+prop_cl+'(self):'+'\n\t\t' +\
+                #         'cdict={}')
+                #     for chem in schems:
+                #         if type(chem)==float:
+                #             ch_name='nan'
+                #             prop_val=df_prop_val[df_prop_val['specificchemical'].isnull()]['propertyvalue'].values[0]
+                #         else:
+                #             prop_val=df_prop_val.loc[df_prop_val['specificchemical']==chem,'propertyvalue'].values[0]             
+                #             ch_name=clean_chem_names(chem)
+                #         if (prop not in non_formula_props) and (prop not in bool_props):
+                #             try:
+                #                 prop_val=clean_props(prop_val)    
+                #             except:
+                #                 pass
+                #         ### the try except is because it tries to evaluate each chemical even when it is not the current chemical with the method decorator approach
+                #         f.write('\n\t\t'+\
+                #                 'try:''\n\t\t\t'+\
+                #                 'cdict["'+ch_name+'"]='+prop_val+'\n\t\t'+\
+                #                 'except:''\n\t\t\t'+\
+                #                 'cdict["'+ch_name+'"]=nan'+'\n\t\t')
+                #     f.write('\n\t\t'+\
+                #             'return cdict')
+                #     f.write('\n')
+                #     cpname='chemical_'+prop_cl
+                #     cprop='self.'+prop_cl+'[self.currentchemical.name]'
+                #     f.write('\n\t'+\
+                #         '@property'+'\n\t' +\
+                #         'def '+cpname+'(self):'+'\n\t\t' +\
+                #         'return '+cprop)
+
+
+
                 else: # multiple chems
-                    schems=[x for x in chems if x in inputs['simulation_chemicals']] #simulation chems only
-                    f.write('\n\t'+\
+                    condition= ('soil' in group) and (prop_cl=='methylationrate' or prop_cl=='demethylationrate' or prop_cl=='reductionrate' or prop_cl=='oxidationrate')
+                    if not condition:
+                        schems=[x for x in chems if x in inputs['simulation_chemicals']] #simulation chems only
+                        f.write('\n\n\t'+\
+                            '@property'+'\n\t' +\
+                            'def '+prop_cl+'(self):'+'\n\t\t' +\
+                            'cdict={}')
+                        for chem in schems:
+                            if type(chem)==float:
+                                ch_name='nan'
+                                prop_val=df_prop_val[df_prop_val['specificchemical'].isnull()]['propertyvalue'].values[0]
+                            else:
+                                prop_val=df_prop_val.loc[df_prop_val['specificchemical']==chem,'propertyvalue'].values[0]             
+                                ch_name=clean_chem_names(chem)
+                            if (prop not in non_formula_props) and (prop not in bool_props):
+                                try:
+                                    prop_val=clean_props(prop_val)    
+                                except:
+                                    pass
+                            ### the try except is because it tries to evaluate each chemical even when it is not the current chemical with the method decorator approach
+                            f.write('\n\t\t'+\
+                                    'try:''\n\t\t\t'+\
+                                    'cdict["'+ch_name+'"]='+prop_val+'\n\t\t'+\
+                                    'except:''\n\t\t\t'+\
+                                    'cdict["'+ch_name+'"]=nan'+'\n\t\t')
+                        f.write('\n\t\t'+\
+                                'return cdict')
+                        f.write('\n')
+                        cpname='chemical_'+prop_cl
+                        cprop='self.'+prop_cl+'[self.currentchemical.name]'
+                        f.write('\n\t'+\
+                            '@property'+'\n\t' +\
+                            'def '+cpname+'(self):'+'\n\t\t' +\
+                            'return '+cprop)
+                                        
+
+                    if condition:
+                        print ('XXXXXXXXXXXXXXXXXXXXXXXXXXXXX')
+                        schems=[x for x in chems if x in inputs['simulation_chemicals']] #simulation chems only
+                        f.write('\n\n\t'+\
+                                prop_cl+'_cdict'+'={}')
+                        for chem in schems:
+                            if type(chem)==float:
+                                ch_name='nan'
+                                prop_val=df_prop_val[df_prop_val['specificchemical'].isnull()]['propertyvalue'].values[0]
+                            else:
+                                prop_val=df_prop_val.loc[df_prop_val['specificchemical']==chem,'propertyvalue'].values[0]             
+                                ch_name=clean_chem_names(chem)
+                            if (prop not in non_formula_props) and (prop not in bool_props):
+                                try:
+                                    prop_val=clean_props(prop_val)    
+                                except:
+                                    pass
+                            ### the try except is because it tries to evaluate each chemical even when it is not the current chemical with the method decorator approach
+                            f.write('\n\t'+\
+                                    'try:''\n\t\t'+\
+                                    prop_cl+'_cdict["'+ch_name+'"]='+prop_val+'\n\t'+\
+                                    'except:''\n\t\t'+\
+                                    prop_cl+'_cdict["'+ch_name+'"]=nan'+'\n\t')
+
+                        f.write('\n')
+
+                        f.write('\n\t'+\
                         '@property'+'\n\t' +\
                         'def '+prop_cl+'(self):'+'\n\t\t' +\
-                        'cdict={}')
-                    for chem in schems:
-                        if type(chem)==float:
-                            ch_name='nan'
-                            prop_val=df_prop_val[df_prop_val['specificchemical'].isnull()]['propertyvalue'].values[0]
-                        else:
-                            prop_val=df_prop_val.loc[df_prop_val['specificchemical']==chem,'propertyvalue'].values[0]             
-                            ch_name=clean_chem_names(chem)
-                        if (prop not in non_formula_props) and (prop not in bool_props):
-                            try:
-                                prop_val=clean_props(prop_val)    
-                            except:
-                                pass
-                        ### the try except is because it tries to evaluate each chemical even when it is not the current chemical with the method decorator approach
-                        f.write('\n\t\t'+\
-                                'try:''\n\t\t\t'+\
-                                'cdict["'+ch_name+'"]='+prop_val+'\n\t\t'+\
-                                'except:''\n\t\t\t'+\
-                                'cdict["'+ch_name+'"]=nan'+'\n\t\t')
-                    f.write('\n\t\t'+\
-                            'return cdict')
-                    f.write('\n')
-                    cpname='chemical_'+prop_cl
-                    cprop='self.'+prop_cl+'[self.currentchemical.name]'
-                    f.write('\n\t'+\
-                        '@property'+'\n\t' +\
-                        'def '+cpname+'(self):'+'\n\t\t' +\
-                        'return '+cprop)
+                        'return self.'+prop_cl+'_cdict')
+
+                        cpname='chemical_'+prop_cl
+                        cprop='self.'+prop_cl+'[self.currentchemical.name]'
+                        f.write('\n\t'+\
+                            '@property'+'\n\t' +\
+                            'def '+cpname+'(self):'+'\n\t\t' +\
+                            'return '+cprop)
+
+    
+    
+                # else: # multiple chems
+                #     schems=[x for x in chems if x in inputs['simulation_chemicals']] #simulation chems only
+                #     f.write('\n\t@property')+\
+                #     f.write('\n\t'+\
+                #         'def _'+prop_cl+'(self):'+'\n\t\t')
+                #     f.write('_cdict={}')    
+                #     for chem in schems:
+                #         if type(chem)==float:
+                #             ch_name='nan'
+                #             prop_val=df_prop_val[df_prop_val['specificchemical'].isnull()]['propertyvalue'].values[0]
+                #         else:
+                #             prop_val=df_prop_val.loc[df_prop_val['specificchemical']==chem,'propertyvalue'].values[0]             
+                #             ch_name=clean_chem_names(chem)
+                #         if (prop not in non_formula_props) and (prop not in bool_props):
+                #             try:
+                #                 prop_val=clean_props(prop_val)    
+                #             except:
+                #                 pass
+                #         ### the try except is because it tries to evaluate each chemical even when it is not the current chemical with the method decorator approach
+                #         f.write('\n\t\t'+\
+                #                 'try:'+'\n\t\t\t'+\
+                #                 '_cdict["'+ch_name+'"]='+prop_val+'\n\t\t'+\
+                #                 'except:'+'\n\t\t\t'+\
+                #                 '_cdict["'+ch_name+'"]=nan')
+                #     f.write('\n\t\t'+'return(_cdict)')    
+                #     f.write('\n\t'+\
+                #         '@property'+'\n\t' +\
+                #         'def '+prop_cl+'(self):'+'\n\t\t' +\
+                #             'if not hasattr(self, _'+prop_cl+':\n\t\t\t'+\
                                 
-  
+                #                 'return self._'+prop_cl)
+                #     f.write('\n\t'+\
+                #             '@'+prop_cl+'.setter'+'\n\t' +\
+                #             'def '+prop_cl+'(self,value):'+'\n\t\t' +\
+                #             'self._'+prop_cl+'=value\n\t') 
+                #     cpname='chemical_'+prop_cl
+                #     cprop='self.'+prop_cl+'[self.currentchemical.name]'
+                #     f.write('\n\t'+\
+                #         '@property'+'\n\t' +\
+                #         'def '+cpname+'(self):'+'\n\t\t' +\
+                #         'return '+cprop)
         
         
     f.close()

@@ -16,6 +16,7 @@ created on wed mar 31 21:15:14 2021
 import pandas as pd
 import os
 import required_elements_temp as req
+from util_functions import * 
 
 parcel_list=['lakecadillac','lakemitchell','n1','nw1','sw1','w1','nw2','sw2','ne3','e2','e3','s1','se1','se2','e1','ne1','n2']
 
@@ -23,7 +24,7 @@ parcel_list=['lakecadillac','lakemitchell','n1','nw1','sw1','w1','nw2','sw2','ne
 
 
 
-def define_compartments(inputs,df_parcels,df_ve,df_pve,df_props,df_dr):
+def define_compartments(inputs,df_parcels,df_ve,df_pve,df_props,df_props_2,df_dr):
 
 
     ifp=inputs['path_inputs']
@@ -536,27 +537,52 @@ def define_comp(currentchemical):
 
             f.write('\n\t'+'comp_objects_dict['+'"'+str(comp_name)+'"'+']='+comp_name+'\n')
             
-            ### add compartment properties
-            f.write('\n\n')
-            for i in range(len(df_props)):
-                if str(df_props.loc[i,'prop_type'])!='compartment':
-                    continue                
-                if str(df_props.loc[i,'prop_owner']).split(' in ')[0].strip().lower() not in required_comp_classes: # temp -- this doesnt work for leaf composites because two " in " so added hack fix to required comps list
-                   continue                
-                
-                obj=df_props.loc[i,'prop_owner_new']
-                if True: # temporary. use condition below later.
-        #        if obj in locals(): # may miss a few objects owing to name cleaning?
-        #            print (obj)
-                    f.write('\t'+'try:'+'\n\t\t')
-                    f.write(str(obj)+\
-                           "." +\
-                           str(df_props.loc[i,'property_new'])+\
-                           "="+\
-                           str(df_props.loc[i,'value_new']))
-                    f.write('\n'+'\t'+'except:'+'\n\t\t'+'pass') 
-                    f.write('\n')            
+        ### add compartment properties
+        f.write('\n\n')
+        for i in range(len(df_props)):
+            if str(df_props.loc[i,'prop_type'])!='compartment':
+                continue                
+            if str(df_props.loc[i,'prop_owner']).split(' in ')[0].strip().lower() not in required_comp_classes: # temp -- this doesnt work for leaf composites because two " in " so added hack fix to required comps list
+               continue                
+            
+            obj=df_props.loc[i,'prop_owner_new']
+            if True: # temporary. use condition below later.
+    #        if obj in locals(): # may miss a few objects owing to name cleaning?
+    #            print (obj)
+                f.write('\t'+'try:'+'\n\t\t')
+                f.write(str(obj)+\
+                       "." +\
+                       str(df_props.loc[i,'property_new'])+\
+                       "="+\
+                       str(df_props.loc[i,'value_new']))
+                f.write('\n'+'\t'+'except:'+'\n\t\t'+'pass') 
+                f.write('\n')            
 
+
+
+        ### add compartment properties from df_props_2
+        f.write('\n')
+        f.write('### note: this is to write other properties' +'\n')        
+        f.write('\n')
+
+        for i in range(len(df_props_2)):
+            obj=df_props_2.loc[i,'prop_owner_new']
+            if True: # temporary. use condition below later.
+    #        if obj in locals(): # may miss a few objects owing to name cleaning?
+    #            print (obj)
+                cname=df_props_2.loc[i,'value'].split('}')[0].replace('{','').strip()# get chem name
+                cname=clean_chem_names(cname)
+                pval=df_props_2.loc[i,'value'].split('}')[1].replace('{','').strip() # get value
+                f.write('\t'+'try:'+'\n\t\t')
+                f.write(str(obj)+\
+                       "." +\
+                       str(df_props_2.loc[i,'property_new'])+\
+                       "['"+\
+                       str(cname)+\
+                       "']="+\
+                       str(pval))+\
+                f.write('\n\t'+'except:'+'\n\t\t'+'pass') 
+                f.write('\n')            
 
     
     
