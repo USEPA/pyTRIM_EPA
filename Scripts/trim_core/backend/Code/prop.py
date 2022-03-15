@@ -10,7 +10,7 @@ auto writes scripts to define attributes of scenario and various objects, specif
 import pandas as pd
 import os
 import re
-
+from util_functions import * 
 
 
 
@@ -460,5 +460,78 @@ def get_met_ave(mfn,mfcol):
                        str(df_props.loc[i,'value_new']))
                 f.write('\n'+'except:'+'\n\t'+'pass') 
                 f.write('\n')            
+
+#### Read, process, and write other properties file
+
+
+    ifp=inputs['path_inputs']
+    ifn=inputs['prop_file_2']    
+    ifpn=os.path.join(ifp,ifn)
+    
+
+    prop_file=open(ifpn,'r') 
+    prop_lines=prop_file.readlines()
+    val_end_flag=False
+    #### read volume element & compartment properties 
+    
+    prop_owner_types=['volumeelement','compartment','scenario']# list of property owners for which we are gathering inputs          
+    prop_tuples=[] # initialize list for storing point lines
+    prop_owner_list=[] # initialize list of property owners    
+    
+    for line in prop_lines: # loop over lines 
+        line=line.strip() # strip /n and space       
+        if line[:2]==r'//' or line=='': # if a comment or if blank, move on to next line
+            continue # move to next line
+        line_nc=line.split("//")[0] # line stripped of comment    
+        prop_type=line_nc.split(':')[0].strip() # split on : . text to the left is the property type 
+        if prop_type in prop_owner_types: # if volume element or compartment
+            prop_type_flag=True # flag indicates that a new ve or comp has begun
+            if val_end_flag and prop_type_flag: # if value reading has ended and a new property type has begun: 
+                prop_owner_list=[]; prop="";form="";value="";val_end_flag=False         # initialize list and values    
+            prop_owner=line_nc.split(":")[1].strip()
+            prop_owner_list.append((prop_type,prop_owner)) 
+        elif line_nc[:9]=="property:":        
+            prop=line_nc.split(":")[1].strip()
+        elif line_nc[:5]=="form:":   
+            form=line_nc.split(":")[1].strip()
+        elif line_nc[:6]=="value:":  
+    #        value=line_nc.split(":")[1].strip()
+            value="".join(line_nc.split(":")[1:])
+            value=value.strip()
+            for p_owner in prop_owner_list:                
+                p=(p_owner[0],p_owner[1],prop,form,value)
+    #            print (p)
+                prop_tuples.append(p)
+                val_end_flag=True      
             
-    return(df_props,df_links,df_plinks)
+    df_props_2=pd.DataFrame(prop_tuples,columns=['prop_type', 'prop_owner', 'property','form','value'])
+    
+    df_props_2['prop_owner_new']=df_props_2['prop_owner'].apply(clean_names)
+    df_props_2['property_new']=df_props_2['property'].apply(clean_names)
+    df_props_2['value_new']=df_props_2['value'].apply(clean_values)
+    df_props_2['value_new']=df_props_2['value_new'].apply(add_quotes)
+
+    with open(ofpn, 'a') as f:
+        f.write('### note: this is to write other properties' +'\n')        
+        for i in range(len(df_props_2)):
+            obj=df_props_2.loc[i,'prop_owner_new']
+            if True: # temporary. use condition below later.
+    #        if obj in locals(): # may miss a few objects owing to name cleaning?
+    #            print (obj)
+                cname=df_props_2.loc[i,'value'].split('}')[0].replace('{','').strip()# get chem name
+                cname=clean_chem_names(cname)
+                pval=df_props_2.loc[i,'value'].split('}')[1].replace('{','').strip() # get value
+                f.write('try:'+'\n\t')
+                f.write(str(obj)+\
+                       "." +\
+                       str(df_props_2.loc[i,'property_new'])+\
+                       "['"+\
+                       str(cname)+\
+                       "']="+\
+                       str(pval))+\
+                f.write('\n'+'except:'+'\n\t'+'pass') 
+                f.write('\n')            
+
+
+            
+    return(df_props,df_props_2,df_links,df_plinks)
