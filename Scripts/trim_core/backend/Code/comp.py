@@ -18,7 +18,7 @@ import os
 import required_elements_temp as req
 from util_functions import * 
 
-parcel_list=['lakecadillac','lakemitchell','n1','nw1','sw1','w1','nw2','sw2','ne3','e2','e3','s1','se1','se2','e1','ne1','n2']
+parcel_list=['lakecadillac','lakemitchell','n1','nw1','sw1','w1','nw2','sw2','ne3','e2','e3','s1','se1','se2','e1','ne1','n2','s2','ne2']
 
 # parcel_list=['lakecadillac','lakemitchell','s1']
 
@@ -574,10 +574,16 @@ def define_comp(currentchemical):
                 cname=clean_chem_names(cname)
                 pval=df_props_2.loc[i,'value'].split('}')[1].replace('{','').strip() # get value
                 f.write('\t'+'try:'+'\n\t\t')
+                # test hack to see if other properties can be directly defined in instance
+                # f.write(str(obj)+\
+                #         "." +\
+                #         str(df_props_2.loc[i,'property_new'])+\
+                #         "={}"+"\n\t\t")
+
                 f.write(str(obj)+\
                        "." +\
-                       str(df_props_2.loc[i,'property_new'])+\
-                       "['"+\
+                        str(df_props_2.loc[i,'property_new'])+\
+                           "['"+\
                        str(cname)+\
                        "']="+\
                        str(pval))+\
