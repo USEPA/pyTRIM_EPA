@@ -4,7 +4,7 @@
 # required compartments refer to primary abiotic types 
 
 required_compartments = ["advection sink",\
-            "degradation/reaction sink",\
+            # "degradation/reaction sink",\
             "flush rate sink",\
             "sediment",\
             "sediment burial sink",\
@@ -145,6 +145,20 @@ required_algorithms = [\
             "transfer from stem to leaf - grasses/herbs, cd(alginstid_1260)",\
             "transfer from stem to leaf - grasses/herbs, hg(alginstid_1260)",\
             "transfer from stem to leaf - grasses/herbs, organic(alginstid_1260)",\
+
+            "time-dependent partition from root zone to root, interacts with bulk soil - agriculture, cd(alginstid_1953)",\
+            "time-dependent partition from root zone to root, interacts with bulk soil - agriculture, hg(alginstid_1953)",\
+            "time-dependent partition from root zone to root, interacts with bulk soil - grasses/herbs,cd(alginstid_1952)",\
+            "time-dependent partition from root zone to root, interacts with bulk soil - grasses/herbs,hg(alginstid_1952)",\
+            "time-dependent partition from root zone to root, interacts with soil pore water - agriculture, organics",\
+            "time-dependent partition from root zone to root, interacts with soil pore water - grasses/herbs, organics(alginstid_1949)",\
+            "time-dependent partition from root to root zone, interacts with bulk soil - agriculture, cd(alginstid_1932)",\
+            "time-dependent partition from root to root zone, interacts with bulk soil - agriculture, hg(alginstid_1932)",\
+            "time-dependent partition from root to root zone, interacts with bulk soil - grasses/herbs, cd(alginstid_1933)",\
+            "time-dependent partition from root to root zone, interacts with bulk soil - grasses/herbs, hg(alginstid_1933)",\
+            "time-dependent partition from root to root zone, interacts with soil pore water - agriculture, organics",\
+            "time-dependent partition from root to root zone, interacts with soil pore water - grasses/herbs, organics(alginstid_1929)",\
+
                 
             "diffusion from root zone to surface soil(alginstid_1939)",\
             "diffusion from surface soil to root zone(alginstid_1919)",\

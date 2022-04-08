@@ -336,3 +336,10 @@ def create_trans_mat(inputs,dict_inputs): # function to create transition matrix
 # comp_col=comp_list[col_index]
 # comp1_name=comp_row
 # comp2_name=comp_col  
+
+# row_index=36 # elemental n1 surface soil
+# col_index=37 # elemental n1 root soil
+# comp_row=comp_list[row_index]
+# comp_col=comp_list[col_index]
+# comp1_name=comp_row
+# comp2_name=comp_col 

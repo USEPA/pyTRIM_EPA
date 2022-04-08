@@ -474,7 +474,7 @@ def get_met_ave(mfn,mfcol):
     val_end_flag=False
     #### read volume element & compartment properties 
     
-    prop_owner_types=['volumeelement','compartment','scenario']# list of property owners for which we are gathering inputs          
+    prop_owner_types=['volumeelement','compartment']# list of property owners for which we are gathering inputs          
     prop_tuples=[] # initialize list for storing point lines
     prop_owner_list=[] # initialize list of property owners    
     
