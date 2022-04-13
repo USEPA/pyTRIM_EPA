@@ -25,7 +25,7 @@ def create_app(testing=False):
     # Create app and load configuration
     app = Flask(__name__)
     app.logger.info("Initializing a new TRIM.Builder-WebApp")
-    init_config(app, testing=False)
+    init_config(app, testing=testing)
 
     # Initialize db module
     db.init_app(app)

@@ -39,14 +39,12 @@ window.TRIM = (function(trim) {
         if (!Array.isArray(fields)) {
             fields = [fields];
         }
-
         var form = document.createElement('form');
         form.setAttribute('enctype', 'multipart/form-data');
         var formData = new FormData(form);
 
         for (var i = 0, len = fields.length; i < len; i++) {
             var field = fields[i];
-
             if (field.type === 'file') {
                 formData.append(field.name, field.files[0])
             }
@@ -100,9 +98,29 @@ window.TRIM = (function(trim) {
     };
 
     api.getParcels = function() {
-        let url = api.getUrl('parcels_api.get');
+        var url = api.getUrl('parcels_api.get');
         return AJAX.call({
             url: url
+        });
+    };
+
+    api.updateParcel = function(parcel) {
+        var url = api.getUrl('parcels_api.update');
+        var data = makeFormData(parcel);
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: data
+        });
+    };
+
+    api.deleteParcels = function(parcels) {
+        var url = api.getUrl('parcels_api.delete');
+        var data = makeFormData(parcels);
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: data
         });
     };
 
