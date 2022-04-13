@@ -32,6 +32,7 @@ class Scenario(Model, TrackUpdatesMixin):
         return list(sorted(volume_els, key=lambda x: x.name))
 
     def get_volume_element(self, name):
+        print(self.volume_elements)
         for ve in self.volume_elements:
             if ve.name == name or ve.standard_name == name:
                 return ve

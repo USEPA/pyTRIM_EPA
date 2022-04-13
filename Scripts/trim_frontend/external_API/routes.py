@@ -11,17 +11,19 @@ from flask_security import login_required
 from custom.flask_api import ApiException, ApiResult
 from trim_frontend import api
 from ..utils.logging import make_logger
-from .helpers.usdaSoilAPI import UsdaApi
+from .helpers import UsdaApi, UsleClimateApi
 from pyproj import CRS, Transformer
 from trim_db import ParcelService
-from trim_db import Parcel
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
 
 
-external_api = Blueprint('external_api', __name__)
-api.use_api_errors(external_api)
+external_api_soil = Blueprint('external_api_soil', __name__)
+external_api_r = Blueprint('external_api_r', __name__)
+api.use_api_errors(external_api_soil)
+api.use_api_errors(external_api_r)
 
 
-@external_api.route('/api/soildata/<string:tillage>', methods=['GET'])
+@external_api_soil.route('/api/soildata/<string:tillage>', methods=['GET'])
 @login_required
 def get_soil_data(tillage):
     logger = make_logger('external_api_call')
@@ -38,7 +40,10 @@ def get_soil_data(tillage):
                 this_parcel_data = this_p.as_serializable()
                 parcels[this_parcel_data['name']] = [(t[1], t[0]) for t in this_parcel_data['vertices']]
         sd = SoilData(vert_dict=parcels)
-        no_till_soil_data_json, tilled_soil_data_json = sd.run()
+        # no_till_soil_data_json, tilled_soil_data_json = sd.run()
+        sd.run()
+        no_till_soil_data_json = sd.scenario_no_till_results
+        tilled_soil_data_json = sd.scenario_tilled_results
     except Exception as e:
         logger.error(traceback.format_exc())
 
@@ -50,6 +55,28 @@ def get_soil_data(tillage):
         result_soil_data_json = {"tilled_data": tilled_soil_data_json,
                                  "no_till_data": no_till_soil_data_json}
     return result_soil_data_json
+
+
+@external_api_r.route('/api/usledata/', methods=['GET'])
+@login_required
+def get_soil_data():
+    logger = make_logger('external_api_call')
+    logger.info(f"Obtaining parcel soil data from USDA.gov")
+    try:
+        from_url = request.referrer
+        this_scenario_id = int(re.findall('/scenario/(\d+)/', from_url)[0])
+        if not this_scenario_id:
+            raise ApiException("No Scenario defined")
+        p = ParcelService.get_all(scenario_id=this_scenario_id)
+        parcels = {}
+        for this_p in p:
+            this_parcel_data = this_p.as_serializable()
+            parcels[this_parcel_data['name']] = [(t[1], t[0]) for t in this_parcel_data['vertices']]
+        usle_r_data = UsleRData()
+        climate_data_file = ""
+        usle_r_data.run(parcels, climate_data_file)
+    except Exception as e:
+        logger.error(traceback.format_exc())
 
 
 class SoilData:
@@ -70,6 +97,10 @@ class SoilData:
                      'vadose': {'bounds': [80, 220]},
                      'gw': {'bounds': [220, 250]}
                      }
+
+    scenario_tilled_results = {}
+
+    scenario_no_till_results = {}
 
     def __init__(self, vert_file_name=None, vert_dict=None, no_till_layers=no_tilled_layers, tilled_layers=tilled_layers):
         if vert_file_name is not None:
@@ -257,46 +288,162 @@ class SoilData:
             str_vert_list[poly_list] = elem
         return str_vert_list
 
+    @staticmethod
+    def get_soil_data(parcel_verts):
+        parcel_dict = parcel_verts["pv"]
+        r = UsdaApi.get_parcel_soil_data(parcel_coords=parcel_dict)
+        return r
+
+    def compute_parameters(self, parcel_data):
+        r = parcel_data["pd"]
+        this_parcel_vertices = parcel_data["pn"]
+        tilled_results = {}
+        no_till_results = {}
+        r_dict = \
+            r['soap:Envelope']['soap:Body']['RunQueryResponse']['RunQueryResult']['diffgr:diffgram']['NewDataSet'][
+                'Table']
+        df = pd.DataFrame(r_dict)
+        df['area'] = pd.to_numeric(df.area)
+        df['hzdept_r'] = pd.to_numeric(df.hzdept_r)
+        df['hzdepb_r'] = pd.to_numeric(df.hzdepb_r)
+        df['hzthk_r'] = pd.to_numeric(df.hzthk_r)
+        df['comppct_r'] = pd.to_numeric(df.comppct_r)
+        df['slope_r'] = pd.to_numeric(df.slope_r)
+        df['kwfact'] = pd.to_numeric(df.kwfact)
+        df['ph1to1h2o_r'] = pd.to_numeric(df.ph1to1h2o_r)
+        df['om_r'] = pd.to_numeric(df.om_r)
+        df['awc_r'] = pd.to_numeric(df.awc_r)
+        df['sandtotal_r'] = pd.to_numeric(df.sandtotal_r)
+        df['slopelenusle_r'] = pd.to_numeric(df.slopelenusle_r)
+
+        unique_mu = df.drop_duplicates(subset=['mukey'])['mukey']
+        t_df = pd.DataFrame()
+        nt_df = pd.DataFrame()
+        total_area = 0
+        for mu in unique_mu:
+            df_mu = df.query(f'mukey=="{mu}"')
+            total_area = total_area + list(df_mu['area'])[0]
+            this_mu_nt_df = pd.DataFrame(self.compute_layer_averages(df_mu))
+            this_mu_t_df = pd.DataFrame(self.compute_layer_averages(df_mu, True))
+            nt_df = pd.concat([nt_df, this_mu_nt_df])
+            t_df = pd.concat([t_df, this_mu_t_df])
+
+        # Calculate map unit averages for tilled case for given layer
+        parcel_averages_df = self.compute_parcel_averages(t_df, total_area, tilled=True)
+        # Calculate map unit averages for not tilled case for given layer
+        no_till_parcel_averages_df = self.compute_parcel_averages(nt_df, total_area, tilled=False)
+
+        tilled_results[this_parcel_vertices] = parcel_averages_df.to_json()
+        no_till_results[this_parcel_vertices] = no_till_parcel_averages_df.to_json()
+        return tilled_results, no_till_results
+
     def run(self):
         parcel_dicts = self.parcel_vertices
         tilled_results = {}
         no_till_results = {}
-        for this_parcel_vertices in parcel_dicts:
-            r = UsdaApi.get_parcel_soil_data(parcel_coords=parcel_dicts[this_parcel_vertices])
-            r_dict = \
-                r['soap:Envelope']['soap:Body']['RunQueryResponse']['RunQueryResult']['diffgr:diffgram']['NewDataSet']['Table']
-            df = pd.DataFrame(r_dict)
-            df['area'] = pd.to_numeric(df.area)
-            df['hzdept_r'] = pd.to_numeric(df.hzdept_r)
-            df['hzdepb_r'] = pd.to_numeric(df.hzdepb_r)
-            df['hzthk_r'] = pd.to_numeric(df.hzthk_r)
-            df['comppct_r'] = pd.to_numeric(df.comppct_r)
-            df['slope_r'] = pd.to_numeric(df.slope_r)
-            df['kwfact'] = pd.to_numeric(df.kwfact)
-            df['ph1to1h2o_r'] = pd.to_numeric(df.ph1to1h2o_r)
-            df['om_r'] = pd.to_numeric(df.om_r)
-            df['awc_r'] = pd.to_numeric(df.awc_r)
-            df['sandtotal_r'] = pd.to_numeric(df.sandtotal_r)
-            df['slopelenusle_r'] = pd.to_numeric(df.slopelenusle_r)
+        parcel_vertices_names = list(parcel_dicts.keys())
+        with ThreadPoolExecutor(max_workers=50) as t_executor:
+            data_results = t_executor.map(self.get_soil_data, [{'pv': parcel_dicts[this_parcel_vertices],
+                                                                'pn': parcel_vertices_names[i]}
+                                                               for i, this_parcel_vertices in enumerate(parcel_dicts)])
+        with ProcessPoolExecutor(max_workers=10) as p_executor:
+            ave_results = p_executor.map(self.compute_parameters, [{'pd': data,
+                                                                    'pn': parcel_vertices_names[i]}
+                                                                   for i, data in enumerate(data_results)])
+        for i, r in enumerate(ave_results):
+            tilled_results[parcel_vertices_names[i]] = r[0][parcel_vertices_names[i]]
+            no_till_results[parcel_vertices_names[i]] = r[1][parcel_vertices_names[i]]
+        self.scenario_tilled_results = tilled_results
+        self.scenario_no_till_results = no_till_results
+        # return no_till_results, tilled_results
 
-            unique_mu = df.drop_duplicates(subset=['mukey'])['mukey']
-            t_df = pd.DataFrame()
-            nt_df = pd.DataFrame()
-            total_area = 0
-            for mu in unique_mu:
-                df_mu = df.query(f'mukey=="{mu}"')
-                total_area = total_area + list(df_mu['area'])[0]
-                this_mu_nt_df = pd.DataFrame(self.compute_layer_averages(df_mu))
-                this_mu_t_df = pd.DataFrame(self.compute_layer_averages(df_mu, True))
-                nt_df = pd.concat([nt_df, this_mu_nt_df])
-                t_df = pd.concat([t_df, this_mu_t_df])
 
-            # Calculate map unit averages for tilled case for given layer
-            parcel_averages_df = self.compute_parcel_averages(t_df, total_area, tilled=True)
-            # Calculate map unit averages for not tilled case for given layer
-            no_till_parcel_averages_df = self.compute_parcel_averages(nt_df, total_area, tilled=False)
+class UsleRData:
+    @staticmethod
+    def run(Parcels, ClimateData):
+        # Import climate data shapefile layer
+        Climate_layer = QgsVectorLayer(ClimateData, "ClimateData", "ogr")
+        if not Climate_layer.isValid():
+            print("Climate layer failed to load!")
+        else:
+            pass
+            # QgsProject.instance().addMapLayer(Climate_layer)
 
-            tilled_results[this_parcel_vertices] = parcel_averages_df
-            no_till_results[this_parcel_vertices] = no_till_parcel_averages_df.to_json()
+        # Import parcels shapefile layer
+        Parcels_layer = QgsVectorLayer(Parcels, "Parcels", "ogr")
+        if not Parcels_layer.isValid():
+            print("Parcels layer failed to load!")
+        else:
+            pass
+            # QgsProject.instance().addMapLayer(Parcels_layer)
 
-        return no_till_results, tilled_results
+        # 1) Fix geometries on parcel layer
+        parameter = {'INPUT': Parcels_layer, 'OUTPUT': 'memory: FixedParcels_1'}
+        result = processing.run("native:fixgeometries", parameter)
+        # FixedParcels_1 = QgsProject.instance().addMapLayer(result['OUTPUT'])
+        FixedParcels_1 = result['OUTPUT']
+
+        # 2) Reproject fixed parcel layer
+        parameter = {'INPUT': FixedParcels_1, 'TARGET_CRS': QgsCoordinateReferenceSystem('ESRI:102003'),
+                     'OPERATION': '+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=aea +lat_0=37.5 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +ellps=GRS80',
+                     'OUTPUT': 'memory:ReprojectedFixedParcels_2'}
+        result = processing.run("native:reprojectlayer", parameter)
+        # ReprojectedFixedParcels_2 = QgsProject.instance().addMapLayer(result['OUTPUT'])
+        ReprojectedFixedParcels_2 = result['OUTPUT']
+
+        # 3) Add geometry to reprojected fixed parcels
+        parameter = {'INPUT': ReprojectedFixedParcels_2, 'CALC_METHOD': 0,
+                     'OUTPUT': 'memory:AreaCalcReprojectedFixedParcels_3'}
+        result = processing.run("qgis:exportaddgeometrycolumns", parameter)
+        # AreaCalcReprojectedFixedParcels_3 = QgsProject.instance().addMapLayer(result['OUTPUT'])
+        AreaCalcReprojectedFixedParcels_3 = result['OUTPUT']
+
+        # 4) Intersection
+        parameter = {'INPUT': AreaCalcReprojectedFixedParcels_3, 'OVERLAY': Climate_layer, 'INPUT_FIELDS': [],
+                     'OVERLAY_FIELDS': [], 'OVERLAY_FIELDS_PREFIX': '', 'OUTPUT': 'memory:Intersection_4'}
+        # have to use ClimateData variable for overlay as opposed to Climate_layer variable
+        result = processing.run("native:intersection", parameter)
+        # Intersection_4 = QgsProject.instance().addMapLayer(result['OUTPUT'])
+        Intersection_4 = result['OUTPUT']
+
+        # 5) Area Calculation
+        parameter = {'INPUT': Intersection_4, 'CALC_METHOD': 0, 'OUTPUT': 'memory:AreaCalcIntersection_5'}
+        result = processing.run("qgis:exportaddgeometrycolumns", parameter)
+        # AreaCalcIntersection_5 = QgsProject.instance().addMapLayer(result['OUTPUT'])
+        AreaCalcIntersection_5 = result['OUTPUT']
+
+        # 6) Field calculator for percent area
+        parameter = {'INPUT': AreaCalcIntersection_5, 'FIELD_NAME': 'Perc_Area', 'FIELD_TYPE': 0, 'FIELD_LENGTH': 10,
+                     'FIELD_PRECISION': 3, 'FORMULA': ' \"area_2\" /  \"area\" ', 'OUTPUT': 'memory:PercentAreaCalc_6'}
+        result = processing.run("native:fieldcalculator", parameter)
+        # PercentAreaCalc_6 = QgsProject.instance().addMapLayer(result['OUTPUT'])
+        PercentAreaCalc_6 = result['OUTPUT']
+
+        # 7) Convert Polygon Layer to Random Points Inside Polygon
+        parameter = {'INPUT': PercentAreaCalc_6, 'POINTS_NUMBER': 1, 'MIN_DISTANCE': 0, 'MIN_DISTANCE_GLOBAL': 0,
+                     'MAX_TRIES_PER_POINT': 10, 'SEED': None, 'INCLUDE_POLYGON_ATTRIBUTES': True,
+                     'OUTPUT': 'memory:PercentAreaAsPoints_7'}
+        result = processing.run("native:randompointsinpolygons", parameter)
+        # PercentAreaAsPoints_7 = QgsProject.instance().addMapLayer(result['OUTPUT'])
+        PercentAreaAsPoints_7 = result['OUTPUT']
+
+        # 8) Add XY Columns to Layer
+        parameter = {'INPUT': PercentAreaAsPoints_7, 'CRS': QgsCoordinateReferenceSystem('EPSG:4326'), 'PREFIX': '',
+                     'OUTPUT': 'memory:AddXY_8'}
+        result = processing.run("native:addxyfields", parameter)
+        # AddXY_8 = QgsProject.instance().addMapLayer(result['OUTPUT'])
+        AddXY_8 = result['OUTPUT']
+
+        # 9) Convert Attribute Table to Pandas DataFrame
+        cols = [f.name() for f in AddXY_8.fields()]
+        datagen = ([f[col] for col in cols] for f in AddXY_8.getFeatures())
+
+        df = pd.DataFrame.from_records(data=datagen, columns=cols)
+
+        df['R_Value'] = df.apply(lambda x: UsleClimateApi.get_r_value(x["y"], x["x"]), axis=1)
+        df['Area_Weighted_R'] = df['R_Value'] * df['Perc_Area']
+
+        results = df.groupby('PartName')['Area_Weighted_R'].agg(sum)
+
+        return results
+

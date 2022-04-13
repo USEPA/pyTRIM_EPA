@@ -46,7 +46,6 @@
 <script>
     onDomLoad(function (e) {
         $('[data-toggle="tooltip"]').tooltip()
-        loadParceldata()
         var form = document.getElementById('erosion-settings-gui');
         form.addEventListener('form:loaded', function () {
             $('.div_checkbox').hide()
@@ -67,43 +66,71 @@
                 "P": 1,
                 "Total Effective Erosion Rate": 3.30E-03
             }
-            let loadedData = $('#mapid').data('loadedParcels')
+
+            setTimeout( function () { // remove this
+            let loadedData = $('#root').data('loadedParcels')
             let data1 = []
             let data2 = []
             let data3 = []
             if (loadedData && loadedData.success) {
                  loadedData['scenario'].forEach(function(e,i) {
+                     let a_param = default_data["a"]
+                     let area_in_sq_mile = (e.area/1E6).toFixed(2) / 2.58998811
+                     if (area_in_sq_mile <= 0.1) {
+                         a_param = 2.1
+                     } else if (area_in_sq_mile > 0.1 && area_in_sq_mile <= 1) {
+                         a_param = 1.9
+                     } else if (area_in_sq_mile > 1 && area_in_sq_mile <= 10) {
+                         a_param = 1.4
+                     } else if (area_in_sq_mile > 10 && area_in_sq_mile <= 100) {
+                         a_param = 1.2
+                     } else {
+                         a_param = 0.6
+                     }
+                     let C_factor = default_data["C"]
+                     if (e.landUse === "Agriculture (General)" || e.landUse === "Tilled Soil") {
+                         C_factor = 0.5
+                     } else if (e.landUse === "Soil") {
+                         C_factor = 1.0
+                     } else if (e.landUse === "impervious") {
+                         C_factor = 0
+                     } else {
+                         C_factor = 0.1
+                     }
                      data1.push({
+                         "parcelid": e.id,
                          "Surface Parcel": e.name,
                          "Area": (e.area/1E6).toFixed(2),
-                         "Land Cover": default_data["Land Cover"],
-                         "Total Effective Erosion Rate": new Intl.NumberFormat('en-US', {notation: "scientific"}).format(default_data["Total Effective Erosion Rate"])
+                         "Land Cover": e.landUse,
+                         "Total Effective Erosion Rate": new Intl.NumberFormat('en-US', {notation: "scientific"}).format(e.totalErosionRate)
                      });
                      data2.push({
+                         "parcelid": e.id,
                          "Surface Parcel": e.name,
                          "Area": (e.area/1E6).toFixed(2),
-                         "Land Cover": default_data["Land Cover"],
+                         "Land Cover": e.landUse,
                          "A": new Intl.NumberFormat('en-US', {notation: "scientific"}).format(default_data["A"]),
-                         "a": default_data["a"],
+                         "a": a_param,
                          "b": default_data["b"],
-                         "SD": this.a * (e.area)**(-this.b),
+                         "SD": a_param * (e.area)**(-default_data["b"]),
                          "Total Effective Erosion Rate": new Intl.NumberFormat('en-US', {notation: "scientific"}).format(this.A * this.SD)
                      })
                      data3.push({
+                         "parcelid": e.id,
                          "Surface Parcel": e.name,
                          "Area": (e.area/1E6).toFixed(2),
-                         "Land Cover": default_data["Land Cover"],
+                         "Land Cover": e.landUse,
                          "R": default_data["R"],
                          "K": default_data["K"],
                          "S": default_data["S"],
                          "L": default_data["L"],
-                         "LS": this.L * this.S,
-                         "C": default_data["C"],
+                         "LS": default_data["L"] * default_data["S"],
+                         "C": C_factor,
                          "P": default_data["P"],
                          "A": new Intl.NumberFormat('en-US', {notation: "scientific"}).format(default_data["A"]),
-                         "a": default_data["a"],
+                         "a": a_param,
                          "b": default_data["b"],
-                         "SD": this.a * (e.area)**(-this.b),
+                         "SD": a_param * (e.area)**(-default_data["b"]),
                          "Total Effective Erosion Rate": new Intl.NumberFormat('en-US', {notation: "scientific"}).format(this.R * this.K * this.LS * this.C * this.P)
                      })
                  })
@@ -172,7 +199,21 @@
                             "data": "Total Effective Erosion Rate",
                             "className":"td_ER",
                             "render": function (data, type, row, meta) {
-                                return "<input class='editableCell form-control form-control-sm' type='text' value='" +
+                                let parcel_info = [{
+                                    'type': 'data',
+                                    'name': 'id',
+                                    'value': row.parcelid,
+                                },{
+                                    'type': 'data',
+                                    'name': 'field',
+                                    'value': 'totalErosionRate'
+                                }, {
+                                    'type': 'input',
+                                    'name': 'totalErosionRate',
+                                    'value': data
+                                }]
+                                parcel_info = JSON.stringify(parcel_info)
+                                return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +
                                     data +
                                     "' style='display:none'>" +
                                     "<label class='editableCell'>" + data + "</label>"
@@ -241,7 +282,7 @@
                             "className":"td_ER",
                             "render": function (data, type, row, meta) {
                                 return "<input data-toggle='tooltip' data-placement='top' data-html='true' title='ER = A * SD' class='editableCell form-control form-control-sm erosion_inp_opt2 inp_ER' type='text' value='" +
-                                    calculate_ER_ASD(row) +
+                                    calculate_ER_ASD(row, true) +
                                     "' style='display:none'>" +
                                     "<label class='editableCell lb_ER'>" + calculate_ER_ASD(row,true) + "</label>"
                             }
@@ -282,9 +323,9 @@
                             "data": "K",
                             "render": function (data, type, row, meta) {
                                 return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_K' type='text' value='" +
-                                    data +
+                                    new Intl.NumberFormat('en-US', {notation: "scientific"}).format(data) +
                                     "' style='display:none'>" +
-                                    "<label class='editableCell lb_K'>" + data + "</label>"
+                                    "<label class='editableCell lb_K'>" + new Intl.NumberFormat('en-US', {notation: "scientific"}).format(data) + "</label>"
                             }
                         },
                         {
@@ -292,9 +333,9 @@
                             "className":"td_LS",
                             "render": function (data, type, row, meta) {
                                 return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_S' type='text' value='" +
-                                    data +
+                                    data.toFixed(2) +
                                     "' style='display:none'>" +
-                                    "<label class='editableCell lb_S'>" + data + "</label>"
+                                    "<label class='editableCell lb_S'>" + data.toFixed(2) + "</label>"
                             }
                         },
                         {
@@ -302,9 +343,9 @@
                             "className":"td_LS",
                             "render": function (data, type, row, meta) {
                                 return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_L' type='text' value='" +
-                                    data +
+                                    data.toFixed(2) +
                                     "' style='display:none'>" +
-                                    "<label class='editableCell lb_L'>" + data + "</label>"
+                                    "<label class='editableCell lb_L'>" + data.toFixed(2) + "</label>"
                             }
                         },
                         {
@@ -380,7 +421,7 @@
                             "className":"td_ER",
                             "render": function (data, type, row, meta) {
                                 return "<input data-toggle='tooltip' data-placement='top' data-html='true' title='ER = R*K*LS*C*P\n or\nER = A * SD' class='editableCell form-control form-control-sm erosion_inp_opt3 inp_ER' type='text' value='" +
-                                    calculate_ER_USLE(row) +
+                                    calculate_ER_USLE(row, true) +
                                     "' style='display:none'>" +
                                     "<label class='editableCell lb_ER'>" + calculate_ER_USLE(row, true) + "</label>"
                             }
@@ -393,7 +434,29 @@
                         $(rows).each((i,row)=>update_cell_format(row,["label.lb_A","label.lb_a","label.lb_b","label.lb_SD"],true))
                     }
                 });
-
+            $('label.editableCell').click(function () {
+                $(this).prev("input").show()
+                $(this).prev("input").focus()
+                $(this).hide();
+            })
+            $('input.editableCell').focusout(function () {
+                const data = $(this).val()
+                $(this).hide()
+                $(this).next("label").show().text(data)
+                let parcel_info = $(this).data('parcelinfo')
+                if (parcel_info) {
+                    parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
+                    TRIM.api.updateParcel(parcel_info)
+                }
+            })
+            $('input.erosion_inp_opt2,input.erosion_inp_opt3').change(function () {
+                const cls = $(this).attr('class').split(' ')
+                const row = $(this).parents('tr')
+                // reset decorations
+                update_cell_calc(row,cls)
+            })
+            },2000) // remove this
+            let field_name_dd = $("select[id*='field_name_']").filter((i,e)=>$(e).attr("id").startsWith("erosion_inputs"))
             /* const tables = ['#tableDiv_opt1', '#tableDiv_opt2', '#tableDiv_opt3'];
             $(have_file_cb).each(function (i, el) {
                 this_opt = el.id.split("_")[2]
@@ -462,29 +525,12 @@
                                     $(this_row_datacell).data("thisrow", new_row_data)
                                     update_cell_calc(this_row,cls)
                                 }
-
                             }
                         })
                     }
                 })
             })
 
-            $('label.editableCell').click(function () {
-                $(this).prev("input").show()
-                $(this).prev("input").focus()
-                $(this).hide();
-            })
-            $('input.editableCell').focusout(function () {
-                const data = $(this).val()
-                $(this).hide()
-                $(this).next("label").show().text(data)
-            })
-            $('input.erosion_inp_opt2,input.erosion_inp_opt3').change(function () {
-                const cls = $(this).attr('class').split(' ')
-                const row = $(this).parents('tr')
-                // reset decorations
-                update_cell_calc(row,cls)
-            })
         });
 
         function get_Data_from_table(thisTableID){
@@ -621,7 +667,7 @@
         }
 
         function calculate_SD(row) {
-            let SD = new Intl.NumberFormat('en-US', {notation: "scientific"}).format(row.a * (row.Area ** (-1 * row.b)))
+            let SD = new Intl.NumberFormat('en-US', {notation: "scientific"}).format(row.a * ((row.Area * 1E6) ** (-1 * row.b)))
             return SD
         }
 
@@ -637,6 +683,22 @@
             } else {
                 ER = new Intl.NumberFormat('en-US', {notation: "scientific"}).format(row.A * row.SD)
             }
+            let parcel_info = [{
+                'type': 'data',
+                'name': 'id',
+                'value': row.parcelid,
+            },{
+                'type': 'data',
+                'name': 'field',
+                'value': 'totalErosionRate'
+            }, {
+                'type': 'input',
+                'name': 'totalErosionRate',
+                'value': ER
+            }]
+            if (!firstLoad) {
+                TRIM.api.updateParcel(parcel_info)
+            }
             return ER
         }
 
@@ -647,13 +709,23 @@
             } else {
                 ER = new Intl.NumberFormat('en-US', {notation: "scientific"}).format(row.R * row.K * row.LS * row.C * row.P)
             }
+            let parcel_info = [{
+                'type': 'data',
+                'name': 'id',
+                'value': row.parcelid,
+            },{
+                'type': 'data',
+                'name': 'field',
+                'value': 'totalErosionRate'
+            }, {
+                'type': 'input',
+                'name': 'totalErosionRate',
+                'value': ER
+            }]
+            if (!firstLoad) {
+                TRIM.api.updateParcel(parcel_info)
+            }
             return ER
-        }
-
-        function loadParceldata() {
-                TRIM.api.getParcels().on('load', function() {
-                     $('#erosion_input_options').data('loadedParcels',JSON.parse(this.responseText));
-                })
         }
 
         function enableFieldUpdates() {
@@ -745,12 +817,12 @@
                                 let cls_L = $(this_cell_L).find('input.editableCell').attr('class')
                                 if (cls_K && cls_S && cls_L ) {
                                     let this_parcel_data = JSON.parse(soil_data[parcel])
-                                    $(this_cell_K).find('label.editableCell').text(this_parcel_data.kwfact["0"])
-                                    $(this_cell_K).find('input.editableCell').val(this_parcel_data.kwfact["0"])
-                                    $(this_cell_S).find('label.editableCell').text(this_parcel_data.slope_r["0"])
-                                    $(this_cell_S).find('input.editableCell').val(this_parcel_data.slope_r["0"])
-                                    $(this_cell_L).find('label.editableCell').text(this_parcel_data.slopelenusle_r["0"])
-                                    $(this_cell_L).find('input.editableCell').val(this_parcel_data.slopelenusle_r["0"])
+                                    $(this_cell_K).find('label.editableCell').text(new Intl.NumberFormat('en-US', {notation: "scientific"}).format(this_parcel_data.kwfact["0"]))
+                                    $(this_cell_K).find('input.editableCell').val(new Intl.NumberFormat('en-US', {notation: "scientific"}).format(this_parcel_data.kwfact["0"]))
+                                    $(this_cell_S).find('label.editableCell').text(this_parcel_data.slope_r["0"].toFixed(2))
+                                    $(this_cell_S).find('input.editableCell').val(this_parcel_data.slope_r["0"].toFixed(2))
+                                    $(this_cell_L).find('label.editableCell').text(this_parcel_data.slopelenusle_r["0"].toFixed(2))
+                                    $(this_cell_L).find('input.editableCell').val(this_parcel_data.slopelenusle_r["0"].toFixed(2))
                                     // Update row data in the data field of the parcel name label element
                                     this_row_datacell = $(this_row).find("label.lb_parcel")
                                     new_table_data = get_Data_from_table(this_opt_table_id)

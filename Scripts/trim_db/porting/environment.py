@@ -191,7 +191,9 @@ def parse_volume_elements(scenario, vol_file):
             name=line[0], scenario_id=scenario.id,
             no_commit=True
         )
-        p.vertices = [points[pid] for pid in line[2:]]
+        vertices_coord = transform_coordinates_to_decimal([points[pid] for pid in line[2:]])
+        # p.vertices = [points[pid] for pid in line[2:]]
+        p.vertices = vertices_coord
         ParcelService.commit()
 
     for line in parsed_lines['volume_elements']:
@@ -270,3 +272,4 @@ def parse_compartments(scenario, comp_file):
             create_compartment(c_name, ve, no_commit=True)
 
     CompartmentService.commit()
+

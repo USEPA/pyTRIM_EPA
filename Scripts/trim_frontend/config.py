@@ -71,6 +71,7 @@ class TestConfig(DevConfig):
     BCRYPT_LOG_ROUNDS = 4
     MAIL_SUPPRESS_SEND = True
     SQLALCHEMY_DATABASE_URI = f'sqlite:///{app_folder}/test.db'
+    # SQLALCHEMY_DATABASE_URI = f'sqlite:///{root}/database.db'
 
     # Security config
     SECURITY_CONFIRMABLE = False

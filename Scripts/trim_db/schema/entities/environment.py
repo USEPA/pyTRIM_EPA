@@ -84,6 +84,57 @@ class Parcel(Model):
                 return x
         return None
 
+    @property
+    def has_air(self):
+        for ve in self.volume_elements:
+            if ve.name == "Air":
+                return "Yes"
+        return "No"
+
+    @property
+    def land_use(self):
+        for c in self.compartments:
+            if c.media.isa('Surface_Water'):
+                return 'Water'
+            if c.media.isa('Coniferous_Forest'):
+                return 'Coniferous Forest'
+            if c.media.isa('Deciduous_Forest'):
+                return 'Deciduous Forest'
+            if c.media.isa('Agriculture'):
+                return 'Agriculture - General'
+            if c.media.isa('Grass'):
+                return 'Grasses/Herbs'
+            if c.media.isa('Tilled_Soil'):
+                return 'Tilled Soil'
+            if c.media.isa('Untilled_Soil'):
+                return 'Untilled Soil'
+        return 'Impervious'
+
+    @property
+    def has_farm_food_chain(self):
+        if self.get_compartment("Farm"):
+            return "Yes"
+        return "No"
+
+    @property
+    def has_fish_food_web(self):
+        if self.get_compartment("Fish"):
+            return "Yes"
+        return "No"
+
+    @property
+    def has_wetland(self):
+        if self.get_compartment("Wetland"):
+            return "Yes"
+        return "No"
+
+    @property
+    def total_erosion_rate(self):
+        for c in self.compartments:
+            if c.media.isa('Surface_Soil'):
+                return c.parameters.get('TotalErosionRate').value
+        return None
+
     # Each parcel should have a unique name in its scenario
     __table_args__ = (
         sa.UniqueConstraint('scenario_id', 'name'),
@@ -95,8 +146,33 @@ class Parcel(Model):
             'name': self.name,
             'description': self.description,
             'vertices': self.vertices,
-            'area': self.area
+            'area': self.area,
+            'hasAir': self.has_air,
+            'landUse': self.land_use,
+            'hasFarmFoodChain': self.has_farm_food_chain,
+            'hasFishFoodWeb': self.has_fish_food_web,
+            'hasWetland': self.has_wetland,
+            'totalErosionRate': self.total_erosion_rate
         }
+
+    def calc_default_erosion_rate_sdr(self):
+        for c in self.compartments:
+            if c.name == "Soil_Surface":
+                unit_soil_loss = c.parameters["UnitSoilLoss"].default_value
+                area_in_sq_mile = (self.area / 1E6) / 2.58998811
+                if area_in_sq_mile <= 0.1:
+                    intercept_coef = 2.1
+                elif 0.1 < area_in_sq_mile <= 1:
+                    intercept_coef = 1.9
+                elif 1 < area_in_sq_mile <= 10:
+                    intercept_coef = 1.4
+                elif 10 < area_in_sq_mile <= 100:
+                    intercept_coef = 1.2
+                else:
+                    intercept_coef = 0.6
+                slope_coef = c.parameters["SedimentDeliveryRatioSlopeCoef"].default_value
+                sed_delivery_ratio = intercept_coef * (self.area ** (-1 * slope_coef))
+                return unit_soil_loss * sed_delivery_ratio
 
     def __repr__(self):
         return (
