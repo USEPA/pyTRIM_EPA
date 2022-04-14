@@ -1,5 +1,5 @@
 import argparse
-from .trim_frontend import create_app
+from trim_frontend import create_app
 
 application = create_app()
 
