@@ -137,6 +137,8 @@ def link_check (comp_objects_dict,comp1_name,comp2_name,dict_inputs,chem_list_cl
                 cond1=False
             if ('leaf' in comp1.name or 'particle' in comp1.name) and 'soil_surface' in comp2.name and  (comp1.name.split('_')[-1]!=comp2.name.split('_')[-1]): # leaf components should connect only to underlying surface soil parcels not neighboring air parcels. This may be too restrictive -- replace with is above approach
                 cond1=False
+            if ('leaf' in comp1.name or 'particle' in comp1.name or 'stem' in comp1.name or 'root' in comp1.name) and ('leaf' in comp2.name or 'particle' in comp2.name or 'stem' in comp2.name or 'root' in comp2.name) and  (comp1.name.split('_')[-1]!=comp2.name.split('_')[-1]): # leaf components should not connect to leaf components in neighboring air parcels. This may be too restrictive -- replace with is above approach
+                cond1=False
 
 
     ### make list of applicable algorithms based on conditions 1 and 2 
@@ -339,6 +341,13 @@ def create_trans_mat(inputs,dict_inputs): # function to create transition matrix
 
 # row_index=36 # elemental n1 surface soil
 # col_index=37 # elemental n1 root soil
+# comp_row=comp_list[row_index]
+# comp_col=comp_list[col_index]
+# comp1_name=comp_row
+# comp2_name=comp_col 
+
+# row_index=205 # elemental wet vapor n1
+# col_index=118 # elemental n1 leaf
 # comp_row=comp_list[row_index]
 # comp_col=comp_list[col_index]
 # comp1_name=comp_row
