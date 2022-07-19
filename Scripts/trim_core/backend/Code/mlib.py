@@ -545,11 +545,23 @@ def linkedCompartmentvalue(containingvolumeelement,comp_objects_dict,primary_abi
                             'def '+prop+'(self,value):'+'\n\t\t' +\
                             'self._'+prop+'=value\n')             
                             
+                    # if (prop in bool_props): 
+                    #     f.write('\n\t'+\
+                    #             '@property'+'\n\t' +\
+                    #             'def '+prop+'(self):'+'\n\t\t' +\
+                    #             'return ('+prop_val+')\n\t')                 
+
                     if (prop in bool_props): 
                         f.write('\n\t'+\
-                                '@property'+'\n\t' +\
-                                'def '+prop+'(self):'+'\n\t\t' +\
-                                'return ('+prop_val+')\n\t')                 
+                            '_'+prop+'='+prop_val +'\n\t' +\
+                            '@property'+'\n\t' +\
+                            'def '+prop+'(self):'+'\n\t\t' +\
+                            'return self._'+prop+'\n\t'+\
+                            '@'+prop+'.setter''\n\t' +\
+                            'def '+prop+'(self,value):'+'\n\t\t' +\
+                            'self._'+prop+'=value\n')             
+
+                        
 
                     if (prop in non_formula_props): 
                         if type(prop_val)==float:

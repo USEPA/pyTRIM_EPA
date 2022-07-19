@@ -147,7 +147,8 @@ def process_met(inputs): ## one time process all met weighted averages
    ### need to clean up messy met file to get reasonable averages. This shouldnt be required with a quality met file.             
 
     met_dict={}
-    metcol_dict={'rain':(0,1),'airtemperature':(200,373),'horizontalwindspeed':(0,12),'winddirection':(0,360),'mixingheight':(0,1000),'isday':(0,1),'cumulativerain':(0,1.6)} # k, v represent name and min-max
+    # metcol_dict={'rain':(0,1),'airtemperature':(200,373),'horizontalwindspeed':(0,12),'winddirection':(0,360),'mixingheight':(0,1000),'isday':(0,1),'cumulativerain':(0,1.6)} # k, v represent name and min-max
+    metcol_dict={'rain':(0,1),'airtemperature':(200,373),'horizontalwindspeed':(0,100),'winddirection':(-360,360),'mixingheight':(0,1000),'isday':(0,1),'cumulativerain':(0,1.6)} # k, v represent name and min-max
     
     for k,v in metcol_dict.items():
         df2=df
