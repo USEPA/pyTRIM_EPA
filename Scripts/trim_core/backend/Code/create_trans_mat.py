@@ -352,3 +352,24 @@ def create_trans_mat(inputs,dict_inputs): # function to create transition matrix
 # comp_col=comp_list[col_index]
 # comp1_name=comp_row
 # comp2_name=comp_col 
+
+# row_index=216 # elemental dry vapor e1
+# col_index=110 # elemental e1 leaf
+# comp_row=comp_list[row_index]
+# comp_col=comp_list[col_index]
+# comp1_name=comp_row
+# comp2_name=comp_col 
+
+# row_index=216 # elemental dry vapor e1
+# col_index=24 # elemental e1 surf soil
+# comp_row=comp_list[row_index]
+# comp_col=comp_list[col_index]
+# comp1_name=comp_row
+# comp2_name=comp_col 
+
+# row_index=241 # elemental wet particle source e1
+# col_index=111 # elemental e1 leaf particle
+# comp_row=comp_list[row_index]
+# comp_col=comp_list[col_index]
+# comp1_name=comp_row
+# comp2_name=comp_col 

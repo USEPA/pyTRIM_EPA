@@ -115,8 +115,15 @@ def process_master_library(inputs):
 
         if 'sendingvolumeelementsumof[terrestrial plant | leaf]'in prop:
             prop=prop.replace('sendingvolumeelementsumof[terrestrial plant | leaf].','self.sendingcompartment.associated_leaf_comp.')
+        
 
+        if 'self.sendingcompartment.allowexchange_forother' in prop and '1-self.dict_inputs["met_dict"]["frac_time_rain"]' in prop: # to address interaction between exchange and rain
+            prop=prop.replace('self.sendingcompartment.allowexchange_forother','1')
+            prop=prop.replace('1-self.dict_inputs["met_dict"]["frac_time_rain"]','self.dict_inputs["met_dict"]["frac_time_exchange_no_rain"]')
 
+        if 'self.sendingcompartment.allowexchange_forother' in prop and 'self.dict_inputs["met_dict"]["frac_time_rain"]' in prop: # to address interaction between exchange and rain
+            prop=prop.replace('self.sendingcompartment.allowexchange_forother','1')
+            prop=prop.replace('self.dict_inputs["met_dict"]["frac_time_rain"]','self.dict_inputs["met_dict"]["frac_time_exchange_rain"]')
 
         return (prop)
    
@@ -530,6 +537,10 @@ def linkedCompartmentvalue(containingvolumeelement,comp_objects_dict,primary_abi
                         pass
                     if prop=="sedimentresuspensionvelocity": # temp hack to deal with sediment resuspension issue 
                         prop_val="9.64763202734353e-05"
+
+                    if prop=="calculatewetdepinterceptionfraction": # temp hack to deal with CalculateWetDepInterceptionFraction (false in library but read in as true in Foundries run) 
+                        prop_val="False"
+
                         
 #                    if type(prop_val)==float or is_number(prop_val):
 #                        if isnan(prop_val):
