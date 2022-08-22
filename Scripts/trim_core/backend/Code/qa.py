@@ -97,7 +97,7 @@ for var in pyvars[1:]: # loop over py variables and find ratio of corresponding 
         py_val=df_py[var].loc['mean']
         
         if leg_val==py_val: # to catch 0/0
-            ratio=1
+            ratio=1       
         else:
             ratio=py_val/leg_val
             ratio=round(ratio,2)
