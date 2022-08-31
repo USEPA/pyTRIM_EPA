@@ -9,7 +9,7 @@ trim.fate backend runner script
 import os
 import time
 
-import convert_lc,mlib,plib,vol_elem,comp,prop,dep_rates,solve_ode # import supporting modules to process inputs and auto generate code to define objects
+import convert_lc,mlib,plib,vol_elem,comp,prop,dep_rates,solve_ode,gen_conc # import supporting modules to process inputs and auto generate code to define objects
 from util_functions import process_met
 
 runner_full_path = os.path.realpath(__file__) # full path to this runner script
@@ -66,10 +66,12 @@ if __name__=='__main__':
     dict_inputs=read_inputs_write_classes(inputs) # call function to read inputs and auto generate code to define objects    
     import create_trans_mat # need to import here because supporting modules are not defined until this point 
     tm_start=time.time()
-    tm,sm,df_tm,df_sm=create_trans_mat.create_trans_mat(inputs,dict_inputs) # call function to generate transition matrix and sources matrix   
+    tm,sm,vmu,df_tm,df_sm,df_vmu=create_trans_mat.create_trans_mat(inputs,dict_inputs) # call function to generate transition matrix, sources, volume-mass-concentration_units matrix   
     ode_start=time.time()
     nt,df_nt=solve_ode.ode_sim(tm,df_tm,sm,df_sm)
     ode_end=time.time()
+    df_conc=gen_conc.compute_conc(nt,df_nt,vmu,df_vmu) # compute concentrations time series 
+    conc_end=time.time()
     ### output results (temp)
     ofpn=os.path.join(path_output,'results.csv')
     df_nt.to_csv(ofpn,index=False)
@@ -77,6 +79,8 @@ if __name__=='__main__':
     df_tm.to_csv(ofpn,index=True)
     ofpn=os.path.join(path_output,'sm.csv')
     df_sm.to_csv(ofpn,index=True)
+    ofpn=os.path.join(path_output,'results_conc.csv')
+    df_conc.to_csv(ofpn,index=False) 
     output_end=time.time()
     analysis_time=round((time.time()-start),2)
     print ('time to run analysis in seconds = ',analysis_time)
@@ -84,6 +88,7 @@ if __name__=='__main__':
     print ('% time to create tm = ',round(100*(ode_start-tm_start)/analysis_time,2),'%')    
     print ('time to create tm = ',round((ode_start-tm_start),2),' seconds')  
     print ('% time to run odes = ',round(100*(ode_end-ode_start)/analysis_time,2),'%')
-    print ('% time to write output = ',round(100*(output_end-ode_end)/analysis_time,2),'%')    
+    print ('% time to calculate concentrations = ',round(100*(conc_end-ode_end)/analysis_time,2),'%')
+    print ('% time to write output = ',round(100*(output_end-conc_end)/analysis_time,2),'%')    
 
     

@@ -21,18 +21,9 @@ path_output=os.path.abspath(os.path.join(path_code,'..','output')) # output dire
 
 cross_walk={'DiHg':'divalent_mercury','ElHg':'elemental_mercury','MeHg':'methylmercury'} # key is sheetname, value is corresponding chemical name in pytrim
 
-#leg_fp=r'C:\Users\13963\Documents\RTR\PyTRIM\output\LegacyRun_Results.xlsx' # legacy annual mass results text file read in and saved from excel. First 4 lines to be skipped.
-#leg_fp=r'C:\Users\13963\Documents\RTR\PyTRIM\output\LegacyRun_Results_NoLakeErosionRunoff.xlsx' # legacy annual mass results text file read in and saved from excel. First 4 lines to be skipped.
-#leg_fp=r'C:\Users\13963\OneDrive - ICF\Documents\RTR\PyTRIM\output\LegacyRun_Results_NoLakeErosionRunoff.xlsx' # legacy annual mass results text file read in and saved from excel. First 4 lines to be skipped.
+leg_fp=os.path.join(path_output, 'LegacyRun_Results_Conc.xlsx') # legacy annual conc results text file read in and saved from excel. First 4 lines to be skipped.
 
-leg_fp=os.path.join(path_output, 'LegacyRun_Results.xlsx') # legacy annual mass results text file read in and saved from excel. First 4 lines to be skipped.
-# leg_fp=os.path.join(path_output, 'LegacyRun_Results_NoLakeErosionRunoff.xlsx') # legacy annual mass results text file read in and saved from excel. First 4 lines to be skipped.
-
-
-#pytrim_fp=r'C:\Users\13963\Documents\RTR\PyTRIM\output\results.csv' # pytrim results
-#pytrim_fp=r'C:\Users\13963\OneDrive - ICF\Documents\RTR\PyTRIM\output\results.csv' # pytrim results
-
-pytrim_fp=os.path.join(path_output, 'results.csv') # path to pytrim results
+pytrim_fp=os.path.join(path_output, 'results_conc.csv') # path to pytrim results
 
 ### read legacy results
 
@@ -105,7 +96,10 @@ for var in pyvars[1:]: # loop over py variables and find ratio of corresponding 
                 ratio=1
         tup=(var_name,ratio)
         op_dic[chem_name].append(tup)
-        
+        # if "leaf" in var:
+        #     print (py_val, leg_val, py_val/leg_val)
+        if "stem" in var:
+            print (py_val, leg_val, py_val/leg_val)
 for k,v in op_dic.items():
     op_dic[k]=pd.DataFrame(v,columns=['Compartment','Ratio'])
  
@@ -114,7 +108,7 @@ for k,v in op_dic.items():
 ofp=r'C:\Users\13963\OneDrive - ICF\Documents\RTR\PyTRIM\output'
 # ofp=r'C:\Users\13963\Desktop'
 
-ofn=r"PyTRIM_Results_Comparison_Mass.xlsx"
+ofn=r"PyTRIM_Results_Comparison_Conc.xlsx"
 # ofn=r"PyTRIM_Results_Comparison_NoLakeErosionRunoff.xlsx"
 
 ofpn=os.path.join(path_output,ofn)

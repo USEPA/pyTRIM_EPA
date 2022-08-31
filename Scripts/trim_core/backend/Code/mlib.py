@@ -412,15 +412,17 @@ from define_attributes_props import *
 
         if 'organiccarboncontent' in prop:
             prop=prop.replace('organiccarboncontent','organiccarboncontent')
-            
 
-        if 'self.volume *' in prop:
-            prop=prop.replace('self.volume *','self.containingvolumeelement.volume *')
-        if 'self.volume*' in prop:
-            prop=prop.replace('self.volume*','self.containingvolumeelement.volume*')
 
-        if 'self.height' in prop:
-            prop=prop.replace('self.height','self.containingvolumeelement.height')
+### 083022 Testing commenting out these because some self.height and self.volume may be calculated differently from parent volume abiotic element. e.g. stem. not sure of impacts on others.            
+
+        # if 'self.volume *' in prop:
+        #     prop=prop.replace('self.volume *','self.containingvolumeelement.volume *')
+        # if 'self.volume*' in prop:
+        #     prop=prop.replace('self.volume*','self.containingvolumeelement.volume*')
+
+        # if 'self.height' in prop:
+        #     prop=prop.replace('self.height','self.containingvolumeelement.height')
 
     
         return (prop)
