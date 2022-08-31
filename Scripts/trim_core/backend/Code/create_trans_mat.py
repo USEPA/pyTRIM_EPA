@@ -172,6 +172,9 @@ def link_check (comp_objects_dict,comp1_name,comp2_name,dict_inputs,chem_list_cl
         if 'particle' in comp1.category and 'particle' in comp2.category: # to cover cases where comp1 category is terrestrial plant | leaf particle| something and comp2 category is terrestrial plant | leaf | something
             df_app2=df_alg_mat.loc[(df_alg_mat['sendingcompartmentcategory']=="terrestrial plant | leaf particle") &(df_alg_mat['receivingcompartmentcategory']=="terrestrial plant | leaf particle") & (df_alg_mat['enabled']=='True')]
             df_app=df_app.append(df_app2) 
+        if 'terrestrial plant | stem | stem - grasses/herbs' in comp1.category and 'terrestrial plant | stem | stem - grasses/herbs' in comp2.category: # to cover cases where comp1 category is 'terrestrial plant | stem | stem - grasses/herbs' and comp2 category is 'terrestrial plant | stem | stem - grasses/herbs'
+            df_app2=df_alg_mat.loc[(df_alg_mat['sendingcompartmentcategory']=="terrestrial plant | stem") &(df_alg_mat['receivingcompartmentcategory']=="terrestrial plant | stem") & (df_alg_mat['enabled']=='True')]
+            df_app=df_app.append(df_app2) 
 
 
 
@@ -220,6 +223,9 @@ def link_check (comp_objects_dict,comp1_name,comp2_name,dict_inputs,chem_list_cl
             
             algs_chem3=list(df_app.loc[df_app['chemical_category']==currentchemical.category]['index']) #   filter on the whole category e.g. metals | mercury | elemental mercury  
             app_algs.append(algs_chem3)
+
+            # algs_chem4=list(df_app.loc[df_app['chemical_category']==' | '.join(currentchemical.category.split(' | ')[0:2])]['index']) # new -- introduced to accommodate case where chemical category in df_app is like metals | mercury and current chemical category is like 'metals | mercury | divalent mercury -- in case of root to stem connection
+            # app_algs.append(algs_chem4)
             
             app_algs=[y for x in app_algs for y in x] # flatten list
             app_algs=list(set(app_algs)) # unique algorithm list in case of double counts
@@ -240,7 +246,7 @@ def link_check (comp_objects_dict,comp1_name,comp2_name,dict_inputs,chem_list_cl
     else:
         return(False, app_algs)        
 
-        
+            
 
 def create_trans_mat(inputs,dict_inputs): # function to create transition matrix
     chem_list=inputs['simulation_chemicals'] # simulation chemicals
@@ -251,6 +257,7 @@ def create_trans_mat(inputs,dict_inputs): # function to create transition matrix
     mat_dim= ncomp*nchem # number of rows or cols in the transition matrix
     tm=np.zeros((mat_dim,mat_dim), dtype=float) # create zero matrix     
     sm=np.zeros(mat_dim,dtype=float) # create zero sources matrix
+    vmu=[] # list of compartment volume mass and units
     df_alg_mat=dict_inputs['df_alg_mat']      # DataFrame of applicable algorithms for combination of sending and receiving compartment types
     df_psalg_mat=dict_inputs['df_psalg_mat']      # DataFrame of applicable algorithms for combination of sending and receiving compartment types
 
@@ -268,7 +275,40 @@ def create_trans_mat(inputs,dict_inputs): # function to create transition matrix
             if hasattr(comp_objects_dict[comp_row], 'deposition_rate'): # if sending compartment has deposition rate
                 if currentchemical.name in comp_objects_dict[comp_row].deposition_rate.keys(): # if there is deposition of the current chemical:
                     sm[int(chem_index*ncomp+row_index)]=sm[int(chem_index*ncomp+row_index)]+comp_objects_dict[comp_row].deposition_rate[currentchemical.name] # add depostion rate
+            if hasattr(comp_objects_dict[comp_row], 'volume'): # if sending compartment has volume (m3)
+                vol=comp_objects_dict[comp_row].volume
+            else:
+                vol=np.nan
+            if hasattr(comp_objects_dict[comp_row], 'totalmass'): # if sending compartment has mass (kg)
+                mass=comp_objects_dict[comp_row].totalmass
+            else:
+                mass=np.nan                
+            if hasattr(comp_objects_dict[comp_row], 'concentrationoutputunits'): # if sending compartment has concentration output units 
+                cou=comp_objects_dict[comp_row].concentrationoutputunits
+            else:
+                cou=""
+            if hasattr(comp_objects_dict[comp_row], 'concentrationoutputfactor'): # if sending compartment has concentration output factor
+                if type(comp_objects_dict[comp_row].concentrationoutputfactor)==dict: # if concentration output factor is a dict
+                    cof=comp_objects_dict[comp_row].concentrationoutputfactor[currentchemical.name]
+                else: # if cof not a dict
+                    cof=comp_objects_dict[comp_row].concentrationoutputfactor
+            else:
+                cof=np.nan
+            if hasattr(comp_objects_dict[comp_row], 'category'): # if sending compartment has concentration output factor
+                denom="mass" # default denom is mass
+                if "abiotic" in comp_objects_dict[comp_row].category: # if compartment is abiotic
+                    denom="volume" # denominator in concentration calculation must be volume
+                if "leaf" in comp_objects_dict[comp_row].category: # if compartment is leaf or leaf particle (inferred this based on concentration output factor)
+                    denom="volume" # denominator in concentration calculation must be volume
+                if "surface water" in comp_objects_dict[comp_row].category : # if compartment is surface water note that denom must be in L
+                    denom="volume_L" # denominator in concentration calculation must be volume
+                if "groundwater" in comp_objects_dict[comp_row].category : # if compartment is groundwater note that denom must be in L
+                    denom="volume_L" # denominator in concentration calculation must be volume
+            else:
+                denom=""
 
+            vmu_tup=(vol,mass,cou,cof,denom) # tuples of volume, mass, units, output factor, and denominator quantity                
+            vmu.append(vmu_tup) # append tuple to list
             for col_index, comp_col in enumerate (comp_list): # loop over columns (sending compartments)
                 link,app_algs=link_check(comp_objects_dict,comp_row,comp_col,dict_inputs,chem_list_clean,currentchemical) # call function to check if compartments are linked and if so what algorithms apply
                 if link: 
@@ -298,8 +338,9 @@ def create_trans_mat(inputs,dict_inputs): # function to create transition matrix
            
     df_tm=pd.DataFrame(tm,index=ind_name,columns=ind_name)
     df_sm=pd.DataFrame(sm,index=ind_name,columns=['deposition_rate_g_day-1'])
+    df_vmu=pd.DataFrame(vmu,index=ind_name,columns=['volume_m3','mass_kg','concentrationoutputunits','concentrationoutputfactor','denominator'])
               
-    return(tm,sm,df_tm,df_sm)
+    return(tm,sm,vmu,df_tm,df_sm,df_vmu)
 
 ## for qa only
      
@@ -369,6 +410,21 @@ def create_trans_mat(inputs,dict_inputs): # function to create transition matrix
 
 # row_index=241 # elemental wet particle source e1
 # col_index=111 # elemental e1 leaf particle
+# comp_row=comp_list[row_index]
+# comp_col=comp_list[col_index]
+# comp1_name=comp_row
+# comp2_name=comp_col 
+
+
+# row_index=25 # elemental e1 root zone soil
+# col_index=112 # elemental e1 stem
+# comp_row=comp_list[row_index]
+# comp_col=comp_list[col_index]
+# comp1_name=comp_row
+# comp2_name=comp_col 
+
+# row_index=112 # elemental e1 ot zone soil
+# col_index=112 # elemental e1 stem
 # comp_row=comp_list[row_index]
 # comp_col=comp_list[col_index]
 # comp1_name=comp_row
