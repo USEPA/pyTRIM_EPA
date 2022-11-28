@@ -1,0 +1,57 @@
+### note: this is an auto generated script
+                
+class volume_element:
+    def __init__(self,ve_name,parcel_name,primary_abiotic,bottom,top,point_ids,height,area,volume):
+        self.ve_name=ve_name
+        self.parcel_name=parcel_name
+        self.primary_abiotic=primary_abiotic
+        self.bottom=bottom
+        self.top=top
+        self.point_ids=point_ids
+        self.height=height
+        self.area=area
+        self.volume=volume
+dryvaporsource_s4=volume_element('dryvaporsource_s4','s4','dryvaporsource','-13.2','-5.2','p14 p16 p20 p18','800.0','2041140.0','1632912000.0')
+wetvaporsource_s4=volume_element('wetvaporsource_s4','s4','wetvaporsource','-21.2','-13.2','p14 p16 p20 p18','9200.0','2041140.0','18778488000.0')
+dryparticlesource_s1=volume_element('dryparticlesource_s1','s1','dryparticlesource','-13.2','-5.2','p4 p3 p8 p7','800.0','58445.62','46756496.0')
+wetparticlesource_s1=volume_element('wetparticlesource_s1','s1','wetparticlesource','-21.2','-13.2','p4 p3 p8 p7','800.0','58445.62','46756496.0')
+dryparticlesource_source=volume_element('dryparticlesource_source','source','dryparticlesource','-13.2','-5.2','p1 p2 p3 p4 p5','800.0','62500.0','50000000.0')
+dryvaporsource_source=volume_element('dryvaporsource_source','source','dryvaporsource','-21.2','-13.2','p1 p2 p3 p4 p5','800.0','62500.0','50000000.0')
+wetparticlesource_source=volume_element('wetparticlesource_source','source','wetparticlesource','-29.2','-21.2','p1 p2 p3 p4 p5','800.0','62500.0','50000000.0')
+wetvaporsource_source=volume_element('wetvaporsource_source','source','wetvaporsource','-37.2','-29.2','p1 p2 p3 p4 p5','800.0','62500.0','50000000.0')
+dryparticlesource_n1=volume_element('dryparticlesource_n1','n1','dryparticlesource','-13.2','-5.2','p5 p4 p7 p6','800.0','58445.62','46756496.0')
+wetparticlesource_n1=volume_element('wetparticlesource_n1','n1','wetparticlesource','-21.2','-13.2','p5 p4 p7 p6','800.0','58445.62','46756496.0')
+dryparticlesource_n7=volume_element('dryparticlesource_n7','n7','dryparticlesource','-13.2','-5.2','p25 p26 p10 p9','800.0','73291.5','58633200.0')
+wetparticlesource_n7=volume_element('wetparticlesource_n7','n7','wetparticlesource','-21.2','-13.2','p25 p26 p10 p9','800.0','73291.5','58633200.0')
+dryparticlesource_n3=volume_element('dryparticlesource_n3','n3','dryparticlesource','-13.2','-5.2','p9 p10 p14 p13','3.18','351265.0','1117022.7')
+wetparticlesource_n3=volume_element('wetparticlesource_n3','n3','wetparticlesource','-21.2','-13.2','p9 p10 p14 p13','0.05','351265.0','17563.25')
+dryvaporsource_s1=volume_element('dryvaporsource_s1','s1','dryvaporsource','-29.2','-21.2','p4 p3 p8 p7','0.01','58445.62','584.46')
+wetvaporsource_s1=volume_element('wetvaporsource_s1','s1','wetvaporsource','-37.2','-29.2','p4 p3 p8 p7','0.79','58445.62','46172.04')
+dryparticlesource_s5=volume_element('dryparticlesource_s5','s5','dryparticlesource','-13.2','-5.2','p18 p20 p24 p22','1.4','6693050.0','9370270.0')
+wetparticlesource_s5=volume_element('wetparticlesource_s5','s5','wetparticlesource','-21.2','-13.2','p18 p20 p24 p22','3.0','6693050.0','20079150.0')
+dryparticlesource_s4=volume_element('dryparticlesource_s4','s4','dryparticlesource','-29.2','-21.2','p14 p16 p20 p18','0.01','2041140.0','20411.4')
+wetparticlesource_s4=volume_element('wetparticlesource_s4','s4','wetparticlesource','-37.2','-29.2','p14 p16 p20 p18','0.79','2041140.0','1612500.6')
+dryvaporsource_s5=volume_element('dryvaporsource_s5','s5','dryvaporsource','-29.2','-21.2','p18 p20 p24 p22','1.4','6693050.0','9370270.0')
+wetvaporsource_s5=volume_element('wetvaporsource_s5','s5','wetvaporsource','-37.2','-29.2','p18 p20 p24 p22','3.0','6693050.0','20079150.0')
+dryvaporsource_n5=volume_element('dryvaporsource_n5','n5','dryvaporsource','-13.2','-5.2','p17 p18 p22 p21','0.2','6693050.0','1338610.0')
+wetvaporsource_n5=volume_element('wetvaporsource_n5','n5','wetvaporsource','-21.2','-13.2','p17 p18 p22 p21','0.6','6693050.0','4015830.0')
+dryvaporsource_n4=volume_element('dryvaporsource_n4','n4','dryvaporsource','-13.2','-5.2','p13 p14 p18 p17','1.4','2041140.0','2857596.0')
+wetvaporsource_n4=volume_element('wetvaporsource_n4','n4','wetvaporsource','-21.2','-13.2','p13 p14 p18 p17','3.0','2041140.0','6123420.0')
+dryvaporsource_n3=volume_element('dryvaporsource_n3','n3','dryvaporsource','-29.2','-21.2','p9 p10 p14 p13','0.01','351265.0','3512.65')
+wetvaporsource_n3=volume_element('wetvaporsource_n3','n3','wetvaporsource','-37.2','-29.2','p9 p10 p14 p13','0.79','351265.0','277499.35')
+dryvaporsource_n1=volume_element('dryvaporsource_n1','n1','dryvaporsource','-29.2','-21.2','p5 p4 p7 p6','1.4','58445.62','81823.87')
+wetvaporsource_n1=volume_element('wetvaporsource_n1','n1','wetvaporsource','-37.2','-29.2','p5 p4 p7 p6','3.0','58445.62','175336.86')
+dryvaporsource_n7=volume_element('dryvaporsource_n7','n7','dryvaporsource','-29.2','-21.2','p25 p26 p10 p9','0.01','73291.5','732.92')
+wetvaporsource_n7=volume_element('wetvaporsource_n7','n7','wetvaporsource','-37.2','-29.2','p25 p26 p10 p9','0.79','73291.5','57900.28')
+dryparticlesource_n4=volume_element('dryparticlesource_n4','n4','dryparticlesource','-29.2','-21.2','p13 p14 p18 p17','1.4','2041140.0','2857596.0')
+wetparticlesource_n4=volume_element('wetparticlesource_n4','n4','wetparticlesource','-37.2','-29.2','p13 p14 p18 p17','3.0','2041140.0','6123420.0')
+dryparticlesource_n5=volume_element('dryparticlesource_n5','n5','dryparticlesource','-29.2','-21.2','p17 p18 p22 p21','0.01','6693050.0','66930.5')
+wetparticlesource_n5=volume_element('wetparticlesource_n5','n5','wetparticlesource','-37.2','-29.2','p17 p18 p22 p21','0.79','6693050.0','5287509.5')
+dryparticlesource_n6=volume_element('dryparticlesource_n6','n6','dryparticlesource','-13.2','-5.2','p6 p7 p26 p25','1.4','40633.0','56886.2')
+dryvaporsource_n6=volume_element('dryvaporsource_n6','n6','dryvaporsource','-21.2','-13.2','p6 p7 p26 p25','3.0','40633.0','121899.0')
+wetparticlesource_n6=volume_element('wetparticlesource_n6','n6','wetparticlesource','-29.2','-21.2','p6 p7 p26 p25','0.01','40633.0','406.33')
+wetvaporsource_n6=volume_element('wetvaporsource_n6','n6','wetvaporsource','-37.2','-29.2','p6 p7 p26 p25','0.79','40633.0','32100.07')
+dryparticlesource_pond=volume_element('dryparticlesource_pond','pond','dryparticlesource','-11.23','-3.23','p7 p8 p16 p14','1.4','465187.5','651262.5')
+dryvaporsource_pond=volume_element('dryvaporsource_pond','pond','dryvaporsource','-19.23','-11.23','p7 p8 p16 p14','3.0','465187.5','1395562.5')
+wetparticlesource_pond=volume_element('wetparticlesource_pond','pond','wetparticlesource','-27.23','-19.23','p7 p8 p16 p14','0.01','465187.5','4651.88')
+wetvaporsource_pond=volume_element('wetvaporsource_pond','pond','wetvaporsource','-35.23','-27.23','p7 p8 p16 p14','0.79','465187.5','367498.12')
