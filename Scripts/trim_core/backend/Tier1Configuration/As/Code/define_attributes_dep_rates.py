@@ -1,0 +1,1057 @@
+### note: this is an auto generated script
+try:
+	dryparticlesource_in_dryparticlesource_source.emission_rate['chem_benzo_a_pyrene']=1e-11*dryparticlesource_in_dryparticlesource_source.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_source.emission_rate['chem_arsenic']=1e-11*dryparticlesource_in_dryparticlesource_source.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_source.emission_rate['chem_cadmium']=1e-11*dryparticlesource_in_dryparticlesource_source.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_source.emission_rate['chem_2_3_7_8_tcdd']=1e-11*dryparticlesource_in_dryparticlesource_source.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_source.emission_rate['chem_divalent_mercury']=1e-11*dryparticlesource_in_dryparticlesource_source.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_source.emission_rate['chem_methylmercury']=1e-11*dryparticlesource_in_dryparticlesource_source.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_source.emission_rate['chem_benzo_a_pyrene']=2e-11*wetparticlesource_in_wetparticlesource_source.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_source.emission_rate['chem_arsenic']=2e-11*wetparticlesource_in_wetparticlesource_source.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_source.emission_rate['chem_cadmium']=2e-11*wetparticlesource_in_wetparticlesource_source.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_source.emission_rate['chem_2_3_7_8_tcdd']=2e-11*wetparticlesource_in_wetparticlesource_source.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_source.emission_rate['chem_divalent_mercury']=2e-11*wetparticlesource_in_wetparticlesource_source.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_source.emission_rate['chem_methylmercury']=2e-11*wetparticlesource_in_wetparticlesource_source.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_source.emission_rate['chem_benzo_a_pyrene']=3e-11*dryvaporsource_in_dryvaporsource_source.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_source.emission_rate['chem_arsenic']=0e-11*dryvaporsource_in_dryvaporsource_source.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_source.emission_rate['chem_cadmium']=0e-11*dryvaporsource_in_dryvaporsource_source.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_source.emission_rate['chem_2_3_7_8_tcdd']=3e-11*dryvaporsource_in_dryvaporsource_source.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_source.emission_rate['chem_divalent_mercury']=3e-11*dryvaporsource_in_dryvaporsource_source.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_source.emission_rate['chem_methylmercury']=3e-11*dryvaporsource_in_dryvaporsource_source.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_source.emission_rate['chem_benzo_a_pyrene']=4e-11*wetvaporsource_in_wetvaporsource_source.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_source.emission_rate['chem_arsenic']=0e-11*wetvaporsource_in_wetvaporsource_source.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_source.emission_rate['chem_cadmium']=0e-11*wetvaporsource_in_wetvaporsource_source.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_source.emission_rate['chem_2_3_7_8_tcdd']=4e-11*wetvaporsource_in_wetvaporsource_source.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_source.emission_rate['chem_divalent_mercury']=4e-11*wetvaporsource_in_wetvaporsource_source.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_source.emission_rate['chem_methylmercury']=4e-11*wetvaporsource_in_wetvaporsource_source.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n1.emission_rate['chem_benzo_a_pyrene']=1e-11*dryparticlesource_in_dryparticlesource_n1.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n1.emission_rate['chem_arsenic']=1e-11*dryparticlesource_in_dryparticlesource_n1.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n1.emission_rate['chem_cadmium']=1e-11*dryparticlesource_in_dryparticlesource_n1.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n1.emission_rate['chem_2_3_7_8_tcdd']=1e-11*dryparticlesource_in_dryparticlesource_n1.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n1.emission_rate['chem_divalent_mercury']=1e-11*dryparticlesource_in_dryparticlesource_n1.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n1.emission_rate['chem_methylmercury']=1e-11*dryparticlesource_in_dryparticlesource_n1.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n1.emission_rate['chem_benzo_a_pyrene']=2e-11*wetparticlesource_in_wetparticlesource_n1.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n1.emission_rate['chem_arsenic']=2e-11*wetparticlesource_in_wetparticlesource_n1.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n1.emission_rate['chem_cadmium']=2e-11*wetparticlesource_in_wetparticlesource_n1.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n1.emission_rate['chem_2_3_7_8_tcdd']=2e-11*wetparticlesource_in_wetparticlesource_n1.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n1.emission_rate['chem_divalent_mercury']=2e-11*wetparticlesource_in_wetparticlesource_n1.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n1.emission_rate['chem_methylmercury']=2e-11*wetparticlesource_in_wetparticlesource_n1.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n1.emission_rate['chem_benzo_a_pyrene']=3e-11*dryvaporsource_in_dryvaporsource_n1.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n1.emission_rate['chem_arsenic']=0e-11*dryvaporsource_in_dryvaporsource_n1.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n1.emission_rate['chem_cadmium']=0e-11*dryvaporsource_in_dryvaporsource_n1.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n1.emission_rate['chem_2_3_7_8_tcdd']=3e-11*dryvaporsource_in_dryvaporsource_n1.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n1.emission_rate['chem_divalent_mercury']=3e-11*dryvaporsource_in_dryvaporsource_n1.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n1.emission_rate['chem_methylmercury']=3e-11*dryvaporsource_in_dryvaporsource_n1.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n1.emission_rate['chem_benzo_a_pyrene']=4e-11*wetvaporsource_in_wetvaporsource_n1.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n1.emission_rate['chem_arsenic']=0e-11*wetvaporsource_in_wetvaporsource_n1.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n1.emission_rate['chem_cadmium']=0e-11*wetvaporsource_in_wetvaporsource_n1.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n1.emission_rate['chem_2_3_7_8_tcdd']=4e-11*wetvaporsource_in_wetvaporsource_n1.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n1.emission_rate['chem_divalent_mercury']=4e-11*wetvaporsource_in_wetvaporsource_n1.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n1.emission_rate['chem_methylmercury']=4e-11*wetvaporsource_in_wetvaporsource_n1.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n6.emission_rate['chem_benzo_a_pyrene']=1e-11*dryparticlesource_in_dryparticlesource_n6.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n6.emission_rate['chem_arsenic']=1e-11*dryparticlesource_in_dryparticlesource_n6.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n6.emission_rate['chem_cadmium']=1e-11*dryparticlesource_in_dryparticlesource_n6.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n6.emission_rate['chem_2_3_7_8_tcdd']=1e-11*dryparticlesource_in_dryparticlesource_n6.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n6.emission_rate['chem_divalent_mercury']=1e-11*dryparticlesource_in_dryparticlesource_n6.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n6.emission_rate['chem_methylmercury']=1e-11*dryparticlesource_in_dryparticlesource_n6.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n6.emission_rate['chem_benzo_a_pyrene']=2e-11*wetparticlesource_in_wetparticlesource_n6.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n6.emission_rate['chem_arsenic']=2e-11*wetparticlesource_in_wetparticlesource_n6.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n6.emission_rate['chem_cadmium']=2e-11*wetparticlesource_in_wetparticlesource_n6.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n6.emission_rate['chem_2_3_7_8_tcdd']=2e-11*wetparticlesource_in_wetparticlesource_n6.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n6.emission_rate['chem_divalent_mercury']=2e-11*wetparticlesource_in_wetparticlesource_n6.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n6.emission_rate['chem_methylmercury']=2e-11*wetparticlesource_in_wetparticlesource_n6.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n6.emission_rate['chem_benzo_a_pyrene']=3e-11*dryvaporsource_in_dryvaporsource_n6.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n6.emission_rate['chem_arsenic']=0e-11*dryvaporsource_in_dryvaporsource_n6.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n6.emission_rate['chem_cadmium']=0e-11*dryvaporsource_in_dryvaporsource_n6.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n6.emission_rate['chem_2_3_7_8_tcdd']=3e-11*dryvaporsource_in_dryvaporsource_n6.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n6.emission_rate['chem_divalent_mercury']=3e-11*dryvaporsource_in_dryvaporsource_n6.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n6.emission_rate['chem_methylmercury']=3e-11*dryvaporsource_in_dryvaporsource_n6.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n6.emission_rate['chem_benzo_a_pyrene']=4e-11*wetvaporsource_in_wetvaporsource_n6.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n6.emission_rate['chem_arsenic']=0e-11*wetvaporsource_in_wetvaporsource_n6.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n6.emission_rate['chem_cadmium']=0e-11*wetvaporsource_in_wetvaporsource_n6.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n6.emission_rate['chem_2_3_7_8_tcdd']=4e-11*wetvaporsource_in_wetvaporsource_n6.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n6.emission_rate['chem_divalent_mercury']=4e-11*wetvaporsource_in_wetvaporsource_n6.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n6.emission_rate['chem_methylmercury']=4e-11*wetvaporsource_in_wetvaporsource_n6.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n7.emission_rate['chem_benzo_a_pyrene']=1e-11*dryparticlesource_in_dryparticlesource_n7.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n7.emission_rate['chem_arsenic']=2e-11*dryparticlesource_in_dryparticlesource_n7.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n7.emission_rate['chem_cadmium']=2e-11*dryparticlesource_in_dryparticlesource_n7.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n7.emission_rate['chem_2_3_7_8_tcdd']=2e-11*dryparticlesource_in_dryparticlesource_n7.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n7.emission_rate['chem_divalent_mercury']=2e-11*dryparticlesource_in_dryparticlesource_n7.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n7.emission_rate['chem_methylmercury']=2e-11*dryparticlesource_in_dryparticlesource_n7.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n7.emission_rate['chem_benzo_a_pyrene']=2e-11*wetparticlesource_in_wetparticlesource_n7.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n7.emission_rate['chem_arsenic']=2e-11*wetparticlesource_in_wetparticlesource_n7.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n7.emission_rate['chem_cadmium']=2e-11*wetparticlesource_in_wetparticlesource_n7.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n7.emission_rate['chem_2_3_7_8_tcdd']=2e-11*wetparticlesource_in_wetparticlesource_n7.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n7.emission_rate['chem_divalent_mercury']=2e-11*wetparticlesource_in_wetparticlesource_n7.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n7.emission_rate['chem_methylmercury']=2e-11*wetparticlesource_in_wetparticlesource_n7.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n7.emission_rate['chem_benzo_a_pyrene']=3e-11*dryvaporsource_in_dryvaporsource_n7.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n7.emission_rate['chem_arsenic']=0e-11*dryvaporsource_in_dryvaporsource_n7.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n7.emission_rate['chem_cadmium']=0e-11*dryvaporsource_in_dryvaporsource_n7.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n7.emission_rate['chem_2_3_7_8_tcdd']=3e-11*dryvaporsource_in_dryvaporsource_n7.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n7.emission_rate['chem_divalent_mercury']=3e-11*dryvaporsource_in_dryvaporsource_n7.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n7.emission_rate['chem_methylmercury']=3e-11*dryvaporsource_in_dryvaporsource_n7.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n7.emission_rate['chem_benzo_a_pyrene']=4e-11*wetvaporsource_in_wetvaporsource_n7.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n7.emission_rate['chem_arsenic']=0e-11*wetvaporsource_in_wetvaporsource_n7.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n7.emission_rate['chem_cadmium']=0e-11*wetvaporsource_in_wetvaporsource_n7.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n7.emission_rate['chem_2_3_7_8_tcdd']=4e-11*wetvaporsource_in_wetvaporsource_n7.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n7.emission_rate['chem_divalent_mercury']=4e-11*wetvaporsource_in_wetvaporsource_n7.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n7.emission_rate['chem_methylmercury']=4e-11*wetvaporsource_in_wetvaporsource_n7.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n3.emission_rate['chem_benzo_a_pyrene']=1e-11*dryparticlesource_in_dryparticlesource_n3.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n3.emission_rate['chem_arsenic']=1e-11*dryparticlesource_in_dryparticlesource_n3.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n3.emission_rate['chem_cadmium']=1e-11*dryparticlesource_in_dryparticlesource_n3.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n3.emission_rate['chem_2_3_7_8_tcdd']=1e-11*dryparticlesource_in_dryparticlesource_n3.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n3.emission_rate['chem_divalent_mercury']=1e-11*dryparticlesource_in_dryparticlesource_n3.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n3.emission_rate['chem_methylmercury']=1e-11*dryparticlesource_in_dryparticlesource_n3.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n3.emission_rate['chem_benzo_a_pyrene']=2e-11*wetparticlesource_in_wetparticlesource_n3.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n3.emission_rate['chem_arsenic']=2e-11*wetparticlesource_in_wetparticlesource_n3.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n3.emission_rate['chem_cadmium']=2e-11*wetparticlesource_in_wetparticlesource_n3.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n3.emission_rate['chem_2_3_7_8_tcdd']=2e-11*wetparticlesource_in_wetparticlesource_n3.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n3.emission_rate['chem_divalent_mercury']=2e-11*wetparticlesource_in_wetparticlesource_n3.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n3.emission_rate['chem_methylmercury']=2e-11*wetparticlesource_in_wetparticlesource_n3.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n3.emission_rate['chem_benzo_a_pyrene']=3e-11*dryvaporsource_in_dryvaporsource_n3.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n3.emission_rate['chem_arsenic']=0e-11*dryvaporsource_in_dryvaporsource_n3.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n3.emission_rate['chem_cadmium']=0e-11*dryvaporsource_in_dryvaporsource_n3.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n3.emission_rate['chem_2_3_7_8_tcdd']=3e-11*dryvaporsource_in_dryvaporsource_n3.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n3.emission_rate['chem_divalent_mercury']=3e-11*dryvaporsource_in_dryvaporsource_n3.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n3.emission_rate['chem_methylmercury']=3e-11*dryvaporsource_in_dryvaporsource_n3.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n3.emission_rate['chem_benzo_a_pyrene']=4e-11*wetvaporsource_in_wetvaporsource_n3.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n3.emission_rate['chem_arsenic']=0e-11*wetvaporsource_in_wetvaporsource_n3.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n3.emission_rate['chem_cadmium']=0e-11*wetvaporsource_in_wetvaporsource_n3.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n3.emission_rate['chem_2_3_7_8_tcdd']=4e-11*wetvaporsource_in_wetvaporsource_n3.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n3.emission_rate['chem_divalent_mercury']=4e-11*wetvaporsource_in_wetvaporsource_n3.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n3.emission_rate['chem_methylmercury']=4e-11*wetvaporsource_in_wetvaporsource_n3.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n4.emission_rate['chem_benzo_a_pyrene']=1e-11*dryparticlesource_in_dryparticlesource_n4.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n4.emission_rate['chem_arsenic']=1e-11*dryparticlesource_in_dryparticlesource_n4.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n4.emission_rate['chem_cadmium']=1e-11*dryparticlesource_in_dryparticlesource_n4.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n4.emission_rate['chem_2_3_7_8_tcdd']=1e-11*dryparticlesource_in_dryparticlesource_n4.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n4.emission_rate['chem_divalent_mercury']=1e-11*dryparticlesource_in_dryparticlesource_n4.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n4.emission_rate['chem_methylmercury']=1e-11*dryparticlesource_in_dryparticlesource_n4.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n4.emission_rate['chem_benzo_a_pyrene']=2e-11*wetparticlesource_in_wetparticlesource_n4.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n4.emission_rate['chem_arsenic']=2e-11*wetparticlesource_in_wetparticlesource_n4.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n4.emission_rate['chem_cadmium']=2e-11*wetparticlesource_in_wetparticlesource_n4.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n4.emission_rate['chem_2_3_7_8_tcdd']=2e-11*wetparticlesource_in_wetparticlesource_n4.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n4.emission_rate['chem_divalent_mercury']=2e-11*wetparticlesource_in_wetparticlesource_n4.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n4.emission_rate['chem_methylmercury']=2e-11*wetparticlesource_in_wetparticlesource_n4.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n4.emission_rate['chem_benzo_a_pyrene']=3e-11*dryvaporsource_in_dryvaporsource_n4.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n4.emission_rate['chem_arsenic']=0e-11*dryvaporsource_in_dryvaporsource_n4.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n4.emission_rate['chem_cadmium']=0e-11*dryvaporsource_in_dryvaporsource_n4.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n4.emission_rate['chem_2_3_7_8_tcdd']=3e-11*dryvaporsource_in_dryvaporsource_n4.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n4.emission_rate['chem_divalent_mercury']=3e-11*dryvaporsource_in_dryvaporsource_n4.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n4.emission_rate['chem_methylmercury']=3e-11*dryvaporsource_in_dryvaporsource_n4.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n4.emission_rate['chem_benzo_a_pyrene']=4e-11*wetvaporsource_in_wetvaporsource_n4.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n4.emission_rate['chem_arsenic']=0e-11*wetvaporsource_in_wetvaporsource_n4.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n4.emission_rate['chem_cadmium']=0e-11*wetvaporsource_in_wetvaporsource_n4.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n4.emission_rate['chem_2_3_7_8_tcdd']=4e-11*wetvaporsource_in_wetvaporsource_n4.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n4.emission_rate['chem_divalent_mercury']=4e-11*wetvaporsource_in_wetvaporsource_n4.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n4.emission_rate['chem_methylmercury']=4e-11*wetvaporsource_in_wetvaporsource_n4.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n5.emission_rate['chem_benzo_a_pyrene']=1e-11*dryparticlesource_in_dryparticlesource_n5.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n5.emission_rate['chem_arsenic']=1e-11*dryparticlesource_in_dryparticlesource_n5.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n5.emission_rate['chem_cadmium']=1e-11*dryparticlesource_in_dryparticlesource_n5.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n5.emission_rate['chem_2_3_7_8_tcdd']=1e-11*dryparticlesource_in_dryparticlesource_n5.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n5.emission_rate['chem_divalent_mercury']=1e-11*dryparticlesource_in_dryparticlesource_n5.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_n5.emission_rate['chem_methylmercury']=1e-11*dryparticlesource_in_dryparticlesource_n5.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n5.emission_rate['chem_benzo_a_pyrene']=2e-11*wetparticlesource_in_wetparticlesource_n5.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n5.emission_rate['chem_arsenic']=2e-11*wetparticlesource_in_wetparticlesource_n5.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n5.emission_rate['chem_cadmium']=2e-11*wetparticlesource_in_wetparticlesource_n5.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n5.emission_rate['chem_2_3_7_8_tcdd']=2e-11*wetparticlesource_in_wetparticlesource_n5.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n5.emission_rate['chem_divalent_mercury']=2e-11*wetparticlesource_in_wetparticlesource_n5.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_n5.emission_rate['chem_methylmercury']=2e-11*wetparticlesource_in_wetparticlesource_n5.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n5.emission_rate['chem_benzo_a_pyrene']=3e-11*dryvaporsource_in_dryvaporsource_n5.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n5.emission_rate['chem_arsenic']=0e-11*dryvaporsource_in_dryvaporsource_n5.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n5.emission_rate['chem_cadmium']=0e-11*dryvaporsource_in_dryvaporsource_n5.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n5.emission_rate['chem_2_3_7_8_tcdd']=3e-11*dryvaporsource_in_dryvaporsource_n5.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n5.emission_rate['chem_divalent_mercury']=3e-11*dryvaporsource_in_dryvaporsource_n5.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_n5.emission_rate['chem_methylmercury']=3e-11*dryvaporsource_in_dryvaporsource_n5.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n5.emission_rate['chem_benzo_a_pyrene']=4e-11*wetvaporsource_in_wetvaporsource_n5.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n5.emission_rate['chem_arsenic']=0e-11*wetvaporsource_in_wetvaporsource_n5.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n5.emission_rate['chem_cadmium']=0e-11*wetvaporsource_in_wetvaporsource_n5.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n5.emission_rate['chem_2_3_7_8_tcdd']=4e-11*wetvaporsource_in_wetvaporsource_n5.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n5.emission_rate['chem_divalent_mercury']=4e-11*wetvaporsource_in_wetvaporsource_n5.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_n5.emission_rate['chem_methylmercury']=4e-11*wetvaporsource_in_wetvaporsource_n5.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_s1.emission_rate['chem_benzo_a_pyrene']=1e-11*dryparticlesource_in_dryparticlesource_s1.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_s1.emission_rate['chem_arsenic']=1e-11*dryparticlesource_in_dryparticlesource_s1.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_s1.emission_rate['chem_cadmium']=1e-11*dryparticlesource_in_dryparticlesource_s1.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_s1.emission_rate['chem_2_3_7_8_tcdd']=1e-11*dryparticlesource_in_dryparticlesource_s1.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_s1.emission_rate['chem_divalent_mercury']=1e-11*dryparticlesource_in_dryparticlesource_s1.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_s1.emission_rate['chem_methylmercury']=1e-11*dryparticlesource_in_dryparticlesource_s1.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_s1.emission_rate['chem_benzo_a_pyrene']=2e-11*wetparticlesource_in_wetparticlesource_s1.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_s1.emission_rate['chem_arsenic']=2e-11*wetparticlesource_in_wetparticlesource_s1.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_s1.emission_rate['chem_cadmium']=2e-11*wetparticlesource_in_wetparticlesource_s1.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_s1.emission_rate['chem_2_3_7_8_tcdd']=2e-11*wetparticlesource_in_wetparticlesource_s1.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_s1.emission_rate['chem_divalent_mercury']=2e-11*wetparticlesource_in_wetparticlesource_s1.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_s1.emission_rate['chem_methylmercury']=2e-11*wetparticlesource_in_wetparticlesource_s1.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_s1.emission_rate['chem_benzo_a_pyrene']=3e-11*dryvaporsource_in_dryvaporsource_s1.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_s1.emission_rate['chem_arsenic']=0e-11*dryvaporsource_in_dryvaporsource_s1.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_s1.emission_rate['chem_cadmium']=0e-11*dryvaporsource_in_dryvaporsource_s1.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_s1.emission_rate['chem_2_3_7_8_tcdd']=3e-11*dryvaporsource_in_dryvaporsource_s1.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_s1.emission_rate['chem_divalent_mercury']=3e-11*dryvaporsource_in_dryvaporsource_s1.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_s1.emission_rate['chem_methylmercury']=3e-11*dryvaporsource_in_dryvaporsource_s1.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_s1.emission_rate['chem_benzo_a_pyrene']=4e-11*wetvaporsource_in_wetvaporsource_s1.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_s1.emission_rate['chem_arsenic']=0e-11*wetvaporsource_in_wetvaporsource_s1.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_s1.emission_rate['chem_cadmium']=0e-11*wetvaporsource_in_wetvaporsource_s1.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_s1.emission_rate['chem_2_3_7_8_tcdd']=4e-11*wetvaporsource_in_wetvaporsource_s1.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_s1.emission_rate['chem_divalent_mercury']=4e-11*wetvaporsource_in_wetvaporsource_s1.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_s1.emission_rate['chem_methylmercury']=4e-11*wetvaporsource_in_wetvaporsource_s1.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_pond.emission_rate['chem_benzo_a_pyrene']=1e-11*dryparticlesource_in_dryparticlesource_pond.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_pond.emission_rate['chem_arsenic']=1e-11*dryparticlesource_in_dryparticlesource_pond.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_pond.emission_rate['chem_cadmium']=1e-11*dryparticlesource_in_dryparticlesource_pond.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_pond.emission_rate['chem_2_3_7_8_tcdd']=1e-11*dryparticlesource_in_dryparticlesource_pond.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_pond.emission_rate['chem_divalent_mercury']=1e-11*dryparticlesource_in_dryparticlesource_pond.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_pond.emission_rate['chem_methylmercury']=1e-11*dryparticlesource_in_dryparticlesource_pond.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_pond.emission_rate['chem_benzo_a_pyrene']=2e-11*wetparticlesource_in_wetparticlesource_pond.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_pond.emission_rate['chem_arsenic']=2e-11*wetparticlesource_in_wetparticlesource_pond.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_pond.emission_rate['chem_cadmium']=2e-11*wetparticlesource_in_wetparticlesource_pond.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_pond.emission_rate['chem_2_3_7_8_tcdd']=2e-11*wetparticlesource_in_wetparticlesource_pond.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_pond.emission_rate['chem_divalent_mercury']=2e-11*wetparticlesource_in_wetparticlesource_pond.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_pond.emission_rate['chem_methylmercury']=2e-11*wetparticlesource_in_wetparticlesource_pond.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_pond.emission_rate['chem_benzo_a_pyrene']=3e-11*dryvaporsource_in_dryvaporsource_pond.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_pond.emission_rate['chem_arsenic']=0e-11*dryvaporsource_in_dryvaporsource_pond.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_pond.emission_rate['chem_cadmium']=0e-11*dryvaporsource_in_dryvaporsource_pond.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_pond.emission_rate['chem_2_3_7_8_tcdd']=3e-11*dryvaporsource_in_dryvaporsource_pond.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_pond.emission_rate['chem_divalent_mercury']=3e-11*dryvaporsource_in_dryvaporsource_pond.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_pond.emission_rate['chem_methylmercury']=3e-11*dryvaporsource_in_dryvaporsource_pond.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_pond.emission_rate['chem_benzo_a_pyrene']=4e-11*wetvaporsource_in_wetvaporsource_pond.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_pond.emission_rate['chem_arsenic']=0e-11*wetvaporsource_in_wetvaporsource_pond.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_pond.emission_rate['chem_cadmium']=0e-11*wetvaporsource_in_wetvaporsource_pond.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_pond.emission_rate['chem_2_3_7_8_tcdd']=4e-11*wetvaporsource_in_wetvaporsource_pond.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_pond.emission_rate['chem_divalent_mercury']=4e-11*wetvaporsource_in_wetvaporsource_pond.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_pond.emission_rate['chem_methylmercury']=4e-11*wetvaporsource_in_wetvaporsource_pond.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_s4.emission_rate['chem_benzo_a_pyrene']=1e-11*dryparticlesource_in_dryparticlesource_s4.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_s4.emission_rate['chem_arsenic']=1e-11*dryparticlesource_in_dryparticlesource_s4.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_s4.emission_rate['chem_cadmium']=1e-11*dryparticlesource_in_dryparticlesource_s4.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_s4.emission_rate['chem_2_3_7_8_tcdd']=1e-11*dryparticlesource_in_dryparticlesource_s4.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_s4.emission_rate['chem_divalent_mercury']=1e-11*dryparticlesource_in_dryparticlesource_s4.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_s4.emission_rate['chem_methylmercury']=1e-11*dryparticlesource_in_dryparticlesource_s4.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_s4.emission_rate['chem_benzo_a_pyrene']=2e-11*wetparticlesource_in_wetparticlesource_s4.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_s4.emission_rate['chem_arsenic']=2e-11*wetparticlesource_in_wetparticlesource_s4.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_s4.emission_rate['chem_cadmium']=2e-11*wetparticlesource_in_wetparticlesource_s4.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_s4.emission_rate['chem_2_3_7_8_tcdd']=2e-11*wetparticlesource_in_wetparticlesource_s4.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_s4.emission_rate['chem_divalent_mercury']=2e-11*wetparticlesource_in_wetparticlesource_s4.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_s4.emission_rate['chem_methylmercury']=2e-11*wetparticlesource_in_wetparticlesource_s4.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_s4.emission_rate['chem_benzo_a_pyrene']=3e-11*dryvaporsource_in_dryvaporsource_s4.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_s4.emission_rate['chem_arsenic']=0e-11*dryvaporsource_in_dryvaporsource_s4.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_s4.emission_rate['chem_cadmium']=0e-11*dryvaporsource_in_dryvaporsource_s4.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_s4.emission_rate['chem_2_3_7_8_tcdd']=3e-11*dryvaporsource_in_dryvaporsource_s4.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_s4.emission_rate['chem_divalent_mercury']=3e-11*dryvaporsource_in_dryvaporsource_s4.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_s4.emission_rate['chem_methylmercury']=3e-11*dryvaporsource_in_dryvaporsource_s4.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_s4.emission_rate['chem_benzo_a_pyrene']=4e-11*wetvaporsource_in_wetvaporsource_s4.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_s4.emission_rate['chem_arsenic']=0e-11*wetvaporsource_in_wetvaporsource_s4.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_s4.emission_rate['chem_cadmium']=0e-11*wetvaporsource_in_wetvaporsource_s4.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_s4.emission_rate['chem_2_3_7_8_tcdd']=4e-11*wetvaporsource_in_wetvaporsource_s4.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_s4.emission_rate['chem_divalent_mercury']=4e-11*wetvaporsource_in_wetvaporsource_s4.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_s4.emission_rate['chem_methylmercury']=4e-11*wetvaporsource_in_wetvaporsource_s4.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_s5.emission_rate['chem_benzo_a_pyrene']=1e-11*dryparticlesource_in_dryparticlesource_s5.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_s5.emission_rate['chem_arsenic']=1e-11*dryparticlesource_in_dryparticlesource_s5.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_s5.emission_rate['chem_cadmium']=1e-11*dryparticlesource_in_dryparticlesource_s5.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_s5.emission_rate['chem_2_3_7_8_tcdd']=1e-11*dryparticlesource_in_dryparticlesource_s5.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_s5.emission_rate['chem_divalent_mercury']=1e-11*dryparticlesource_in_dryparticlesource_s5.parcel_area
+except:
+	pass
+try:
+	dryparticlesource_in_dryparticlesource_s5.emission_rate['chem_methylmercury']=1e-11*dryparticlesource_in_dryparticlesource_s5.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_s5.emission_rate['chem_benzo_a_pyrene']=2e-11*wetparticlesource_in_wetparticlesource_s5.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_s5.emission_rate['chem_arsenic']=2e-11*wetparticlesource_in_wetparticlesource_s5.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_s5.emission_rate['chem_cadmium']=2e-11*wetparticlesource_in_wetparticlesource_s5.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_s5.emission_rate['chem_2_3_7_8_tcdd']=2e-11*wetparticlesource_in_wetparticlesource_s5.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_s5.emission_rate['chem_divalent_mercury']=2e-11*wetparticlesource_in_wetparticlesource_s5.parcel_area
+except:
+	pass
+try:
+	wetparticlesource_in_wetparticlesource_s5.emission_rate['chem_methylmercury']=2e-11*wetparticlesource_in_wetparticlesource_s5.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_s5.emission_rate['chem_benzo_a_pyrene']=3e-11*dryvaporsource_in_dryvaporsource_s5.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_s5.emission_rate['chem_arsenic']=0e-11*dryvaporsource_in_dryvaporsource_s5.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_s5.emission_rate['chem_cadmium']=0e-11*dryvaporsource_in_dryvaporsource_s5.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_s5.emission_rate['chem_2_3_7_8_tcdd']=3e-11*dryvaporsource_in_dryvaporsource_s5.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_s5.emission_rate['chem_divalent_mercury']=3e-11*dryvaporsource_in_dryvaporsource_s5.parcel_area
+except:
+	pass
+try:
+	dryvaporsource_in_dryvaporsource_s5.emission_rate['chem_methylmercury']=3e-11*dryvaporsource_in_dryvaporsource_s5.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_s5.emission_rate['chem_benzo_a_pyrene']=4e-11*wetvaporsource_in_wetvaporsource_s5.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_s5.emission_rate['chem_arsenic']=0e-11*wetvaporsource_in_wetvaporsource_s5.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_s5.emission_rate['chem_cadmium']=0e-11*wetvaporsource_in_wetvaporsource_s5.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_s5.emission_rate['chem_2_3_7_8_tcdd']=4e-11*wetvaporsource_in_wetvaporsource_s5.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_s5.emission_rate['chem_divalent_mercury']=4e-11*wetvaporsource_in_wetvaporsource_s5.parcel_area
+except:
+	pass
+try:
+	wetvaporsource_in_wetvaporsource_s5.emission_rate['chem_methylmercury']=4e-11*wetvaporsource_in_wetvaporsource_s5.parcel_area
+except:
+	pass

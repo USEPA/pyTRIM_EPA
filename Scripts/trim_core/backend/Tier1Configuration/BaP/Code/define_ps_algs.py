@@ -12,19 +12,15 @@ class diffusion_from_dryvaporsource_to_plant_leaf_hg0:
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def masstransfercoefficient(self):
-		return ( self.receivingcompartment.associated_soil_comp.chemical_masstransfercoefficientonairsideofairsoilboundary )
-	
-	@property
-	def doestransportchemical(self):
-		return ("True")
+	def category(self):
+		return ("abstract transfer")
 	
 	@property
 	def receivingchemicalname(self):
 		return ("elemental mercury")
 	
 	@property
-	def isdefaultforcategory(self):
+	def doestransportchemical(self):
 		return ("True")
 	
 	@property
@@ -36,6 +32,14 @@ class diffusion_from_dryvaporsource_to_plant_leaf_hg0:
 		return ("terrestrial plant | leaf")
 	
 	@property
+	def masstransfercoefficient(self):
+		return ( self.receivingcompartment.associated_soil_comp.chemical_masstransfercoefficientonairsideofairsoilboundary )
+	
+	@property
+	def doestransformchemical(self):
+		return ("False")
+	
+	@property
 	def sendingcompartmentcategory(self):
 		return ("pseudosource | dry | vapor")
 	
@@ -44,12 +48,8 @@ class diffusion_from_dryvaporsource_to_plant_leaf_hg0:
 		return ("elemental mercury")
 	
 	@property
-	def category(self):
-		return ("abstract transfer")
-	
-	@property
-	def doestransformchemical(self):
-		return ("False")
+	def isdefaultforcategory(self):
+		return ("True")
 	
 
 	@property
@@ -109,19 +109,15 @@ class diffusion_from_dryvaporsource_to_plant_leaf_mhg:
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def masstransfercoefficient(self):
-		return ( self.receivingcompartment.associated_soil_comp.chemical_masstransfercoefficientonairsideofairsoilboundary )
-	
-	@property
-	def doestransportchemical(self):
-		return ("True")
+	def category(self):
+		return ("abstract transfer")
 	
 	@property
 	def receivingchemicalname(self):
 		return ("methylmercury")
 	
 	@property
-	def isdefaultforcategory(self):
+	def doestransportchemical(self):
 		return ("True")
 	
 	@property
@@ -133,6 +129,14 @@ class diffusion_from_dryvaporsource_to_plant_leaf_mhg:
 		return ("terrestrial plant | leaf")
 	
 	@property
+	def masstransfercoefficient(self):
+		return ( self.receivingcompartment.associated_soil_comp.chemical_masstransfercoefficientonairsideofairsoilboundary )
+	
+	@property
+	def doestransformchemical(self):
+		return ("False")
+	
+	@property
 	def sendingcompartmentcategory(self):
 		return ("pseudosource | dry | vapor")
 	
@@ -141,12 +145,8 @@ class diffusion_from_dryvaporsource_to_plant_leaf_mhg:
 		return ("methylmercury")
 	
 	@property
-	def category(self):
-		return ("abstract transfer")
-	
-	@property
-	def doestransformchemical(self):
-		return ("False")
+	def isdefaultforcategory(self):
+		return ("True")
 	
 
 	@property
@@ -206,15 +206,15 @@ class diffusion_from_dryvaporsource_to_plant_leaf_organics:
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def masstransfercoefficient(self):
-		return ( self.receivingcompartment.associated_soil_comp.chemical_masstransfercoefficientonairsideofairsoilboundary )
+	def category(self):
+		return ("abstract transfer")
+	
+	@property
+	def chemicalcategory(self):
+		return ("organic")
 	
 	@property
 	def doestransportchemical(self):
-		return ("True")
-	
-	@property
-	def isdefaultforcategory(self):
 		return ("True")
 	
 	@property
@@ -226,20 +226,20 @@ class diffusion_from_dryvaporsource_to_plant_leaf_organics:
 		return ("terrestrial plant | leaf")
 	
 	@property
-	def sendingcompartmentcategory(self):
-		return ("pseudosource | dry | vapor")
-	
-	@property
-	def chemicalcategory(self):
-		return ("organic")
-	
-	@property
-	def category(self):
-		return ("abstract transfer")
+	def masstransfercoefficient(self):
+		return ( self.receivingcompartment.associated_soil_comp.chemical_masstransfercoefficientonairsideofairsoilboundary )
 	
 	@property
 	def doestransformchemical(self):
 		return ("False")
+	
+	@property
+	def sendingcompartmentcategory(self):
+		return ("pseudosource | dry | vapor")
+	
+	@property
+	def isdefaultforcategory(self):
+		return ("True")
 	
 
 	@property
@@ -299,19 +299,15 @@ class diffusion_from_dryvaporsource_to_surface_soil_hg0:
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def masstransfercoefficient(self):
-		return ( self.receivingcompartment.chemical_masstransfercoefficientonairsideofairsoilboundary )
-	
-	@property
-	def doestransportchemical(self):
-		return ("True")
+	def category(self):
+		return ("abstract transfer")
 	
 	@property
 	def receivingchemicalname(self):
 		return ("elemental mercury")
 	
 	@property
-	def isdefaultforcategory(self):
+	def doestransportchemical(self):
 		return ("True")
 	
 	@property
@@ -323,6 +319,14 @@ class diffusion_from_dryvaporsource_to_surface_soil_hg0:
 		return ("abiotic | soil | surface soil | surface soil - default")
 	
 	@property
+	def masstransfercoefficient(self):
+		return ( self.receivingcompartment.chemical_masstransfercoefficientonairsideofairsoilboundary )
+	
+	@property
+	def doestransformchemical(self):
+		return ("False")
+	
+	@property
 	def sendingcompartmentcategory(self):
 		return ("pseudosource | dry | vapor")
 	
@@ -331,12 +335,8 @@ class diffusion_from_dryvaporsource_to_surface_soil_hg0:
 		return ("elemental mercury")
 	
 	@property
-	def category(self):
-		return ("abstract transfer")
-	
-	@property
-	def doestransformchemical(self):
-		return ("False")
+	def isdefaultforcategory(self):
+		return ("True")
 	                     
 
 	@property
@@ -397,19 +397,15 @@ class diffusion_from_dryvaporsource_to_surface_soil_mhg:
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def masstransfercoefficient(self):
-		return ( self.receivingcompartment.chemical_masstransfercoefficientonairsideofairsoilboundary )
-	
-	@property
-	def doestransportchemical(self):
-		return ("True")
+	def category(self):
+		return ("abstract transfer")
 	
 	@property
 	def receivingchemicalname(self):
 		return ("methylmercury")
 	
 	@property
-	def isdefaultforcategory(self):
+	def doestransportchemical(self):
 		return ("True")
 	
 	@property
@@ -421,6 +417,14 @@ class diffusion_from_dryvaporsource_to_surface_soil_mhg:
 		return ("abiotic | soil | surface soil | surface soil - default")
 	
 	@property
+	def masstransfercoefficient(self):
+		return ( self.receivingcompartment.chemical_masstransfercoefficientonairsideofairsoilboundary )
+	
+	@property
+	def doestransformchemical(self):
+		return ("False")
+	
+	@property
 	def sendingcompartmentcategory(self):
 		return ("pseudosource | dry | vapor")
 	
@@ -429,12 +433,8 @@ class diffusion_from_dryvaporsource_to_surface_soil_mhg:
 		return ("methylmercury")
 	
 	@property
-	def category(self):
-		return ("abstract transfer")
-	
-	@property
-	def doestransformchemical(self):
-		return ("False")
+	def isdefaultforcategory(self):
+		return ("True")
 	                     
 
 	@property
@@ -495,15 +495,15 @@ class diffusion_from_dryvaporsource_to_surface_soil_organics:
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def masstransfercoefficient(self):
-		return ( self.receivingcompartment.chemical_masstransfercoefficientonairsideofairsoilboundary )
+	def category(self):
+		return ("abstract transfer")
+	
+	@property
+	def chemicalcategory(self):
+		return ("organic")
 	
 	@property
 	def doestransportchemical(self):
-		return ("True")
-	
-	@property
-	def isdefaultforcategory(self):
 		return ("True")
 	
 	@property
@@ -515,20 +515,20 @@ class diffusion_from_dryvaporsource_to_surface_soil_organics:
 		return ("abiotic | soil | surface soil | surface soil - default")
 	
 	@property
-	def sendingcompartmentcategory(self):
-		return ("pseudosource | dry | vapor")
-	
-	@property
-	def chemicalcategory(self):
-		return ("organic")
-	
-	@property
-	def category(self):
-		return ("abstract transfer")
+	def masstransfercoefficient(self):
+		return ( self.receivingcompartment.chemical_masstransfercoefficientonairsideofairsoilboundary )
 	
 	@property
 	def doestransformchemical(self):
 		return ("False")
+	
+	@property
+	def sendingcompartmentcategory(self):
+		return ("pseudosource | dry | vapor")
+	
+	@property
+	def isdefaultforcategory(self):
+		return ("True")
 	                     
 
 	@property
@@ -589,12 +589,12 @@ class direct_transfer_from_pseudosource_to_surface_water:
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def doestransportchemical(self):
-		return ("True")
+	def category(self):
+		return ("abstract transfer")
 	
 	@property
-	def isdefaultforcategory(self):
-		return ("True")
+	def chemicalcategory(self):
+		return ("all")
 	
 	@property
 	def enabled(self):
@@ -605,20 +605,20 @@ class direct_transfer_from_pseudosource_to_surface_water:
 		return ("abiotic | surface water | surface water - default")
 	
 	@property
+	def doestransformchemical(self):
+		return ("False")
+	
+	@property
 	def sendingcompartmentcategory(self):
 		return ("pseudosource")
 	
 	@property
-	def chemicalcategory(self):
-		return ("all")
+	def isdefaultforcategory(self):
+		return ("True")
 	
 	@property
-	def category(self):
-		return ("abstract transfer")
-	
-	@property
-	def doestransformchemical(self):
-		return ("False")
+	def doestransportchemical(self):
+		return ("True")
 	
 	@property
 	def transferfactor(self):
@@ -641,12 +641,12 @@ class dry_deposition_of_particles_from_dryparticlesource_to_plants:
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def doestransportchemical(self):
-		return ("True")
+	def category(self):
+		return ("abstract transfer")
 	
 	@property
-	def isdefaultforcategory(self):
-		return ("True")
+	def chemicalcategory(self):
+		return ("all")
 	
 	@property
 	def enabled(self):
@@ -657,20 +657,20 @@ class dry_deposition_of_particles_from_dryparticlesource_to_plants:
 		return ("terrestrial plant | leaf particle")
 	
 	@property
+	def doestransformchemical(self):
+		return ("False")
+	
+	@property
 	def sendingcompartmentcategory(self):
 		return ("pseudosource | dry | particle")
 	
 	@property
-	def chemicalcategory(self):
-		return ("all")
+	def isdefaultforcategory(self):
+		return ("True")
 	
 	@property
-	def category(self):
-		return ("abstract transfer")
-	
-	@property
-	def doestransformchemical(self):
-		return ("False")
+	def doestransportchemical(self):
+		return ("True")
 	
 	@property
 	def transferfactor(self):
@@ -693,12 +693,12 @@ class dry_deposition_of_particles_from_dryparticlesource_to_soil:
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def doestransportchemical(self):
-		return ("True")
+	def category(self):
+		return ("abstract transfer")
 	
 	@property
-	def isdefaultforcategory(self):
-		return ("True")
+	def chemicalcategory(self):
+		return ("all")
 	
 	@property
 	def enabled(self):
@@ -709,20 +709,20 @@ class dry_deposition_of_particles_from_dryparticlesource_to_soil:
 		return ("abiotic | soil | surface soil | surface soil - default")
 	
 	@property
+	def doestransformchemical(self):
+		return ("False")
+	
+	@property
 	def sendingcompartmentcategory(self):
 		return ("pseudosource | dry | particle")
 	
 	@property
-	def chemicalcategory(self):
-		return ("all")
+	def isdefaultforcategory(self):
+		return ("True")
 	
 	@property
-	def category(self):
-		return ("abstract transfer")
-	
-	@property
-	def doestransformchemical(self):
-		return ("False")
+	def doestransportchemical(self):
+		return ("True")
 	
 	@property
 	def transferfactor(self):
@@ -745,16 +745,16 @@ class dry_deposition_of_vapor_from_dryvaporsource_to_plants_hg2:
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def receivingchemicalname(self):
-		return ("divalent mercury")
-	
-	@property
-	def doestransportchemical(self):
-		return ("True")
+	def category(self):
+		return ("abstract transfer")
 	
 	@property
 	def isdefaultforcategory(self):
 		return ("True")
+	
+	@property
+	def receivingchemicalname(self):
+		return ("divalent mercury")
 	
 	@property
 	def enabled(self):
@@ -765,6 +765,10 @@ class dry_deposition_of_vapor_from_dryvaporsource_to_plants_hg2:
 		return ("terrestrial plant | leaf")
 	
 	@property
+	def doestransformchemical(self):
+		return ("False")
+	
+	@property
 	def sendingcompartmentcategory(self):
 		return ("pseudosource | dry | vapor")
 	
@@ -773,12 +777,8 @@ class dry_deposition_of_vapor_from_dryvaporsource_to_plants_hg2:
 		return ("divalent mercury")
 	
 	@property
-	def category(self):
-		return ("abstract transfer")
-	
-	@property
-	def doestransformchemical(self):
-		return ("False")
+	def doestransportchemical(self):
+		return ("True")
 	
 	@property
 	def transferfactor(self):
@@ -801,16 +801,16 @@ class dry_deposition_of_vapor_from_dryvaporsource_to_soil_hg2:
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def receivingchemicalname(self):
-		return ("divalent mercury")
-	
-	@property
-	def doestransportchemical(self):
-		return ("True")
+	def category(self):
+		return ("abstract transfer")
 	
 	@property
 	def isdefaultforcategory(self):
 		return ("True")
+	
+	@property
+	def receivingchemicalname(self):
+		return ("divalent mercury")
 	
 	@property
 	def enabled(self):
@@ -821,6 +821,10 @@ class dry_deposition_of_vapor_from_dryvaporsource_to_soil_hg2:
 		return ("abiotic | soil | surface soil | surface soil - default")
 	
 	@property
+	def doestransformchemical(self):
+		return ("False")
+	
+	@property
 	def sendingcompartmentcategory(self):
 		return ("pseudosource | dry | vapor")
 	
@@ -829,12 +833,8 @@ class dry_deposition_of_vapor_from_dryvaporsource_to_soil_hg2:
 		return ("divalent mercury")
 	
 	@property
-	def category(self):
-		return ("abstract transfer")
-	
-	@property
-	def doestransformchemical(self):
-		return ("False")
+	def doestransportchemical(self):
+		return ("True")
 	
 	@property
 	def transferfactor(self):
@@ -857,12 +857,12 @@ class wet_deposition_of_particles_from_wetparticlesource_to_plants:
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def doestransportchemical(self):
-		return ("True")
+	def category(self):
+		return ("abstract transfer")
 	
 	@property
-	def isdefaultforcategory(self):
-		return ("True")
+	def chemicalcategory(self):
+		return ("all")
 	
 	@property
 	def enabled(self):
@@ -873,20 +873,20 @@ class wet_deposition_of_particles_from_wetparticlesource_to_plants:
 		return ("terrestrial plant | leaf particle")
 	
 	@property
+	def doestransformchemical(self):
+		return ("False")
+	
+	@property
 	def sendingcompartmentcategory(self):
 		return ("pseudosource | wet | particle")
 	
 	@property
-	def chemicalcategory(self):
-		return ("all")
+	def isdefaultforcategory(self):
+		return ("True")
 	
 	@property
-	def category(self):
-		return ("abstract transfer")
-	
-	@property
-	def doestransformchemical(self):
-		return ("False")
+	def doestransportchemical(self):
+		return ("True")
 	
 	@property
 	def transferfactor(self):
@@ -909,12 +909,12 @@ class wet_deposition_of_particles_from_wetparticlesource_to_surface_soil:
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def doestransportchemical(self):
-		return ("True")
+	def category(self):
+		return ("abstract transfer")
 	
 	@property
-	def isdefaultforcategory(self):
-		return ("True")
+	def chemicalcategory(self):
+		return ("all")
 	
 	@property
 	def enabled(self):
@@ -925,20 +925,20 @@ class wet_deposition_of_particles_from_wetparticlesource_to_surface_soil:
 		return ("abiotic | soil | surface soil | surface soil - default")
 	
 	@property
+	def doestransformchemical(self):
+		return ("False")
+	
+	@property
 	def sendingcompartmentcategory(self):
 		return ("pseudosource | wet | particle")
 	
 	@property
-	def chemicalcategory(self):
-		return ("all")
+	def isdefaultforcategory(self):
+		return ("True")
 	
 	@property
-	def category(self):
-		return ("abstract transfer")
-	
-	@property
-	def doestransformchemical(self):
-		return ("False")
+	def doestransportchemical(self):
+		return ("True")
 	
 	@property
 	def transferfactor(self):
@@ -961,16 +961,16 @@ class wet_deposition_of_vapor_phase_from_wetvaporsource_to_plants_hg0:
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def receivingchemicalname(self):
-		return ("elemental mercury")
-	
-	@property
-	def doestransportchemical(self):
-		return ("True")
+	def category(self):
+		return ("abstract transfer")
 	
 	@property
 	def isdefaultforcategory(self):
 		return ("True")
+	
+	@property
+	def receivingchemicalname(self):
+		return ("elemental mercury")
 	
 	@property
 	def enabled(self):
@@ -981,6 +981,10 @@ class wet_deposition_of_vapor_phase_from_wetvaporsource_to_plants_hg0:
 		return ("terrestrial plant | leaf")
 	
 	@property
+	def doestransformchemical(self):
+		return ("False")
+	
+	@property
 	def sendingcompartmentcategory(self):
 		return ("pseudosource | wet | vapor")
 	
@@ -989,12 +993,8 @@ class wet_deposition_of_vapor_phase_from_wetvaporsource_to_plants_hg0:
 		return ("elemental mercury")
 	
 	@property
-	def category(self):
-		return ("abstract transfer")
-	
-	@property
-	def doestransformchemical(self):
-		return ("False")
+	def doestransportchemical(self):
+		return ("True")
 	
 	@property
 	def transferfactor(self):
@@ -1017,16 +1017,16 @@ class wet_deposition_of_vapor_phase_from_wetvaporsource_to_plants_hg2:
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def receivingchemicalname(self):
-		return ("divalent mercury")
-	
-	@property
-	def doestransportchemical(self):
-		return ("True")
+	def category(self):
+		return ("abstract transfer")
 	
 	@property
 	def isdefaultforcategory(self):
 		return ("True")
+	
+	@property
+	def receivingchemicalname(self):
+		return ("divalent mercury")
 	
 	@property
 	def enabled(self):
@@ -1037,6 +1037,10 @@ class wet_deposition_of_vapor_phase_from_wetvaporsource_to_plants_hg2:
 		return ("terrestrial plant | leaf")
 	
 	@property
+	def doestransformchemical(self):
+		return ("False")
+	
+	@property
 	def sendingcompartmentcategory(self):
 		return ("pseudosource | wet | vapor")
 	
@@ -1045,12 +1049,8 @@ class wet_deposition_of_vapor_phase_from_wetvaporsource_to_plants_hg2:
 		return ("divalent mercury")
 	
 	@property
-	def category(self):
-		return ("abstract transfer")
-	
-	@property
-	def doestransformchemical(self):
-		return ("False")
+	def doestransportchemical(self):
+		return ("True")
 	
 	@property
 	def transferfactor(self):
@@ -1073,12 +1073,12 @@ class wet_deposition_of_vapor_phase_from_wetvaporsource_to_plants_organics:
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def doestransportchemical(self):
-		return ("True")
+	def category(self):
+		return ("abstract transfer")
 	
 	@property
-	def isdefaultforcategory(self):
-		return ("True")
+	def chemicalcategory(self):
+		return ("organic")
 	
 	@property
 	def enabled(self):
@@ -1089,20 +1089,20 @@ class wet_deposition_of_vapor_phase_from_wetvaporsource_to_plants_organics:
 		return ("terrestrial plant | leaf")
 	
 	@property
+	def doestransformchemical(self):
+		return ("False")
+	
+	@property
 	def sendingcompartmentcategory(self):
 		return ("pseudosource | wet | vapor")
 	
 	@property
-	def chemicalcategory(self):
-		return ("organic")
+	def isdefaultforcategory(self):
+		return ("True")
 	
 	@property
-	def category(self):
-		return ("abstract transfer")
-	
-	@property
-	def doestransformchemical(self):
-		return ("False")
+	def doestransportchemical(self):
+		return ("True")
 	
 	@property
 	def transferfactor(self):
@@ -1125,16 +1125,16 @@ class wet_deposition_of_vapor_phase_from_wetvaporsource_to_soil_hg0:
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def receivingchemicalname(self):
-		return ("elemental mercury")
-	
-	@property
-	def doestransportchemical(self):
-		return ("True")
+	def category(self):
+		return ("abstract transfer")
 	
 	@property
 	def isdefaultforcategory(self):
 		return ("True")
+	
+	@property
+	def receivingchemicalname(self):
+		return ("elemental mercury")
 	
 	@property
 	def enabled(self):
@@ -1145,6 +1145,10 @@ class wet_deposition_of_vapor_phase_from_wetvaporsource_to_soil_hg0:
 		return ("abiotic | soil | surface soil | surface soil - default")
 	
 	@property
+	def doestransformchemical(self):
+		return ("False")
+	
+	@property
 	def sendingcompartmentcategory(self):
 		return ("pseudosource | wet | vapor")
 	
@@ -1153,12 +1157,8 @@ class wet_deposition_of_vapor_phase_from_wetvaporsource_to_soil_hg0:
 		return ("elemental mercury")
 	
 	@property
-	def category(self):
-		return ("abstract transfer")
-	
-	@property
-	def doestransformchemical(self):
-		return ("False")
+	def doestransportchemical(self):
+		return ("True")
 	
 	@property
 	def transferfactor(self):
@@ -1181,16 +1181,16 @@ class wet_deposition_of_vapor_phase_from_wetvaporsource_to_soil_hg2:
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def receivingchemicalname(self):
-		return ("divalent mercury")
-	
-	@property
-	def doestransportchemical(self):
-		return ("True")
+	def category(self):
+		return ("abstract transfer")
 	
 	@property
 	def isdefaultforcategory(self):
 		return ("True")
+	
+	@property
+	def receivingchemicalname(self):
+		return ("divalent mercury")
 	
 	@property
 	def enabled(self):
@@ -1201,6 +1201,10 @@ class wet_deposition_of_vapor_phase_from_wetvaporsource_to_soil_hg2:
 		return ("abiotic | soil | surface soil | surface soil - default")
 	
 	@property
+	def doestransformchemical(self):
+		return ("False")
+	
+	@property
 	def sendingcompartmentcategory(self):
 		return ("pseudosource | wet | vapor")
 	
@@ -1209,12 +1213,8 @@ class wet_deposition_of_vapor_phase_from_wetvaporsource_to_soil_hg2:
 		return ("divalent mercury")
 	
 	@property
-	def category(self):
-		return ("abstract transfer")
-	
-	@property
-	def doestransformchemical(self):
-		return ("False")
+	def doestransportchemical(self):
+		return ("True")
 	
 	@property
 	def transferfactor(self):
@@ -1237,12 +1237,12 @@ class wet_deposition_of_vapor_phase_from_wetvaporsource_to_soil_organics:
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def doestransportchemical(self):
-		return ("True")
+	def category(self):
+		return ("abstract transfer")
 	
 	@property
-	def isdefaultforcategory(self):
-		return ("True")
+	def chemicalcategory(self):
+		return ("organic")
 	
 	@property
 	def enabled(self):
@@ -1253,20 +1253,20 @@ class wet_deposition_of_vapor_phase_from_wetvaporsource_to_soil_organics:
 		return ("abiotic | soil | surface soil | surface soil - default")
 	
 	@property
+	def doestransformchemical(self):
+		return ("False")
+	
+	@property
 	def sendingcompartmentcategory(self):
 		return ("pseudosource | wet | vapor")
 	
 	@property
-	def chemicalcategory(self):
-		return ("organic")
+	def isdefaultforcategory(self):
+		return ("True")
 	
 	@property
-	def category(self):
-		return ("abstract transfer")
-	
-	@property
-	def doestransformchemical(self):
-		return ("False")
+	def doestransportchemical(self):
+		return ("True")
 	
 	@property
 	def transferfactor(self):
