@@ -119,11 +119,17 @@ def process_master_library(inputs):
 
         if 'self.sendingcompartment.allowexchange_forother' in prop and '1-self.dict_inputs["met_dict"]["frac_time_rain"]' in prop: # to address interaction between exchange and rain
             prop=prop.replace('self.sendingcompartment.allowexchange_forother','1')
-            prop=prop.replace('1-self.dict_inputs["met_dict"]["frac_time_rain"]','self.dict_inputs["met_dict"]["frac_time_exchange_no_rain"]')
+            # prop=prop.replace('1-self.dict_inputs["met_dict"]["frac_time_rain"]','self.dict_inputs["met_dict"]["frac_time_exchange_no_rain"]')
+            prop=prop.replace('1-self.dict_inputs["met_dict"]["frac_time_rain"]','(self.dict_inputs["met_dict"]["frac_time_exchange_no_rain"] if ("coniferous" not in self.sendingcompartment.name) else (1-self.dict_inputs["met_dict"]["frac_time_rain"]))' )
 
         if 'self.sendingcompartment.allowexchange_forother' in prop and 'self.dict_inputs["met_dict"]["frac_time_rain"]' in prop: # to address interaction between exchange and rain
             prop=prop.replace('self.sendingcompartment.allowexchange_forother','1')
-            prop=prop.replace('self.dict_inputs["met_dict"]["frac_time_rain"]','self.dict_inputs["met_dict"]["frac_time_exchange_rain"]')
+            # prop=prop.replace('self.dict_inputs["met_dict"]["frac_time_rain"]','self.dict_inputs["met_dict"]["frac_time_exchange_rain"]')
+            # prop=prop.replace('self.dict_inputs["met_dict"]["frac_time_rain"]','(self.dict_inputs["met_dict"]["frac_time_exchange_rain"] if ("coniferous" not in self.sendingcompartment.name) else self.dict_inputs["met_dict"]["frac_time_rain"])')
+            prop=prop.replace('self.dict_inputs["met_dict"]["frac_time_rain"]','(self.dict_inputs["met_dict"]["wt_av_allowexchange"] if ("coniferous" not in self.sendingcompartment.name) else 1)')
+
+        if '((self.receivingcompartment.chemical_dustresuspensionrate * (1 -  (  self.sendingcompartment.associated_leaf_comp.allowexchange_forair * self.sendingcompartment.associated_leaf_comp.drydepinterceptionfraction )))' in prop: # fix to ensure alg 4000 works for vegetationless compartments
+            prop=prop.replace('((self.receivingcompartment.chemical_dustresuspensionrate * (1 -  (  self.sendingcompartment.associated_leaf_comp.allowexchange_forair * self.sendingcompartment.associated_leaf_comp.drydepinterceptionfraction )))','((self.receivingcompartment.chemical_dustresuspensionrate * (1 -(self.sendingcompartment.associated_leaf_comp.allowexchange_forair * self.sendingcompartment.associated_leaf_comp.drydepinterceptionfraction) if hasattr(self.sendingcompartment,"associated_leaf_comp") else 1))')
 
         return (prop)
    

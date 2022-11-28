@@ -2,7 +2,7 @@
 from find_neighbors import *
 from numpy import sqrt,nan,log,exp
 from util_functions import *
-mfp=r"C:\Users\13963\OneDrive - ICF\Documents\RTR\PyTRIM\TCDD\input_files"   # path to met file
+mfp=r"C:\Users\13963\OneDrive - ICF\Documents\RTR\PyTRIM\Tier1_TestCases\TCDD\input_files"   # path to met file
 mfn=r"MetData_streamlined.csv"   # met file name
 default_rechargerate=1.42e-04
 
@@ -862,24 +862,24 @@ class diffusion_from_sediment_to_surface_water_fugacity_based_alginstid_2195:
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def diffusiveterm_1(self):
-		return (self.masstransfercoefficient_receiving_to_sending * self.receivingcompartment.chemical_z_total / self.sendingcompartment.chemical_z_total)
-	
-	@property
-	def compartmentrelationship(self):
-		return ("sender_below")
-	
-	@property
-	def masstransfercoefficient_sending_to_receiving(self):
-		return (self.receivingcompartment.chemical_d_effective / self.receivingcompartment.boundarylayerthicknessabovesediment)
+	def diffusiveterm_2(self):
+		return (self.masstransfercoefficient_sending_to_receiving)
 	
 	@property
 	def diffusiveterm(self):
 		return ((1 / self.diffusiveterm_1 + 1 / self.diffusiveterm_2) ** (-1))
 	
 	@property
-	def diffusiveterm_2(self):
-		return (self.masstransfercoefficient_sending_to_receiving)
+	def compartmentrelationship(self):
+		return ("sender_below")
+	
+	@property
+	def diffusiveterm_1(self):
+		return (self.masstransfercoefficient_receiving_to_sending * self.receivingcompartment.chemical_z_total / self.sendingcompartment.chemical_z_total)
+	
+	@property
+	def masstransfercoefficient_sending_to_receiving(self):
+		return (self.receivingcompartment.chemical_d_effective / self.receivingcompartment.boundarylayerthicknessabovesediment)
 	
 	@property
 	def masstransfercoefficient_receiving_to_sending(self):
@@ -1063,8 +1063,28 @@ class diffusion_from_surface_water_to_air_two_film_alginstid_4080_hg:
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def ratioofvolatilizationratetoreaerationrate(self):
-		return (sqrt(32/self.currentchemical.molecularweight))
+	def reaerationvelocity_owensformula(self):
+		return (5.349 * (self.sendingcompartment.currentvelocity**0.67)/ (self.sendingcompartment.depth**0.85))
+	
+	@property
+	def reaerationvelocity_churchillformula(self):
+		return (5.049 * (self.sendingcompartment.currentvelocity**0.969)/ (self.sendingcompartment.depth**0.673))
+	
+	@property
+	def liquidphasetransfercoefficient_lake(self):
+		return ((self.sendingcompartment.shearvelocity_m_per_day)*((self.receivingcompartment.airdensity_kg_m3/self.sendingcompartment.waterdensity)**(0.5))*((self.constants.vonkarmensconstant**(0.33))/self.sendingcompartment.dimensionlessviscoussublayerthickness) * self.sendingcompartment.chemical_waterschmidtnumber**(-0.67))
+	
+	@property
+	def volatilizationtransferrate(self):
+		return (1/(self.liquidphaseresistance + self.gasphaseresistance))
+	
+	@property
+	def liquidphasetransfercoefficient_flowingwaterbody(self):
+		return (self.reaerationvelocity_owensformula * self.ratioofvolatilizationratetoreaerationrate if self.sendingcompartment.depth < 0.61 else ((self.currentchemical.d_purewater_m2_per_s * self.sendingcompartment.currentvelocity/self.sendingcompartment.depth)**(0.5))* 86400 if self.sendingcompartment.depth >= 0.61 and (self.sendingcompartment.currentvelocity < 0.518 or self.sendingcompartment.depth> 13.584 * self.sendingcompartment.currentvelocity**(0.29135)) else self.reaerationvelocity_churchillformula * self.ratioofvolatilizationratetoreaerationrate)
+	
+	@property
+	def gasphasetransfercoefficient(self):
+		return ((self.sendingcompartment.shearvelocity_m_per_day)*((self.constants.vonkarmensconstant**(0.33))/self.sendingcompartment.dimensionlessviscoussublayerthickness) * self.receivingcompartment.chemical_airschmidtnumber**(-0.67))
 	
 	@property
 	def liquidphaseresistance(self):
@@ -1075,28 +1095,8 @@ class diffusion_from_surface_water_to_air_two_film_alginstid_4080_hg:
 		return (1/  ( self.gasphasetransfercoefficient * (self.currentchemical.h_over_r_t) ))
 	
 	@property
-	def reaerationvelocity_owensformula(self):
-		return (5.349 * (self.sendingcompartment.currentvelocity**0.67)/ (self.sendingcompartment.depth**0.85))
-	
-	@property
-	def liquidphasetransfercoefficient_lake(self):
-		return ((self.sendingcompartment.shearvelocity_m_per_day)*((self.receivingcompartment.airdensity_kg_m3/self.sendingcompartment.waterdensity)**(0.5))*((self.constants.vonkarmensconstant**(0.33))/self.sendingcompartment.dimensionlessviscoussublayerthickness) * self.sendingcompartment.chemical_waterschmidtnumber**(-0.67))
-	
-	@property
-	def liquidphasetransfercoefficient_flowingwaterbody(self):
-		return (self.reaerationvelocity_owensformula * self.ratioofvolatilizationratetoreaerationrate if self.sendingcompartment.depth < 0.61 else ((self.currentchemical.d_purewater_m2_per_s * self.sendingcompartment.currentvelocity/self.sendingcompartment.depth)**(0.5))* 86400 if self.sendingcompartment.depth >= 0.61 and (self.sendingcompartment.currentvelocity < 0.518 or self.sendingcompartment.depth> 13.584 * self.sendingcompartment.currentvelocity**(0.29135)) else self.reaerationvelocity_churchillformula * self.ratioofvolatilizationratetoreaerationrate)
-	
-	@property
-	def reaerationvelocity_churchillformula(self):
-		return (5.049 * (self.sendingcompartment.currentvelocity**0.969)/ (self.sendingcompartment.depth**0.673))
-	
-	@property
-	def gasphasetransfercoefficient(self):
-		return ((self.sendingcompartment.shearvelocity_m_per_day)*((self.constants.vonkarmensconstant**(0.33))/self.sendingcompartment.dimensionlessviscoussublayerthickness) * self.receivingcompartment.chemical_airschmidtnumber**(-0.67))
-	
-	@property
-	def volatilizationtransferrate(self):
-		return (1/(self.liquidphaseresistance + self.gasphaseresistance))
+	def ratioofvolatilizationratetoreaerationrate(self):
+		return (sqrt(32/self.currentchemical.molecularweight))
 	
 	@property
 	def transferfactor(self):
@@ -1128,8 +1128,28 @@ class diffusion_from_surface_water_to_air_two_film_alginstid_4080_organic:
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def ratioofvolatilizationratetoreaerationrate(self):
-		return (sqrt(32/self.currentchemical.molecularweight))
+	def reaerationvelocity_owensformula(self):
+		return (5.349 * (self.sendingcompartment.currentvelocity**0.67)/ (self.sendingcompartment.depth**0.85))
+	
+	@property
+	def reaerationvelocity_churchillformula(self):
+		return (5.049 * (self.sendingcompartment.currentvelocity**0.969)/ (self.sendingcompartment.depth**0.673))
+	
+	@property
+	def liquidphasetransfercoefficient_lake(self):
+		return ((self.sendingcompartment.shearvelocity_m_per_day)*((self.receivingcompartment.airdensity_kg_m3/self.sendingcompartment.waterdensity)**(0.5))*((self.constants.vonkarmensconstant**(0.33))/self.sendingcompartment.dimensionlessviscoussublayerthickness) * self.sendingcompartment.chemical_waterschmidtnumber**(-0.67))
+	
+	@property
+	def volatilizationtransferrate(self):
+		return (1/(self.liquidphaseresistance + self.gasphaseresistance))
+	
+	@property
+	def liquidphasetransfercoefficient_flowingwaterbody(self):
+		return (self.reaerationvelocity_owensformula * self.ratioofvolatilizationratetoreaerationrate if self.sendingcompartment.depth < 0.61 else ((self.currentchemical.d_purewater_m2_per_s * self.sendingcompartment.currentvelocity/self.sendingcompartment.depth)**(0.5))* 86400 if self.sendingcompartment.depth >= 0.61 and (self.sendingcompartment.currentvelocity < 0.518 or self.sendingcompartment.depth> 13.584 * self.sendingcompartment.currentvelocity**(0.29135)) else self.reaerationvelocity_churchillformula * self.ratioofvolatilizationratetoreaerationrate)
+	
+	@property
+	def gasphasetransfercoefficient(self):
+		return ((self.sendingcompartment.shearvelocity_m_per_day)*((self.constants.vonkarmensconstant**(0.33))/self.sendingcompartment.dimensionlessviscoussublayerthickness) * self.receivingcompartment.chemical_airschmidtnumber**(-0.67))
 	
 	@property
 	def liquidphaseresistance(self):
@@ -1140,28 +1160,8 @@ class diffusion_from_surface_water_to_air_two_film_alginstid_4080_organic:
 		return (1/  ( self.gasphasetransfercoefficient * (self.currentchemical.h_over_r_t) ))
 	
 	@property
-	def reaerationvelocity_owensformula(self):
-		return (5.349 * (self.sendingcompartment.currentvelocity**0.67)/ (self.sendingcompartment.depth**0.85))
-	
-	@property
-	def liquidphasetransfercoefficient_lake(self):
-		return ((self.sendingcompartment.shearvelocity_m_per_day)*((self.receivingcompartment.airdensity_kg_m3/self.sendingcompartment.waterdensity)**(0.5))*((self.constants.vonkarmensconstant**(0.33))/self.sendingcompartment.dimensionlessviscoussublayerthickness) * self.sendingcompartment.chemical_waterschmidtnumber**(-0.67))
-	
-	@property
-	def liquidphasetransfercoefficient_flowingwaterbody(self):
-		return (self.reaerationvelocity_owensformula * self.ratioofvolatilizationratetoreaerationrate if self.sendingcompartment.depth < 0.61 else ((self.currentchemical.d_purewater_m2_per_s * self.sendingcompartment.currentvelocity/self.sendingcompartment.depth)**(0.5))* 86400 if self.sendingcompartment.depth >= 0.61 and (self.sendingcompartment.currentvelocity < 0.518 or self.sendingcompartment.depth> 13.584 * self.sendingcompartment.currentvelocity**(0.29135)) else self.reaerationvelocity_churchillformula * self.ratioofvolatilizationratetoreaerationrate)
-	
-	@property
-	def reaerationvelocity_churchillformula(self):
-		return (5.049 * (self.sendingcompartment.currentvelocity**0.969)/ (self.sendingcompartment.depth**0.673))
-	
-	@property
-	def gasphasetransfercoefficient(self):
-		return ((self.sendingcompartment.shearvelocity_m_per_day)*((self.constants.vonkarmensconstant**(0.33))/self.sendingcompartment.dimensionlessviscoussublayerthickness) * self.receivingcompartment.chemical_airschmidtnumber**(-0.67))
-	
-	@property
-	def volatilizationtransferrate(self):
-		return (1/(self.liquidphaseresistance + self.gasphaseresistance))
+	def ratioofvolatilizationratetoreaerationrate(self):
+		return (sqrt(32/self.currentchemical.molecularweight))
 	
 	@property
 	def transferfactor(self):
@@ -1193,24 +1193,24 @@ class diffusion_from_surface_water_to_sediment_fugacity_based_alginstid_2149:
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def diffusiveterm_1(self):
-		return (self.masstransfercoefficient_receiving_to_sending * self.receivingcompartment.chemical_z_total / self.sendingcompartment.chemical_z_total)
-	
-	@property
-	def compartmentrelationship(self):
-		return ("sender_above")
-	
-	@property
-	def masstransfercoefficient_sending_to_receiving(self):
-		return (self.sendingcompartment.chemical_d_effective / self.sendingcompartment.boundarylayerthicknessabovesediment)
+	def diffusiveterm_2(self):
+		return (self.masstransfercoefficient_sending_to_receiving)
 	
 	@property
 	def diffusiveterm(self):
 		return ((1 / self.diffusiveterm_1 + 1 / self.diffusiveterm_2) ** (-1))
 	
 	@property
-	def diffusiveterm_2(self):
-		return (self.masstransfercoefficient_sending_to_receiving)
+	def compartmentrelationship(self):
+		return ("sender_above")
+	
+	@property
+	def diffusiveterm_1(self):
+		return (self.masstransfercoefficient_receiving_to_sending * self.receivingcompartment.chemical_z_total / self.sendingcompartment.chemical_z_total)
+	
+	@property
+	def masstransfercoefficient_sending_to_receiving(self):
+		return (self.sendingcompartment.chemical_d_effective / self.sendingcompartment.boundarylayerthicknessabovesediment)
 	
 	@property
 	def masstransfercoefficient_receiving_to_sending(self):
@@ -1341,16 +1341,16 @@ class erosion_from_surface_soil_to_soil_advection_sink:
 		self.dict_inputs=dict_inputs
 		
 	@property
+	def solidarealphasevelocity(self):
+		return (self.arealerosionrate / self.sendingcompartment.rho)
+	
+	@property
 	def arealerosionrate(self):
 		return (self.sendingcompartment.totalerosionrate_kg_m2_day * float(self.dict_inputs['df_links'].loc[(self.dict_inputs['df_links']['receiving_compartment_new']==self.receivingcompartment.name)&(self.dict_inputs['df_links']['sending_compartment_new']==self.sendingcompartment.name)&(self.dict_inputs['df_links']['property']=='fractionoftotalerosion'),'value'].values[0]))
 	
 	@property
 	def compartmentrelationship(self):
 		return ("in_same_volume_element")
-	
-	@property
-	def solidarealphasevelocity(self):
-		return (self.arealerosionrate / self.sendingcompartment.rho)
 	
 	@property
 	def transferfactor(self):
@@ -1382,16 +1382,16 @@ class erosion_from_surface_soil_to_surface_soil_general_alginstid_2460:
 		self.dict_inputs=dict_inputs
 		
 	@property
+	def solidarealphasevelocity(self):
+		return (self.arealerosionrate / self.sendingcompartment.rho)
+	
+	@property
 	def arealerosionrate(self):
 		return (self.sendingcompartment.totalerosionrate_kg_m2_day * float(self.dict_inputs['df_links'].loc[(self.dict_inputs['df_links']['receiving_compartment_new']==self.receivingcompartment.name)&(self.dict_inputs['df_links']['sending_compartment_new']==self.sendingcompartment.name)&(self.dict_inputs['df_links']['property']=='fractionoftotalerosion'),'value'].values[0]))
 	
 	@property
 	def compartmentrelationship(self):
 		return ("next_to")
-	
-	@property
-	def solidarealphasevelocity(self):
-		return (self.arealerosionrate / self.sendingcompartment.rho)
 	
 	@property
 	def transferfactor(self):
@@ -1423,16 +1423,16 @@ class erosion_from_surface_soil_to_surface_water_general_alginstid_3515:
 		self.dict_inputs=dict_inputs
 		
 	@property
+	def solidarealphasevelocity(self):
+		return (self.arealerosionrate / self.sendingcompartment.rho)
+	
+	@property
 	def arealerosionrate(self):
 		return (self.sendingcompartment.totalerosionrate_kg_m2_day * float(self.dict_inputs['df_links'].loc[(self.dict_inputs['df_links']['receiving_compartment_new']==self.receivingcompartment.name)&(self.dict_inputs['df_links']['sending_compartment_new']==self.sendingcompartment.name)&(self.dict_inputs['df_links']['property']=='fractionoftotalerosion'),'value'].values[0]))
 	
 	@property
 	def compartmentrelationship(self):
 		return ("next_to")
-	
-	@property
-	def solidarealphasevelocity(self):
-		return (self.arealerosionrate / self.sendingcompartment.rho)
 	
 	@property
 	def transferfactor(self):
@@ -2749,7 +2749,7 @@ class particles_blown_off_from_plant_leaf_to_air_dry_alginstid_4010:
 	@property
 	def transferfactor(self):
 		try:
-			r=1 * self.receivingcompartment.chemical_particlevolumetricdrydepositionrate * self.sendingcompartment.associated_leaf_comp.drydepinterceptionfraction * check_neighbor(self.sendingcompartment,self.receivingcompartment,self.dict_inputs).is_neighbor()[1]/ self.sendingcompartment.volume  * (self.dict_inputs["met_dict"]["frac_time_exchange_no_rain"]) if self.sendingcompartment.volume>0 else 0
+			r=1 * self.receivingcompartment.chemical_particlevolumetricdrydepositionrate * self.sendingcompartment.associated_leaf_comp.drydepinterceptionfraction * check_neighbor(self.sendingcompartment,self.receivingcompartment,self.dict_inputs).is_neighbor()[1]/ self.sendingcompartment.volume  * ((self.dict_inputs["met_dict"]["frac_time_exchange_no_rain"] if ("coniferous" not in self.sendingcompartment.name) else (1-self.dict_inputs["met_dict"]["frac_time_rain"]))) if self.sendingcompartment.volume>0 else 0
 		except:
 			r=nan
 		return (r)
@@ -2782,7 +2782,7 @@ class particles_washed_off_leaf_onto_ground_alginstid_1103:
 	@property
 	def transferfactor(self):
 		try:
-			r=1 * self.sendingcompartment.chemical_particlevolumetricwetdepositionrate * self.sendingcompartment.associated_leaf_comp.wetdepinterceptionfraction * self.receivingcompartment.area/self.sendingcompartment.volume *self.dict_inputs["met_dict"]["frac_time_exchange_rain"]
+			r=1 * self.sendingcompartment.chemical_particlevolumetricwetdepositionrate * self.sendingcompartment.associated_leaf_comp.wetdepinterceptionfraction * self.receivingcompartment.area/self.sendingcompartment.volume *(self.dict_inputs["met_dict"]["wt_av_allowexchange"] if ("coniferous" not in self.sendingcompartment.name) else 1)
 		except:
 			r=nan
 		return (r)
@@ -2995,12 +2995,12 @@ class resuspension_from_sediment_to_surface_water_general_alginstid_2190:
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def compartmentrelationship(self):
-		return ("sender_below")
-	
-	@property
 	def solidarealphasevelocity(self):
 		return (self.sendingcompartment.sedimentresuspensionrate_m3_m2_day)
+	
+	@property
+	def compartmentrelationship(self):
+		return ("sender_below")
 	
 	@property
 	def transferfactor(self):
@@ -3034,7 +3034,7 @@ class resuspension_from_surface_soil_to_air_set_to_deposition_rate_of_particles_
 	@property
 	def transferfactor(self):
 		try:
-			r=((self.receivingcompartment.chemical_dustresuspensionrate * (1 -  (  self.sendingcompartment.associated_leaf_comp.allowexchange_forair * self.sendingcompartment.associated_leaf_comp.drydepinterceptionfraction ))) / self.receivingcompartment.dustdensity) * (self.sendingcompartment.chemical_z_solid / self.sendingcompartment.chemical_z_total) * (check_neighbor(self.sendingcompartment,self.receivingcompartment,self.dict_inputs).is_neighbor()[1] / self.sendingcompartment.volume)
+			r=((self.receivingcompartment.chemical_dustresuspensionrate * (1 -(self.sendingcompartment.associated_leaf_comp.allowexchange_forair * self.sendingcompartment.associated_leaf_comp.drydepinterceptionfraction) if hasattr(self.sendingcompartment,"associated_leaf_comp") else 1)) / self.receivingcompartment.dustdensity) * (self.sendingcompartment.chemical_z_solid / self.sendingcompartment.chemical_z_total) * (check_neighbor(self.sendingcompartment,self.receivingcompartment,self.dict_inputs).is_neighbor()[1] / self.sendingcompartment.volume)
 		except:
 			r=nan
 		return (r)
@@ -3172,12 +3172,12 @@ class sediment_burial_from_sediment_to_sediment_burial_sink_zero_net_deposition_
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def compartmentrelationship(self):
-		return ("sender_above")
-	
-	@property
 	def solidarealphasevelocity(self):
 		return (self.sendingcompartment.sedimentburialratetohavezeronetdeposition_m3_m2_day)
+	
+	@property
+	def compartmentrelationship(self):
+		return ("sender_above")
 	
 	@property
 	def transferfactor(self):
@@ -3209,12 +3209,12 @@ class sediment_deposition_from_surface_water_to_sediment_general_alginstid_2139:
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def compartmentrelationship(self):
-		return ("sender_above")
-	
-	@property
 	def solidarealphasevelocity(self):
 		return (self.sendingcompartment.sedimentdepositionrate_m3_m2_day)
+	
+	@property
+	def compartmentrelationship(self):
+		return ("sender_above")
 	
 	@property
 	def transferfactor(self):
@@ -3246,12 +3246,12 @@ class time_dependent_partition_from_benthic_invertebrate_to_bulk_sediment_for_di
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def k1(self):
-		return (-log(1 - self.sendingcompartment.chemical_sedimentpartitioning_alphaofequilibrium) / self.sendingcompartment.chemical_sedimentpartitioning_timetoreachalphaofequilibrium)
-	
-	@property
 	def k2(self):
 		return (self.k1 * self.sendingcompartment.chemical_sedimentpartitioning_partitioncoefficient)
+	
+	@property
+	def k1(self):
+		return (-log(1 - self.sendingcompartment.chemical_sedimentpartitioning_alphaofequilibrium) / self.sendingcompartment.chemical_sedimentpartitioning_timetoreachalphaofequilibrium)
 	
 	@property
 	def transferfactor(self):
@@ -3283,12 +3283,12 @@ class time_dependent_partition_from_benthic_invertebrate_to_sediment_alginstid_1
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def k1(self):
-		return (-log(1 - self.sendingcompartment.chemical_sedimentpartitioning_alphaofequilibrium) / self.sendingcompartment.chemical_sedimentpartitioning_timetoreachalphaofequilibrium)
-	
-	@property
 	def k2(self):
 		return (self.k1 * self.sendingcompartment.chemical_sedimentpartitioning_partitioncoefficient)
+	
+	@property
+	def k1(self):
+		return (-log(1 - self.sendingcompartment.chemical_sedimentpartitioning_alphaofequilibrium) / self.sendingcompartment.chemical_sedimentpartitioning_timetoreachalphaofequilibrium)
 	
 	@property
 	def transferfactor(self):
@@ -3320,12 +3320,12 @@ class time_dependent_partition_from_bulk_sediment_to_benthic_invertebrate_for_di
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def k1(self):
-		return (-log(1 - self.receivingcompartment.chemical_sedimentpartitioning_alphaofequilibrium) / self.receivingcompartment.chemical_sedimentpartitioning_timetoreachalphaofequilibrium)
-	
-	@property
 	def k2(self):
 		return (self.k1 * self.receivingcompartment.chemical_sedimentpartitioning_partitioncoefficient)
+	
+	@property
+	def k1(self):
+		return (-log(1 - self.receivingcompartment.chemical_sedimentpartitioning_alphaofequilibrium) / self.receivingcompartment.chemical_sedimentpartitioning_timetoreachalphaofequilibrium)
 	
 	@property
 	def transferfactor(self):
@@ -3357,12 +3357,12 @@ class time_dependent_partition_from_macrophyte_to_surface_water_alginstid_1544_h
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def k1(self):
-		return (-log(1 - self.sendingcompartment.chemical_watercolumndissolvedpartitioning_alphaofequilibrium) / self.sendingcompartment.chemical_watercolumndissolvedpartitioning_timetoreachalphaofequilibrium)
-	
-	@property
 	def k2(self):
 		return (self.k1 * self.sendingcompartment.chemical_watercolumndissolvedpartitioning_partitioncoefficient)
+	
+	@property
+	def k1(self):
+		return (-log(1 - self.sendingcompartment.chemical_watercolumndissolvedpartitioning_alphaofequilibrium) / self.sendingcompartment.chemical_watercolumndissolvedpartitioning_timetoreachalphaofequilibrium)
 	
 	@property
 	def transferfactor(self):
@@ -3394,12 +3394,12 @@ class time_dependent_partition_from_root_to_root_zone_interacts_with_bulk_soil_a
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def k1(self):
-		return (-log(1 - self.sendingcompartment.chemical_root_rootzonepartitioningbulksoil_alphaofsteadystate) / self.sendingcompartment.chemical_root_rootzonepartitioningbulksoil_timetoreachalphaofsteadystate)
-	
-	@property
 	def k2(self):
 		return (self.k1 * self.sendingcompartment.chemical_root_rootzonepartitioningbulksoil_partitioncoefficient)
+	
+	@property
+	def k1(self):
+		return (-log(1 - self.sendingcompartment.chemical_root_rootzonepartitioningbulksoil_alphaofsteadystate) / self.sendingcompartment.chemical_root_rootzonepartitioningbulksoil_timetoreachalphaofsteadystate)
 	
 	@property
 	def transferfactor(self):
@@ -3431,12 +3431,12 @@ class time_dependent_partition_from_root_to_root_zone_interacts_with_bulk_soil_a
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def k1(self):
-		return (-log(1 - self.sendingcompartment.chemical_root_rootzonepartitioningbulksoil_alphaofsteadystate) / self.sendingcompartment.chemical_root_rootzonepartitioningbulksoil_timetoreachalphaofsteadystate)
-	
-	@property
 	def k2(self):
 		return (self.k1 * self.sendingcompartment.chemical_root_rootzonepartitioningbulksoil_partitioncoefficient)
+	
+	@property
+	def k1(self):
+		return (-log(1 - self.sendingcompartment.chemical_root_rootzonepartitioningbulksoil_alphaofsteadystate) / self.sendingcompartment.chemical_root_rootzonepartitioningbulksoil_timetoreachalphaofsteadystate)
 	
 	@property
 	def transferfactor(self):
@@ -3468,12 +3468,12 @@ class time_dependent_partition_from_root_to_root_zone_interacts_with_bulk_soil_g
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def k1(self):
-		return (-log(1 - self.sendingcompartment.chemical_root_rootzonepartitioningbulksoil_alphaofsteadystate) / self.sendingcompartment.chemical_root_rootzonepartitioningbulksoil_timetoreachalphaofsteadystate)
-	
-	@property
 	def k2(self):
 		return (self.k1 * self.sendingcompartment.chemical_root_rootzonepartitioningbulksoil_partitioncoefficient)
+	
+	@property
+	def k1(self):
+		return (-log(1 - self.sendingcompartment.chemical_root_rootzonepartitioningbulksoil_alphaofsteadystate) / self.sendingcompartment.chemical_root_rootzonepartitioningbulksoil_timetoreachalphaofsteadystate)
 	
 	@property
 	def transferfactor(self):
@@ -3505,12 +3505,12 @@ class time_dependent_partition_from_root_to_root_zone_interacts_with_bulk_soil_g
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def k1(self):
-		return (-log(1 - self.sendingcompartment.chemical_root_rootzonepartitioningbulksoil_alphaofsteadystate) / self.sendingcompartment.chemical_root_rootzonepartitioningbulksoil_timetoreachalphaofsteadystate)
-	
-	@property
 	def k2(self):
 		return (self.k1 * self.sendingcompartment.chemical_root_rootzonepartitioningbulksoil_partitioncoefficient)
+	
+	@property
+	def k1(self):
+		return (-log(1 - self.sendingcompartment.chemical_root_rootzonepartitioningbulksoil_alphaofsteadystate) / self.sendingcompartment.chemical_root_rootzonepartitioningbulksoil_timetoreachalphaofsteadystate)
 	
 	@property
 	def transferfactor(self):
@@ -3542,12 +3542,12 @@ class time_dependent_partition_from_root_to_root_zone_interacts_with_soil_pore_w
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def k1(self):
-		return (-log(1 - self.sendingcompartment.chemical_rootsoilwaterinteraction_alpha) / self.sendingcompartment.chemical_rootsoilwaterinteraction_t_alpha)
-	
-	@property
 	def k2(self):
 		return (self.k1 * (self.sendingcompartment.watercontent + self.sendingcompartment.lipidcontent * self.currentchemical.k_ow ** self.sendingcompartment.correctionexponent) * self.sendingcompartment.density)
+	
+	@property
+	def k1(self):
+		return (-log(1 - self.sendingcompartment.chemical_rootsoilwaterinteraction_alpha) / self.sendingcompartment.chemical_rootsoilwaterinteraction_t_alpha)
 	
 	@property
 	def transferfactor(self):
@@ -3579,12 +3579,12 @@ class time_dependent_partition_from_root_to_root_zone_interacts_with_soil_pore_w
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def k1(self):
-		return (-log(1 - self.sendingcompartment.chemical_rootsoilwaterinteraction_alpha) / self.sendingcompartment.chemical_rootsoilwaterinteraction_t_alpha)
-	
-	@property
 	def k2(self):
 		return (self.k1 * (self.sendingcompartment.watercontent + self.sendingcompartment.lipidcontent * self.currentchemical.k_ow ** self.sendingcompartment.correctionexponent) * self.sendingcompartment.density)
+	
+	@property
+	def k1(self):
+		return (-log(1 - self.sendingcompartment.chemical_rootsoilwaterinteraction_alpha) / self.sendingcompartment.chemical_rootsoilwaterinteraction_t_alpha)
 	
 	@property
 	def transferfactor(self):
@@ -3616,12 +3616,12 @@ class time_dependent_partition_from_root_zone_to_root_interacts_with_bulk_soil_a
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def k1(self):
-		return (-log(1 - self.receivingcompartment.chemical_root_rootzonepartitioningbulksoil_alphaofsteadystate) / self.receivingcompartment.chemical_root_rootzonepartitioningbulksoil_timetoreachalphaofsteadystate)
-	
-	@property
 	def k2(self):
 		return (self.k1 * self.receivingcompartment.chemical_root_rootzonepartitioningbulksoil_partitioncoefficient)
+	
+	@property
+	def k1(self):
+		return (-log(1 - self.receivingcompartment.chemical_root_rootzonepartitioningbulksoil_alphaofsteadystate) / self.receivingcompartment.chemical_root_rootzonepartitioningbulksoil_timetoreachalphaofsteadystate)
 	
 	@property
 	def transferfactor(self):
@@ -3653,12 +3653,12 @@ class time_dependent_partition_from_root_zone_to_root_interacts_with_bulk_soil_a
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def k1(self):
-		return (-log(1 - self.receivingcompartment.chemical_root_rootzonepartitioningbulksoil_alphaofsteadystate) / self.receivingcompartment.chemical_root_rootzonepartitioningbulksoil_timetoreachalphaofsteadystate)
-	
-	@property
 	def k2(self):
 		return (self.k1 * self.receivingcompartment.chemical_root_rootzonepartitioningbulksoil_partitioncoefficient)
+	
+	@property
+	def k1(self):
+		return (-log(1 - self.receivingcompartment.chemical_root_rootzonepartitioningbulksoil_alphaofsteadystate) / self.receivingcompartment.chemical_root_rootzonepartitioningbulksoil_timetoreachalphaofsteadystate)
 	
 	@property
 	def transferfactor(self):
@@ -3690,12 +3690,12 @@ class time_dependent_partition_from_root_zone_to_root_interacts_with_bulk_soil_g
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def k1(self):
-		return (-log(1 - self.receivingcompartment.chemical_root_rootzonepartitioningbulksoil_alphaofsteadystate) / self.receivingcompartment.chemical_root_rootzonepartitioningbulksoil_timetoreachalphaofsteadystate)
-	
-	@property
 	def k2(self):
 		return (self.k1 * self.receivingcompartment.chemical_root_rootzonepartitioningbulksoil_partitioncoefficient)
+	
+	@property
+	def k1(self):
+		return (-log(1 - self.receivingcompartment.chemical_root_rootzonepartitioningbulksoil_alphaofsteadystate) / self.receivingcompartment.chemical_root_rootzonepartitioningbulksoil_timetoreachalphaofsteadystate)
 	
 	@property
 	def transferfactor(self):
@@ -3727,12 +3727,12 @@ class time_dependent_partition_from_root_zone_to_root_interacts_with_bulk_soil_g
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def k1(self):
-		return (-log(1 - self.receivingcompartment.chemical_root_rootzonepartitioningbulksoil_alphaofsteadystate) / self.receivingcompartment.chemical_root_rootzonepartitioningbulksoil_timetoreachalphaofsteadystate)
-	
-	@property
 	def k2(self):
 		return (self.k1 * self.receivingcompartment.chemical_root_rootzonepartitioningbulksoil_partitioncoefficient)
+	
+	@property
+	def k1(self):
+		return (-log(1 - self.receivingcompartment.chemical_root_rootzonepartitioningbulksoil_alphaofsteadystate) / self.receivingcompartment.chemical_root_rootzonepartitioningbulksoil_timetoreachalphaofsteadystate)
 	
 	@property
 	def transferfactor(self):
@@ -3764,12 +3764,12 @@ class time_dependent_partition_from_root_zone_to_root_interacts_with_soil_pore_w
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def k1(self):
-		return (-log(1 - self.receivingcompartment.chemical_rootsoilwaterinteraction_alpha) / self.receivingcompartment.chemical_rootsoilwaterinteraction_t_alpha)
-	
-	@property
 	def k2(self):
 		return (self.k1 * (self.receivingcompartment.watercontent + self.receivingcompartment.lipidcontent * self.currentchemical.k_ow ** self.receivingcompartment.correctionexponent) * self.receivingcompartment.density)
+	
+	@property
+	def k1(self):
+		return (-log(1 - self.receivingcompartment.chemical_rootsoilwaterinteraction_alpha) / self.receivingcompartment.chemical_rootsoilwaterinteraction_t_alpha)
 	
 	@property
 	def transferfactor(self):
@@ -3801,12 +3801,12 @@ class time_dependent_partition_from_root_zone_to_root_interacts_with_soil_pore_w
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def k1(self):
-		return (-log(1 - self.receivingcompartment.chemical_rootsoilwaterinteraction_alpha) / self.receivingcompartment.chemical_rootsoilwaterinteraction_t_alpha)
-	
-	@property
 	def k2(self):
 		return (self.k1 * (self.receivingcompartment.watercontent + self.receivingcompartment.lipidcontent * self.currentchemical.k_ow ** self.receivingcompartment.correctionexponent) * self.receivingcompartment.density)
+	
+	@property
+	def k1(self):
+		return (-log(1 - self.receivingcompartment.chemical_rootsoilwaterinteraction_alpha) / self.receivingcompartment.chemical_rootsoilwaterinteraction_t_alpha)
 	
 	@property
 	def transferfactor(self):
@@ -3838,12 +3838,12 @@ class time_dependent_partition_from_sediment_to_benthic_invertebrate_alginstid_1
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def k1(self):
-		return (-log(1 - self.receivingcompartment.chemical_sedimentpartitioning_alphaofequilibrium) / self.receivingcompartment.chemical_sedimentpartitioning_timetoreachalphaofequilibrium)
-	
-	@property
 	def k2(self):
 		return (self.k1 * self.receivingcompartment.chemical_sedimentpartitioning_partitioncoefficient)
+	
+	@property
+	def k1(self):
+		return (-log(1 - self.receivingcompartment.chemical_sedimentpartitioning_alphaofequilibrium) / self.receivingcompartment.chemical_sedimentpartitioning_timetoreachalphaofequilibrium)
 	
 	@property
 	def transferfactor(self):
@@ -3875,12 +3875,12 @@ class time_dependent_partition_from_surface_water_to_macrophyte_hg_alginstid_154
 		self.dict_inputs=dict_inputs
 		
 	@property
-	def k1(self):
-		return (-log(1 - self.receivingcompartment.chemical_watercolumndissolvedpartitioning_alphaofequilibrium) / self.receivingcompartment.chemical_watercolumndissolvedpartitioning_timetoreachalphaofequilibrium)
-	
-	@property
 	def k2(self):
 		return (self.k1 * self.receivingcompartment.chemical_watercolumndissolvedpartitioning_partitioncoefficient)
+	
+	@property
+	def k1(self):
+		return (-log(1 - self.receivingcompartment.chemical_watercolumndissolvedpartitioning_alphaofequilibrium) / self.receivingcompartment.chemical_watercolumndissolvedpartitioning_timetoreachalphaofequilibrium)
 	
 	@property
 	def transferfactor(self):

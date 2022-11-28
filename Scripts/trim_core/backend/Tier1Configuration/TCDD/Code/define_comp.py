@@ -4295,11 +4295,11 @@ def define_comp(currentchemical):
 	except:
 		pass
 	try:
-		dryvaporsource_in_dryvaporsource_source.deposition_rate['chem_arsenic']=3e-11*dryvaporsource_in_dryvaporsource_source.parcel_area
+		dryvaporsource_in_dryvaporsource_source.deposition_rate['chem_arsenic']=0e-11*dryvaporsource_in_dryvaporsource_source.parcel_area
 	except:
 		pass
 	try:
-		dryvaporsource_in_dryvaporsource_source.deposition_rate['chem_cadmium']=3e-11*dryvaporsource_in_dryvaporsource_source.parcel_area
+		dryvaporsource_in_dryvaporsource_source.deposition_rate['chem_cadmium']=0e-11*dryvaporsource_in_dryvaporsource_source.parcel_area
 	except:
 		pass
 	try:
@@ -4319,11 +4319,11 @@ def define_comp(currentchemical):
 	except:
 		pass
 	try:
-		wetvaporsource_in_wetvaporsource_source.deposition_rate['chem_arsenic']=4e-11*wetvaporsource_in_wetvaporsource_source.parcel_area
+		wetvaporsource_in_wetvaporsource_source.deposition_rate['chem_arsenic']=0e-11*wetvaporsource_in_wetvaporsource_source.parcel_area
 	except:
 		pass
 	try:
-		wetvaporsource_in_wetvaporsource_source.deposition_rate['chem_cadmium']=4e-11*wetvaporsource_in_wetvaporsource_source.parcel_area
+		wetvaporsource_in_wetvaporsource_source.deposition_rate['chem_cadmium']=0e-11*wetvaporsource_in_wetvaporsource_source.parcel_area
 	except:
 		pass
 	try:
@@ -4391,11 +4391,11 @@ def define_comp(currentchemical):
 	except:
 		pass
 	try:
-		dryvaporsource_in_dryvaporsource_n1.deposition_rate['chem_arsenic']=3e-11*dryvaporsource_in_dryvaporsource_n1.parcel_area
+		dryvaporsource_in_dryvaporsource_n1.deposition_rate['chem_arsenic']=0e-11*dryvaporsource_in_dryvaporsource_n1.parcel_area
 	except:
 		pass
 	try:
-		dryvaporsource_in_dryvaporsource_n1.deposition_rate['chem_cadmium']=3e-11*dryvaporsource_in_dryvaporsource_n1.parcel_area
+		dryvaporsource_in_dryvaporsource_n1.deposition_rate['chem_cadmium']=0e-11*dryvaporsource_in_dryvaporsource_n1.parcel_area
 	except:
 		pass
 	try:
@@ -4415,11 +4415,11 @@ def define_comp(currentchemical):
 	except:
 		pass
 	try:
-		wetvaporsource_in_wetvaporsource_n1.deposition_rate['chem_arsenic']=4e-11*wetvaporsource_in_wetvaporsource_n1.parcel_area
+		wetvaporsource_in_wetvaporsource_n1.deposition_rate['chem_arsenic']=0e-11*wetvaporsource_in_wetvaporsource_n1.parcel_area
 	except:
 		pass
 	try:
-		wetvaporsource_in_wetvaporsource_n1.deposition_rate['chem_cadmium']=4e-11*wetvaporsource_in_wetvaporsource_n1.parcel_area
+		wetvaporsource_in_wetvaporsource_n1.deposition_rate['chem_cadmium']=0e-11*wetvaporsource_in_wetvaporsource_n1.parcel_area
 	except:
 		pass
 	try:
@@ -4487,11 +4487,11 @@ def define_comp(currentchemical):
 	except:
 		pass
 	try:
-		dryvaporsource_in_dryvaporsource_n6.deposition_rate['chem_arsenic']=3e-11*dryvaporsource_in_dryvaporsource_n6.parcel_area
+		dryvaporsource_in_dryvaporsource_n6.deposition_rate['chem_arsenic']=0e-11*dryvaporsource_in_dryvaporsource_n6.parcel_area
 	except:
 		pass
 	try:
-		dryvaporsource_in_dryvaporsource_n6.deposition_rate['chem_cadmium']=3e-11*dryvaporsource_in_dryvaporsource_n6.parcel_area
+		dryvaporsource_in_dryvaporsource_n6.deposition_rate['chem_cadmium']=0e-11*dryvaporsource_in_dryvaporsource_n6.parcel_area
 	except:
 		pass
 	try:
@@ -4511,27 +4511,47 @@ def define_comp(currentchemical):
 	except:
 		pass
 	try:
+		wetvaporsource_in_wetvaporsource_n6.deposition_rate['chem_arsenic']=0e-11*wetvaporsource_in_wetvaporsource_n6.parcel_area
+	except:
+		pass
+	try:
+		wetvaporsource_in_wetvaporsource_n6.deposition_rate['chem_cadmium']=0e-11*wetvaporsource_in_wetvaporsource_n6.parcel_area
+	except:
+		pass
+	try:
+		wetvaporsource_in_wetvaporsource_n6.deposition_rate['chem_2_3_7_8_tcdd']=4e-11*wetvaporsource_in_wetvaporsource_n6.parcel_area
+	except:
+		pass
+	try:
+		wetvaporsource_in_wetvaporsource_n6.deposition_rate['chem_divalent_mercury']=4e-11*wetvaporsource_in_wetvaporsource_n6.parcel_area
+	except:
+		pass
+	try:
+		wetvaporsource_in_wetvaporsource_n6.deposition_rate['chem_methylmercury']=4e-11*wetvaporsource_in_wetvaporsource_n6.parcel_area
+	except:
+		pass
+	try:
 		dryparticlesource_in_dryparticlesource_n7.deposition_rate['chem_benzo_a_pyrene']=1e-11*dryparticlesource_in_dryparticlesource_n7.parcel_area
 	except:
 		pass
 	try:
-		dryparticlesource_in_dryparticlesource_n7.deposition_rate['chem_arsenic']=2e-11*dryparticlesource_in_dryparticlesource_n7.parcel_area
+		dryparticlesource_in_dryparticlesource_n7.deposition_rate['chem_arsenic']=1e-11*dryparticlesource_in_dryparticlesource_n7.parcel_area
 	except:
 		pass
 	try:
-		dryparticlesource_in_dryparticlesource_n7.deposition_rate['chem_cadmium']=2e-11*dryparticlesource_in_dryparticlesource_n7.parcel_area
+		dryparticlesource_in_dryparticlesource_n7.deposition_rate['chem_cadmium']=1e-11*dryparticlesource_in_dryparticlesource_n7.parcel_area
 	except:
 		pass
 	try:
-		dryparticlesource_in_dryparticlesource_n7.deposition_rate['chem_2_3_7_8_tcdd']=2e-11*dryparticlesource_in_dryparticlesource_n7.parcel_area
+		dryparticlesource_in_dryparticlesource_n7.deposition_rate['chem_2_3_7_8_tcdd']=1e-11*dryparticlesource_in_dryparticlesource_n7.parcel_area
 	except:
 		pass
 	try:
-		dryparticlesource_in_dryparticlesource_n7.deposition_rate['chem_divalent_mercury']=2e-11*dryparticlesource_in_dryparticlesource_n7.parcel_area
+		dryparticlesource_in_dryparticlesource_n7.deposition_rate['chem_divalent_mercury']=1e-11*dryparticlesource_in_dryparticlesource_n7.parcel_area
 	except:
 		pass
 	try:
-		dryparticlesource_in_dryparticlesource_n7.deposition_rate['chem_methylmercury']=2e-11*dryparticlesource_in_dryparticlesource_n7.parcel_area
+		dryparticlesource_in_dryparticlesource_n7.deposition_rate['chem_methylmercury']=1e-11*dryparticlesource_in_dryparticlesource_n7.parcel_area
 	except:
 		pass
 	try:
@@ -4539,7 +4559,7 @@ def define_comp(currentchemical):
 	except:
 		pass
 	try:
-		wetparticlesource_in_wetparticlesource_n7.deposition_rate['chem_arsenic']=4e-11*wetparticlesource_in_wetparticlesource_n7.parcel_area
+		wetparticlesource_in_wetparticlesource_n7.deposition_rate['chem_arsenic']=0e-11*wetparticlesource_in_wetparticlesource_n7.parcel_area
 	except:
 		pass
 	try:
@@ -4563,11 +4583,11 @@ def define_comp(currentchemical):
 	except:
 		pass
 	try:
-		dryvaporsource_in_dryvaporsource_n7.deposition_rate['chem_arsenic']=3e-11*dryvaporsource_in_dryvaporsource_n7.parcel_area
+		dryvaporsource_in_dryvaporsource_n7.deposition_rate['chem_arsenic']=0e-11*dryvaporsource_in_dryvaporsource_n7.parcel_area
 	except:
 		pass
 	try:
-		dryvaporsource_in_dryvaporsource_n7.deposition_rate['chem_cadmium']=3e-11*dryvaporsource_in_dryvaporsource_n7.parcel_area
+		dryvaporsource_in_dryvaporsource_n7.deposition_rate['chem_cadmium']=0e-11*dryvaporsource_in_dryvaporsource_n7.parcel_area
 	except:
 		pass
 	try:
@@ -4587,11 +4607,11 @@ def define_comp(currentchemical):
 	except:
 		pass
 	try:
-		wetvaporsource_in_wetvaporsource_n7.deposition_rate['chem_arsenic']=4e-11*wetvaporsource_in_wetvaporsource_n7.parcel_area
+		wetvaporsource_in_wetvaporsource_n7.deposition_rate['chem_arsenic']=0e-11*wetvaporsource_in_wetvaporsource_n7.parcel_area
 	except:
 		pass
 	try:
-		wetvaporsource_in_wetvaporsource_n7.deposition_rate['chem_cadmium']=4e-11*wetvaporsource_in_wetvaporsource_n7.parcel_area
+		wetvaporsource_in_wetvaporsource_n7.deposition_rate['chem_cadmium']=0e-11*wetvaporsource_in_wetvaporsource_n7.parcel_area
 	except:
 		pass
 	try:
@@ -4611,23 +4631,23 @@ def define_comp(currentchemical):
 	except:
 		pass
 	try:
-		dryparticlesource_in_dryparticlesource_n3.deposition_rate['chem_arsenic']=2e-11*dryparticlesource_in_dryparticlesource_n3.parcel_area
+		dryparticlesource_in_dryparticlesource_n3.deposition_rate['chem_arsenic']=1e-11*dryparticlesource_in_dryparticlesource_n3.parcel_area
 	except:
 		pass
 	try:
-		dryparticlesource_in_dryparticlesource_n3.deposition_rate['chem_cadmium']=2e-11*dryparticlesource_in_dryparticlesource_n3.parcel_area
+		dryparticlesource_in_dryparticlesource_n3.deposition_rate['chem_cadmium']=1e-11*dryparticlesource_in_dryparticlesource_n3.parcel_area
 	except:
 		pass
 	try:
-		dryparticlesource_in_dryparticlesource_n3.deposition_rate['chem_2_3_7_8_tcdd']=2e-11*dryparticlesource_in_dryparticlesource_n3.parcel_area
+		dryparticlesource_in_dryparticlesource_n3.deposition_rate['chem_2_3_7_8_tcdd']=1e-11*dryparticlesource_in_dryparticlesource_n3.parcel_area
 	except:
 		pass
 	try:
-		dryparticlesource_in_dryparticlesource_n3.deposition_rate['chem_divalent_mercury']=2e-11*dryparticlesource_in_dryparticlesource_n3.parcel_area
+		dryparticlesource_in_dryparticlesource_n3.deposition_rate['chem_divalent_mercury']=1e-11*dryparticlesource_in_dryparticlesource_n3.parcel_area
 	except:
 		pass
 	try:
-		dryparticlesource_in_dryparticlesource_n3.deposition_rate['chem_methylmercury']=2e-11*dryparticlesource_in_dryparticlesource_n3.parcel_area
+		dryparticlesource_in_dryparticlesource_n3.deposition_rate['chem_methylmercury']=1e-11*dryparticlesource_in_dryparticlesource_n3.parcel_area
 	except:
 		pass
 	try:
@@ -4659,11 +4679,11 @@ def define_comp(currentchemical):
 	except:
 		pass
 	try:
-		dryvaporsource_in_dryvaporsource_n3.deposition_rate['chem_arsenic']=3e-11*dryvaporsource_in_dryvaporsource_n3.parcel_area
+		dryvaporsource_in_dryvaporsource_n3.deposition_rate['chem_arsenic']=0e-11*dryvaporsource_in_dryvaporsource_n3.parcel_area
 	except:
 		pass
 	try:
-		dryvaporsource_in_dryvaporsource_n3.deposition_rate['chem_cadmium']=3e-11*dryvaporsource_in_dryvaporsource_n3.parcel_area
+		dryvaporsource_in_dryvaporsource_n3.deposition_rate['chem_cadmium']=0e-11*dryvaporsource_in_dryvaporsource_n3.parcel_area
 	except:
 		pass
 	try:
@@ -4680,6 +4700,26 @@ def define_comp(currentchemical):
 		pass
 	try:
 		wetvaporsource_in_wetvaporsource_n3.deposition_rate['chem_benzo_a_pyrene']=4e-11*wetvaporsource_in_wetvaporsource_n3.parcel_area
+	except:
+		pass
+	try:
+		wetvaporsource_in_wetvaporsource_n3.deposition_rate['chem_arsenic']=0e-11*wetvaporsource_in_wetvaporsource_n3.parcel_area
+	except:
+		pass
+	try:
+		wetvaporsource_in_wetvaporsource_n3.deposition_rate['chem_cadmium']=0e-11*wetvaporsource_in_wetvaporsource_n3.parcel_area
+	except:
+		pass
+	try:
+		wetvaporsource_in_wetvaporsource_n3.deposition_rate['chem_2_3_7_8_tcdd']=4e-11*wetvaporsource_in_wetvaporsource_n3.parcel_area
+	except:
+		pass
+	try:
+		wetvaporsource_in_wetvaporsource_n3.deposition_rate['chem_divalent_mercury']=4e-11*wetvaporsource_in_wetvaporsource_n3.parcel_area
+	except:
+		pass
+	try:
+		wetvaporsource_in_wetvaporsource_n3.deposition_rate['chem_methylmercury']=4e-11*wetvaporsource_in_wetvaporsource_n3.parcel_area
 	except:
 		pass
 	try:
@@ -4735,11 +4775,11 @@ def define_comp(currentchemical):
 	except:
 		pass
 	try:
-		dryvaporsource_in_dryvaporsource_n4.deposition_rate['chem_arsenic']=3e-11*dryvaporsource_in_dryvaporsource_n4.parcel_area
+		dryvaporsource_in_dryvaporsource_n4.deposition_rate['chem_arsenic']=0e-11*dryvaporsource_in_dryvaporsource_n4.parcel_area
 	except:
 		pass
 	try:
-		dryvaporsource_in_dryvaporsource_n4.deposition_rate['chem_cadmium']=3e-11*dryvaporsource_in_dryvaporsource_n4.parcel_area
+		dryvaporsource_in_dryvaporsource_n4.deposition_rate['chem_cadmium']=0e-11*dryvaporsource_in_dryvaporsource_n4.parcel_area
 	except:
 		pass
 	try:
@@ -4759,11 +4799,11 @@ def define_comp(currentchemical):
 	except:
 		pass
 	try:
-		wetvaporsource_in_wetvaporsource_n4.deposition_rate['chem_arsenic']=4e-11*wetvaporsource_in_wetvaporsource_n4.parcel_area
+		wetvaporsource_in_wetvaporsource_n4.deposition_rate['chem_arsenic']=0e-11*wetvaporsource_in_wetvaporsource_n4.parcel_area
 	except:
 		pass
 	try:
-		wetvaporsource_in_wetvaporsource_n4.deposition_rate['chem_cadmium']=4e-11*wetvaporsource_in_wetvaporsource_n4.parcel_area
+		wetvaporsource_in_wetvaporsource_n4.deposition_rate['chem_cadmium']=0e-11*wetvaporsource_in_wetvaporsource_n4.parcel_area
 	except:
 		pass
 	try:
@@ -4831,11 +4871,11 @@ def define_comp(currentchemical):
 	except:
 		pass
 	try:
-		dryvaporsource_in_dryvaporsource_n5.deposition_rate['chem_arsenic']=3e-11*dryvaporsource_in_dryvaporsource_n5.parcel_area
+		dryvaporsource_in_dryvaporsource_n5.deposition_rate['chem_arsenic']=0e-11*dryvaporsource_in_dryvaporsource_n5.parcel_area
 	except:
 		pass
 	try:
-		dryvaporsource_in_dryvaporsource_n5.deposition_rate['chem_cadmium']=3e-11*dryvaporsource_in_dryvaporsource_n5.parcel_area
+		dryvaporsource_in_dryvaporsource_n5.deposition_rate['chem_cadmium']=0e-11*dryvaporsource_in_dryvaporsource_n5.parcel_area
 	except:
 		pass
 	try:
@@ -4855,11 +4895,11 @@ def define_comp(currentchemical):
 	except:
 		pass
 	try:
-		wetvaporsource_in_wetvaporsource_n5.deposition_rate['chem_arsenic']=4e-11*wetvaporsource_in_wetvaporsource_n5.parcel_area
+		wetvaporsource_in_wetvaporsource_n5.deposition_rate['chem_arsenic']=0e-11*wetvaporsource_in_wetvaporsource_n5.parcel_area
 	except:
 		pass
 	try:
-		wetvaporsource_in_wetvaporsource_n5.deposition_rate['chem_cadmium']=4e-11*wetvaporsource_in_wetvaporsource_n5.parcel_area
+		wetvaporsource_in_wetvaporsource_n5.deposition_rate['chem_cadmium']=0e-11*wetvaporsource_in_wetvaporsource_n5.parcel_area
 	except:
 		pass
 	try:
@@ -4927,11 +4967,11 @@ def define_comp(currentchemical):
 	except:
 		pass
 	try:
-		dryvaporsource_in_dryvaporsource_s1.deposition_rate['chem_arsenic']=3e-11*dryvaporsource_in_dryvaporsource_s1.parcel_area
+		dryvaporsource_in_dryvaporsource_s1.deposition_rate['chem_arsenic']=0e-11*dryvaporsource_in_dryvaporsource_s1.parcel_area
 	except:
 		pass
 	try:
-		dryvaporsource_in_dryvaporsource_s1.deposition_rate['chem_cadmium']=3e-11*dryvaporsource_in_dryvaporsource_s1.parcel_area
+		dryvaporsource_in_dryvaporsource_s1.deposition_rate['chem_cadmium']=0e-11*dryvaporsource_in_dryvaporsource_s1.parcel_area
 	except:
 		pass
 	try:
@@ -4951,11 +4991,11 @@ def define_comp(currentchemical):
 	except:
 		pass
 	try:
-		wetvaporsource_in_wetvaporsource_s1.deposition_rate['chem_arsenic']=4e-11*wetvaporsource_in_wetvaporsource_s1.parcel_area
+		wetvaporsource_in_wetvaporsource_s1.deposition_rate['chem_arsenic']=0e-11*wetvaporsource_in_wetvaporsource_s1.parcel_area
 	except:
 		pass
 	try:
-		wetvaporsource_in_wetvaporsource_s1.deposition_rate['chem_cadmium']=4e-11*wetvaporsource_in_wetvaporsource_s1.parcel_area
+		wetvaporsource_in_wetvaporsource_s1.deposition_rate['chem_cadmium']=0e-11*wetvaporsource_in_wetvaporsource_s1.parcel_area
 	except:
 		pass
 	try:
@@ -5023,11 +5063,11 @@ def define_comp(currentchemical):
 	except:
 		pass
 	try:
-		dryvaporsource_in_dryvaporsource_pond.deposition_rate['chem_arsenic']=3e-11*dryvaporsource_in_dryvaporsource_pond.parcel_area
+		dryvaporsource_in_dryvaporsource_pond.deposition_rate['chem_arsenic']=0e-11*dryvaporsource_in_dryvaporsource_pond.parcel_area
 	except:
 		pass
 	try:
-		dryvaporsource_in_dryvaporsource_pond.deposition_rate['chem_cadmium']=3e-11*dryvaporsource_in_dryvaporsource_pond.parcel_area
+		dryvaporsource_in_dryvaporsource_pond.deposition_rate['chem_cadmium']=0e-11*dryvaporsource_in_dryvaporsource_pond.parcel_area
 	except:
 		pass
 	try:
@@ -5047,11 +5087,11 @@ def define_comp(currentchemical):
 	except:
 		pass
 	try:
-		wetvaporsource_in_wetvaporsource_pond.deposition_rate['chem_arsenic']=4e-11*wetvaporsource_in_wetvaporsource_pond.parcel_area
+		wetvaporsource_in_wetvaporsource_pond.deposition_rate['chem_arsenic']=0e-11*wetvaporsource_in_wetvaporsource_pond.parcel_area
 	except:
 		pass
 	try:
-		wetvaporsource_in_wetvaporsource_pond.deposition_rate['chem_cadmium']=4e-11*wetvaporsource_in_wetvaporsource_pond.parcel_area
+		wetvaporsource_in_wetvaporsource_pond.deposition_rate['chem_cadmium']=0e-11*wetvaporsource_in_wetvaporsource_pond.parcel_area
 	except:
 		pass
 	try:
@@ -5119,11 +5159,11 @@ def define_comp(currentchemical):
 	except:
 		pass
 	try:
-		dryvaporsource_in_dryvaporsource_s4.deposition_rate['chem_arsenic']=3e-11*dryvaporsource_in_dryvaporsource_s4.parcel_area
+		dryvaporsource_in_dryvaporsource_s4.deposition_rate['chem_arsenic']=0e-11*dryvaporsource_in_dryvaporsource_s4.parcel_area
 	except:
 		pass
 	try:
-		dryvaporsource_in_dryvaporsource_s4.deposition_rate['chem_cadmium']=3e-11*dryvaporsource_in_dryvaporsource_s4.parcel_area
+		dryvaporsource_in_dryvaporsource_s4.deposition_rate['chem_cadmium']=0e-11*dryvaporsource_in_dryvaporsource_s4.parcel_area
 	except:
 		pass
 	try:
@@ -5143,11 +5183,11 @@ def define_comp(currentchemical):
 	except:
 		pass
 	try:
-		wetvaporsource_in_wetvaporsource_s4.deposition_rate['chem_arsenic']=4e-11*wetvaporsource_in_wetvaporsource_s4.parcel_area
+		wetvaporsource_in_wetvaporsource_s4.deposition_rate['chem_arsenic']=0e-11*wetvaporsource_in_wetvaporsource_s4.parcel_area
 	except:
 		pass
 	try:
-		wetvaporsource_in_wetvaporsource_s4.deposition_rate['chem_cadmium']=4e-11*wetvaporsource_in_wetvaporsource_s4.parcel_area
+		wetvaporsource_in_wetvaporsource_s4.deposition_rate['chem_cadmium']=0e-11*wetvaporsource_in_wetvaporsource_s4.parcel_area
 	except:
 		pass
 	try:
@@ -5215,11 +5255,11 @@ def define_comp(currentchemical):
 	except:
 		pass
 	try:
-		dryvaporsource_in_dryvaporsource_s5.deposition_rate['chem_arsenic']=3e-11*dryvaporsource_in_dryvaporsource_s5.parcel_area
+		dryvaporsource_in_dryvaporsource_s5.deposition_rate['chem_arsenic']=0e-11*dryvaporsource_in_dryvaporsource_s5.parcel_area
 	except:
 		pass
 	try:
-		dryvaporsource_in_dryvaporsource_s5.deposition_rate['chem_cadmium']=3e-11*dryvaporsource_in_dryvaporsource_s5.parcel_area
+		dryvaporsource_in_dryvaporsource_s5.deposition_rate['chem_cadmium']=0e-11*dryvaporsource_in_dryvaporsource_s5.parcel_area
 	except:
 		pass
 	try:
@@ -5239,11 +5279,11 @@ def define_comp(currentchemical):
 	except:
 		pass
 	try:
-		wetvaporsource_in_wetvaporsource_s5.deposition_rate['chem_arsenic']=4e-11*wetvaporsource_in_wetvaporsource_s5.parcel_area
+		wetvaporsource_in_wetvaporsource_s5.deposition_rate['chem_arsenic']=0e-11*wetvaporsource_in_wetvaporsource_s5.parcel_area
 	except:
 		pass
 	try:
-		wetvaporsource_in_wetvaporsource_s5.deposition_rate['chem_cadmium']=4e-11*wetvaporsource_in_wetvaporsource_s5.parcel_area
+		wetvaporsource_in_wetvaporsource_s5.deposition_rate['chem_cadmium']=0e-11*wetvaporsource_in_wetvaporsource_s5.parcel_area
 	except:
 		pass
 	try:
