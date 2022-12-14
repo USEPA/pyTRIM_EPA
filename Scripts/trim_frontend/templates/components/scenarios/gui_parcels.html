@@ -93,7 +93,6 @@
 <script>
     onDomLoad(function() {
         var form = document.getElementById('parcels-gui');
-        // loadParceldata()
 
         var map = L.map('mapid', { drawControl: false }).setView([35.99, -78.90], 12);
         form.addEventListener('form:loaded', function() {
@@ -644,18 +643,16 @@
                 });
                 return myRows
             }
-            map.whenReady(retrieveSavedParcels)
+
+
+            $(document.body).addEventListener('parcels:loaded', function() {
+                map.whenReady(retrieveSavedParcels);
+            });
         });
 
         $(window).on ('load',function(){
             setTimeout(function () {map.invalidateSize()},2000)
         })
-
-        // function loadParceldata() {
-        //     TRIM.api.getParcels().on('load', function() {
-        //         $('#root').data('loadedParcels',JSON.parse(this.responseText));
-        //     })
-        // }
 
         function enableFieldUpdates() {
             var gui = $('#parcels-gui');

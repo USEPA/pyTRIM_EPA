@@ -107,19 +107,26 @@
         // the current scenario data into editor forms
         LoadingScreen.show('scenario_loading');
         // Load current scenario values
-        TRIM.api.getParcels().on('load',function (){
-            $('#root').data('loadedParcels', JSON.parse(this.responseText))
-              TRIM.api.getScenario('{{ scenario.id }}').on('load', function () {
-                try {
-                    if (this.responseJSON) {
-                        let scenarioJSON = this.responseJSON
+        TRIM.api.getScenario('{{ scenario.id }}').on('load', function () {
+            try {
+                if (this.responseJSON) {
+                    let scenarioJSON = this.responseJSON
+
+                    TRIM.api.getParcels().on('load', function() {
+                        $('#root').data('loadedParcels',JSON.parse(this.responseText));
+
+                        var parcelsLoadEvent = document.createEvent('Event');
+                        parcelsLoadEvent.initEvent('parcels:loaded', true, true);
+                        document.body.dispatchEvent(parcelsLoadEvent);
+
                         populateForms(scenarioJSON.scenario);
-                    }
-                } catch {
-                    LoadingScreen.hide('scenario_loading');
+                    });
                 }
+            } catch {
+                LoadingScreen.hide('scenario_loading');
+            }
         });
-        })
+
         function populateForms(scenario) {
             if (!scenario) {
                 return; // if we didn't get a scenario, just give up
