@@ -30,7 +30,7 @@ class CompartmentService(GenericService):
         __model__ = Media
 
         land_use_media_list = ['Impervious', 'Tilled Soil', 'Untilled Soil', 'Agriculture (General)', 'Grasses/Herbs',
-                               'Deciduous Forest', 'Coniferous Forest', 'Water']
+                               'Deciduous Forest', 'Coniferous Forest']
 
         @classmethod
         def create(

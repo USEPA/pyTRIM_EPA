@@ -92,47 +92,49 @@
                          C_factor = 0.5
                      } else if (e.landUse === "Soil") {
                          C_factor = 1.0
-                     } else if (e.landUse === "impervious") {
+                     } else if (e.landUse === "Impervious") {
                          C_factor = 0
                      } else {
                          C_factor = 0.1
                      }
-                     data1.push({
-                         "parcelid": e.id,
-                         "Surface Parcel": e.name,
-                         "Area": (e.area/1E6).toFixed(2),
-                         "Land Cover": e.landUse,
-                         "Total Effective Erosion Rate": new Intl.NumberFormat('en-US', {notation: "scientific"}).format(e.totalErosionRate)
-                     });
-                     data2.push({
-                         "parcelid": e.id,
-                         "Surface Parcel": e.name,
-                         "Area": (e.area/1E6).toFixed(2),
-                         "Land Cover": e.landUse,
-                         "A": new Intl.NumberFormat('en-US', {notation: "scientific"}).format(default_data["A"]),
-                         "a": a_param,
-                         "b": default_data["b"],
-                         "SD": a_param * (e.area)**(-default_data["b"]),
-                         "Total Effective Erosion Rate": new Intl.NumberFormat('en-US', {notation: "scientific"}).format(this.A * this.SD)
-                     })
-                     data3.push({
-                         "parcelid": e.id,
-                         "Surface Parcel": e.name,
-                         "Area": (e.area/1E6).toFixed(2),
-                         "Land Cover": e.landUse,
-                         "R": default_data["R"],
-                         "K": default_data["K"],
-                         "S": default_data["S"],
-                         "L": default_data["L"],
-                         "LS": default_data["L"] * default_data["S"],
-                         "C": C_factor,
-                         "P": default_data["P"],
-                         "A": new Intl.NumberFormat('en-US', {notation: "scientific"}).format(default_data["A"]),
-                         "a": a_param,
-                         "b": default_data["b"],
-                         "SD": a_param * (e.area)**(-default_data["b"]),
-                         "Total Effective Erosion Rate": new Intl.NumberFormat('en-US', {notation: "scientific"}).format(this.R * this.K * this.LS * this.C * this.P)
-                     })
+                     if (e.landUse != "Impervious" && e.landUse != "Water") {
+                         data1.push({
+                            "parcelid": e.id,
+                            "Surface Parcel": e.name,
+                            "Area": (e.area/1E6).toFixed(2),
+                            "Land Cover": e.landUse,
+                            "Total Effective Erosion Rate": new Intl.NumberFormat('en-US', {notation: "scientific"}).format(e.totalErosionRate)
+                        });
+                         data2.push({
+                             "parcelid": e.id,
+                             "Surface Parcel": e.name,
+                             "Area": (e.area/1E6).toFixed(2),
+                             "Land Cover": e.landUse,
+                             "A": new Intl.NumberFormat('en-US', {notation: "scientific"}).format(default_data["A"]),
+                             "a": a_param,
+                             "b": default_data["b"],
+                             "SD": a_param * (e.area)**(-default_data["b"]),
+                             "Total Effective Erosion Rate": (["Water","Impervious"].indexOf(e.landUse) == -1) ? new Intl.NumberFormat('en-US', {notation: "scientific"}).format(this.A * this.SD) : new Intl.NumberFormat('en-US', {notation: "scientific"}).format(0)
+                         })
+                         data3.push({
+                             "parcelid": e.id,
+                             "Surface Parcel": e.name,
+                             "Area": (e.area/1E6).toFixed(2),
+                             "Land Cover": e.landUse,
+                             "R": default_data["R"],
+                             "K": default_data["K"],
+                             "S": default_data["S"],
+                             "L": default_data["L"],
+                             "LS": default_data["L"] * default_data["S"]/100,
+                             "C": C_factor,
+                             "P": default_data["P"],
+                             "A": new Intl.NumberFormat('en-US', {notation: "scientific"}).format(default_data["A"]),
+                             "a": a_param,
+                             "b": default_data["b"],
+                             "SD": a_param * (e.area)**(-default_data["b"]),
+                             "Total Effective Erosion Rate": (["Water","Impervious"].indexOf(e.landUse) == -1) ? new Intl.NumberFormat('en-US', {notation: "scientific"}).format(this.R * this.K * this.LS * this.C * this.P) : new Intl.NumberFormat('en-US', {notation: "scientific"}).format(0)
+                         })
+                     }
                  })
             }
 
@@ -281,10 +283,11 @@
                             "data": "Total Effective Erosion Rate",
                             "className":"td_ER",
                             "render": function (data, type, row, meta) {
+                                let TER = calculate_ER_ASD(row,true)
                                 return "<input data-toggle='tooltip' data-placement='top' data-html='true' title='ER = A * SD' class='editableCell form-control form-control-sm erosion_inp_opt2 inp_ER' type='text' value='" +
                                     calculate_ER_ASD(row, true) +
                                     "' style='display:none'>" +
-                                    "<label class='editableCell lb_ER'>" + calculate_ER_ASD(row,true) + "</label>"
+                                    "<label class='editableCell lb_ER'>" + TER + "</label>"
                             }
                         }
                     ],
@@ -420,10 +423,11 @@
                             "data": "Total Effective Erosion Rate",
                             "className":"td_ER",
                             "render": function (data, type, row, meta) {
+                                let TER = calculate_ER_USLE(row, true)
                                 return "<input data-toggle='tooltip' data-placement='top' data-html='true' title='ER = R*K*LS*C*P\n or\nER = A * SD' class='editableCell form-control form-control-sm erosion_inp_opt3 inp_ER' type='text' value='" +
                                     calculate_ER_USLE(row, true) +
                                     "' style='display:none'>" +
-                                    "<label class='editableCell lb_ER'>" + calculate_ER_USLE(row, true) + "</label>"
+                                    "<label class='editableCell lb_ER'>" + TER + "</label>"
                             }
                         }
                     ],
@@ -455,7 +459,7 @@
                 // reset decorations
                 update_cell_calc(row,cls)
             })
-            },2000) // remove this
+            },3000) // remove this
             let field_name_dd = $("select[id*='field_name_']").filter((i,e)=>$(e).attr("id").startsWith("erosion_inputs"))
             /* const tables = ['#tableDiv_opt1', '#tableDiv_opt2', '#tableDiv_opt3'];
             $(have_file_cb).each(function (i, el) {
@@ -521,7 +525,9 @@
                                     // Update row data in the data field of the parcel name label element
                                     this_row_datacell = $(this_row).find("label.lb_parcel")
                                     new_table_data = get_Data_from_table(this_opt_table_id)
+                                    old_row_data = $(this_row_datacell).data("thisrow")
                                     new_row_data = new_table_data[row_idx-1]
+                                    new_row_data.parcelid = old_row_data.parcelid
                                     $(this_row_datacell).data("thisrow", new_row_data)
                                     update_cell_calc(this_row,cls)
                                 }
@@ -672,60 +678,68 @@
         }
 
         function calculate_LS(row) {
-            let ER = new Intl.NumberFormat('en-US', {notation: "scientific"}).format(row.L * row.S)
+            let ER = new Intl.NumberFormat('en-US', {notation: "scientific"}).format(row.L * row.S/100)
             return ER
         }
 
         function calculate_ER_ASD(row,firstLoad = false) {
-            let ER = row.ER
-            if (firstLoad) {
-                ER = new Intl.NumberFormat('en-US', {notation: "scientific"}).format(row.A * calculate_SD(row))
+            if ( ["Water", "Impervious"].indexOf(row["Land Cover"]) == -1 ) {
+                let ER = row.ER
+                if (firstLoad) {
+                    ER = new Intl.NumberFormat('en-US', {notation: "scientific"}).format(row.A * calculate_SD(row))
+                } else {
+                    ER = new Intl.NumberFormat('en-US', {notation: "scientific"}).format(row.A * row.SD)
+                }
+                let parcel_info = [{
+                    'type': 'data',
+                    'name': 'id',
+                    'value': row.parcelid,
+                },{
+                    'type': 'data',
+                    'name': 'field',
+                    'value': 'totalErosionRate'
+                }, {
+                    'type': 'input',
+                    'name': 'totalErosionRate',
+                    'value': ER
+                }]
+                if (!firstLoad) {
+                    TRIM.api.updateParcel(parcel_info)
+                }
+                return ER
             } else {
-                ER = new Intl.NumberFormat('en-US', {notation: "scientific"}).format(row.A * row.SD)
+                return new Intl.NumberFormat('en-US', {notation: "scientific"}).format(0)
             }
-            let parcel_info = [{
-                'type': 'data',
-                'name': 'id',
-                'value': row.parcelid,
-            },{
-                'type': 'data',
-                'name': 'field',
-                'value': 'totalErosionRate'
-            }, {
-                'type': 'input',
-                'name': 'totalErosionRate',
-                'value': ER
-            }]
-            if (!firstLoad) {
-                TRIM.api.updateParcel(parcel_info)
-            }
-            return ER
         }
 
         function calculate_ER_USLE(row, firstLoad = false) {
-            let ER = row.ER
-            if (firstLoad) {
-                ER = new Intl.NumberFormat('en-US', {notation: "scientific"}).format(row.R * row.K * calculate_LS(row) * row.C * row.P)
+            if ( ["Water", "Impervious"].indexOf(row["Land Cover"]) == -1 ) {
+                let ER = row.ER
+                if (firstLoad) {
+                    ER = new Intl.NumberFormat('en-US', {notation: "scientific"}).format(row.R * row.K * calculate_LS(row) * row.C * row.P)
+                } else {
+                    ER = new Intl.NumberFormat('en-US', {notation: "scientific"}).format(row.R * row.K * row.LS * row.C * row.P)
+                }
+                let parcel_info = [{
+                    'type': 'data',
+                    'name': 'id',
+                    'value': row.parcelid,
+                }, {
+                    'type': 'data',
+                    'name': 'field',
+                    'value': 'totalErosionRate'
+                }, {
+                    'type': 'input',
+                    'name': 'totalErosionRate',
+                    'value': ER
+                }]
+                if (!firstLoad) {
+                    TRIM.api.updateParcel(parcel_info)
+                }
+                return ER
             } else {
-                ER = new Intl.NumberFormat('en-US', {notation: "scientific"}).format(row.R * row.K * row.LS * row.C * row.P)
+                return new Intl.NumberFormat('en-US', {notation: "scientific"}).format(0)
             }
-            let parcel_info = [{
-                'type': 'data',
-                'name': 'id',
-                'value': row.parcelid,
-            },{
-                'type': 'data',
-                'name': 'field',
-                'value': 'totalErosionRate'
-            }, {
-                'type': 'input',
-                'name': 'totalErosionRate',
-                'value': ER
-            }]
-            if (!firstLoad) {
-                TRIM.api.updateParcel(parcel_info)
-            }
-            return ER
         }
 
         function enableFieldUpdates() {
@@ -794,7 +808,6 @@
                 $(this).prop('disabled', true)
                 TRIM.api.getSoilData('notill').on('load', function () {
                     let soil_data = JSON.parse(this.responseText)
-                    console.log(soil_data)
                     $('#SoilData_btn_opt3').data('soil',soil_data)
                     let this_opt_table_id = '#erosionTable_opt3'
                     let displayed_data = {"data": get_Data_from_table(this_opt_table_id)};
@@ -826,7 +839,9 @@
                                     // Update row data in the data field of the parcel name label element
                                     this_row_datacell = $(this_row).find("label.lb_parcel")
                                     new_table_data = get_Data_from_table(this_opt_table_id)
+                                    old_row_data = $(this_row_datacell).data("thisrow")
                                     new_row_data = new_table_data[row_idx-1]
+                                    new_row_data.parcelid = old_row_data.parcelid
                                     $(this_row_datacell).data("thisrow", new_row_data)
                                     update_cell_calc(this_row,cls_L)
                                 }

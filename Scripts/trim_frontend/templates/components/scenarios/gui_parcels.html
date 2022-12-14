@@ -38,7 +38,7 @@
             </div>
             <div class="row">
                 <div class="col-sm">
-                    <div data-slot="true" data-target="parcel_air_field"></div>
+                    <div data-slot="true" data-target="parcel_type_field"></div>
                     <div data-slot="true" data-target="parcel_land_use_field"></div>
                     <div data-slot="true" data-target="parcel_farm_food_field"></div>
                     <div data-slot="true" data-target="parcel_fish_food_field"></div>
@@ -66,7 +66,7 @@
                             <th data-toggle="tooltip" data-placement="top" data-html="true" title="">Parcel Name</th>
                             <th data-toggle="tooltip" data-placement="top" data-html="true" title="">Description</th>
                             <th data-toggle="tooltip" data-placement="top" data-html="true" title="(km<sup>2</sup>)">Area</th>
-                            <th data-toggle="tooltip" data-placement="top" data-html="true" title="">Air</th>
+                            <th data-toggle="tooltip" data-placement="top" data-html="true" title="">Parcel Type</th>
                             <th data-toggle="tooltip" data-placement="top" data-html="true" title="">Land Use</th>
                             <th data-toggle="tooltip" data-placement="top" data-html="true" title="">Farm Food Chain</th>
                             <th data-toggle="tooltip" data-placement="top" data-html="true" title="">Fish Food Web</th>
@@ -93,7 +93,8 @@
 <script>
     onDomLoad(function() {
         var form = document.getElementById('parcels-gui');
-        loadParceldata()
+        // loadParceldata()
+
         var map = L.map('mapid', { drawControl: false }).setView([35.99, -78.90], 12);
         form.addEventListener('form:loaded', function() {
             $('#parcel_file_fields_div').hide()
@@ -191,6 +192,7 @@
                 new_parcel.feature.properties.desc = parcel.data.description;
                 new_parcel.feature.properties.area = parcel.data.area;
                 new_parcel.feature.properties.air = parcel.data.hasAir;
+                new_parcel.feature.properties.parceltype=parcel.data.parcelType
                 new_parcel.feature.properties.landuse = {'lu': parcel.data.landUse, 'list': parcel.media}; // we will need NLCD data here?
                 new_parcel.feature.properties.farmfoodchain = parcel.data.hasFarmFoodChain;
                 new_parcel.feature.properties.fishfoodweb = parcel.data.hasFishFoodWeb;
@@ -209,8 +211,9 @@
                 parcel.feature.properties.name = sName;
                 parcel.feature.properties.desc = sDesc;
                 parcel.feature.properties.area = sArea;
+                parcel.feature.properties.parceltype = "Land & Air"
                 parcel.feature.properties.air = "No";
-                parcel.feature.properties.landuse = "No"; // we will need NLCD data here?
+                parcel.feature.properties.landuse = "Nozq   "; // we will need NLCD data here?
                 parcel.feature.properties.farmfoodchain = "No";
                 parcel.feature.properties.fishfoodweb = "No";
                 parcel.feature.properties.wetland = "No";
@@ -225,6 +228,7 @@
                         parcel.feature.properties.parcelid = new_parcel["scenario"]["id"]
                         parcel.feature.properties.area = new_parcel["scenario"]["area"]
                         parcel.feature.properties.air = new_parcel["scenario"]["hasAir"]
+                        parcel.feature.properties.parceltype = new_parcel["scenario"]["parcelType"]
                         parcel.feature.properties.landuse = {'lu': new_parcel["scenario"]["landUse"], 'list': new_parcel.media}
                         parcel.feature.properties.farmfoodchain = new_parcel["scenario"]["hasFarmFoodChain"]
                         parcel.feature.properties.fishfoodweb = new_parcel["scenario"]["hasFishFoodWeb"]
@@ -355,7 +359,7 @@
                             }
                         },
                         {
-                            data: "properties.air",
+                            data: "properties.parceltype",
                             render: function (data, type, row) {
                                 let parcel_info = [{
                                     'type': 'data',
@@ -364,18 +368,37 @@
                                 },{
                                     'type': 'data',
                                     'name': 'field',
-                                    'value': 'hasAir'
+                                    'value': 'parcelType'
                                 }, {
                                     'type': 'input',
-                                    'name': 'hasAir',
+                                    'name': 'parcelType',
                                     'value': data
                                 }]
                                 parcel_info = JSON.stringify(parcel_info)
-                                return "<select class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' name='select' style='display:none'>" +
-                                            "<option value='Yes'>Yes</option>" +
-                                            "<option value='No'>No</option>" +
-                                        "</select>" +
-                                       "<label class='editableCell badge badge-light'>" + data + "</label>"
+                                var parcel_types = ["Air Only", "Water Only", "Land Only", "Land & Air", "Water & Air"]
+                                var $select = $("<select class='editableCell form-control form-control-sm parceltype_ddl' name='select' style='display:none'></select>", {})
+                                $.each(parcel_types, function(k,v){
+                                    var $option = $("<option></option>",
+                                        {
+                                            text: v,
+                                            value: v
+                                        });
+                                    if (row.properties.parceltype == v) {
+                                        $option.attr("selected","selected")
+                                    }
+                                    $select.append($option)
+                                })
+                                $select.attr("data-parcelinfo",parcel_info)
+                                return $select.prop("outerHTML") +
+                                    "<label class='editableCell badge badge-light'>" + data + "</label>"
+                                // return "<select class='editableCell form-control form-control-sm parceltype_ddl' data-parcelinfo='" + parcel_info +"' name='select' style='display:none'>" +
+                                //             "<option value='Air Only'>Air Only</option>" +
+                                //             "<option value='Water Only'>Water Only</option>" +
+                                //             "<option value='Land Only'>Land Only</option>" +
+                                //             "<option value='Land & Air'>Land & Air</option>" +
+                                //             "<option value='Water & Air'>Water & Air</option>" +
+                                //         "</select>" +
+                                //        "<label class='editableCell badge badge-light'>" + data + "</label>"
                             }
                         },
                         {
@@ -395,13 +418,22 @@
                                     'value': data.lu
                                 }]
                                 parcel_info = JSON.stringify(parcel_info)
-                                let select_comp =  "<select class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' name='select' style='display:none'>"
-                                data.list.forEach(function(e){
-                                    select_comp += "<option>" + e + "</option>"
+                                var $select = $("<select class='editableCell form-control form-control-sm landuse_ddl' name='select' style='display:none'></select>", {})
+                                $.each(data.list, function(k,v){
+                                    var $option = $("<option></option>",
+                                        {
+                                            text: v,
+                                            value: v
+                                        });
+                                    if (row.properties.landuse.lu == v) {
+                                        $option.attr("selected","selected")
+                                    }
+                                    $select.append($option)
                                 })
-                                select_comp += "</select>"
-                                return select_comp +
-                                    "<label class='editableCell badge badge-light'>" + data.lu + "</label>"
+                                let editFlag = (row.properties.landuse.lu != "N/A") ? "editableCell badge badge-light" : "text-muted"
+                                $select.attr("data-parcelinfo",parcel_info)
+                                return $select.prop("outerHTML") +
+                                    "<label class='"+ editFlag +" landuse_lb'>" + data.lu + "</label>"
                             }
                         },
                         {
@@ -426,7 +458,7 @@
                                             "<option value='Yes'>Yes</option>" +
                                             "<option value='No'>No</option>" +
                                         "</select>" +
-                                       "<label class='" + editFlag + "'>" + data + "</label>"
+                                       "<label class='" + editFlag + " farmfoodchain'>" + data + "</label>"
                             }
                         },
                         {
@@ -445,13 +477,13 @@
                                     'name': 'hasFishFoodWeb',
                                     'value': data
                                 }]
-                                let editFlag = (row.properties.landuse.lu == "Water")  ? "editableCell badge badge-light" : "text-muted"
+                                let editFlag = (row.properties.parceltype.includes("Water"))  ? "editableCell badge badge-light" : "text-muted"
                                 parcel_info = JSON.stringify(parcel_info)
                                 return "<select class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' name='select' style='display:none'>" +
                                             "<option value='Yes'>Yes</option>" +
                                             "<option value='No'>No</option>" +
                                         "</select>" +
-                                       "<label class='" + editFlag +"'>" + data + "</label>"
+                                       "<label class='" + editFlag +" fishfoodweb'>" + data + "</label>"
                             }
                         },
                         {
@@ -470,19 +502,65 @@
                                     'name': 'hasWetland',
                                     'value': data
                                 }]
-                                let editFlag = (row.properties.landuse.lu == "Water" || row.properties.landuse.lu == "Impervious") ? "text-muted" : "editableCell badge badge-light"
+                                let editFlag = (row.properties.parceltype.includes("Water") || row.properties.landuse.lu == "Impervious") ? "text-muted" : "editableCell badge badge-light"
                                 parcel_info = JSON.stringify(parcel_info)
                                 return "<select class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' name='select' style='display:none'>" +
                                             "<option value='Yes'>Yes</option>" +
                                             "<option value='No'>No</option>" +
                                         "</select>" +
-                                       "<label class='" + editFlag + "'>" + data + "</label>"
+                                       "<label class='" + editFlag + " wetland'>" + data + "</label>"
                             }
                         }
                     ],
                     initComplete: function (settings, json) {
                         $("#mapTable").wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                         $('[data-toggle="tooltip"]').tooltip()
+                        $('#mapTable tbody').on('change', 'select.landuse_ddl', function () {
+                            //get selected value
+                            var changed = $(this).find(":selected").val();
+                            //get cell being changed
+                            //var cell = mapTable.cell($(this).closest('td'));
+                            //get row being changed
+                            var row = mapTable.row($(this).closest('tr'));
+                            var data = row.data();
+                            if (changed == "Water" || changed == "Impervious") {
+                                $(this).closest('tr').find("label.wetland").text("No")
+                            }
+                            if (changed != "Tilled Soil" || changed != "Untilled Soil") {
+                                $(this).closest('tr').find("label.farmfoodchain").text("No")
+                            }
+                            if (changed != "Water") {
+                                $(this).closest('tr').find("label.fishfoodweb").text("No")
+                            }
+                            //invalidate the data and redraw
+                            //row.invalidate().draw(false);
+                        });
+                        $('#mapTable tbody').on('change', 'select.parceltype_ddl', function () {
+                            //get selected value
+                            var changed = $(this).find(":selected").val();
+                            //get cell being changed
+                            //var cell = mapTable.cell($(this).closest('td'));
+                            //get row being changed
+                            var row = mapTable.row($(this).closest('tr'));
+                            var data = row.data();
+                            if (changed.includes("Water")) {
+                                $(this).closest('tr').find("label.wetland").text("No")
+                            }
+                            if (!changed.includes("Water")) {
+                                $(this).closest('tr').find("label.fishfoodweb").text("No")
+                            }
+                            if (changed != "Water Only" && changed != "Air Only" && changed != "Water & Air") {
+                                $(this).closest('tr').find("select.landuse_ddl option").filter(function() {
+                                    return $(this).text() == "Grasses/Herbs"
+                                }).attr('selected',true)
+                                $(this).closest('tr').find('label.landuse_lb').text("Grasses/Herbs")
+                            }
+                            if (changed == "Water Only" || changed == "Air Only" || changed == "Water & Air") {
+                                $(this).closest('tr').find('label.landuse_lb').text("N/A").attr("class","text-muted")
+                            }
+                            //invalidate the data and redraw
+                            //row.invalidate().draw(false);
+                        });
                     }
                 });
 
@@ -526,7 +604,7 @@
                         map.setView([mean_lat, mean_lon], 12);
                     }
                     mapTableRedraw()
-                },3000)
+                },30)
             }
 
             function update_data(this_table_id) {
@@ -536,6 +614,7 @@
                     for(i; i < ii; i++) if(shapes.features[i].properties.name === e["Parcel Name"]){break};
                     shapes.features[i].properties.desc = e["Description"]
                     shapes.features[i].properties.air = e["Air"]
+                    shapes.features[i].properties.parceltype = e["Parcel Type"]
                     shapes.features[i].properties.landuse = {'lu': e["Land Use"], 'list':shapes.features[i].properties.landuse.list}
                     shapes.features[i].properties.farmfoodchain = e["Farm Food Chain"]
                     shapes.features[i].properties.fishfoodweb = e["Fish Food Web"]
@@ -572,11 +651,11 @@
             setTimeout(function () {map.invalidateSize()},2000)
         })
 
-        function loadParceldata() {
-            TRIM.api.getParcels().on('load', function() {
-                $('#root').data('loadedParcels',JSON.parse(this.responseText));
-            })
-        }
+        // function loadParceldata() {
+        //     TRIM.api.getParcels().on('load', function() {
+        //         $('#root').data('loadedParcels',JSON.parse(this.responseText));
+        //     })
+        // }
 
         function enableFieldUpdates() {
             var gui = $('#parcels-gui');
