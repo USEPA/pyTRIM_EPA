@@ -13,7 +13,7 @@ import json
 
 scenario = Blueprint('scenario', __name__)
 
-Land_Parcel_VolElem_defaults = {
+Air_Parcel_VolElem_defaults = {
     'Air': {
         'name': 'Air',
         'top': 800,
@@ -29,6 +29,20 @@ Land_Parcel_VolElem_defaults = {
             }
         }
     },
+    'UpperAir': {
+        'name': 'UpperAir',
+        'top': 1000,
+        'bottom': 800,
+        'Compartments': {
+            'Air': {
+                'name': 'Air',
+                'media_id': 2
+            }
+        }
+    }
+}
+
+Land_Parcel_VolElem_defaults = {
     'SurfSoil': {
         'name': 'SurfSoil',
         'top': 0,
@@ -63,21 +77,6 @@ Land_Parcel_VolElem_defaults = {
 }
 
 Water_Parcel_VolElem_defaults = {
-    'Air': {
-        'name': 'Air',
-        'top': 800,
-        'bottom': 0,
-        'Compartments': {
-            'Air': {
-                'name': 'Air',
-                'media_id': 2
-            },
-            'Degradation_Reaction_Sink': {
-                'name': 'Degradation_Reaction_Sink',
-                'media_id': 15
-            }
-        }
-    },
     'SW': {
         'name': 'SW',
         'top': 0,
@@ -261,58 +260,54 @@ def update_parcel():
 
         # Update the specified property
         field_name = parcels_data["field"]
-        if field_name == "hasAir":
-            ve_air = VolumeElementService.get(name="Air", parcel_id=p.id)
-            ve_upper_air = VolumeElementService.get(name="UpperAir", parcel_id=p.id)
-            if parcels_data['hasAir'] == "Yes":
-                if not ve_air:
-                    ve_air = VolumeElementService.create(name="Air", parcel_id=p.id, top=800, bottom=0)
-                    CompartmentService.create(name="Air", volume_element_id=ve_air.id, media_id=2)
-                    CompartmentService.create(name="Degradation_Reaction_Sink",
-                                              volume_element_id=ve_air.id, media_id=15)
-                if not ve_upper_air:
-                    ve_upper_air = VolumeElementService.create(name="UpperAir", parcel_id=p.id, top=1000, bottom=800)
-                    CompartmentService.create(name="Air", volume_element_id=ve_upper_air.id,
-                                              media_id=2)
-            if parcels_data['hasAir'] == "No":
-                if ve_air:
-                    for cmp in CompartmentService.get_all(volume_element_id=ve_air.id):
-                        CompartmentService.delete(cmp, False)
-                    VolumeElementService.delete(ve_air, False)
-                if ve_upper_air:
-                    for cmp in CompartmentService.get_all(volume_element_id=ve_upper_air.id):
-                        CompartmentService.delete(cmp, False)
-                    VolumeElementService.delete(ve_upper_air, False)
+        if field_name == "parcelType":
+            # Delete all compartments and volume elements
+            delete_parcel_contents(p)
+            if parcels_data['parcelType'] == "Air Only":
+                # add standard Air Volume element and compartments
+                initialize_parcel_contents(p, "Air")
+            if parcels_data['parcelType'] == "Water Only":
+                # add standard Water Volume element and compartments
+                initialize_parcel_contents(p, "Water")
+            if parcels_data['parcelType'] == "Land Only":
+                # add standard Land Volume element and compartments
+                initialize_parcel_contents(p, "Land")
+            if parcels_data['parcelType'] == "Land & Air":
+                # add standard Air Volume element and compartments
+                initialize_parcel_contents(p, "Air")
+                # add standard Land Volume element and compartments
+                initialize_parcel_contents(p, "Land")
+            if parcels_data['parcelType'] == "Water & Air":
+                # add standard Air Volume element and compartments
+                initialize_parcel_contents(p, "Air")
+                # add standard Water Volume element and compartments
+                initialize_parcel_contents(p, "Water")
+
         if field_name == "landUse":
-            if parcels_data['landUse'] == "Water" and not p.land_use == "Water":
-                # LAND TO WATER VOLUME ELEMENT CHANGE
-                # Delete all compartments and volume elements
-                delete_parcel_contents(p)
-                # add standard water Volume element and compartments
-                initialize_parcel_contents(p, False)
-            elif not parcels_data['landUse'] == "Water" and p.land_use == "Water":
-                # WATER TO LAND VOLUME ELEMENT CHANGE
-                # Delete all compartments and volume elements
-                delete_parcel_contents(p)
-                # add standard land Volume elements and compartments
-                # first we need to initialize it as land
-                initialize_parcel_contents(p, True)
-                p = ParcelService.get(int(parcels_data['id']))
-                create_base_land_compartments(parcels_data, p)
-            elif parcels_data['landUse'] in ['Coniferous Forest', 'Deciduous Forest', 'Agriculture - General',
-                                             'Grasses/Herbs', 'Tilled Soil', 'Untilled Soil', 'Impervious']:
+            if parcels_data['landUse'] in ['Coniferous Forest', 'Deciduous Forest', 'Agriculture - General',
+                                           'Grasses/Herbs', 'Tilled Soil', 'Untilled Soil', 'Impervious']:
                 # COMPARTMENT CHANGE
                 if not parcels_data['landUse'] == p.land_use:
                     create_base_land_compartments(parcels_data, p)
+            if parcels_data['landUse'] not in ['Tilled Soil', 'Untilled Soil']:
+                ve = p.get_volume_element("SurfSoil")
+                if ve:
+                    if ve.get_compartment("Farm"):
+                        cmp = ve.get_compartment("Farm")
+                        CompartmentService.delete(cmp, False)
+            if parcels_data['landUse'] in ['Impervious']:
+                ve = p.get_volume_element("SurfSoil")
+                if ve:
+                    if ve.get_compartment("Wetland"):
+                        cmp = ve.get_compartment("Wetland")
+                        CompartmentService.delete(cmp, False)
+
         if field_name == "hasFarmFoodChain":
             if parcels_data['hasFarmFoodChain'] == "Yes":
                 if p.get_volume_element("SurfSoil"):
                     ve = p.get_volume_element("SurfSoil")
                     c = CompartmentService.get_or_create(name="Farm", volume_element_id=ve.id, media_id=53)
-                else:
-                    ve = VolumeElementService.get_or_create(name="SurfSoil", parcel_id=p.id, top=0, bottom=-0.01)
-                    c = CompartmentService.get_or_create(name="Farm", volume_element_id=ve.id, media_id=53)
-                if not c:
+                if not p.get_volume_element("SurfSoil"):
                     raise ValueError("Cannot create or get Farm Compartment")
             if parcels_data['hasFarmFoodChain'] == "No":
                 if p.get_volume_element("SurfSoil"):
@@ -325,11 +320,8 @@ def update_parcel():
                 if p.get_volume_element("SW"):
                     ve = p.get_volume_element("SW")
                     c = CompartmentService.get_or_create(name="Fish", volume_element_id=ve.id, media_id=54)
-                else:
-                    ve = VolumeElementService.get_or_create(name="SW", parcel_id=p.id, top=0, bottom=-3.6)
-                    c = CompartmentService.get_or_create(name="Fish", volume_element_id=ve.id, media_id=54)
-                if not c:
-                    raise ValueError("Cannot create or get Farm Compartment")
+                if not p.get_volume_element("SW"):
+                    raise ValueError("Cannot create or get Fish Compartment")
             if parcels_data['hasFishFoodWeb'] == "No":
                 if p.get_volume_element("SW"):
                     ve = p.get_volume_element("SW")
@@ -341,10 +333,7 @@ def update_parcel():
                 if p.get_volume_element("SurfSoil"):
                     ve = p.get_volume_element("SurfSoil")
                     c = CompartmentService.get_or_create(name="Wetland", volume_element_id=ve.id, media_id=58)
-                else:
-                    ve = VolumeElementService.get_or_create(name="SurfSoil", parcel_id=p.id, top=0, bottom=-0.01)
-                    c = CompartmentService.get_or_create(name="Wetland", volume_element_id=ve.id, media_id=58)
-                if not c:
+                if not p.get_volume_element("SurfSoil"):
                     raise ValueError("Cannot create or get Wetland Compartment")
             if parcels_data['hasWetland'] == "No":
                 if p.get_volume_element("SurfSoil"):
@@ -352,16 +341,6 @@ def update_parcel():
                     if ve.get_compartment("Wetland"):
                         cmp = ve.get_compartment("Wetland")
                         CompartmentService.delete(cmp, False)
-            # ve_sw = VolumeElementService.get(name="SW", parcel_id=p.id)
-            # if parcels_data['hasWetland'] == "Yes":
-            #     if not ve_sw:
-            #         ve_sw = VolumeElementService.create(name="SW", parcel_id=p.id, top=0, bottom=-3.6)
-            #         CompartmentService.create(name="Surface_water", volume_element_id=ve_sw.id, media_id=4)
-            # if parcels_data['hasWetland'] == "No":
-            #     if ve_sw:
-            #         for cmp in CompartmentService.get_all(volume_element_id=ve_sw.id):
-            #             CompartmentService.delete(cmp, False)
-            #         VolumeElementService.delete(ve_sw, False)
         if field_name == "description":
             p.description = parcels_data['description']
         if field_name == 'totalErosionRate':
@@ -369,7 +348,96 @@ def update_parcel():
                 if c.media.isa('Surface_Soil'):
                     par = c.parameters.get('TotalErosionRate')
                     par.value = parcels_data['totalErosionRate']
-
+        if field_name == "dustLoad":
+            for c in p.compartments:
+                if c.name == "Air":
+                    par = c.parameters.get("DustLoad")
+                    par.value = parcels_data['dustLoad']
+        if field_name == "dustDensity":
+            for c in p.compartments:
+                if c.name == "Air":
+                    par = c.parameters.get("DustDensity")
+                    par.value = parcels_data['dustDensity']
+        if field_name == "airDensity":
+            for c in p.compartments:
+                if c.name == "Air":
+                    par = c.parameters.get("AirDensity")
+                    par.value = parcels_data['airDensity']
+        if field_name == "fractionOrganicMatteronParticulates":
+            for c in p.compartments:
+                if c.name == "Air":
+                    par = c.parameters.get("FractionOrganicMatteronParticulates")
+                    par.value = parcels_data['fractionOrganicMatteronParticulates']
+        if field_name == "fractionOrganicMatteronParticulates":
+            for c in p.compartments:
+                if c.name == "Air":
+                    par = c.parameters.get("FractionOrganicMatteronParticulates")
+                    par.value = parcels_data['fractionOrganicMatteronParticulates']
+        # Note that 0 is the fixed datum for volume element boundary locations
+        if field_name == "airHeight":
+            for co in p.compartments:
+                if co.name == "Air":
+                    co.volume_element.top = parcels_data['airHeight']
+        if field_name == "surfaceSoilThickness":
+            thickness_before = p.get_compartment("Soil_Surface").volume_element.height.magnitude
+            p.get_compartment("Soil_Surface").volume_element.bottom = \
+                p.get_compartment("Soil_Surface").volume_element.top + \
+                (-1 * float(parcels_data['surfaceSoilThickness']))
+            thickness_now = p.get_compartment("Soil_Surface").volume_element.height.magnitude
+            delta_thickness = thickness_now - thickness_before
+            for soil_comp in ["Soil_Root_Zone", "Soil_Vadose_Zone", "Groundwater", "DryVaporSource", "WetVaporSource",
+                              "DryParticleSource", "WetParticleSource"]:
+                p.get_compartment(soil_comp).volume_element.top = \
+                    (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.top
+                p.get_compartment(soil_comp).volume_element.bottom = \
+                    (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.bottom
+        if field_name == "rootSoilThickness":
+            thickness_before = p.get_compartment("Soil_Root_Zone").volume_element.height
+            p.get_compartment("Soil_Root_Zone").volume_element.bottom = \
+                p.get_compartment("Soil_Root_Zone").volume_element.top + \
+                (-1 * float(parcels_data['rootSoilThickness']))
+            thickness_now = p.get_compartment("Soil_Root_Zone").volume_element.height
+            delta_thickness = thickness_now.magnitude - thickness_before.magnitude
+            for soil_comp in ["Soil_Vadose_Zone", "Groundwater", "DryVaporSource", "WetVaporSource",
+                              "DryParticleSource", "WetParticleSource"]:
+                p.get_compartment(soil_comp).volume_element.top = \
+                    (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.top
+                p.get_compartment(soil_comp).volume_element.bottom = \
+                    (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.bottom
+        if field_name == "vadoseZoneSoilThick":
+            thickness_before = p.get_compartment("Soil_Vadose_Zone").volume_element.height
+            p.get_compartment("Soil_Vadose_Zone").volume_element.bottom = \
+                p.get_compartment("Soil_Vadose_Zone").volume_element.top + \
+                (-1 * float(parcels_data['vadoseZoneSoilThick']))
+            thickness_now = p.get_compartment("Soil_Vadose_Zone").volume_element.height
+            delta_thickness = thickness_now.magnitude - thickness_before.magnitude
+            for soil_comp in ["Groundwater", "DryVaporSource", "WetVaporSource",
+                              "DryParticleSource", "WetParticleSource"]:
+                p.get_compartment(soil_comp).volume_element.top = \
+                    (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.top
+                p.get_compartment(soil_comp).volume_element.bottom = \
+                    (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.bottom
+        if field_name == "groundwaterZoneSoilThick":
+            thickness_before = p.get_compartment("Groundwater").volume_element.height
+            p.get_compartment("Groundwater").volume_element.bottom = \
+                p.get_compartment("Groundwater").volume_element.top + \
+                (-1 * float(parcels_data['groundwaterZoneSoilThick']))
+            thickness_now = p.get_compartment("Groundwater").volume_element.height
+            delta_thickness = thickness_now.magnitude - thickness_before.magnitude
+            for soil_comp in ["Groundwater", "DryVaporSource", "WetVaporSource",
+                              "DryParticleSource", "WetParticleSource"]:
+                p.get_compartment(soil_comp).volume_element.top = \
+                    (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.top
+                p.get_compartment(soil_comp).volume_element.bottom = \
+                    (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.bottom
+        if field_name == "tillage":
+            for c in p.compartments:
+                if c.name == 'Soil_Surface':
+                    par = c.parameters.get('soilTillage')
+                    if parcels_data['tillage'] == "Yes":
+                        par.value = 1
+                    elif parcels_data['tillage'] == "No":
+                        par.value = 0
         # Update record
         ParcelService.update(p)
 
@@ -402,11 +470,13 @@ def delete_parcels():
     return "success"
 
 
-def initialize_parcel_contents(new_parcel, is_land=True):
-    if is_land:
+def initialize_parcel_contents(new_parcel, parcel_type="Land"):
+    if parcel_type == "Land":
         parcel_defaults = Land_Parcel_VolElem_defaults
-    else:
+    elif parcel_type == "Water":
         parcel_defaults = Water_Parcel_VolElem_defaults
+    elif parcel_type == "Air":
+        parcel_defaults = Air_Parcel_VolElem_defaults
 
     for ve in parcel_defaults.items():
         # Create standard volume elements

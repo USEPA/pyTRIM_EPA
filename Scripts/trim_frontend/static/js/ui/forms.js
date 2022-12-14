@@ -670,7 +670,6 @@ window.TRIM = (function(trim) {
     }
 
     forms.populate = function(form, data) {
-
         // Convert data to an array if necessary
         // (helps us handle field-list/fieldsets)
         if (!Array.isArray(data)) {

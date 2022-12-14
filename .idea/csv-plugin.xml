@@ -59,6 +59,20 @@
             </Attribute>
           </value>
         </entry>
+        <entry key="\Input_Files\8Layout_Parceldf.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Scripts\.output\sm_new.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
         <entry key="\Scripts\trim_core\backend\Legacy_Input_Files\AllowExchange_Foundries.csv">
           <value>
             <Attribute>
@@ -67,6 +81,13 @@
           </value>
         </entry>
         <entry key="\Scripts\trim_core\backend\Legacy_Input_Files\ISF_met_MI_20181219.CSV">
+          <value>
+            <Attribute>
+              <option name="separator" value="," />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Scripts\trim_core\classic\Classes\test.csv">
           <value>
             <Attribute>
               <option name="separator" value="," />

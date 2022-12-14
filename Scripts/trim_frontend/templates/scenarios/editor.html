@@ -33,6 +33,11 @@
         'gui': 'gui_abiotic_properties.html'
     },
     {
+        'id': 'lake-props-tab',
+        'title': 'Lake Properties',
+        'gui': 'gui_lake_properties.html'
+    },
+    {
         'id': 'Erosion-tab',
         'title': 'Erosion Settings',
         'gui': 'gui_erosion_settings.html'
@@ -101,24 +106,25 @@
         // Show a loading screen while we pre-load
         // the current scenario data into editor forms
         LoadingScreen.show('scenario_loading');
-
         // Load current scenario values
-        TRIM.api.getScenario('{{ scenario.id }}').on('load', function() {
-            try {
-                if (this.responseJSON) {
-                    populateForms(this.responseJSON.scenario);
+        TRIM.api.getParcels().on('load',function (){
+            $('#root').data('loadedParcels', JSON.parse(this.responseText))
+              TRIM.api.getScenario('{{ scenario.id }}').on('load', function () {
+                try {
+                    if (this.responseJSON) {
+                        let scenarioJSON = this.responseJSON
+                        populateForms(scenarioJSON.scenario);
+                    }
+                } catch {
+                    LoadingScreen.hide('scenario_loading');
                 }
-            }
-            catch {
-                LoadingScreen.hide('scenario_loading');
-            }
         });
+        })
         function populateForms(scenario) {
             if (!scenario) {
                 return; // if we didn't get a scenario, just give up
                 // TODO: alert the user that something went wrong
             }
-
             // Check if all json-generated forms have loaded
             var forms = $('form[data-async-form]');
             if (forms.filter(':not(.form-loaded)').length) {
@@ -127,6 +133,7 @@
                 setTimeout(function() { populateForms(scenario); }, 1000);
                 return;
             }
+
 
             // Populate each form with data from the current scenario
             forms.each(function() {

@@ -199,6 +199,22 @@ window.LoadingScreen = (function(loader) {
 // Initialize global event-handlers
 
 onDomLoad(function() {
+    // window.LoadingScreen.show()
+    // let load_data = new Promise(function(resolve, reject) {
+    //     TRIM.api.getParcels().on('load', function () {
+    //         $('#root').data('loadedParcels', JSON.parse(this.responseText))
+    //         resolve(JSON.parse(this.responseText))
+    //     })
+    // })
+    // load_data.then(function(load_success) {
+    //     window.LoadingScreen.hide()
+    //     console.log("I am main")
+    // })
+    ////
+    // TRIM.api.getParcels().on('load', function() {
+    //             $('#root').data('loadedParcels',JSON.parse(this.responseText));
+    //             window.LoadingScreen.hide()
+    //         })
     // Register actions on body click
     document.body.addEventListener('click', function(e) {
         if (typeof(e.target.className)=="string") {
