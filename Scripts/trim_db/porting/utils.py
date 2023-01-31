@@ -337,6 +337,12 @@ def hacky_unit_cleaning(val):
 
     val = val.replace('[um^2  *  day  *  nmol]', 'um^2  *  day  *  nmol')
 
+    if (
+        val.startswith('degrees clockwise')
+        or val.startswith('degrees counterclockwise')
+    ):
+        return None
+
     return val
 
 
