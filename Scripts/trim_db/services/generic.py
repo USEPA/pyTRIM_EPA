@@ -1,21 +1,23 @@
-from flask_sqlalchemy import SQLAlchemy
+import os
 from ..schema import Model
 from ..schema.utils.caching import CacheManager
 
 
 __all__ = ['db', 'GenericService', 'PermissionsMixin']
 
-
-db = SQLAlchemy(model_class=Model)
-
-# import os
-# from .engine import DataBase
-# db_path = (
-#     'sqlite:///'
-#     f'{os.path.dirname(os.path.abspath(__file__))}/../'
-#     'temp.db'
-# )
-# db = DataBase(db_path, model_base=Model)
+if os.getenv('TEST_DB_SERVERLESS'):
+    print('-- Connecting to temp.db')
+    from .engine import DataBase
+    db_path = (
+        'sqlite:///'
+        f'{os.path.dirname(os.path.abspath(__file__))}/../'
+        'temp.db'
+    )
+    db = DataBase(db_path, model_base=Model)
+else:
+    print('-- Connecting to flask_sqlalchemy db')
+    from flask_sqlalchemy import SQLAlchemy
+    db = SQLAlchemy(model_class=Model)
 
 
 def make_key(**opts):
