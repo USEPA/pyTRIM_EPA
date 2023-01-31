@@ -38,7 +38,9 @@ def as_quantity(val, unit=''):
     if not unit:
         return val
 
-    unit = unit.split(' or ')[0]
+    unit = unit.split('(or ')[0].split(' or ')[0]
+    while unit.count('(') > unit.count(')'):
+        unit += ')'
 
     try:
         return val.to(unit)
