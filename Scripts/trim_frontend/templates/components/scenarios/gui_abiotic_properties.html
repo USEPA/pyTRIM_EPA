@@ -500,44 +500,34 @@
             return myRows
         }
 
-        // let load_data = new Promise(function(resolve, reject) {
-        //     TRIM.api.getParcels().on('load', function () {
-        //         $('#root').data('loadedParcels', JSON.parse(this.responseText))
-        //         resolve(JSON.parse(this.responseText))
-        //     })
-        // })
-        // load_data.then(function(load_success) {
-        load_success = true
-            if (load_success) {
-                let loadedData = $('#root').data('loadedParcels')
-                let abiotic_data = []
-                if (loadedData && loadedData.success) {
-                    loadedData['scenario'].forEach(function(e,i) {
-                         abiotic_data.push(
-                             {
-                                 'parcelid': e.id,
-                                 'Surface Parcel': e.name,
-                                 'hasAir': e.hasAir,
-                                 'hasLand': e.hasLand,
-                                 'parcelType': e.parcelType,
-                                 'DustParticleConcentration': (e.dustLoad ? e.dustLoad : default_data.DustParticleConcentration),
-                                 'DustParticleDensity': (e.dustDensity ? e.dustDensity : default_data.DustParticleDensity),
-                                 'AirDensity': (e.airDensity ? e.airDensity : default_data.AirDensity),
-                                 'DustParticleOrganicMatter': (e.fractionOrganicMatteronParticulates ? e.fractionOrganicMatteronParticulates : default_data.DustParticleOrganicMatter),
-                                 'AirHeight': (e.airHeight ? e.airHeight : default_data.AirVEDefaultHeight),
-                                 'Tillage': (e.soilTillage ? e.soilTillage : default_data.Tillage),
-                                 'SurfaceSoilThick': (e.surfaceSoilThickness ? e.surfaceSoilThickness :(e.tillage == "Yes" ? default_data.SurfaceSoilTilledThick : default_data.SurfaceSoilUntilledThick)),
-                                 'RootSoilThick': (e.rootSoilThickness ? e.rootSoilThickness : (e.tillage == "Yes" ? default_data.RootSoilTilledThick: default_data.RootSoilUntilledThick)),
-                                 'VadoseZoneSoilThick': (e.vadoseSoilThickness ? e.vadoseSoilThickness : default_data.VadoseZoneSoilThick),
-                                 'GroundwaterZoneSoilThick': (e.groundwaterZoneThickness ? e.groundwaterZoneThickness : default_data.GroundwaterZoneSoilThick)
-                             }
-                         )
-                    })
-                }
-                TableRedraw(abiotic_data)
-            } else {
-                console.log("ERROR loading data")
+        document.body.addEventListener('parcels:loaded', function() {
+            let loadedData = $('#root').data('loadedParcels')
+            let abiotic_data = []
+            if (loadedData && loadedData.success) {
+                loadedData['scenario'].forEach(function (e, i) {
+                    abiotic_data.push(
+                        {
+                            'parcelid': e.id,
+                            'Surface Parcel': e.name,
+                            'hasAir': e.hasAir,
+                            'hasLand': e.hasLand,
+                            'parcelType': e.parcelType,
+                            'DustParticleConcentration': (e.dustLoad ? e.dustLoad : default_data.DustParticleConcentration),
+                            'DustParticleDensity': (e.dustDensity ? e.dustDensity : default_data.DustParticleDensity),
+                            'AirDensity': (e.airDensity ? e.airDensity : default_data.AirDensity),
+                            'DustParticleOrganicMatter': (e.fractionOrganicMatteronParticulates ? e.fractionOrganicMatteronParticulates : default_data.DustParticleOrganicMatter),
+                            'AirHeight': (e.airHeight ? e.airHeight : default_data.AirVEDefaultHeight),
+                            'Tillage': (e.soilTillage ? e.soilTillage : default_data.Tillage),
+                            'SurfaceSoilThick': (e.surfaceSoilThickness ? e.surfaceSoilThickness : (e.tillage == "Yes" ? default_data.SurfaceSoilTilledThick : default_data.SurfaceSoilUntilledThick)),
+                            'RootSoilThick': (e.rootSoilThickness ? e.rootSoilThickness : (e.tillage == "Yes" ? default_data.RootSoilTilledThick : default_data.RootSoilUntilledThick)),
+                            'VadoseZoneSoilThick': (e.vadoseSoilThickness ? e.vadoseSoilThickness : default_data.VadoseZoneSoilThick),
+                            'GroundwaterZoneSoilThick': (e.groundwaterZoneThickness ? e.groundwaterZoneThickness : default_data.GroundwaterZoneSoilThick)
+                        }
+                    )
+                })
             }
-        })
-    //});
+            TableRedraw(abiotic_data)
+        });
+    })
+
 </script>
