@@ -645,7 +645,7 @@
             }
 
 
-            $(document.body).addEventListener('parcels:loaded', function() {
+            document.body.addEventListener('parcels:loaded', function() {
                 map.whenReady(retrieveSavedParcels);
             });
         });
