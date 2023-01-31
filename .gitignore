@@ -6,3 +6,6 @@
 
 # Ignore executables
 **/*.exe
+
+# Ignore .env file
+.env
