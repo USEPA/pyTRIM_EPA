@@ -1,0 +1,124 @@
+{% macro conditional_erosion_subform( file_input, have_user_file, optionNum) %}
+    <div class="row py-2">
+        <div class="col-sm">
+            <h6 class="text-center">
+                {% if optionNum == 1 %}
+                    Total Effective Erosion Rate Input
+                {% elif optionNum == 2 %}
+                    Unit Soil Loss & Sediment Delivery Ratio Input
+                {% else %}
+                    Universal Soil Loss Equation Parameters & Sediment Delivery Ratio Input
+                {% endif %}
+            </h6>
+        </div>
+    </div>
+    <div class="row mb-1">
+        <div class="col-sm">
+            <div data-slot="true" data-target="{{ file_input }}"></div>
+            <div class="form-text mb-2">
+                <small class="text-muted">
+                    {% if optionNum == 1 %}
+                        <a href="{{ url_for('static', filename='templates/erosion_Total_Effective_Rate.csv'
+                                   ) }}">Click here</a> to download the template CSV file containing effective erosion rate parameter.
+                    {% elif optionNum == 2 %}
+                         <a href="{{ url_for('static', filename='templates/erosion_USL_SDR.csv'
+                                   ) }}">Click here</a> to download the template CSV file containing unit soil loss and sediment-delivery ratio parameters.
+                    {% else %}
+                         <a href="{{ url_for('static', filename='templates/erosion_USLE_parameters.csv'
+                                   ) }}">Click here</a> to download the template CSV file containing universal soil loss equation parameters and sediment-delivery ratio.
+                    {% endif %}
+                </small>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-3">
+<!--        <div class="col-sm text-right">-->
+<!--            <button type="button" class="btn btn-dark"> Load Erosion Parameters from File </button>-->
+<!--        </div>-->
+    </div>
+
+    {% for this_param in have_user_file %}
+        <div class="row mb-1 div_checkbox">
+            {% set array = this_param.split("_",3)  %}
+            {% set array = array[3] %}
+            <div class="col-md">
+                {% if array.endswith("_PN") %}
+                    <div class="mt-2" >
+                        <span>Parcel Name</span>
+                    </div>
+                {% elif array.endswith("opt1_ER") %}
+                    <div class="mt-2" >
+                        <span>Total Effective Erosion Rate</span>
+                    </div>
+                {% else %}
+                    <div class="mt-2" data-slot="true" data-target="{{ this_param }}"></div>
+                {% endif %}
+            </div>
+            <div class="col-md">
+                <div data-slot="true" data-target="{{ 'field_name_' + array }}"></div>
+            </div>
+        </div>
+    {% endfor %}
+
+    <div>
+        {% if optionNum == 1 %}
+        <div id="tableDiv_opt1" class="col-md">
+            <div><small><strong><u>Click on the table cells to edit properties.</u> Please note that the values displayed in the table at the time of the "Save" operation are the values that will be incorporated into the calculations</strong></small></div>
+            <table class="hover" id="erosionTable_opt1">
+                <thead>
+                    <tr>
+                        <th>Surface Parcel</th>
+                        <th>Land Cover</th>
+                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="(km<sup>2</sup>)" >Area</th>
+                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="(kg/m<sup>2</sup>-d)">Total Effective Erosion Rate</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        {% elif optionNum == 2 %}
+        <div id="tableDiv_opt2" class="col-md">
+            <div class="pill pill-alert"><small><strong><u>Click on the table cells to edit properties.</u> Please note that the values displayed in the table at the time of the "Save" operation are the values that will be incorporated into the calculations</strong></small></div>
+            <table class="hover" id="erosionTable_opt2">
+                <thead>
+                    <tr>
+                        <th>Surface Parcel</th>
+                        <th>Land Cover</th>
+                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="(km<sup>2</sup>)">Area</th>
+                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="unit soil loss (kg/m<sup>2</sup>-d)">A</th>
+                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="sediment delivery ratio: empirical intercept coefficient (unitless)">a</th>
+                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="sediment delivery ratio: empirical slope coefficient (unitless)">b</th>
+                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="sediment delivery ratio (unitless)">SD</th>
+                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="(kg/m<sup>2</sup>-d)">Total Effective Erosion Rate</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        {% else %}
+        <div id="tableDiv_opt3" class="col-md">
+            <div class="pill pill-alert"><small><strong><u>Click on the table cells to edit properties.</u> Please note that the values displayed in the table at the time of the "Save" operation are the values that will be incorporated into the calculations</strong></small></div>
+            <button id="SoilData_btn_opt3" class="btn btn-secondary mt-2">Get USDA Soil Data</button>
+            <table class="hover" id="erosionTable_opt3">
+                <thead>
+                    <tr>
+                        <th>Surface Parcel</th>
+                        <th>Land Cover</th>
+                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="(km<sup>2</sup>)">Area</th>
+                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="rainfall erosivity index (100 ft-ton/acre)">R</th>
+                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="erodibility index (tons/area/(100 ft-ton/acre))">K</th>
+                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="slope gradient (%)">S</th>
+                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="slope length (ft)">L</th>
+                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="topographical length-slope factor (unitless)">LS</th>
+                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="cover/management factor (unitless)">C</th>
+                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="supporting practices factor (unitless)">P</th>
+                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="unit soil loss (kg/m<sup>2</sup>-d)">A</th>
+                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="sediment delivery ratio: empirical intercept coefficient (unitless)">a</th>
+                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="sediment delivery ratio: empirical slope coefficient (unitless)">b</th>
+                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="sediment delivery ratio (unitless)">SD</th>
+                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="(kg/m<sup>2</sup>-d)">Total Effective Erosion Rate</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+        {% endif %}
+    </div>
+{% endmacro %}
