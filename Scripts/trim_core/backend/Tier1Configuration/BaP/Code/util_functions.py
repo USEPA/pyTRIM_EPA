@@ -108,7 +108,7 @@ def process_met(inputs): ## one time process all met weighted averages
 
     df['DT_Check']=df.DT>=(df.DT.shift())
     df=df[df['DT_Check']]
-    df=df[(df['time_delta']<0.05)&(df['time_delta']>0)]# assume all observations valid for an hour since this is an hourly met file. eliminate overinfluential observations. not sure if needed but checking.
+    # df=df[(df['time_delta']<0.05)&(df['time_delta']>0)]# assume all observations valid for an hour since this is an hourly met file. eliminate overinfluential observations. not sure if needed but checking.
     # df=df[df['time_delta']>0]# assume all observations valid for an hour since this is an hourly met file. eliminate overinfluential observations. not sure if needed but checking.
     # df=df[(df['time_delta']<1)&(df['time_delta']>0)]# assume all observations valid for an hour since this is an hourly met file. eliminate overinfluential observations. not sure if needed but checking.
     
@@ -127,7 +127,7 @@ def process_met(inputs): ## one time process all met weighted averages
     df['raintime']=df['is_rain']*df['time_delta']
     rain_frac_time=df['raintime'].sum()/df['time_delta'].sum()    
     met_dict['frac_time_rain']=rain_frac_time
-    met_dict['wt_av_rain']=rain_frac_time # overwrite wt_av_rain with rain_frac_time (superior method, i think)
+    # met_dict['wt_av_rain']=rain_frac_time # overwrite wt_av_rain with rain_frac_time (superior method, i think)
 
 
     # process AE file ## has unusal data column header -- not interfered with original data. Ignored hour resolution. 

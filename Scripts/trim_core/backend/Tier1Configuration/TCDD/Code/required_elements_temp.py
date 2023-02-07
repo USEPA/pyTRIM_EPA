@@ -4,7 +4,7 @@
 # required compartments refer to primary abiotic types 
 
 required_compartments = ["advection sink",\
-            # "degradation/reaction sink",\
+            "degradation/reaction sink",\
             "flush rate sink",\
             "sediment",\
             "sediment burial sink",\
@@ -20,9 +20,13 @@ required_compartments = ["advection sink",\
             "water column omnivore",\
             "soil - surface",\
             "leaf - deciduous forest in deciduous forest",\
+            "leaf - coniferous forest in coniferous forest",\
             "leaf particle - deciduous forest in deciduous forest",\
+            "leaf particle - coniferous forest in coniferous forest",\
+
             "leaf - deciduous forest",\
             "leaf particle - deciduous forest",\
+                
             "soil - root zone",\
             "soil - vadose zone",\
             "groundwater",\
@@ -33,8 +37,6 @@ required_compartments = ["advection sink",\
                 ]
 
 required_algorithms = [\
-            "degradation/reaction sink in sediment(alginstid_4565)",\
-            "degradation/reaction sink in surface water(alginstid_4585)",\
             "demethylation(mhg -> hg2) in abiotic media, rate is input(alginstid_1892)",\
             "diffusion from sediment to surface water, fugacity-based(alginstid_2195)",\
             "diffusion from surface water to sediment, fugacity-based(alginstid_2149)",\
@@ -45,6 +47,20 @@ required_algorithms = [\
             "sediment burial from sediment to sediment burial sink, zero net deposition, general(alginstid_4135)",\
             "sediment deposition from surface water to sediment, general(alginstid_2139)",\
 
+            "degradation/reaction sink in air(alginstid_4675)",\
+            "degradation/reaction sink in benthic invertebrate(alginstid_4580)",\
+            "degradation/reaction sink in fish(alginstid_4570)",\
+            "degradation/reaction sink in groundwater(alginstid_4145)",\
+            "degradation/reaction sink in leaf(alginstid_4165)",\
+            "degradation/reaction sink in macrophyte",\
+            "degradation/reaction sink in root zone(alginstid_4155)",\
+            "degradation/reaction sink in root(alginstid_4175)",\
+            "degradation/reaction sink in sediment(alginstid_4565)",\
+            "degradation/reaction sink in stem(alginstid_4170)",\
+            "degradation/reaction sink in surface soil(alginstid_4160)",\
+            "degradation/reaction sink in surface water(alginstid_4585)",\
+            "degradation/reaction sink in vadose zone(alginstid_4150)",\
+            "degradation/reaction sink in zooplankton(alginstid_4570_z)",\
 
             "fish bioenergetic model - ingestion of algae by fish(alginstid_1527)",\
             "fish bioenergetic model - ingestion of algae by zooplankton",\
@@ -73,20 +89,26 @@ required_algorithms = [\
             "fish bioenergetic model - ingestion of water column omnivore by water column carnivore(alginstid_1610)",\
             "fish bioenergetic model - ingestion of zooplankton by water column herbivore",\
             
+            "exchange from surface water to macrophyte(alginstid_1552)",\
             'exchange from macrophyte to surface water(alginstid_1547)',\
             'degradation/reaction sink in macrophyte',\
             'oxidation(hg0 -> hg2) in macrophytes',\
             'time-dependent partition from surface water to macrophyte, hg(alginstid_1549)',\
             'time-dependent partition from macrophyte to surface water(alginstid_1544),hg',\
 
+            "exchange from surface water to zooplankton, organics(alginstid_1517_z)",\
+            "exchange from fish to surface water, organics(alginstid_1515)",\
+
             'time-dependent partition from sediment to benthic invertebrate(alginstid_1438)',\
             'time-dependent partition from benthic invertebrate to sediment(alginstid_1433)',\
-
+            "exchange from sediment to benthic invertebrate, interacts with pore water, pahs",\
+            "exchange from benthic invertebrate to sediment, pahs",\
             
             'degradation/reaction sink in zooplankton(alginstid_4570_z)',\
             'elimination from zooplankton to surface water',\
             'elimination from fish to surface water(alginstid_1512)',\
 
+            "exchange from surface water to fish, organics(alginstid_1517)",\
             "demethylation (mhg->hg2) in fish(alginstid_1446)",\
             'oxidation(hg0 -> hg2) in fish(alginstid_1443)',\
             'reduction(hg2 -> hg0) in fish(alginstid_1444)',\
@@ -106,6 +128,7 @@ required_algorithms = [\
 
             "diffusion from surface soil to air, hg0(alginstid_3997)",\
             "diffusion from surface soil to air, mhg(alginstid_3999)",\
+            "diffusion from surface soil to air, organics(alginstid_3995)",\
 
             "resuspension from surface soil to air, set to deposition rate of particles(alginstid_4000)",\
                 
@@ -158,6 +181,8 @@ required_algorithms = [\
             "time-dependent partition from root to root zone, interacts with bulk soil - grasses/herbs, hg(alginstid_1933)",\
             "time-dependent partition from root to root zone, interacts with soil pore water - agriculture, organics",\
             "time-dependent partition from root to root zone, interacts with soil pore water - grasses/herbs, organics(alginstid_1929)",\
+            "time-dependent partition from benthic invertebrate to bulk sediment for dioxins(icfid_08-003)",\
+            "time-dependent partition from bulk sediment to benthic invertebrate for dioxins(icfid_08-002)",\
 
                 
             "diffusion from root zone to surface soil(alginstid_1939)",\
@@ -175,6 +200,11 @@ required_algorithms = [\
             "percolation from vadose zone to groundwater(alginstid_1899)",\
             "recharge from groundwater to surface water, general(alginstid_3510)",\
             "degradation/reaction sink in groundwater(alginstid_4145)",\
-                
+  
+            "exchange from benthic invertebrate to sediment, pahs",\
+            "exchange from benthic invertebrate to sediment, dioxins",\
+            "exchange from sediment to benthic invertebrate, interacts with pore water, pahs",\
+            "exchange from sediment to benthic invertebrate, interacts with pore water, dioxins",\
+            "diffusion from surface water to air, two film(alginstid_4080)-organic",\
+
                 ]
-                

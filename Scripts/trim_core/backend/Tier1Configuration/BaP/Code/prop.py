@@ -189,103 +189,103 @@ def define_properties(inputs):
     #### read custom links  file. Note this part of the code is specific to the way inputs were specified for the Foundries run. May not have generic value.
     
 
-    ifp=inputs['path_inputs']
-    ifn=inputs['prop_file_3']    
-    ifpn=os.path.join(ifp,ifn)
+#     ifp=inputs['path_inputs']
+#     ifn=inputs['prop_file_3']    
+#     ifpn=os.path.join(ifp,ifn)
     
 
-    prop_file=open(ifpn,'r') 
-    prop_lines=prop_file.readlines()
-    val_end_flag=False
+#     prop_file=open(ifpn,'r') 
+#     prop_lines=prop_file.readlines()
+#     val_end_flag=False
     
-    prop_owner_types=['compartment','link']# list of property owners for which we are gathering inputs          
-    prop_tuples=[] # initialize list for storing point lines
-    prop_owner_list=[] # initialize list of property owners    
+#     prop_owner_types=['compartment','link']# list of property owners for which we are gathering inputs          
+#     prop_tuples=[] # initialize list for storing point lines
+#     prop_owner_list=[] # initialize list of property owners    
     
-    for line in prop_lines: # loop over lines 
-        line=line.strip() # strip /n and space       
-        if line[:2]==r'//' or line=='': # if a comment or if blank, move on to next line
-            continue # move to next line
-        line_nc=line.split("//")[0] # line stripped of comment    
-        prop_type=line_nc.split(':')[0].strip() # split on : . text to the left is the property type 
-        if prop_type in prop_owner_types: # if volume element or compartment
-            prop_type_flag=True # flag indicates that a new ve or comp has begun
-            if val_end_flag and prop_type_flag: # if value reading has ended and a new property type has begun: 
-                prop_owner_list=[]; prop="";form="";value="";val_end_flag=False         # initialize list and values    
-            prop_owner=line_nc.split(":")[1].strip()
-            prop_owner_list.append((prop_type,prop_owner)) 
-        elif line_nc[:9]=="property:":        
-            prop=line_nc.split(":")[1].strip()
-        elif line_nc[:5]=="form:":   
-            form=line_nc.split(":")[1].strip()
-        elif line_nc[:6]=="value:":  
-    #        value=line_nc.split(":")[1].strip()
-            value="".join(line_nc.split(":")[1:])
-            value=value.strip()
-            for p_owner in prop_owner_list:                
-                p=(p_owner[0],p_owner[1],prop,form,value)
-    #            print (p)
-                prop_tuples.append(p)
-                val_end_flag=True      
+#     for line in prop_lines: # loop over lines 
+#         line=line.strip() # strip /n and space       
+#         if line[:2]==r'//' or line=='': # if a comment or if blank, move on to next line
+#             continue # move to next line
+#         line_nc=line.split("//")[0] # line stripped of comment    
+#         prop_type=line_nc.split(':')[0].strip() # split on : . text to the left is the property type 
+#         if prop_type in prop_owner_types: # if volume element or compartment
+#             prop_type_flag=True # flag indicates that a new ve or comp has begun
+#             if val_end_flag and prop_type_flag: # if value reading has ended and a new property type has begun: 
+#                 prop_owner_list=[]; prop="";form="";value="";val_end_flag=False         # initialize list and values    
+#             prop_owner=line_nc.split(":")[1].strip()
+#             prop_owner_list.append((prop_type,prop_owner)) 
+#         elif line_nc[:9]=="property:":        
+#             prop=line_nc.split(":")[1].strip()
+#         elif line_nc[:5]=="form:":   
+#             form=line_nc.split(":")[1].strip()
+#         elif line_nc[:6]=="value:":  
+#     #        value=line_nc.split(":")[1].strip()
+#             value="".join(line_nc.split(":")[1:])
+#             value=value.strip()
+#             for p_owner in prop_owner_list:                
+#                 p=(p_owner[0],p_owner[1],prop,form,value)
+#     #            print (p)
+#                 prop_tuples.append(p)
+#                 val_end_flag=True      
     
-    try:        
-        df_props_3=pd.DataFrame(prop_tuples,columns=['prop_type', 'prop_owner', 'property','form','value'])
-    except:
-        df_props_3=pd.DataFrame(columns=['prop_type', 'prop_owner', 'property','form','value'])
+#     try:        
+#         df_props_3=pd.DataFrame(prop_tuples,columns=['prop_type', 'prop_owner', 'property','form','value'])
+#     except:
+#         df_props_3=pd.DataFrame(columns=['prop_type', 'prop_owner', 'property','form','value'])
     
-#    df_link_props=df_props_3.loc[df_props_3['prop_type']=='link'] # not required because same information in df_links_3
-#    
-    df_non_link_props=df_props_3.loc[df_props_3['prop_type']!='link']
+# #    df_link_props=df_props_3.loc[df_props_3['prop_type']=='link'] # not required because same information in df_links_3
+# #    
+#     df_non_link_props=df_props_3.loc[df_props_3['prop_type']!='link']
     
-    df_props=df_props.append(df_non_link_props) # append the non link props to the main df_props
-    df_props=df_props.reset_index(drop=True) # reset index from zero
+#     df_props=df_props.append(df_non_link_props) # append the non link props to the main df_props
+#     df_props=df_props.reset_index(drop=True) # reset index from zero
     
-    val_end_flag=False 
-    link_tuples=[]
-    algs=[]; sc="";rc="";prop="";form="";value="";
-    for line in prop_lines: # loop over lines 
-        line=line.strip() # strip /n and space       
-        if line[:2]==r'//' or line=='': # if a comment or if blank, move on to next line
-            continue # move to next line
-        line_nc=line.split("//")[0] # line stripped of comment    
-        prop_type=line_nc.split(':')[0].strip() # split on : . text to the left is the property type 
-        if prop_type=='new link': # if new link        
-            new_link_flag=True # flag indicates that a new link has begun
-            if val_end_flag and new_link_flag: # if value reading has ended and a new property type has begun: 
-                algs=[]; sc="";rc="";prop="";form="";value="";val_end_flag=False         # initialize list and values    
-        elif prop_type=="sendingcompartment":
-            sc=line_nc.split(':')[1].strip()
-        elif prop_type=="receivingcompartment":
-            rc=line_nc.split(':')[1].strip()
-        elif prop_type=="algorithm":
-            al=line_nc.split(':')[1].strip()
-            algs.append(al)
-        elif prop_type=="property":
-            prop=line_nc.split(':')[1].strip()
-        elif prop_type=="form":
-            form=line_nc.split(':')[1].strip()
-        elif prop_type=="value":
-            val=line_nc.split(':')[1].strip()
-            val_end_flag=True      
-            if algs!=[] and sc!="" and rc!="": 
-                for alg in algs:
-                     lp=(sc,rc,alg,prop,form,val)
-                     link_tuples.append(lp)
+#     val_end_flag=False 
+#     link_tuples=[]
+#     algs=[]; sc="";rc="";prop="";form="";value="";
+#     for line in prop_lines: # loop over lines 
+#         line=line.strip() # strip /n and space       
+#         if line[:2]==r'//' or line=='': # if a comment or if blank, move on to next line
+#             continue # move to next line
+#         line_nc=line.split("//")[0] # line stripped of comment    
+#         prop_type=line_nc.split(':')[0].strip() # split on : . text to the left is the property type 
+#         if prop_type=='new link': # if new link        
+#             new_link_flag=True # flag indicates that a new link has begun
+#             if val_end_flag and new_link_flag: # if value reading has ended and a new property type has begun: 
+#                 algs=[]; sc="";rc="";prop="";form="";value="";val_end_flag=False         # initialize list and values    
+#         elif prop_type=="sendingcompartment":
+#             sc=line_nc.split(':')[1].strip()
+#         elif prop_type=="receivingcompartment":
+#             rc=line_nc.split(':')[1].strip()
+#         elif prop_type=="algorithm":
+#             al=line_nc.split(':')[1].strip()
+#             algs.append(al)
+#         elif prop_type=="property":
+#             prop=line_nc.split(':')[1].strip()
+#         elif prop_type=="form":
+#             form=line_nc.split(':')[1].strip()
+#         elif prop_type=="value":
+#             val=line_nc.split(':')[1].strip()
+#             val_end_flag=True      
+#             if algs!=[] and sc!="" and rc!="": 
+#                 for alg in algs:
+#                      lp=(sc,rc,alg,prop,form,val)
+#                      link_tuples.append(lp)
             
         
-    try:
-        df_links_3=pd.DataFrame(link_tuples,columns=['sending_compartment', 'receiving_compartment', 'algorithm','property','form','value'])
-        df_links_3=df_links_3.drop_duplicates()
-    except:
-        df_links_3=pd.DataFrame(columns=['sending_compartment', 'receiving_compartment', 'algorithm','property','form','value'])
+#     try:
+#         df_links_3=pd.DataFrame(link_tuples,columns=['sending_compartment', 'receiving_compartment', 'algorithm','property','form','value'])
+#         df_links_3=df_links_3.drop_duplicates()
+#     except:
+#         df_links_3=pd.DataFrame(columns=['sending_compartment', 'receiving_compartment', 'algorithm','property','form','value'])
 
-#    df_props=df_props.append(df_props_2)
-#    df_props=df_props.append(df_props_3)
-#
-##    df_links=df_props.append(df_links_2)
-    df_links=df_links.append(df_links_3) # append links in df_links_3 to main df_links
-    df_links=df_links.reset_index(drop=True) # reset index from zero
-#
+# #    df_props=df_props.append(df_props_2)
+# #    df_props=df_props.append(df_props_3)
+# #
+# ##    df_links=df_props.append(df_links_2)
+#     df_links=df_links.append(df_links_3) # append links in df_links_3 to main df_links
+#     df_links=df_links.reset_index(drop=True) # reset index from zero
+# #
 #    
     #### read pseudo volume element links
     
