@@ -163,6 +163,10 @@
                 $('#option_3_form').hide()
 
                 $(data_source_select).change(function (e) {
+                    form_display_on_data_source_select(e,true)
+                })
+
+                function form_display_on_data_source_select(e,update_db) {
                     have_file_cb = $("input[id*='have_user_file']")
                     field_name_dd = $("select[id*='field_name_']")
                     optionNum = $(data_source_select).children("option:selected").index() + 1
@@ -179,7 +183,10 @@
                         $('#option_2_form').hide()
                         $('#option_3_form').show()
                     }
-                })
+                    if (update_db) {
+                        // ******* ADD API CALL TO UPDATE THE "erosionRateCalcSource" in the backend
+                    }
+                }
 
                 $('#erosionTable_opt1').DataTable(
                     {
@@ -459,6 +466,10 @@
                     // reset decorations
                     update_cell_calc(row,cls)
                 })
+                // SELECT THE SAVED "erosionRateCalcSource" ON LOAD
+                let opt_idx = loadedData.scenario_head.erosionRateSource - 1
+                $($("#erosion_input_options").find("option")[opt_idx]).attr("selected","selected")
+                form_display_on_data_source_select(e,false)
             })
             let field_name_dd = $("select[id*='field_name_']").filter((i,e)=>$(e).attr("id").startsWith("erosion_inputs"))
             /* const tables = ['#tableDiv_opt1', '#tableDiv_opt2', '#tableDiv_opt3'];

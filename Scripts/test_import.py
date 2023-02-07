@@ -8,7 +8,7 @@ TRIM_FILES = (
     'TRIM_frontend/trim-builder-dev/Scripts/trim_core/backend/Legacy_Input_Files'
 )
 
-SCENARIO_NAME = 'Foundries_SS'
+SCENARIO_NAME = 'Foundries_SS2'
 CHEMICAL_CATEGORY = 'Mercury'
 
 
