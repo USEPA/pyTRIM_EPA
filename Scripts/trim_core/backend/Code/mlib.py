@@ -87,8 +87,12 @@ def process_master_library(inputs):
         prop=prop.replace('z_total','z_total')
         prop=prop.replace ('!',' not ')
         prop=prop.replace('sendingchemical_','self.currentchemical.')
+        prop=prop.replace('receivingchemical_','self.currentchemical.')
         prop=prop.replace('molecularweight','molecularweight')        
         prop=prop.replace('ln','log')
+        prop=prop.replace('if (self.containingscenario.rain==0 and self.sendingcompartment.volume>0) else 0',' * (1-self.dict_inputs["met_dict"]["frac_time_rain"]) if self.sendingcompartment.volume>0 else 0')   ## important: replace rain time dependent switch with fraction of time rain for static non time series analysis. affects algorithm -- blowing particles of leaf to air    (when not raining)
+        prop=prop.replace('if (self.containingscenario.rain>0 and self.sendingcompartment.volume>0) else 0','*self.dict_inputs["met_dict"]["frac_time_rain"]') ## important: replace rain time dependent switch with fraction of time rain for static non time series analysis. affects algorithm -- blowing particles of leaf to ground    (when raining)
+
         
         if 'thelink.interfacialarea' in prop: # replace thelink interfacial area custom function with python function
             prop=prop.replace('thelink.interfacialarea','check_neighbor(self.sendingcompartment,self.receivingcompartment,self.dict_inputs).is_neighbor()[1]')           
@@ -98,6 +102,29 @@ def process_master_library(inputs):
         if 'thelink.bulkwaterflowrate_volumetric' in prop: # hack to deal with interconnected water bodies
             prop=prop.replace('thelink.bulkwaterflowrate_volumetric',"float(self.dict_inputs['df_links'].loc[(self.dict_inputs['df_links']['receiving_compartment_new']==self.receivingcompartment.name)&(self.dict_inputs['df_links']['sending_compartment_new']==self.sendingcompartment.name)&(self.dict_inputs['df_links']['property']=='bulkwaterflowrate_volumetric'),'value'].values[0])")          
 
+        if 'thelink.fractionoftotalrunoff' in prop: # hack to deal with runoff link
+            prop=prop.replace('thelink.fractionoftotalrunoff',"float(self.dict_inputs['df_links'].loc[(self.dict_inputs['df_links']['receiving_compartment_new']==self.receivingcompartment.name)&(self.dict_inputs['df_links']['sending_compartment_new']==self.sendingcompartment.name)&(self.dict_inputs['df_links']['property']=='fractionoftotalrunoff'),'value'].values[0])")          
+        if 'thelink.fractionoftotalerosion' in prop: # hack to deal with erosion link
+            prop=prop.replace('thelink.fractionoftotalerosion',"float(self.dict_inputs['df_links'].loc[(self.dict_inputs['df_links']['receiving_compartment_new']==self.receivingcompartment.name)&(self.dict_inputs['df_links']['sending_compartment_new']==self.sendingcompartment.name)&(self.dict_inputs['df_links']['property']=='fractionoftotalerosion'),'value'].values[0])")          
+        
+        if 'sendingwithincompositecompartment[terrestrial plant | leaf]'in prop:
+            prop=prop.replace('sendingwithincompositecompartment[terrestrial plant | leaf].','self.sendingcompartment.associated_leaf_comp.')
+
+        if 'thelink.rechargerate'in prop: ## default value -- find a way to read default values when properties are not defined in properties file
+            prop=prop.replace('thelink.rechargerate','default_rechargerate')
+
+        if 'sendingvolumeelementsumof[terrestrial plant | leaf]'in prop:
+            prop=prop.replace('sendingvolumeelementsumof[terrestrial plant | leaf].','self.sendingcompartment.associated_leaf_comp.')
+        
+
+        if 'self.sendingcompartment.allowexchange_forother' in prop and '1-self.dict_inputs["met_dict"]["frac_time_rain"]' in prop: # to address interaction between exchange and rain
+            prop=prop.replace('self.sendingcompartment.allowexchange_forother','1')
+            prop=prop.replace('1-self.dict_inputs["met_dict"]["frac_time_rain"]','self.dict_inputs["met_dict"]["frac_time_exchange_no_rain"]')
+
+        if 'self.sendingcompartment.allowexchange_forother' in prop and 'self.dict_inputs["met_dict"]["frac_time_rain"]' in prop: # to address interaction between exchange and rain
+            prop=prop.replace('self.sendingcompartment.allowexchange_forother','1')
+            prop=prop.replace('self.dict_inputs["met_dict"]["frac_time_rain"]','self.dict_inputs["met_dict"]["frac_time_exchange_rain"]')
+
         return (prop)
    
     required_algs=req.required_algorithms # look up list of required algorithms
@@ -105,7 +132,13 @@ def process_master_library(inputs):
     with open(ofpn, 'w') as f:  
         f.write('### note: this is an auto generated script' +'\n')        
         f.write('from find_neighbors import *' +'\n')
-        f.write('from numpy import sqrt,nan,log' +'\n')
+        f.write('from numpy import sqrt,nan,log,exp' +'\n')
+        f.write('from util_functions import *' +'\n')
+        f.write('mfp=r"'+str(inputs['path_inputs'])+'"'+'   # path to met file'+'\n') 
+        f.write('mfn=r"'+str(inputs['met_file'])+'"'+'   # met file name'+'\n') 
+        f.write('default_rechargerate=1.42e-04'+'\n\n\n')
+        # f.write('print("Fraction Time Rain = ", frac_time_rain(mfp,mfn))'+'\n\n\n') # test 
+
         
         for index,group in enumerate(grouped_alg.groups):
             if group not in required_algs:
@@ -332,6 +365,7 @@ from define_attributes_props import *
     
     
     def clean_props(prop): # function to convert properties to pythonic syntax, 
+        prop=prop.replace('(compartment.allowexchange_forother > 0 ? compartment.wetvolumeperarea * containingvolumeelement.area : 0)','compartment.allowexchange_forother > 0 ? compartment.wetvolumeperarea * containingvolumeelement.area : 0') # ternary convertor doesnt handle props enclosed in paranthesis 
         if '?' in prop: # change ternary if then else syntax to pythonic syntax
             prop=ternary2python(prop)
             
@@ -342,6 +376,7 @@ from define_attributes_props import *
         prop=prop.replace('True','True')
         prop=prop.replace('constants','self.constants')
         prop=prop.replace('containingscenario','self.containingscenario')
+        prop=prop.replace('withincontainingvolumeelement[abiotic | soil | surface soil].area','self.associated_soil_comp.area')
         prop=prop.replace('containingvolumeelement','self.containingvolumeelement')
         prop=prop.replace('currentchemical','self.currentchemical')
         prop=prop.replace('<unset>','"<unset>"')
@@ -349,6 +384,14 @@ from define_attributes_props import *
         prop=prop.replace('z_vapor','z_vapor')
         prop=prop.replace('d_purewater','d_purewater')
         prop=prop.replace('fractionmass_vapor','fractionmass_vapor')
+        prop=prop.replace('(compartment.allowexchange_forother > 0 ? compartment.wetvolumeperarea * containingvolumeelement.area : 0)','compartment.allowexchange_forother > 0 ? compartment.wetvolumeperarea * containingvolumeelement.area : 0') 
+        prop=prop.replace('withincompositecompartment[terrestrial plant | leaf | leaf - deciduous forest].','self.associated_leaf_comp.')
+        prop=prop.replace('withincompositecompartment[terrestrial plant | leaf].','self.associated_leaf_comp.')  
+        prop=prop.replace('withincompositecompartment[terrestrial plant | leaf | leaf - grasses/herbs].','self.associated_leaf_comp.')
+        prop=prop.replace('withincontainingvolumeelement[abiotic | soil | surface soil].area','self.associated_soil_comp.area')
+        prop=prop.replace('self.allowexchange_dynamic','wt_av_allowexchange') # Call dynamic allow exchange defined at top of script
+
+
         if 'linkedcompartment' in prop:
             prop=linkcomp(prop)
         if 'currentchemical' not in prop and 'chemical.' in prop:
@@ -369,18 +412,25 @@ from define_attributes_props import *
 
         if 'organiccarboncontent' in prop:
             prop=prop.replace('organiccarboncontent','organiccarboncontent')
-            
 
-        if 'self.volume *' in prop:
-            prop=prop.replace('self.volume *','self.containingvolumeelement.volume *')
-        if 'self.volume*' in prop:
-            prop=prop.replace('self.volume*','self.containingvolumeelement.volume*')
 
-        if 'self.height' in prop:
-            prop=prop.replace('self.height','self.containingvolumeelement.height')
+### 083022 Testing commenting out these because some self.height and self.volume may be calculated differently from parent volume abiotic element. e.g. stem. not sure of impacts on others.            
+
+        # if 'self.volume *' in prop:
+        #     prop=prop.replace('self.volume *','self.containingvolumeelement.volume *')
+        # if 'self.volume*' in prop:
+        #     prop=prop.replace('self.volume*','self.containingvolumeelement.volume*')
+
+        # if 'self.height' in prop:
+        #     prop=prop.replace('self.height','self.containingvolumeelement.height')
 
     
         return (prop)
+
+
+       
+   
+       
     
     df_comp_lib=df_lib.loc[df_lib['objecttype']=='compartment']
     grouped_comp = df_comp_lib.groupby("objectname")
@@ -422,7 +472,13 @@ def linkedCompartmentvalue(containingvolumeelement,comp_objects_dict,primary_abi
     val=eval(val_str)
     return(val)  
     ''')
-            
+ 
+
+        
+        f.write('\n')  # implement a cleaner way of giving comp classes access to met dict (e.g. make inputs or dict_inputs a parameter in comp class definition? ORM approach may supercede all this)
+        for k,v in inputs['met_dict'].items():
+            f.write(k+'='+str(v)+'\n')
+        f.write('\n')               
     
 # method decorator approach 
 
@@ -444,7 +500,13 @@ def linkedCompartmentvalue(containingvolumeelement,comp_objects_dict,primary_abi
             all_props=list(grouped_comp.get_group(group)['propertyname']) # all property names 
             all_vals=list(grouped_comp.get_group(group)['propertyvalue']) # all property values 
             all_types=list(grouped_comp.get_group(group)['datatype']) # # all property types 
-    
+
+            if group=="advection sink":                 # hack to fix default category name in advection sinks which is set to air in library
+                cat_index=all_props.index('category') # index of category property
+                del all_props[cat_index]
+                del all_vals[cat_index]
+                del all_types[cat_index]
+            
             c_p=tuple(zip(all_props,all_vals,all_types))
     
             constant_props=[] # properties that depend on constant number     
@@ -467,6 +529,7 @@ def linkedCompartmentvalue(containingvolumeelement,comp_objects_dict,primary_abi
                 chems=list(df_prop_val['specificchemical'])
                 prop_cl=clean_props(prop)
 
+
                 if len(chems)==1 and type(chems[0])== float:#isnan(chems[0]): # if only nan:
                     ch_name='nan'
                     prop_val=df_prop_val['propertyvalue'].values[0]
@@ -476,6 +539,10 @@ def linkedCompartmentvalue(containingvolumeelement,comp_objects_dict,primary_abi
                         pass
                     if prop=="sedimentresuspensionvelocity": # temp hack to deal with sediment resuspension issue 
                         prop_val="9.64763202734353e-05"
+
+                    if prop=="calculatewetdepinterceptionfraction": # temp hack to deal with CalculateWetDepInterceptionFraction (false in library but read in as true in Foundries run) 
+                        prop_val="False"
+
                         
 #                    if type(prop_val)==float or is_number(prop_val):
 #                        if isnan(prop_val):
@@ -491,11 +558,23 @@ def linkedCompartmentvalue(containingvolumeelement,comp_objects_dict,primary_abi
                             'def '+prop+'(self,value):'+'\n\t\t' +\
                             'self._'+prop+'=value\n')             
                             
+                    # if (prop in bool_props): 
+                    #     f.write('\n\t'+\
+                    #             '@property'+'\n\t' +\
+                    #             'def '+prop+'(self):'+'\n\t\t' +\
+                    #             'return ('+prop_val+')\n\t')                 
+
                     if (prop in bool_props): 
                         f.write('\n\t'+\
-                                '@property'+'\n\t' +\
-                                'def '+prop+'(self):'+'\n\t\t' +\
-                                'return ('+prop_val+')\n\t')                 
+                            '_'+prop+'='+prop_val +'\n\t' +\
+                            '@property'+'\n\t' +\
+                            'def '+prop+'(self):'+'\n\t\t' +\
+                            'return self._'+prop+'\n\t'+\
+                            '@'+prop+'.setter''\n\t' +\
+                            'def '+prop+'(self,value):'+'\n\t\t' +\
+                            'self._'+prop+'=value\n')             
+
+                        
 
                     if (prop in non_formula_props): 
                         if type(prop_val)==float:
@@ -512,41 +591,204 @@ def linkedCompartmentvalue(containingvolumeelement,comp_objects_dict,primary_abi
                                 'return ('+prop_val+')\n\t')   
 
 
-                else: # multiple chems
-                    schems=[x for x in chems if x in inputs['simulation_chemicals']] #simulation chems only
-                    f.write('\n\t'+\
-                        '@property'+'\n\t' +\
-                        'def '+prop_cl+'(self):'+'\n\t\t' +\
-                        'cdict={}')
-                    for chem in schems:
-                        if type(chem)==float:
-                            ch_name='nan'
-                            prop_val=df_prop_val[df_prop_val['specificchemical'].isnull()]['propertyvalue'].values[0]
-                        else:
-                            prop_val=df_prop_val.loc[df_prop_val['specificchemical']==chem,'propertyvalue'].values[0]             
-                            ch_name=clean_chem_names(chem)
-                        if (prop not in non_formula_props) and (prop not in bool_props):
-                            try:
-                                prop_val=clean_props(prop_val)    
-                            except:
-                                pass
-                        ### the try except is because it tries to evaluate each chemical even when it is not the current chemical with the method decorator approach
+                # else: # multiple chems
+                #     schems=[x for x in chems if x in inputs['simulation_chemicals']] #simulation chems only
+                #     f.write('\n\t'+\
+                #         '@property'+'\n\t' +\
+                #         'def '+prop_cl+'(self):'+'\n\t\t' +\
+                #         'cdict={}')
+                #     for chem in schems:
+                #         if type(chem)==float:
+                #             ch_name='nan'
+                #             prop_val=df_prop_val[df_prop_val['specificchemical'].isnull()]['propertyvalue'].values[0]
+                #         else:
+                #             prop_val=df_prop_val.loc[df_prop_val['specificchemical']==chem,'propertyvalue'].values[0]             
+                #             ch_name=clean_chem_names(chem)
+                #         if (prop not in non_formula_props) and (prop not in bool_props):
+                #             try:
+                #                 prop_val=clean_props(prop_val)    
+                #             except:
+                #                 pass
+                #         ### the try except is because it tries to evaluate each chemical even when it is not the current chemical with the method decorator approach
+                #         f.write('\n\t\t'+\
+                #                 'try:''\n\t\t\t'+\
+                #                 'cdict["'+ch_name+'"]='+prop_val+'\n\t\t'+\
+                #                 'except:''\n\t\t\t'+\
+                #                 'cdict["'+ch_name+'"]=nan'+'\n\t\t')
+                #     f.write('\n\t\t'+\
+                #             'return cdict')
+                #     f.write('\n')
+                #     cpname='chemical_'+prop_cl
+                #     cprop='self.'+prop_cl+'[self.currentchemical.name]'
+                #     f.write('\n\t'+\
+                #         '@property'+'\n\t' +\
+                #         'def '+cpname+'(self):'+'\n\t\t' +\
+                #         'return '+cprop)
+
+
+
+                else: # multiple chems # condition is a dirty hack for applying values in other properties file. will not work if file includes other types of props than in the condition statement.
+                    # condition= ('soil' in group) and (prop_cl=='methylationrate' or prop_cl=='demethylationrate' or prop_cl=='reductionrate' or prop_cl=='oxidationrate')
+                    condition= ('soil' in group) and (prop_cl=='methylationrate' or prop_cl=='demethylationrate' or prop_cl=='reductionrate' or prop_cl=='oxidationrate')
+
+                    if not condition:
+                        schems=[x for x in chems if x in inputs['simulation_chemicals']] #simulation chems only
+                        f.write('\n\n\t'+\
+                            '@property'+'\n\t' +\
+                            'def '+prop_cl+'(self):'+'\n\t\t' +\
+                            'cdict={}')
+                        for chem in schems:
+                            if type(chem)==float:
+                                ch_name='nan'
+                                prop_val=df_prop_val[df_prop_val['specificchemical'].isnull()]['propertyvalue'].values[0]
+                            else:
+                                prop_val=df_prop_val.loc[df_prop_val['specificchemical']==chem,'propertyvalue'].values[0]             
+                                ch_name=clean_chem_names(chem)
+                            if (prop not in non_formula_props) and (prop not in bool_props):
+                                try:
+                                    prop_val=clean_props(prop_val)    
+                                except:
+                                    pass
+                            ### the try except is because it tries to evaluate each chemical even when it is not the current chemical with the method decorator approach
+                            f.write('\n\t\t'+\
+                                    'try:''\n\t\t\t'+\
+                                    'cdict["'+ch_name+'"]='+prop_val+'\n\t\t'+\
+                                    'except:''\n\t\t\t'+\
+                                    'cdict["'+ch_name+'"]=nan'+'\n\t\t')
                         f.write('\n\t\t'+\
-                                'try:''\n\t\t\t'+\
-                                'cdict["'+ch_name+'"]='+prop_val+'\n\t\t'+\
-                                'except:''\n\t\t\t'+\
-                                'cdict["'+ch_name+'"]=nan'+'\n\t\t')
-                    f.write('\n\t\t'+\
-                            'return cdict')
-                    f.write('\n')
+                                'return cdict')
+                        f.write('\n')
+                        cpname='chemical_'+prop_cl
+                        cprop='self.'+prop_cl+'[self.currentchemical.name]'
+                        f.write('\n\t'+\
+                            '@property'+'\n\t' +\
+                            'def '+cpname+'(self):'+'\n\t\t' +\
+                            'return '+cprop +'\n')
+                            
+
+
+
+# ## comment out -- do not create certain properties of soil class that will be directly created in the instance                                        
+#                     if condition:
+#                         schems=[x for x in chems if x in inputs['simulation_chemicals']] #simulation chems only
+#                         f.write('\n\n\t'+\
+#                                 prop_cl+'_cdict'+'={}')
+#                         for chem in schems:
+#                             if type(chem)==float:
+#                                 ch_name='nan'
+#                                 prop_val=df_prop_val[df_prop_val['specificchemical'].isnull()]['propertyvalue'].values[0]
+#                             else:
+#                                 prop_val=df_prop_val.loc[df_prop_val['specificchemical']==chem,'propertyvalue'].values[0]             
+#                                 ch_name=clean_chem_names(chem)
+#                             if (prop not in non_formula_props) and (prop not in bool_props):
+#                                 try:
+#                                     prop_val=clean_props(prop_val)    
+#                                 except:
+#                                     pass
+#                             ### the try except is because it tries to evaluate each chemical even when it is not the current chemical with the method decorator approach
+#                             f.write('\n\t'+\
+#                                     'try:''\n\t\t'+\
+#                                     prop_cl+'_cdict["'+ch_name+'"]='+prop_val+'\n\t'+\
+#                                     'except:''\n\t\t'+\
+#                                     prop_cl+'_cdict["'+ch_name+'"]=nan'+'\n\t')
+
+#                         f.write('\n')
+
+#                         f.write('\n\t'+\
+#                         '@property'+'\n\t' +\
+#                         'def '+prop_cl+'(self):'+'\n\t\t' +\
+#                         'return self.'+prop_cl+'_cdict')
+
+#                         cpname='chemical_'+prop_cl
+#                         cprop='self.'+prop_cl+'[self.currentchemical.name]'
+#                         f.write('\n\t'+\
+#                             '@property'+'\n\t' +\
+#                             'def '+cpname+'(self):'+'\n\t\t' +\
+#                             'return '+cprop)
+
+
+                    if condition:
+                        
+                        schems=[x for x in chems if x in inputs['simulation_chemicals']] #simulation chems only
+                        f.write('\n\t@property')+\
+                        f.write('\n\t'+\
+                            'def '+prop_cl+'(self):'+'\n\t\t'+\
+                                'if not hasattr(self,"_'+prop_cl+'"):\n\t\t\t'+\
+                                    'self._'+prop_cl+'={}'+'\n\t\t\t')
+
+                            
+                                            
+                                    
+
+                        for chem in schems: # there is only one chemical for these properties or this wouldnt work
+                            if type(chem)==float:
+                                ch_name='nan'
+                                prop_val=df_prop_val[df_prop_val['specificchemical'].isnull()]['propertyvalue'].values[0]
+                            else:
+                                prop_val=df_prop_val.loc[df_prop_val['specificchemical']==chem,'propertyvalue'].values[0]             
+                                ch_name=clean_chem_names(chem)
+                            if (prop not in non_formula_props) and (prop not in bool_props):
+                                try:
+                                    prop_val=clean_props(prop_val)    
+                                except:
+                                    pass
+                            ### the try except is because it tries to evaluate each chemical even when it is not the current chemical with the method decorator approach
+                            f.write('try:'+'\n\t\t\t\t'+\
+                                    'self._'+prop_cl+'["'+ch_name+'"]='+prop_val+'\n\t\t\t'+\
+                                    'except:'+'\n\t\t\t\t'+\
+                                    'self._'+prop_cl+'["'+ch_name+'"]=nan'+'\n\t\t'+\
+                                    'return self._'+prop_cl)
+ 
+                                
                     cpname='chemical_'+prop_cl
                     cprop='self.'+prop_cl+'[self.currentchemical.name]'
                     f.write('\n\t'+\
                         '@property'+'\n\t' +\
                         'def '+cpname+'(self):'+'\n\t\t' +\
-                        'return '+cprop)
-                                
-  
+                        'return '+cprop +'\n')
+
+
+    
+                # else: # multiple chems
+                #     schems=[x for x in chems if x in inputs['simulation_chemicals']] #simulation chems only
+                #     f.write('\n\t@property')+\
+                #     f.write('\n\t'+\
+                #         'def _'+prop_cl+'(self):'+'\n\t\t')
+                #     f.write('_cdict={}')    
+                #     for chem in schems:
+                #         if type(chem)==float:
+                #             ch_name='nan'
+                #             prop_val=df_prop_val[df_prop_val['specificchemical'].isnull()]['propertyvalue'].values[0]
+                #         else:
+                #             prop_val=df_prop_val.loc[df_prop_val['specificchemical']==chem,'propertyvalue'].values[0]             
+                #             ch_name=clean_chem_names(chem)
+                #         if (prop not in non_formula_props) and (prop not in bool_props):
+                #             try:
+                #                 prop_val=clean_props(prop_val)    
+                #             except:
+                #                 pass
+                #         ### the try except is because it tries to evaluate each chemical even when it is not the current chemical with the method decorator approach
+                #         f.write('\n\t\t'+\
+                #                 'try:'+'\n\t\t\t'+\
+                #                 '_cdict["'+ch_name+'"]='+prop_val+'\n\t\t'+\
+                #                 'except:'+'\n\t\t\t'+\
+                #                 '_cdict["'+ch_name+'"]=nan')
+                #     f.write('\n\t\t'+'return(_cdict)')    
+                #     f.write('\n\t'+\
+                #         '@property'+'\n\t' +\
+                #         'def '+prop_cl+'(self):'+'\n\t\t' +\
+                #             'if not hasattr(self, _'+prop_cl+':\n\t\t\t'+\
+                #                 'self._'+prop_cl+'={}')
+                #     f.write('\n\t'+\
+                #             '@'+prop_cl+'.setter'+'\n\t' +\
+                #             'def '+prop_cl+'(self,value):'+'\n\t\t' +\
+                #             'self._'+prop_cl+'=value\n\t') 
+                #     cpname='chemical_'+prop_cl
+                #     cprop='self.'+prop_cl+'[self.currentchemical.name]'
+                #     f.write('\n\t'+\
+                #         '@property'+'\n\t' +\
+                #         'def '+cpname+'(self):'+'\n\t\t' +\
+                #         'return '+cprop)
         
         
     f.close()

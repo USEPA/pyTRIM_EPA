@@ -92,43 +92,34 @@ def process_met(inputs): ## one time process all met weighted averages
     df['Year']=pd.to_numeric(df['Year'], errors='coerce')   
     df['Hour']=pd.to_numeric(df['xhour'], errors='coerce')
     df=df.loc[(df.Month<13) & (df.Day<32) & (df.Year<2100)&(df.Hour<25)] # drop faulty
-
-    metcol_dict={'rain':(0,1),'airtemperature':(200,373),'horizontalwindspeed':(0,100),'winddirection':(-360,360),'mixingheight':(0,1000),'isday':(0,1),'cumulativerain':(0,1.6)} # k, v represent name and min-max
-    for k,v in metcol_dict.items():
-        df['metcol']=pd.to_numeric(df[k], errors='coerce')
-        df=df[(df['metcol']<=v[1])&(df['metcol']>=v[0])] # keep rows within min max bounds
-
-
     df['DT']=list(pd.to_datetime(df[['Year', 'Month', 'Day','Hour']],errors='coerce'))
     df['date_delta'] = (df['DT'] - df['DT'].min())  / timedelta64(1,'D')
     df['time_delta']=df['date_delta'].diff()
-    df['time_delta']=df['time_delta'].shift(-1) # shift up the column 1 so that applicability of met condition is aligned to duration
 
     # clean up non sequential dates. slow 
 
     df['DT_Check']=df.DT>=(df.DT.shift())
     df=df[df['DT_Check']]
-    df=df[(df['time_delta']<0.05)&(df['time_delta']>0)]# assume all observations valid for an hour since this is an hourly met file. eliminate overinfluential observations. not sure if needed but checking.
-    # df=df[df['time_delta']>0]# assume all observations valid for an hour since this is an hourly met file. eliminate overinfluential observations. not sure if needed but checking.
-    # df=df[(df['time_delta']<1)&(df['time_delta']>0)]# assume all observations valid for an hour since this is an hourly met file. eliminate overinfluential observations. not sure if needed but checking.
     
 
    ### need to clean up messy met file to get reasonable averages. This shouldnt be required with a quality met file.             
 
     met_dict={}
+    # metcol_dict={'rain':(0,1),'airtemperature':(200,373),'horizontalwindspeed':(0,12),'winddirection':(0,360),'mixingheight':(0,1000),'isday':(0,1),'cumulativerain':(0,1.6)} # k, v represent name and min-max
+    metcol_dict={'rain':(0,1),'airtemperature':(200,373),'horizontalwindspeed':(0,100),'winddirection':(-360,360),'mixingheight':(0,1000),'isday':(0,1),'cumulativerain':(0,1.6)} # k, v represent name and min-max
     
     for k,v in metcol_dict.items():
-        df['metcol']=pd.to_numeric(df[k], errors='coerce')
-        df['prod']=df['metcol']*df['time_delta']
-        wt_ave=df['prod'].sum()/df['time_delta'].sum()    
+        df2=df
+        df2['metcol']=pd.to_numeric(df[k], errors='coerce')
+        df2=df2[(df2['metcol']<=v[1])&(df2['metcol']>=v[0])] # keep rows within min max bounds
+        df2['prod']=df2['metcol']*df2['time_delta']
+        wt_ave=df2['prod'].sum()/df2['time_delta'].sum()    
         met_dict['wt_av_'+k]=wt_ave
     df['rain']=pd.to_numeric(df['rain'], errors='coerce')
     df['is_rain'] = [1 if x > 0 else 0 for x in df['rain']]
     df['raintime']=df['is_rain']*df['time_delta']
     rain_frac_time=df['raintime'].sum()/df['time_delta'].sum()    
     met_dict['frac_time_rain']=rain_frac_time
-    met_dict['wt_av_rain']=rain_frac_time # overwrite wt_av_rain with rain_frac_time (superior method, i think)
-
 
     # process AE file ## has unusal data column header -- not interfered with original data. Ignored hour resolution. 
     
@@ -141,18 +132,32 @@ def process_met(inputs): ## one time process all met weighted averages
     df2['Month']=pd.to_numeric(df2['Month'], errors='coerce')    
     df2['Day']=pd.to_numeric(df2['Day'], errors='coerce')    
     df2['Year']=pd.to_numeric(df2['Year'], errors='coerce')   
+    # df['Hour']=pd.to_numeric(df['hour'], errors='coerce')
+    # df=df.loc[(df.Month<13) & (df.Day<32) & (df.Year<2100)&(df.Hour<25)] # drop faulty
     df2=df2.loc[(df2.Month<13) & (df2.Day<32) & (df2.Year<2100)] # drop faulty
 
     df2['DT']=list(pd.to_datetime(df2[['Year', 'Month', 'Day']],errors='coerce'))
+    # df['DT']=list(pd.to_datetime(df[['Year', 'Month', 'Day','Hour']],errors='coerce'))
     df2['date_delta'] = (df2['DT'] - df2['DT'].min())  / timedelta64(1,'D')
     df2['time_delta']=df2['date_delta'].diff()
-    df2['time_delta']=df2['time_delta'].shift(-1) # shift up the column 1 so that applicability of met condition is aligned to duration
 
     df2['ae']=pd.to_numeric(df2['allowexchange'], errors='coerce')
     df2['prod']=df2['ae']*df2['time_delta']
     wt_ave=df2['prod'].sum()/df2['time_delta'].sum()    
     met_dict['wt_av_allowexchange']=wt_ave
 
+    ### Compute interaction between rainfall and allow exchange. MAKE THIS FASTER
+
+    # df2['DT_Change']=df2['DT'].shift(-1)
+    # df["ae"]=0
+    # for i in range(1,len(df)):
+    #     print ("I =",i)
+    #     for j in range(0,len(df2)-1):
+    #         print ("J =",j)
+    #         if (df.loc[i,'DT']>=df2.loc[j,'DT'] and df.loc[i,'DT']<df2.loc[j,'DT_Change']):
+    #             print ("hello")
+    #             df.loc[i,'AE']=df2.loc[j,'ae']
+    #             break
     df=df.merge(df2[['DT','ae']],how='left',on='DT',indicator=True) # merge in AE
     
     first_ind=df.loc[df['_merge']=='both'].index[0]# index first date in AE file
@@ -211,14 +216,13 @@ def process_met(inputs): ## one time process all met weighted averages
     # df['DT']=list(pd.to_datetime(df[['Year', 'Month', 'Day','Hour']],errors='coerce'))
     df['date_delta'] = (df['DT'] - df['DT'].min())  / timedelta64(1,'D')
     df['time_delta']=df['date_delta'].diff()
-    df['time_delta']=df['time_delta'].shift(-1) # shift up the column 1 so that applicability of met condition is aligned to duration
 
     df['lf']=pd.to_numeric(df['litterfallrate'], errors='coerce')
     df['prod']=df['lf']*df['time_delta']
     wt_ave=df['prod'].sum()/df['time_delta'].sum()    
     met_dict['wt_av_litterfallrate']=wt_ave
-    # met_dict['wt_av_litterfallrate']=0.0745 # fix
-    # met_dict['wt_av_allowexchange']=5/12
+    met_dict['wt_av_litterfallrate']=0.0745 # fix
+    met_dict['wt_av_allowexchange']=5/12
     
 
     return(met_dict)

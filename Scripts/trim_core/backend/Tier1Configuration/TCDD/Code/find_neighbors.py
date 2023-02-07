@@ -51,6 +51,13 @@ class check_neighbor:
         if parcel_neighbor:
             intersection_length=Polygon_sc.intersection(Polygon_rc).length
                 
+            # new for sediment burial sink 
+            if Polygon_sc.intersection(Polygon_rc).area>0 and self.sendingcompartment.category=='abiotic | sediment | sediment - default' and self.receivingcompartment.category=='sink | abiotic | sediment | sediment - default': # overlying parcels
+                z_overlap=1
+                chk_overlap=True
+                interfacial_area=z_overlap*Polygon_sc.intersection(Polygon_rc).area
+                return(chk_overlap,interfacial_area)
+
             if top_sc >= top_rc and top_rc > bottom_sc:
                 z_overlap=top_rc-bottom_sc
                 chk_overlap=True
@@ -63,27 +70,13 @@ class check_neighbor:
                 interfacial_area=z_overlap*intersection_length
                 return(chk_overlap,interfacial_area)
 
-            # if top_sc == bottom_rc or top_rc == bottom_sc: # overlying parcels
-            #     z_overlap=1
-            #     chk_overlap=True
-            #     interfacial_area=z_overlap*Polygon_sc.area
-            #     return(chk_overlap,interfacial_area)
-
 
             if (top_sc == bottom_rc or top_rc == bottom_sc) and Polygon_sc.intersection(Polygon_rc).area>0: # overlying parcels
                 z_overlap=1
                 chk_overlap=True
                 interfacial_area=z_overlap*Polygon_sc.intersection(Polygon_rc).area
                 return(chk_overlap,interfacial_area)
-                                                
-
-            # if top_sc == bottom_rc or top_rc == bottom_sc: # overlying parcels
-            #     z_overlap=Polygon_sc.intersection(Polygon_rc).area
-            #     if z_overlap>0.00000001:
-            #         chk_overlap=True
-            #     interfacial_area=z_overlap*Polygon_sc.area
-            #     return(chk_overlap,interfacial_area)
-                        
+                                              
 
         return(chk_overlap,interfacial_area)
         

@@ -111,7 +111,11 @@ def link_check (comp_objects_dict,comp1_name,comp2_name,dict_inputs,chem_list_cl
         cond2=True
     else:
         cond2=False
-        
+        if ('degradation_reaction_sink' in comp2.name): # let deg sinks be handled by condition 1 
+            cond1=True ## CHECK THIS. NOT DOING ANYTHING I THINK.
+
+    
+
     ## check if manual links  exist    
     df_mlinks=df_links.loc[(df_links['sending_compartment_new']==comp1_name) & (df_links['receiving_compartment_new']==comp2_name)] # filter links dataframe to see if any rows correspond
     if len(df_mlinks)>0: # if there are connecting algorithms
@@ -139,7 +143,14 @@ def link_check (comp_objects_dict,comp1_name,comp2_name,dict_inputs,chem_list_cl
                 cond1=False
             if ('leaf' in comp1.name or 'particle' in comp1.name or 'stem' in comp1.name or 'root' in comp1.name) and ('leaf' in comp2.name or 'particle' in comp2.name or 'stem' in comp2.name or 'root' in comp2.name) and  (comp1.name.split('_')[-1]!=comp2.name.split('_')[-1]): # leaf components should not connect to leaf components in neighboring air parcels. This may be too restrictive -- replace with is above approach
                 cond1=False
-
+            if 'degradation_reaction_sink' in comp2.name and comp1.name.split('_in_')[-1]!=comp2.name.split('_in_')[-1]: # degradation sinks only connect to same compartment
+                cond1=False
+            if ('degradation_reaction_sink_in_surfsoil' in comp2.name)and (('leaf' in comp1.name or 'stem' in comp1.name or'root' in comp1.name) and ('particle' not in comp1.name) and ('root_zone' not in comp1.name)) and (comp1.parcel_name!=comp2.parcel_name) : # connect leaves, stem, and root of plants with degradation sinks of surfsoil compartment of same parcel
+                cond1=False
+            if (comp1.category=='abiotic | soil | root zone | root zone - default') and (comp2.category=='abiotic | soil | surface soil | surface soil - default') and (comp1.parcel_name!=comp2.parcel_name): #disallow rootzone to connect to surface soil if not in same ve
+                cond1=False
+            if (comp1.category=='abiotic | soil | surface soil | surface soil - default') and (comp2.category=='abiotic | soil | root zone | root zone - default') and (comp1.parcel_name!=comp2.parcel_name): #disallow rootzone to connect to surface soil if not in same ve
+                cond1=False
 
     ### make list of applicable algorithms based on conditions 1 and 2 
 
@@ -174,7 +185,19 @@ def link_check (comp_objects_dict,comp1_name,comp2_name,dict_inputs,chem_list_cl
             df_app=df_app.append(df_app2) 
         if 'terrestrial plant | stem | stem - grasses/herbs' in comp1.category and 'terrestrial plant | stem | stem - grasses/herbs' in comp2.category: # to cover cases where comp1 category is 'terrestrial plant | stem | stem - grasses/herbs' and comp2 category is 'terrestrial plant | stem | stem - grasses/herbs'
             df_app2=df_alg_mat.loc[(df_alg_mat['sendingcompartmentcategory']=="terrestrial plant | stem") &(df_alg_mat['receivingcompartmentcategory']=="terrestrial plant | stem") & (df_alg_mat['enabled']=='True')]
-            df_app=df_app.append(df_app2) 
+            df_app=df_app.append(df_app2)
+        if 'terrestrial plant | stem | stem - grasses/herbs' in comp1.category and 'sink | degradation/reaction sink' in comp2.category: # to cover cases where comp1 category is 'terrestrial plant | stem | stem - grasses/herbs' and comp2 category is 'sink | degradation/reaction sink'
+            df_app2=df_alg_mat.loc[(df_alg_mat['sendingcompartmentcategory']=="terrestrial plant | stem") &(df_alg_mat['receivingcompartmentcategory']=='sink | degradation/reaction sink') & (df_alg_mat['enabled']=='True')]
+            df_app=df_app.append(df_app2)
+        if 'terrestrial plant | root | root - grasses/herbs' in comp1.category and 'sink | degradation/reaction sink' in comp2.category: # to cover cases where comp1 category is 'terrestrial plant | root | root - grasses/herbs' and comp2 category is 'sink | degradation/reaction sink'
+            df_app2=df_alg_mat.loc[(df_alg_mat['sendingcompartmentcategory']=="terrestrial plant | root") &(df_alg_mat['receivingcompartmentcategory']=='sink | degradation/reaction sink') & (df_alg_mat['enabled']=='True')]
+            df_app=df_app.append(df_app2)
+        if 'fish' in comp1.category and 'sink | degradation/reaction sink' in comp2.category: # to cover cases where comp2 category = fish | something but algorithm receiving comp category is just fish
+            df_app2=df_alg_mat.loc[(df_alg_mat['sendingcompartmentcategory']=="fish") & (df_alg_mat['receivingcompartmentcategory']==comp2.category) & (df_alg_mat['enabled']=='True')]
+            df_app=df_app.append(df_app2)  
+        if 'abiotic | surface water | surface water - default' in comp1.category and 'fish' in comp2.category: # to cover cases where comp2 category = fish | something but algorithm receiving comp category is just fish
+            df_app2=df_alg_mat.loc[(df_alg_mat['sendingcompartmentcategory']=='abiotic | surface water | surface water - default') & (df_alg_mat['receivingcompartmentcategory']=='fish') & (df_alg_mat['enabled']=='True')]
+            df_app=df_app.append(df_app2)  
 
 
 
@@ -268,8 +291,7 @@ def create_trans_mat(inputs,dict_inputs): # function to create transition matrix
     for chem_index, chem in enumerate(chem_list_clean): # loop over chemicals
         currentchemical=chem_objects_dict[chem] # current chemical object
         comp_objects_dict=define_comp.define_comp(currentchemical) # create dictionary of compartment objects    
-        print ('chemical is ', chem, 'kd is ',comp_objects_dict['surface_water_in_sw_lakecadillac'].chemical_kd)
-        
+
         for row_index, comp_row in enumerate(comp_list): # loop over rows (sending compartments)
             ind_name.append(currentchemical.name+'_'+comp_objects_dict[comp_row].name) # index name for this element of the matrix                   
             if hasattr(comp_objects_dict[comp_row], 'deposition_rate'): # if sending compartment has deposition rate
@@ -328,6 +350,10 @@ def create_trans_mat(inputs,dict_inputs): # function to create transition matrix
                         # print (sendingcompartment.name,receivingcompartment.name)
                         alg_instance=alg_class(constants,containingscenario,currentchemical,sendingcompartment,receivingcompartment,dict_inputs)# instantiate algorithm class
                         transfer_factor=alg_instance.transferfactor # compute transfer factor
+                        # check if this hack works below
+                        # if (alg<0) and (np.isnan(transfer_factor)) and (receivingcompartment.category=='abiotic | soil | surface soil | surface soil - default') and ('pseudosource' in sendingcompartment.category):
+                        if (alg<0) and (not hasattr(receivingcompartment,'associated_leaf_comp')) and (receivingcompartment.category=='abiotic | soil | surface soil | surface soil - default') and ('pseudosource' in sendingcompartment.category):
+                              transfer_factor=float(1) # hack to deal with pseudosource compartments connecting to vegetationless soil compartments
                         if (type(transfer_factor)==float or type(transfer_factor)==np.float64 or type(transfer_factor)==np.float32) and not np.isnan(transfer_factor) and alg_instance.doestransformchemical=='False': # if tf is a float (not error) and algorithms does not involved transformation
                             tm[int(chem_index*ncomp+row_index)][int(chem_index*ncomp+row_index)]=tm[int(chem_index*ncomp+row_index)][int(chem_index*ncomp+row_index)]-transfer_factor # sending compartment tf is negative
                             tm[int(chem_index*ncomp+col_index)][int(chem_index*ncomp+row_index)]=tm[int(chem_index*ncomp+col_index)][int(chem_index*ncomp+row_index)]+transfer_factor # receiving compartment tf is positive                        
@@ -345,87 +371,18 @@ def create_trans_mat(inputs,dict_inputs): # function to create transition matrix
 ## for qa only
      
 
-# row_index=56
-# col_index=52
-# comp_row=comp_list[row_index]
-# comp_col=comp_list[col_index]
-# comp1_name=comp_row
-# comp2_name=comp_col  
-
-# row_index=125
-# col_index=22
-# comp_row=comp_list[row_index]
-# comp_col=comp_list[col_index]
-# comp1_name=comp_row
-# comp2_name=comp_col  
-
-# row_index=31 # rootzone e3
-# col_index=32 # vadosezone e3
-# comp_row=comp_list[row_index]
-# comp_col=comp_list[col_index]
-# comp1_name=comp_row
-# comp2_name=comp_col  
-
-# row_index=54 # elemental nw2 soil
-# col_index=234 # elemental nw2 advection sink
-# comp_row=comp_list[row_index]
-# comp_col=comp_list[col_index]
-# comp1_name=comp_row
-# comp2_name=comp_col  
-
-# row_index=34 # elemental nw2 soil
-# col_index=20 # elemental nw2 advection sink
-# comp_row=comp_list[row_index]
-# comp_col=comp_list[col_index]
-# comp1_name=comp_row
-# comp2_name=comp_col  
-
-# row_index=36 # elemental n1 surface soil
-# col_index=37 # elemental n1 root soil
-# comp_row=comp_list[row_index]
-# comp_col=comp_list[col_index]
-# comp1_name=comp_row
-# comp2_name=comp_col 
-
-# row_index=205 # elemental wet vapor n1
-# col_index=118 # elemental n1 leaf
-# comp_row=comp_list[row_index]
-# comp_col=comp_list[col_index]
-# comp1_name=comp_row
-# comp2_name=comp_col 
-
-# row_index=216 # elemental dry vapor e1
-# col_index=110 # elemental e1 leaf
-# comp_row=comp_list[row_index]
-# comp_col=comp_list[col_index]
-# comp1_name=comp_row
-# comp2_name=comp_col 
-
-# row_index=216 # elemental dry vapor e1
-# col_index=24 # elemental e1 surf soil
-# comp_row=comp_list[row_index]
-# comp_col=comp_list[col_index]
-# comp1_name=comp_row
-# comp2_name=comp_col 
-
-# row_index=241 # elemental wet particle source e1
-# col_index=111 # elemental e1 leaf particle
+# row_index=14 # surfsoil in source
+# col_index=0 # air in source
 # comp_row=comp_list[row_index]
 # comp_col=comp_list[col_index]
 # comp1_name=comp_row
 # comp2_name=comp_col 
 
 
-# row_index=25 # elemental e1 root zone soil
-# col_index=112 # elemental e1 stem
+# row_index=19 # surfsoil in source
+# col_index=22# air in source
 # comp_row=comp_list[row_index]
 # comp_col=comp_list[col_index]
 # comp1_name=comp_row
 # comp2_name=comp_col 
 
-# row_index=112 # elemental e1 ot zone soil
-# col_index=112 # elemental e1 stem
-# comp_row=comp_list[row_index]
-# comp_col=comp_list[col_index]
-# comp1_name=comp_row
-# comp2_name=comp_col 

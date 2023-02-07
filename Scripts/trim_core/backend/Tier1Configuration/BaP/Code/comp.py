@@ -4,9 +4,6 @@
 created on wed mar 31 21:15:14 2021
 @author: 13963
 
-## added a single surface soil compartment n1
-## added a few temporary if conditions to limit to sediment and surface water system
-
 1) parses compartments text file and stores as DataFrame
 2) auto write script to instantiate comparment objects, specifically define_comp.py
 
@@ -18,7 +15,20 @@ import os
 import required_elements_temp as req
 from util_functions import * 
 
-parcel_list=['lakecadillac','lakemitchell','n1','nw1','sw1','w1','nw2','sw2','ne3','e2','e3','s1','se1','se2','e1','ne1','n2','s2','ne2']
+parcel_list=['source',
+     'n1',
+     'n6',
+     'n7',
+     'n3',
+     'n4',
+     'n5',
+     's1',
+     'pond',
+     's4',
+     's5',
+     'n2',
+     's2',
+     's3']
 
 # parcel_list=['lakecadillac','lakemitchell','s1']
 
@@ -464,6 +474,87 @@ def define_comp(currentchemical):
         
             f.write('\n\t'+'comp_objects_dict['+'"'+str(comp_name)+'"'+']='+comp_name+'\n')    
             f.write('\n\t')
+
+
+    
+    ###### append code to auto define sediment burial sinks
+    
+    df_sed_sinks=df_ve.loc[df_ve.primary_abiotic=='sediment']
+
+    
+    with open(ofpn, 'a') as f:
+        for i in df_sed_sinks.index:
+            primary_abiotic=str(df_sed_sinks.loc[i,'primary_abiotic']).lower() # temp
+            if primary_abiotic not in required_comp_classes: #  temp
+               continue # temp    
+            ve_name=str(df_sed_sinks.loc[i,'ve_name'].replace(r'/','_').replace(r'-','_').replace(' ','_'))
+            parcel_name=ve_name.split('_')[1] # parcel name
+            parcel_points=df_parcels['point_ids'].loc[df_parcels['parcel_name']==parcel_name].values[0] # parcel points
+            parcel_area=df_parcels['parcel_area'].loc[df_parcels['parcel_name']==parcel_name].values[0] # parcel area
+            exterior_boundary=df_parcels['external_boundary'].loc[df_parcels['parcel_name']==parcel_name].values[0] # parcel exterior boundary
+            comp_name='sediment_burial_sink_for_'+str(df_ve.loc[i,'primary_abiotic'].replace(r'/','_').replace(r'-','_').replace(' ','_')) + '_in_' + str(df_ve.loc[i,'ve_name'].replace(r'/','_').replace(r'-','_').replace(' ','_')) 
+            comp_name=str(comp_name.replace('___','_').replace('__','_'))
+            primary_abiotic=df_sed_sinks.loc[i,'primary_abiotic']
+            comp_class='sediment_burial_sink'
+            # comp_ct= 'sink | abiotic | sediment | sediment - default' # compartment category
+
+            comp_dict[counter]=comp_name
+            counter+=1
+            f.write('\n\t'+\
+                str(comp_name)+\
+                '=' +\
+                comp_class+\
+                '(constants,containingscenario,currentchemical,'+\
+                str(ve_name)+\
+                ',comp_objects_dict'+\
+                ')')
+            f.write('\n\t'+\
+                        str(comp_name)+\
+                        '.'+\
+                        'name='+\
+                        '"'+ comp_name+'"'+\
+                        '\n\t'+\
+                        str(comp_name)+\
+                        '.'+\
+                        'containingvolumeelementname='+\
+                         '"'+ve_name+'"'+\
+                        '\n\t'+\
+                        str(comp_name)+\
+                        '.'+\
+                        'parcel_name='+\
+                        '"'+parcel_name+'"'+\
+                        '\n\t'+\
+                        str(comp_name)+\
+                        '.'+\
+                        'parcel_points='+\
+                        '"'+parcel_points+'"'+\
+                        '\n\t'+\
+                        str(comp_name)+\
+                        '.'+\
+                        'parcel_area='+\
+                        str(parcel_area)+\
+                        '\n\t'+\
+                        str(comp_name)+\
+                        '.'+\
+                        'exterior_boundary='+\
+                        str(exterior_boundary))
+                        # '\n\t'+\
+                        # str(comp_name)+\
+                        # '.'+\
+                        # 'category='+\
+                        # '"'+str(comp_ct)+'"')
+                        # '\n\t'+\
+                        #  '@property'+\
+                        # '\n\t'+\
+                        # 'def category(self):'+\
+                        #  '\n\t\t'+\
+                        #  'return '+'"'+str(comp_ct)+'"')
+            f.write('\n\t')
+        
+            f.write('\n\t'+'comp_objects_dict['+'"'+str(comp_name)+'"'+']='+comp_name+'\n')    
+            f.write('\n\t')
+
+
     
     ################################# append python script to instantiate pseudo primary abiotic compartments -- must first have df_pve in memory (run vol_elem.py)
     
