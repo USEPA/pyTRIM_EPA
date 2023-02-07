@@ -331,7 +331,11 @@ class CustomParameter(Model):
     scenario_id = sa.Column(
         sa.Integer(), sa.ForeignKey('scenario.id'), nullable=False
     )
-    scenario = sa.orm.relationship('Scenario')
+    # scenario = sa.orm.relationship('Scenario')
+
+    scenario = sa.orm.relationship(
+        'Scenario', backref=sa.orm.backref('custom_params', lazy='dynamic')
+    )
 
     requirements = sa.Column(sa.String())
 

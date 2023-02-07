@@ -236,15 +236,17 @@ def get_parcels():
             raise ApiException("No Scenario defined")
         p = ParcelService.get_all(scenario_id=this_scenario_id)
         m = CompartmentService.media.land_use_media_list
+        s = ScenarioService.get(this_scenario_id)
         parcels = []
         media = m
         if p is not None:
+            sh = s.as_serializable()
             for this_p in p:
                 parcels.append(this_p.as_serializable())
     except Exception as e:
         logger.error(traceback.format_exc())
 
-    return ApiResult({'scenario': parcels, 'media': media})
+    return ApiResult({'scenario_head': sh, 'scenario': parcels, 'media': media})
 
 
 @parcels_api.route('/api/parcels/update', methods=['POST'])
