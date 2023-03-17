@@ -391,10 +391,10 @@ def check_alg_values(scenario, chemical, alg, sender, receiver):
 
 
 def run_tests():
-    parse_prop_types(
-        f'{TRIM_FILES}/ICF_Master_Library_03212016_PropertyType_Exporter.txt'
-    )
-    return
+    # parse_prop_types(
+    #     f'{TRIM_FILES}/ICF_Master_Library_03212016_PropertyType_Exporter.txt'
+    # )
+    # return
     scenario = ScenarioService.get(name=SCENARIO_NAME)
 
     if not scenario:
