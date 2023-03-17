@@ -1,0 +1,398 @@
+// ********************************** //
+// Link properties for pseudo-sources //
+// ********************************** //
+// This file defines the abstract links between PseudoSource
+// compartments and their receivers. These properties are meant to be
+// applied in addition to any other scenario-specific properties.
+// Pseudo-sources were created for parcels whose
+// names matched the following [include] pattern:
+//     '.+'
+//
+// unless the name matched the following [exclude] pattern:
+//     '^$'
+
+
+Version:1
+Scenario: TNC0
+Run: BaseRun
+
+
+NewLink:
+    SendingCompartment: DryVaporSource in DryVaporSource_S4
+    ReceivingCompartment: Leaf - Coniferous Forest in Coniferous Forest in SurfSoil_S4
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetVaporSource in WetVaporSource_S4
+    ReceivingCompartment: Leaf - Coniferous Forest in Coniferous Forest in SurfSoil_S4
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryParticleSource in DryParticleSource_S1
+    ReceivingCompartment: Leaf Particle - Grasses/Herbs in Grasses/Herbs in SurfSoil_S1
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetParticleSource in WetParticleSource_S1
+    ReceivingCompartment: Leaf Particle - Grasses/Herbs in Grasses/Herbs in SurfSoil_S1
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryParticleSource in DryParticleSource_Source
+    ReceivingCompartment: Soil - Surface in SurfSoil_Source
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryVaporSource in DryVaporSource_Source
+    ReceivingCompartment: Soil - Surface in SurfSoil_Source
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetParticleSource in WetParticleSource_Source
+    ReceivingCompartment: Soil - Surface in SurfSoil_Source
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetVaporSource in WetVaporSource_Source
+    ReceivingCompartment: Soil - Surface in SurfSoil_Source
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryParticleSource in DryParticleSource_N1
+    ReceivingCompartment: Leaf Particle - Grasses/Herbs in Grasses/Herbs in SurfSoil_N1
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetParticleSource in WetParticleSource_N1
+    ReceivingCompartment: Leaf Particle - Grasses/Herbs in Grasses/Herbs in SurfSoil_N1
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryParticleSource in DryParticleSource_N7
+    ReceivingCompartment: Leaf Particle - Grasses/Herbs in Grasses/Herbs in SurfSoil_N7
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetParticleSource in WetParticleSource_N7
+    ReceivingCompartment: Leaf Particle - Grasses/Herbs in Grasses/Herbs in SurfSoil_N7
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryParticleSource in DryParticleSource_N3
+    ReceivingCompartment: Leaf Particle - Grasses/Herbs in Grasses/Herbs in SurfSoil_N3
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetParticleSource in WetParticleSource_N3
+    ReceivingCompartment: Leaf Particle - Grasses/Herbs in Grasses/Herbs in SurfSoil_N3
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryVaporSource in DryVaporSource_S1
+    ReceivingCompartment: Leaf - Grasses/Herbs in Grasses/Herbs in SurfSoil_S1
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetVaporSource in WetVaporSource_S1
+    ReceivingCompartment: Leaf - Grasses/Herbs in Grasses/Herbs in SurfSoil_S1
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryParticleSource in DryParticleSource_S5
+    ReceivingCompartment: Leaf Particle - Coniferous Forest in Coniferous Forest in SurfSoil_S5
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetParticleSource in WetParticleSource_S5
+    ReceivingCompartment: Leaf Particle - Coniferous Forest in Coniferous Forest in SurfSoil_S5
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryParticleSource in DryParticleSource_S1
+    ReceivingCompartment: Soil - Surface in SurfSoil_S1
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryVaporSource in DryVaporSource_S1
+    ReceivingCompartment: Soil - Surface in SurfSoil_S1
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetParticleSource in WetParticleSource_S1
+    ReceivingCompartment: Soil - Surface in SurfSoil_S1
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetVaporSource in WetVaporSource_S1
+    ReceivingCompartment: Soil - Surface in SurfSoil_S1
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryParticleSource in DryParticleSource_S4
+    ReceivingCompartment: Soil - Surface in SurfSoil_S4
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryVaporSource in DryVaporSource_S4
+    ReceivingCompartment: Soil - Surface in SurfSoil_S4
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetParticleSource in WetParticleSource_S4
+    ReceivingCompartment: Soil - Surface in SurfSoil_S4
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetVaporSource in WetVaporSource_S4
+    ReceivingCompartment: Soil - Surface in SurfSoil_S4
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryParticleSource in DryParticleSource_S5
+    ReceivingCompartment: Soil - Surface in SurfSoil_S5
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryVaporSource in DryVaporSource_S5
+    ReceivingCompartment: Soil - Surface in SurfSoil_S5
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetParticleSource in WetParticleSource_S5
+    ReceivingCompartment: Soil - Surface in SurfSoil_S5
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetVaporSource in WetVaporSource_S5
+    ReceivingCompartment: Soil - Surface in SurfSoil_S5
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryParticleSource in DryParticleSource_S4
+    ReceivingCompartment: Leaf Particle - Coniferous Forest in Coniferous Forest in SurfSoil_S4
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetParticleSource in WetParticleSource_S4
+    ReceivingCompartment: Leaf Particle - Coniferous Forest in Coniferous Forest in SurfSoil_S4
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryVaporSource in DryVaporSource_N5
+    ReceivingCompartment: Leaf - Coniferous Forest in Coniferous Forest in SurfSoil_N5
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetVaporSource in WetVaporSource_N5
+    ReceivingCompartment: Leaf - Coniferous Forest in Coniferous Forest in SurfSoil_N5
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryVaporSource in DryVaporSource_N4
+    ReceivingCompartment: Leaf - Coniferous Forest in Coniferous Forest in SurfSoil_N4
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetVaporSource in WetVaporSource_N4
+    ReceivingCompartment: Leaf - Coniferous Forest in Coniferous Forest in SurfSoil_N4
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryVaporSource in DryVaporSource_S5
+    ReceivingCompartment: Leaf - Coniferous Forest in Coniferous Forest in SurfSoil_S5
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetVaporSource in WetVaporSource_S5
+    ReceivingCompartment: Leaf - Coniferous Forest in Coniferous Forest in SurfSoil_S5
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryVaporSource in DryVaporSource_N3
+    ReceivingCompartment: Leaf - Grasses/Herbs in Grasses/Herbs in SurfSoil_N3
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetVaporSource in WetVaporSource_N3
+    ReceivingCompartment: Leaf - Grasses/Herbs in Grasses/Herbs in SurfSoil_N3
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryVaporSource in DryVaporSource_N1
+    ReceivingCompartment: Leaf - Grasses/Herbs in Grasses/Herbs in SurfSoil_N1
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetVaporSource in WetVaporSource_N1
+    ReceivingCompartment: Leaf - Grasses/Herbs in Grasses/Herbs in SurfSoil_N1
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryVaporSource in DryVaporSource_N7
+    ReceivingCompartment: Leaf - Grasses/Herbs in Grasses/Herbs in SurfSoil_N7
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetVaporSource in WetVaporSource_N7
+    ReceivingCompartment: Leaf - Grasses/Herbs in Grasses/Herbs in SurfSoil_N7
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryParticleSource in DryParticleSource_N4
+    ReceivingCompartment: Leaf Particle - Coniferous Forest in Coniferous Forest in SurfSoil_N4
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetParticleSource in WetParticleSource_N4
+    ReceivingCompartment: Leaf Particle - Coniferous Forest in Coniferous Forest in SurfSoil_N4
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryParticleSource in DryParticleSource_N5
+    ReceivingCompartment: Soil - Surface in SurfSoil_N5
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryVaporSource in DryVaporSource_N5
+    ReceivingCompartment: Soil - Surface in SurfSoil_N5
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetParticleSource in WetParticleSource_N5
+    ReceivingCompartment: Soil - Surface in SurfSoil_N5
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetVaporSource in WetVaporSource_N5
+    ReceivingCompartment: Soil - Surface in SurfSoil_N5
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryParticleSource in DryParticleSource_N4
+    ReceivingCompartment: Soil - Surface in SurfSoil_N4
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryVaporSource in DryVaporSource_N4
+    ReceivingCompartment: Soil - Surface in SurfSoil_N4
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetParticleSource in WetParticleSource_N4
+    ReceivingCompartment: Soil - Surface in SurfSoil_N4
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetVaporSource in WetVaporSource_N4
+    ReceivingCompartment: Soil - Surface in SurfSoil_N4
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryParticleSource in DryParticleSource_N7
+    ReceivingCompartment: Soil - Surface in SurfSoil_N7
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryVaporSource in DryVaporSource_N7
+    ReceivingCompartment: Soil - Surface in SurfSoil_N7
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetParticleSource in WetParticleSource_N7
+    ReceivingCompartment: Soil - Surface in SurfSoil_N7
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetVaporSource in WetVaporSource_N7
+    ReceivingCompartment: Soil - Surface in SurfSoil_N7
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryParticleSource in DryParticleSource_N6
+    ReceivingCompartment: Soil - Surface in SurfSoil_N6
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryVaporSource in DryVaporSource_N6
+    ReceivingCompartment: Soil - Surface in SurfSoil_N6
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetParticleSource in WetParticleSource_N6
+    ReceivingCompartment: Soil - Surface in SurfSoil_N6
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetVaporSource in WetVaporSource_N6
+    ReceivingCompartment: Soil - Surface in SurfSoil_N6
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryParticleSource in DryParticleSource_N1
+    ReceivingCompartment: Soil - Surface in SurfSoil_N1
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryVaporSource in DryVaporSource_N1
+    ReceivingCompartment: Soil - Surface in SurfSoil_N1
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetParticleSource in WetParticleSource_N1
+    ReceivingCompartment: Soil - Surface in SurfSoil_N1
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetVaporSource in WetVaporSource_N1
+    ReceivingCompartment: Soil - Surface in SurfSoil_N1
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryParticleSource in DryParticleSource_N3
+    ReceivingCompartment: Soil - Surface in SurfSoil_N3
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryVaporSource in DryVaporSource_N3
+    ReceivingCompartment: Soil - Surface in SurfSoil_N3
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetParticleSource in WetParticleSource_N3
+    ReceivingCompartment: Soil - Surface in SurfSoil_N3
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetVaporSource in WetVaporSource_N3
+    ReceivingCompartment: Soil - Surface in SurfSoil_N3
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryParticleSource in DryParticleSource_Pond
+    ReceivingCompartment: Surface water in SW_Pond
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryVaporSource in DryVaporSource_Pond
+    ReceivingCompartment: Surface water in SW_Pond
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetParticleSource in WetParticleSource_Pond
+    ReceivingCompartment: Surface water in SW_Pond
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetVaporSource in WetVaporSource_Pond
+    ReceivingCompartment: Surface water in SW_Pond
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: DryParticleSource in DryParticleSource_N5
+    ReceivingCompartment: Leaf Particle - Coniferous Forest in Coniferous Forest in SurfSoil_N5
+    Algorithm: Default
+
+NewLink:
+    SendingCompartment: WetParticleSource in WetParticleSource_N5
+    ReceivingCompartment: Leaf Particle - Coniferous Forest in Coniferous Forest in SurfSoil_N5
+    Algorithm: Default

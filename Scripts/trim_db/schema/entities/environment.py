@@ -1,6 +1,8 @@
 import json
 import sqlalchemy as sa
 from shapely.geometry import Polygon
+from pyproj import Geod
+from shapely import wkt
 from ..parameters.utils import ureg
 from ..utils.base import Model
 
@@ -13,6 +15,7 @@ __all__ = [
 
 class Parcel(Model):
     name = sa.Column(sa.String(120), nullable=False)
+    description = sa.Column(sa.String(250), nullable=True)
 
     scenario_id = sa.Column(
         sa.Integer(), sa.ForeignKey('scenario.id'), nullable=False
@@ -46,7 +49,12 @@ class Parcel(Model):
     @property
     def area(self):
         # CAREFUL: we assume dimensions are in meters ...
-        return self.polygon.area * ureg('m^2')
+        # return self.polygon.area * ureg('m^2')
+        # CAREFUL-2: we assume ellipsoid is WGS84 ...
+        geod = Geod(ellps="WGS84")
+        poly = wkt.loads(
+            f'''POLYGON (({", ".join([str(tpl[0]) + " " + str(tpl[1]) for tpl in self.vertices])}))''')
+        return abs(geod.geometry_area_perimeter(poly)[0])
 
     def get_volume_element(self, name):
         for ve in self.volume_elements:
@@ -76,6 +84,165 @@ class Parcel(Model):
                 return x
         return None
 
+    @property
+    def has_air(self):
+        for ve in self.volume_elements:
+            if ve.name == "Air":
+                return "Yes"
+        return "No"
+
+    @property
+    def has_water(self):
+        for ve in self.volume_elements:
+            if ve.name == "SW":
+                return "Yes"
+        return "No"
+
+    @property
+    def has_land(self):
+        for ve in self.volume_elements:
+            if ve.name == "SurfSoil":
+                return "Yes"
+        return "No"
+
+    @property
+    def parcel_type(self):
+        if self.has_air == "Yes":
+            if self.has_water == "Yes":
+                return "Water & Air"
+            if self.has_land == "Yes":
+                return "Land & Air"
+            return "Air Only"
+        if self.has_water == "Yes":
+            return "Water Only"
+        return "Land Only"
+
+    @property
+    def land_use(self):
+        # No land use for air-only and land-only parcels
+        if self.parcel_type in ["Air Only", "Water Only", "Water & Air"]:
+            return "N/A"
+        for c in self.compartments:
+            # if c.media.isa('Surface_Water'):
+            #     return 'Water'
+            if c.media.isa('Coniferous_Forest'):
+                return 'Coniferous Forest'
+            if c.media.isa('Deciduous_Forest'):
+                return 'Deciduous Forest'
+            if c.media.isa('Agriculture'):
+                return 'Agriculture - General'
+            if c.media.isa('Grass'):
+                return 'Grasses/Herbs'
+            if c.media.isa('Tilled_Soil'):
+                return 'Tilled Soil'
+            if c.media.isa('Untilled_Soil'):
+                return 'Untilled Soil'
+        return 'Impervious'
+
+    @property
+    def has_farm_food_chain(self):
+        if self.get_compartment("Farm"):
+            return "Yes"
+        return "No"
+
+    @property
+    def has_fish_food_web(self):
+        if self.get_compartment("Fish"):
+            return "Yes"
+        return "No"
+
+    @property
+    def has_wetland(self):
+        if self.get_compartment("Wetland"):
+            return "Yes"
+        return "No"
+
+    @property
+    def dust_load(self):
+        for c in self.compartments:
+            if c.name == "Air":
+                dust_concentration = c.parameters["DustLoad"].value
+                return dust_concentration
+        return None
+
+    @property
+    def dust_density(self):
+        for c in self.compartments:
+            if c.name == "Air":
+                dust_density = c.parameters["DustDensity"].value
+                return dust_density
+        return None
+
+    @property
+    def fraction_organic_matter_on_particulates(self):
+        for c in self.compartments:
+            if c.name == "Air":
+                fraction_organic_matter_on_particulates = c.parameters["FractionOrganicMatteronParticulates"].value
+                return fraction_organic_matter_on_particulates
+        return None
+
+    @property
+    def air_density(self):
+        for c in self.compartments:
+            if c.name == "Air":
+                air_density = c.parameters["AirDensity"].value
+                return air_density
+        return None
+
+    @property
+    def air_height(self):
+        for ve in self.volume_elements.all():
+            if "Air" in [a.name for a in list(ve.compartments)]:
+                air_ind = [a.name for a in list(ve.compartments)].index("Air")
+                return ve.compartments[air_ind].volume_element.height.m_as("m")
+        return None
+
+    @property
+    def soil_tillage(self):
+        for c in self.compartments:
+            if c.name == "Soil_Surface":
+                print(c.parameters.get("soilTillage"))
+        return None
+
+    @property
+    def surface_soil_height(self):
+        for ve in self.volume_elements.all():
+            if 'Soil_Surface' in [a.name for a in list(ve.compartments)]:
+                comp_ind = [a.name for a in list(ve.compartments)].index("Soil_Surface")
+                return ve.compartments[comp_ind].volume_element.height.m_as("m")
+        return None
+
+    @property
+    def root_soil_height(self):
+        for ve in self.volume_elements.all():
+            if 'Soil_Root_Zone' in [a.name for a in list(ve.compartments)]:
+                comp_ind = [a.name for a in list(ve.compartments)].index("Soil_Root_Zone")
+                return ve.compartments[comp_ind].volume_element.height.m_as("m")
+        return None
+
+    @property
+    def vadose_soil_height(self):
+        for ve in self.volume_elements.all():
+            if 'Soil_Vadose_Zone' in [a.name for a in list(ve.compartments)]:
+                comp_ind = [a.name for a in list(ve.compartments)].index("Soil_Vadose_Zone")
+                return ve.compartments[comp_ind].volume_element.height.m_as("m")
+        return None
+
+    @property
+    def groundwater_height(self):
+        for ve in self.volume_elements.all():
+            if 'Groundwater' in [a.name for a in list(ve.compartments)]:
+                comp_ind = [a.name for a in list(ve.compartments)].index("Groundwater")
+                return ve.compartments[comp_ind].volume_element.height.m_as("m")
+        return None
+
+    @property
+    def total_erosion_rate(self):
+        for c in self.compartments:
+            if c.media.isa('Surface_Soil'):
+                return c.parameters.get('TotalErosionRate').value
+        return None
+
     # Each parcel should have a unique name in its scenario
     __table_args__ = (
         sa.UniqueConstraint('scenario_id', 'name'),
@@ -85,9 +252,47 @@ class Parcel(Model):
         return {
             'id': self.id,
             'name': self.name,
+            'description': self.description,
             'vertices': self.vertices,
-            'area': self.area
+            'area': self.area,
+            'hasAir': self.has_air,
+            'airDensity': self.air_density,
+            'airHeight': self.air_height,
+            'surfaceSoilThickness': self.surface_soil_height,
+            'rootSoilThickness': self.root_soil_height,
+            'vadoseSoilThickness': self.vadose_soil_height,
+            "groundwaterZoneThickness": self.groundwater_height,
+            'parcelType': self.parcel_type,
+            'hasLand': self.has_land,
+            'landUse': self.land_use,
+            'hasFarmFoodChain': self.has_farm_food_chain,
+            'hasFishFoodWeb': self.has_fish_food_web,
+            'hasWetland': self.has_wetland,
+            'dustLoad': self.dust_load,
+            'dustDensity': self.dust_density,
+            'fractionOrganicMatteronParticulates': self.fraction_organic_matter_on_particulates,
+            'soilTillage': self.soil_tillage,
+            'totalErosionRate': self.total_erosion_rate
         }
+
+    def calc_default_erosion_rate_sdr(self):
+        for c in self.compartments:
+            if c.name == "Soil_Surface":
+                unit_soil_loss = c.parameters["UnitSoilLoss"].default_value
+                area_in_sq_mile = (self.area / 1E6) / 2.58998811
+                if area_in_sq_mile <= 0.1:
+                    intercept_coef = 2.1
+                elif 0.1 < area_in_sq_mile <= 1:
+                    intercept_coef = 1.9
+                elif 1 < area_in_sq_mile <= 10:
+                    intercept_coef = 1.4
+                elif 10 < area_in_sq_mile <= 100:
+                    intercept_coef = 1.2
+                else:
+                    intercept_coef = 0.6
+                slope_coef = c.parameters["SedimentDeliveryRatioSlopeCoef"].default_value
+                sed_delivery_ratio = intercept_coef * (self.area ** (-1 * slope_coef))
+                return unit_soil_loss * sed_delivery_ratio
 
     def __repr__(self):
         return (

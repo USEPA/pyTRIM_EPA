@@ -4,11 +4,11 @@ from trim_db.schema import *
 from trim_db.services import *
 
 TRIM_FILES = (
-    'C:/Users/50466/Documents/Projects/sandbox/TRIM/'
-    'trim-builder/Scripts/trim_core/backend/Legacy_Input_Files'
+    'C:/Users/55284/OneDrive - ICF/Desktop/RTR_TRIM-FaTE/'
+    'TRIM_frontend/trim-builder-dev/Scripts/trim_core/backend/Legacy_Input_Files'
 )
 
-SCENARIO_NAME = 'Foundries_SS'
+SCENARIO_NAME = 'Foundries_SS2'
 CHEMICAL_CATEGORY = 'Mercury'
 
 

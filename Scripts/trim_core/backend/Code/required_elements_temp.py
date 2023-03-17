@@ -4,7 +4,7 @@
 # required compartments refer to primary abiotic types 
 
 required_compartments = ["advection sink",\
-            "degradation/reaction sink",\
+            # "degradation/reaction sink",\
             "flush rate sink",\
             "sediment",\
             "sediment burial sink",\
@@ -106,6 +106,8 @@ required_algorithms = [\
 
             "diffusion from surface soil to air, hg0(alginstid_3997)",\
             "diffusion from surface soil to air, mhg(alginstid_3999)",\
+
+            "resuspension from surface soil to air, set to deposition rate of particles(alginstid_4000)",\
                 
             "litterfall from leaves to soil(alginstid_1088)",\
             "litterfall of leaf particle to soil(alginstid_1098)",\
@@ -143,6 +145,20 @@ required_algorithms = [\
             "transfer from stem to leaf - grasses/herbs, cd(alginstid_1260)",\
             "transfer from stem to leaf - grasses/herbs, hg(alginstid_1260)",\
             "transfer from stem to leaf - grasses/herbs, organic(alginstid_1260)",\
+
+            "time-dependent partition from root zone to root, interacts with bulk soil - agriculture, cd(alginstid_1953)",\
+            "time-dependent partition from root zone to root, interacts with bulk soil - agriculture, hg(alginstid_1953)",\
+            "time-dependent partition from root zone to root, interacts with bulk soil - grasses/herbs,cd(alginstid_1952)",\
+            "time-dependent partition from root zone to root, interacts with bulk soil - grasses/herbs,hg(alginstid_1952)",\
+            "time-dependent partition from root zone to root, interacts with soil pore water - agriculture, organics",\
+            "time-dependent partition from root zone to root, interacts with soil pore water - grasses/herbs, organics(alginstid_1949)",\
+            "time-dependent partition from root to root zone, interacts with bulk soil - agriculture, cd(alginstid_1932)",\
+            "time-dependent partition from root to root zone, interacts with bulk soil - agriculture, hg(alginstid_1932)",\
+            "time-dependent partition from root to root zone, interacts with bulk soil - grasses/herbs, cd(alginstid_1933)",\
+            "time-dependent partition from root to root zone, interacts with bulk soil - grasses/herbs, hg(alginstid_1933)",\
+            "time-dependent partition from root to root zone, interacts with soil pore water - agriculture, organics",\
+            "time-dependent partition from root to root zone, interacts with soil pore water - grasses/herbs, organics(alginstid_1929)",\
+
                 
             "diffusion from root zone to surface soil(alginstid_1939)",\
             "diffusion from surface soil to root zone(alginstid_1919)",\
@@ -152,7 +168,8 @@ required_algorithms = [\
             "diffusion from vadose zone to root zone(alginstid_1914)",\
             "degradation/reaction sink in vadose zone(alginstid_4150)",\
             "diffusion from root zone to vadose zone(alginstid_1904)",\
-            "diffusion from vadose zone to vadose zone(alginstid_2445)",\
+            "percolation from root zone to vadose zone(alginstid_1909)",\
+          # "diffusion from vadose zone to vadose zone(alginstid_2445)",\ #turning this off because we dont accommodate above or below relationshipts
             "diffusion from vadose zone to root zone(alginstid_1914)",\
                 
             "percolation from vadose zone to groundwater(alginstid_1899)",\

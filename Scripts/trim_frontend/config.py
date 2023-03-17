@@ -46,6 +46,12 @@ class AppConfig:
     # You need to EXPLICITLY set this to avoid a bug
     SECURITY_EMAIL_SENDER = MAIL_DEFAULT_SENDER
 
+    # BOTO config
+    BOTO_AWS_KEY = ''
+    BOTO_AWS_SECRET = ''
+    BOTO_S3_BUCKET = ''
+    BOTO_AWS_REGION = 'us-east-1'
+
 
 class ProdConfig(AppConfig):
     SECRET_KEY = os.getenv('SECRET_KEY', '')
@@ -65,6 +71,7 @@ class TestConfig(DevConfig):
     BCRYPT_LOG_ROUNDS = 4
     MAIL_SUPPRESS_SEND = True
     SQLALCHEMY_DATABASE_URI = f'sqlite:///{app_folder}/test.db'
+    # SQLALCHEMY_DATABASE_URI = f'sqlite:///{root}/database.db'
 
     # Security config
     SECURITY_CONFIRMABLE = False
@@ -76,6 +83,7 @@ class TestConfig(DevConfig):
 
 def init_config(app, testing=False):
     env = os.getenv('FLASK_ENV', 'production')
+    # app.logger.info(f'************ Flask_env is {env}, Root is {root} and App_folder is {app_folder} ***************')
     if env == 'development':
         if testing:
             app.config.from_object(TestConfig)

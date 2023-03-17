@@ -10,7 +10,7 @@ __all__ = ['parse_scenario', 'parse_prop_types']
 
 
 def parse_scenario(
-    root_folder, name, parameter_library={}, chemicals=[], creator_id=1
+    root_folder, name, parameter_library={}, chemicals=[], creator_id=2
 ):
     print(f'Parsing scenario "{name}" at "{root_folder}" ...')
     name = name.rstrip()

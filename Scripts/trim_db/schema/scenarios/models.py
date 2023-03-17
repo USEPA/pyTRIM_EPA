@@ -77,11 +77,21 @@ class Scenario(Model, TrackUpdatesMixin):
         'User', backref=sa.orm.backref('created_scenarios', lazy='dynamic')
     )
 
+    @property
+    def erosion_rate_data_source(self):
+        for cp in self.custom_params:
+            if cp.definition.variable_name == "erosionRateCalcSource":
+                return cp.value
+            else:
+                continue
+        return 1
+
     def as_serializable(self):
         return {
             'id': self.id,
             'name': self.name,
-            'description': self.description
+            'description': self.description,
+            'erosionRateSource': self.erosion_rate_data_source
         }
 
     def __repr__(self):

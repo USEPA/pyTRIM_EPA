@@ -286,6 +286,16 @@ def process_pseudo_library(inputs):
         if 'currentchemical' not in prop and 'chemical.' in prop:
             prop=prop.replace('chemical.','chemical_')
         prop=prop.replace('.chemical.','.chemical_') # to cover cases where both current chemical and chemical are in the same property
+
+        if 'self.receivingcompartment.allowexchange_forair' in prop and 'self.receivingcompartment.isday_forair * self.receivingcompartment.chemical_totalstomatalconductance' in prop: # to address interaction between exchange and isday
+            prop=prop.replace('self.receivingcompartment.allowexchange_forair *((','(self.receivingcompartment.allowexchange_forair *')
+            prop=prop.replace('(self.receivingcompartment.isday_forair * self.receivingcompartment.chemical_totalstomatalconductance))','self.dict_inputs["met_dict"]["frac_time_exchange_day"]* self.receivingcompartment.chemical_totalstomatalconductance')
+            
+        if 'self.receivingcompartment.associated_leaf_comp.allowexchange_forair' in prop and 'self.receivingcompartment.associated_leaf_comp.isday_forair * self.receivingcompartment.associated_leaf_comp.chemical_totalstomatalconductance' in prop:
+            prop=prop.replace('self.receivingcompartment.associated_leaf_comp.allowexchange_forair *((','(self.receivingcompartment.associated_leaf_comp.allowexchange_forair *')
+            prop=prop.replace('(self.receivingcompartment.associated_leaf_comp.isday_forair * self.receivingcompartment.associated_leaf_comp.chemical_totalstomatalconductance))','self.dict_inputs["met_dict"]["frac_time_exchange_day"]* self.receivingcompartment.associated_leaf_comp.chemical_totalstomatalconductance')
+
+
         return (prop)
     
     
@@ -334,47 +344,182 @@ def process_pseudo_library(inputs):
             
             # residual_props=set(alg_props)-set(['category','chemicalcategory','doestransformchemical','doestransportchemical','enabled','isdefaultforcategory','mate','receivingcompartmentcategory','sendingcompartmentcategory','transferfactor'])
 
-            residual_props=set(alg_props)-set(['transferfactor'])
+            diff_algs_leaf=['diffusion_from_dryvaporsource_to_plant_leaf_hg0',\
+            'diffusion_from_dryvaporsource_to_plant_leaf_mhg',\
+            'diffusion_from_dryvaporsource_to_plant_leaf_organics'\
+            ]
 
-### testing method decorator approach
+            diff_algs_soil=['diffusion_from_dryvaporsource_to_surface_soil_hg0',\
+            'diffusion_from_dryvaporsource_to_surface_soil_mhg',\
+            'diffusion_from_dryvaporsource_to_surface_soil_organics'\
+            ]
 
-            for prop in residual_props:
-                prop_val=grouped_alg.get_group(group).loc[grouped_alg.get_group(group)['property']==prop]['value'].values[0] #property value
-                prop_val=clean_props(prop_val)
-                if type(prop_val)==float or is_number(prop_val):
-                    f.write('\n\t'+\
-                            '_'+prop+'='+prop_val +'\n\t' +\
-                            '@property'+'\n\t' +\
-                            'def '+prop+'(self):'+'\n\t\t' +\
-                            'return self._'+prop+'\n\n\t' +\
-                            '@'+prop+'.setter''\n\t' +\
-                            'def '+prop+'(self,value):'+'\n\t\t' +\
-                            'self._'+prop+'=value\n')             
-                else:
-                    if prop in ['category','receivingcompartmentcategory','sendingchemicalname','sendingcompartmentcategory','receivingchemicalname','compartmentrelationship','chemicalcategory','doestransformchemical','doestransportchemical','enabled','isdefaultforcategory','receivingchemicalname','receivingcompartmentcategory','sendingcompartmentcategory','sendingchemicalname','transferfactor']: # write as string
+            if alg_name in diff_algs_leaf: # special case of leaf diffusion algorithms to accommodate met interaction terms
+                special_props=['transferfactor','transferfractiontotal','transferfractionleaf','transferfractionsoil']
+                residual_props=set(alg_props)-set(special_props)
+
+                for prop in residual_props:
+                    prop_val=grouped_alg.get_group(group).loc[grouped_alg.get_group(group)['property']==prop]['value'].values[0] #property value
+                    prop_val=clean_props(prop_val)
+                    if type(prop_val)==float or is_number(prop_val):
                         f.write('\n\t'+\
+                                '_'+prop+'='+prop_val +'\n\t' +\
                                 '@property'+'\n\t' +\
                                 'def '+prop+'(self):'+'\n\t\t' +\
-                                'return ("'+prop_val+'")\n\t') 
+                                'return self._'+prop+'\n\n\t' +\
+                                '@'+prop+'.setter''\n\t' +\
+                                'def '+prop+'(self,value):'+'\n\t\t' +\
+                                'self._'+prop+'=value\n')             
                     else:
+                        if prop in ['category','receivingcompartmentcategory','sendingchemicalname','sendingcompartmentcategory','receivingchemicalname','compartmentrelationship','chemicalcategory','doestransformchemical','doestransportchemical','enabled','isdefaultforcategory','receivingchemicalname','receivingcompartmentcategory','sendingcompartmentcategory','sendingchemicalname','transferfactor']: # write as string
+                            f.write('\n\t'+\
+                                    '@property'+'\n\t' +\
+                                    'def '+prop+'(self):'+'\n\t\t' +\
+                                    'return ("'+prop_val+'")\n\t') 
+                        else:
+                            f.write('\n\t'+\
+                                    '@property'+'\n\t' +\
+                                    'def '+prop+'(self):'+'\n\t\t' +\
+                                    'return ('+prop_val+')\n\t')                 
+
+                f.write('''
+
+	@property
+	def transferfractionleaf(self):
+		mdict={}
+		mdict['ae_notday']=self.receivingcompartment.associated_soil_comp.area * 2*self.receivingcompartment.leafareaindex * self.receivingcompartment.chemical_totalcuticularconductance
+		mdict['ae_day']=(self.receivingcompartment.associated_soil_comp.area * 2*self.receivingcompartment.leafareaindex * self.receivingcompartment.chemical_totalcuticularconductance) +(self.receivingcompartment.leafareaindex * self.receivingcompartment.associated_soil_comp.area * self.receivingcompartment.chemical_totalstomatalconductance) 
+		mdict['no_ae']=0
+		return (mdict)
+
+	@property
+	def transferfractionsoil(self):
+		return (((self.receivingcompartment.associated_soil_comp.fractionofareaavailableforverticaldiffusion * self.receivingcompartment.associated_soil_comp.area)/self.currentchemical.z_pureair) * ((1/(self.currentchemical.z_pureair * self.masstransfercoefficient))+(1/(self.receivingcompartment.associated_soil_comp.chemical_z_total * (self.receivingcompartment.associated_soil_comp.chemical_d_effective / self.receivingcompartment.associated_soil_comp.depth))))**(-1))
+
+	@property
+	def transferfractiontotal(self):
+		mdict={}
+		mdict['ae_notday']=(self.transferfractionleaf['ae_notday'] + self.transferfractionsoil) 
+		mdict['ae_day']=(self.transferfractionleaf['ae_day'] + self.transferfractionsoil )
+		mdict['no_ae']=(self.transferfractionleaf['no_ae'] + self.transferfractionsoil)
+		return (mdict)
+
+	@property
+	def transferfactor(self):
+		try:
+			r=self.dict_inputs["met_dict"]["frac_time_exchange_not_day"]*(self.transferfractionleaf['ae_notday']/self.transferfractiontotal['ae_notday'])+self.dict_inputs["met_dict"]["frac_time_exchange_day"]*(self.transferfractionleaf['ae_day']/self.transferfractiontotal['ae_day'])+(1-self.dict_inputs["met_dict"]["wt_av_allowexchange"])*(self.transferfractionleaf['no_ae']/self.transferfractiontotal['no_ae'])
+		except:
+			r=nan    
+		return(r)
+
+''')
+
+
+            if alg_name in diff_algs_soil:# special case of soil diffusion algorithms to accommodate met interaction terms
+                special_props=['transferfactor','transferfractiontotal','transferfractionleaf','transferfractionsoil']
+                residual_props=set(alg_props)-set(special_props)
+
+                for prop in residual_props:
+                    prop_val=grouped_alg.get_group(group).loc[grouped_alg.get_group(group)['property']==prop]['value'].values[0] #property value
+                    prop_val=clean_props(prop_val)
+                    if type(prop_val)==float or is_number(prop_val):
                         f.write('\n\t'+\
+                                '_'+prop+'='+prop_val +'\n\t' +\
                                 '@property'+'\n\t' +\
                                 'def '+prop+'(self):'+'\n\t\t' +\
-                                'return ('+prop_val+')\n\t') 
+                                'return self._'+prop+'\n\n\t' +\
+                                '@'+prop+'.setter''\n\t' +\
+                                'def '+prop+'(self,value):'+'\n\t\t' +\
+                                'self._'+prop+'=value\n')             
+                    else:
+                        if prop in ['category','receivingcompartmentcategory','sendingchemicalname','sendingcompartmentcategory','receivingchemicalname','compartmentrelationship','chemicalcategory','doestransformchemical','doestransportchemical','enabled','isdefaultforcategory','receivingchemicalname','receivingcompartmentcategory','sendingcompartmentcategory','sendingchemicalname','transferfactor']: # write as string
+                            f.write('\n\t'+\
+                                    '@property'+'\n\t' +\
+                                    'def '+prop+'(self):'+'\n\t\t' +\
+                                    'return ("'+prop_val+'")\n\t') 
+                        else:
+                            f.write('\n\t'+\
+                                    '@property'+'\n\t' +\
+                                    'def '+prop+'(self):'+'\n\t\t' +\
+                                    'return ('+prop_val+')\n\t')                 
+                f.write('''                     
+
+ 
+	@property
+	def transferfractionleaf(self):
+		mdict={}
+		mdict['ae_notday']=self.receivingcompartment.area * 2*self.receivingcompartment.associated_leaf_comp.leafareaindex * self.receivingcompartment.associated_leaf_comp.chemical_totalcuticularconductance
+		mdict['ae_day']=(self.receivingcompartment.area * 2*self.receivingcompartment.associated_leaf_comp.leafareaindex * self.receivingcompartment.associated_leaf_comp.chemical_totalcuticularconductance) +(self.receivingcompartment.associated_leaf_comp.leafareaindex * self.receivingcompartment.area * self.receivingcompartment.associated_leaf_comp.chemical_totalstomatalconductance) 
+		mdict['no_ae']=0
+		return (mdict)
+
+	@property
+	def transferfractionsoil(self):
+		return (((self.receivingcompartment.fractionofareaavailableforverticaldiffusion * self.receivingcompartment.area)/self.currentchemical.z_pureair) * ((1/(self.currentchemical.z_pureair * self.masstransfercoefficient))+(1/(self.receivingcompartment.chemical_z_total * (self.receivingcompartment.chemical_d_effective / self.receivingcompartment.depth))))**(-1))
+
+	@property
+	def transferfractiontotal(self):
+		mdict={}
+		mdict['ae_notday']=(self.transferfractionleaf['ae_notday'] + self.transferfractionsoil) 
+		mdict['ae_day']=(self.transferfractionleaf['ae_day'] + self.transferfractionsoil )
+		mdict['no_ae']=(self.transferfractionleaf['no_ae'] + self.transferfractionsoil)
+		return (mdict)
+
+	@property
+	def transferfactor(self):
+		try:
+			r=self.dict_inputs["met_dict"]["frac_time_exchange_not_day"]*(self.transferfractionsoil/self.transferfractiontotal['ae_notday'])+self.dict_inputs["met_dict"]["frac_time_exchange_day"]*(self.transferfractionsoil/self.transferfractiontotal['ae_day'])+(1-self.dict_inputs["met_dict"]["wt_av_allowexchange"])*(self.transferfractionsoil/self.transferfractiontotal['no_ae'])
+		except:
+			r=nan    
+		return(r)
+
+''')
+            
+            
+            if alg_name not in diff_algs_soil and alg_name not in diff_algs_leaf: # for regular algorithms
+            
+
+                residual_props=set(alg_props)-set(['transferfactor'])
+
+    ### testing method decorator approach
+
+                for prop in residual_props:
+                    prop_val=grouped_alg.get_group(group).loc[grouped_alg.get_group(group)['property']==prop]['value'].values[0] #property value
+                    prop_val=clean_props(prop_val)
+                    if type(prop_val)==float or is_number(prop_val):
+                        f.write('\n\t'+\
+                                '_'+prop+'='+prop_val +'\n\t' +\
+                                '@property'+'\n\t' +\
+                                'def '+prop+'(self):'+'\n\t\t' +\
+                                'return self._'+prop+'\n\n\t' +\
+                                '@'+prop+'.setter''\n\t' +\
+                                'def '+prop+'(self,value):'+'\n\t\t' +\
+                                'self._'+prop+'=value\n')             
+                    else:
+                        if prop in ['category','receivingcompartmentcategory','sendingchemicalname','sendingcompartmentcategory','receivingchemicalname','compartmentrelationship','chemicalcategory','doestransformchemical','doestransportchemical','enabled','isdefaultforcategory','receivingchemicalname','receivingcompartmentcategory','sendingcompartmentcategory','sendingchemicalname','transferfactor']: # write as string
+                            f.write('\n\t'+\
+                                    '@property'+'\n\t' +\
+                                    'def '+prop+'(self):'+'\n\t\t' +\
+                                    'return ("'+prop_val+'")\n\t') 
+                        else:
+                            f.write('\n\t'+\
+                                    '@property'+'\n\t' +\
+                                    'def '+prop+'(self):'+'\n\t\t' +\
+                                    'return ('+prop_val+')\n\t') 
 
 
-            f.write('\n\t'+\
-                    '@property'+'\n\t' +\
-                    'def transferfactor(self):'+'\n\t\t' +\
-                    'try:'+'\n\t\t\t' +\
-                    'r='+tf+'\n\t\t' +\
-                    'except:'+'\n\t\t\t' +\
-                    'r=nan'+'\n\t\t'+\
-                    'return (r)') 
+                f.write('\n\t'+\
+                        '@property'+'\n\t' +\
+                        'def transferfactor(self):'+'\n\t\t' +\
+                        'try:'+'\n\t\t\t' +\
+                        'r='+tf+'\n\t\t' +\
+                        'except:'+'\n\t\t\t' +\
+                        'r=nan'+'\n\t\t'+\
+                        'return (r)') 
 
-            f.write('\n\n')    
+                f.write('\n\n')    
 
-            f.write('\n\n')    
+                f.write('\n\n')    
             
     return(df_psalgs,df_psalg_mat,df_ps,df_pt)
     
