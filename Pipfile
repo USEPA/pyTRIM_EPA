@@ -4,7 +4,7 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [requires]
-python_version = "3.6"
+python_version = "3.8"
 
 [dev-packages]
 pipenv = "*"
@@ -17,7 +17,6 @@ ipdb = "*"
 pint = "*"
 simpleeval = "*"
 scipy = "*"
-
 sqlalchemy = "*"
 psycopg2-binary = "*"
 alembic = "*"
@@ -34,3 +33,8 @@ libsass = "*"
 cssmin = "*"
 pyscss = "*"
 email_validator = "*"
+boto = "*"
+requests = "*"
+xmltodict = "*"
+pyproj = "*"
+pyshp = "*"

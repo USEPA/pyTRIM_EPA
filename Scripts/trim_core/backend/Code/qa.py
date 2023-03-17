@@ -97,7 +97,7 @@ for var in pyvars[1:]: # loop over py variables and find ratio of corresponding 
         py_val=df_py[var].loc['mean']
         
         if leg_val==py_val: # to catch 0/0
-            ratio=1
+            ratio=1       
         else:
             ratio=py_val/leg_val
             ratio=round(ratio,2)
@@ -114,7 +114,7 @@ for k,v in op_dic.items():
 ofp=r'C:\Users\13963\OneDrive - ICF\Documents\RTR\PyTRIM\output'
 # ofp=r'C:\Users\13963\Desktop'
 
-ofn=r"PyTRIM_Results_Comparison.xlsx"
+ofn=r"PyTRIM_Results_Comparison_Mass.xlsx"
 # ofn=r"PyTRIM_Results_Comparison_NoLakeErosionRunoff.xlsx"
 
 ofpn=os.path.join(path_output,ofn)

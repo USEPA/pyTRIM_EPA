@@ -2,13 +2,15 @@ import re
 import pandas as pd
 from functools import partial
 from ..schema.parameters.equations import *
+from pyproj import CRS, Transformer
 
 __all__ = [
     'read_master_library',
     'safe_name', 'clean_prop', 'clean_unit',
     'UNIT_SUFFIXES',
     'split_unit_suffix',
-    'clean_equation'
+    'clean_equation',
+    'transform_coordinates_to_decimal'
 ]
 
 
@@ -584,3 +586,23 @@ def hacky_equation_cleaning(val):
     #     val = val.replace('math.math.', 'math.')
 
     return val
+
+
+def transform_coordinates_to_decimal(poly):
+    # Create a transformation object from x to WGS84
+    proj = 'PROJCS["WGS_1984_UTM_Zone_16N",GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]],PROJECTION["Transverse_Mercator"],PARAMETER["False_Easting",500000.0],PARAMETER["False_Northing",0.0],PARAMETER["Central_Meridian",-87.0],PARAMETER["Scale_Factor",0.9996],PARAMETER["Latitude_Of_Origin",0.0],UNIT["Meter",1.0]]'
+    from_crs = CRS.from_wkt(proj)
+    to_crs = CRS.from_epsg(4326)
+    transformer = Transformer.from_crs(from_crs, to_crs)
+
+    # Create Dictionary of Polygons and Coordinates
+    decimal_poly = []
+    for coord in poly:
+        transformed_point = transformer.transform(coord[0], coord[1])
+        decimal_poly.append((transformed_point[1], transformed_point[0]))
+
+    if decimal_poly[0][0] != decimal_poly[decimal_poly.__len__()-1][0] or \
+            decimal_poly[0][1] != decimal_poly[decimal_poly.__len__()-1][1]:
+        decimal_poly.append((decimal_poly[0][0], decimal_poly[0][1]))
+
+    return decimal_poly
