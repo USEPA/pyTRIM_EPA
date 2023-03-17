@@ -60,6 +60,8 @@ def print_scenario_info(scenario):
 
     # print(f'\ntransport_processes = {TransportProcessService.get_all()}')
 
+    print('\n==========================\n')
+
 
 def print_chemical_class_info():
     print('Chemical.domains =', Chemical.domains)
@@ -69,10 +71,8 @@ def print_chemical_class_info():
         '\nChemical.parameters["D_pureair"] =',
         Chemical.parameters['D_pureair']
     )
-    # print(
-    #     'Chemical.parameters["D_pureair_m2_s"] =',
-    #     Chemical.parameters['D_pureair_m2_s']
-    # )
+
+    print('\n==========================\n')
 
 
 def print_scenario_chemical_info(scenario):
@@ -84,7 +84,6 @@ def print_scenario_chemical_info(scenario):
 
         print('\nchem.parameters["D_pureair"] =', chem.parameters['D_pureair'])
         print('\nchem.D_pureair =', chem.D_pureair)
-        # print('chem.D_pureair_m2_s =', chem.D_pureair_m2_s)
         print('chem.MeltingPoint =', chem.MeltingPoint)
 
         print(
@@ -288,7 +287,7 @@ def make_transition_matrix(scenario):
     return df_tm, df_sm
 
 
-def safe_output(df_tm, df_sm):
+def safe_save_output(df_tm, df_sm):
     try:
         import os
         if not os.path.isdir('./.output'):
@@ -392,6 +391,10 @@ def check_alg_values(scenario, chemical, alg, sender, receiver):
 
 
 def run_tests():
+    # parse_prop_types(
+    #     f'{TRIM_FILES}/ICF_Master_Library_03212016_PropertyType_Exporter.txt'
+    # )
+    # return
     scenario = ScenarioService.get(name=SCENARIO_NAME)
 
     if not scenario:
@@ -406,13 +409,9 @@ def run_tests():
 
     print('\n==========================\n')
 
-    print_scenario_info(scenario)
-
-    print('\n==========================\n')
+    # print_scenario_info(scenario)
 
     # print_chemical_class_info()
-
-    # print('\n==========================\n')
 
     # print_scenario_chemical_info(scenario)
 
@@ -425,7 +424,8 @@ def run_tests():
     df_tm, df_sm = make_transition_matrix(scenario)
     end = time.time()
     print('time to create tm = ', round((end - start), 2), ' seconds')
-    safe_output(df_tm, df_sm)
+
+    # safe_save_output(df_tm, df_sm)
 
     print('\n==========================\n')
 
