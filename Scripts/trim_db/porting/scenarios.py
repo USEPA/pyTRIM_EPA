@@ -6,7 +6,7 @@ from .environment import *
 from .utils import *
 
 
-__all__ = ['parse_scenario']
+__all__ = ['parse_scenario', 'parse_prop_types']
 
 
 def parse_scenario(
@@ -96,6 +96,10 @@ def parse_scenario(
         add_scenario_properties(
             s, parsed, parameter_library.get('Link', {})
         )
+
+    prop_types = [f for f in files if f.endswith('PropertyType_Exporter.txt')]
+    if prop_types:
+        parse_prop_types(prop_types[0])
 
 
 TRANSFER_RULES = {
@@ -583,3 +587,64 @@ def parse_compartment_props(
             parse_compartment_props(
                 s, rel_params, compartment=compartment, silent=True
             )
+
+
+def parse_prop_types(fpath):
+    prop_types = pd.read_csv(fpath, sep='\t', index_col=False)
+
+    prop_types.columns = [
+        ' '.join(c.split()).strip().lower().replace(' ', '_')
+        for c in prop_types.columns.values
+    ]
+
+    # pd.set_option('display.max_columns', None)
+    # print(prop_types)
+
+    for row in prop_types.itertuples():
+        name, _ = split_unit_suffix(row.property_type)
+
+        name = clean_prop(name)
+
+        param = ParameterService.definitions.get(variable_name=name)
+        if param is None:
+            continue
+
+        changed = False
+
+        default = row.default
+        if not pd.isna(default) and param.default_value is None:
+            if isinstance(default, str):
+                if default.lower() == 'false':
+                    default = 0
+                elif default.lower() == 'true':
+                    default = 1
+                else:
+                    default = None
+            elif default is False:
+                default = 0
+            elif default is True:
+                default = 1
+
+            if default is not None:
+                changed = True
+                # print(default)
+                param.default_value = default
+
+        units = clean_unit(row.units)
+        if units and param.default_unit is None:
+            changed = True
+            # print(units)
+            param.default_unit = units
+            if param.default_value is None:
+                param.default_value = 0
+
+        desc = row.description
+        if desc and param.description is None:
+            changed = True
+            # print(desc)
+            param.description = desc
+
+        # if changed:
+        #     print(param)
+
+    ParameterService.commit()
