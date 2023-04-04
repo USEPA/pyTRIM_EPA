@@ -13,6 +13,7 @@
 
 # Ignore shell files
 **/*.bat
+!**/*RUSLE_QGIS.bat
 
 **/temp*
 
