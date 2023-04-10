@@ -1,7 +1,8 @@
 import pandas as pd
 import requests
 #import numpy as np
-import os, sys
+import os, sys, json
+import cs_USLE_climateAPI
 from qgis.core import *
 
 QGIS_ROOT = " ".join(sys.argv[1:])
@@ -21,22 +22,6 @@ Processing.initialize()
 
 ClimateData = os.path.join(WORKING_DIR, "Inputs", "ClimateShapeFile.shp")
 Parcels = os.path.join(WORKING_DIR, "Inputs", "Foundries_Parcels.shp")
-
-
-def get_r_value(latitude, longitude):
-    url = "http://csip.engr.colostate.edu:8088/csip-misc/d/r2climate/3.0"
-    data = {
-        "parameter": [
-            {"name": "latitude", "value": latitude},
-            {"name": "longitude", "value": longitude},
-        ]
-    }
-    headers = {"Authorization": None, "Content-Type": "application/json"}
-
-    resp = requests.post(url, json=data, headers=headers)
-    data = resp.json()
-    results = data["result"][1]["value"]["Obj"]["Flt"][0]
-    return results["Data"]
 
 
 def RUSLE(Parcels, ClimateData):
@@ -153,7 +138,7 @@ def RUSLE(Parcels, ClimateData):
 
     df = pd.DataFrame.from_records(data=datagen, columns=cols)
 
-    df["R_Value"] = df.apply(lambda x: get_r_value(x["y"], x["x"]), axis=1)
+    df["R_Value"] = df.apply(lambda x: cs_USLE_climateAPI.UsleClimateApi.get_r_value(x["y"], x["x"]), axis=1)
     df["R_Value"] = df["R_Value"].astype(float).fillna(0.0)
     df["Area_Weighted_R"] = df["R_Value"] * df["Perc_Area"]
 
