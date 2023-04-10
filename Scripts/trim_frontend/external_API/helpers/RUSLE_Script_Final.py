@@ -148,4 +148,5 @@ def RUSLE(Parcels, ClimateData):
 
 
 df = RUSLE(Parcels, ClimateData)
-df.to_json(os.path.join(WORKING_DIR, "RUSLE_output.json"))
+print(df.to_json())
+#df.to_json(os.path.join(WORKING_DIR, "RUSLE_output.json"))
