@@ -75,7 +75,8 @@ def get_soil_data():
             parcels[this_parcel_data['name']] = [(t[1], t[0]) for t in this_parcel_data['vertices']]
         usle_r_data = UsleRData()
         climate_data_file = ""
-        usle_r_data.run(parcels, climate_data_file)
+        result_usle_data_json = usle_r_data.run(parcels, climate_data_file)
+        return result_usle_data_json
     except Exception as e:
         logger.error(traceback.format_exc())
 
@@ -361,17 +362,17 @@ class SoilData:
 
 class UsleRData:
     @staticmethod
-    def run(Parcels, ClimateData):
-        # TODO -- how to pass inputs to actual RUSLE script
+    def run(parcels, ClimateData):
+        logger = make_logger('external_api_call')
         WORKING_DIR = os.path.dirname(__file__)
-        BATCH_PATH = os.path.join(WORKING_DIR, "helpers", "RUSLE_QGIS_startup.bat")
+        qgis_interpreter = "C:\\Program Files\\QGIS 3.30.0\\apps\\Python39\\python3.exe"
+        RUSLE_script = os.path.join(WORKING_DIR, "helpers", "RUSLE_Script_Final.py")
 
-        p = subprocess.Popen(BATCH_PATH, 
+        p = subprocess.Popen([qgis_interpreter, RUSLE_script, json.dumps(parcels)],                     
                             stdout = subprocess.PIPE, 
-                            stderr = subprocess.PIPE,
-                            text = True,
-                            shell = True)
-
+                            stderr = subprocess.PIPE)
         stdout, stderr = p.communicate()
-        return stdout.strip()
+        if stderr:
+            logger.error(stderr.strip().decode('utf-8'))
+        return stdout.strip().decode('utf-8')
 

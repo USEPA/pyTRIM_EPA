@@ -1,28 +1,29 @@
-import pandas as pd
-import requests
-#import numpy as np
 import os, sys, json
-import cs_USLE_climateAPI
-from qgis.core import *
+import pandas as pd
+from cs_USLE_climateAPI import UsleClimateApi
 
-QGIS_ROOT = " ".join(sys.argv[1:])
+QGIS_ROOT = r"C:\Program Files\QGIS 3.30.0\apps"
 WORKING_DIR = os.path.dirname(__file__)
 
-# Initialize QGIS Application
-QgsApplication.setPrefixPath(f"{QGIS_ROOT}/apps/qgis", True)
+sys.path.append(os.path.join(QGIS_ROOT, r"Python39\Lib\site-packages")) # PyQt5 (5.15.3)
+sys.path.append(os.path.join(QGIS_ROOT, r"qgis\python")) # qgis.core
+sys.path.append(os.path.join(QGIS_ROOT, r"qgis\python\plugins")) # processing plugin
+from qgis.core import *
+
+# Initialize QGIS Application and Processing plugin
+QgsApplication.setPrefixPath(os.path.join(QGIS_ROOT, "qgis"), True)
 qgs = QgsApplication([], False)
 qgs.initQgis()
 
-
 import processing
 from processing.core.Processing import Processing
-
 Processing.initialize()
 
 
 ClimateData = os.path.join(WORKING_DIR, "Inputs", "ClimateShapeFile.shp")
 Parcels = os.path.join(WORKING_DIR, "Inputs", "Foundries_Parcels.shp")
 
+parcels = json.loads(sys.argv[1]) # arguments from external_API/routes.py
 
 def RUSLE(Parcels, ClimateData):
     # Import climate data shapefile layer
@@ -138,7 +139,7 @@ def RUSLE(Parcels, ClimateData):
 
     df = pd.DataFrame.from_records(data=datagen, columns=cols)
 
-    df["R_Value"] = df.apply(lambda x: cs_USLE_climateAPI.UsleClimateApi.get_r_value(x["y"], x["x"]), axis=1)
+    df["R_Value"] = df.apply(lambda x: UsleClimateApi.get_r_value(x["y"], x["x"]), axis=1)
     df["R_Value"] = df["R_Value"].astype(float).fillna(0.0)
     df["Area_Weighted_R"] = df["R_Value"] * df["Perc_Area"]
 
