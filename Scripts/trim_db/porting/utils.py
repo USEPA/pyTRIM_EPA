@@ -3,6 +3,7 @@ import pandas as pd
 from functools import partial
 from ..schema.parameters.equations import *
 from pyproj import CRS, Transformer
+from ..services import *
 
 __all__ = [
     'read_master_library',
@@ -23,7 +24,7 @@ def read_master_library(filepath):
 
     df_lib = read_lib(skiprows=[0], names=read_lib(nrows=0).columns.values)
 
-    from trim_db.schema import Scenario
+    from trim_db.schema import Scenario, Compartment
 
     constants = [
         ('g_per_kg', 1000, 'g/kg'),
@@ -39,10 +40,26 @@ def read_master_library(filepath):
         ('ug_per_kg', 1e6, 'ug/kg'),
         ('um3_per_m3', 1e18, 'um^3/m^3'),
         ('vonKarmensConstant', 0.74, None),
-        ('waterMeltingPoint', 273.15, 'K')
+        ('waterMeltingPoint', 273.15, 'K'),
+        ('erosionRateCalcSource', 1, None)
     ]
+
+    compartment_default_params = [
+        ('soilTillage', 0, None, None),
+        ('waterEvaporationRate', 0.7, 'm[water]/year', 'Compartment [Surface_Water]'),
+        ('BedDensity', 2600, 'kg[sediment particles]/m^3[sediment particles]', 'Compartment [Sediment]'),
+        ('ExternalSedimentInflow', 0, 'kg[sediment particles]/day', 'Compartment [Surface_Water]')
+    ]
+
     for const in constants:
         Scenario.parameters.add(const[0], value=const[1], unit=const[2])
+
+    for param in compartment_default_params:
+        if param[3] is None:
+            Compartment.parameters.add(param[0], value=param[1], unit=param[2])
+        else:
+            par_domain = ParameterService.domains.get(name=param[3])
+            Compartment.parameters.add(param[0], value=param[1], unit=param[2], domain=par_domain)
 
     parsed = parse_master_library_params(df_lib)
 
@@ -229,16 +246,51 @@ GLOBAL_REPLACE = {
     'Sendingcompartment.Chemical.': f'sender{VAR_SPLITTER}chemical.',  # noqa
     'ReceivingCompartment.Chemical.': f'receiver{VAR_SPLITTER}chemical.',  # noqa
     'Receivingcompartment.Chemical.': f'receiver{VAR_SPLITTER}chemical.',  # noqa
+    'Receivingchemical.': f'receiver{VAR_SPLITTER}chemical.',  # noqa
     'SendingCompartment.Volume': 'sender.volume_element.volume',
     'Sendingcompartment.Volume': 'sender.volume_element.volume',
     'ReceivingCompartment.Volume': 'receiver.volume_element.volume',
     'Receivingcompartment.Volume': 'receiver.volume_element.volume',
     'SendingCompartment.': 'sender.',
     'Sendingcompartment.': 'sender.',
+    'sendingcompartment.': 'sender.',
     'ReceivingCompartment.': 'receiver.',
     'Receivingcompartment.': 'receiver.',
-
+    'receivingcompartment.': 'receiver.',
     'link.': f'receiver{VAR_SPLITTER}sender.',
+
+    'receivingVolumeElementSumOf[Terrestrial Plant | Leaf].AllowExchange_forAir':
+        'sum([c.AllowExchange_forAir for c in receiver.volume_element.compartments if c.media.isa("$Leaf")])',
+
+    'receivingVolumeElementSumOf[Terrestrial Plant | Leaf].LeafAreaIndex':
+        'sum([c.LeafAreaIndex for c in receiver.volume_element.compartments if c.media.isa("$Leaf")])',
+
+    'receivingVolumeElementSumOf[Terrestrial Plant | Leaf].isDay_forAir':
+        'sum([c.IsDay_forAir for c in receiver.volume_element.compartments if c.media.isa("$Leaf")])',
+
+    'receivingVolumeElementSumOf[Terrestrial Plant | Leaf].Chemical.TotalStomatalConductance':
+        'sum([chemical.TotalStomatalConductance(c) for c in receiver.volume_element.compartments if c.media.isa("$Leaf")])',
+
+    'receivingVolumeElementSumOf[Terrestrial Plant | Leaf].Chemical.TotalCuticularConductance':
+        'sum([chemical.TotalCuticularConductance(c) for c in receiver.volume_element.compartments if c.media.isa("$Leaf")])',
+
+    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil - Default].Area':
+        'max([c.volume_element.parcel.area for c in receiver.volume_element.compartments if c.media.isa("Surface_Soil")] + [0])',
+
+    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil - Default].FractionofAreaAvailableforVerticalDiffusion':
+        'sum([c.Fractionofareaavailableforverticaldiffusion for c in receiver.volume_element.compartments if c.media.isa("Surface_Soil")])',
+
+    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil - Default].Depth':
+        'sum([c.Depth for c in receiver.volume_element.compartments if c.media.isa("Surface_Soil")])',
+
+    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil - Default].Chemical.MassTransferCoefficientOnAirSideofAirSoilBoundary':
+        'sum([chemical.MassTransferCoefficientOnAirSideofAirSoilBoundary(c) for c in receiver.volume_element.compartments if c.media.isa("Surface_Soil")])',
+
+    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil - Default].Chemical.Z_Total':
+        'sum([chemical.Z_Total(c) for c in receiver.volume_element.compartments if c.media.isa("Surface_Soil")])',
+
+    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil - Default].Chemical.D_effective':
+        'sum([chemical.D_effective(c) for c in receiver.volume_element.compartments if c.media.isa("Surface_Soil")])'
 }
 
 

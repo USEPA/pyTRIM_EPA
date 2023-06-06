@@ -210,7 +210,7 @@
                             }]
                             parcel_info = JSON.stringify(parcel_info)
                             let this_cell_data = row.hasAir == "Yes" ? data : "N/A"
-                            let this_cell_prop = row.hasAir == "Yes" ? 'editableCell' : 'text-muted'
+                            let this_cell_prop = row.hasAir == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
                             return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
                                 "<label class='"+ this_cell_prop +"'>" + this_cell_data + "</label>"
                         }
@@ -234,7 +234,7 @@
                             }]
                             parcel_info = JSON.stringify(parcel_info)
                             let this_cell_data = row.hasAir == "Yes" ? data : "N/A"
-                            let this_cell_prop = row.hasAir == "Yes" ? 'editableCell' : 'text-muted'
+                            let this_cell_prop = row.hasAir == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
                             return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
                                 "<label class='" + this_cell_prop + "'>" + this_cell_data + "</label>"
                         }
@@ -258,7 +258,7 @@
                             }]
                             parcel_info = JSON.stringify(parcel_info)
                             let this_cell_data = row.hasAir == "Yes" ? data : "N/A"
-                            let this_cell_prop = row.hasAir == "Yes" ? 'editableCell' : 'text-muted'
+                            let this_cell_prop = row.hasAir == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
                             return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
                                 "<label class='" + this_cell_prop +"'>" + this_cell_data + "</label>"
                         }
@@ -282,7 +282,7 @@
                             }]
                             parcel_info = JSON.stringify(parcel_info)
                             let this_cell_data = row.hasAir == "Yes" ? data : "N/A"
-                            let this_cell_prop = row.hasAir == "Yes" ? 'editableCell' : 'text-muted'
+                            let this_cell_prop = row.hasAir == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
                             return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
                                 "<label class='" + this_cell_prop +" '>" + this_cell_data + "</label>"
                         }
@@ -306,7 +306,7 @@
                             }]
                             parcel_info = JSON.stringify(parcel_info)
                             let this_cell_data = row.hasAir == "Yes" ? data : "N/A"
-                            let this_cell_prop = row.hasAir == "Yes" ? 'editableCell' : 'text-muted'
+                            let this_cell_prop = row.hasAir == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
                             return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
                                 "<label class='" + this_cell_prop + "'>" + this_cell_data + "</label>"
                         }
@@ -317,7 +317,7 @@
                             let parcel_info = [{
                                 'type': 'data',
                                 'name': 'id',
-                                'value': row.tillage,
+                                'value': row.parcelid,
                             },{
                                 'type': 'data',
                                 'name': 'field',
@@ -328,7 +328,7 @@
                                 'value': data
                             }]
                             let this_cell_data = row.hasLand == "Yes" ? data : "N/A"
-                            let this_cell_prop = row.hasLand == "Yes" ? 'editableCell' : 'text-muted'
+                            let this_cell_prop = row.hasLand == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
                             parcel_info = JSON.stringify(parcel_info)
                             return "<select class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' name='select_tillage' style='display:none'>" +
                                         "<option value='Yes'>Yes</option>" +
@@ -356,7 +356,7 @@
                             }]
                             parcel_info = JSON.stringify(parcel_info)
                             let this_cell_data = row.hasLand == "Yes" ? data : "N/A"
-                            let this_cell_prop = row.hasLand == "Yes" ? 'editableCell' : 'text-muted'
+                            let this_cell_prop = row.hasLand == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
                             return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
                                 "<label class='" + this_cell_prop + "'>" + this_cell_data + "</label>"
                         }
@@ -380,7 +380,7 @@
                             }]
                             parcel_info = JSON.stringify(parcel_info)
                             let this_cell_data = row.hasLand == "Yes" ? data : "N/A"
-                            let this_cell_prop = row.hasLand == "Yes" ? 'editableCell' : 'text-muted'
+                            let this_cell_prop = row.hasLand == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
                             return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
                                 "<label class='" + this_cell_prop + "'>" + this_cell_data + "</label>"
                         }
@@ -403,8 +403,8 @@
                                 'value': data
                             }]
                             parcel_info = JSON.stringify(parcel_info)
-                            let this_cell_data = row.hasLand == "Yes" ? data : "N/A"
-                            let this_cell_prop = row.hasLand == "Yes" ? 'editableCell' : 'text-muted'
+                            let this_cell_data = row.hasLand == "Yes" ? Number.parseFloat(data).toFixed(5) : "N/A"
+                            let this_cell_prop = row.hasLand == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
                             return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
                                 "<label class='" + this_cell_prop + "'>" + this_cell_data + "</label>"
                         }
@@ -428,7 +428,7 @@
                             }]
                             parcel_info = JSON.stringify(parcel_info)
                             let this_cell_data = row.hasLand == "Yes" ? data : "N/A"
-                            let this_cell_prop = row.hasLand == "Yes" ? 'editableCell' : 'text-muted'
+                            let this_cell_prop = row.hasLand == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
                             return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
                                 "<label class='" + this_cell_prop + "'>" + this_cell_data + "</label>"
                         }

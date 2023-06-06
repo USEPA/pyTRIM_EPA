@@ -14,13 +14,14 @@ ureg = pint.UnitRegistry(autoconvert_offset_to_baseunit=True)
 
 
 BRACKETED = re.compile('\[.*?\]')  # noqa
+NOEXPOSYMBL = re.compile('[a-zA-Z]\d')  # noqa
 
 
 def is_number(val):
     check = str(val).strip()
     if not check:
         return False
-    check = check.replace('.', '').replace('-', '').split('e')
+    check = check.replace('.', '').replace('-', '').replace('+', '').split('e')
     for part in check:
         if not part.isnumeric():
             return False
@@ -34,6 +35,15 @@ def as_quantity(val, unit=''):
     unit = str(unit or '')
     if '[' in unit:
         unit = BRACKETED.sub('', unit)
+    elif 'wet weight' in unit or 'dry weight' in unit:
+        # TODO Better way to handle will be needed
+        unit = unit.replace('wet weight', '').replace('dry weight', '')
+    # TODO Better way to handle will be needed
+    unit = unit.replace('(or m)/(day)', '')
+
+    for uu in NOEXPOSYMBL.findall(unit):
+        nuu = "^".join(list(uu))
+        unit = unit.replace(uu, nuu)
 
     if not unit:
         return val
@@ -49,6 +59,11 @@ def as_quantity(val, unit=''):
 
     if not is_number(val):
         raise TypeError(f'Invalid magnitude: "{val}"')
+    import tokenize
+    try:
+        tmp = ureg(unit)
+    except tokenize.TokenError as msg:
+        print(f"{msg} ---> {unit}")
 
     quantity = val * ureg(unit)
 

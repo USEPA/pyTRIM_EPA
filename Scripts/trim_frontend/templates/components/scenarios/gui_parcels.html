@@ -91,15 +91,23 @@
 <script src="{{ url_for('static', filename='js/lib/shp.js') }}">
 </script>
 <script>
+    var map = L.map('mapid', { drawControl: false }).setView([35.99, -78.90], 12);
+    var observer = new MutationObserver(function(mutations) {
+        map.invalidateSize(true)
+    });
+    var target = document.querySelector('#parcels-tab-pill');
+    observer.observe(target, {
+        attributes: true
+    });
     onDomLoad(function() {
         var form = document.getElementById('parcels-gui');
 
-        var map = L.map('mapid', { drawControl: false }).setView([35.99, -78.90], 12);
+        // var map = L.map('mapid', { drawControl: false }).setView([35.99, -78.90], 12);
         form.addEventListener('form:loaded', function() {
             $('#parcel_file_fields_div').hide()
             enableFieldUpdates();
 
-            var StreetBM = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+            var StreetBM = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiY2JiaXJ5b2wiLCJhIjoiY2xnZHZ4cnVvMGcwZTNkcXJ6ZTNvM3N0dSJ9.S6TzhpcjiSv1qttl8B1UMA', {
                 maxZoom: 18,
                 attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ' +
                     'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
@@ -127,12 +135,24 @@
                 format: 'image/png'
             });
 
-            var togglelayers = L.layerGroup([wmsNLCD2016])
+            var wmsHUC12 = L.tileLayer.wms('https://hydro.nationalmap.gov:443/arcgis/services/NHDPlus_HR/MapServer/WmsServer?',{
+                layers: "0",
+                transparent: true,
+                format: 'image/png'
+            });
 
+            var wmsLakes = L.tileLayer.wms('https://hydro.nationalmap.gov:443/arcgis/services/NHDPlus_HR/MapServer/WmsServer?',{
+                layers: "3",
+                transparent: true,
+                format: 'image/png'
+            });
+
+            var togglelayers = L.layerGroup([wmsNLCD2016])
 
             var overlayMaps= {
                 "NLCD" : togglelayers,
-                "Flowline - Large Scale" : wmsFlowLine
+                "Flowline - Large Scale" : wmsFlowLine,
+                "HUC12 Boundaries" : wmsHUC12
             }
             var baseMaps = {
                 "Streets Basemap" : StreetBM,
@@ -348,7 +368,7 @@
                                 }]
                                 parcel_info = JSON.stringify(parcel_info)
                                 return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                                    "<label class='editableCell'>" + data + "</label>"
+                                    "<label class='editableCell badge badge-light'>" + data + "</label>"
                             }
                         },
                         {
@@ -389,7 +409,7 @@
                                 })
                                 $select.attr("data-parcelinfo",parcel_info)
                                 return $select.prop("outerHTML") +
-                                    "<label class='editableCell badge badge-light'>" + data + "</label>"
+                                    "<label class='editableCell badge badge-light badge badge-light'>" + data + "</label>"
                                 // return "<select class='editableCell form-control form-control-sm parceltype_ddl' data-parcelinfo='" + parcel_info +"' name='select' style='display:none'>" +
                                 //             "<option value='Air Only'>Air Only</option>" +
                                 //             "<option value='Water Only'>Water Only</option>" +
@@ -397,7 +417,7 @@
                                 //             "<option value='Land & Air'>Land & Air</option>" +
                                 //             "<option value='Water & Air'>Water & Air</option>" +
                                 //         "</select>" +
-                                //        "<label class='editableCell badge badge-light'>" + data + "</label>"
+                                //        "<label class='editableCell badge badge-light badge badge-light'>" + data + "</label>"
                             }
                         },
                         {
@@ -587,23 +607,21 @@
             }
 
             function retrieveSavedParcels() {
-                setTimeout( function () {
-                    let loadedData = $('#root').data('loadedParcels')
-                    if (loadedData.scenario.length > 0 && loadedData.success) {
-                        let lat_means = []
-                        let lon_means = []
-                        loadedData['scenario'].forEach(function(e,i) {
-                            let this_parcel_data = {'data': e, 'media': loadedData['media']}
-                            plotLoadedParcel(this_parcel_data)
-                            lon_means.push(e.vertices.map((c, i, arr) => c[0] / arr.length).reduce ((p, c) => c + p))
-                            lat_means.push(e.vertices.map((c, i, arr) => c[1] / arr.length).reduce ((p, c) => c + p))
-                        })
-                        let mean_lat = lat_means.map((c, i, arr) => c/ arr.length).reduce ((p, c) => c + p)
-                        let mean_lon = lon_means.map((c, i, arr) => c/ arr.length).reduce ((p, c) => c + p)
-                        map.setView([mean_lat, mean_lon], 12);
-                    }
-                    mapTableRedraw()
-                },30)
+                let loadedData = $('#root').data('loadedParcels')
+                if (loadedData.scenario.length > 0 && loadedData.success) {
+                    let lat_means = []
+                    let lon_means = []
+                    loadedData['scenario'].forEach(function(e,i) {
+                        let this_parcel_data = {'data': e, 'media': loadedData['media']}
+                        plotLoadedParcel(this_parcel_data)
+                        lon_means.push(e.vertices.map((c, i, arr) => c[0] / arr.length).reduce ((p, c) => c + p))
+                        lat_means.push(e.vertices.map((c, i, arr) => c[1] / arr.length).reduce ((p, c) => c + p))
+                    })
+                    let mean_lat = lat_means.map((c, i, arr) => c/ arr.length).reduce ((p, c) => c + p)
+                    let mean_lon = lon_means.map((c, i, arr) => c/ arr.length).reduce ((p, c) => c + p)
+                    map.setView([mean_lat, mean_lon], 12);
+                }
+                mapTableRedraw()
             }
 
             function update_data(this_table_id) {
@@ -647,6 +665,7 @@
 
             document.body.addEventListener('parcels:loaded', function() {
                 map.whenReady(retrieveSavedParcels);
+                setTimeout(function () {map.invalidateSize()},1000)
             });
         });
 
