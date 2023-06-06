@@ -165,91 +165,106 @@
         let divDietTables = $('#DietTables')
         let default_aquatic_data = {
             'Standing Biomass – Macrophyte':{
-                'short_name':'MacrophyteBiomass',
+                'short_name': 'MacrophyteBiomass',
+                'comp_name': 'Macrophyte',
                 'default_value': 0.5,
                 'unit': 'kg ww/m<sup>2</sup>',
                 'helpText': 'Enter the macrophyte standing biomass. Macrophyte include hydrilla and milfoil. The default value of 0.5 is from professional judgement: biomass assumptions are based on typical biomass by trophic level found in northeastern U.S. lakes and ponds and the diet habits of the fish and fish sizes are simplified to match. Note that more biomass would dilute bioaccumulation. Note that while macrophytes can remove some chemical from the water, they generally do not transport chemicals from sediments through the blades/leaves of plants, so they are not an important part of chemical transport in aquatic ecosystems in most U.S. regions. The exception is the southern US, where carp may regularly consume macrophytes.'
             },
             'Standing Biomass – Zooplankton':{
-                'short_name':'ZooplanktonBiomass',
+                'short_name': 'ZooplanktonBiomass',
+                'comp_name': 'Zooplankton',
                 'default_value':0.0064,
                 'unit': 'kg ww/m<sup>2</sup>',
                 'helpText': 'Enter the zooplankton standing biomass. Zooplankton include water fleas, rotifers, and protozoans. The default value of 0.0064 is from professional judgement: biomass assumptions are based on typical biomass by trophic level found in northeastern U.S. lakes and ponds and the diet habits of the fish and fish sizes are simplified to match. Note that more biomass would dilute bioaccumulation.'
             },
             'Single organism body weight – Zooplankton':{
-                'short_name':'ZooplanktonWeight',
+                'short_name': 'ZooplanktonWeight',
+                'comp_name': 'Zooplankton',
                 'default_value': 5.7E-08,
                 'unit': 'kg',
                 'helpText': 'Enter the zooplankton single organism body weight. Zooplankton include water fleas, rotifers, and protozoans. The default value of 5.7E-08 is from professional judgement: organism body weights are estimated based on many typical species that have the specified default diets, and also with the basic assumption that body weights increase by roughly an order of magnitude between herbivores to omnivores to carnivores.'
             },
             'Standing Biomass – Benthic invertebrate':{
                 'short_name':'BenthicInvertebrateBiomass',
+                'comp_name': 'Benthic_Invertebrate',
                 'default_value':0.02,
                 'unit': 'kg ww/m<sup>2</sup>',
                 'helpText': 'Enter the benthic invertebrate standing biomass. Benthic invertebrate include aquatic insects (e.g., nymphs of mayflies, caddisflies, dragonflies, and other species that emerge from the water when they become adults), crustaceans (e.g., amphipods, crayfish), and mollusks (e.g., snails, mussels). The default value of 0.02 is from professional judgement: biomass assumptions are based on typical biomass by trophic level found in northeastern U.S. lakes and ponds and the diet habits of the fish and fish sizes are simplified to match. Note that more biomass would dilute bioaccumulation.'
             },
             'Single organism body weight – Benthic invertebrate':{
-                'short_name':'BenthicInvertebrateWeight',
+                'short_name': 'BenthicInvertebrateWeight',
+                'comp_name': 'Benthic_Invertebrate',
                 'default_value': 2.6E-04,
                 'unit': 'kg',
                 'helpText': 'Enter the benthic invertebrate single organism body weight. Benthic invertebrate include aquatic insects (e.g., nymphs of mayflies, caddisflies, dragonflies, and other species that emerge from the water when they become adults), crustaceans (e.g., amphipods, crayfish), and mollusks (e.g., snails, mussels). The default value of 2.6E-04 is from professional judgement: organism body weights are estimated based on many typical species that have the specified default diets, and also with the basic assumption that body weights increase by roughly an order of magnitude between herbivores to omnivores to carnivores.'
             },
             'Standing Biomass – Water column herbivore':{
-                'short_name':'WaterColumnHerbivoreBiomass',
+                'short_name': 'WaterColumnHerbivoreBiomass',
+                'comp_name': 'Water_Column_Herbivore',
                 'default_value':0.002,
                 'unit': 'kg ww/m<sup>2</sup>',
                 'helpText': 'Enter the water column herbivore standing biomass. Water column herbivore include young-of-the-year minnows. The default value of 0.002 is from professional judgement: biomass assumptions are based on typical biomass by trophic level found in northeastern U.S. lakes and ponds and the diet habits of the fish and fish sizes are simplified to match. Note that more biomass would dilute bioaccumulation.'
             },
             'Single organism body weight – Water column herbivore':{
-                'short_name':'WaterColumnHerbivoreWeight',
+                'short_name': 'WaterColumnHerbivoreWeight',
+                'comp_name': 'Water_Column_Herbivore',
                 'default_value': 0.025,
                 'unit': 'kg',
                 'helpText': 'Enter the water column herbivore single organism body weight. Water column herbivore include young-of-the-year minnows. The default value of 0.025 is from professional judgement: organism body weights are estimated based on many typical species that have the specified default diets, and also with the basic assumption that body weights increase by roughly an order of magnitude between herbivores to omnivores to carnivores.'
             },
             'Standing Biomass – Benthic omnivore':{
-                'short_name':'BenthicOmnivoreBiomass',
+                'short_name': 'BenthicOmnivoreBiomass',
+                'comp_name': 'Benthic_Omnivore',
                 'default_value':0.002,
                 'unit': 'kg ww/m<sup>2</sup>',
                 'helpText': 'Enter the benthic omnivore standing biomass. Benthic omnivore include small catfish and rock bass. The default value of 0.002 is from professional judgement: biomass assumptions are based on typical biomass by trophic level found in northeastern U.S. lakes and ponds and the diet habits of the fish and fish sizes are simplified to match. Note that more biomass would dilute bioaccumulation'
             },
             'Single organism body weight – Benthic omnivore':{
-                'short_name':'BenthicOmnivoreWeight',
+                'short_name': 'BenthicOmnivoreWeight',
+                'comp_name': 'Benthic_Omnivore',
                 'default_value': 0.25,
                 'unit': 'kg',
                 'helpText': 'Enter the benthic omnivore single organism body weight. Benthic omnivore include small catfish and rock bass. The default value of 0.25 is from professional judgement: organism body weights are estimated based on many typical species that have the specified default diets, and also with the basic assumption that body weights increase by roughly an order of magnitude between herbivores to omnivores to carnivores.'
             },
             'Standing Biomass – Water column omnivore':{
-                'short_name':'WaterColumnOmnivoreBiomass',
+                'short_name': 'WaterColumnOmnivoreBiomass',
+                'comp_name': 'Water_Column_Omnivore',
                 'default_value':0.0005,
                 'unit': 'kg ww/m<sup>2</sup>',
                 'helpText': 'Enter the water column omnivore standing biomass. Water column omnivore include bluegill and white perch. The default value of 0.0005 is from professional judgement: biomass assumptions are based on typical biomass by trophic level found in northeastern U.S. lakes and ponds and the diet habits of the fish and fish sizes are simplified to match. Note that more biomass would dilute bioaccumulation.'
             },
             'Single organism body weight – Water column omnivore':{
-                'short_name':'WaterColumnOmnivoreWeight',
+                'short_name': 'WaterColumnOmnivoreWeight',
+                'comp_name': 'Water_Column_Omnivore',
                 'default_value': 0.25,
                 'unit': 'kg',
                 'helpText': 'Enter the water column omnivore single organism body weight. Water column omnivore include bluegill and white perch. The default value of 0.25 is from professional judgement: organism body weights are estimated based on many typical species that have the specified default diets, and also with the basic assumption that body weights increase by roughly an order of magnitude between herbivores to omnivores to carnivores.'
             },
             'Standing Biomass – Benthic carnivore':{
-                'short_name':'WaterColumnOmnivoreBiomass',
+                'short_name': 'BenthicCarnivoreBiomass',
+                'comp_name': 'Benthic_Carnivore',
                 'default_value':0.001,
                 'unit': 'kg ww/m<sup>2</sup>',
                 'helpText': 'Enter the benthic carnivore standing biomass. Benthic carnivore include large catfish and sculpins. The default value of 0.001 is from professional judgement: biomass assumptions are based on typical biomass by trophic level found in northeastern U.S. lakes and ponds and the diet habits of the fish and fish sizes are simplified to match. Note that more biomass would dilute bioaccumulation.'
             },
             'Single organism body weight – Benthic carnivore':{
-                'short_name':'BenthicCarnivoreWeight',
+                'short_name': 'BenthicCarnivoreWeight',
+                'comp_name': 'Benthic_Carnivore',
                 'default_value': 2,
                 'unit': 'kg',
                 'helpText': 'Enter the benthic carnivore single organism body weight. Benthic carnivore include large catfish and sculpins. The default value of 2 is from professional judgement: organism body weights are estimated based on many typical species that have the specified default diets, and also with the basic assumption that body weights increase by roughly an order of magnitude between herbivores to omnivores to carnivores.'
             },
             'Standing Biomass – Water column carnivore':{
-                'short_name':'WaterColumnCarnivoreBiomass',
+                'short_name': 'WaterColumnCarnivoreBiomass',
+                'comp_name': 'Water_Column_Carnivore',
                 'default_value':0.0002,
                 'unit': 'kg ww/m<sup>2</sup>',
                 'helpText': 'Enter the water column carnivore standing biomass. Water column carnivore include largemouth bass and walleye. The default value of 0.0002 is from professional judgement: biomass assumptions are based on typical biomass by trophic level found in northeastern U.S. lakes and ponds and the diet habits of the fish and fish sizes are simplified to match. Note that more biomass would dilute bioaccumulation.'
             },
             'Single organism body weight – Water column carnivore':{
-                'short_name':'WaterColumnCarnivoreWeight',
+                'short_name': 'WaterColumnCarnivoreWeight',
+                'comp_name': 'Water_Column_Carnivore',
                 'default_value': 2,
                 'unit': 'kg',
                 'helpText': 'Enter the water column carnivore single organism body weight. Water column carnivore include largemouth bass and walleye. The default value of 2.0 is from professional judgement: organism body weights are estimated based on many typical species that have the specified default diets, and also with the basic assumption that body weights increase by roughly an order of magnitude between herbivores to omnivores to carnivores.'
@@ -282,75 +297,75 @@
             '<tbody>' +
             '<tr data-rsval="1">' +
             '<td style="text-align: right; border-right: 1px solid black; padding: 10px"><strong>Zooplankton</strong></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="1" style="width: 50px; display:none"/><label class="editableCell">1</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="1" style="width: 50px; display:none"/><label class="editableCell badge badge-light">1</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
             '</tr>' +
             '<tr data-rsval="1">' +
             '<td style="text-align: right; border-right: 1px solid black; padding: 10px"><strong>Water Column Herbivore</strong></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="1" style="width: 50px; display:none"/><label class="editableCell">1</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="1" style="width: 50px; display:none"/><label class="editableCell badge badge-light">1</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
             '</tr>' +
             '<tr data-rsval="1">' +
             '<td style="text-align: right; border-right: 1px solid black; padding: 10px"><strong>Benthic Omnivore</strong></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="1" style="width: 50px; display:none"/><label class="editableCell">1</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="1" style="width: 50px; display:none"/><label class="editableCell badge badge-light">1</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
             '</tr>' +
             '<tr>' +
             '<td style="text-align: right; border-right: 1px solid black; padding: 10px"><strong>Water Column Omnivore</strong></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="1" style="width: 50px; display:none"/><label class="editableCell">1</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="1" style="width: 50px; display:none"/><label class="editableCell badge badge-light">1</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
             '</tr>' +
             '<tr data-rsval="1">' +
-            '<td style="text-align: right; border-right: 1px solid black; padding: 10px"><strong>Benthic Carivore</strong></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0.5" style="width: 50px; display:none"/><label class="editableCell">0.5</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0.5" style="width: 50px; display:none"/><label class="editableCell">0.5</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
+            '<td style="text-align: right; border-right: 1px solid black; padding: 10px"><strong>Benthic Carnivore</strong></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0.5" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0.5</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0.5" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0.5</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
             '</tr>' +
             '<tr>' +
-            '<td style="text-align: right; border-right: 1px solid black; padding: 10px"><strong>Water Column Carivore</strong></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="1" style="width: 50px; display:none"/><label class="editableCell">1</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
-            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell">0</label></td>' +
+            '<td style="text-align: right; border-right: 1px solid black; padding: 10px"><strong>Water Column Carnivore</strong></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="1" style="width: 50px; display:none"/><label class="editableCell badge badge-light">1</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
+            '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
             '</tr>' +
             '</tbody>' +
             '</table>'
@@ -369,6 +384,9 @@
                     bFilter: false,
                     info: false,
                     bAutoWidth: false,
+                    columnDefs: [
+                       { width: '100%', targets: 0 }
+                    ],
                     columns: get_pivoted_columns(table_type),
                     initComplete: function (settings, json) {
                         $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
@@ -404,14 +422,31 @@
             });
 
             $('input.editableCell,select.editableCell').blur(function () {
-                let data = $(this).val()
-                let $label = $(this).next("label")
-                validate_input(this)
+                let ee =this
+                let validation_promise = new Promise(function(res,rej) {
+                    let resp=validate_input(ee)
+                    if (resp) {
+                        res("Success")
+                    } else {
+                        rej("Fail")
+                    }
+                })
+                validation_promise.then(function(val) {
+                    let data = $(ee).val() == "" ? 0 : $(ee).val()
+                    let $label = $(ee).next("label.editableCell")
+                    $label.siblings("input").hide()
+                    $label.show().text(data)
+                }, function(err){
+                    console.log(err)
+                })
+                let data = $(this).val() == "" ? 0 : $(this).val()
+                let $label = $(this).next("label.editableCell")
                 $label.siblings("input").hide()
                 $label.show().text(data)
                 let parcel_info = $(this).data('parcelinfo')
                 if (parcel_info) {
                     parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
+                    console.log(parcel_info)
                     TRIM.api.updateParcel(parcel_info)
                     if (tblId) {
                         let default_data =  default_aquatic_data
@@ -444,14 +479,45 @@
                                 $(this_cell).append(tt)
                                 $(this_cell).find("label.warningTT").tooltip('show')
                             }
+                            return true
                         } else {
                             $(this_row).find("label.warningTT").tooltip('dispose')
                             $(this_row).find("label.warningTT").remove()
-                            // $("label.warningTT").tooltip('hide')
-                            // $("label.warningTT").remove()
-                            console.log("hide tooltip")
+                            // Get all data from table and organize it into array of json form data
+                            let mat_table = $(this_row).closest("table")
+                            let col_headers = $(mat_table).find("thead > tr > th > div > span").map((i,e) => e.innerHTML)
+                            $(mat_table).find("tbody > tr").each(function(){
+                                let row_header = $(this).find("td > strong").text()
+                                let row_name = row_header.replaceAll(" ","").replaceAll("WaterColumn","Fish").replace("BenthicCarnivore", "FishBenthicCarnivore").replace("BenthicOmnivore", "FishBenthicOmnivore")
+                                let parcel_info = [{
+                                            'type': 'data',
+                                            'name': 'id',
+                                            'value': $(mat_table).data("parcelid")
+                                        },{
+                                            'type': 'data',
+                                            'name': 'field',
+                                            'value': row_name
+                                        }]
+                                $(this).find("td").each(function (i,e){
+                                    if ($(e).find("strong").length == 0) {
+                                        let col_name = "FractionDiet" + col_headers[i-1].replaceAll(" ","").replaceAll("WaterColumn","Fish").replace("BenthicCarnivore", "FishBenthicCarnivore").replace("BenthicOmnivore", "FishBenthicOmnivore")
+                                        let diet_fraction_val = $(e).find("label.editableCell").text()
+                                        let cell_form_data = {
+                                            'type': 'input',
+                                            'name': col_name,
+                                            'value': diet_fraction_val
+                                        }
+                                        parcel_info.push(cell_form_data)
+                                    }
+                                })
+                                // Push change to DB
+                                TRIM.api.updateParcel(parcel_info)
+                            })
+                            return true
                         }
                     }
+                } else {
+                    return true
                 }
             }
         }
@@ -477,7 +543,7 @@
                     }
                 }]
             let loadedData = $('#root').data('loadedParcels')
-            let data_subset = loadedData['scenario'].filter(e=> (e.parcelType == "Water Only" || e.parcelType == "Water & Air"))
+            let data_subset = loadedData['scenario'].filter(e=> (e.hasFishFoodWeb == "Yes"))
             data_subset.forEach(function (e, i) {
                 if ($(table_header).find("th").length < (data_subset.length + 1)) {
                     $(table_header).append("<th>" + e.name + "</th>")
@@ -489,7 +555,7 @@
                         let parcel_info = [{
                             'type': 'data',
                             'name': 'id',
-                            'value': e.id,
+                            'value': e.id
                         },{
                             'type': 'data',
                             'name': 'field',
@@ -504,7 +570,7 @@
                         let auto_calc_button = Auto_calculable.indexOf(row.Property) >= 0 ? "<p><button data-active='False' data-calcinfo='" + calc_info +"' class='btn btn-sm btn-outline-dark auto_calc'><small>Auto-calculate</small></button></p>" : ""
                         let link_options = []
                         loadedData['scenario'].forEach(function (el, i) {
-                            if (el.parcelType == "Water Only" || el.parcelType == "Water & Air") {
+                            if (el.hasFishFoodWeb == "Yes") {
                                 if (el.name != e.name) {
                                     link_options.push(el.name)
                                 }
@@ -530,7 +596,7 @@
                         let linked_prop_input = linked_data.indexOf(row.Property) >= 0 ? $(hq_ms).html() : ""
                         // let linked_prop_input = linked_data.indexOf(row.Property) >= 0 ? "<p><select class='form-select'>" + link_options.map(el => "<option>" + el + "</option>").join("") + "</select></p>" : ""
                         let this_cell_data =  data
-                        let this_cell_prop = 'editableCell'
+                        let this_cell_prop = 'editableCell badge badge-light'
                         if (linked_data.indexOf(row.Property) >= 0) {
                             return "<div class='divLinkedPropBtn'><label>" + this_cell_data + "</label></div>" + auto_calc_button + linked_prop_input
                         }
@@ -575,10 +641,14 @@
                  aquatic_properties.forEach(function (p, i) {
                      let this_aquatic_property = {}
                      loadedData['scenario'].forEach(function (e, i) {
-                         if (e.parcelType == "Water Only" || e.parcelType == "Water & Air") {
+                         if (e.hasFishFoodWeb == "Yes") {
+                             let prop = "aquatic_bw"
+                             if (p.indexOf("Biomass") > 0) {
+                                 prop = "aquatic_biomass"
+                             }
                              this_aquatic_property['Property'] = p
-                             this_aquatic_property[e.name] = e[default_aquatic_data[p]['short_name']] ? e[default_aquatic_data[p]['short_name']] : default_aquatic_data[p]['default_value'],
-                                 this_aquatic_property["helpText"] = default_aquatic_data[p]['helpText'] ? default_aquatic_data[p]['helpText'] : "Some text"
+                             this_aquatic_property[e.name] = e[prop][default_aquatic_data[p]['comp_name']] ? e[prop][default_aquatic_data[p]['comp_name']] : default_aquatic_data[p]['default_value']
+                             this_aquatic_property["helpText"] = default_aquatic_data[p]['helpText'] ? default_aquatic_data[p]['helpText'] : "Some text"
                              this_aquatic_property["unit"] = default_aquatic_data[p]['unit'] ? default_aquatic_data[p]['unit'] : "No units"
                              this_aquatic_property["shortProperty"] = default_aquatic_data[p]['short_name']
                          }
@@ -587,16 +657,38 @@
                  })
                  TableRedraw(aquatic_data, "aquatic")
                  loadedData['scenario'].forEach(function (e, i) {
-                     if (e.parcelType == "Water Only" || e.parcelType == "Water & Air") {
+                     if (e.hasFishFoodWeb == "Yes") {
                          let this_matrix = $(diet_table_template)
+                         let matrix_data = e.aquatic_diet_fractions
+                         let clean_matrix_data = {};
+                         Object.keys(matrix_data).forEach(function(e){
+                             clean_matrix_data[e] = {}
+                             Object.keys(matrix_data[e]).forEach(ee=>clean_matrix_data[e][ee.replaceAll("Fish","")]=matrix_data[e][ee])})
+                         let mat_table = $($(this_matrix)[1])
+                         $(mat_table).attr("data-parcelid",e.id)
+                         let col_headers = $(mat_table).find("thead > tr > th > div > span").map((i,e) => e.innerHTML)
+                         $(mat_table).find("tbody > tr").each(function(){
+                             let row_header = $(this).find("td > strong").text()
+                             $(this).find("td").each(function (i,e){
+                                 if ($(e).find("strong").length == 0) {
+                                     let row_name = row_header.replaceAll(" ","_")
+                                     let col_name = "FractionDiet" + col_headers[i-1].replaceAll(" ","").replaceAll("WaterColumn","")
+                                     let this_cell_data = clean_matrix_data[row_name][col_name]
+                                     $(this).find("label").text(this_cell_data)
+                                     $(this).find("input").val(this_cell_data)
+                                 }
+                             })
+                         })
+
                          $($(this_matrix)[0]).text(e.name)
+
                          divDietTables.append(this_matrix)
                      }
                  })
                  diet_properties.forEach(function (p, i) {
                      let this_diet_property = {}
                      loadedData['scenario'].forEach(function (e, i) {
-                         if (e.parcelType == "Water Only" || e.parcelType == "Water & Air") {
+                         if (e.hasFishFoodWeb == "Yes") {
                              this_diet_property['Property'] = p
                              this_diet_property[e.name] = e[default_diet_data[p]['short_name']] ? e[default_diet_data[p]['short_name']] : default_diet_data[p]['default_value'],
                                  this_diet_property["helpText"] = default_diet_data[p]['helpText'] ? default_diet_data[p]['helpText'] : "Some text"

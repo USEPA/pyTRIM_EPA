@@ -1,14 +1,14 @@
 import time
-from trim_db.porting import *
-from trim_db.schema import *
-from trim_db.services import *
+# from trim_db.porting import *
+# from trim_db.schema import *
+# from trim_db.services import *
 
 TRIM_FILES = (
     'C:/Users/55284/OneDrive - ICF/Desktop/RTR_TRIM-FaTE/'
     'TRIM_frontend/trim-builder-dev/Scripts/trim_core/backend/Legacy_Input_Files'
 )
 
-SCENARIO_NAME = 'Foundries_SS2'
+SCENARIO_NAME = 'Foundries_SS'
 CHEMICAL_CATEGORY = 'Mercury'
 
 
@@ -419,11 +419,11 @@ def run_tests():
 
     # print_scenario_compartment_info(scenario)
 
-    print('creating tm ...')
-    start = time.time()
-    df_tm, df_sm = make_transition_matrix(scenario)
-    end = time.time()
-    print('time to create tm = ', round((end - start), 2), ' seconds')
+    # print('creating tm ...')
+    # start = time.time()
+    # df_tm, df_sm = make_transition_matrix(scenario)
+    # end = time.time()
+    # print('time to create tm = ', round((end - start), 2), ' seconds')
 
     # safe_save_output(df_tm, df_sm)
 
@@ -434,6 +434,10 @@ if __name__ == '__main__':
     try:
         from trim_db.utils.users_roles import implement_users_roles
         implement_users_roles()
+        time.sleep(10)
+        from trim_db.porting import *
+        from trim_db.schema import *
+        from trim_db.services import *
     except Exception as e:
         print(f'-- Unable to create Users/Roles.\n{e}')
 

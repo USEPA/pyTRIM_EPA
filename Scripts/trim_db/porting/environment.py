@@ -139,7 +139,7 @@ MEDIA_MAP = {
     )
 }
 for k, v in list(MEDIA_MAP.items()):
-    for pref in sorted(['Leaf_', 'Leaf_Particle_' 'Root_', 'Stem_'], key=len):
+    for pref in sorted(['Leaf_', 'Leaf_Particle_', 'Root_', 'Stem_'], key=len):
         if not k.startswith(pref):
             continue
         variant = f'{k}_in_{k[len(pref):]}'
