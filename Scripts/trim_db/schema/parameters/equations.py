@@ -170,6 +170,12 @@ OPEN_BRACKETS = '({['
 CLOSE_BRACKETS = ')}]'
 
 
+def is_reserved(s, base=False):
+    if base:
+        return s.split('.')[0] in RESERVED_WORDS
+    return s in RESERVED_WORDS
+
+
 def deconstruct_equation(equation):
 
     temp = equation
@@ -202,7 +208,7 @@ def deconstruct_equation(equation):
             continue
 
         prev_op = prev in OPERATORS
-        prev_reserved = prev in RESERVED_WORDS
+        prev_reserved = is_reserved(prev)
 
         if (
             prev.endswith('e-') and is_number(prev[:-2])
@@ -239,11 +245,15 @@ def find_arguments(equation, combine_partial_args=True, drop_functions=True):
             if i == 0:
                 break
             i -= 1
+            if is_reserved(deconstructed[i], base=True):
+                break
             if element[0] in '.]':
                 element = deconstructed[i] + element
             elif deconstructed[i][-1] in '][':
                 element = deconstructed[i] + element
             elif i > 0 and deconstructed[i - 1][-1] in '[(':
+                if is_reserved(deconstructed[i - 1], base=True):
+                    break
                 element = deconstructed[i - 1] + deconstructed[i] + element
                 i -= 1
             else:
@@ -271,7 +281,7 @@ def find_arguments(equation, combine_partial_args=True, drop_functions=True):
         if is_number(check):
             continue
 
-        if check in RESERVED_WORDS or element.split('.')[0] in RESERVED_WORDS:
+        if is_reserved(check) or is_reserved(element.split('.')[0]):
             continue
 
         if drop_functions and element.endswith('('):
