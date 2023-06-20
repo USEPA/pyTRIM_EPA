@@ -13,6 +13,11 @@ def make_transfer_matrix(scenario):
     chem_list = list(sorted(
         scenario.chemicals, key=lambda xcl: xcl.name
     ))
+
+    # -- TEMPORARILY SHORTEN CHEMICAL LIST (COMMENT OUT FOR TM COMPARISON)
+    # chem_list = [chem_list[0]]
+    # -- --
+
     comp_list = list(sorted(
         scenario.compartments, key=lambda xl: xl.standard_name
     ))
