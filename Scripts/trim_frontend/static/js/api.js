@@ -20,6 +20,16 @@ window.TRIM = (function(trim) {
         });
     };
 
+    api.copyScenario = function(scenario) {
+        var url = api.getUrl('secnario_api.copy_scenario');
+        var data = makeFormData(scenario);
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: data
+        })
+    }
+
     api.loadForms = function(names) {
         if (!names) {
             return undefined;
