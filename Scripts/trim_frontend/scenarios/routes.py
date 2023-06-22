@@ -320,14 +320,17 @@ def update_scenario():
 @scenario_api.route('/api/scenario/copy/', methods=['POST'])
 @login_required
 def copy_scenario():
-
     scenario_data = request.form.to_dict()
-    if not scenario_data['id']:
+    scenario_data['user_id'] = current_user.id
+
+    if not scenario_data['scenario_id']:
         raise AssertionError("Scenario ID cannot be blank.")
-    scenario_id = scenario_data['scenario_id']
-    user_id = scenario_data['user_id']
+    
+    scenario_id = int(scenario_data['scenario_id'])
+    user_id = int(scenario_data['user_id'])
     s = ScenarioService.get(scenario_id)
     res = "Fail"
+
     try:
         # Create new Scenario
         new_name = f'{s.name}_{"{:%Y-%m-%d_%H_%M_%S}".format(datetime.now())}'
@@ -370,7 +373,8 @@ def copy_scenario():
     except:
         print("Failed to copy scenario...")
 
-    return ApiResult({'result': res})
+    # return ApiResult({'result': res})
+    return redirect(request.referrer)
 
 
 parcels_api = Blueprint('parcels_api', __name__)

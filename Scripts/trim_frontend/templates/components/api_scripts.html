@@ -7,6 +7,7 @@ window.TRIM = (function(trim) {
     var urls = {
         'scenario_api.get_scenario': '{{ url_for("scenario_api.get_scenario", id=0) }}',
         'scenario_api.update_scenario': '{{ url_for("scenario_api.update_scenario", id=0) }}',
+        'scenario_api.copy_scenario': '{{ url_for("scenario_api.copy_scenario") }}',
         'parcels_api.create':'{{ url_for("parcels_api.create_parcels") }}',
         'parcels_api.get':'{{ url_for("parcels_api.get_parcels") }}',
         'parcels_api.update': '{{ url_for("parcels_api.update_parcel") }}',
