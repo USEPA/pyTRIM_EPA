@@ -229,7 +229,8 @@ def view_scenarios():
 
     return render_template(
         'scenarios/view_all.html', scenarios=scenarios,
-        scenario_form=scenario_form
+        scenario_form=scenario_form,
+        logged_in_user = current_user
     )
 
 
@@ -321,9 +322,9 @@ def update_scenario():
 @login_required
 def copy_scenario():
     scenario_data = request.form.to_dict()
-    scenario_data['user_id'] = current_user.id
-
-    if not scenario_data['scenario_id']:
+    if not scenario_data.get('user_id'):
+        raise AssertionError("User ID cannot be blank.")
+    if not scenario_data.get('scenario_id'):
         raise AssertionError("Scenario ID cannot be blank.")
     
     scenario_id = int(scenario_data['scenario_id'])
