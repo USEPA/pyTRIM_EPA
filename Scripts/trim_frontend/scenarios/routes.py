@@ -4,7 +4,7 @@ from flask import Blueprint, request, render_template, redirect, url_for
 from flask_security import login_required, current_user
 from custom.flask_api import ApiResult,  ApiException
 from datetime import datetime
-from trim_db import ScenarioService, ParcelService, CompartmentService, VolumeElementService, ParameterService
+from trim_db import ScenarioService, ParcelService, CompartmentService, VolumeElementService, ParameterService, ChemicalService
 from trim_frontend import api
 from .forms import *
 from trim_db import Scenario, Parcel
@@ -375,6 +375,35 @@ def copy_scenario():
         print("Failed to copy scenario...")
 
     # return ApiResult({'result': res})
+    return redirect(request.referrer)
+
+
+@scenario_api.route('/api/scenario/delete/', methods=['POST'])
+@login_required
+def delete_scenario():
+    scenario_data = request.form.to_dict()
+    if not scenario_data.get('scenario_id'):
+        raise AssertionError("Scenario ID cannot be blank.")
+    
+    scenario_id = int(scenario_data['scenario_id'])
+    s = ScenarioService.get(scenario_id)
+
+    try:
+        # TODO -- I think compartment links are deleted
+        # Delete all parcels and contents
+        for parcel in s.parcels.all():
+            delete_parcel_contents(parcel)
+            ParcelService.delete(parcel.id)
+
+        # Delete scenario chemicals
+        for sc in s.chemicals:
+            ChemicalService.delete(sc.id)
+
+        # Delete scenario
+        ScenarioService.delete(s.id)
+    except:
+        print("Failed to delete scenario...")
+
     return redirect(request.referrer)
 
 
