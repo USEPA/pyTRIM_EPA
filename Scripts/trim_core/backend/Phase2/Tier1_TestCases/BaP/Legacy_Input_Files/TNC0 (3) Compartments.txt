@@ -1,0 +1,179 @@
+// TRIM.FaTE scenario compartments
+// Biotic and non-primary abiotoc compartments
+
+// TNC0
+// Recreation of Tier 1 Thresholds
+
+// Generated:  5/16/2023 4:22:50 PM
+
+Version:1
+
+// ----------------------------------------------------------------------------
+// Air
+// ----------------------------------------------------------------------------
+
+VolumeElement: Air_Source
+Compartment: Degradation/Reaction Sink
+VolumeElement: Air_N1
+Compartment: Degradation/Reaction Sink
+VolumeElement: Air_N6
+Compartment: Degradation/Reaction Sink
+VolumeElement: Air_N7
+Compartment: Degradation/Reaction Sink
+VolumeElement: Air_N3
+Compartment: Degradation/Reaction Sink
+VolumeElement: Air_N4
+Compartment: Degradation/Reaction Sink
+VolumeElement: Air_N5
+Compartment: Degradation/Reaction Sink
+VolumeElement: Air_S1
+Compartment: Degradation/Reaction Sink
+VolumeElement: Air_Pond
+Compartment: Degradation/Reaction Sink
+VolumeElement: Air_S4
+Compartment: Degradation/Reaction Sink
+VolumeElement: Air_S5
+Compartment: Degradation/Reaction Sink
+
+// ----------------------------------------------------------------------------
+// Water
+// ----------------------------------------------------------------------------
+
+// Pond
+VolumeElement: SW_Pond
+Compartment: Degradation/Reaction Sink
+Compartment: Flush Rate Sink
+Compartment: Macrophyte
+Compartment: Zooplankton
+Compartment: Water Column Herbivore
+Compartment: Water Column Omnivore
+Compartment: Water Column Carnivore
+VolumeElement: Sed_Pond
+Compartment: Degradation/Reaction Sink
+Compartment: Benthic Invertebrate
+Compartment: Benthic Omnivore
+Compartment: Benthic Carnivore
+
+
+// ----------------------------------------------------------------------------
+// Land
+// ----------------------------------------------------------------------------
+
+// Source land use: untilled soil
+VolumeElement: GW_Source
+Compartment: Degradation/Reaction Sink
+VolumeElement: VadoseSoil_Source
+Compartment: Degradation/Reaction Sink
+VolumeElement: RootSoil_Source
+Compartment: Degradation/Reaction Sink
+VolumeElement: SurfSoil_Source
+Compartment: Degradation/Reaction Sink
+Compartment: Soil Advection Sink
+
+// N1 land use: grass
+VolumeElement: GW_N1
+Compartment: Degradation/Reaction Sink
+VolumeElement: VadoseSoil_N1
+Compartment: Degradation/Reaction Sink
+VolumeElement: RootSoil_N1
+Compartment: Degradation/Reaction Sink
+VolumeElement: SurfSoil_N1
+Compartment: Degradation/Reaction Sink
+Compartment: Soil Advection Sink
+CompositeCompartment: Grasses/Herbs
+
+// N6 land use: tilled soil
+VolumeElement: GW_N6
+Compartment: Degradation/Reaction Sink
+VolumeElement: VadoseSoil_N6
+Compartment: Degradation/Reaction Sink
+VolumeElement: RootSoil_N6
+Compartment: Degradation/Reaction Sink
+VolumeElement: SurfSoil_N6
+Compartment: Degradation/Reaction Sink
+Compartment: Soil Advection Sink
+
+// N7 land use: grass
+VolumeElement: GW_N7
+Compartment: Degradation/Reaction Sink
+VolumeElement: VadoseSoil_N7
+Compartment: Degradation/Reaction Sink
+VolumeElement: RootSoil_N7
+Compartment: Degradation/Reaction Sink
+VolumeElement: SurfSoil_N7
+Compartment: Degradation/Reaction Sink
+Compartment: Soil Advection Sink
+CompositeCompartment: Grasses/Herbs
+
+// N3 land use: grass
+VolumeElement: GW_N3
+Compartment: Degradation/Reaction Sink
+VolumeElement: VadoseSoil_N3
+Compartment: Degradation/Reaction Sink
+VolumeElement: RootSoil_N3
+Compartment: Degradation/Reaction Sink
+VolumeElement: SurfSoil_N3
+Compartment: Degradation/Reaction Sink
+Compartment: Soil Advection Sink
+CompositeCompartment: Grasses/Herbs
+
+// N4 land use: coniferous forest
+VolumeElement: GW_N4
+Compartment: Degradation/Reaction Sink
+VolumeElement: VadoseSoil_N4
+Compartment: Degradation/Reaction Sink
+VolumeElement: RootSoil_N4
+Compartment: Degradation/Reaction Sink
+VolumeElement: SurfSoil_N4
+Compartment: Degradation/Reaction Sink
+Compartment: Soil Advection Sink
+CompositeCompartment: Coniferous Forest
+
+// N5 land use: coniferous forest
+VolumeElement: GW_N5
+Compartment: Degradation/Reaction Sink
+VolumeElement: VadoseSoil_N5
+Compartment: Degradation/Reaction Sink
+VolumeElement: RootSoil_N5
+Compartment: Degradation/Reaction Sink
+VolumeElement: SurfSoil_N5
+Compartment: Degradation/Reaction Sink
+Compartment: Soil Advection Sink
+CompositeCompartment: Coniferous Forest
+
+// S1 land use: grass
+VolumeElement: GW_S1
+Compartment: Degradation/Reaction Sink
+VolumeElement: VadoseSoil_S1
+Compartment: Degradation/Reaction Sink
+VolumeElement: RootSoil_S1
+Compartment: Degradation/Reaction Sink
+VolumeElement: SurfSoil_S1
+Compartment: Degradation/Reaction Sink
+Compartment: Soil Advection Sink
+CompositeCompartment: Grasses/Herbs
+
+// S4 land use: coniferous forest
+VolumeElement: GW_S4
+Compartment: Degradation/Reaction Sink
+VolumeElement: VadoseSoil_S4
+Compartment: Degradation/Reaction Sink
+VolumeElement: RootSoil_S4
+Compartment: Degradation/Reaction Sink
+VolumeElement: SurfSoil_S4
+Compartment: Degradation/Reaction Sink
+Compartment: Soil Advection Sink
+CompositeCompartment: Coniferous Forest
+
+// S5 land use: coniferous forest
+VolumeElement: GW_S5
+Compartment: Degradation/Reaction Sink
+VolumeElement: VadoseSoil_S5
+Compartment: Degradation/Reaction Sink
+VolumeElement: RootSoil_S5
+Compartment: Degradation/Reaction Sink
+VolumeElement: SurfSoil_S5
+Compartment: Degradation/Reaction Sink
+Compartment: Soil Advection Sink
+CompositeCompartment: Coniferous Forest
+

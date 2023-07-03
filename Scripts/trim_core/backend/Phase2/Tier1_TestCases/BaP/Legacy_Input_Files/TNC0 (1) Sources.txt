@@ -1,0 +1,61 @@
+// TRIM.FaTE library file with site-specific emission sources
+
+// TNC0
+// Recreation of Tier 1 Thresholds
+
+// Generated:  5/16/2023 4:22:45 PM
+
+Version:1
+
+
+// This file must be imported into the TRIM.FaTE library directly
+// (not the scenario). Sources must then be manually added to the
+// scenario using the graphical interface.
+
+
+PointSource: Screening_Source
+Property: Enabled
+Form: Constant
+Value: True
+Property: X
+Form: Constant
+Value: 601000
+Property: Y
+Form: Constant
+Value: 4540000
+Property: Elevation
+Form: Constant
+Value: 80
+Property: EmissionRate
+Value:  {MethylMercury} 0
+Value:  {Lead} 0
+Value:  {Indeno(1,2,3-cd)pyrene} 0
+Value:  {Elemental Mercury} 0
+Value:  {Divalent Mercury} 1
+Value:  {Dibenz(a,h)anthracene} 0
+Value:  {Chrysene} 0
+Value:  {Cadmium} 1
+Value:  {Benzo(k)fluoranthene} 0
+Value:  {Benzo(b)fluoranthene} 0
+Value:  {Benzo(A)Pyrene} 1
+Value:  {Benz(a)anthracene} 0
+Value:  {2,3,7,8-TCDF} 0
+Value:  {2,3,7,8-TCDD} 1
+Value:  {2,3,4,7,8-PeCDF} 0
+Value:  {2,3,4,6,7,8-HxCDF} 0
+Value:  {1,2,3,7,8-PeCDF} 0
+Value:  {1,2,3,7,8-PeCDD} 0
+Value:  {1,2,3,7,8,9-HxCDF} 0
+Value:  {1,2,3,7,8,9-HxCDD} 0
+Value:  {1,2,3,6,7,8-HxCDF} 0
+Value:  {1,2,3,6,7,8-HxCDD} 0
+Value:  {1,2,3,4,7,8-HxCDF} 0
+Value:  {1,2,3,4,7,8-HxCDD} 0
+Value:  {1,2,3,4,7,8,9-HpCDF} 0
+Value:  {1,2,3,4,6,7,8-HpCDF} 0
+Value:  {1,2,3,4,6,7,8-HpCDD} 0
+Value:  {1,2,3,4,6,7,8,9-OCDF} 0
+Value:  {1,2,3,4,6,7,8,9-OCDD} 0
+Value:  {Arsenic} 1
+
+
