@@ -245,8 +245,20 @@ def log_quantity(x, *args, **kwargs):
         return math.log(x, *args, **kwargs)
 
 
+def log10_quantity(x, *args, **kwargs):
+    try:
+        return math.log10(x.magnitude, *args, **kwargs)
+    except AttributeError:
+        return math.log10(x, *args, **kwargs)
+
+
+def sqrt_quantity(x, *args, **kwargs):
+    return x ** 0.5
+
 UREG_CUSTOM_FUNCTIONS = {
     **simpleeval.DEFAULT_FUNCTIONS,
     'safe_exp': exp_quantity,
-    'safe_log': log_quantity
+    'safe_log': log_quantity,
+    'safe_log10': log10_quantity,
+    'safe_sqrt': sqrt_quantity
 }
