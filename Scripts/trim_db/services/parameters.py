@@ -96,6 +96,7 @@ def parameterize(cls):
 
     def get_scenario(obj, scenario=None):
         if scenario is not None:
+            CacheManager.clear_cache(f'entity_param::{cls_name}')
             setattr(obj, '__current_scenario', scenario)
         if getattr(obj, '__current_scenario', None) is None:
             from trim_db.services import ScenarioService
