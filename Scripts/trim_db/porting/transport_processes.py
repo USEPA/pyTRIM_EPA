@@ -205,14 +205,24 @@ def parse_transport_processes(algorithm_parameters):
 
         # print(name)
         try:
-            sending_chem = ChemicalService.get(
-                name=get_param(params, 'sendingChemicalName')
-            )
+            sending_chem = get_param(params, 'sendingChemicalName')
+            chem_cat = get_param(params, 'chemicalCategory')
+            if sending_chem:
+                sending_chem = ChemicalService.get(
+                    name=sending_chem
+                )
+                chem_cat = None
+            elif chem_cat:
+                sending_chem = None
         except Exception:
             sending_chem = None
+            chem_cat = None
+
         if sending_chem:
             requirements.append(f'(chemical.id == {sending_chem.id})')
-        # print(sending_chem)
+        elif chem_cat:
+            requirements.append(f'(chemical.isa("{chem_cat}"))')
+        # print(sending_chem, chem_cat)
 
         require_comps = [
             ('sendingCompartmentCategory', 'sender'),
@@ -221,7 +231,7 @@ def parse_transport_processes(algorithm_parameters):
         for param, name in require_comps:
             m_name = get_param(params, param)
 
-            if m_name.lower() == 'pseudosource':
+            if m_name.lower().startswith('pseudosource'):
                 m_name = 'Source'
             elif 'Sink' in m_name:
                 m_name = m_name.lower()
