@@ -129,9 +129,9 @@ TRANSFER_RULES = {
             'exportHTML',
             'exportTimeStepsDown',
             'significantDigits',
-            'isDay_SteadyState_forAir',
-            'isDay_SteadyState_forOther',
-            'isDay_Dynamic'
+            # 'isDay_SteadyState_forAir',
+            # 'isDay_SteadyState_forOther',
+            # 'isDay_Dynamic'
         ]
     },
     'VolumeElement': {

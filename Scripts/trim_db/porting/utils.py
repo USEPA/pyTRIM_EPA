@@ -197,6 +197,7 @@ GLOBAL_REPLACE = {
     'totalMass': 'TotalMass',
     'Surfsoil': 'SurfSoil',
     'Halflife': 'HalfLife',
+    'D_pureair': 'D_PureAir',
     'D_purewater': 'D_PureWater',
     'D_Purewater': 'D_PureWater',
     'FractionMass_vapor': 'FractionMass_Vapor',
@@ -222,9 +223,11 @@ GLOBAL_REPLACE = {
     'Z_vapor': 'Z_Vapor',
     'z_vapor': 'Z_Vapor',
     'Z_pureair': 'Z_PureAir',
+    'Z_pureAir': 'Z_PureAir',
     'Z_colloid': 'Z_Colloid',
     'Z_purewater': 'Z_PureWater',
     'Z_total': 'Z_Total',
+    'Depth_times_gamma': 'Depth_times_Gamma',
     'conc_colloid': 'conc_Colloid',
     'Kd_colloid': 'Kd_Colloid',
     'rho_colloid': 'rho_Colloid',
@@ -261,6 +264,7 @@ GLOBAL_REPLACE = {
     'Receivingcompartment.Chemical.': f'receiver{VAR_SPLITTER}chemical.',  # noqa
     'receivingcompartment.chemical.': f'receiver{VAR_SPLITTER}chemical.',  # noqa
     'Receivingchemical.': f'receiver{VAR_SPLITTER}chemical.',  # noqa
+    'ReceivingChemical.': f'receiver{VAR_SPLITTER}chemical.',  # noqa
     'ReceivingCompartment.Volume': 'receiver.volume_element.volume',
     'receivingCompartment.Volume': 'receiver.volume_element.volume',
     'Receivingcompartment.Volume': 'receiver.volume_element.volume',
@@ -328,11 +332,15 @@ GLOBAL_REPLACE = {
     'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil].FractionofAreaAvailableforVerticalDiffusion':
         'receiver.comp_vol_elem_sum_of("Fractionofareaavailableforverticaldiffusion", "Surface_Soil")',
 
+    'FractionofAreaAvailableforVerticalDiffusion': 'Fractionofareaavailableforverticaldiffusion',
+
     'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil].Depth':
         'receiver.comp_vol_elem_sum_of("Depth", "Surface_Soil")',
 
     'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil].Chemical.MassTransferCoefficientOnAirSideofAirSoilBoundary':
         'receiver.comp_vol_elem_sum_of("chemical.MassTransferCoefficientOnAirSideofAirSoilBoundary", "Surface_Soil")',
+
+    'MassTransferCoefficientonAirSideofAirSoilBoundary': 'MassTransferCoefficientOnAirSideofAirSoilBoundary',
 
     'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil].Chemical.Z_Total':
         'receiver.comp_vol_elem_sum_of("chemical.Z_Total", "Surface_Soil")',
@@ -378,12 +386,12 @@ def clean_prop(prop, custom_replace={}):
         v = replacements[k]
         # Here we implement a better way to handle case insensitivity for legacy properties in order to eliminate
         # repetition of case variants of the same property
-        if str(k).lower() in str(val).lower():
-            idx = [i for i in range(len(val)) if str(val).lower().startswith(str(k).lower(), i)]
-            rep_k = [val[i:i + len(str(k))] for i in idx]
-            for rk in rep_k:
-                val = val.replace(str(rk), str(v))
-        # val = val.replace(str(k), str(v))
+        # if str(k).lower() in str(val).lower():
+        #     idx = [i for i in range(len(val)) if str(val).lower().startswith(str(k).lower(), i)]
+        #     rep_k = [val[i:i + len(str(k))] for i in idx]
+        #     for rk in rep_k:
+        #         val = val.replace(str(rk), str(v))
+        val = val.replace(str(k), str(v))
 
     val = hacky_value_cleaning(val)
 
@@ -666,6 +674,15 @@ def unit_conversions_to_pint(expression):
         )
         cleaned = cleaned.replace(
             '.to("K") - 273', '.to("degC")'
+        )
+
+    if '"mg/L"' in cleaned:
+        cleaned = cleaned.replace(
+            '.to("mg/L") <', '.to("mg/L").magnitude <'
+        )
+    if '"mg / L"' in cleaned:
+        cleaned = cleaned.replace(
+            '.to("mg / L") <', '.to("mg / L").magnitude <'
         )
 
     for x in ['SedimentDepositionRate', 'SedimentResuspensionRate']:
