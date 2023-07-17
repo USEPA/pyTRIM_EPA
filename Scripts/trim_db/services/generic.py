@@ -7,7 +7,7 @@ from ..schema.utils.caching import CacheManager
 __all__ = ['db', 'GenericService', 'PermissionsMixin']
 
 
-if os.getenv('TEST_DB_SERVERLESS'):
+if os.getenv('TEST_DB_SERVERLESS') == "True":
     print('-- Connecting to database.db')
     from .engine import DataBase
     db_path = (
