@@ -18,6 +18,18 @@ class Chemical(Model):
         )
     )
 
+    def isa(self, cat_or_chem):
+        if isinstance(cat_or_chem, str):
+            if cat_or_chem == self.name or cat_or_chem == self.category:
+                return True
+        elif isinstance(cat_or_chem, Chemical):
+            if cat_or_chem.id == self.id:
+                return True
+        else:
+            raise TypeError
+
+        return False
+
     def as_serializable(self):
         return {
             'id': self.id,
