@@ -1,11 +1,11 @@
 import time
-# from trim_db.porting import *
-# from trim_db.schema import *
-# from trim_db.services import *
+from trim_db.porting import *
+from trim_db.schema import *
+from trim_db.services import *
 
 TRIM_FILES = (
-    'C:/Users/55284/OneDrive - ICF/Desktop/RTR_TRIM-FaTE/'
-    'TRIM_frontend/trim-builder-dev/Scripts/trim_core/backend/Legacy_Input_Files'
+    '/Users/55284/Library/CloudStorage/OneDrive-ICF/Desktop/RTR_TRIM-FaTE/TRIM_builder_new_mac/Scripts/'
+    'trim_core/backend/Legacy_Input_Files'
 )
 
 SCENARIO_NAME = 'Foundries_SS'
@@ -432,12 +432,14 @@ def run_tests():
 
 if __name__ == '__main__':
     try:
+        # import os
+        # os.environ.setdefault('TEST_DB_SERVERLESS', 'True')
         from trim_db.utils.users_roles import implement_users_roles
         implement_users_roles()
-        time.sleep(10)
-        from trim_db.porting import *
-        from trim_db.schema import *
-        from trim_db.services import *
+        # time.sleep(10)
+        # from trim_db.porting import *
+        # from trim_db.schema import *
+        # from trim_db.services import *
     except Exception as e:
         print(f'-- Unable to create Users/Roles.\n{e}')
 

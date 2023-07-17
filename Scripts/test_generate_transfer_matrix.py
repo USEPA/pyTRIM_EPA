@@ -1,5 +1,10 @@
 # import termios
 import time
+import types
+
+from trim_db.porting import *
+from trim_db.schema import *
+from trim_db.services import *
 
 
 SCENARIO_NAME = 'Foundries_SS'
@@ -63,19 +68,37 @@ def make_transfer_matrix(scenario):
                         try:
                             transfer_factor = transport_proc.eval(sender=sender, receiver=receiver,
                                                                   chemical=chem, environment=scenario)
-                            print(f"{sender.name} -> {receiver.name}: {transport_proc.name}")
+                            print(f"{sender.name} -> {receiver.name}: ")
                         except Exception as err:
-                            print(f"{20*'*'} PROBLEM {20*'*'} {sender.name} -> {receiver.name}: {transport_proc.name}")
-                            problem_tfm_file.write(f"{sender.name} -> {receiver.name}: {transport_proc.name}: {str(err)}\n")
+                            print(f"{20*'*'} EVAL PROBLEM {20*'*'} {sender.name} -> {receiver.name}: {transport_proc.name}")
+                            problem_tfm_file.write(f"EVAL PROBLEM: {sender.name} -> {receiver.name}: {transport_proc.name}: {str(err)}\n")
                             pass
                         try:
-                            transfer_factor = transfer_factor.magnitude
-                        except Exception:
+                            if not isinstance(transfer_factor, float) and not isinstance(transfer_factor, int):
+                                if isinstance(transfer_factor, types.FunctionType):
+                                    transfer_factor = eval(f'transfer_factor()')
+                                else:
+                                    transfer_factor = transfer_factor.magnitude
+                            elif pd.isna(transfer_factor):
+                                print(f"{20 * '*'} NAN PROBLEM {20 * '*'}")
+                                problem_tfm_file.write(
+                                    f"NAN PROBLEM: {sender.name} -> {receiver.name}: {transport_proc.name}, id: "
+                                    f"{transport_proc.algorithm_id}\n")
+                            print(f"{transport_proc.name}: {transfer_factor}")
+                        except Exception as err:
+                            print(
+                                f"{20 * '*'} MAG PROBLEM {20 * '*'} {sender.name} -> {receiver.name}: {transport_proc.name}")
+                            problem_tfm_file.write(
+                                f"MAG PROBLEM: {sender.name} -> {receiver.name}: {transport_proc.name}: {str(err)}\n")
                             pass
                         try:
                             if (not transfer_factor or pd.isna(transfer_factor)):
                                 continue
-                        except ValueError:
+                        except ValueError as err:
+                            print(
+                                f"{20 * '*'} VALUE PROBLEM {20 * '*'} {sender.name} -> {receiver.name}: {transport_proc.name}")
+                            problem_tfm_file.write(
+                                f"VALUE PROBLEM: {sender.name} -> {receiver.name}: {transport_proc.name}: {str(err)}\n")
                             pass
                         if transport_proc.is_transform:
                             try:
@@ -91,8 +114,11 @@ def make_transfer_matrix(scenario):
                             if tm_y > -1:
                                 transition_matrix[tm_y][tm_x] += (transfer_factor)
                         except Exception as err:
+                            print(
+                                f"{20 * '*'} TM PROBLEM {20 * '*'} {sender.name} -> {receiver.name}: {transport_proc.name}")
                             problem_tfm_file.write(
-                                f"{sender.name} -> {receiver.name}: {transport_proc.name}: {str(err)}\n")
+                                f"TM PROBLEM: {sender.name} -> {receiver.name}: {transport_proc.name}: {str(err)}\n")
+                            pass
 
     problem_tfm_file.close()
 
@@ -109,10 +135,10 @@ if __name__ == '__main__':
     try:
         from trim_db.utils.users_roles import implement_users_roles
         implement_users_roles()
-        time.sleep(10)
-        from trim_db.porting import *
-        from trim_db.schema import *
-        from trim_db.services import *
+        # time.sleep(10)
+        # from trim_db.porting import *
+        # from trim_db.schema import *
+        # from trim_db.services import *
     except Exception as e:
         print(f'-- Unable to create Users/Roles.\n{e}')
 
