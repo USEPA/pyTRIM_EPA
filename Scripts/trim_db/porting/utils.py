@@ -346,11 +346,29 @@ GLOBAL_REPLACE = {
         'receiver.comp_vol_elem_sum_of("chemical.Z_Total", "Surface_Soil")',
 
     'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil].Chemical.D_effective':
-        'receiver.comp_vol_elem_sum_of("chemical.D_effective", "Surface_Soil")'
+        'receiver.comp_vol_elem_sum_of("chemical.D_effective", "Surface_Soil")',
+
+    'withinContainingVolumeElement[Abiotic | Soil | Surface Soil].Area':
+        'self.comp_vol_elem_sum_of("Area", "Surface_Soil")',
+
+    'withinCompositeCompartment[Terrestrial Plant | Leaf | Leaf - Grasses/Herbs].LeafAreaIndex':
+        'sender.within_composite_compartment("LeafAreaIndex", "Grass_Leaf")',
+
+    'withinCompositeCompartment[Terrestrial Plant | Leaf | Leaf - Agriculture - General].LeafAreaIndex':
+        'sender.within_composite_compartment("LeafAreaIndex", "Agriculture_Leaf")',
+
+    'withinCompositeCompartment[Terrestrial Plant | Leaf | Leaf - Agriculture - General].LitterfallRate':
+        'sender.within_composite_compartment("LitterfallRate", "Agriculture_Leaf")',
+
+    'withinCompositeCompartment[Terrestrial Plant | Leaf | Leaf - Coniferous Forest].LitterfallRate':
+        'sender.within_composite_compartment("LitterfallRate", "Coniferous_Leaf")',
+
+    'withinCompositeCompartment[Terrestrial Plant | Leaf | Leaf - Deciduous Forest].LitterfallRate':
+        'sender.within_composite_compartment("LitterfallRate", "Deciduous_Leaf")',
+
+    'withinCompositeCompartment[Terrestrial Plant | Leaf | Leaf - Grasses/Herbs].LitterfallRate':
+        'sender.within_composite_compartment("LitterfallRate", "Grass_Leaf")'
 }
-# TODO-1: Convert sums above to Methods for ORM classes
-# TODO-2: Formula Arguments wrong for the plant and abiotic fixes above. Why? Need to fix?
-# TODO-3: Use eq tester in root folder to test equations and find out why some cannot be evaluated when computing TM
 
 
 def clean_prop(prop, custom_replace={}):
@@ -462,6 +480,7 @@ def hacky_unit_cleaning(val):
     # HACKS
 
     val = val.replace('[um^2  *  day  *  nmol]', 'um^2  *  day  *  nmol')
+    val = val.replace(' [m/m]', '[m/m]')
 
     if (
         val.startswith('degrees clockwise')
@@ -715,6 +734,8 @@ def unit_conversions_to_pint(expression):
 def hacky_equation_cleaning(val):
     # HACKS
 
+    val = val.replace('compartment.chemical.Porosity', 'self.Porosity(compartment)')
+    val = val.replace('compartment.self.Porosity', 'self.Porosity(compartment)')
     # if 'math.' in val:
     #     val = val.replace('math.math.', 'math.')
 
