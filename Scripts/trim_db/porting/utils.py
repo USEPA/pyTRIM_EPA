@@ -3,6 +3,7 @@ import pandas as pd
 from functools import partial
 from ..schema.parameters.equations import *
 from pyproj import CRS, Transformer
+from ..services import *
 
 __all__ = [
     'read_master_library',
@@ -23,7 +24,7 @@ def read_master_library(filepath):
 
     df_lib = read_lib(skiprows=[0], names=read_lib(nrows=0).columns.values)
 
-    from trim_db.schema import Scenario
+    from trim_db.schema import Scenario, Compartment
 
     constants = [
         ('g_per_kg', 1000, 'g/kg'),
@@ -39,10 +40,28 @@ def read_master_library(filepath):
         ('ug_per_kg', 1e6, 'ug/kg'),
         ('um3_per_m3', 1e18, 'um^3/m^3'),
         ('vonKarmensConstant', 0.74, None),
-        ('waterMeltingPoint', 273.15, 'K')
+        ('waterMeltingPoint', 273.15, 'K'),
+        ('erosionRateCalcSource', 1, None)
     ]
+
+    compartment_default_params = [
+        ('unitSoilLoss', 0.00036, 'kg/m^2/d', 'Compartment [Surface_Soil]'),
+        ('sedimentDeliveryRatioSlopeCoef', 0.125, None, 'Compartment [Surface_Soil]'),
+        ('soilTillage', 0, None, None),
+        ('waterEvaporationRate', 0.7, 'm[water]/year', 'Compartment [Surface_Water]'),
+        ('BedDensity', 2600, 'kg[sediment particles]/m^3[sediment particles]', 'Compartment [Sediment]'),
+        ('ExternalSedimentInflow', 0, 'kg[sediment particles]/day', 'Compartment [Surface_Water]')
+    ]
+
     for const in constants:
         Scenario.parameters.add(const[0], value=const[1], unit=const[2])
+
+    for param in compartment_default_params:
+        if param[3] is None:
+            Compartment.parameters.add(param[0], value=param[1], unit=param[2])
+        else:
+            par_domain = ParameterService.domains.get(name=param[3])
+            Compartment.parameters.add(param[0], value=param[1], unit=param[2], domain=par_domain)
 
     parsed = parse_master_library_params(df_lib)
 
@@ -178,6 +197,7 @@ GLOBAL_REPLACE = {
     'totalMass': 'TotalMass',
     'Surfsoil': 'SurfSoil',
     'Halflife': 'HalfLife',
+    'D_pureair': 'D_PureAir',
     'D_purewater': 'D_PureWater',
     'D_Purewater': 'D_PureWater',
     'FractionMass_vapor': 'FractionMass_Vapor',
@@ -203,9 +223,11 @@ GLOBAL_REPLACE = {
     'Z_vapor': 'Z_Vapor',
     'z_vapor': 'Z_Vapor',
     'Z_pureair': 'Z_PureAir',
+    'Z_pureAir': 'Z_PureAir',
     'Z_colloid': 'Z_Colloid',
     'Z_purewater': 'Z_PureWater',
     'Z_total': 'Z_Total',
+    'Depth_times_gamma': 'Depth_times_Gamma',
     'conc_colloid': 'conc_Colloid',
     'Kd_colloid': 'Kd_Colloid',
     'rho_colloid': 'rho_Colloid',
@@ -226,25 +248,120 @@ GLOBAL_REPLACE = {
 
     'SendingChemical.': 'chemical.',
     'SendingCompartment.Chemical.': f'sender{VAR_SPLITTER}chemical.',  # noqa
+    'sendingCompartment.Chemical.': f'sender{VAR_SPLITTER}chemical.',  # noqa
     'Sendingcompartment.Chemical.': f'sender{VAR_SPLITTER}chemical.',  # noqa
-    'ReceivingCompartment.Chemical.': f'receiver{VAR_SPLITTER}chemical.',  # noqa
-    'Receivingcompartment.Chemical.': f'receiver{VAR_SPLITTER}chemical.',  # noqa
+    'sendingcompartment.Chemical.': f'sender{VAR_SPLITTER}chemical.',  # noqa
     'SendingCompartment.Volume': 'sender.volume_element.volume',
+    'sendingCompartment.Volume': 'sender.volume_element.volume',
     'Sendingcompartment.Volume': 'sender.volume_element.volume',
-    'ReceivingCompartment.Volume': 'receiver.volume_element.volume',
-    'Receivingcompartment.Volume': 'receiver.volume_element.volume',
+    'sendingcompartment.Volume': 'sender.volume_element.volume',
     'SendingCompartment.': 'sender.',
+    'sendingCompartment.': 'sender.',
     'Sendingcompartment.': 'sender.',
+    'sendingcompartment.': 'sender.',
+    'ReceivingCompartment.Chemical.': f'receiver{VAR_SPLITTER}chemical.',  # noqa
+    'receivingCompartment.Chemical.': f'receiver{VAR_SPLITTER}chemical.',  # noqa
+    'Receivingcompartment.Chemical.': f'receiver{VAR_SPLITTER}chemical.',  # noqa
+    'receivingcompartment.chemical.': f'receiver{VAR_SPLITTER}chemical.',  # noqa
+    'Receivingchemical.': f'receiver{VAR_SPLITTER}chemical.',  # noqa
+    'ReceivingChemical.': f'receiver{VAR_SPLITTER}chemical.',  # noqa
+    'ReceivingCompartment.Volume': 'receiver.volume_element.volume',
+    'receivingCompartment.Volume': 'receiver.volume_element.volume',
+    'Receivingcompartment.Volume': 'receiver.volume_element.volume',
+    'receivingcompartment.Volume': 'receiver.volume_element.volume',
+    'ReceivingCompartment.Area': 'receiver.comp_parcel_area',
+    'Receivingcompartment.Area': 'receiver.comp_parcel_area',
+    'receivingcompartment.Area': 'receiver.comp_parcel_area',
+    'ReceivingCompartment.Depth': 'receiver.comp_vol_elem_depth',
+    'Receivingcompartment.Depth': 'receiver.comp_vol_elem_depth',
+    'receivingcompartment.Depth': 'receiver.comp_vol_elem_depth',
     'ReceivingCompartment.': 'receiver.',
+    'receivingCompartment.': 'receiver.',
     'Receivingcompartment.': 'receiver.',
-
+    'receivingcompartment.': 'receiver.',
     'link.': f'receiver{VAR_SPLITTER}sender.',
+
+    'receivingVolumeElementSumOf[Terrestrial Plant | Leaf].AllowExchange_forAir':
+        'receiver.comp_vol_elem_sum_of("AllowExchange_forAir", "$Leaf")',
+
+    'receivingVolumeElementSumOf[Terrestrial Plant | Leaf].LeafAreaIndex':
+        'receiver.comp_vol_elem_sum_of("LeafAreaIndex", "$Leaf")',
+
+    'receivingVolumeElementSumOf[Terrestrial Plant | Leaf].isDay_forAir':
+        'receiver.comp_vol_elem_sum_of("IsDay_forAir", "$Leaf")',
+
+    'receivingVolumeElementSumOf[Terrestrial Plant | Leaf].Chemical.TotalStomatalConductance':
+        'receiver.comp_vol_elem_sum_of("chemical.TotalStomatalConductance", "$Leaf")',
+
+    'receivingVolumeElementSumOf[Terrestrial Plant | Leaf].Chemical.TotalCuticularConductance':
+        'receiver.comp_vol_elem_sum_of("chemical.TotalCuticularConductance", "$Leaf")',
+
+    'sendingVolumeElementSumOf[Terrestrial Plant | Leaf].DryDepInterceptionFraction':
+        'sender.comp_vol_elem_sum_of("DryDepInterceptionFraction", "$Leaf")',
+
+    'sendingVolumeElementSumOf[Terrestrial Plant | Leaf].AllowExchange_forAir':
+        'sender.comp_vol_elem_sum_of("AllowExchange_forAir", "$Leaf")',
+
+    'SendingwithinCompositeCompartment[Terrestrial Plant | Leaf].DryDepInterceptionFraction':
+        'sender.within_composite_compartment("DryDepInterceptionFraction", "$Leaf")',
+
+    'SendingwithinCompositeCompartment[Terrestrial Plant | Leaf].WetDepInterceptionFraction':
+        'sender.within_composite_compartment("WetDepInterceptionFraction", "$Leaf")',
+
+    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil - Default].Area':
+        'receiver.comp_vol_elem_sum_of("Area", "Surface_Soil")',
+
+    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil - Default].FractionofAreaAvailableforVerticalDiffusion':
+        'receiver.comp_vol_elem_sum_of("Fractionofareaavailableforverticaldiffusion", "Surface_Soil")',
+
+    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil - Default].Depth':
+        'receiver.comp_vol_elem_sum_of("Depth", "Surface_Soil")',
+
+    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil - Default].Chemical.MassTransferCoefficientOnAirSideofAirSoilBoundary':
+        'receiver.comp_vol_elem_sum_of("chemical.MassTransferCoefficientOnAirSideofAirSoilBoundary", "Surface_Soil")',
+
+    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil - Default].Chemical.Z_Total':
+        'receiver.comp_vol_elem_sum_of("chemical.Z_Total", "Surface_Soil")',
+
+    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil - Default].Chemical.D_effective':
+        'receiver.comp_vol_elem_sum_of("chemical.D_effective", "Surface_Soil")',
+
+    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil].Area':
+        'receiver.comp_vol_elem_sum_of("Area", "Surface_Soil")',
+
+    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil].FractionofAreaAvailableforVerticalDiffusion':
+        'receiver.comp_vol_elem_sum_of("Fractionofareaavailableforverticaldiffusion", "Surface_Soil")',
+
+    'FractionofAreaAvailableforVerticalDiffusion': 'Fractionofareaavailableforverticaldiffusion',
+
+    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil].Depth':
+        'receiver.comp_vol_elem_sum_of("Depth", "Surface_Soil")',
+
+    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil].Chemical.MassTransferCoefficientOnAirSideofAirSoilBoundary':
+        'receiver.comp_vol_elem_sum_of("chemical.MassTransferCoefficientOnAirSideofAirSoilBoundary", "Surface_Soil")',
+
+    'MassTransferCoefficientonAirSideofAirSoilBoundary': 'MassTransferCoefficientOnAirSideofAirSoilBoundary',
+
+    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil].Chemical.Z_Total':
+        'receiver.comp_vol_elem_sum_of("chemical.Z_Total", "Surface_Soil")',
+
+    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil].Chemical.D_effective':
+        'receiver.comp_vol_elem_sum_of("chemical.D_effective", "Surface_Soil")'
 }
+# TODO-1: Convert sums above to Methods for ORM classes
+# TODO-2: Formula Arguments wrong for the plant and abiotic fixes above. Why? Need to fix?
+# TODO-3: Use eq tester in root folder to test equations and find out why some cannot be evaluated when computing TM
 
 
 def clean_prop(prop, custom_replace={}):
     if prop is None or pd.isna(prop):
         return None
+
+    # We need to eliminate [[ and ]] in the beginning and end of some property values that were probably used by legacy
+    # code to identify beginning and end of the property value string
+    if str(prop).startswith("[[") and \
+            str(prop).endswith("]]"):
+        prop = str(prop).replace("[[", "").replace("]]", "")
 
     val = str(prop).strip()
     try:
@@ -267,6 +384,13 @@ def clean_prop(prop, custom_replace={}):
     keys = sorted(list(replacements), key=lambda x: len(x))
     for k in reversed(keys):
         v = replacements[k]
+        # Here we implement a better way to handle case insensitivity for legacy properties in order to eliminate
+        # repetition of case variants of the same property
+        # if str(k).lower() in str(val).lower():
+        #     idx = [i for i in range(len(val)) if str(val).lower().startswith(str(k).lower(), i)]
+        #     rep_k = [val[i:i + len(str(k))] for i in idx]
+        #     for rk in rep_k:
+        #         val = val.replace(str(rk), str(v))
         val = val.replace(str(k), str(v))
 
     val = hacky_value_cleaning(val)
@@ -550,6 +674,15 @@ def unit_conversions_to_pint(expression):
         )
         cleaned = cleaned.replace(
             '.to("K") - 273', '.to("degC")'
+        )
+
+    if '"mg/L"' in cleaned:
+        cleaned = cleaned.replace(
+            '.to("mg/L") <', '.to("mg/L").magnitude <'
+        )
+    if '"mg / L"' in cleaned:
+        cleaned = cleaned.replace(
+            '.to("mg / L") <', '.to("mg / L").magnitude <'
         )
 
     for x in ['SedimentDepositionRate', 'SedimentResuspensionRate']:

@@ -1,0 +1,36 @@
+{% extends 'admin/master.html' %}
+
+{% block body %}
+
+<form id="copy-scenario-form"
+    action="{{ url_for('scenario_api.copy_scenario') }}" method="POST">
+    <div class="row">
+        <div class="col-lg-3 col-md-4 col-sm-6 py-2">
+            <p>Scenario</p>
+
+            <select name="scenario_id" id="scenario_id">
+                <option value></option>
+                {% for scenario in scenarios %}
+                <option value="{{ scenario.id }}">{{ scenario.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-lg-3 col-md-4 col-sm-6 py-2">
+            <p>User</p>
+            <select name="user_id" id="user_id">
+                <option value></option>
+                {% for user in users %}
+                <option value="{{ user.id }}">{{ user.email }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+    </div>
+    <br>
+    {{ scenario_form.csrf_token }}
+    <button type="submit" id="copy-scenario-btn" class="btn btn-primary">
+        Copy scenario
+    </button>
+</form>
+{% endblock body %}

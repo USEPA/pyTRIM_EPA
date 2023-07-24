@@ -4,7 +4,7 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [requires]
-python_version = "3.8"
+python_version = "3.9"
 
 [dev-packages]
 pipenv = "*"
@@ -21,7 +21,7 @@ sqlalchemy = "*"
 psycopg2-binary = "*"
 alembic = "*"
 python-dotenv = "*"
-flask = "*"
+flask = "==2.2.5"
 flask-admin = "*"
 flask-sqlalchemy = "*"
 wtforms-sqlalchemy = "*"
@@ -38,3 +38,4 @@ requests = "*"
 xmltodict = "*"
 pyproj = "*"
 pyshp = "*"
+flask-wtf = "==1.0.1"

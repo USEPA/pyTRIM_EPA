@@ -5,6 +5,7 @@ import numpy as np
 import re
 import shapefile
 import traceback
+import subprocess
 
 from flask import Blueprint, request
 from flask_security import login_required
@@ -74,7 +75,8 @@ def get_soil_data():
             parcels[this_parcel_data['name']] = [(t[1], t[0]) for t in this_parcel_data['vertices']]
         usle_r_data = UsleRData()
         climate_data_file = ""
-        usle_r_data.run(parcels, climate_data_file)
+        result_usle_data_json = usle_r_data.run(parcels, climate_data_file)
+        return result_usle_data_json
     except Exception as e:
         logger.error(traceback.format_exc())
 
@@ -360,90 +362,17 @@ class SoilData:
 
 class UsleRData:
     @staticmethod
-    def run(Parcels, ClimateData):
-        # Import climate data shapefile layer
-        Climate_layer = QgsVectorLayer(ClimateData, "ClimateData", "ogr")
-        if not Climate_layer.isValid():
-            print("Climate layer failed to load!")
-        else:
-            pass
-            # QgsProject.instance().addMapLayer(Climate_layer)
+    def run(parcels, ClimateData):
+        logger = make_logger('external_api_call')
+        WORKING_DIR = os.path.dirname(__file__)
+        qgis_interpreter = "C:\\Program Files\\QGIS 3.30.0\\apps\\Python39\\python3.exe"
+        RUSLE_script = os.path.join(WORKING_DIR, "helpers", "RUSLE_Script_Final.py")
 
-        # Import parcels shapefile layer
-        Parcels_layer = QgsVectorLayer(Parcels, "Parcels", "ogr")
-        if not Parcels_layer.isValid():
-            print("Parcels layer failed to load!")
-        else:
-            pass
-            # QgsProject.instance().addMapLayer(Parcels_layer)
-
-        # 1) Fix geometries on parcel layer
-        parameter = {'INPUT': Parcels_layer, 'OUTPUT': 'memory: FixedParcels_1'}
-        result = processing.run("native:fixgeometries", parameter)
-        # FixedParcels_1 = QgsProject.instance().addMapLayer(result['OUTPUT'])
-        FixedParcels_1 = result['OUTPUT']
-
-        # 2) Reproject fixed parcel layer
-        parameter = {'INPUT': FixedParcels_1, 'TARGET_CRS': QgsCoordinateReferenceSystem('ESRI:102003'),
-                     'OPERATION': '+proj=pipeline +step +proj=unitconvert +xy_in=deg +xy_out=rad +step +proj=aea +lat_0=37.5 +lon_0=-96 +lat_1=29.5 +lat_2=45.5 +x_0=0 +y_0=0 +ellps=GRS80',
-                     'OUTPUT': 'memory:ReprojectedFixedParcels_2'}
-        result = processing.run("native:reprojectlayer", parameter)
-        # ReprojectedFixedParcels_2 = QgsProject.instance().addMapLayer(result['OUTPUT'])
-        ReprojectedFixedParcels_2 = result['OUTPUT']
-
-        # 3) Add geometry to reprojected fixed parcels
-        parameter = {'INPUT': ReprojectedFixedParcels_2, 'CALC_METHOD': 0,
-                     'OUTPUT': 'memory:AreaCalcReprojectedFixedParcels_3'}
-        result = processing.run("qgis:exportaddgeometrycolumns", parameter)
-        # AreaCalcReprojectedFixedParcels_3 = QgsProject.instance().addMapLayer(result['OUTPUT'])
-        AreaCalcReprojectedFixedParcels_3 = result['OUTPUT']
-
-        # 4) Intersection
-        parameter = {'INPUT': AreaCalcReprojectedFixedParcels_3, 'OVERLAY': Climate_layer, 'INPUT_FIELDS': [],
-                     'OVERLAY_FIELDS': [], 'OVERLAY_FIELDS_PREFIX': '', 'OUTPUT': 'memory:Intersection_4'}
-        # have to use ClimateData variable for overlay as opposed to Climate_layer variable
-        result = processing.run("native:intersection", parameter)
-        # Intersection_4 = QgsProject.instance().addMapLayer(result['OUTPUT'])
-        Intersection_4 = result['OUTPUT']
-
-        # 5) Area Calculation
-        parameter = {'INPUT': Intersection_4, 'CALC_METHOD': 0, 'OUTPUT': 'memory:AreaCalcIntersection_5'}
-        result = processing.run("qgis:exportaddgeometrycolumns", parameter)
-        # AreaCalcIntersection_5 = QgsProject.instance().addMapLayer(result['OUTPUT'])
-        AreaCalcIntersection_5 = result['OUTPUT']
-
-        # 6) Field calculator for percent area
-        parameter = {'INPUT': AreaCalcIntersection_5, 'FIELD_NAME': 'Perc_Area', 'FIELD_TYPE': 0, 'FIELD_LENGTH': 10,
-                     'FIELD_PRECISION': 3, 'FORMULA': ' \"area_2\" /  \"area\" ', 'OUTPUT': 'memory:PercentAreaCalc_6'}
-        result = processing.run("native:fieldcalculator", parameter)
-        # PercentAreaCalc_6 = QgsProject.instance().addMapLayer(result['OUTPUT'])
-        PercentAreaCalc_6 = result['OUTPUT']
-
-        # 7) Convert Polygon Layer to Random Points Inside Polygon
-        parameter = {'INPUT': PercentAreaCalc_6, 'POINTS_NUMBER': 1, 'MIN_DISTANCE': 0, 'MIN_DISTANCE_GLOBAL': 0,
-                     'MAX_TRIES_PER_POINT': 10, 'SEED': None, 'INCLUDE_POLYGON_ATTRIBUTES': True,
-                     'OUTPUT': 'memory:PercentAreaAsPoints_7'}
-        result = processing.run("native:randompointsinpolygons", parameter)
-        # PercentAreaAsPoints_7 = QgsProject.instance().addMapLayer(result['OUTPUT'])
-        PercentAreaAsPoints_7 = result['OUTPUT']
-
-        # 8) Add XY Columns to Layer
-        parameter = {'INPUT': PercentAreaAsPoints_7, 'CRS': QgsCoordinateReferenceSystem('EPSG:4326'), 'PREFIX': '',
-                     'OUTPUT': 'memory:AddXY_8'}
-        result = processing.run("native:addxyfields", parameter)
-        # AddXY_8 = QgsProject.instance().addMapLayer(result['OUTPUT'])
-        AddXY_8 = result['OUTPUT']
-
-        # 9) Convert Attribute Table to Pandas DataFrame
-        cols = [f.name() for f in AddXY_8.fields()]
-        datagen = ([f[col] for col in cols] for f in AddXY_8.getFeatures())
-
-        df = pd.DataFrame.from_records(data=datagen, columns=cols)
-
-        df['R_Value'] = df.apply(lambda x: UsleClimateApi.get_r_value(x["y"], x["x"]), axis=1)
-        df['Area_Weighted_R'] = df['R_Value'] * df['Perc_Area']
-
-        results = df.groupby('PartName')['Area_Weighted_R'].agg(sum)
-
-        return results
+        p = subprocess.Popen([qgis_interpreter, RUSLE_script, json.dumps(parcels)],                     
+                            stdout = subprocess.PIPE, 
+                            stderr = subprocess.PIPE)
+        stdout, stderr = p.communicate()
+        if stderr:
+            logger.error(stderr.strip().decode('utf-8'))
+        return stdout.strip().decode('utf-8')
 

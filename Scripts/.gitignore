@@ -15,5 +15,6 @@
 **/*.bat
 
 **/temp*
+!**/templates*
 
 **/*.csv

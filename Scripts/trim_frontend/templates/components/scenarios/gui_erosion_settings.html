@@ -1,5 +1,6 @@
 {% from 'macros/scenarios/erosion/erosion_macros.html' import conditional_erosion_subform %}
 
+{% block content %}
 <form id="erosion-settings-gui"
     data-async-form="true"
     data-form-src="scenario_erosion_form"
@@ -169,7 +170,7 @@
                 function form_display_on_data_source_select(e,update_db) {
                     have_file_cb = $("input[id*='have_user_file']")
                     field_name_dd = $("select[id*='field_name_']")
-                    optionNum = $(data_source_select).children("option:selected").index() + 1
+                    let optionNum = $(data_source_select).children("option:selected").index() + 1
                     if (optionNum == 1) {
                         $('#option_1_form').show()
                         $('#option_2_form').hide()
@@ -185,6 +186,20 @@
                     }
                     if (update_db) {
                         // ******* ADD API CALL TO UPDATE THE "erosionRateCalcSource" in the backend
+                        let scenario_info = [{
+                            'type': 'data',
+                            'name': 'id',
+                            'value': {{ scenario.id }}
+                        },{
+                            'type': 'data',
+                            'name': 'field',
+                            'value': 'erosionRateCalcSource'
+                        },{
+                            'type': 'input',
+                            'name': 'erosionRateCalcSource',
+                            'value': optionNum
+                        }]
+                        TRIM.api.updateScenario(scenario_info)
                     }
                 }
 
@@ -202,8 +217,8 @@
                                     return '<label class="lb_parcel" data-thisrow=\''+  JSON.stringify(row).replace(/'/g, "\'") + '\'>' + data + '</label>'
                                 }
                             },
-                            {"data": "Land Cover"},
-                            {"data": "Area"},
+                            {"data": "Land Cover", className: "text-muted"},
+                            {"data": "Area", className: "text-muted"},
                             {
                                 "data": "Total Effective Erosion Rate",
                                 "className":"td_ER",
@@ -225,7 +240,7 @@
                                     return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +
                                         data +
                                         "' style='display:none'>" +
-                                        "<label class='editableCell'>" + data + "</label>"
+                                        "<label class='editableCell badge badge-light badge badge-light'>" + data + "</label>"
                                 }
                             }
                         ]
@@ -245,15 +260,15 @@
                                     return '<label class="lb_parcel" data-thisrow=\''+  JSON.stringify(row).replace(/'/g, "\'") + '\'>' + data + '</label>'
                                 }
                             },
-                            {"data": "Land Cover"},
-                            {"data": "Area"},
+                            {"data": "Land Cover", className: "text-muted"},
+                            {"data": "Area", className: "text-muted"},
                             {
                                 "data": "A",
                                 "render": function (data, type, row, meta) {
                                     return "<input class='editableCell form-control form-control-sm erosion_inp_opt2 inp_A' type='text' value='" +
                                         data +
                                         "' style='display:none'>" +
-                                        "<label class='editableCell lb_A'>" + data + "</label>"
+                                        "<label class='editableCell badge badge-light lb_A'>" + data + "</label>"
                                 }
                             },
                             {
@@ -263,7 +278,7 @@
                                     return "<input class='editableCell form-control form-control-sm erosion_inp_opt2 inp_a' type='text' value='" +
                                         data +
                                         "' style='display:none'>" +
-                                        "<label class='editableCell lb_a'>" + data + "</label>"
+                                        "<label class='editableCell badge badge-light lb_a'>" + data + "</label>"
                                 }
                             },
                             {
@@ -273,7 +288,7 @@
                                     return "<input class='editableCell form-control form-control-sm erosion_inp_opt2 inp_b' type='text' value='" +
                                         data +
                                         "' style='display:none'>" +
-                                        "<label class='editableCell lb_b'>" + data + "</label>"
+                                        "<label class='editableCell badge badge-light lb_b'>" + data + "</label>"
                                 }
                             },
                             {
@@ -283,7 +298,7 @@
                                     return "<input data-toggle='tooltip' data-placement='top' data-html='true' title='SD = a * (Area)<sup>-b</sup>' class='editableCell form-control form-control-sm erosion_inp_opt2 inp_SD' type='text' value='" +
                                         calculate_SD(row) +
                                         "' style='display:none'>" +
-                                        "<label class='editableCell lb_SD'>" + calculate_SD(row) + "</label>"
+                                        "<label class='editableCell badge badge-light lb_SD'>" + calculate_SD(row) + "</label>"
                                 }
                             },
                             {
@@ -294,7 +309,7 @@
                                     return "<input data-toggle='tooltip' data-placement='top' data-html='true' title='ER = A * SD' class='editableCell form-control form-control-sm erosion_inp_opt2 inp_ER' type='text' value='" +
                                         calculate_ER_ASD(row, true) +
                                         "' style='display:none'>" +
-                                        "<label class='editableCell lb_ER'>" + TER + "</label>"
+                                        "<label class='editableCell badge badge-light lb_ER'>" + TER + "</label>"
                                 }
                             }
                         ],
@@ -318,15 +333,15 @@
                                      return '<label class="lb_parcel" data-thisrow=\''+  JSON.stringify(row).replace(/'/g, "\'") + '\'>' + data + '</label>'
                                 }
                             },
-                            {"data": "Land Cover"},
-                            {"data": "Area"},
+                            {"data": "Land Cover", className: "text-muted"},
+                            {"data": "Area", className: "text-muted"},
                             {
                                 "data": "R",
                                 "render": function (data, type, row, meta) {
                                     return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_R' type='text' value='" +
                                         data +
                                         "' style='display:none'>" +
-                                        "<label class='editableCell lb_R'>" + data + "</label>"
+                                        "<label class='editableCell badge badge-light lb_R'>" + data + "</label>"
                                 }
                             },
                             {
@@ -335,7 +350,7 @@
                                     return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_K' type='text' value='" +
                                         new Intl.NumberFormat('en-US', {notation: "scientific"}).format(data) +
                                         "' style='display:none'>" +
-                                        "<label class='editableCell lb_K'>" + new Intl.NumberFormat('en-US', {notation: "scientific"}).format(data) + "</label>"
+                                        "<label class='editableCell badge badge-light lb_K'>" + new Intl.NumberFormat('en-US', {notation: "scientific"}).format(data) + "</label>"
                                 }
                             },
                             {
@@ -345,7 +360,7 @@
                                     return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_S' type='text' value='" +
                                         data.toFixed(2) +
                                         "' style='display:none'>" +
-                                        "<label class='editableCell lb_S'>" + data.toFixed(2) + "</label>"
+                                        "<label class='editableCell badge badge-light lb_S'>" + data.toFixed(2) + "</label>"
                                 }
                             },
                             {
@@ -355,7 +370,7 @@
                                     return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_L' type='text' value='" +
                                         data.toFixed(2) +
                                         "' style='display:none'>" +
-                                        "<label class='editableCell lb_L'>" + data.toFixed(2) + "</label>"
+                                        "<label class='editableCell badge badge-light lb_L'>" + data.toFixed(2) + "</label>"
                                 }
                             },
                             {
@@ -365,7 +380,7 @@
                                     return "<input data-toggle='tooltip' data-placement='top' data-html='true' title='LS = L * S' class='editableCell form-control form-control-sm erosion_inp_opt3 inp_LS' type='text' value='" +
                                         calculate_LS(row) +
                                         "' style='display:none'>" +
-                                        "<label class='editableCell lb_LS'>" + calculate_LS(row) + "</label>"
+                                        "<label class='editableCell badge badge-light lb_LS'>" + calculate_LS(row) + "</label>"
                                 }
                             },
                             {
@@ -374,7 +389,7 @@
                                     return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_C' type='text' value='" +
                                         data +
                                         "' style='display:none'>" +
-                                        "<label class='editableCell lb_C'>" + data + "</label>"
+                                        "<label class='editableCell badge badge-light lb_C'>" + data + "</label>"
                                 }
                             },
                             {
@@ -383,7 +398,7 @@
                                     return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_P' type='text' value='" +
                                         data +
                                         "' style='display:none'>" +
-                                        "<label class='editableCell lb_P'>" + data + "</label>"
+                                        "<label class='editableCell badge badge-light lb_P'>" + data + "</label>"
                                 }
                             },
                             {
@@ -393,7 +408,7 @@
                                     return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_A' type='text' value='" +
                                         data +
                                         "' style='display:none'>" +
-                                        "<label class='editableCell lb_A'>" + data + "</label>"
+                                        "<label class='editableCell badge badge-light lb_A'>" + data + "</label>"
                                 }
                             },
                             {
@@ -403,7 +418,7 @@
                                     return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_a' type='text' value='" +
                                         data +
                                         "' style='display:none'>" +
-                                        "<label class='editableCell lb_a'>" + data + "</label>"
+                                        "<label class='editableCell badge badge-light lb_a'>" + data + "</label>"
                                 }
                             },
                             {
@@ -413,7 +428,7 @@
                                     return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_b' type='text' value='" +
                                         data +
                                         "' style='display:none'>" +
-                                        "<label class='editableCell lb_b'>" + data + "</label>"
+                                        "<label class='editableCell badge badge-light lb_b'>" + data + "</label>"
                                 }
                             },
                             {
@@ -423,7 +438,7 @@
                                     return "<input data-toggle='tooltip' data-placement='top' data-html='true' title=\"SD = a * (Area)<sup>-b</sup>\" class='editableCell form-control form-control-sm erosion_inp_opt3 inp_SD' type='text' value='" +
                                         calculate_SD(row) +
                                         "' style='display:none'>" +
-                                        "<label class='editableCell lb_SD'>" + calculate_SD(row) + "</label>"
+                                        "<label class='editableCell badge badge-light lb_SD'>" + calculate_SD(row) + "</label>"
                                 }
                             },
                             {
@@ -434,7 +449,7 @@
                                     return "<input data-toggle='tooltip' data-placement='top' data-html='true' title='ER = R*K*LS*C*P\n or\nER = A * SD' class='editableCell form-control form-control-sm erosion_inp_opt3 inp_ER' type='text' value='" +
                                         calculate_ER_USLE(row, true) +
                                         "' style='display:none'>" +
-                                        "<label class='editableCell lb_ER'>" + TER + "</label>"
+                                        "<label class='editableCell badge badge-light lb_ER'>" + TER + "</label>"
                                 }
                             }
                         ],
@@ -903,3 +918,4 @@
 }
 
 </style>
+{% endblock content %}

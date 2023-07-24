@@ -67,9 +67,74 @@ TRANSFER_ALGORITHMS = [
     'Diffusion from Surface Water to Air, Two Film(AlgInstID_4080)-Hg',
     'Algae Deposition from Surface Water to Sediment, General(AlgInstID_2144)',
 
+    'Diffusion from DryVaporSource to Plant Leaf, Hg0',
+    'Diffusion from DryVaporSource to Plant Leaf, MHg',
+    'Diffusion from DryVaporSource to Plant Leaf, Organics',
+    'Diffusion from DryVaporSource to Surface Soil, Hg0',
+    'Diffusion from DryVaporSource to Surface Soil, MHg',
+    'Diffusion from DryVaporSource to Surface Soil, Organics',
+
+    'Diffusion from Surface Soil to Air, Hg0(AlgInstID_3997)',
+    'Diffusion from Surface Soil to Air, MHg(AlgInstID_3999)',
+    'Diffusion from Surface Soil to Air, Organics(AlgInstID_3995)',
+    'Diffusion from Plant Leaf to Air, Hg0, Default (Bennett 1998)(AlgInstID_4005)',
+
+    'Diffusion from Plant Leaf to Air, MHg, Default (Bennett 1998)(AlgInstID_4005)',
+    'Diffusion from Plant Leaf to Air, Organics, Default (Bennett 1998)(AlgInstID_4005)',
+    'Diffusion from Surface Soil to Root Zone(AlgInstID_1919)',
+    'Diffusion from Root Zone to Surface Soil(AlgInstID_1939)',
+    'Diffusion from Root Zone to Vadose Zone(AlgInstID_1904)',
+    'Diffusion from Vadose Zone to Root Zone(AlgInstID_1914)',
+    'Diffusion from Vadose Zone to Vadose Zone(AlgInstID_2445)',
+
+    'Runoff from Surface Soil to Soil Advection Sink',
+    'Runoff from Surface Soil to Surface Soil, General(AlgInstID_2465)',
+    'Runoff from Surface Soil to Surface Water, General(AlgInstID_3520)',
+
+    'Erosion from Surface Soil to Surface Soil, General(AlgInstID_2460)',
+    'Erosion from Surface Soil to Surface Water, General(AlgInstID_3515)',
+    'Erosion from Surface Soil to Soil Advection Sink',
+
+    'Recharge from Groundwater to Surface Water, General(AlgInstID_3510)',
+
+    'Litterfall from Leaves to Soil(AlgInstID_1088)',
+    'Litterfall of Leaf Particle to Soil(AlgInstID_1098)',
+
+    'Particles Blown off from Plant Leaf to Air (DRY)(AlgInstID_4010)',
+    'Particles Washed off Leaf onto Ground(AlgInstID_1103)',
+
+    'Demethylation(MHg -> Hg2) in Plant Leaves, Rate is input(AlgInstID_1249)',
+    'Demethylation(MHg -> Hg2) in Plant Stem, Rate is input(AlgInstID_1271)',
+    'Methylation(Hg2 -> MHg) in Plant Leaves, Rate is input(AlgInstID_1248)',
+    'Methylation(Hg2 -> MHg) in Plant Stem, Rate is input(AlgInstID_1270)',
+
+    'Percolation from Surface Soil to Root Zone(AlgInstID_1924)',
+    'Percolation from Vadose Zone to Groundwater(AlgInstID_1899)',
+    'Percolation from Root Zone to Vadose Zone(AlgInstID_1909)',
+
+    'Degradation/Reaction Sink in Root Zone(AlgInstID_4155)',
+    'Degradation/Reaction Sink in Vadose Zone(AlgInstID_4150)',
+    'Degradation/Reaction Sink in Groundwater(AlgInstID_4145)',
+
+    'Resuspension from Surface Soil to Air, Set to Deposition rate of particles(AlgInstID_4000)',
+    
     'Waterflow from Surface Water to Surface Water, General(AlgInstID_3685)',
 
-    'Direct Transfer from PseudoSource to Surface water'
+    'Direct Transfer from PseudoSource to Surface water',
+
+    'Transfer from Leaf Particle on Surface to Leaf, Hg(AlgInstID_1250)',
+    'Transfer from Leaf to Leaf Particle on Surface, Hg(AlgInstID_1255)',
+    'Transfer from Leaf to Stem - Agriculture, Hg(AlgInstID_1265)',
+    'Transfer from Leaf to Stem - Grasses/Herbs, Hg',
+    'Transfer from Root Zone to Stem - Agriculture, Hg',
+    'Transfer from Root Zone to Stem - Grasses/Herbs, Hg(AlgInstID_1944)',
+    'Transfer from Stem to Leaf - Agriculture, Hg',
+    'Transfer from Stem to Leaf - Grasses/Herbs, Hg(AlgInstID_1260)',
+
+    'Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Agriculture, Hg(AlgInstID_1953)',
+    'Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Grasses/Herbs,Hg(AlgInstID_1952)',
+    'Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Agriculture, Hg(AlgInstID_1932)',
+    'Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Grasses/Herbs, Hg(AlgInstID_1933)'
 ]
 
 
@@ -107,6 +172,7 @@ def parse_transport_processes(algorithm_parameters):
         CompartmentService.media.get_or_create(category=m)
 
     for name, params in algorithm_parameters.items():
+
         if name not in TRANSFER_ALGORITHMS:
             continue
 
@@ -139,14 +205,24 @@ def parse_transport_processes(algorithm_parameters):
 
         # print(name)
         try:
-            sending_chem = ChemicalService.get(
-                name=get_param(params, 'sendingChemicalName')
-            )
+            sending_chem = get_param(params, 'sendingChemicalName')
+            chem_cat = get_param(params, 'chemicalCategory')
+            if sending_chem:
+                sending_chem = ChemicalService.get(
+                    name=sending_chem
+                )
+                chem_cat = None
+            elif chem_cat:
+                sending_chem = None
         except Exception:
             sending_chem = None
+            chem_cat = None
+
         if sending_chem:
             requirements.append(f'(chemical.id == {sending_chem.id})')
-        # print(sending_chem)
+        elif chem_cat:
+            requirements.append(f'(chemical.isa("{chem_cat}"))')
+        # print(sending_chem, chem_cat)
 
         require_comps = [
             ('sendingCompartmentCategory', 'sender'),
@@ -155,7 +231,7 @@ def parse_transport_processes(algorithm_parameters):
         for param, name in require_comps:
             m_name = get_param(params, param)
 
-            if m_name.lower() == 'pseudosource':
+            if m_name.lower().startswith('pseudosource'):
                 m_name = 'Source'
             elif 'Sink' in m_name:
                 m_name = m_name.lower()

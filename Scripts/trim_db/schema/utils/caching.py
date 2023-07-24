@@ -24,22 +24,26 @@ class CacheManager:
                 k = CacheManager.cache_key(*args, **kwargs)
 
                 if not CacheManager.DISABLED and k in self:
-                    # print(f'Cached for "{base_key}" and {k}: {self[k]}')
+                    # print(f'Found in Cache for "{f}" with key: val as {k}: {self[k]}')
+                    # print(self)
                     ans = self[k]
                     if isinstance(ans, Exception):
+                        # print(f"Read from Cache problem for val {k}: {ans}")
                         raise ans
                     return ans
 
                 try:
                     ans = f(*args, **kwargs)
                 except Exception as e:
+                    # print(f"Cache eval problem {e}")
                     ans = e
 
                 if not CacheManager.DISABLED:
-                    # print(f'Caching: {ans} for "{base_key}" and {k}')
+                    # print(f'Caching: {ans} for "{k}" and function {f}')
                     self[k] = ans
 
                 if isinstance(ans, Exception):
+                    # print(f"Caching problem {ans}")
                     raise ans
                 return ans
             return cached
@@ -48,6 +52,10 @@ class CacheManager:
     def subcache(cls, key):
         # print(f'Making sub-cache with "{key}"')
         return cls._CACHERS.setdefault(key, cls.Cacher())
+
+    @classmethod
+    def clear_cache(cls, key):
+        cls._CACHERS.get(key, {}).clear()
 
     @classmethod
     def toggle_caching(cls, on_off=None):

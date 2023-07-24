@@ -62,6 +62,7 @@ class DevConfig(AppConfig):
     SECRET_KEY = 'dcf917c34aec178987494a853bffa479'
     SECURITY_PASSWORD_SALT = ''
     SQLALCHEMY_DATABASE_URI = f'sqlite:///{root}/database.db'
+    SQLALCHEMY_ECHO = False
 
 
 class TestConfig(DevConfig):

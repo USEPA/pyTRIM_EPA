@@ -111,7 +111,7 @@ TRANSFER_RULES = {
             'simulationEndDateTime',
             'simulationTimeStep',
             'simulationStepsPerOutputStep',
-            'simulateSteadyState',
+            # 'simulateSteadyState',
             'averageResultsFiles',
             'averagingInterval',
             'enableBoundaryContributions',
@@ -129,9 +129,9 @@ TRANSFER_RULES = {
             'exportHTML',
             'exportTimeStepsDown',
             'significantDigits',
-            'isDay_SteadyState_forAir',
-            'isDay_SteadyState_forOther',
-            'isDay_Dynamic'
+            # 'isDay_SteadyState_forAir',
+            # 'isDay_SteadyState_forOther',
+            # 'isDay_Dynamic'
         ]
     },
     'VolumeElement': {
@@ -184,10 +184,19 @@ def parse_props(props_file, oneline_keyvals=False, rules=TRANSFER_RULES):
     current_els = []
     prop_name = None
     got_prop = False
+    multi_line = ""
     for i, line in enumerate(lines):
         line = line.split('//')[0].strip()  # remove comment
         if not line:
             continue  # Nothing to see here
+
+        if line.count("(") > line.count(")") or line.count("[") > line.count("]") or (not multi_line == ""):
+            multi_line += line.replace("\n", "")
+            if multi_line.count("(") > multi_line.count(")") or multi_line.count("[") > multi_line.count("]"):
+                continue
+            else:
+                line = multi_line
+        multi_line = ""
 
         line = line.split(':', 1)
         if not len(line) > 1:

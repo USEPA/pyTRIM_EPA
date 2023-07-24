@@ -1,9 +1,14 @@
 import json
+import logging
+import time
+
+# import pathspec
 import sqlalchemy as sa
 from shapely.geometry import Polygon
 from pyproj import Geod
 from shapely import wkt
 from ..parameters.utils import ureg
+from ..parameters.models import ParameterDefinition, CustomParameter
 from ..utils.base import Model
 
 
@@ -11,6 +16,8 @@ __all__ = [
     'Parcel', 'VolumeElement', 'Media', 'Compartment',
     'CompartmentLink'
 ]
+
+GLOBAL_WILDCARD = "$"
 
 
 class Parcel(Model):
@@ -147,7 +154,8 @@ class Parcel(Model):
 
     @property
     def has_fish_food_web(self):
-        if self.get_compartment("Fish"):
+        aquatic_biota = [c for c in self.compartments if c.media.isa("Aquatic")]
+        if len(aquatic_biota) > 0:
             return "Yes"
         return "No"
 
@@ -159,35 +167,77 @@ class Parcel(Model):
 
     @property
     def dust_load(self):
-        for c in self.compartments:
-            if c.name == "Air":
-                dust_concentration = c.parameters["DustLoad"].value
-                return dust_concentration
+        air_comp = [c for c in self.compartments if c.media.isa("Air")]
+        if len(air_comp) > 0:
+            air_comp = air_comp[0]
+            if air_comp.DustLoad:
+                return air_comp.DustLoad.magnitude
+            else:
+                dust_load = air_comp.parameters.get("DustLoad").default_value if air_comp.parameters.get(
+                    "DustLoad") else None
+                return dust_load
         return None
+        # for c in self.compartments:
+        #     if c.name == "Air":
+        #         dust_concentration = c.parameters["DustLoad"].value
+        #         return dust_concentration
+        # return None
 
     @property
     def dust_density(self):
-        for c in self.compartments:
-            if c.name == "Air":
-                dust_density = c.parameters["DustDensity"].value
+        air_comp = [c for c in self.compartments if c.media.isa("Air")]
+        if len(air_comp) > 0:
+            air_comp = air_comp[0]
+            if air_comp.DustDensity:
+                return air_comp.DustDensity.magnitude
+            else:
+                dust_density = air_comp.parameters.get("DustDensity").default_value if air_comp.parameters.get(
+                    "DustDensity") else None
                 return dust_density
         return None
+        # for c in self.compartments:
+        #     if c.name == "Air":
+        #         dust_density = c.parameters["DustDensity"].value
+        #         return dust_density
+        # return None
 
     @property
     def fraction_organic_matter_on_particulates(self):
-        for c in self.compartments:
-            if c.name == "Air":
-                fraction_organic_matter_on_particulates = c.parameters["FractionOrganicMatteronParticulates"].value
+        air_comp = [c for c in self.compartments if c.media.isa("Air")]
+        if len(air_comp) > 0:
+            air_comp = air_comp[0]
+            if air_comp.FractionOrganicMatteronParticulates:
+                try:
+                    return air_comp.FractionOrganicMatteronParticulates.magnitude
+                except AttributeError:  # TODO: Investigate why magnitude works for some and not for others???
+                    return air_comp.FractionOrganicMatteronParticulates
+            else:
+                fraction_organic_matter_on_particulates = air_comp.parameters.get("FractionOrganicMatteronParticulates").default_value if air_comp.parameters.get(
+                    "FractionOrganicMatteronParticulates") else None
                 return fraction_organic_matter_on_particulates
         return None
+        # for c in self.compartments:
+        #     if c.name == "Air":
+        #         fraction_organic_matter_on_particulates = c.parameters["FractionOrganicMatteronParticulates"].value
+        #         return fraction_organic_matter_on_particulates
+        # return None
 
     @property
-    def air_density(self):
-        for c in self.compartments:
-            if c.name == "Air":
-                air_density = c.parameters["AirDensity"].value
+    def air_density(self):  # TODO: This needs to be fixed so that parameters belonging to compartment domain should automatically associated with that compartment???
+        air_comp = [c for c in self.compartments if c.media.isa("Air")]
+        if len(air_comp) > 0:
+            air_comp = air_comp[0]
+            if air_comp.AirDensity:
+                return air_comp.AirDensity.magnitude
+            else:
+                air_density = air_comp.parameters.get("AirDensity").default_value if air_comp.parameters.get("AirDensity") else None
                 return air_density
         return None
+        # for c in self.compartments:
+        #     if c.media.isa("Air"):
+        #         air_density = c.parameters["AirDensity"].value
+        #         return air_density
+        # return None
 
     @property
     def air_height(self):
@@ -199,10 +249,61 @@ class Parcel(Model):
 
     @property
     def soil_tillage(self):
+        is_tilled = "No"
         for c in self.compartments:
             if c.name == "Soil_Surface":
-                print(c.parameters.get("soilTillage"))
-        return None
+                st = c.parameters.get("soilTillage")
+                if isinstance(st, ParameterDefinition):
+                    val = int(st.default_value)
+                elif isinstance(st, CustomParameter):
+                    val = int(st.value)
+                else:
+                    raise AssertionError
+                is_tilled = "Yes" if val == 1 else "No"
+        return is_tilled
+
+    @property
+    def aquatic_diet_fractions(self):
+        frc_diet = {
+            'FractionDietAlgae': 0,
+            'FractionDietMacrophyte': 0,
+            'FractionDietZooplankton': 0,
+            'FractionDietBenthicInvertebrate': 0,
+            'FractionDietFishHerbivore': 0,
+            'FractionDietFishBenthicOmnivore': 0,
+            'FractionDietFishOmnivore': 0,
+            'FractionDietFishBenthicCarnivore': 0,
+            'FractionDietFishCarnivore': 0
+        }
+        diet_mat = {}
+        for ve in self.volume_elements.all():
+            if ve.name == 'SW' or ve.name == "Sed":
+                for comp in ve.compartments.all():
+                    if comp.media.isa("Benthic") or comp.media.isa("Water_Column") or comp.media.isa(
+                            "Plankton") or comp.media.isa("Macrophyte"):
+                        fd = frc_diet.copy()
+                        for f, v in fd.items():
+                            if comp.parameters.get(f):
+                                fd[f] = comp.parameters.get(f).value
+
+                        diet_mat[comp.name] = fd
+        return diet_mat
+
+    def aquatic_property(self, prop):
+        apr = {}
+
+        comps = [c for c in self.compartments if c.media.isa("Aquatic")]
+        for c in comps:
+            comp_name = c.name
+            if c.parameters.get(prop) is not None:
+                if c.parameters.get(prop).__tablename__ == "parameter_definition":
+                    apr[f'{comp_name}'] = float("%0.4f" % c.parameters.get(prop).default_value)
+                else:
+                    apr[f'{comp_name}'] = float("%0.4f" % c.parameters.get(prop).value)
+            else:
+                apr[f'{comp_name}'] = None
+
+        return apr
 
     @property
     def surface_soil_height(self):
@@ -240,13 +341,141 @@ class Parcel(Model):
     def total_erosion_rate(self):
         for c in self.compartments:
             if c.media.isa('Surface_Soil'):
-                return c.parameters.get('TotalErosionRate').value
+                if c.parameters.get('TotalErosionRate'):
+                    return c.parameters.get('TotalErosionRate').value
         return None
 
     # Each parcel should have a unique name in its scenario
     __table_args__ = (
         sa.UniqueConstraint('scenario_id', 'name'),
     )
+
+    def wc_properties(self, p_name):
+        c = [c for c in self.compartments if c.media.isa("Surface_Water")]
+        if len(c) > 0:
+            c = c[0]
+        if p_name == "MeanWaterDepth":
+            return c.volume_element.top - c.volume_element.bottom
+        if c.parameters.get(p_name) is not None:
+            if c.parameters.get(p_name).__tablename__ == "parameter_definition":
+                return c.parameters.get(p_name).default_value
+            else:
+                return c.parameters.get(p_name).value
+        return None
+
+    def sed_properties(self, p_name):
+        c = [c for c in self.compartments if c.media.isa("Sediment")]
+        if len(c) > 0:
+            c = c[0]
+        if p_name == "MeanThickness":
+            return c.volume_element.top - c.volume_element.bottom
+        if c.parameters.get(p_name) is not None:
+            if c.parameters.get(p_name).__tablename__ == "parameter_definition":
+                return c.parameters.get(p_name).default_value
+            else:
+                return c.parameters.get(p_name).value
+        return None
+
+    @property
+    def precipitation_rate(self):
+        return 1
+
+    @property
+    def runoff_watershed_area(self):
+        return 1e3
+
+    @property
+    def precip_seepage_frac_to_gw(self):
+        return 0.001
+
+    # TODO: Water body properties loads so slow! Why? Need a permanent fix!
+    @property
+    def seepage_vol_rate_to_gw(self):
+        # if all([i is not None for i in [self.precipitation_rate, self.precip_seepage_frac_to_gw,
+        #                                 self.runoff_watershed_area]]):
+        #     return self.precipitation_rate * self.precip_seepage_frac_to_gw * self.runoff_watershed_area
+        # return None
+        return 1
+
+    @property
+    def precip_runoff_frac_to_sw(self):
+        return 0.001
+
+    @property
+    def runoff_vol_rate_to_sw(self):
+        # if all([i is not None for i in [self.precipitation_rate, self.precip_runoff_frac_to_sw,
+        #                                 self.runoff_watershed_area]]):
+        #     return self.precipitation_rate * self.precip_runoff_frac_to_sw * self.runoff_watershed_area
+        # return None
+        return 1
+
+    @property
+    def precipitation_vol_rate_to_sw(self):
+        # if all([i is not None for i in [self.precipitation_rate, self.area]]):
+        #     return self.precipitation_rate * self.area
+        # return None
+        return 4.8E6
+
+    @property
+    def wc_external_inflow(self):
+        return 0
+
+    @property
+    def wc_discharge_vol_rate(self):
+        # if all([i is not None for i in [self.runoff_vol_rate_to_sw, self.seepage_vol_rate_to_gw,
+        #                                 self.wc_external_inflow, self.evaporation_vol_rate,
+        #                                 self.precipitation_vol_rate_to_sw]]):
+        #     return float('{:.5f}'.format(self.runoff_vol_rate_to_sw + self.seepage_vol_rate_to_gw + self.wc_external_inflow +
+        #                                  self.precipitation_vol_rate_to_sw + self.precipitation_vol_rate_to_sw -
+        #                                  self.evaporation_vol_rate))
+        # return None
+        return 6.2E6
+        
+    @property
+    def wc_sed_discharge_rate(self):
+        # if all([i is not None for i in [self.wc_properties("SuspendedSedimentConcentration"),
+        #                                 self.wc_discharge_vol_rate]]):
+        #     return self.wc_properties("SuspendedSedimentConcentration") * self.wc_discharge_vol_rate
+        # return None
+        return 3.13E5
+
+    @property
+    def evaporation_vol_rate(self):
+        # if all([i is not None for i in [self.wc_properties("waterEvaporationRate"), self.area]]):
+        #     return self.wc_properties("waterEvaporationRate") * self.area
+        # return None
+        return 3.3E6
+
+    @property
+    def sed_burial_vol_rate(self):
+        # if all([i is not None for i in [self.wc_properties("ExternalSedimentInflow"), self.sed_soil_erosion_to_sw,
+        #                                 self.wc_sed_discharge_rate, self.sed_properties("BedDensity"), self.area]]):
+        #     return (self.wc_properties("ExternalSedimentInflow") + self.sed_soil_erosion_to_sw -
+        #                                   self.wc_sed_discharge_rate) / (self.sed_properties("BedDensity") * self.area)
+        # return None
+        return 2.4992e-5
+
+    @property
+    def sed_deposition_vol_rate(self):
+        # if all([i is not None for i in [self.wc_properties("SedimentDepositionVelocity"),
+        #                                 self.wc_properties("SuspendedSedimentConcentration"),
+        #                                 self.sed_properties("BedDensity")]]):
+        #     return (self.wc_properties("SedimentDepositionVelocity") *
+        #             self.wc_properties("SuspendedSedimentConcentration")) / self.sed_properties("BedDensity")
+        # return None
+        return 3.8462e-5
+
+    @property
+    def sed_resuspension_vel(self):
+        # if all([i is not None for i in [self.sed_deposition_vol_rate, self.sed_burial_vol_rate,
+        #                                 self.sed_properties("Porosity")]]):
+        #     return (self.sed_deposition_vol_rate - self.sed_burial_vol_rate) / (1 - self.sed_properties("Porosity"))
+        # return None
+        return 6.2480e-5
+
+    @property
+    def sed_soil_erosion_to_sw(self):
+        return 100
 
     def as_serializable(self):
         return {
@@ -272,13 +501,52 @@ class Parcel(Model):
             'dustDensity': self.dust_density,
             'fractionOrganicMatteronParticulates': self.fraction_organic_matter_on_particulates,
             'soilTillage': self.soil_tillage,
-            'totalErosionRate': self.total_erosion_rate
+            'totalErosionRate': self.total_erosion_rate,
+            'aquatic_diet_fractions': self.aquatic_diet_fractions,
+            'aquatic_biomass': self.aquatic_property("BiomassPerArea"),
+            'aquatic_bw': self.aquatic_property("BW"),
+            'precip_rate': self.precipitation_rate,
+            'precip_runoff_watershed_area': self.runoff_watershed_area,
+            'precip_seepage_vol_rate_to_GW': self.seepage_vol_rate_to_gw,
+            'precip_runoff_vol_rate_to_SW': self.runoff_vol_rate_to_sw,
+            'precip_vol_rate_to_SW': self.precipitation_vol_rate_to_sw,
+            'sed_soil_erosion_to_SW': self.sed_soil_erosion_to_sw,
+            'surface_water': None if self.parcel_type not in ["Water Only", "Water & Air"] else {
+                'wc_props':  {
+                    'flush_rate': 0.48,  # self.wc_properties("Flushes"),
+                    'suspended_sed_conc': 0.05,  # self.wc_properties("SuspendedSedimentConcentration"),
+                    'algae_density': 1.23E-2,  # self.wc_properties("AlgaeDensityInWaterColumn"),
+                    'chloride_conc': 7,  # self.wc_properties("ChlorideConcentration"),
+                    'chlorophyll_conc': 0.003,  # self.wc_properties("ChlorophyllConcentration"),
+                    'mean_depth': 3.6,  # self.wc_properties("MeanWaterDepth"),
+                    'evaporation_rate': 0.7,  # self.wc_properties("waterEvaporationRate"),
+                    'evaporation_vol_rate': self.evaporation_vol_rate,
+                    'suspended_organic_carbon': 0.05,  # self.wc_properties("OrganicCarbonContent"),
+                    'water_ph': 8.5,  # self.wc_properties("pH"),
+                    'sed_deposition_vel': 2,  # self.wc_properties("SedimentDepositionVelocity"),
+                    'water_temp': 286.15,  # self.wc_properties("WaterTemperature"),
+                    'sed_inflow': 0,  # self.wc_properties("ExternalSedimentInflow"),
+                    'discharge_vol_rate': self.wc_discharge_vol_rate,
+                    'sed_discharge_rate': self.wc_sed_discharge_rate
+                },
+                'sed_props': {
+                    'bed_density': 2600,  # self.sed_properties("BedDensity"),
+                    'organic_carbon_frac': 0.02,  # self.sed_properties("OrganicCarbonContent"),
+                    'bed_pH': 7.3,  # self.sed_properties("pH"),
+                    'bed_porosity': 0.6,  # self.sed_properties("Porosity"),
+                    'bed_thickness': self.sed_properties("MeanThickness"),
+                    'sed_burial_vol_rate': self.sed_burial_vol_rate,
+                    'sed_deposition_vol_rate': self.sed_deposition_vol_rate,
+                    'sed_resuspension_vel': self.sed_resuspension_vel,
+                    'sed_soil_erosion_to_sw': self.sed_soil_erosion_to_sw
+                }
+            }
         }
 
     def calc_default_erosion_rate_sdr(self):
         for c in self.compartments:
             if c.name == "Soil_Surface":
-                unit_soil_loss = c.parameters["UnitSoilLoss"].default_value
+                unit_soil_loss = c.parameters["unitSoilLoss"].default_value
                 area_in_sq_mile = (self.area / 1E6) / 2.58998811
                 if area_in_sq_mile <= 0.1:
                     intercept_coef = 2.1
@@ -290,7 +558,7 @@ class Parcel(Model):
                     intercept_coef = 1.2
                 else:
                     intercept_coef = 0.6
-                slope_coef = c.parameters["SedimentDeliveryRatioSlopeCoef"].default_value
+                slope_coef = c.parameters["sedimentDeliveryRatioSlopeCoef"].default_value
                 sed_delivery_ratio = intercept_coef * (self.area ** (-1 * slope_coef))
                 return unit_soil_loss * sed_delivery_ratio
 
@@ -327,6 +595,13 @@ class VolumeElement(Model):
     @property
     def volume(self):
         return self.parcel.area * self.height
+
+    def vol_elem_agg(self, type, prop, media_name):
+        val = 0
+        if type == "sum":
+            comp_vals = [c[prop] for c in self.compartments if c.media.isa(media_name)]
+            val = sum(comp_vals)
+        return val
 
     def overlap_with(self, volume_element):
         polygon_a = self.parcel.polygon
@@ -381,6 +656,11 @@ class VolumeElement(Model):
     __table_args__ = (
         sa.UniqueConstraint('parcel_id', 'name'),
     )
+
+    # def get_all_leaf(self):
+    #     if self.name == "SurfSoil":
+    #         return [c for c in self.compartments if c.media.name.lower().endswith("leaf")]
+    #     return None
 
     def as_serializable(self):
         return {
@@ -446,8 +726,22 @@ class Media(Model):
 
     def isa(self, name_or_media):
         if isinstance(name_or_media, str):
-            if name_or_media == self.name or name_or_media == self.category:
-                return True
+            # check asterisk in the beginning
+            if name_or_media.startswith(GLOBAL_WILDCARD):
+                if (
+                        self.name.endswith(name_or_media[1:])
+                        or self.category.endswith(name_or_media[1:])
+                ):
+                    return True
+            if name_or_media.endswith(GLOBAL_WILDCARD):
+                if (
+                        self.name.startswith(name_or_media[:-1])
+                        or self.category.startswith(name_or_media[:-1])
+                ):
+                    return True
+            else:
+                if name_or_media == self.name or name_or_media == self.category:
+                    return True
         elif isinstance(name_or_media, Media):
             if name_or_media.id == self.id:
                 return True
@@ -555,6 +849,41 @@ class Compartment(Model):
     __table_args__ = (
         sa.UniqueConstraint('volume_element_id', 'name'),
     )
+
+    @property
+    def comp_parcel_area(self):
+        return self.volume_element.parcel.area
+
+    @property
+    def comp_vol_elem_depth(self):
+        return abs(self.volume_element.top - self.volume_element.bottom)
+
+    def comp_vol_elem_sum_of(self, prop, media):
+        ve_sum = 0
+        if prop == "Area":
+            ve_sum = max([c.volume_element.parcel.area for c in self.volume_element.compartments if
+                          c.media.isa(media)] + [0])
+        elif prop.startswith("chemical."):
+            f = eval(prop)
+            if f:
+                ve_sum = sum([f(c) for c in self.volume_element.compartments if c.media.isa(media)])
+        else:
+            comps = [c for c in self.volume_element.compartments if c.media.isa(media)]
+            for comp in comps:
+                if isinstance(comp.parameters.get(prop), ParameterDefinition):
+                    ve_sum += comp.parameters[prop].default_value or 0
+                elif isinstance(comp.parameters.get(prop), CustomParameter):
+                    ve_sum += comp.parameters[prop].value or 0
+        return ve_sum
+
+    def within_composite_compartment(self, prop, media):
+        composite_comp = self.linked_compartments(media=media)[0]
+        val = 0
+        if isinstance(composite_comp.parameters.get(prop), ParameterDefinition):
+            val = composite_comp.parameters[prop].default_value or 0
+        elif isinstance(composite_comp.parameters.get(prop), CustomParameter):
+            val = composite_comp.parameters[prop].value or 0
+        return val
 
     def as_serializable(self):
         return {

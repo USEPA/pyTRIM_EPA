@@ -10,6 +10,36 @@ window.TRIM = (function(trim) {
         });
     }
 
+     api.updateScenario = function(scenario) {
+        var url = api.getUrl('scenario_api.update_scenario');
+        var data = makeFormData(scenario);
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: data
+        });
+    };
+
+    api.copyScenario = function(scenario) {
+        var url = api.getUrl('secnario_api.copy_scenario');
+        var data = makeFormData(scenario);
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: data
+        })
+    }
+
+    api.deleteScenario = function(scenario) {
+        var url = api.getUrl('secnario_api.delete_scenario');
+        var data = makeFormData(scenario);
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: data
+        })
+    }
+
     api.loadForms = function(names) {
         if (!names) {
             return undefined;
@@ -42,7 +72,6 @@ window.TRIM = (function(trim) {
         var form = document.createElement('form');
         form.setAttribute('enctype', 'multipart/form-data');
         var formData = new FormData(form);
-
         for (var i = 0, len = fields.length; i < len; i++) {
             var field = fields[i];
             if (field.type === 'file') {
