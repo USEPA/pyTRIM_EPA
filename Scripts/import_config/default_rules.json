@@ -1,0 +1,11 @@
+{
+    "chemicals": [
+        "Mercury"
+    ],
+    "media": {
+        "restrict_emissions": [
+        ],
+        "restrict_absorption": [
+        ]
+    }
+}
