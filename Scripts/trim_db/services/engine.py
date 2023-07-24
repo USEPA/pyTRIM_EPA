@@ -1,6 +1,6 @@
 # import os
 import sqlalchemy as sa
-from ..schema import Model
+from ..schema.utils.base import Model
 
 __all__ = [
     'DataBase'
@@ -10,15 +10,18 @@ __all__ = [
 class DataBase:
     def __init__(self, uri, model_base=Model):
         self.uri = uri
+        self._create_engine()
+
+        if model_base:
+            self._init_model_base(model_base)
+
+    def _create_engine(self):
         self.engine = sa.create_engine(
             self.uri, connect_args={'check_same_thread': False},
             # echo=os.getenv('FLASK_ENV', '').lower() == 'development'
         )
         print("Created new database connection")
         self._session = None
-
-        if model_base:
-            self._init_model_base(model_base)
 
     def _make_session(self):
         s = sa.orm.Session(bind=self.engine)

@@ -24,26 +24,22 @@ class CacheManager:
                 k = CacheManager.cache_key(*args, **kwargs)
 
                 if not CacheManager.DISABLED and k in self:
-                    # print(f'Found in Cache for "{f}" with key: val as {k}: {self[k]}')
-                    # print(self)
+                    # print(f'Cached for "{base_key}" and {k}: {self[k]}')
                     ans = self[k]
                     if isinstance(ans, Exception):
-                        # print(f"Read from Cache problem for val {k}: {ans}")
                         raise ans
                     return ans
 
                 try:
                     ans = f(*args, **kwargs)
                 except Exception as e:
-                    # print(f"Cache eval problem {e}")
                     ans = e
 
                 if not CacheManager.DISABLED:
-                    # print(f'Caching: {ans} for "{k}" and function {f}')
+                    # print(f'Caching: {ans} for "{base_key}" and {k}')
                     self[k] = ans
 
                 if isinstance(ans, Exception):
-                    # print(f"Caching problem {ans}")
                     raise ans
                 return ans
             return cached

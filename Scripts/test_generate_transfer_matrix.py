@@ -132,15 +132,7 @@ def make_transfer_matrix(scenario):
 
 
 if __name__ == '__main__':
-    try:
-        from trim_db.utils.users_roles import implement_users_roles
-        implement_users_roles()
-        # time.sleep(10)
-        # from trim_db.porting import *
-        # from trim_db.schema import *
-        # from trim_db.services import *
-    except Exception as e:
-        print(f'-- Unable to create Users/Roles.\n{e}')
+    from trim_db.local import *  # Loads user/role tables
 
     SCENARIO_NAME = 'Foundries_SS'
     scn = ScenarioService.get(name=SCENARIO_NAME)

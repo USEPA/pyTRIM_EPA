@@ -172,7 +172,6 @@ def parse_transport_processes(algorithm_parameters):
         CompartmentService.media.get_or_create(category=m)
 
     for name, params in algorithm_parameters.items():
-
         if name not in TRANSFER_ALGORITHMS:
             continue
 
@@ -205,24 +204,21 @@ def parse_transport_processes(algorithm_parameters):
 
         # print(name)
         try:
-            sending_chem = get_param(params, 'sendingChemicalName')
-            chem_cat = get_param(params, 'chemicalCategory')
-            if sending_chem:
-                sending_chem = ChemicalService.get(
-                    name=sending_chem
-                )
-                chem_cat = None
-            elif chem_cat:
-                sending_chem = None
+            sending_chem = ChemicalService.get(
+                name=get_param(params, 'sendingChemicalName')
+            )
         except Exception:
             sending_chem = None
-            chem_cat = None
-
         if sending_chem:
             requirements.append(f'(chemical.id == {sending_chem.id})')
-        elif chem_cat:
-            requirements.append(f'(chemical.isa("{chem_cat}"))')
-        # print(sending_chem, chem_cat)
+        # print(sending_chem)
+
+        try:
+            chem_cat = get_param(params, 'chemicalCategory')
+            if chem_cat:
+                requirements.append(f'chemical.isa("{chem_cat}")')
+        except Exception:
+            pass
 
         require_comps = [
             ('sendingCompartmentCategory', 'sender'),

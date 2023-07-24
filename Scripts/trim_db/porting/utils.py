@@ -281,26 +281,9 @@ GLOBAL_REPLACE = {
     'receivingcompartment.': 'receiver.',
     'link.': f'receiver{VAR_SPLITTER}sender.',
 
-    'receivingVolumeElementSumOf[Terrestrial Plant | Leaf].AllowExchange_forAir':
-        'receiver.comp_vol_elem_sum_of("AllowExchange_forAir", "$Leaf")',
+    'Fractionofareaavailableforverticaldiffusion': 'FractionofAreaAvailableforVerticalDiffusion',
 
-    'receivingVolumeElementSumOf[Terrestrial Plant | Leaf].LeafAreaIndex':
-        'receiver.comp_vol_elem_sum_of("LeafAreaIndex", "$Leaf")',
-
-    'receivingVolumeElementSumOf[Terrestrial Plant | Leaf].isDay_forAir':
-        'receiver.comp_vol_elem_sum_of("IsDay_forAir", "$Leaf")',
-
-    'receivingVolumeElementSumOf[Terrestrial Plant | Leaf].Chemical.TotalStomatalConductance':
-        'receiver.comp_vol_elem_sum_of("chemical.TotalStomatalConductance", "$Leaf")',
-
-    'receivingVolumeElementSumOf[Terrestrial Plant | Leaf].Chemical.TotalCuticularConductance':
-        'receiver.comp_vol_elem_sum_of("chemical.TotalCuticularConductance", "$Leaf")',
-
-    'sendingVolumeElementSumOf[Terrestrial Plant | Leaf].DryDepInterceptionFraction':
-        'sender.comp_vol_elem_sum_of("DryDepInterceptionFraction", "$Leaf")',
-
-    'sendingVolumeElementSumOf[Terrestrial Plant | Leaf].AllowExchange_forAir':
-        'sender.comp_vol_elem_sum_of("AllowExchange_forAir", "$Leaf")',
+    'MassTransferCoefficientonAirSideofAirSoilBoundary': 'MassTransferCoefficientOnAirSideofAirSoilBoundary',
 
     'SendingwithinCompositeCompartment[Terrestrial Plant | Leaf].DryDepInterceptionFraction':
         'sender.within_composite_compartment("DryDepInterceptionFraction", "$Leaf")',
@@ -308,45 +291,6 @@ GLOBAL_REPLACE = {
     'SendingwithinCompositeCompartment[Terrestrial Plant | Leaf].WetDepInterceptionFraction':
         'sender.within_composite_compartment("WetDepInterceptionFraction", "$Leaf")',
 
-    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil - Default].Area':
-        'receiver.comp_vol_elem_sum_of("Area", "Surface_Soil")',
-
-    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil - Default].FractionofAreaAvailableforVerticalDiffusion':
-        'receiver.comp_vol_elem_sum_of("Fractionofareaavailableforverticaldiffusion", "Surface_Soil")',
-
-    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil - Default].Depth':
-        'receiver.comp_vol_elem_sum_of("Depth", "Surface_Soil")',
-
-    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil - Default].Chemical.MassTransferCoefficientOnAirSideofAirSoilBoundary':
-        'receiver.comp_vol_elem_sum_of("chemical.MassTransferCoefficientOnAirSideofAirSoilBoundary", "Surface_Soil")',
-
-    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil - Default].Chemical.Z_Total':
-        'receiver.comp_vol_elem_sum_of("chemical.Z_Total", "Surface_Soil")',
-
-    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil - Default].Chemical.D_effective':
-        'receiver.comp_vol_elem_sum_of("chemical.D_effective", "Surface_Soil")',
-
-    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil].Area':
-        'receiver.comp_vol_elem_sum_of("Area", "Surface_Soil")',
-
-    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil].FractionofAreaAvailableforVerticalDiffusion':
-        'receiver.comp_vol_elem_sum_of("Fractionofareaavailableforverticaldiffusion", "Surface_Soil")',
-
-    'FractionofAreaAvailableforVerticalDiffusion': 'Fractionofareaavailableforverticaldiffusion',
-
-    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil].Depth':
-        'receiver.comp_vol_elem_sum_of("Depth", "Surface_Soil")',
-
-    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil].Chemical.MassTransferCoefficientOnAirSideofAirSoilBoundary':
-        'receiver.comp_vol_elem_sum_of("chemical.MassTransferCoefficientOnAirSideofAirSoilBoundary", "Surface_Soil")',
-
-    'MassTransferCoefficientonAirSideofAirSoilBoundary': 'MassTransferCoefficientOnAirSideofAirSoilBoundary',
-
-    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil].Chemical.Z_Total':
-        'receiver.comp_vol_elem_sum_of("chemical.Z_Total", "Surface_Soil")',
-
-    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil].Chemical.D_effective':
-        'receiver.comp_vol_elem_sum_of("chemical.D_effective", "Surface_Soil")'
 }
 # TODO-1: Convert sums above to Methods for ORM classes
 # TODO-2: Formula Arguments wrong for the plant and abiotic fixes above. Why? Need to fix?
@@ -527,6 +471,10 @@ def split_unit_suffix(val):
     return stripped + args, unit_suff
 
 
+AGGREGATE_FUNCTIONS = {
+    'SumOf': 'sum'
+}
+
 def clean_equation(equation):
     equation = str(equation).strip()
     eq = deconstruct_equation(equation)
@@ -559,6 +507,10 @@ def clean_equation(equation):
         cleaned = cleaned.replace(f'{brackets[0]} ', brackets[0])
         cleaned = cleaned.replace(f' {brackets[1]}', brackets[1])
 
+    for agg_expression in AGGREGATE_FUNCTIONS:
+        if f'volumeelement{agg_expression.lower()}' in cleaned.lower():
+            cleaned = convert_property_aggregates(cleaned, agg_expression)
+
     if 'linkedcompartment' in cleaned.lower():
         cleaned = convert_linked_compartments(cleaned)
 
@@ -579,6 +531,70 @@ def clean_equation(equation):
 
     return cleaned
 
+
+def convert_property_aggregates(expression, agg_expression):
+    from .environment import MEDIA_MAP
+
+    agg_func = AGGREGATE_FUNCTIONS[agg_expression]
+
+    cleaned = expression
+    if f'VolumeElement{agg_expression}' not in cleaned:
+        if f'volumeelement{agg_expression.lower()}' in cleaned:
+            cleaned = cleaned.replace(
+                f'volumeelement{agg_expression.lower()}',
+                f'VolumeElement{agg_expression}'
+            )
+        else:
+            return cleaned
+
+    temp = cleaned.split(f'ingVolumeElement{agg_expression}[')
+    cleaned = [temp[0]]
+    for el in temp[1:]:
+        if ']' not in el:
+            raise AssertionError
+        suff = ''
+        if '[' in el:
+            el = el.rsplit('[', 1)
+            suff = el[1]
+            if suff:
+                suff = f'[{suff}'
+            el = el[0]
+        el = el.rsplit(']', 1)
+        suff = el[1] + suff
+        suff = suff.split(' ', 1)
+        if len(suff) > 1:
+            nxt = suff[1]
+        else:
+            nxt = ''
+        suff = suff[0]
+
+        paren = ''
+        while suff.endswith(')'):
+            paren += ')'
+            suff = suff[:-1]
+
+        if suff.lower() in ['.area', '.depth']:
+            suff = suff.lower().replace('area', 'parcel.area')
+            cleaned.append(f'{suff.lower()}{paren} {nxt}')
+            continue
+
+        m = el[0].split('|')[-1].strip().replace(' ', '_')
+        if m == 'Surface_Soil_-_Default':
+            m = 'Surface_Soil'
+        m = MEDIA_MAP.get(m, m)
+        if m == 'Leaf':
+            m = '$Leaf'
+        c = suff.lower().startswith('.chemical.')
+        if c:
+            suff = '.' + suff.split('emical.', 1)[-1]
+        cleaned.append(f'.agg("{agg_func}", "{suff[1:]}",')
+        if c:
+            cleaned[-1] += ' chemical=chemical,'
+        cleaned[-1] += f' compartment_media="{m}"){paren} {nxt}'
+
+    cleaned = 'er.volume_element'.join(cleaned).strip()
+
+    return cleaned
 
 def convert_linked_compartments(expression):
     from .environment import MEDIA_MAP
@@ -603,6 +619,8 @@ def convert_linked_compartments(expression):
         if '[' in el:
             el = el.rsplit('[', 1)
             suff = el[1]
+            if suff:
+                suff = f'[{suff}'
             el = el[0]
         el = el.rsplit(']', 1)
         suff = el[1] + suff

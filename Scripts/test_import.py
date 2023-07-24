@@ -3,29 +3,34 @@ from trim_db.porting import *
 from trim_db.schema import *
 from trim_db.services import *
 
-TRIM_FILES = (
-    '/Users/55284/Library/CloudStorage/OneDrive-ICF/Desktop/RTR_TRIM-FaTE/TRIM_builder_new_mac/Scripts/'
-    'trim_core/backend/Legacy_Input_Files'
-)
+TRIM_FILES = './Scripts/trim_core/backend/Legacy_Input_Files'
 
 SCENARIO_NAME = 'Foundries_SS'
 CHEMICAL_CATEGORY = 'Mercury'
 
 
-def load_data():
-    parameter_library = read_master_library(
-        f'{TRIM_FILES}/ICF_Master_Library_03212016_PropertyExporter.txt'
-    )
+def load_data(trim_file_root, scenario_name, for_chemicals=None):
+    master_library = [
+        os.path.join(trim_file_root, f) for f in os.listdir(trim_file_root)
+        if 'Master_Library' in f and f.endswith('_PropertyExporter.txt')
+    ]
+    if not master_library:
+        return
+
+    parameter_library = {}
+    for f in master_library:
+        parameter_library.update(read_master_library(f))
+        break  # Only one??
 
     parse_chemicals(parameter_library['Chemical'])
 
     chems = [
         c for c in ChemicalService.get_all()
-        if CHEMICAL_CATEGORY in (c.category or '')
+        if for_chemicals in (c.category or '')
     ]
 
     parse_scenario(
-        TRIM_FILES, SCENARIO_NAME,
+        trim_file_root, scenario_name,
         parameter_library=parameter_library, chemicals=chems
     )
 
@@ -391,17 +396,16 @@ def check_alg_values(scenario, chemical, alg, sender, receiver):
 
 
 def run_tests():
-    # parse_prop_types(
-    #     f'{TRIM_FILES}/ICF_Master_Library_03212016_PropertyType_Exporter.txt'
-    # )
-    # return
     scenario = ScenarioService.get(name=SCENARIO_NAME)
 
     if not scenario:
         # return
         print('loading data ...')
         start = time.time()
-        load_data()
+        load_data(
+            TRIM_FILES, SCENARIO_NAME,
+            for_chemicals=CHEMICAL_CATEGORY
+        )
         end = time.time()
         print('time to load data = ', round((end - start), 2), ' seconds')
 
@@ -419,28 +423,17 @@ def run_tests():
 
     # print_scenario_compartment_info(scenario)
 
-    # print('creating tm ...')
-    # start = time.time()
-    # df_tm, df_sm = make_transition_matrix(scenario)
-    # end = time.time()
-    # print('time to create tm = ', round((end - start), 2), ' seconds')
+    print('creating tm ...')
+    start = time.time()
+    df_tm, df_sm = make_transition_matrix(scenario)
+    end = time.time()
+    print('time to create tm = ', round((end - start), 2), ' seconds')
 
-    # safe_save_output(df_tm, df_sm)
+    safe_save_output(df_tm, df_sm)
 
     print('\n==========================\n')
 
 
 if __name__ == '__main__':
-    try:
-        # import os
-        # os.environ.setdefault('TEST_DB_SERVERLESS', 'True')
-        from trim_db.utils.users_roles import implement_users_roles
-        implement_users_roles()
-        # time.sleep(10)
-        # from trim_db.porting import *
-        # from trim_db.schema import *
-        # from trim_db.services import *
-    except Exception as e:
-        print(f'-- Unable to create Users/Roles.\n{e}')
-
+    from trim_db.local import *  # Loads user/role tables
     run_tests()
