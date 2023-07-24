@@ -101,6 +101,7 @@ def parameterize(cls):
         if getattr(obj, '__current_scenario', None) is None:
             from trim_db.services import ScenarioService
             s = ScenarioService.get_or_create(name='Default', creator_id=1)
+            print(f"CACHE NOT CLEARED ... USING scenario {s.name}. cls name is {cls_name}")
             setattr(obj, '__current_scenario', s)
         return obj.__current_scenario
 
