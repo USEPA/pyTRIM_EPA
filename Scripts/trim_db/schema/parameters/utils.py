@@ -21,7 +21,8 @@ def is_number(val):
     check = str(val).strip()
     if not check:
         return False
-    check = check.replace('.', '').replace('-', '').replace('+', '').split('e')
+    check = check.replace('.', '').replace('-', '').replace('+', '')
+    check = check.split('e')
     for part in check:
         if not part.isnumeric():
             return False
@@ -59,11 +60,11 @@ def as_quantity(val, unit=''):
 
     if not is_number(val):
         raise TypeError(f'Invalid magnitude: "{val}"')
-    import tokenize
-    try:
-        tmp = ureg(unit)
-    except tokenize.TokenError as msg:
-        print(f"{msg} ---> {unit}")
+    # import tokenize
+    # try:
+    #     tmp = ureg(unit)
+    # except tokenize.TokenError as msg:
+    #     print(f"{msg} ---> {unit}")
 
     quantity = val * ureg(unit)
 

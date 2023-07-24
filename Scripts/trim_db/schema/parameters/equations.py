@@ -105,10 +105,10 @@ def as_function(equation, with_caching=True, **default_kwargs):
                 f'\n{str_with_args(equation, evaluator)}'
             )
         except Exception:
-            print(f'{20 * "%%%%%%"}\n{evaluator.names}')
-            print(f'{20 * "******"}\n{custom_arg_map}')
-            print(f'{20 * "^^^^^^"}\n{equation}')
-            print(f'{20 * "______"}')
+            # print(f'{20 * "%%%%%%"}\n{evaluator.names}')
+            # print(f'{20 * "******"}\n{custom_arg_map}')
+            # print(f'{20 * "^^^^^^"}\n{equation}')
+            # print(f'{20 * "______"}')
             raise TypeError(
                 f'Invalid equation!'
                 f'\n{str_with_args(equation, evaluator)}'
@@ -142,7 +142,6 @@ def evaluated_args(eq, evaluator=evaluator):
         if el.endswith('('):
             els = []
             for x in eq.split(el)[1:]:
-                # x = x.split(')')[0]
                 t = x.split(')')[0]
                 p_i = 0
                 while t.count("(") > t.count(")"):
@@ -162,13 +161,12 @@ def evaluated_args(eq, evaluator=evaluator):
         for el in els:
             try:
                 v = evaluator.eval(el)
-            except Exception as err:
-                print(err)
+            except Exception:
                 v = CANT_EVAL
                 try:
                     evaluated_args[k] = evaluator.eval(k)
-                except Exception as err:
-                    print(f"Problem evaluating {k}: {err}")
+                except Exception as e:
+                    # print(f"Problem evaluating {k}: {e}")
                     pass
             evaluated_args[el] = v
     return evaluated_args
