@@ -52,6 +52,8 @@ def as_function(equation, with_caching=True, **default_kwargs):
 
     equation = equation.replace('math.exp', 'safe_exp')
     equation = equation.replace('math.log', 'safe_log')
+    equation = equation.replace('math.log10', 'safe_log10')
+    equation = equation.replace('math.sqrt', 'safe_sqrt')
 
     def fix_non_callables(eq, evaluator):
         args = evaluated_args(eq, evaluator)
@@ -103,6 +105,10 @@ def as_function(equation, with_caching=True, **default_kwargs):
                 f'\n{str_with_args(equation, evaluator)}'
             )
         except Exception:
+            print(f'{20 * "%%%%%%"}\n{evaluator.names}')
+            print(f'{20 * "******"}\n{custom_arg_map}')
+            print(f'{20 * "^^^^^^"}\n{equation}')
+            print(f'{20 * "______"}')
             raise TypeError(
                 f'Invalid equation!'
                 f'\n{str_with_args(equation, evaluator)}'
@@ -136,7 +142,13 @@ def evaluated_args(eq, evaluator=evaluator):
         if el.endswith('('):
             els = []
             for x in eq.split(el)[1:]:
-                x = x.split(')')[0]
+                # x = x.split(')')[0]
+                t = x.split(')')[0]
+                p_i = 0
+                while t.count("(") > t.count(")"):
+                    p_i += 1
+                    t = "".join(x.split(")")[:p_i]) + ")"
+                x = t
                 els.append(f'{el}{x})')
         elif el.endswith(')'):
             els = []
@@ -150,11 +162,13 @@ def evaluated_args(eq, evaluator=evaluator):
         for el in els:
             try:
                 v = evaluator.eval(el)
-            except Exception:
+            except Exception as err:
+                print(err)
                 v = CANT_EVAL
                 try:
                     evaluated_args[k] = evaluator.eval(k)
-                except Exception:
+                except Exception as err:
+                    print(f"Problem evaluating {k}: {err}")
                     pass
             evaluated_args[el] = v
     return evaluated_args
@@ -163,7 +177,7 @@ def evaluated_args(eq, evaluator=evaluator):
 RESERVED_WORDS = [
     'for', 'in', 'if', 'elif', 'else', 'not', 'and', 'or',
     'None', 'True', 'False',
-    'math'
+    'math', 'min', 'max', '**'
 ]
 OPERATORS = '+-*/=!<>?,'
 OPEN_BRACKETS = '({['
@@ -199,7 +213,7 @@ def deconstruct_equation(equation):
 
         prev = deconstructed[-2]
 
-        if prev == '=':
+        if prev == '=' and el != "=":
             # this must be a sub-argument;
             # remove as distinct element and join to argname,
             # infixing equals sign as well
@@ -269,6 +283,9 @@ def find_arguments(equation, combine_partial_args=True, drop_functions=True):
             and element.count('(') > element.count(')')
         ):
             element += ')'
+        if element[0] == "-":
+            element = element[1:]
+
         return element
 
     args = {}
@@ -292,6 +309,12 @@ def find_arguments(equation, combine_partial_args=True, drop_functions=True):
 
         if element.endswith('.to('):
             element = element[:-4]
+
+        if not element:
+            continue
+
+        if element.endswith('.magnitude'):
+            element = element[:-10]
 
         if not element:
             continue

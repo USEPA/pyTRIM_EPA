@@ -4,6 +4,9 @@ from flask_admin.base import _wrap_view
 from flask_admin.contrib.fileadmin.s3 import S3FileAdmin
 from flask_admin.contrib.sqla import ModelView
 from flask_security import current_user
+from trim_db.schema.scenarios.models import *
+from trim_frontend.users.models import *
+from trim_frontend.scenarios.forms import ScenarioDefinitionForm
 from .class_utils import add_method
 
 
@@ -105,6 +108,15 @@ class AdminBaseView(AdminAuthMixin, AuthBaseView):
                 self._urls.append((route, fname, methods))
 
         super().__init__(*args, **kwargs)
+
+
+class AdminScenarioView(AdminBaseView):
+    @expose('/')
+    def index(self):
+        all_users = User.query.all()
+        all_scenarios = Scenario.query.all()
+        scenario_form = ScenarioDefinitionForm()
+        return self.render('./admin/copy_scenario.html', scenario_form=scenario_form, scenarios=all_scenarios, users=all_users)
 
 
 def init_admin_views(app, admin):
