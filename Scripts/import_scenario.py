@@ -1,0 +1,109 @@
+import argparse
+import json
+import os
+import time
+from trim_db.porting import *
+from trim_db.services import *
+
+DEFAULT_IMPORT_RULES = './Scripts/import_config/default_rules.json'
+
+
+def import_scenario(config):
+    scenario_name = config.get('scenario_name')
+    if not scenario_name:
+        raise AssertionError('Must specify a scenario name!')
+
+    scenario = ScenarioService.get(name=scenario_name)
+    if scenario:
+        print(f'Scenario "{scenario_name}" already exists!')
+        return
+
+    trim_files = config.get('directory')
+    if not trim_files:
+        raise AssertionError('Must specify a directory!')
+
+    import_rules = config.get('import_rules') or DEFAULT_IMPORT_RULES
+
+    print('\n==========================\n')
+
+    print(f'Loading "{scenario_name}" ...')
+    print('')
+    start = time.time()
+    load_data(trim_files, scenario_name, import_rules)
+    end = time.time()
+    print('Time to load data = ', round((end - start), 2), ' seconds')
+
+    scenario = ScenarioService.get(name=scenario_name)
+    print(scenario)
+
+    print('\n==========================\n')
+
+
+def load_data(trim_file_root, scenario_name, import_rules):
+    if os.path.isfile(import_rules):
+        with open(import_rules, mode='r', encoding='utf-8') as f:
+            import_rules = json.load(f)
+
+    master_library = [
+        os.path.join(trim_file_root, f) for f in os.listdir(trim_file_root)
+        if 'Master_Library' in f and f.endswith('_PropertyExporter.txt')
+    ]
+    if not master_library:
+        return
+
+    parameter_library = {}
+    for f in master_library:
+        parameter_library.update(read_master_library(f))
+        break  # Should only be one??
+
+    for_chemicals = import_rules.get('chemicals', [])
+
+    def chemical_of_interest(chem):
+        for c in for_chemicals:
+            if chem.isa(c):
+                return True
+        return False
+
+    parse_chemicals(parameter_library['Chemical'])
+
+    chems = [
+        c for c in ChemicalService.get_all()
+        if chemical_of_interest(c)
+    ]
+    parse_scenario(
+        trim_file_root, scenario_name,
+        parameter_library=parameter_library, chemicals=chems
+    )
+
+    parse_transport_processes(parameter_library['Algorithm'])
+
+    for m in CompartmentService.media.get_all():
+        for x in NON_ABSORBING_MEDIA:
+            if m.isa(x):
+                m.can_absorb = False
+        for x in NON_EMITTING_MEDIA:
+            if m.isa(x):
+                m.can_emit = False
+    CompartmentService.commit()
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--config')
+    parser.add_argument('--scenario', default=None)
+    parser.add_argument('--directory', default=None)
+    parser.add_argument('--import-rules', default=DEFAULT_IMPORT_RULES)
+    args = parser.parse_args()
+
+    from trim_db.local import *  # Loads user/role tables
+
+    if args.config:
+        config = args.config
+    else:
+        config = {
+            "scenario_name": args.scenario,
+            "directory": args.directory,
+            "import_rules": args.import_rules
+        }
+
+    import_scenario(config)

@@ -1,14 +1,9 @@
+import argparse
 from trim_db.schema.parameters.equations import *
 from trim_db.schema.parameters.equations import evaluated_args
 
-if __name__ == '__main__':
-    eq = (
-        '(- math.exp(1 - chemical.SedimentPartitioning_AlphaofEquilibrium(sender)) / chemical.SedimentPartitioning_TimeToReachAlphaofEquilibrium(sender))'
-    )
-    eq = (
-        '(chemical.EffectiveAdvectionVelocity(sender) * chemical.GradientofSoilConcentrationChange(sender)) / (math.exp(chemical.GradientofSoilConcentrationChange(sender) * sender) - 1)'
-    )
-
+def parse_equation(eq):
+    print('')
     print(eq)
     print('')
     print('deconstruct_equation ->')
@@ -28,3 +23,17 @@ if __name__ == '__main__':
     print('')
     print('evaluated_args ->')
     print(evaluated_args(eq))
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-e', '--equation')
+    args = parser.parse_args()
+    # eq = (
+    #     '(- math.exp(1 - chemical.SedimentPartitioning_AlphaofEquilibrium(sender)) / chemical.SedimentPartitioning_TimeToReachAlphaofEquilibrium(sender))'
+    # )
+    # eq = (
+    #     '(chemical.EffectiveAdvectionVelocity(sender) * chemical.GradientofSoilConcentrationChange(sender)) / (math.exp(chemical.GradientofSoilConcentrationChange(sender) * sender) - 1)'
+    # )
+
+    parse_equation(args.equation)
