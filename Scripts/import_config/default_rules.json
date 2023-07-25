@@ -4,8 +4,145 @@
     ],
     "media": {
         "restrict_emissions": [
+            "Abiotic|Air",
+            "Sink"
         ],
         "restrict_absorption": [
+            "Source"
+        ]
+    },
+    "transport_processes": [
+        "Degradation/Reaction Sink in Sediment(AlgInstID_4565)",
+        "Degradation/Reaction Sink in Surface Water(AlgInstID_4585)",
+        "Demethylation(MHg -> Hg2) in Abiotic Media, Rate is input(AlgInstID_1892)",
+        "Diffusion from Sediment to Surface Water, Fugacity-based(AlgInstID_2195)",
+        "Diffusion from Surface Water to Sediment, Fugacity-based(AlgInstID_2149)",
+        "Methylation(Hg2 -> MHg) in Abiotic Media, Rate is input(AlgInstID_1891)",
+        "Oxidation(Hg0 -> Hg2) in Abiotic Media, Rate is input(AlgInstID_1894)",
+        "Reduction(Hg2 -> Hg0) in Abiotic Media, Rate is input(AlgInstID_1893)",
+        "Resuspension from Sediment to Surface Water, General(AlgInstID_2190)",
+        "Sediment Burial from Sediment to Sediment Burial Sink, Zero net deposition, General(AlgInstID_4135)",
+        "Sediment Deposition from Surface Water to Sediment, General(AlgInstID_2139)",
+
+        "Fish Bioenergetic Model - Ingestion of Algae by Fish(AlgInstID_1527)",
+        "Fish Bioenergetic Model - Ingestion of Algae by Zooplankton",
+        "Fish Bioenergetic Model - Ingestion of Benthic Carnivore by Benthic Omnivore(AlgInstID_1455)",
+        "Fish Bioenergetic Model - Ingestion of Benthic Carnivore by Water Column Carnivore(AlgInstID_2245)",
+        "Fish Bioenergetic Model - Ingestion of Benthic Carnivore by Water Column Omnivore(AlgInstID_2277)",
+        "Fish Bioenergetic Model - Ingestion of Benthic Invertebrate by Benthic Carnivore(ICFID_08-001)",
+        "Fish Bioenergetic Model - Ingestion of Benthic Invertebrate by Benthic Omnivore(AlgInstID_1467)",
+        "Fish Bioenergetic Model - Ingestion of Benthic Invertebrate by Water Column Carnivore(AlgInstID_2255)",
+        "Fish Bioenergetic Model - Ingestion of Benthic Invertebrate by Water Column Herbivore(AlgInstID_2270)",
+        "Fish Bioenergetic Model - Ingestion of Benthic Invertebrate by Water Column Omnivore(AlgInstID_2287)",
+        "Fish Bioenergetic Model - Ingestion of Benthic Omnivore by Benthic Carnivore(AlgInstID_1447)",
+        "Fish Bioenergetic Model - Ingestion of Benthic Omnivore by Water Column Carnivore(AlgInstID_2250)",
+        "Fish Bioenergetic Model - Ingestion of Benthic Omnivore by Water Column Omnivore(AlgInstID_2282)",
+        "Fish Bioenergetic Model - Ingestion of Macrophyte by Water Column Herbivore(AlgInstID_1646)",
+        "Fish Bioenergetic Model - Ingestion of Macrophyte by Water Column Omnivore(AlgInstID_1655)",
+        "Fish Bioenergetic Model - Ingestion of Water Column Carnivore by Benthic Carnivore(AlgInstID_2158)",
+        "Fish Bioenergetic Model - Ingestion of Water Column Carnivore by Benthic Omnivore(AlgInstID_2175)",
+        "Fish Bioenergetic Model - Ingestion of Water Column Carnivore by Water Column Omnivore(AlgInstID_1618)",
+        "Fish Bioenergetic Model - Ingestion of Water Column Herbivore by Benthic Carnivore(AlgInstID_2163)",
+        "Fish Bioenergetic Model - Ingestion of Water Column Herbivore by Benthic Omnivore(AlgInstID_2180)",
+        "Fish Bioenergetic Model - Ingestion of Water Column Herbivore by Water Column Carnivore(AlgInstID_1600)",
+        "Fish Bioenergetic Model - Ingestion of Water Column Herbivore by Water Column Omnivore(AlgInstID_1638)",
+        "Fish Bioenergetic Model - Ingestion of Water Column Omnivore by Benthic Carnivore(AlgInstID_2168)",
+        "Fish Bioenergetic Model - Ingestion of Water Column Omnivore by Benthic Omnivore(AlgInstID_2185)",
+        "Fish Bioenergetic Model - Ingestion of Water Column Omnivore by Water Column Carnivore(AlgInstID_1610)",
+        "Fish Bioenergetic Model - Ingestion of Zooplankton by Water Column Herbivore",
+
+        "Exchange from Macrophyte to Surface Water(AlgInstID_1547)",
+        "Degradation/Reaction Sink in Macrophyte",
+        "Time-dependent Partition from Surface Water to Macrophyte, Hg(AlgInstID_1549)",
+        "Time-dependent Partition from Macrophyte to Surface Water(AlgInstID_1544),Hg",
+
+        "Time-dependent Partition from Sediment to Benthic Invertebrate(AlgInstID_1438)",
+        "Time-dependent Partition from Benthic Invertebrate to Sediment(AlgInstID_1433)",
+
+        "Degradation/Reaction Sink in Zooplankton(AlgInstID_4570_Z)",
+        "Elimination from Fish to Surface Water(AlgInstID_1512)",
+
+        "Demethylation (MHg->Hg2) in Fish(AlgInstID_1446)",
+        "Oxidation(Hg0 -> Hg2) in Fish(AlgInstID_1443)",
+        "Reduction(Hg2 -> Hg0) in Fish(AlgInstID_1444)",
+
+        "Bulk Advection from Surface Water to Flush-rate Advection Sink, General(AlgInstID_4125)",
+        "Diffusion from Surface Water to Air, Two Film(AlgInstID_4080)-Hg",
+        "Algae Deposition from Surface Water to Sediment, General(AlgInstID_2144)",
+
+        "Diffusion from DryVaporSource to Plant Leaf, Hg0",
+        "Diffusion from DryVaporSource to Plant Leaf, MHg",
+        "Diffusion from DryVaporSource to Plant Leaf, Organics",
+        "Diffusion from DryVaporSource to Surface Soil, Hg0",
+        "Diffusion from DryVaporSource to Surface Soil, MHg",
+        "Diffusion from DryVaporSource to Surface Soil, Organics",
+
+        "Diffusion from Surface Soil to Air, Hg0(AlgInstID_3997)",
+        "Diffusion from Surface Soil to Air, MHg(AlgInstID_3999)",
+        "Diffusion from Surface Soil to Air, Organics(AlgInstID_3995)",
+        "Diffusion from Plant Leaf to Air, Hg0, Default (Bennett 1998)(AlgInstID_4005)",
+
+        "Diffusion from Plant Leaf to Air, MHg, Default (Bennett 1998)(AlgInstID_4005)",
+        "Diffusion from Plant Leaf to Air, Organics, Default (Bennett 1998)(AlgInstID_4005)",
+        "Diffusion from Surface Soil to Root Zone(AlgInstID_1919)",
+        "Diffusion from Root Zone to Surface Soil(AlgInstID_1939)",
+        "Diffusion from Root Zone to Vadose Zone(AlgInstID_1904)",
+        "Diffusion from Vadose Zone to Root Zone(AlgInstID_1914)",
+        "Diffusion from Vadose Zone to Vadose Zone(AlgInstID_2445)",
+
+        "Runoff from Surface Soil to Soil Advection Sink",
+        "Runoff from Surface Soil to Surface Soil, General(AlgInstID_2465)",
+        "Runoff from Surface Soil to Surface Water, General(AlgInstID_3520)",
+
+        "Erosion from Surface Soil to Surface Soil, General(AlgInstID_2460)",
+        "Erosion from Surface Soil to Surface Water, General(AlgInstID_3515)",
+        "Erosion from Surface Soil to Soil Advection Sink",
+
+        "Recharge from Groundwater to Surface Water, General(AlgInstID_3510)",
+
+        "Litterfall from Leaves to Soil(AlgInstID_1088)",
+        "Litterfall of Leaf Particle to Soil(AlgInstID_1098)",
+
+        "Particles Blown off from Plant Leaf to Air (DRY)(AlgInstID_4010)",
+        "Particles Washed off Leaf onto Ground(AlgInstID_1103)",
+
+        "Demethylation(MHg -> Hg2) in Plant Leaves, Rate is input(AlgInstID_1249)",
+        "Demethylation(MHg -> Hg2) in Plant Stem, Rate is input(AlgInstID_1271)",
+        "Methylation(Hg2 -> MHg) in Plant Leaves, Rate is input(AlgInstID_1248)",
+        "Methylation(Hg2 -> MHg) in Plant Stem, Rate is input(AlgInstID_1270)",
+
+        "Percolation from Surface Soil to Root Zone(AlgInstID_1924)",
+        "Percolation from Vadose Zone to Groundwater(AlgInstID_1899)",
+        "Percolation from Root Zone to Vadose Zone(AlgInstID_1909)",
+
+        "Degradation/Reaction Sink in Root Zone(AlgInstID_4155)",
+        "Degradation/Reaction Sink in Vadose Zone(AlgInstID_4150)",
+        "Degradation/Reaction Sink in Groundwater(AlgInstID_4145)",
+
+        "Resuspension from Surface Soil to Air, Set to Deposition rate of particles(AlgInstID_4000)",
+        
+        "Waterflow from Surface Water to Surface Water, General(AlgInstID_3685)",
+
+        "Direct Transfer from PseudoSource to Surface water",
+
+        "Transfer from Leaf Particle on Surface to Leaf, Hg(AlgInstID_1250)",
+        "Transfer from Leaf to Leaf Particle on Surface, Hg(AlgInstID_1255)",
+        "Transfer from Leaf to Stem - Agriculture, Hg(AlgInstID_1265)",
+        "Transfer from Leaf to Stem - Grasses/Herbs, Hg",
+        "Transfer from Root Zone to Stem - Agriculture, Hg",
+        "Transfer from Root Zone to Stem - Grasses/Herbs, Hg(AlgInstID_1944)",
+        "Transfer from Stem to Leaf - Agriculture, Hg",
+        "Transfer from Stem to Leaf - Grasses/Herbs, Hg(AlgInstID_1260)",
+
+        "Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Agriculture, Hg(AlgInstID_1953)",
+        "Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Grasses/Herbs,Hg(AlgInstID_1952)",
+        "Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Agriculture, Hg(AlgInstID_1932)",
+        "Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Grasses/Herbs, Hg(AlgInstID_1933)"
+    ],
+    "_notes": {
+        "transport_processes": [
+            "'Oxidation(Hg0 -> Hg2) in Macrophytes' is covered by Fish",
+            "'Elimination from Zooplankton to Surface Water' is covered by Fish"
         ]
     }
 }

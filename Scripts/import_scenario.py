@@ -75,13 +75,23 @@ def load_data(trim_file_root, scenario_name, import_rules):
         parameter_library=parameter_library, chemicals=chems
     )
 
-    parse_transport_processes(parameter_library['Algorithm'])
+    parse_transport_processes(
+        parameter_library['Algorithm'],
+        restrict_to=import_rules.get('transport_processes')
+    )
+
+    non_emitting_media = import_rules.get('media', {}).get(
+        'restrict_emissions', []
+    )
+    non_absorbing_media = import_rules.get('media', {}).get(
+        'restrict_absorption', []
+    )
 
     for m in CompartmentService.media.get_all():
-        for x in NON_ABSORBING_MEDIA:
+        for x in non_absorbing_media:
             if m.isa(x):
                 m.can_absorb = False
-        for x in NON_EMITTING_MEDIA:
+        for x in non_emitting_media:
             if m.isa(x):
                 m.can_emit = False
     CompartmentService.commit()
@@ -97,8 +107,11 @@ if __name__ == '__main__':
 
     from trim_db.local import *  # Loads user/role tables
 
+    config = {}
     if args.config:
-        config = args.config
+        if os.path.isfile(args.config):
+            with open(args.config, mode='r', encoding='utf-8') as f:
+                config = json.load(f)
     else:
         config = {
             "scenario_name": args.scenario,
