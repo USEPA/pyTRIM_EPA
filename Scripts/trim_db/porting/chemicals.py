@@ -1,12 +1,8 @@
+from .config import *
 from ..schema import Chemical
 from ..services import ChemicalService
 
 __all__ = ['parse_chemicals']
-
-
-DONT_TRANSFER = [
-    'CAS', 'enabled'
-]
 
 
 def parse_chemicals(
@@ -38,7 +34,7 @@ def parse_chemicals(
             continue
 
         for prop, prop_data in params.items():
-            if prop in DONT_TRANSFER:
+            if prop in CHEMICAL_PROPS_DONT_TRANSFER:
                 continue
 
             elif prop == 'category':

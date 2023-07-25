@@ -419,7 +419,8 @@ def parse_compartment_props(
     if not silent:
         print('Loading compartment-media properties from library data ...')
 
-    from .environment import MEDIA_MAP, clean_compartment_name
+    from .config import MEDIA_MAP
+    from .environment import clean_compartment_name
     from ..schema import Compartment, Chemical
     from functools import partial
 

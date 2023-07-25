@@ -1,8 +1,9 @@
 import re
 import pandas as pd
 from functools import partial
-from ..schema.parameters.equations import *
 from pyproj import CRS, Transformer
+from .config import MEDIA_MAP
+from ..schema.parameters.equations import *
 from ..services import *
 
 __all__ = [
@@ -533,8 +534,6 @@ def clean_equation(equation):
 
 
 def convert_property_aggregates(expression, agg_expression):
-    from .environment import MEDIA_MAP
-
     agg_func = AGGREGATE_FUNCTIONS[agg_expression]
 
     cleaned = expression
@@ -597,8 +596,6 @@ def convert_property_aggregates(expression, agg_expression):
     return cleaned
 
 def convert_linked_compartments(expression):
-    from .environment import MEDIA_MAP
-
     if 'linkedCompartment' not in expression:
         if 'linkedcompartment' in expression:
             expression = expression.replace(
