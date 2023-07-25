@@ -2,7 +2,7 @@ import logging
 
 from flask import Blueprint, request, render_template, redirect, url_for
 from flask_security import login_required, current_user
-from custom.flask_api import ApiResult,  ApiException
+from flask_api import ApiResult,  ApiException
 from datetime import datetime
 from trim_db import ScenarioService, ParcelService, CompartmentService, VolumeElementService, ParameterService, ChemicalService
 from trim_frontend import api
