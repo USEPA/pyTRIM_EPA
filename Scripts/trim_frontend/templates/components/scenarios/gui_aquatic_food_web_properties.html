@@ -413,14 +413,6 @@
                 $(this).hide();
             });
 
-            $('label.editableCell').click(function () {
-                $(this).siblings("input").show()
-                $(this).siblings("select").show()
-                $(this).prev("input").focus()
-                $(this).prev("select").focus()
-                $(this).hide();
-            });
-
             $('input.editableCell,select.editableCell').blur(function () {
                 let ee =this
                 let validation_promise = new Promise(function(res,rej) {

@@ -389,7 +389,6 @@ def delete_scenario():
     s = ScenarioService.get(scenario_id)
 
     try:
-        # TODO -- I think compartment links are deleted
         # Delete all parcels and contents
         for parcel in s.parcels.all():
             delete_parcel_contents(parcel)
