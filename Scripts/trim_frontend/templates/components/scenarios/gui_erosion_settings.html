@@ -465,7 +465,7 @@
                     $(this).prev("input").focus()
                     $(this).hide();
                 })
-                $('input.editableCell').focusout(function () {
+                $('input.editableCell').blur(function () { // this gets called when abiotic properties table gets modified
                     const data = $(this).val()
                     $(this).hide()
                     $(this).next("label").show().text(data)
