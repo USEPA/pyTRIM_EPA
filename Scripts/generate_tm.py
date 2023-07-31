@@ -2,13 +2,14 @@ import argparse
 import time
 from trim_db.schema import *
 from trim_db.schema.parameters.equations import evaluated_args, \
-    evaluator, CANT_EVAL
+    evaluator, NoEval
 from trim_db.services import *
 
 
 DEBUG = True
 RESTRICT_COMPARTMENTS = [
-    'Lake'
+    # 'Lake',
+    'E1', 'E2', 'E3'
 ]
 
 
@@ -66,27 +67,11 @@ def make_transition_matrix(scenario):
 
     try:
         for chem_idx, chem in enumerate(chem_list):
-            # try:
-            #     kd = chem.Kd(scenario.get_compartment(
-            #         'Surface_water in SW_LakeCadillac'
-            #     ))
-            # except Exception:
-            #     kd = None
-
+            if chem.name != 'Elemental Mercury':
+                continue
             print('\n' + '==' * 28)
             print(f'Chemical = {chem.name}')
-            # print(f'Chemical = {chem.name}, Kd = {kd}')
             print('==' * 28)
-
-            # check_alg_values(
-            #     scenario, chem,
-            #     (
-            #         'Direct Transfer from PseudoSource to Surface water'
-            #     ),
-            #     'WetParticleSource in WetParticleSource_LakeCadillac',
-            #     'Surface_water in SW_LakeCadillac'
-            # )
-            # continue
 
             for x, sender in enumerate(comp_list):
                 tm_x = int(chem_idx * n_comp + x)
@@ -126,6 +111,7 @@ def make_transition_matrix(scenario):
                     for link in links:
                         for transport_proc in link.transport_processes(chem):
                             check_alg = False
+                            transfer_factor = np.nan
                             try:
                                 transfer_factor = transport_proc.eval(
                                     sender=sender, receiver=receiver,
@@ -146,18 +132,21 @@ def make_transition_matrix(scenario):
 
                             try:
                                 if pd.isna(transfer_factor):
-                                    print(vals.append('Unexpected NAN'))
-                                    print_vals.extend(check_alg_values(
-                                        scenario, chem,
-                                        transport_proc.name,
-                                        sender.standard_name,
-                                        receiver.standard_name
-                                    ))
+                                    print_vals.append('\t\t\t Unexpected NAN!')
+                                    print_vals.extend([
+                                        f'\t\t\t {s}'
+                                        for s in check_alg_values(
+                                            scenario, chem,
+                                            transport_proc.name,
+                                            sender.standard_name,
+                                            receiver.standard_name
+                                        )
+                                    ])
                                     continue  # No point in continuing
                                 elif not transfer_factor:
                                     continue  # No point in continuing
                             except ValueError:
-                                print_vals.extend('Value error')
+                                print_vals.extend('\t\t\t Value error!')
                                 check_alg = True
                                 pass
 
@@ -180,15 +169,20 @@ def make_transition_matrix(scenario):
                                         transfer_factor
                                     )
                             except Exception:
-                                print_vals.extend('Error updating transfer matrix')
+                                print_vals.extend(
+                                    '\t\t\t Error updating transfer matrix!'
+                                )
                                 check_alg = True
                             if check_alg:
-                                print_vals.extend(check_alg_values(
-                                    scenario, chem,
-                                    transport_proc.name,
-                                    sender.standard_name,
-                                    receiver.standard_name
-                                ))
+                                print_vals.extend([
+                                    f'\t\t\t {s}'
+                                    for s in check_alg_values(
+                                        scenario, chem,
+                                        transport_proc.name,
+                                        sender.standard_name,
+                                        receiver.standard_name
+                                    )
+                                ])
 
                     if len(print_vals) > 1:
                         for ln in print_vals:
@@ -207,53 +201,6 @@ def make_transition_matrix(scenario):
     )
 
     return df_tm, df_sm
-
-
-def print_args(equation, evaluator, new_names={}):
-    print_vals = []
-    print_vals.append('')
-    # print_vals.append(equation)
-    old_names = dict(evaluator.names)
-    evaluator.names.update(new_names)
-    try:
-        eval_args = evaluated_args(equation, evaluator)
-        for k in sorted(eval_args.keys()):
-            if k in evaluator.names:
-                continue
-            v = eval_args[k]
-            if str(v).startswith('<function '):
-                continue
-
-            print_vals.append(f'{k} = {v}')
-            if v == CANT_EVAL:
-                param = k.rsplit('.', 1)
-                obj = param[0]
-                obj = obj.split('.', 1)
-                obj[0] = f'evaluator.names.get("{obj[0]}")'
-                # print_vals.append('.'.join(obj))
-                obj = eval('.'.join(obj))
-                param = param[1]
-                if '(' in param:
-                    param = param.split('(')
-                    args = param[1]
-                    param = param[0]
-                    args = [
-                        x.strip()
-                        for x in args.replace(')', '').split(',')
-                    ]
-                else:
-                    args = []
-                param = obj.parameters[param]
-                # print_vals.append(f'{k} = {param}({", ".join(args)})')
-                print_args(
-                    param.quantity.equation, evaluator,
-                    new_names={
-                        'self': obj
-                    }
-                )
-    finally:
-        evaluator.names = old_names
-    return print_vals
 
 
 def check_alg_values(scenario, chemical, alg, sender, receiver):
@@ -280,12 +227,14 @@ def check_alg_values(scenario, chemical, alg, sender, receiver):
     )
     print_vals.append(f'transport_process_applies = {applies}')
 
-    print_args(process.algorithm.equation, evaluator, new_names={
-        'sender': sender,
-        'receiver': receiver,
-        'chemical': chemical,
-        'environment': scenario
-    })
+    print_vals.extend(print_args(
+        process.algorithm.equation, evaluator, new_names={
+            'sender': sender,
+            'receiver': receiver,
+            'chemical': chemical,
+            'environment': scenario
+        }
+    ))
 
     try:
         transfer_factor = process.eval(
@@ -301,6 +250,94 @@ def check_alg_values(scenario, chemical, alg, sender, receiver):
             raise
         print_vals.append('Cannot evaluate transfer_factor')
     print_vals.append('')
+    return print_vals
+
+
+def print_args(equation, evaluator, new_names={}, depth=0):
+    print_vals = []
+    print_vals.append('')
+    print_vals.append('--' * 15)
+    print_vals.append(equation)
+    print_vals.append('--' * 15)
+    old_names = dict(evaluator.names)
+    evaluator.names.update(new_names)
+    try:
+        eval_args = evaluated_args(equation, evaluator)
+        for k in sorted(eval_args.keys()):
+            if k in evaluator.names:
+                continue
+            v = eval_args[k]
+            if str(v).startswith('<function '):
+                continue
+            if str(v).startswith('<bound method '):
+                continue
+
+            print_vals.append(f'{k} = {v}')
+            continue
+            if not isinstance(v, NoEval):
+                print_vals.append(f'{k} = {v}')
+            else:
+                param = k.rsplit('.', 1)
+                if len(param) != 2:
+                    print_vals.append(f'{k} = {v} (<None>)')
+                    continue
+                obj = param[0]
+                obj = obj.split('.', 1)
+                obj[0] = f'evaluator.names.get("{obj[0]}")'
+                # print_vals.append('.'.join(obj))
+                try:
+                    obj = eval('.'.join(obj))
+                except Exception as e:
+                    print_vals.append(f'{k} = {v} ({e})')
+                    continue
+                if obj is None:
+                    print_vals.append(f'{k} = {v} (<None>)')
+                    continue
+                param = param[1]
+                if '(' in param:
+                    param = param.split('(')
+                    args = param[1]
+                    param = param[0]
+                    args = [
+                        x.strip()
+                        for x in args.replace(')', '').split(',')
+                    ]
+                else:
+                    args = []
+                param = obj.parameters.get(param)
+                if param is None:
+                    print_vals.append(f'{k} = {v} (<None>)')
+                    continue
+                # print_vals.append(f'{k} = {param}({", ".join(args)})')
+                try:
+                    param.quantity
+                except AttributeError:
+                    print_vals.append(
+                        f'\t-> {k} = {param} has no quantity'
+                    )
+                try:
+                    print_vals.append(
+                        f'\t-> Evaluating {k} = {param}'
+                    )
+                    print_vals.extend(print_args(
+                        param.quantity.equation, evaluator,
+                        new_names={
+                            'self': obj,
+                            **{
+                                x: eval(x) for x in args
+                            }
+                        },
+                        depth=(depth + 1)
+                    ))
+                except AttributeError:
+                    print_vals.append(
+                        f'\t-> {k} = {param.quantity} is not an equation'
+                    )
+    finally:
+        evaluator.names = old_names
+    print_vals.append('--' * 15)
+    # print(print_vals)
+    print_vals = [('\t' * depth) + s for s in print_vals]
     return print_vals
 
 
