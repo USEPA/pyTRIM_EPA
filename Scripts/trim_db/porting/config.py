@@ -26,6 +26,9 @@ MEDIA_MAP = {
     'Surface_Soil': (
         'Abiotic|Soil|Surface_Soil'
     ),
+    'Surface_Soil_Default': (
+        'Abiotic|Soil|Surface_Soil'
+    ),
     'Root_Zone': (
         'Abiotic|Soil|Root_Zone'
     ),
