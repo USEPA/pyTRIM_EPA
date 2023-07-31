@@ -1,4 +1,5 @@
 import json
+import pandas as pd
 import sqlalchemy as sa
 from shapely.geometry import Polygon
 from pyproj import Geod
@@ -57,7 +58,7 @@ class Parcel(Model):
         geod = Geod(ellps="WGS84")
         poly = wkt.loads(
             f'''POLYGON (({", ".join([str(tpl[0]) + " " + str(tpl[1]) for tpl in self.vertices])}))''')
-        return abs(geod.geometry_area_perimeter(poly)[0])
+        return abs(geod.geometry_area_perimeter(poly)[0]) * ureg('m^2')
 
     def get_volume_element(self, name):
         for ve in self.volume_elements:
@@ -591,32 +592,47 @@ class VolumeElement(Model):
     @property
     def depth(self):
         # CAREFUL: we assume dimensions are in meters ...
-        return (self.top - self.bottom) * ureg('m')
+        return abs(self.top - self.bottom) * ureg('m')
 
     @property
     def volume(self):
         return self.parcel.area * self.height
 
     def agg(
-        self, func, property, chemical=None, compartment_name=None, compartment_media=None,
+        self, func, prop, chemical=None, compartment_name=None, compartment_media=None,
         *args, **kwargs
     ):
         comps = self.get_compartment(name=compartment_name, media=compartment_media)
-        if not isisntance(comps, list):
+        if not isinstance(comps, list):
             comps = [comps]
 
         def get_prop(c):
             if args or kwargs:
                 if chemical is not None:
-                    return chemical[prop](c, *args, **kwargs)
-                return c[prop](*args, **kwargs)
+                    return getattr(chemical, prop)(c, *args, **kwargs)
+                return getattr(c, prop)(*args, **kwargs)
             else:
                 if chemical is not None:
-                    return chemical[prop](c)
-                return c[prop]
+                    return getattr(chemical, prop)(c)
+                return getattr(c, prop)
+
+        def eval_prop(c):
+            p = get_prop(c)
+            if isinstance(p, ParameterDefinition):
+                return p.default_value
+            elif isinstance(p, CustomParameter):
+                return p.value
+            else:
+                return p
 
         if func == 'sum':
-            return sum([get_prop(c) for c in comps])
+            props = []
+            for c in comps:
+                p = eval_prop(c)
+                if pd.isna(p):
+                    return pd.NA
+                props.append(p)
+            return sum(props)
 
         raise AssertionError('Unknown function!')
 
@@ -864,23 +880,6 @@ class Compartment(Model):
     __table_args__ = (
         sa.UniqueConstraint('volume_element_id', 'name'),
     )
-
-    @property
-    def comp_parcel_area(self):
-        return self.volume_element.parcel.area
-
-    @property
-    def comp_vol_elem_depth(self):
-        return self.volume_element.depth
-
-    def within_composite_compartment(self, prop, media):
-        composite_comp = self.linked_compartments(media=media)[0]
-        val = 0
-        if isinstance(composite_comp.parameters.get(prop), ParameterDefinition):
-            val = composite_comp.parameters[prop].default_value or 0
-        elif isinstance(composite_comp.parameters.get(prop), CustomParameter):
-            val = composite_comp.parameters[prop].value or 0
-        return val
 
     def as_serializable(self):
         return {
