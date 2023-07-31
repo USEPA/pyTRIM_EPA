@@ -12,12 +12,6 @@ __all__ = [
 ]
 
 
-def clean_compartment_name(name):
-    name = name.replace('/', '_')
-    name = name.replace(' - ', '_').replace(' ', '_')
-    return name
-
-
 def parse_volume_elements(scenario, vol_file):
     print(
         'Parsing volume elements'

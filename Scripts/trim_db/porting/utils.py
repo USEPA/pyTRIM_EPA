@@ -9,6 +9,7 @@ from ..services import *
 __all__ = [
     'read_master_library',
     'safe_name', 'clean_prop', 'clean_unit',
+    'clean_compartment_name',
     'UNIT_SUFFIXES',
     'split_unit_suffix',
     'clean_equation',
@@ -156,6 +157,14 @@ def safe_name(name):
     return name
 
 
+def clean_compartment_name(name):
+    name = name.replace(' - ', '_').replace(' / ', '_')
+    name = name.replace('-', '_').replace('/', '_')
+    name = name.strip().replace(' ', '_')
+    name = '_'.join(name.split('_'))  # remove multiple __ in a row
+    return name
+
+
 VAR_SPLITTER = '______'
 
 GLOBAL_REPLACE = {
@@ -252,10 +261,34 @@ GLOBAL_REPLACE = {
     'sendingCompartment.Chemical.': f'sender{VAR_SPLITTER}chemical.',  # noqa
     'Sendingcompartment.Chemical.': f'sender{VAR_SPLITTER}chemical.',  # noqa
     'sendingcompartment.Chemical.': f'sender{VAR_SPLITTER}chemical.',  # noqa
+    'ReceivingCompartment.Volume': 'receiver.volume_element.volume',
+    'receivingCompartment.Volume': 'receiver.volume_element.volume',
+    'Receivingcompartment.Volume': 'receiver.volume_element.volume',
+    'receivingcompartment.Volume': 'receiver.volume_element.volume',
     'SendingCompartment.Volume': 'sender.volume_element.volume',
     'sendingCompartment.Volume': 'sender.volume_element.volume',
     'Sendingcompartment.Volume': 'sender.volume_element.volume',
     'sendingcompartment.Volume': 'sender.volume_element.volume',
+    'ReceivingCompartment.Area': 'receiver.volume_element.parcel.area',
+    'Receivingcompartment.Area': 'receiver.volume_element.parcel.area',
+    'receivingcompartment.Area': 'receiver.volume_element.parcel.area',
+    'receivingCompartment.Area': 'receiver.volume_element.parcel.area',
+    'SendingCompartment.Area': 'sender.volume_element.parcel.area',
+    'Sendingcompartment.Area': 'sender.volume_element.parcel.area',
+    'sendingcompartment.Area': 'sender.volume_element.parcel.area',
+    'sendingCompartment.Area': 'sender.volume_element.parcel.area',
+    'ReceivingCompartment.Depth': 'receiver.volume_element.depth',
+    'Receivingcompartment.Depth': 'receiver.volume_element.depth',
+    'receivingcompartment.Depth': 'receiver.volume_element.depth',
+    'receivingCompartment.Depth': 'receiver.volume_element.depth',
+    'SendingCompartment.Depth': 'sender.volume_element.depth',
+    'Sendingcompartment.Depth': 'sender.volume_element.depth',
+    'sendingcompartment.Depth': 'sender.volume_element.depth',
+    'sendingCompartment.Depth': 'sender.volume_element.depth',
+    'ReceivingCompartment.': 'receiver.',
+    'receivingCompartment.': 'receiver.',
+    'Receivingcompartment.': 'receiver.',
+    'receivingcompartment.': 'receiver.',
     'SendingCompartment.': 'sender.',
     'sendingCompartment.': 'sender.',
     'Sendingcompartment.': 'sender.',
@@ -266,34 +299,25 @@ GLOBAL_REPLACE = {
     'receivingcompartment.chemical.': f'receiver{VAR_SPLITTER}chemical.',  # noqa
     'Receivingchemical.': f'receiver{VAR_SPLITTER}chemical.',  # noqa
     'ReceivingChemical.': f'receiver{VAR_SPLITTER}chemical.',  # noqa
-    'ReceivingCompartment.Volume': 'receiver.volume_element.volume',
-    'receivingCompartment.Volume': 'receiver.volume_element.volume',
-    'Receivingcompartment.Volume': 'receiver.volume_element.volume',
-    'receivingcompartment.Volume': 'receiver.volume_element.volume',
-    'ReceivingCompartment.Area': 'receiver.comp_parcel_area',
-    'Receivingcompartment.Area': 'receiver.comp_parcel_area',
-    'receivingcompartment.Area': 'receiver.comp_parcel_area',
-    'ReceivingCompartment.Depth': 'receiver.comp_vol_elem_depth',
-    'Receivingcompartment.Depth': 'receiver.comp_vol_elem_depth',
-    'receivingcompartment.Depth': 'receiver.comp_vol_elem_depth',
-    'ReceivingCompartment.': 'receiver.',
-    'receivingCompartment.': 'receiver.',
-    'Receivingcompartment.': 'receiver.',
-    'receivingcompartment.': 'receiver.',
     'link.': f'receiver{VAR_SPLITTER}sender.',
 
     'Fractionofareaavailableforverticaldiffusion': 'FractionofAreaAvailableforVerticalDiffusion',
 
     'MassTransferCoefficientonAirSideofAirSoilBoundary': 'MassTransferCoefficientOnAirSideofAirSoilBoundary',
 
-    'SendingwithinCompositeCompartment[Terrestrial Plant | Leaf].DryDepInterceptionFraction':
-        'sender.within_composite_compartment("DryDepInterceptionFraction", "$Leaf")',
+    'SendingwithinCompositeCompartment': 'SendingWithinCompositeCompartment',
+    'sendingWithinCompositeCompartment': 'SendingWithinCompositeCompartment',
+    'sendingwithincompositecompartment': 'SendingWithinCompositeCompartment',
 
-    'SendingwithinCompositeCompartment[Terrestrial Plant | Leaf].WetDepInterceptionFraction':
-        'sender.within_composite_compartment("WetDepInterceptionFraction", "$Leaf")',
+    'withinCompositeCompartment': 'WithinCompositeCompartment',
+    'WithinCompositeCompartment': 'WithinCompositeCompartment',
+    'withincompositecompartment': 'WithinCompositeCompartment',
 
+    'withinContainingVolumeElement': 'WithinContainingVolumeElement',
+    'WithinContainingVolumeElement': 'WithinContainingVolumeElement',
+    'withincontainingvolumeelement': 'WithinContainingVolumeElement'
 }
-# TODO-1: Convert sums above to Methods for ORM classes
+# TODO-1: Convert sums above to Methods for ORM classes -- DONE
 # TODO-2: Formula Arguments wrong for the plant and abiotic fixes above. Why? Need to fix?
 # TODO-3: Use eq tester in root folder to test equations and find out why some cannot be evaluated when computing TM
 
@@ -476,6 +500,12 @@ AGGREGATE_FUNCTIONS = {
     'SumOf': 'sum'
 }
 
+COMPOSITE_COMPARTMENT_FUNCTIONS = {
+    'SendingWithinCompositeCompartment': 'sender',
+    'WithinCompositeCompartment': 'sender',
+    'WithinContainingVolumeElement': 'self'
+}
+
 def clean_equation(equation):
     equation = str(equation).strip()
     eq = deconstruct_equation(equation)
@@ -514,6 +544,15 @@ def clean_equation(equation):
 
     if 'linkedcompartment' in cleaned.lower():
         cleaned = convert_linked_compartments(cleaned)
+
+    # Must be done AFTER normal linkedcompartment replacement,
+    # since this hijacks that functionality
+    for k, v in COMPOSITE_COMPARTMENT_FUNCTIONS.items():
+        if k.lower() in cleaned.lower():
+            cleaned = cleaned.replace(k, 'linkedCompartment')
+            cleaned = convert_linked_compartments(
+                cleaned, from_compartment=v, restrict_parcel=True
+            )
 
     if '?' in cleaned and ':' in cleaned:
         cleaned = convert_ternary(cleaned)
@@ -558,6 +597,7 @@ def convert_property_aggregates(expression, agg_expression):
             if suff:
                 suff = f'[{suff}'
             el = el[0]
+
         el = el.rsplit(']', 1)
         suff = el[1] + suff
         suff = suff.split(' ', 1)
@@ -577,8 +617,8 @@ def convert_property_aggregates(expression, agg_expression):
             cleaned.append(f'{suff.lower()}{paren} {nxt}')
             continue
 
-        m = el[0].split('|')[-1].strip().replace(' ', '_')
-        if m == 'Surface_Soil_-_Default':
+        m = clean_compartment_name(el[0].split('|')[-1])
+        if m == 'Surface_Soil_Default':
             m = 'Surface_Soil'
         m = MEDIA_MAP.get(m, m)
         if m == 'Leaf':
@@ -595,7 +635,10 @@ def convert_property_aggregates(expression, agg_expression):
 
     return cleaned
 
-def convert_linked_compartments(expression):
+
+def convert_linked_compartments(
+    expression, from_compartment='compartment', restrict_parcel=False
+):
     if 'linkedCompartment' not in expression:
         if 'linkedcompartment' in expression:
             expression = expression.replace(
@@ -619,14 +662,35 @@ def convert_linked_compartments(expression):
             if suff:
                 suff = f'[{suff}'
             el = el[0]
+
         el = el.rsplit(']', 1)
         suff = el[1] + suff
-        m = el[0].split('|')[-1].strip().replace(' ', '_')
+        suff = suff.split(' ', 1)
+        if len(suff) > 1:
+            nxt = suff[1]
+        else:
+            nxt = ''
+        suff = suff[0]
+
+        paren = ''
+        while suff.endswith(')'):
+            paren += ')'
+            suff = suff[:-1]
+
+        if suff.lower() in ['.area', '.depth']:
+            suff = suff.lower().replace('area', 'volume_element.parcel.area')
+            cleaned.append(f'{suff.lower()}{paren} {nxt}')
+            continue
+
+        m = clean_compartment_name(el[0].split('|')[-1])
         m = MEDIA_MAP.get(m, m)
-        cleaned.append(
-            f'.linked_compartments(media="{m}")[0]{suff}'
-        )
-    return 'compartment'.join(cleaned)
+        if m == 'Leaf':
+            m = '$Leaf'
+        compartment_finder = f'.linked_compartments(media="{m}"'
+        if restrict_parcel:
+            compartment_finder += ', same_parcel=True'
+        cleaned.append(f'{compartment_finder})[0]{suff}{paren} {nxt}')
+    return from_compartment.join(cleaned)
 
 
 def convert_ternary(expression):
