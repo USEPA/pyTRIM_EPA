@@ -9,7 +9,7 @@ from trim_db.services import *
 DEBUG = True
 RESTRICT_COMPARTMENTS = [
     # 'Lake',
-    'E1', 'E2', 'E3'
+    # 'E1', 'E2', 'E3'
 ]
 
 
@@ -67,8 +67,8 @@ def make_transition_matrix(scenario):
 
     try:
         for chem_idx, chem in enumerate(chem_list):
-            if chem.name != 'Elemental Mercury':
-                continue
+            # if chem.name != 'Elemental Mercury':
+            #     continue
             print('\n' + '==' * 28)
             print(f'Chemical = {chem.name}')
             print('==' * 28)

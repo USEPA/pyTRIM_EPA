@@ -134,12 +134,26 @@ def make_transfer_matrix(scenario):
 
 
 if __name__ == '__main__':
-    from trim_db.local import *  # Loads user/role tables
+    import warnings
+    warnings.warn(
+        (
+            '\n'
+            '\n============================================================='
+            '\nDEPRECATED'
+            '\n-------------------------------------------------------------'
+            '\nThis version of the code for generating a transfer matrix'
+            ' has been deprecated; check out Scripts/generate_tm.py instead!'
+            '\n============================================================='
+            '\n'
+        ),
+        DeprecationWarning
+    )
+    if input('Continue? [Y/N] ').upper() == 'Y':
+        from trim_db.local import *  # Loads user/role tables
 
-    SCENARIO_NAME = 'Foundries_SS'
-    scn = ScenarioService.get(name=SCENARIO_NAME)
+        SCENARIO_NAME = 'Foundries_SS'
+        scn = ScenarioService.get(name=SCENARIO_NAME)
 
-    tm = make_transfer_matrix(scn)
-    tm.to_csv("Transfer_Matrix_test.csv")
-    print(tm)
-
+        tm = make_transfer_matrix(scn)
+        tm.to_csv("Transfer_Matrix_test.csv")
+        print(tm)
