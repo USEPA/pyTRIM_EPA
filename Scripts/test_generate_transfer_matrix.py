@@ -45,9 +45,9 @@ def make_transfer_matrix(scenario):
 
     problem_tfm_file = open("Problem_TFM_components.txt", "a")
     for chem_idx, chem in enumerate(chem_list):
-        problem_tfm_file.write(f"{20*'-'} Chemical: {chem} {20*'-'}\n")
+        problem_tfm_file.write(f"{20*'-'} Chemical: {chem} {20*'-'} Scenario: {chem.current_scenario()} {20*'-'} \n")
         print('\n' + '==' * 28)
-        print(f'Chemical = {chem.name}')
+        print(f'Chemical = {chem.name} **** Scenario: {chem.current_scenario()}')
         print('==' * 28)
         for x, sender in enumerate(comp_list):
             tm_x = int(chem_idx * n_comp + x)
@@ -81,10 +81,12 @@ def make_transfer_matrix(scenario):
                                     transfer_factor = transfer_factor.magnitude
                             elif pd.isna(transfer_factor):
                                 print(f"{20 * '*'} NAN PROBLEM {20 * '*'}")
+                                if transport_proc.algorithm_id in [2501, 2576]:
+                                    print("2507")
                                 problem_tfm_file.write(
                                     f"NAN PROBLEM: {sender.name} -> {receiver.name}: {transport_proc.name}, id: "
                                     f"{transport_proc.algorithm_id}\n")
-                            print(f"{transport_proc.name}: {transfer_factor}")
+                            print(f"{transport_proc.name}: {transfer_factor} ({transport_proc.algorithm_id})\n")
                         except Exception as err:
                             print(
                                 f"{20 * '*'} MAG PROBLEM {20 * '*'} {sender.name} -> {receiver.name}: {transport_proc.name}")
