@@ -41,6 +41,8 @@ def make_transition_matrix(scenario):
     ))
 
     def is_compartment_of_interest(comp):
+        if not RESTRICT_COMPARTMENTS:
+            return True
         for x in RESTRICT_COMPARTMENTS:
             if x in comp.standard_name:
                 return True
