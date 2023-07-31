@@ -431,6 +431,7 @@ def hacky_unit_cleaning(val):
     # HACKS
 
     val = val.replace('[um^2  *  day  *  nmol]', 'um^2  *  day  *  nmol')
+    val = val.replace(' [m/m]', '[m/m]')
 
     if (
         val.startswith('degrees clockwise')
@@ -796,6 +797,16 @@ def hacky_equation_cleaning(val):
 
     # if 'math.' in val:
     #     val = val.replace('math.math.', 'math.')
+    if '.chemical.Porosity' in val:
+        val = val.replace(
+            'compartment.chemical.Porosity',
+            'chemical.Porosity(compartment)'
+        )
+    if '.self.Porosity' in val:
+        val = val.replace(
+            'compartment.self.Porosity',
+            'self.Porosity(compartment)'
+        )
 
     return val
 
