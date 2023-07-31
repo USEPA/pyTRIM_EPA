@@ -51,7 +51,7 @@ class TransportProcess(Model):
             except Exception as e:
                 if 'Missing argument' in str(e):
                     raise
-                # raise
+                raise
                 return np.nan
         return cached_eval(**kwargs)
 

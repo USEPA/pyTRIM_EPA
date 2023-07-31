@@ -58,7 +58,7 @@ def as_function(equation, with_caching=True, **default_kwargs):
     def fix_non_callables(eq, evaluator):
         args = evaluated_args(eq, evaluator)
         for k, v in args.items():
-            if not v == CANT_EVAL or not k.endswith(')'):
+            if not isinstance(v, NoEval) or not k.endswith(')'):
                 continue
             non_func = k.rsplit('(')[0]
             if non_func not in args:
@@ -102,16 +102,21 @@ def as_function(equation, with_caching=True, **default_kwargs):
         except (IndexError):
             raise TypeError(
                 f'Invalid index!'
+                '\n>>>>>>>>>>>>>>>>>>>>>>>>'
                 f'\n{str_with_args(equation, evaluator)}'
+                '\n<<<<<<<<<<<<<<<<<<<<<<<<'
             )
-        except Exception:
+        except Exception as e:
             # print(f'{20 * "%%%%%%"}\n{evaluator.names}')
             # print(f'{20 * "******"}\n{custom_arg_map}')
             # print(f'{20 * "^^^^^^"}\n{equation}')
             # print(f'{20 * "______"}')
             raise TypeError(
                 f'Invalid equation!'
+                f'\n{e}'
+                '\n>>>>>>>>>>>>>>>>>>>>>>>>'
                 f'\n{str_with_args(equation, evaluator)}'
+                '\n<<<<<<<<<<<<<<<<<<<<<<<<'
             )
         finally:
             evaluator.names = old_names
@@ -119,7 +124,20 @@ def as_function(equation, with_caching=True, **default_kwargs):
     return func
 
 
-CANT_EVAL = '<Unable to Evaluate>'
+class NoEval(str):
+    def __init__(self, error):
+        self.error = error
+
+    def __str__(self):
+        return repr(self)
+
+    def __repr__(self):
+        return (
+            f'<Unable to Evaluate>'
+            '\n>>>>>>>>>>>>'
+            f'\n{self.error}'
+            '\n<<<<<<<<<<<<'
+        )
 
 
 def evaluated_args(eq, evaluator=evaluator):
@@ -161,13 +179,14 @@ def evaluated_args(eq, evaluator=evaluator):
         for el in els:
             try:
                 v = evaluator.eval(el)
-            except Exception:
-                v = CANT_EVAL
-                try:
-                    evaluated_args[k] = evaluator.eval(k)
-                except Exception as e:
-                    # print(f"Problem evaluating {k}: {e}")
-                    pass
+            except Exception as e:
+                # print(f"Problem evaluating {el}: {e}")
+                v = NoEval(e)
+                # try:
+                #     evaluated_args[k] = evaluator.eval(k)
+                # except Exception as e:
+                #     print(f"Problem evaluating {k}: {e}")
+                #     pass
             evaluated_args[el] = v
     return evaluated_args
 
