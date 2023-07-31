@@ -12,7 +12,10 @@ __all__ = [
 
 
 class ChemicalService(GenericService):
-    __model__ = parameterize(Chemical)
+    __model__ = parameterize(
+        Chemical,
+        default_scenario=lambda x: x._scenarios[0]
+    )
 
 
 class ParcelService(GenericService):
@@ -20,11 +23,17 @@ class ParcelService(GenericService):
 
 
 class VolumeElementService(GenericService):
-    __model__ = parameterize(VolumeElement)
+    __model__ = parameterize(
+        VolumeElement,
+        default_scenario=lambda x: x.parcel.scenario
+    )
 
 
 class CompartmentService(GenericService):
-    __model__ = parameterize(Compartment)
+    __model__ = parameterize(
+        Compartment,
+        default_scenario=lambda x: x.volume_element.parcel.scenario
+    )
 
     class media(GenericService):
         __model__ = Media
