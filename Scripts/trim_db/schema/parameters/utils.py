@@ -12,6 +12,9 @@ __all__ = ['ureg', 'as_quantity', 'is_number']
 
 ureg = pint.UnitRegistry(autoconvert_offset_to_baseunit=True)
 
+EMPERICALLY_DIMENSIONLESS = [
+    # '[length] ** 3 / [mass]'
+]
 
 BRACKETED = re.compile('\[.*?\]')  # noqa
 NOEXPOSYMBL = re.compile('[a-zA-Z]\d')  # noqa
@@ -77,6 +80,17 @@ def as_quantity(val, unit=''):
 def auto_sync_emperical_with_quantity(f):
     @wraps(f)
     def synced(a, b, strict_dimensions=False, strict_offset=False):
+        if not strict_dimensions:
+            if hasattr(a, 'dimensionality'):
+                if a.to_base_units().to_compact().units == 'dimensionless':
+                    a = a.magnitude
+                elif a.dimensionality in EMPERICALLY_DIMENSIONLESS:
+                    a = a.magnitude * ureg('')
+            if hasattr(b, 'dimensionality'):
+                if b.to_base_units().to_compact().units == 'dimensionless':
+                    b = b.magnitude
+                elif b.dimensionality in EMPERICALLY_DIMENSIONLESS:
+                    b = b.magnitude * ureg('')
         try:
             return f(a, b)
         except pint.errors.DimensionalityError as e:
@@ -144,7 +158,7 @@ def safe_power_quantity(a, b):
     a_mag = a.magnitude if hasattr(a, 'dimensionality') else a
     b_mag = b.magnitude if hasattr(b, 'dimensionality') else b
     if a_mag != a:
-        unit = a.units
+        unit = a.units ** b_mag
     else:
         unit = ''
     return as_quantity(simpleeval.safe_power(a_mag, b_mag), unit)
