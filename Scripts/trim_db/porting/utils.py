@@ -241,6 +241,9 @@ GLOBAL_REPLACE = {
     'conc_colloid': 'conc_Colloid',
     'Kd_colloid': 'Kd_Colloid',
     'rho_colloid': 'rho_Colloid',
+    'Depurationrate': 'DepurationRate',
+    'Fractionofareaavailableforerosion': 'FractionofAreaAvailableforErosion',
+
 
     'self.Volume': 'compartment.volume_element.volume',
     'self.Height': 'compartment.volume_element.height',
