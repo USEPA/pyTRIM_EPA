@@ -15,6 +15,10 @@ class CacheManager:
         return '&'.join([x for x in key_args if x])
 
     class Cacher(dict):
+        # def __init__(self, base_key, *args, **kwargs):
+        #     super().__init__(*args, **kwargs)
+        #     self.__base_key__ = base_key
+
         def wrap(self, f):
             @wraps(f)
             def cached(*args, **kwargs):
@@ -24,7 +28,10 @@ class CacheManager:
                 k = CacheManager.cache_key(*args, **kwargs)
 
                 if not CacheManager.DISABLED and k in self:
-                    # print(f'Cached for "{base_key}" and {k}: {self[k]}')
+                    # print(
+                    #     f'Cached for "{self.__base_key__}"'
+                    #     f' and {k}: {self[k]}'
+                    # )
                     ans = self[k]
                     if isinstance(ans, Exception):
                         raise ans
@@ -36,7 +43,10 @@ class CacheManager:
                     ans = e
 
                 if not CacheManager.DISABLED:
-                    # print(f'Caching: {ans} for "{base_key}" and {k}')
+                    # print(
+                    #     f'Caching: {ans} for "{self.__base_key__}"'
+                    #     f' and {k}'
+                    # )
                     self[k] = ans
 
                 if isinstance(ans, Exception):

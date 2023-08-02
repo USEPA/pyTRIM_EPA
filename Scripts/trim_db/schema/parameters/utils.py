@@ -16,6 +16,9 @@ EMPERICALLY_DIMENSIONLESS = [
     '[length] ** 3 / [mass]'
 ]
 
+ALLOW_ZERO_DIVISION = True
+EMPERICAL_ZERO_DIVISION = 0
+
 BRACKETED = re.compile('\[.*?\]')  # noqa
 NOEXPOSYMBL = re.compile('[a-zA-Z]\d')  # noqa
 
@@ -148,8 +151,12 @@ def safe_sub_quantity(a, b):
 
 @auto_sync_emperical_with_quantity
 def safe_div_quantity(a, b):
-    return op.truediv(a, b)
-
+    try:
+        return op.truediv(a, b)
+    except ZeroDivisionError:
+        if ALLOW_ZERO_DIVISION:
+            return EMPERICAL_ZERO_DIVISION
+        raise
 
 simpleeval.MAX_POWER = 100_000_000
 
