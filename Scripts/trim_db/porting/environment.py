@@ -150,6 +150,7 @@ for k, v in list(MEDIA_MAP.items()):
 def clean_compartment_name(name):
     name = name.replace('/', '_')
     name = name.replace(' - ', '_').replace(' ', '_')
+    name = name.replace('___', '_')
     return name
 
 

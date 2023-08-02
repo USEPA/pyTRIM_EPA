@@ -231,6 +231,8 @@ GLOBAL_REPLACE = {
     'conc_colloid': 'conc_Colloid',
     'Kd_colloid': 'Kd_Colloid',
     'rho_colloid': 'rho_Colloid',
+    'DepurationRate': 'Depurationrate',
+    'FractionofAreaAvailableforErosion': 'Fractionofareaavailableforerosion',
 
     'self.Volume': 'compartment.volume_element.volume',
     'self.Height': 'compartment.volume_element.height',
@@ -263,8 +265,10 @@ GLOBAL_REPLACE = {
     'receivingCompartment.Chemical.': f'receiver{VAR_SPLITTER}chemical.',  # noqa
     'Receivingcompartment.Chemical.': f'receiver{VAR_SPLITTER}chemical.',  # noqa
     'receivingcompartment.chemical.': f'receiver{VAR_SPLITTER}chemical.',  # noqa
+
     'Receivingchemical.': f'receiver{VAR_SPLITTER}chemical.',  # noqa
     'ReceivingChemical.': f'receiver{VAR_SPLITTER}chemical.',  # noqa
+    'ReceivingChemical.Z_pureAir': 'chemical.Z_PureAir',
     'ReceivingCompartment.Volume': 'receiver.volume_element.volume',
     'receivingCompartment.Volume': 'receiver.volume_element.volume',
     'Receivingcompartment.Volume': 'receiver.volume_element.volume',
@@ -352,22 +356,22 @@ GLOBAL_REPLACE = {
         'self.comp_vol_elem_sum_of("Area", "Surface_Soil")',
 
     'withinCompositeCompartment[Terrestrial Plant | Leaf | Leaf - Grasses/Herbs].LeafAreaIndex':
-        'sender.within_composite_compartment("LeafAreaIndex", "Grass_Leaf")',
+        'self.within_composite_compartment("LeafAreaIndex", "Grass_Leaf")',
 
     'withinCompositeCompartment[Terrestrial Plant | Leaf | Leaf - Agriculture - General].LeafAreaIndex':
-        'sender.within_composite_compartment("LeafAreaIndex", "Agriculture_Leaf")',
+        'self.within_composite_compartment("LeafAreaIndex", "Agriculture_Leaf")',
 
     'withinCompositeCompartment[Terrestrial Plant | Leaf | Leaf - Agriculture - General].LitterfallRate':
-        'sender.within_composite_compartment("LitterfallRate", "Agriculture_Leaf")',
+        'self.within_composite_compartment("LitterfallRate", "Agriculture_Leaf")',
 
     'withinCompositeCompartment[Terrestrial Plant | Leaf | Leaf - Coniferous Forest].LitterfallRate':
-        'sender.within_composite_compartment("LitterfallRate", "Coniferous_Leaf")',
+        'self.within_composite_compartment("LitterfallRate", "Coniferous_Leaf")',
 
     'withinCompositeCompartment[Terrestrial Plant | Leaf | Leaf - Deciduous Forest].LitterfallRate':
-        'sender.within_composite_compartment("LitterfallRate", "Deciduous_Leaf")',
+        'self.within_composite_compartment("LitterfallRate", "Deciduous_Leaf")',
 
     'withinCompositeCompartment[Terrestrial Plant | Leaf | Leaf - Grasses/Herbs].LitterfallRate':
-        'sender.within_composite_compartment("LitterfallRate", "Grass_Leaf")'
+        'self.within_composite_compartment("LitterfallRate", "Grass_Leaf")'
 }
 
 
@@ -734,7 +738,7 @@ def unit_conversions_to_pint(expression):
 def hacky_equation_cleaning(val):
     # HACKS
 
-    val = val.replace('compartment.chemical.Porosity', 'self.Porosity(compartment)')
+    val = val.replace('compartment.chemical.Porosity', 'chemical.Porosity(compartment)')
     val = val.replace('compartment.self.Porosity', 'self.Porosity(compartment)')
     # if 'math.' in val:
     #     val = val.replace('math.math.', 'math.')
