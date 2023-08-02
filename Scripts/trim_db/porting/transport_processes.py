@@ -140,6 +140,46 @@ def parse_transport_processes(algorithm_parameters, restrict_to=None):
                 ]
                 requirements.append(f'({" or ".join(or_media)})')
 
+        comp_relationship = get_param(params, 'compartmentRelationship')
+        if comp_relationship == 'ABOVE_OR_BELOW':
+            requirements.append(
+                'sender.volume_element.parcel.id'
+                ' == receiver.volume_element.parcel.id'
+            )
+        elif comp_relationship in [
+            'IN_SAME_VOLUME_ELEMENT', 'IN_SAME_COMPOSITE'
+        ]:
+            requirements.append(
+                'sender.volume_element.id'
+                ' == receiver.volume_element.id'
+            )
+        elif comp_relationship == 'NEXT_TO':
+            requirements.append(
+                'sender.is_next_to(receiver)'
+            )
+        elif comp_relationship == 'SENDER_ABOVE':
+            requirements.append(
+                'sender.volume_element.parcel.id'
+                ' == receiver.volume_element.parcel.id'
+            )
+            requirements.append(
+                'sender.volume_element.bottom >'
+                ' receiver.volume_element.bottom'
+            )
+        elif comp_relationship == 'SENDER_BELOW':
+            requirements.append(
+                'sender.volume_element.parcel.id'
+                ' == receiver.volume_element.parcel.id'
+            )
+            requirements.append(
+                'sender.volume_element.top <'
+                ' receiver.volume_element.top'
+            )
+        elif comp_relationship == 'SAME':
+            requirements.append(
+                'sender.id == receiver.id'
+            )
+
         # print(requirements)
         if requirements:
             proc.requirements = ' and '.join(requirements)
