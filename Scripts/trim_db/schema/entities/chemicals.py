@@ -18,9 +18,16 @@ class Chemical(Model):
         )
     )
 
+    @property
+    def normalized_category(self):
+        return self.category.replace(' |', '|').replace('| ', '|')
+    
+
     def isa(self, cat_or_chem):
         if isinstance(cat_or_chem, str):
-            if cat_or_chem == self.name or cat_or_chem == self.category:
+            if cat_or_chem == self.name:
+                return True
+            if f'|{cat_or_chem}|' in f'|{self.normalized_category}|':
                 return True
         elif isinstance(cat_or_chem, Chemical):
             if cat_or_chem.id == self.id:

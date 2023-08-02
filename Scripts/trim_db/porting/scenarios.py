@@ -82,9 +82,9 @@ def parse_scenario(
                 lib, props
             )
     parameter_library.update(lib)
-    with open('temp.json', 'w') as f:
-        import json
-        json.dump(parameter_library, f)
+    # with open('temp.json', 'w') as f:
+    #     import json
+    #     json.dump(parameter_library, f)
 
     if parameter_library:
         parse_compartment_props(s, parameter_library.get('Compartment', {}))
@@ -419,7 +419,8 @@ def parse_compartment_props(
     if not silent:
         print('Loading compartment-media properties from library data ...')
 
-    from .environment import MEDIA_MAP, clean_compartment_name
+    from .config import MEDIA_MAP
+    from .environment import clean_compartment_name
     from ..schema import Compartment, Chemical
     from functools import partial
 

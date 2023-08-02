@@ -1,0 +1,5 @@
+{
+    "scenario_name": "Foundries_SS",
+    "directory": "./Scripts/trim_core/backend/Legacy_Input_Files",
+    "import_rules": "./Scripts/import_config/default_rules.json"
+}
