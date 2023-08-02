@@ -864,6 +864,16 @@ class Compartment(Model):
         # To bad, we just didn't connect
         return False
 
+    def is_next_to(self, compartment):
+        if self.volume_element == compartment.volume_element:
+            return False  # We're actually in the same "space" ...
+
+        if self.volume_element.overlap_with(compartment.volume_element) > 0:
+            return True  # Our "spaces" touch!
+
+        return False
+
+
     def get_links(self, compartment):
         comp_links = [
             x for x in self._links if x.receiver_id == compartment.id
