@@ -91,6 +91,25 @@ class classproperty:
         return self._f(owner, obj)
 
 
+# class CallableQuantity():
+#     def __init__(self, quantity):
+#         self.__quantity__ = quantity
+
+#     def __getattr__(self, name):
+#         if name == '__quantity__':
+#             raise AttributeError()
+#         return getattr(self.__quantity__, name)
+
+#     def __call__(self, *args, **kwargs):
+#         return self.__quantity__
+
+#     def __repr__(self, *args, **kwargs):
+#         return self.__quantity__.__repr__(*args, **kwargs)
+
+#     def __str__(self, *args, **kwargs):
+#         return self.__quantity__.__str__(*args, **kwargs)
+
+
 def parameterize(cls, default_scenario=None):
     cls_name = cls.__name__
 
@@ -376,6 +395,7 @@ def parameterize(cls, default_scenario=None):
             opts.update(kwargs)
             val = formula.eval(*args, **opts)
             val = convert_unit(val, unit, strict=strict_units)
+            # val = CallableQuantity(val)
             return val
         return wrapped
 
@@ -418,6 +438,7 @@ def parameterize(cls, default_scenario=None):
             else:
                 val = q
             val = convert_unit(val, unit, strict=strict_units)
+            # val = CallableQuantity(val)
             return val
         return default
 
