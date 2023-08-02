@@ -1,3 +1,21 @@
+import warnings
+warnings.warn(
+    (
+        '\n'
+        '\n============================================================='
+        '\nDEPRECATED'
+        '\n-------------------------------------------------------------'
+        '\nThis version of the code for generating a transfer matrix'
+        ' has been deprecated; check out Scripts/generate_tm.py instead!'
+        '\n============================================================='
+        '\n'
+    ),
+    DeprecationWarning
+)
+if input('Continue? [Y/N] ').upper() != 'Y':
+    import sys
+    sys.exit()
+
 # import termios
 import time
 import types
@@ -134,13 +152,9 @@ def make_transfer_matrix(scenario):
 
 
 if __name__ == '__main__':
+    from trim_db.utils.users_roles import implement_users_roles
     try:
-        from trim_db.utils.users_roles import implement_users_roles
         implement_users_roles()
-        # time.sleep(10)
-        # from trim_db.porting import *
-        # from trim_db.schema import *
-        # from trim_db.services import *
     except Exception as e:
         print(f'-- Unable to create Users/Roles.\n{e}')
 
@@ -150,4 +164,3 @@ if __name__ == '__main__':
     tm = make_transfer_matrix(scn)
     tm.to_csv("Transfer_Matrix_test.csv")
     print(tm)
-

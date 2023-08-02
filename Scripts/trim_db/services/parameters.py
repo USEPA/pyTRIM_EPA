@@ -91,7 +91,26 @@ class classproperty:
         return self._f(owner, obj)
 
 
-def parameterize(cls):
+# class CallableQuantity():
+#     def __init__(self, quantity):
+#         self.__quantity__ = quantity
+
+#     def __getattr__(self, name):
+#         if name == '__quantity__':
+#             raise AttributeError()
+#         return getattr(self.__quantity__, name)
+
+#     def __call__(self, *args, **kwargs):
+#         return self.__quantity__
+
+#     def __repr__(self, *args, **kwargs):
+#         return self.__quantity__.__repr__(*args, **kwargs)
+
+#     def __str__(self, *args, **kwargs):
+#         return self.__quantity__.__str__(*args, **kwargs)
+
+
+def parameterize(cls, default_scenario=None):
     cls_name = cls.__name__
 
     def get_scenario(obj, scenario=None):
@@ -99,8 +118,15 @@ def parameterize(cls):
             CacheManager.clear_cache(f'entity_param::{cls_name}')
             setattr(obj, '__current_scenario', scenario)
         if getattr(obj, '__current_scenario', None) is None:
-            from trim_db.services import ScenarioService
-            s = ScenarioService.get_or_create(name='Default', creator_id=1)
+            s = None
+            if default_scenario is not None:
+                try:
+                    s = default_scenario(obj)
+                except Exception:
+                    pass
+            if s is None:
+                from trim_db.services import ScenarioService
+                s = ScenarioService.get_or_create(name='Default', creator_id=1)
             setattr(obj, '__current_scenario', s)
         return obj.__current_scenario
 
@@ -369,6 +395,7 @@ def parameterize(cls):
             opts.update(kwargs)
             val = formula.eval(*args, **opts)
             val = convert_unit(val, unit, strict=strict_units)
+            # val = CallableQuantity(val)
             return val
         return wrapped
 
@@ -411,6 +438,7 @@ def parameterize(cls):
             else:
                 val = q
             val = convert_unit(val, unit, strict=strict_units)
+            # val = CallableQuantity(val)
             return val
         return default
 

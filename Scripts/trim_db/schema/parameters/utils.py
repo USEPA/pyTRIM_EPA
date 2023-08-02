@@ -12,6 +12,12 @@ __all__ = ['ureg', 'as_quantity', 'is_number']
 
 ureg = pint.UnitRegistry(autoconvert_offset_to_baseunit=True)
 
+EMPERICALLY_DIMENSIONLESS = [
+    '[length] ** 3 / [mass]'
+]
+
+ALLOW_ZERO_DIVISION = True
+EMPERICAL_ZERO_DIVISION = 0
 
 BRACKETED = re.compile('\[.*?\]')  # noqa
 NOEXPOSYMBL = re.compile('[a-zA-Z]\d')  # noqa
@@ -21,7 +27,8 @@ def is_number(val):
     check = str(val).strip()
     if not check:
         return False
-    check = check.replace('.', '').replace('-', '').replace('+', '').split('e')
+    check = check.replace('.', '').replace('-', '').replace('+', '')
+    check = check.split('e')
     for part in check:
         if not part.isnumeric():
             return False
@@ -59,11 +66,11 @@ def as_quantity(val, unit=''):
 
     if not is_number(val):
         raise TypeError(f'Invalid magnitude: "{val}"')
-    import tokenize
-    try:
-        tmp = ureg(unit)
-    except tokenize.TokenError as msg:
-        print(f"{msg} ---> {unit}")
+    # import tokenize
+    # try:
+    #     tmp = ureg(unit)
+    # except tokenize.TokenError as msg:
+    #     print(f"{msg} ---> {unit}")
 
     quantity = val * ureg(unit)
 
@@ -76,6 +83,17 @@ def as_quantity(val, unit=''):
 def auto_sync_emperical_with_quantity(f):
     @wraps(f)
     def synced(a, b, strict_dimensions=False, strict_offset=False):
+        if not strict_dimensions:
+            if hasattr(a, 'dimensionality'):
+                if a.to_base_units().to_compact().units == 'dimensionless':
+                    a = a.magnitude
+                elif a.dimensionality in EMPERICALLY_DIMENSIONLESS:
+                    a = a.magnitude * ureg('')
+            if hasattr(b, 'dimensionality'):
+                if b.to_base_units().to_compact().units == 'dimensionless':
+                    b = b.magnitude
+                elif b.dimensionality in EMPERICALLY_DIMENSIONLESS:
+                    b = b.magnitude * ureg('')
         try:
             return f(a, b)
         except pint.errors.DimensionalityError as e:
@@ -133,8 +151,12 @@ def safe_sub_quantity(a, b):
 
 @auto_sync_emperical_with_quantity
 def safe_div_quantity(a, b):
-    return op.truediv(a, b)
-
+    try:
+        return op.truediv(a, b)
+    except ZeroDivisionError:
+        if ALLOW_ZERO_DIVISION:
+            return EMPERICAL_ZERO_DIVISION
+        raise
 
 simpleeval.MAX_POWER = 100_000_000
 
@@ -143,7 +165,7 @@ def safe_power_quantity(a, b):
     a_mag = a.magnitude if hasattr(a, 'dimensionality') else a
     b_mag = b.magnitude if hasattr(b, 'dimensionality') else b
     if a_mag != a:
-        unit = a.units
+        unit = a.units ** b_mag
     else:
         unit = ''
     return as_quantity(simpleeval.safe_power(a_mag, b_mag), unit)

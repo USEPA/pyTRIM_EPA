@@ -1,5 +1,4 @@
 import os
-# from flask_sqlalchemy import SQLAlchemy
 from ..schema import Model
 from ..schema.utils.caching import CacheManager
 
@@ -7,31 +6,20 @@ from ..schema.utils.caching import CacheManager
 __all__ = ['db', 'GenericService', 'PermissionsMixin']
 
 
-if os.getenv('TEST_DB_SERVERLESS') == "True":
-    print('-- Connecting to database.db')
+if os.getenv('TEST_DB_SERVERLESS'):
     from .engine import DataBase
+    db_filename = 'database.db'
     db_path = (
         'sqlite:///'
-        f'{os.path.dirname(os.path.abspath(__file__))}/../../'
-        'database.db'
+        + f'{os.path.dirname(os.path.abspath(__file__))}/../../'
+        + db_filename
     )
+    print(f'-- Connecting to local SQLite file\n({db_path})')
     db = DataBase(db_path, model_base=Model)
 else:
     print('-- Connecting to flask_sqlalchemy db')
     from flask_sqlalchemy import SQLAlchemy
     db = SQLAlchemy(model_class=Model)
-
-
-# db = SQLAlchemy(model_class=Model)
-
-# import os
-# from .engine import DataBase
-# db_path = (
-#     'sqlite:///'
-#     f'{os.path.dirname(os.path.abspath(__file__))}/../../'
-#     'database.db'
-# )
-# db = DataBase(db_path, model_base=Model)
 
 
 def make_key(**opts):
