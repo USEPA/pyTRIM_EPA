@@ -62,8 +62,13 @@ def as_function(equation, with_caching=True, **default_kwargs):
                 continue
             non_func = k.rsplit('(')[0]
             if non_func not in args:
-                continue
-            eq = eq.replace(k, non_func)
+                # If it were already in args, we'd know it was ok.
+                # But we need to check if this can be evaluated
+                try:
+                    evaluator.eval(non_func)
+                except Exception:
+                    continue  # Something is still wrong here, so leave it
+            eq = eq.replace(k, non_func)  # Use the non-function version
         return eq
 
     @CacheManager.with_caching(f'equation::"{equation}"')
