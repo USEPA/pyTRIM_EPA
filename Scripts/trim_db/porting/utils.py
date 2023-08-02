@@ -797,16 +797,16 @@ def hacky_equation_cleaning(val):
 
     # if 'math.' in val:
     #     val = val.replace('math.math.', 'math.')
-    if '.chemical.Porosity' in val:
-        val = val.replace(
-            'compartment.chemical.Porosity',
-            'chemical.Porosity(compartment)'
-        )
-    if '.self.Porosity' in val:
-        val = val.replace(
-            'compartment.self.Porosity',
-            'self.Porosity(compartment)'
-        )
+    if '.Porosity' in val:
+        for x in ['chemical', 'self']:
+            val = val.replace(
+                f'compartment.{x}.Porosity', f'{x}.Porosity(compartment)'
+            )
+    if '.Z_PureAir(' in val:
+        for x in ['sender', 'receiver', 'self', 'compartment']:
+            val = val.replace(
+                f'.Z_PureAir({x})', '.Z_PureAir'
+            )
 
     return val
 
