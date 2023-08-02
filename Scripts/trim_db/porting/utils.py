@@ -802,11 +802,11 @@ def hacky_equation_cleaning(val):
             val = val.replace(
                 f'compartment.{x}.Porosity', f'{x}.Porosity(compartment)'
             )
-    if '.Z_PureAir(' in val:
-        for x in ['sender', 'receiver', 'self', 'compartment']:
-            val = val.replace(
-                f'.Z_PureAir({x})', '.Z_PureAir'
-            )
+    # if '.Z_PureAir(' in val:
+    #     for x in ['sender', 'receiver', 'self', 'compartment']:
+    #         val = val.replace(
+    #             f'.Z_PureAir({x})', '.Z_PureAir'
+    #         )
 
     return val
 
