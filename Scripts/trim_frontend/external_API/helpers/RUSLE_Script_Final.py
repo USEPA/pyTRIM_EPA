@@ -19,13 +19,10 @@ import processing
 from processing.core.Processing import Processing
 Processing.initialize()
 
-
 ClimateData = os.path.join(WORKING_DIR, "Inputs", "ClimateShapeFile.shp")
 Parcels = sys.argv[1]
 
 def RUSLE(Parcels, ClimateData):
-
-
     # Import climate data shapefile layer
     Climate_layer = QgsVectorLayer(ClimateData, "ClimateData", "ogr") 
     if not Climate_layer.isValid():
