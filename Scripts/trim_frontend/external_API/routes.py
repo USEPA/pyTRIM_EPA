@@ -12,7 +12,7 @@ from flask_security import login_required
 from custom.flask_api import ApiException, ApiResult
 from trim_frontend import api
 from ..utils.logging import make_logger
-from .helpers import UsdaApi, UsleClimateApi
+from .helpers import UsdaApi, UsleClimateApi, convert_to_geojson
 from pyproj import CRS, Transformer
 from trim_db import ParcelService
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
@@ -364,15 +364,19 @@ class UsleRData:
     @staticmethod
     def run(parcels, ClimateData):
         logger = make_logger('external_api_call')
+
         WORKING_DIR = os.path.dirname(__file__)
         qgis_interpreter = "C:\\Program Files\\QGIS 3.30.0\\apps\\Python39\\python3.exe"
         RUSLE_script = os.path.join(WORKING_DIR, "helpers", "RUSLE_Script_Final.py")
 
-        p = subprocess.Popen([qgis_interpreter, RUSLE_script, json.dumps(parcels)],                     
+        parcels_fp = convert_to_geojson.GeoJson(parcels).convert_json()
+
+        p = subprocess.Popen([qgis_interpreter, RUSLE_script, parcels_fp],                     
                             stdout = subprocess.PIPE, 
                             stderr = subprocess.PIPE)
         stdout, stderr = p.communicate()
         if stderr:
             logger.error(stderr.strip().decode('utf-8'))
+        print("@@@@@@@@" + stdout.strip().decode('utf-8'))
         return stdout.strip().decode('utf-8')
 
