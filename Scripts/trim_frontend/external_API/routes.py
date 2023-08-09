@@ -370,13 +370,16 @@ class UsleRData:
         RUSLE_script = os.path.join(WORKING_DIR, "helpers", "RUSLE_Script_Final.py")
 
         parcels_fp = convert_to_geojson.GeoJson(parcels).convert_json()
-
-        p = subprocess.Popen([qgis_interpreter, RUSLE_script, parcels_fp],                     
-                            stdout = subprocess.PIPE, 
-                            stderr = subprocess.PIPE)
-        stdout, stderr = p.communicate()
-        if stderr:
-            logger.error(stderr.strip().decode('utf-8'))
-        print("@@@@@@@@" + stdout.strip().decode('utf-8'))
+        try:
+            p = subprocess.Popen([qgis_interpreter, RUSLE_script, parcels_fp],                     
+                                stdout = subprocess.PIPE, 
+                                stderr = subprocess.PIPE)
+            stdout, stderr = p.communicate()
+            if stderr:
+                logger.error(stderr.strip().decode('utf-8'))
+        except Exception as e:
+            logger.error(e)
+            
+        os.remove(parcels_fp)
         return stdout.strip().decode('utf-8')
 
