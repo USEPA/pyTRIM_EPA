@@ -23,6 +23,10 @@ function ErrToolTip(ele, is_valid, message) {
     return is_valid
 }
 
+function elementContainsWarning(ele){
+    return $(ele).find(".warningTT").length > 0;
+}
+
 let ErrorValidation = {
     isPositiveValue : function (ele) {
         if (!this.isValidNumber(ele)) {
@@ -36,5 +40,16 @@ let ErrorValidation = {
         let data = $(ele).val();
         let is_valid = isNumber(data);
         return ErrToolTip(ele, is_valid, "Invalid values found within number.");
+    },
+    rowTotalIsValid : function (ele) {
+        let row = ele.closest("tr");
+        let cells = $(row).find("input.editableCell");
+
+        let expected_total = parseFloat($(row).data("rsval"));
+        let total = cells.toArray().reduce((ps,e) => ps + parseFloat($(e).val()),0);
+
+        let is_valid = total === expected_total;
+        ele = $(ele).closest("td")
+        return ErrToolTip(ele, is_valid, "Sum of the fractions for given consuming organism should be "+expected_total)
     }
 }

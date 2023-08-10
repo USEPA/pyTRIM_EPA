@@ -473,9 +473,6 @@ def get_parcels():
     except Exception as e:
         logger.error(traceback.format_exc())
 
-    from trim_frontend.external_API.routes import get_soil_data
-    get_soil_data()
-
     return ApiResult({'scenario_head': sh, 'scenario': parcels, 'media': media})
 
 
