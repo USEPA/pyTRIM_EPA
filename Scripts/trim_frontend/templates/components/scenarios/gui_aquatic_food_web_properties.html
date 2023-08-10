@@ -413,105 +413,84 @@
                 $(this).hide();
             });
 
-            $('input.editableCell,select.editableCell').blur(function () {
-                let ee =this
-                let validation_promise = new Promise(function(res,rej) {
-                    let resp=validate_input(ee)
-                    if (resp) {
-                        res("Success")
-                    } else {
-                        rej("Fail")
-                    }
-                })
-                validation_promise.then(function(val) {
-                    let data = $(ee).val() == "" ? 0 : $(ee).val()
-                    let $label = $(ee).next("label.editableCell")
-                    $label.siblings("input").hide()
-                    $label.show().text(data)
-                }, function(err){
-                    console.log(err)
-                })
-                let data = $(this).val() == "" ? 0 : $(this).val()
-                let $label = $(this).next("label.editableCell")
-                $label.siblings("input").hide()
-                $label.show().text(data)
-                let parcel_info = $(this).data('parcelinfo')
+            $('input.editableCell,select.editableCell').blur(function () {           
+                let parcel_info = $(this).data('parcelinfo');
                 if (parcel_info) {
-                    parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                    console.log(parcel_info)
-                    TRIM.api.updateParcel(parcel_info)
-                    if (tblId) {
-                        let default_data =  default_aquatic_data
-                        table_data.map(function(e,i){
-                                e['unit'] = default_data[e['Property']]['unit']
-                                e['helpText'] = default_data[e['Property']]['helpText']
-                                e['shortProperty'] = default_data[e['Property']]['short_name']
-                            }
-                        )
-                        table_data = get_Data_from_table(tblId)
-                        TableRedraw(table_data, table_type)
+                    submit_aquatic_table(this, parcel_info);
+                }
+                else {
+                    let is_valid_total = ErrorValidation.rowTotalIsValid(this); 
+                    if (is_valid_total) {
+                        submit_diet_tables(this);
                     }
                 }
             })
 
-            function validate_input(elem) {
-                let isValidated = $(elem).data("validate")
-                if (isValidated == "True") {
-                    let validation_type = $(elem).data("valtype")
-                    if (validation_type == "rowSum") {
-                        let this_row = $(elem).closest("tr")
-                        let row_cells = $(this_row).find("input.editableCell")
-                        let sum_val = parseFloat($(this_row).data("rsval"))
-                        let total = row_cells.toArray().reduce((ps,e) => ps + parseFloat($(e).val()),0)
-                        if (total != sum_val) {
-                            let tt = '<label class="warningTT" data-toggle="tooltip" data-placement="top" data-html="true" title="Sum of the fractions for given consuming organism should be 1"><i class="ml-1 fas fa-exclamation-triangle"></i></label>'
-                            let this_cell = $(elem).closest("td")
-                            $("label.warningTT").tooltip('hide')
-                            if ($(this_cell).find("label.warningTT").length == 0) {
-                                $(this_cell).append(tt)
-                                $(this_cell).find("label.warningTT").tooltip('show')
-                            }
-                            return true
-                        } else {
-                            $(this_row).find("label.warningTT").tooltip('dispose')
-                            $(this_row).find("label.warningTT").remove()
-                            // Get all data from table and organize it into array of json form data
-                            let mat_table = $(this_row).closest("table")
-                            let col_headers = $(mat_table).find("thead > tr > th > div > span").map((i,e) => e.innerHTML)
-                            $(mat_table).find("tbody > tr").each(function(){
-                                let row_header = $(this).find("td > strong").text()
-                                let row_name = row_header.replaceAll(" ","").replaceAll("WaterColumn","Fish").replace("BenthicCarnivore", "FishBenthicCarnivore").replace("BenthicOmnivore", "FishBenthicOmnivore")
-                                let parcel_info = [{
-                                            'type': 'data',
-                                            'name': 'id',
-                                            'value': $(mat_table).data("parcelid")
-                                        },{
-                                            'type': 'data',
-                                            'name': 'field',
-                                            'value': row_name
-                                        }]
-                                $(this).find("td").each(function (i,e){
-                                    if ($(e).find("strong").length == 0) {
-                                        let col_name = "FractionDiet" + col_headers[i-1].replaceAll(" ","").replaceAll("WaterColumn","Fish").replace("BenthicCarnivore", "FishBenthicCarnivore").replace("BenthicOmnivore", "FishBenthicOmnivore")
-                                        let diet_fraction_val = $(e).find("label.editableCell").text()
-                                        let cell_form_data = {
-                                            'type': 'input',
-                                            'name': col_name,
-                                            'value': diet_fraction_val
-                                        }
-                                        parcel_info.push(cell_form_data)
-                                    }
-                                })
-                                // Push change to DB
-                                console.log(parcel_info)
-                                TRIM.api.updateParcel(parcel_info)
-                            })
-                            return true
-                        }
-                    }
-                } else {
-                    return true
+            function submit_aquatic_table(elem, parcel_info) {
+                let data = $(elem).val() == "" ? 0 : $(elem).val()
+                let $label = $(elem).next("label.editableCell")
+                $label.siblings("input").hide()
+                $label.show().text(data)
+                
+                parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
+
+                let is_valid = !elementContainsWarning($(this).parent());
+                if (is_valid) {
+                    console.log(parcel_info)
+                    TRIM.api.updateParcel(parcel_info)
                 }
+
+                if (tblId) {
+                    let default_data =  default_aquatic_data
+                    table_data.map(function(e,i){
+                            e['unit'] = default_data[e['Property']]['unit']
+                            e['helpText'] = default_data[e['Property']]['helpText']
+                            e['shortProperty'] = default_data[e['Property']]['short_name']
+                        }
+                    )
+                    table_data = get_Data_from_table(tblId)
+                    TableRedraw(table_data, table_type)
+                }
+            }
+
+            function submit_diet_tables(elem) {
+                // Get all data from table and organize it into array of json form data
+                let this_row = $(elem).closest("tr")
+                let mat_table = $(this_row).closest("table")
+                let col_headers = $(mat_table).find("thead > tr > th > div > span").map((i,e) => e.innerHTML)
+
+                $(mat_table).find("tbody > tr").each(function(){
+                    let row_header = $(this).find("td > strong").text()
+                    let row_name = row_header.replaceAll(" ","").replaceAll("WaterColumn","Fish").replace("BenthicCarnivore", "FishBenthicCarnivore").replace("BenthicOmnivore", "FishBenthicOmnivore")
+                    let parcel_info = [{
+                                'type': 'data',
+                                'name': 'id',
+                                'value': $(mat_table).data("parcelid")
+                            },{
+                                'type': 'data',
+                                'name': 'field',
+                                'value': row_name
+                            }]
+                    $(this).find("td").each(function (i,e){
+                        if ($(e).find("strong").length == 0) {
+                            let col_name = "FractionDiet" + col_headers[i-1].replaceAll(" ","").replaceAll("WaterColumn","Fish").replace("BenthicCarnivore", "FishBenthicCarnivore").replace("BenthicOmnivore", "FishBenthicOmnivore")
+                            let diet_fraction_val = $(e).find("label.editableCell").text()
+                            let cell_form_data = {
+                                'type': 'input',
+                                'name': col_name,
+                                'value': diet_fraction_val
+                            }
+                            parcel_info.push(cell_form_data)
+                        }
+                    })
+
+                    // Push change to DB
+                    let is_valid_row = !elementContainsWarning(this);
+                    if (is_valid_row){
+                        console.log(parcel_info)
+                        TRIM.api.updateParcel(parcel_info)   
+                    }
+                })
             }
         }
         var form = document.getElementById('aquatic-food-web-props-gui');
