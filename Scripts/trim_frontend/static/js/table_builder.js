@@ -23,8 +23,8 @@ function ErrToolTip(ele, is_valid, message) {
     return is_valid
 }
 
-function elementContainsWarning(ele){
-    return $(ele).find(".warningTT").length > 0;
+function elementIsValid(ele){
+    return $(ele).find(".warningTT").length === 0;
 }
 
 let ErrorValidation = {
@@ -43,8 +43,10 @@ let ErrorValidation = {
     },
     rowTotalIsValid : function (ele) {
         let row = ele.closest("tr");
+        if (!elementIsValid(row)) {
+            return false;
+        }
         let cells = $(row).find("input.editableCell");
-
         let expected_total = parseFloat($(row).data("rsval"));
         let total = cells.toArray().reduce((ps,e) => ps + parseFloat($(e).val()),0);
 

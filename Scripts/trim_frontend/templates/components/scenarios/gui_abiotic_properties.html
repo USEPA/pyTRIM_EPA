@@ -461,7 +461,7 @@
 
             // save modified cell
             $('input.editableCell,select.editableCell').blur(function () {
-                let is_valid = !elementContainsWarning($(this).parent());
+                let is_valid = elementIsValid($(this).parent());
 
                 if (is_valid) {
                     let data = $(this).val()
