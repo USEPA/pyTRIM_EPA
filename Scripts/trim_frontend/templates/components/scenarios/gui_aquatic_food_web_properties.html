@@ -413,33 +413,35 @@
                 $(this).hide();
             });
 
-            $('input.editableCell,select.editableCell').blur(function () {           
+            $('input.editableCell,select.editableCell').blur(function () {     
+                // NOTE -- by putting this here, will run check against
+                // all cells in every table 
+                ErrorValidation.isPositiveValue(this);
                 let parcel_info = $(this).data('parcelinfo');
+                
                 if (parcel_info) {
                     submit_aquatic_table(this, parcel_info);
                 }
-                else {
-                    let is_valid_total = ErrorValidation.rowTotalIsValid(this); 
-                    if (is_valid_total) {
+                else { 
+                    if (ErrorValidation.rowTotalIsValid(this)) {
                         submit_diet_tables(this);
                     }
                 }
             })
 
             function submit_aquatic_table(elem, parcel_info) {
-                let data = $(elem).val() == "" ? 0 : $(elem).val()
-                let $label = $(elem).next("label.editableCell")
-                $label.siblings("input").hide()
-                $label.show().text(data)
-                
-                parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
+                if (elementIsValid($(this).parent())){
+                    let data = $(elem).val() == "" ? 0 : $(elem).val()
+                    let $label = $(elem).next("label.editableCell")
+                    $label.siblings("input").hide()
+                    $label.show().text(data)
 
-                let is_valid = !elementContainsWarning($(this).parent());
-                if (is_valid) {
+                    parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data                
                     console.log(parcel_info)
                     TRIM.api.updateParcel(parcel_info)
+                } else {
+                    return
                 }
-
                 if (tblId) {
                     let default_data =  default_aquatic_data
                     table_data.map(function(e,i){
@@ -474,7 +476,7 @@
                     $(this).find("td").each(function (i,e){
                         if ($(e).find("strong").length == 0) {
                             let col_name = "FractionDiet" + col_headers[i-1].replaceAll(" ","").replaceAll("WaterColumn","Fish").replace("BenthicCarnivore", "FishBenthicCarnivore").replace("BenthicOmnivore", "FishBenthicOmnivore")
-                            let diet_fraction_val = $(e).find("label.editableCell").text()
+                            let diet_fraction_val = $(e).find("input.editableCell").val()
                             let cell_form_data = {
                                 'type': 'input',
                                 'name': col_name,
@@ -483,9 +485,8 @@
                             parcel_info.push(cell_form_data)
                         }
                     })
-
                     // Push change to DB
-                    let is_valid_row = !elementContainsWarning(this);
+                    let is_valid_row = elementIsValid(this);
                     if (is_valid_row){
                         console.log(parcel_info)
                         TRIM.api.updateParcel(parcel_info)   
