@@ -366,6 +366,9 @@ def find_arguments(equation, combine_partial_args=True, drop_functions=True):
         if not element:
             continue
 
+        if element.startswith(")[0]"):
+            continue
+
         args[element] = 1
 
     for k in list(args):
