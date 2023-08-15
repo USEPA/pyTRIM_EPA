@@ -318,11 +318,10 @@ GLOBAL_REPLACE = {
 
     'withinContainingVolumeElement': 'WithinContainingVolumeElement',
     'WithinContainingVolumeElement': 'WithinContainingVolumeElement',
-    'withincontainingvolumeelement': 'WithinContainingVolumeElement'
+    'withincontainingvolumeelement': 'WithinContainingVolumeElement',
+
+    'LitterfallRate': 'LitterFallRate'
 }
-# TODO-1: Convert sums above to Methods for ORM classes -- DONE
-# TODO-2: Formula Arguments wrong for the plant and abiotic fixes above. Why? Need to fix?
-# TODO-3: Use eq tester in root folder to test equations and find out why some cannot be evaluated when computing TM
 
 
 def clean_prop(prop, custom_replace={}):
