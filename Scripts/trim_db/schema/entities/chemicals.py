@@ -28,8 +28,6 @@ class Chemical(Model):
                 return True
             if f'|{cat_or_chem}|' in f'|{self.normalized_category}|':
                 return True
-            if cat_or_chem == "All":
-                return True
         elif isinstance(cat_or_chem, Chemical):
             if cat_or_chem.id == self.id:
                 return True

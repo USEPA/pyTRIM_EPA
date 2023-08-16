@@ -11,6 +11,37 @@
             "Source"
         ]
     },
+    "default_entries": {
+        "constants": [
+            ["g_per_kg", 1000, "g/kg"],
+            ["IdealGasConstant", 8.314, "(Pa*m^3)/(mol*K)"],
+            ["kg_per_g", 1e-3, "kg/g"],
+            ["kg_per_m3_Water", 1000, "kg/m^3"],
+            ["kg_per_ug", 1e6, "kg/ug"],
+            ["L_per_m3", 1000, "L/m^3"],
+            ["m3_per_kg_Water", 1e-3, "m^3/kg"],
+            ["m3_per_L", 1e-3, "m^3/L"],
+            ["m3_per_um3", 1e-18, "m^3/um^3"],
+            ["pi", 3.14159265358979323846, null],
+            ["ug_per_kg", 1e6, "ug/kg"],
+            ["um3_per_m3", 1e18, "um^3/m^3"],
+            ["vonKarmensConstant", 0.74, null],
+            ["waterMeltingPoint", 273.15, "K"],
+            ["erosionRateCalcSource", 1, null]
+        ],
+        "compartment_default_params": [
+            ["unitSoilLoss", 0.00036, "kg/m^2/day", "Compartment [Surface_Soil]"],
+            ["sedimentDeliveryRatioSlopeCoef", 0.125, null, "Compartment [Surface_Soil]"],
+            ["soilTillage", 0, null, null],
+            ["waterEvaporationRate", 0.7, "m[water]/year", "Compartment [Surface_Water]"],
+            ["BedDensity", 2600, "kg[sediment particles]/m^3[sediment particles]", "Compartment [Sediment]"],
+            ["ExternalSedimentInflow", 0, "kg[sediment particles]/day", "Compartment [Surface_Water]"],
+            ["RechargeRate", 0.000142, "(m^3[water]/m^2[interface])/day", "Compartment [Groundwater]"],
+            ["DiffusiveExchangeCoefficient", 0.000225, "m^2/day", "Compartment [Surface_Water]"],
+            ["FractionOfTotalErosion", 0, null, null],
+            ["FractionOfTotalRunoff", 0, null, null]
+        ]
+    },
     "transport_processes": [
         "Advection from Air to Air, Steady-state Approx",
         "Advection from Air to Air(AlgInstID_4075)",
