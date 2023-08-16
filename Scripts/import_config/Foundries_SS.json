@@ -1,5 +1,5 @@
 {
     "scenario_name": "Foundries_SS",
-    "directory": "/Users/55284/Library/CloudStorage/OneDrive-ICF/Desktop/RTR_TRIM-FaTE/TRIM_builder_new_mac/Scripts/trim_core/backend/Legacy_Input_Files",
-    "import_rules": "/Users/55284/Library/CloudStorage/OneDrive-ICF/Desktop/RTR_TRIM-FaTE/TRIM_builder_new_mac/Scripts/import_config/default_rules.json"
+    "directory": "./trim_core/backend/Legacy_Input_Files",
+    "import_rules": "./import_config/default_rules.json"
 }

@@ -636,19 +636,17 @@ class VolumeElement(Model):
 
         raise AssertionError('Unknown function!')
 
-    def overlap_with(self, volume_element):
+    def interface_with(self, volume_element):
         polygon_a = self.parcel.polygon
         polygon_b = volume_element.parcel.polygon
 
         is_neighbor = polygon_a.intersects(polygon_b)
         if not is_neighbor:
-            return 0 * ureg('m^3')
+            # CAREFUL: we assume dimensions are in meters ...
+            return 0 * ureg('m^3')  # technically m^2 ...
 
         intersection = polygon_a.intersection(polygon_b)
-        xy_overlap = intersection.area
-        if xy_overlap == 0:
-            # the borders must just touch
-            xy_overlap = intersection.length
+        xy_overlap = intersection.length
 
         top_a = self.top
         top_b = volume_element.top
@@ -656,7 +654,44 @@ class VolumeElement(Model):
         bottom_a = self.bottom
         bottom_b = volume_element.bottom
 
-        if (top_a == bottom_b or top_b == bottom_a) and intersection.area > 0:  # for overlying parcels
+        if (top_a == bottom_b or top_b == bottom_a):
+            z_overlap = 1
+
+        elif top_a >= top_b and top_b > bottom_a:
+            z_overlap = top_b - bottom_a
+
+        elif top_b >= top_a and top_a > bottom_b:
+            z_overlap = top_a - bottom_b
+
+        else:
+            z_overlap = 0
+
+        # CAREFUL: we assume dimensions are in meters ...
+        return (z_overlap * xy_overlap) * ureg('m^3')  # technically m^2 ...
+
+    def overlap_with(self, volume_element):
+        if self.interface_with(volume_element) <= 0:
+            return 0 * ureg('m^3')
+
+        polygon_a = self.parcel.polygon
+        polygon_b = volume_element.parcel.polygon
+
+        is_neighbor = polygon_a.intersects(polygon_b)
+        if not is_neighbor:
+            # CAREFUL: we assume dimensions are in meters ...
+            return 0 * ureg('m^3')
+
+        intersection = polygon_a.intersection(polygon_b)
+        xy_overlap = intersection.area
+
+        top_a = self.top
+        top_b = volume_element.top
+
+        bottom_a = self.bottom
+        bottom_b = volume_element.bottom
+
+        if (top_a == bottom_b or top_b == bottom_a):
+            # for overlying parcels
             z_overlap = 1
 
         elif top_a >= top_b and top_b > bottom_a:
@@ -670,6 +705,17 @@ class VolumeElement(Model):
 
         # CAREFUL: we assume dimensions are in meters ...
         return (z_overlap * xy_overlap) * ureg('m^3')
+
+    def midpoint_distance(self, volume_element):
+        if isinstance(volume_element, Compartment):
+            volume_element = volume_element.volume_element
+
+        polygon_a = self.parcel.polygon
+        polygon_b = volume_element.parcel.polygon
+
+        # CAREFUL: we assume dimensions are in meters ...
+        return polygon_a.centroid.distance(polygon_b.centroid) * ureg('m^2')
+
 
     def get_compartment(self, name=None, media=None):
         if name is None and media is None:
@@ -855,8 +901,8 @@ class Compartment(Model):
         if self.volume_element == compartment.volume_element:
             return True  # We're in the same "space"!
 
-        elif self.volume_element.overlap_with(compartment.volume_element) > 0:
-            return True  # Our "spaces" overlap!
+        elif self.volume_element.interface_with(compartment.volume_element) > 0:
+            return True  # Our "spaces" touch!
 
         elif compartment in self.custom_linked_compartments:
             return True
@@ -868,7 +914,7 @@ class Compartment(Model):
         if self.volume_element == compartment.volume_element:
             return False  # We're actually in the same "space" ...
 
-        if self.volume_element.overlap_with(compartment.volume_element) > 0:
+        if self.volume_element.interface_with(compartment.volume_element) > 0:
             return True  # Our "spaces" touch!
 
         return False

@@ -53,7 +53,7 @@ def load_data(trim_file_root, scenario_name, import_rules):
 
     parameter_library = {}
     for f in master_library:
-        parameter_library.update(read_master_library(f))
+        parameter_library.update(read_master_library(f, import_rules=import_rules))
         break  # Should only be one??
 
     for_chemicals = import_rules.get('chemicals', [])
@@ -79,6 +79,20 @@ def load_data(trim_file_root, scenario_name, import_rules):
         parameter_library['Algorithm'],
         restrict_to=import_rules.get('transport_processes')
     )
+
+    default_entries = import_rules.get('default_entries', {})
+
+    if default_entries:
+        print('Loading additional default parameters ...')
+
+        from trim_db.schema import Compartment
+
+    for param in default_entries.get('compartment_default_params', []):
+        if param[3] is None:
+            Compartment.parameters.add(param[0], value=param[1], unit=param[2])
+        else:
+            par_domain = ParameterService.domains.get(name=param[3])
+            Compartment.parameters.add(param[0], value=param[1], unit=param[2], domain=par_domain)
 
     non_emitting_media = import_rules.get('media', {}).get(
         'restrict_emissions', []
