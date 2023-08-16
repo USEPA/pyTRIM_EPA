@@ -83,7 +83,7 @@ def parse_transport_processes(algorithm_parameters, restrict_to=None):
 
         try:
             chem_cat = get_param(params, 'chemicalCategory')
-            if chem_cat:
+            if chem_cat and (chem_cat.upper().strip() != 'ALL'):
                 requirements.append(f'chemical.isa("{chem_cat}")')
         except Exception:
             pass
@@ -94,6 +94,8 @@ def parse_transport_processes(algorithm_parameters, restrict_to=None):
         ]
         for param, name in require_comps:
             m_name = get_param(params, param)
+            if m_name.upper().strip() == 'ALL':
+                continue
 
             if m_name.lower().startswith('pseudosource'):
                 m_name = 'Source'
@@ -142,6 +144,7 @@ def parse_transport_processes(algorithm_parameters, restrict_to=None):
 
         comp_relationship = get_param(params, 'compartmentRelationship')
         if comp_relationship == 'ABOVE_OR_BELOW':
+            requirements.append('sender.id != receiver.id')
             requirements.append(
                 'sender.volume_element.parcel.id'
                 ' == receiver.volume_element.parcel.id'
@@ -149,6 +152,7 @@ def parse_transport_processes(algorithm_parameters, restrict_to=None):
         elif comp_relationship in [
             'IN_SAME_VOLUME_ELEMENT', 'IN_SAME_COMPOSITE'
         ]:
+            requirements.append('sender.id != receiver.id')
             requirements.append(
                 'sender.volume_element.id'
                 ' == receiver.volume_element.id'
@@ -158,6 +162,7 @@ def parse_transport_processes(algorithm_parameters, restrict_to=None):
                 'sender.is_next_to(receiver)'
             )
         elif comp_relationship == 'SENDER_ABOVE':
+            requirements.append('sender.id != receiver.id')
             requirements.append(
                 'sender.volume_element.parcel.id'
                 ' == receiver.volume_element.parcel.id'
@@ -167,6 +172,7 @@ def parse_transport_processes(algorithm_parameters, restrict_to=None):
                 ' receiver.volume_element.bottom'
             )
         elif comp_relationship == 'SENDER_BELOW':
+            requirements.append('sender.id != receiver.id')
             requirements.append(
                 'sender.volume_element.parcel.id'
                 ' == receiver.volume_element.parcel.id'

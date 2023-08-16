@@ -13,7 +13,8 @@ __all__ = ['ureg', 'as_quantity', 'is_number']
 ureg = pint.UnitRegistry(autoconvert_offset_to_baseunit=True)
 
 EMPERICALLY_DIMENSIONLESS = [
-    '[length] ** 3 / [mass]'
+    '[length] ** 3 / [mass]',
+    '[mass] / [length] ** 3'
 ]
 
 ALLOW_ZERO_DIVISION = True

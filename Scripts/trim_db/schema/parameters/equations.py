@@ -283,9 +283,9 @@ def find_arguments(equation, combine_partial_args=True, drop_functions=True):
             i -= 1
             if is_reserved(deconstructed[i], base=True):
                 break
-            if element[0] in '.]':
+            if element[0] in '.]),':
                 element = deconstructed[i] + element
-            elif deconstructed[i][-1] in '][':
+            elif deconstructed[i][-1] in '][,(':
                 element = deconstructed[i] + element
             elif i > 0 and deconstructed[i - 1][-1] in '[(':
                 if is_reserved(deconstructed[i - 1], base=True):
@@ -364,9 +364,6 @@ def find_arguments(equation, combine_partial_args=True, drop_functions=True):
                 element = element[:-3]
 
         if not element:
-            continue
-
-        if element.startswith(")[0]"):
             continue
 
         args[element] = 1

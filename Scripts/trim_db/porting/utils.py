@@ -17,7 +17,7 @@ __all__ = [
 ]
 
 
-def read_master_library(filepath):
+def read_master_library(filepath, import_rules={}):
     print(f'Reading master library from "{filepath}" ...')
     read_lib = partial(
         pd.read_csv, filepath,
@@ -26,44 +26,12 @@ def read_master_library(filepath):
 
     df_lib = read_lib(skiprows=[0], names=read_lib(nrows=0).columns.values)
 
-    from trim_db.schema import Scenario, Compartment
+    from trim_db.schema import Scenario
 
-    constants = [
-        ('g_per_kg', 1000, 'g/kg'),
-        ('IdealGasConstant', 8.314, '(Pa*m^3)/(mol*K)'),
-        ('kg_per_g', 1e-3, 'kg/g'),
-        ('kg_per_m3_Water', 1000, 'kg/m^3'),
-        ('kg_per_ug', 1e6, 'kg/ug'),
-        ('L_per_m3', 1000, 'L/m^3'),
-        ('m3_per_kg_Water', 1e-3, 'm^3/kg'),
-        ('m3_per_L', 1e-3, 'm^3/L'),
-        ('m3_per_um3', 1e-18, 'm^3/um^3'),
-        ('pi', 3.14159265358979323846, None),
-        ('ug_per_kg', 1e6, 'ug/kg'),
-        ('um3_per_m3', 1e18, 'um^3/m^3'),
-        ('vonKarmensConstant', 0.74, None),
-        ('waterMeltingPoint', 273.15, 'K'),
-        ('erosionRateCalcSource', 1, None)
-    ]
+    default_entries = import_rules.get('default_entries', {})
 
-    compartment_default_params = [
-        ('unitSoilLoss', 0.00036, 'kg/m^2/d', 'Compartment [Surface_Soil]'),
-        ('sedimentDeliveryRatioSlopeCoef', 0.125, None, 'Compartment [Surface_Soil]'),
-        ('soilTillage', 0, None, None),
-        ('waterEvaporationRate', 0.7, 'm[water]/year', 'Compartment [Surface_Water]'),
-        ('BedDensity', 2600, 'kg[sediment particles]/m^3[sediment particles]', 'Compartment [Sediment]'),
-        ('ExternalSedimentInflow', 0, 'kg[sediment particles]/day', 'Compartment [Surface_Water]')
-    ]
-
-    for const in constants:
+    for const in default_entries.get('constants', []):
         Scenario.parameters.add(const[0], value=const[1], unit=const[2])
-
-    for param in compartment_default_params:
-        if param[3] is None:
-            Compartment.parameters.add(param[0], value=param[1], unit=param[2])
-        else:
-            par_domain = ParameterService.domains.get(name=param[3])
-            Compartment.parameters.add(param[0], value=param[1], unit=param[2], domain=par_domain)
 
     parsed = parse_master_library_params(df_lib)
 
@@ -97,7 +65,7 @@ def parse_master_library_params(library_df):
                 val = clean_prop(param_data.PropertyValue)
 
                 if isinstance(val, str):
-                    val = clean_equation(val)
+                    val = clean_equation(val, object_type)
 
                 if val is None or str(val) == 'None':
                     continue
@@ -249,6 +217,7 @@ GLOBAL_REPLACE = {
     'self.Height': 'compartment.volume_element.height',
     'compartment.Volume': 'compartment.volume_element.volume',
     'compartment.Height': 'compartment.volume_element.height',
+    'DistanceBetweenMidpoints': '.volume_element.midpoint_distance',
 
     'Algorithm.': 'algorithm.',
 
@@ -256,8 +225,8 @@ GLOBAL_REPLACE = {
     'TheLink.FractionSpecificcompartmentDiet': '1',
     'theLink.': 'link.',
     'TheLink.': 'link.',
-    'TheLink.InterfacialArea': 'sender.volume_element.overlap_with(receiver.volume_element)',  # noqa
-    'Thelink.InterfacialArea': 'sender.volume_element.overlap_with(receiver.volume_element)',  # noqa
+    'TheLink.InterfacialArea': 'sender.volume_element.interface_with(receiver.volume_element)',  # noqa
+    'Thelink.InterfacialArea': 'sender.volume_element.interface_with(receiver.volume_element)',  # noqa
 
     'SendingChemical.': 'chemical.',
     'SendingCompartment.Chemical.': f'sender{VAR_SPLITTER}chemical.',  # noqa
@@ -320,7 +289,9 @@ GLOBAL_REPLACE = {
     'WithinContainingVolumeElement': 'WithinContainingVolumeElement',
     'withincontainingvolumeelement': 'WithinContainingVolumeElement',
 
-    'LitterfallRate': 'LitterFallRate'
+    'LitterfallRate': 'LitterFallRate',
+    'FractionofTotalErosion': 'FractionOfTotalErosion',
+    'FractionofTotalRunoff': 'FractionOfTotalRunoff'
 }
 
 
@@ -375,6 +346,12 @@ def hacky_value_cleaning(val):
     val = val.replace('volume_element.volumeM', 'VolumeM')
     val = val.replace('volume_element.volumeF', 'VolumeF')
     val = val.replace('math.math.', 'math.')
+
+    for x in ['receiver', 'sender', 'compartment']:
+        val = val.replace(
+            f'.volume_element.midpoint_distance({x})',
+            f'.volume_element.midpoint_distance({x}.volume_element)'
+        )
 
     return val
 
@@ -505,11 +482,11 @@ AGGREGATE_FUNCTIONS = {
 
 COMPOSITE_COMPARTMENT_FUNCTIONS = {
     'SendingWithinCompositeCompartment': 'sender',
-    'WithinCompositeCompartment': 'sender',
+    'WithinCompositeCompartment': 'self',
     'WithinContainingVolumeElement': 'self'
 }
 
-def clean_equation(equation):
+def clean_equation(equation, object_type=None):
     equation = str(equation).strip()
     eq = deconstruct_equation(equation)
     args = find_arguments(equation, combine_partial_args=False)
@@ -570,7 +547,7 @@ def clean_equation(equation):
             'chemical.log10_K_OA', 'math.log10(chemical.K_OA)'
         )
 
-    cleaned = hacky_equation_cleaning(cleaned)
+    cleaned = hacky_equation_cleaning(cleaned, object_type)
 
     return cleaned
 
@@ -794,21 +771,21 @@ def unit_conversions_to_pint(expression):
     return cleaned
 
 
-def hacky_equation_cleaning(val):
+def hacky_equation_cleaning(val, object_type):
     # HACKS
 
-    # if 'math.' in val:
-    #     val = val.replace('math.math.', 'math.')
     if '.Porosity' in val:
         for x in ['chemical', 'self']:
             val = val.replace(
                 f'compartment.{x}.Porosity', f'{x}.Porosity(compartment)'
             )
-    # if '.Z_PureAir(' in val:
-    #     for x in ['sender', 'receiver', 'self', 'compartment']:
-    #         val = val.replace(
-    #             f'.Z_PureAir({x})', '.Z_PureAir'
-    #         )
+
+    if object_type == 'compartment':
+        for x in ['sender', 'receiver', 'compartment']:
+            val = val.replace(f' {x}.', ' self.')
+    elif object_type == 'chemical':
+        for x in ['chemical']:
+            val = val.replace(f' {x}.', ' self.')
 
     return val
 

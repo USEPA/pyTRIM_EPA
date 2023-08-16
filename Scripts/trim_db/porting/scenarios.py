@@ -129,6 +129,7 @@ TRANSFER_RULES = {
             'exportHTML',
             'exportTimeStepsDown',
             'significantDigits',
+            'image',
             # 'isDay_SteadyState_forAir',
             # 'isDay_SteadyState_forOther',
             # 'isDay_Dynamic'
@@ -137,7 +138,8 @@ TRANSFER_RULES = {
     'VolumeElement': {
         'ignore': [
             'top',
-            'bottom'
+            'bottom',
+            'image'
         ]
     },
     'Compartment': {
@@ -147,7 +149,8 @@ TRANSFER_RULES = {
             'Area',
             'category',
             'concentrationOutputUnits',
-            'Volume'
+            'Volume',
+            'image'
         ],
         'unit_map': {
             'SuspendedSedimentConcentration': 'kg/m^3'
@@ -274,7 +277,7 @@ def parse_props(props_file, oneline_keyvals=False, rules=TRANSFER_RULES):
                     val = None
 
                 if eq is not None:
-                    eq = clean_equation(eq)
+                    eq = clean_equation(eq, prop_type.lower())
 
                 unit = None
                 for k, v in iter_by_longest_key(UNIT_SUFFIXES):
