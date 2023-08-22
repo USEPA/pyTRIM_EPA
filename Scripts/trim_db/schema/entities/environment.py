@@ -654,7 +654,7 @@ class VolumeElement(Model):
         bottom_a = self.bottom
         bottom_b = volume_element.bottom
 
-        if (top_a == bottom_b or top_b == bottom_a):
+        if (top_a == bottom_b or top_b == bottom_a) and intersection.area > 0:  # for overlying parcels:
             z_overlap = 1
 
         elif top_a >= top_b and top_b > bottom_a:
@@ -690,7 +690,7 @@ class VolumeElement(Model):
         bottom_a = self.bottom
         bottom_b = volume_element.bottom
 
-        if (top_a == bottom_b or top_b == bottom_a):
+        if (top_a == bottom_b or top_b == bottom_a) and intersection.area > 0:  # for overlying parcels:
             # for overlying parcels
             z_overlap = 1
 
