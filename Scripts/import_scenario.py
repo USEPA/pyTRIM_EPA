@@ -110,6 +110,12 @@ def load_data(trim_file_root, scenario_name, import_rules):
                 m.can_emit = False
     CompartmentService.commit()
 
+    # Load met, litter fall and allow exchange files and update params
+    for file in default_entries.get('external_data_files', {}):
+        default_entries["external_data_files"][file] = os.path.join(trim_file_root, default_entries["external_data_files"][file])
+    ext_dict = read_external_data(default_entries.get('external_data_files', {}), scenario_name)
+
+    print(ext_dict)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
