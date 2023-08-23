@@ -24,6 +24,7 @@ class Chemical(Model):
 
     def isa(self, cat_or_chem):
         if isinstance(cat_or_chem, str):
+            cat_or_chem = cat_or_chem.replace(' |', '|').replace('| ', '|')
             if cat_or_chem == self.name:
                 return True
             if f'|{cat_or_chem}|' in f'|{self.normalized_category}|':
