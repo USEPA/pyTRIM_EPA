@@ -435,10 +435,7 @@ def parse_compartment_props(
         'compartments': {}
     }
 
-    if compartment is not None:
-        obj = compartment
-    else:
-        obj = Compartment
+    for_specific_compartment = (compartment is not None)
 
     for name, params in compartment_parameters.items():
         clean_name = clean_compartment_name(name)
@@ -457,11 +454,11 @@ def parse_compartment_props(
         domain_name = f'Compartment [{media.name}]'
 
         base_id = (
-            obj.id if isinstance(obj, Compartment) else media.id
+            compartment.id if for_specific_compartment else media.id
         )
 
         for prop, prop_data in params.items():
-            if prop in ignore:
+            if prop in ignore or not prop_data:
                 continue
 
             if prop == 'concentrationOutputFactor':
@@ -477,15 +474,15 @@ def parse_compartment_props(
                 formula = None
 
             had_rel_defs = False
-            for name in relative_params:
-                relative_defs = prop_data.pop(f'for_{name}', None)
+            for rel_type in relative_params:
+                relative_defs = prop_data.pop(f'for_{rel_type}', None)
                 if not relative_defs:
                     continue
                 had_rel_defs = True
 
-                if name == 'chemicals':
+                if rel_type == 'chemicals':
                     service_getter = ChemicalService.get
-                elif name == 'compartments':
+                elif rel_type == 'compartments':
                     service_getter = partial(find_compartment, s)
 
                 default = 0
@@ -495,16 +492,18 @@ def parse_compartment_props(
                     if not target:
                         continue
 
-                    target_params = relative_params[name].setdefault(
+                    target_params = relative_params[rel_type].setdefault(
                         (
                             target.name if isinstance(target, Chemical)
-                            else target.standard_name
+                            else compartment.standard_name
                         ), {}
                     )
                     if isinstance(target, Chemical):
                         target_params.setdefault('CAS', {
                             'value': target.cas_number
                         })
+                    else:
+                        base_id = target.id
                     target_prop_data = target_params.setdefault(prop, {
                         'default': default
                     })
@@ -541,65 +540,73 @@ def parse_compartment_props(
                 if prop in unit_map:
                     new_data['unit'] = unit_map[prop]
                 prop_data.update(new_data)
-                obj.parameters.add(prop, **prop_data)
+                if for_specific_compartment:
+                    compartment.parameters.add(prop, **prop_data)
+                else:
+                    Compartment.parameters.add(prop, **prop_data)
 
         CompartmentService.commit()
 
     target_id_path = (
-        'compartment.id' if isinstance(obj, Compartment)
+        'compartment.id' if for_specific_compartment
         else 'compartment.media.id'
     )
 
-    # if relative_params['compartments']:
-    #     print(relative_params)
-    #     raise AssertionError
-
-    for name, rel_params in relative_params.items():
-        for prop_data in rel_params.values():
-            for target_prop_data in prop_data.values():
-                if 'value' in target_prop_data:
+    for rel_type, rel_params in relative_params.items():
+        for comp_name, rel_props in rel_params.items():
+            for prop_name, prop_data in rel_props.items():
+                if 'value' in prop_data:
                     continue
-                vals = target_prop_data.pop('values', {})
-                forms = target_prop_data.pop('formulas', {})
-                default = target_prop_data.pop('default', None)
+                vals = prop_data.pop('values', {})
+                formulas = prop_data.pop('formulas', {})
+                default = prop_data.pop('default', None)
 
-                vals = [
-                    f'(({k}) if {target_id_path} in {set(v)}'
-                    for k, v in vals.items() if v and k
-                ]
+                total_opts = len(vals) + len(formulas)
 
-                forms = [
-                    f'(({k}) if {target_id_path} in {set(v)}'
-                    for k, v in forms.items() if v and k
-                ]
-                if vals:
-                    forms.extend(vals)
-
-                if not forms:
-                    formula = None
-                else:
+                if total_opts > 0:
+                    formulas = [
+                        f'(({k}) if {target_id_path} in {set(v)}'
+                        for k, v in formulas.items() if v and k
+                    ]
+                    if vals:
+                        vals = [
+                            f'(({k}) if {target_id_path} in {set(v)}'
+                            for k, v in vals.items() if v and k
+                        ]
+                        formulas.extend(vals)
                     formula = (
-                        ' else '.join(forms)
+                        ' else '.join(formulas)
                         + f' else {default}'
-                        + (')' * len(forms))
+                        + (')' * len(formulas))
                     ).strip() or None
+                    if rel_type == 'compartments':
+                        formula = formula.replace('compartment.', 'receiver.')
                     formula = formula.replace('self.', 'compartment.')
+                else:
+                    formula = None
 
-                target_prop_data.update({
-                    'value': None if formula is not None else default,
-                    'formula': formula
-                })
+                if rel_type == 'compartments':
+                    prop_data.update({
+                        'value': formula if formula is not None else default
+                    })
+                elif rel_type == 'chemicals':
+                    prop_data.update({
+                        'value': None if formula is not None else default,
+                        'formula': formula
+                    })
 
-        if name == 'chemicals':
+            if rel_type == 'compartments':
+                sender = find_compartment(s, comp_name)
+                parse_compartment_props(
+                    s, {sender.media.name: rel_props}, compartment=sender,
+                    silent=True
+                )
+
+        if rel_type == 'chemicals':
             from .chemicals import parse_chemicals
             parse_chemicals(rel_params, scenario=s, message=(
                 'Loading compartment-chemical properties from library data ...'
             ) if not silent else '')
-
-        elif name == 'compartments':
-            parse_compartment_props(
-                s, rel_params, compartment=compartment, silent=True
-            )
 
 
 def parse_prop_types(fpath):
