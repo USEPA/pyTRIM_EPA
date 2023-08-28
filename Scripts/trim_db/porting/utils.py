@@ -327,6 +327,7 @@ VAR_SPLITTER = '______'
 
 GLOBAL_REPLACE = {
     'Constants': 'environment',
+    'constants': 'environment',
     'containingScenario': 'environment',
 
     'Chemical.': 'chemical.',
@@ -365,6 +366,7 @@ GLOBAL_REPLACE = {
     'totalMass': 'TotalMass',
     'Surfsoil': 'SurfSoil',
     'Halflife': 'HalfLife',
+    'isFlowing': 'IsFlowing',
     'D_pureair': 'D_PureAir',
     'D_purewater': 'D_PureWater',
     'D_Purewater': 'D_PureWater',
