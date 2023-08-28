@@ -37,10 +37,13 @@
             ["BedDensity", 2600, "kg[sediment particles]/m^3[sediment particles]", "Compartment [Sediment]"],
             ["ExternalSedimentInflow", 0, "kg[sediment particles]/day", "Compartment [Surface_Water]"],
             ["RechargeRate", 0.000142, "(m^3[water]/m^2[interface])/day", "Compartment [Groundwater]"],
-            ["DiffusiveExchangeCoefficient", 0.000225, "m^2/day", "Compartment [Surface_Water]"],
-            ["FractionOfTotalErosion", 0, null, null],
-            ["FractionOfTotalRunoff", 0, null, null]
-        ]
+            ["DiffusiveExchangeCoefficient", 0.000225, "m^2/day", "Compartment [Surface_Water]"]
+        ],
+        "external_data_files": {
+            "met_file": "MetData_streamlined.csv",
+            "allowexchange_file": "AllowExchange.csv",
+            "litterfall_file": "LitterFallRate.csv"
+        }
     },
     "transport_processes": [
         "Advection from Air to Air, Steady-state Approx",
@@ -50,7 +53,6 @@
 
         "Bulk Advection from Air to Advection Sink, General(AlgInstID_4095)",
         "Bulk Advection from Air to Advection Sink, Steady-state Approx",
-        "Bulk Advection from Surface Water to Flush-rate Advection Sink, General(AlgInstID_4125)",
 
         "Degradation/Reaction Sink in Air(AlgInstID_4675)",
         "Degradation/Reaction Sink in Benthic Invertebrate(AlgInstID_4580)",
@@ -84,12 +86,6 @@
         "Diffusion from Air to Surface Water, Hg0, Two Film(AlgInstID_3710)",
         "Diffusion from Air to Surface Water, MHg, Two Film(AlgInstID_3710)",
         "Diffusion from Air to Surface Water, Organics, Two Film(AlgInstID_3710)",
-        "Diffusion from DryVaporSource to Plant Leaf, Hg0",
-        "Diffusion from DryVaporSource to Plant Leaf, MHg",
-        "Diffusion from DryVaporSource to Plant Leaf, Organics",
-        "Diffusion from DryVaporSource to Surface Soil, Hg0",
-        "Diffusion from DryVaporSource to Surface Soil, MHg",
-        "Diffusion from DryVaporSource to Surface Soil, Organics",
         "Diffusion from Plant Leaf to Air, Hg0, Default (Bennett 1998)(AlgInstID_4005)",
         "Diffusion from Plant Leaf to Air, MHg, Default (Bennett 1998)(AlgInstID_4005)",
         "Diffusion from Plant Leaf to Air, Organics, Default (Bennett 1998)(AlgInstID_4005)",
@@ -106,16 +102,34 @@
         "Diffusion from Vadose Zone to Root Zone(AlgInstID_1914)",
         "Diffusion from Vadose Zone to Vadose Zone(AlgInstID_2445)",
 
-        "Direct Transfer from PseudoSource to Surface water",
-
         "Dispersive Waterflow from Surface Water to Surface Water, General(AlgInstID_3680)",
+
+        "Direct Transfer from PseudoSource to Surface water",
 
         "Dry Deposition of Particles from Air to Plants",
         "Dry Deposition of Particles from Air to Soil(AlgInstID_2490)",
         "Dry Deposition of Particles from Air to Surface Water(AlgInstID_3695)",
+
+        "Dry Deposition of Particles from DryParticleSource to Plants",
+        "Dry Deposition of Particles from DryParticleSource to Soil",
+
+        "Wet Deposition of Particles from WetParticleSource to Plants",
+        "Wet Deposition of Particles from WetParticleSource to Soil",
+
         "Dry Deposition of Vapor from Air to Plants",
         "Dry Deposition of Vapor from Air to Surface Soil(AlgInstID_2488)",
         "Dry Deposition of Vapor from Air to Surface Water(AlgInstID_3693)",
+
+        "Diffusion from DryVaporSource to Plant Leaf, Hg0",
+        "Dry Deposition of Vapor from DryVaporSource to Plants,  Hg2",
+        "Dry Deposition of Vapor from DryVaporSource to Soil, Hg2",
+
+        "Wet Deposition of Vapor Phase from WetVaporSource to Plants,  Hg0",
+        "Wet Deposition of Vapor Phase from WetVaporSource to Plants,  Hg2",
+        "Wet Deposition of Vapor Phase from WetVaporSource to Plants,  Organics",
+
+        "Wet Deposition of Vapor Phase from WetVaporSource to Soil, Hg0",
+        "Wet Deposition of Vapor Phase from WetVaporSource to Soil, Hg2",
 
         "Elimination from Fish to Surface Water(AlgInstID_1512)",
         "Elimination from Zooplankton to Surface Water",
@@ -175,7 +189,6 @@
 
         "Oxidation(Hg0 -> Hg2) in Abiotic Media, Rate is input(AlgInstID_1894)",
         "Oxidation(Hg0 -> Hg2) in Fish(AlgInstID_1443)",
-        "Oxidation(Hg0 -> Hg2) in Macrophytes",
 
         "Particles Blown off from Plant Leaf to Air (DRY)(AlgInstID_4010)",
         "Particles Washed off Leaf onto Ground(AlgInstID_1103)",
@@ -191,7 +204,6 @@
         "Recharge from Groundwater to Surface Water, General(AlgInstID_3510)",
 
         "Reduction(Hg2 -> Hg0) in Abiotic Media, Rate is input(AlgInstID_1893)",
-        "Reduction(Hg2 -> Hg0) in Fish(AlgInstID_1444)",
 
         "Resuspension from Sediment to Surface Water, General(AlgInstID_2190)",
         "Resuspension from Surface Soil to Air, Set to Deposition rate of particles(AlgInstID_4000)",
@@ -272,3 +284,4 @@
         ]
     }
 }
+

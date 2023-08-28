@@ -14,7 +14,8 @@ ureg = pint.UnitRegistry(autoconvert_offset_to_baseunit=True)
 
 EMPERICALLY_DIMENSIONLESS = [
     '[length] ** 3 / [mass]',
-    '[mass] / [length] ** 3'
+    '[mass] / [length] ** 3',
+    '[temperature] ** 2'
 ]
 
 ALLOW_ZERO_DIVISION = True
@@ -90,11 +91,19 @@ def auto_sync_emperical_with_quantity(f):
                     a = a.magnitude
                 elif a.dimensionality in EMPERICALLY_DIMENSIONLESS:
                     a = a.magnitude * ureg('')
+                # TODO: UGH! Couldn't find a better way to deal with empirical relationship for Diffusion
+                #  from surface water to air
+                elif a.dimensionality == '[mass] ** 0.67 * [time] / [length] ** 3.01':
+                    a = a.magnitude * ureg('day / meter')
             if hasattr(b, 'dimensionality'):
                 if b.to_base_units().to_compact().units == 'dimensionless':
                     b = b.magnitude
                 elif b.dimensionality in EMPERICALLY_DIMENSIONLESS:
                     b = b.magnitude * ureg('')
+                # TODO: UGH! Couldn't find a better way to deal with empirical relationship for Diffusion
+                #  from surface water to air
+                elif b.dimensionality == '[mass] ** 0.67 * [time] / [length] ** 3.01':
+                    b = b.magnitude * ureg('day / meter')
         try:
             return f(a, b)
         except pint.errors.DimensionalityError as e:

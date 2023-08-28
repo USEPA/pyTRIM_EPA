@@ -97,6 +97,14 @@ def parse_scenario(
             s, parsed, parameter_library.get('Link', {})
         )
 
+    fr_prop_file = [f for f in files if f.endswith('FlushRate.txt')]
+    if fr_prop_file:
+        fr_parsed = parse_props(fr_prop_file[0])
+
+        add_scenario_properties(
+            s, fr_parsed, parameter_library.get('Link', {})
+        )
+
     prop_types = [f for f in files if f.endswith('PropertyType_Exporter.txt')]
     if prop_types:
         parse_prop_types(prop_types[0])
