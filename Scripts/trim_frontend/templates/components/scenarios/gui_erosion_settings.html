@@ -465,14 +465,19 @@
                     $(this).prev("input").focus()
                     $(this).hide();
                 })
-                $('input.editableCell').blur(function () { // this gets called when abiotic properties table gets modified
-                    const data = $(this).val()
-                    $(this).hide()
-                    $(this).next("label").show().text(data)
-                    let parcel_info = $(this).data('parcelinfo')
-                    if (parcel_info) {
-                        parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                        TRIM.api.updateParcel(parcel_info)
+                $('input.editableCell').blur(function () {
+                    ErrorValidation.isPositiveValue(this)
+                    let is_valid = elementIsValid($(this).parent());
+
+                    if (is_valid){
+                        const data = $(this).val()
+                        $(this).hide()
+                        $(this).next("label").show().text(data)
+                        let parcel_info = $(this).data('parcelinfo')
+                        if (parcel_info) {
+                            parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
+                            TRIM.api.updateParcel(parcel_info)
+                        }
                     }
                 })
                 $('input.erosion_inp_opt2,input.erosion_inp_opt3').change(function () {

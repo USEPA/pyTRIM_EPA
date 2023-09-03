@@ -53,5 +53,13 @@ let ErrorValidation = {
         let is_valid = total === expected_total;
         ele = $(ele).closest("td")
         return ErrToolTip(ele, is_valid, "Sum of the fractions for given consuming organism should be "+expected_total)
+    },
+    isValidFraction : function (ele) {
+        if (!this.isPositiveValue(ele)) {
+            return false;
+        }
+        let data = $(ele).val();
+        let is_valid = parseFloat(data) <= 1;
+        return ErrToolTip(ele, is_valid, "Fractional value must be no greater than 1.");
     }
 }
