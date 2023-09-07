@@ -101,9 +101,7 @@ def parse_scenario(
     if fr_prop_file:
         fr_parsed = parse_props(fr_prop_file[0])
 
-        add_scenario_properties(
-            s, fr_parsed, parameter_library.get('Link', {})
-        )
+        add_scenario_properties(s, fr_parsed)
 
     prop_types = [f for f in files if f.endswith('PropertyType_Exporter.txt')]
     if prop_types:
@@ -233,7 +231,7 @@ def parse_props(props_file, oneline_keyvals=False, rules=TRANSFER_RULES):
                 )
             elif copying.get(prop_type):
                 if key == 'Property':
-                    prop_name = val
+                    prop_name = clean_prop(val)
                 elif key == 'Value' and prop_name:
                     for el in current_els:
                         el[safe_name(prop_name)] = clean_prop(val)
@@ -241,7 +239,7 @@ def parse_props(props_file, oneline_keyvals=False, rules=TRANSFER_RULES):
                     got_prop = True
                 elif oneline_keyvals:
                     for el in current_els:
-                        el[safe_name(key)] = clean_prop(val)
+                        el[safe_name(clean_prop(key))] = clean_prop(val)
                     prop_name = None
                     got_prop = True
 
@@ -310,7 +308,7 @@ def parse_props(props_file, oneline_keyvals=False, rules=TRANSFER_RULES):
     return parsed
 
 
-def add_scenario_properties(scenario, parsed_props, library_link_properties):
+def add_scenario_properties(scenario, parsed_props, library_link_properties={}):
     # Add non-Link properties to DB
     for prop_type, prop_data in parsed_props.items():
         if prop_type == 'Link':
