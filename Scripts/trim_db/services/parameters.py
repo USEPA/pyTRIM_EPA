@@ -191,7 +191,11 @@ def parameterize(cls, default_scenario=None):
                 # return all possible definitions
                 return {
                     pd.name: pd
-                    for d in self.entity.domains
+                    for d in sorted(
+                        # Sort to make sure sub-domains override parents
+                        self.entity.domains,
+                        key=lambda x: len(str(x.requirements or ''))
+                    )
                     for pd in d.parameter_definitions
                 }
             else:
@@ -201,19 +205,25 @@ def parameterize(cls, default_scenario=None):
                 # or the definition itself
                 # if no specific version applies
                 p = {}
+                got_custom = {}
                 for d in sorted(
                     # Sort to make sure sub-domains override parents
                     self.entity.domains,
                     key=lambda x: len(str(x.requirements or ''))
                 ):
                     for pd in d.parameter_definitions:
-                        if not len(pd.instances):
+                        if pd.name not in got_custom:
+                            # If a higher domain had a custom parameter
+                            # for this entity, don't overwrite it with
+                            # the default for this subdomain;
+                            # only custom parameters should overwrite
+                            # custom parameters
                             p[pd.name] = pd
-                        else:
-                            for cp in pd.instances:
-                                if cp.validate(self.entity):
-                                    p[pd.name] = cp
-                                    break
+                        for cp in pd.instances:
+                            if cp.validate(self.entity):
+                                got_custom[pd.name] = True
+                                p[pd.name] = cp
+                                break
                 return p
 
         def __len__(self):
