@@ -18,6 +18,25 @@ class Chemical(Model):
         )
     )
 
+    @property
+    def normalized_category(self):
+        return self.category.replace(' |', '|').replace('| ', '|')
+
+    def isa(self, cat_or_chem):
+        if isinstance(cat_or_chem, str):
+            cat_or_chem = cat_or_chem.replace(' |', '|').replace('| ', '|')
+            if cat_or_chem == self.name:
+                return True
+            if f'|{cat_or_chem}|' in f'|{self.normalized_category}|':
+                return True
+        elif isinstance(cat_or_chem, Chemical):
+            if cat_or_chem.id == self.id:
+                return True
+        else:
+            raise TypeError
+
+        return False
+
     def as_serializable(self):
         return {
             'id': self.id,

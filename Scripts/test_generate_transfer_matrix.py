@@ -1,5 +1,28 @@
+import warnings
+warnings.warn(
+    (
+        '\n'
+        '\n============================================================='
+        '\nDEPRECATED'
+        '\n-------------------------------------------------------------'
+        '\nThis version of the code for generating a transfer matrix'
+        ' has been deprecated; check out Scripts/generate_tm.py instead!'
+        '\n============================================================='
+        '\n'
+    ),
+    DeprecationWarning
+)
+if input('Continue? [Y/N] ').upper() != 'Y':
+    import sys
+    sys.exit()
+
 # import termios
 import time
+import types
+
+from trim_db.porting import *
+from trim_db.schema import *
+from trim_db.services import *
 
 
 SCENARIO_NAME = 'Foundries_SS'
@@ -40,9 +63,9 @@ def make_transfer_matrix(scenario):
 
     problem_tfm_file = open("Problem_TFM_components.txt", "a")
     for chem_idx, chem in enumerate(chem_list):
-        problem_tfm_file.write(f"{20*'-'} Chemical: {chem} {20*'-'}\n")
+        problem_tfm_file.write(f"{20*'-'} Chemical: {chem} {20*'-'} Scenario: {chem.current_scenario()} {20*'-'} \n")
         print('\n' + '==' * 28)
-        print(f'Chemical = {chem.name}')
+        print(f'Chemical = {chem.name} **** Scenario: {chem.current_scenario()}')
         print('==' * 28)
         for x, sender in enumerate(comp_list):
             tm_x = int(chem_idx * n_comp + x)
@@ -63,19 +86,39 @@ def make_transfer_matrix(scenario):
                         try:
                             transfer_factor = transport_proc.eval(sender=sender, receiver=receiver,
                                                                   chemical=chem, environment=scenario)
-                            print(f"{sender.name} -> {receiver.name}: {transport_proc.name}")
+                            print(f"{sender.name} -> {receiver.name}: ")
                         except Exception as err:
-                            print(f"{20*'*'} PROBLEM {20*'*'} {sender.name} -> {receiver.name}: {transport_proc.name}")
-                            problem_tfm_file.write(f"{sender.name} -> {receiver.name}: {transport_proc.name}: {str(err)}\n")
+                            print(f"{20*'*'} EVAL PROBLEM {20*'*'} {sender.name} -> {receiver.name}: {transport_proc.name}\n{str(err)}")
+                            problem_tfm_file.write(f"EVAL PROBLEM: {sender.name} -> {receiver.name}: {transport_proc.name}: {str(err)}\n")
                             pass
                         try:
-                            transfer_factor = transfer_factor.magnitude
-                        except Exception:
+                            if not isinstance(transfer_factor, float) and not isinstance(transfer_factor, int):
+                                if isinstance(transfer_factor, types.FunctionType):
+                                    transfer_factor = eval(f'transfer_factor()')
+                                else:
+                                    transfer_factor = transfer_factor.magnitude
+                            elif pd.isna(transfer_factor):
+                                print(f"{20 * '*'} NAN PROBLEM {20 * '*'}")
+                                if transport_proc.algorithm_id in [2478, 2501, 2502]:
+                                    print(transport_proc.algorithm_id)
+                                problem_tfm_file.write(
+                                    f"NAN PROBLEM: {sender.name} -> {receiver.name}: {transport_proc.name}, id: "
+                                    f"{transport_proc.algorithm_id}\n")
+                            print(f"{transport_proc.name}: {transfer_factor} ({transport_proc.algorithm_id})\n")
+                        except Exception as err:
+                            print(
+                                f"{20 * '*'} MAG PROBLEM {20 * '*'} {sender.name} -> {receiver.name}: {transport_proc.name}")
+                            problem_tfm_file.write(
+                                f"MAG PROBLEM: {sender.name} -> {receiver.name}: {transport_proc.name}: {str(err)}\n")
                             pass
                         try:
                             if (not transfer_factor or pd.isna(transfer_factor)):
                                 continue
-                        except ValueError:
+                        except ValueError as err:
+                            print(
+                                f"{20 * '*'} VALUE PROBLEM {20 * '*'} {sender.name} -> {receiver.name}: {transport_proc.name}")
+                            problem_tfm_file.write(
+                                f"VALUE PROBLEM: {sender.name} -> {receiver.name}: {transport_proc.name}: {str(err)}\n")
                             pass
                         if transport_proc.is_transform:
                             try:
@@ -91,8 +134,11 @@ def make_transfer_matrix(scenario):
                             if tm_y > -1:
                                 transition_matrix[tm_y][tm_x] += (transfer_factor)
                         except Exception as err:
+                            print(
+                                f"{20 * '*'} TM PROBLEM {20 * '*'} {sender.name} -> {receiver.name}: {transport_proc.name}")
                             problem_tfm_file.write(
-                                f"{sender.name} -> {receiver.name}: {transport_proc.name}: {str(err)}\n")
+                                f"TM PROBLEM: {sender.name} -> {receiver.name}: {transport_proc.name}: {str(err)}\n")
+                            pass
 
     problem_tfm_file.close()
 
@@ -106,13 +152,9 @@ def make_transfer_matrix(scenario):
 
 
 if __name__ == '__main__':
+    from trim_db.utils.users_roles import implement_users_roles
     try:
-        from trim_db.utils.users_roles import implement_users_roles
         implement_users_roles()
-        time.sleep(10)
-        from trim_db.porting import *
-        from trim_db.schema import *
-        from trim_db.services import *
     except Exception as e:
         print(f'-- Unable to create Users/Roles.\n{e}')
 
@@ -122,4 +164,3 @@ if __name__ == '__main__':
     tm = make_transfer_matrix(scn)
     tm.to_csv("Transfer_Matrix_test.csv")
     print(tm)
-

@@ -52,16 +52,23 @@ def as_function(equation, with_caching=True, **default_kwargs):
 
     equation = equation.replace('math.exp', 'safe_exp')
     equation = equation.replace('math.log', 'safe_log')
+    equation = equation.replace('math.log10', 'safe_log10')
+    equation = equation.replace('math.sqrt', 'safe_sqrt')
 
     def fix_non_callables(eq, evaluator):
         args = evaluated_args(eq, evaluator)
         for k, v in args.items():
-            if not v == CANT_EVAL or not k.endswith(')'):
+            if not isinstance(v, NoEval) or not k.endswith(')'):
                 continue
             non_func = k.rsplit('(')[0]
             if non_func not in args:
-                continue
-            eq = eq.replace(k, non_func)
+                # If it were already in args, we'd know it was ok.
+                # But we need to check if this can be evaluated
+                try:
+                    evaluator.eval(non_func)
+                except Exception:
+                    continue  # Something is still wrong here, so leave it
+            eq = eq.replace(k, non_func)  # Use the non-function version
         return eq
 
     @CacheManager.with_caching(f'equation::"{equation}"')
@@ -100,12 +107,21 @@ def as_function(equation, with_caching=True, **default_kwargs):
         except (IndexError):
             raise TypeError(
                 f'Invalid index!'
+                '\n>>>>>>>>>>>>>>>>>>>>>>>>'
                 f'\n{str_with_args(equation, evaluator)}'
+                '\n<<<<<<<<<<<<<<<<<<<<<<<<'
             )
-        except Exception:
+        except Exception as e:
+            # print(f'{20 * "%%%%%%"}\n{evaluator.names}')
+            # print(f'{20 * "******"}\n{custom_arg_map}')
+            # print(f'{20 * "^^^^^^"}\n{equation}')
+            # print(f'{20 * "______"}')
             raise TypeError(
                 f'Invalid equation!'
+                f'\n{e}'
+                '\n>>>>>>>>>>>>>>>>>>>>>>>>'
                 f'\n{str_with_args(equation, evaluator)}'
+                '\n<<<<<<<<<<<<<<<<<<<<<<<<'
             )
         finally:
             evaluator.names = old_names
@@ -113,7 +129,20 @@ def as_function(equation, with_caching=True, **default_kwargs):
     return func
 
 
-CANT_EVAL = '<Unable to Evaluate>'
+class NoEval(str):
+    def __init__(self, error):
+        self.error = error
+
+    def __str__(self):
+        return repr(self)
+
+    def __repr__(self):
+        return (
+            f'<Unable to Evaluate>'
+            '\n>>>>>>>>>>>>'
+            f'\n{self.error}'
+            '\n<<<<<<<<<<<<'
+        )
 
 
 def evaluated_args(eq, evaluator=evaluator):
@@ -136,7 +165,12 @@ def evaluated_args(eq, evaluator=evaluator):
         if el.endswith('('):
             els = []
             for x in eq.split(el)[1:]:
-                x = x.split(')')[0]
+                t = x.split(')')[0]
+                p_i = 0
+                while t.count("(") > t.count(")"):
+                    p_i += 1
+                    t = "".join(x.split(")")[:p_i]) + ")"
+                x = t
                 els.append(f'{el}{x})')
         elif el.endswith(')'):
             els = []
@@ -150,12 +184,14 @@ def evaluated_args(eq, evaluator=evaluator):
         for el in els:
             try:
                 v = evaluator.eval(el)
-            except Exception:
-                v = CANT_EVAL
-                try:
-                    evaluated_args[k] = evaluator.eval(k)
-                except Exception:
-                    pass
+            except Exception as e:
+                # print(f"Problem evaluating {el}: {e}")
+                v = NoEval(e)
+                # try:
+                #     evaluated_args[k] = evaluator.eval(k)
+                # except Exception as e:
+                #     print(f"Problem evaluating {k}: {e}")
+                #     pass
             evaluated_args[el] = v
     return evaluated_args
 
@@ -163,11 +199,17 @@ def evaluated_args(eq, evaluator=evaluator):
 RESERVED_WORDS = [
     'for', 'in', 'if', 'elif', 'else', 'not', 'and', 'or',
     'None', 'True', 'False',
-    'math'
+    'math', 'min', 'max', '**'
 ]
 OPERATORS = '+-*/=!<>?,'
 OPEN_BRACKETS = '({['
 CLOSE_BRACKETS = ')}]'
+
+
+def is_reserved(s, base=False):
+    if base:
+        return s.split('.')[0] in RESERVED_WORDS
+    return s in RESERVED_WORDS
 
 
 def deconstruct_equation(equation):
@@ -193,7 +235,7 @@ def deconstruct_equation(equation):
 
         prev = deconstructed[-2]
 
-        if prev == '=':
+        if prev == '=' and el != "=":
             # this must be a sub-argument;
             # remove as distinct element and join to argname,
             # infixing equals sign as well
@@ -202,7 +244,7 @@ def deconstruct_equation(equation):
             continue
 
         prev_op = prev in OPERATORS
-        prev_reserved = prev in RESERVED_WORDS
+        prev_reserved = is_reserved(prev)
 
         if (
             prev.endswith('e-') and is_number(prev[:-2])
@@ -239,11 +281,15 @@ def find_arguments(equation, combine_partial_args=True, drop_functions=True):
             if i == 0:
                 break
             i -= 1
-            if element[0] in '.]':
+            if is_reserved(deconstructed[i], base=True):
+                break
+            if element[0] in '.]),':
                 element = deconstructed[i] + element
-            elif deconstructed[i][-1] in '][':
+            elif deconstructed[i][-1] in '][,(':
                 element = deconstructed[i] + element
             elif i > 0 and deconstructed[i - 1][-1] in '[(':
+                if is_reserved(deconstructed[i - 1], base=True):
+                    break
                 element = deconstructed[i - 1] + deconstructed[i] + element
                 i -= 1
             else:
@@ -259,6 +305,9 @@ def find_arguments(equation, combine_partial_args=True, drop_functions=True):
             and element.count('(') > element.count(')')
         ):
             element += ')'
+        if element[0] == "-":
+            element = element[1:]
+
         return element
 
     args = {}
@@ -271,7 +320,7 @@ def find_arguments(equation, combine_partial_args=True, drop_functions=True):
         if is_number(check):
             continue
 
-        if check in RESERVED_WORDS or element.split('.')[0] in RESERVED_WORDS:
+        if is_reserved(check) or is_reserved(element.split('.')[0]):
             continue
 
         if drop_functions and element.endswith('('):
@@ -282,6 +331,12 @@ def find_arguments(equation, combine_partial_args=True, drop_functions=True):
 
         if element.endswith('.to('):
             element = element[:-4]
+
+        if not element:
+            continue
+
+        if element.endswith('.magnitude'):
+            element = element[:-10]
 
         if not element:
             continue
