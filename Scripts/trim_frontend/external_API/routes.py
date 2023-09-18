@@ -9,7 +9,7 @@ import subprocess
 
 from flask import Blueprint, request
 from flask_security import login_required
-from custom.flask_api import ApiException, ApiResult
+from flask_api import ApiException, ApiResult
 from trim_frontend import api
 from ..utils.logging import make_logger
 from .helpers import UsdaApi, UsleClimateApi, convert_to_geojson

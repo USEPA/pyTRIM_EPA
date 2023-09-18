@@ -2,7 +2,7 @@ import logging
 
 from flask import Blueprint, request, render_template, redirect, url_for
 from flask_security import login_required, current_user
-from custom.flask_api import ApiResult,  ApiException
+from flask_api import ApiResult,  ApiException
 from datetime import datetime
 from trim_db import ScenarioService, ParcelService, CompartmentService, VolumeElementService, ParameterService, ChemicalService
 from trim_frontend import api
@@ -594,6 +594,7 @@ def update_parcel():
                       ("fractionOrganicMatteronParticulates", "FractionOrganicMatteronParticulates")]
         if field_name in [k for k, v in Air_params]:
             par_name = [v for k, v in Air_params if k == field_name][0]
+            # TODO the below part generates error due to missing par for dustLoad, dustDensity etc...
             cmp = [c for c in p.compartments if "Air in Air_" in c.standard_name][0]
             par = cmp.parameters.get(par_name)
             par.value = parcels_data[field_name]

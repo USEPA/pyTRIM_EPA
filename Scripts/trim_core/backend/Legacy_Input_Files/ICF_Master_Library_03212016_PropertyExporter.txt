@@ -21133,7 +21133,7 @@ Algorithm;Time-dependent Partition from Benthic Invertebrate to Bulk Sediment fo
 Algorithm;Time-dependent Partition from Benthic Invertebrate to Bulk Sediment for Dioxins(ICFID_08-003);doesTransportChemical;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Benthic Invertebrate to Bulk Sediment for Dioxins(ICFID_08-003);enabled;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Benthic Invertebrate to Bulk Sediment for Dioxins(ICFID_08-003);isDefaultForCategory;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
-Algorithm;Time-dependent Partition from Benthic Invertebrate to Bulk Sediment for Dioxins(ICFID_08-003);k1;;#NAME?;1/day;Formula;2011/01/27 22:34;
+Algorithm;Time-dependent Partition from Benthic Invertebrate to Bulk Sediment for Dioxins(ICFID_08-003);k1;;[[-ln(1 - SendingCompartment.Chemical.SedimentPartitioning_AlphaofEquilibrium) / SendingCompartment.Chemical.SedimentPartitioning_TimeToReachAlphaofEquilibrium]];1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Benthic Invertebrate to Bulk Sediment for Dioxins(ICFID_08-003);k2;;Algorithm.k1 * SendingCompartment.Chemical.SedimentPartitioning_PartitionCoefficient;1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Benthic Invertebrate to Bulk Sediment for Dioxins(ICFID_08-003);mate;;<Unset>;;Text Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Benthic Invertebrate to Bulk Sediment for Dioxins(ICFID_08-003);receivingChemicalName;;ReplaceMe;;Text Property;2011/01/27 22:34;
@@ -21147,7 +21147,7 @@ Algorithm;Time-dependent Partition from Benthic Invertebrate to Sediment(AlgInst
 Algorithm;Time-dependent Partition from Benthic Invertebrate to Sediment(AlgInstID_1433);doesTransportChemical;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Benthic Invertebrate to Sediment(AlgInstID_1433);enabled;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Benthic Invertebrate to Sediment(AlgInstID_1433);isDefaultForCategory;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
-Algorithm;Time-dependent Partition from Benthic Invertebrate to Sediment(AlgInstID_1433);k1;;#NAME?;1/day;Formula;2011/01/27 22:34;
+Algorithm;Time-dependent Partition from Benthic Invertebrate to Sediment(AlgInstID_1433);k1;;[[-ln(1 - SendingCompartment.Chemical.SedimentPartitioning_AlphaofEquilibrium) / SendingCompartment.Chemical.SedimentPartitioning_TimeToReachAlphaofEquilibrium]];1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Benthic Invertebrate to Sediment(AlgInstID_1433);k2;;Algorithm.k1 * SendingCompartment.Chemical.SedimentPartitioning_PartitionCoefficient;1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Benthic Invertebrate to Sediment(AlgInstID_1433);mate;;<Unset>;;Text Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Benthic Invertebrate to Sediment(AlgInstID_1433);receivingChemicalName;;ReplaceMe;;Text Property;2011/01/27 22:34;
@@ -21161,7 +21161,7 @@ Algorithm;Time-dependent Partition from Bulk Sediment to Benthic Invertebrate fo
 Algorithm;Time-dependent Partition from Bulk Sediment to Benthic Invertebrate for Dioxins(ICFID_08-002);doesTransportChemical;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Bulk Sediment to Benthic Invertebrate for Dioxins(ICFID_08-002);enabled;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Bulk Sediment to Benthic Invertebrate for Dioxins(ICFID_08-002);isDefaultForCategory;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
-Algorithm;Time-dependent Partition from Bulk Sediment to Benthic Invertebrate for Dioxins(ICFID_08-002);k1;;#NAME?;1/day;Formula;2011/01/27 22:34;
+Algorithm;Time-dependent Partition from Bulk Sediment to Benthic Invertebrate for Dioxins(ICFID_08-002);k1;;[[-ln(1 - ReceivingCompartment.Chemical.SedimentPartitioning_AlphaofEquilibrium) / ReceivingCompartment.Chemical.SedimentPartitioning_TimeToReachAlphaofEquilibrium]];1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Bulk Sediment to Benthic Invertebrate for Dioxins(ICFID_08-002);k2;;Algorithm.k1 * ReceivingCompartment.Chemical.SedimentPartitioning_PartitionCoefficient;1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Bulk Sediment to Benthic Invertebrate for Dioxins(ICFID_08-002);mate;;<Unset>;;Text Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Bulk Sediment to Benthic Invertebrate for Dioxins(ICFID_08-002);receivingChemicalName;;ReplaceMe;;Text Property;2011/01/27 22:34;
@@ -21175,7 +21175,7 @@ Algorithm;Time-dependent Partition from Macrophyte to Surface Water(AlgInstID_15
 Algorithm;Time-dependent Partition from Macrophyte to Surface Water(AlgInstID_1544),Cd;doesTransportChemical;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Macrophyte to Surface Water(AlgInstID_1544),Cd;enabled;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Macrophyte to Surface Water(AlgInstID_1544),Cd;isDefaultForCategory;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
-Algorithm;Time-dependent Partition from Macrophyte to Surface Water(AlgInstID_1544),Cd;k1;;#NAME?;1/day;Formula;2011/01/27 22:34;
+Algorithm;Time-dependent Partition from Macrophyte to Surface Water(AlgInstID_1544),Cd;k1;;[[-ln(1 - SendingCompartment.Chemical.WaterColumnDissolvedPartitioning_AlphaofEquilibrium) / SendingCompartment.Chemical.WaterColumnDissolvedPartitioning_TimeToReachAlphaofEquilibrium]];1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Macrophyte to Surface Water(AlgInstID_1544),Cd;k2;;Algorithm.k1 * SendingCompartment.Chemical.WaterColumnDissolvedPartitioning_PartitionCoefficient;1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Macrophyte to Surface Water(AlgInstID_1544),Cd;mate;;<Unset>;;Text Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Macrophyte to Surface Water(AlgInstID_1544),Cd;receivingChemicalName;;ReplaceMe;;Text Property;2011/01/27 22:34;
@@ -21189,7 +21189,7 @@ Algorithm;Time-dependent Partition from Macrophyte to Surface Water(AlgInstID_15
 Algorithm;Time-dependent Partition from Macrophyte to Surface Water(AlgInstID_1544),Hg;doesTransportChemical;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Macrophyte to Surface Water(AlgInstID_1544),Hg;enabled;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Macrophyte to Surface Water(AlgInstID_1544),Hg;isDefaultForCategory;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
-Algorithm;Time-dependent Partition from Macrophyte to Surface Water(AlgInstID_1544),Hg;k1;;#NAME?;1/day;Formula;2011/01/27 22:34;
+Algorithm;Time-dependent Partition from Macrophyte to Surface Water(AlgInstID_1544),Hg;k1;;[[-ln(1 - SendingCompartment.Chemical.WaterColumnDissolvedPartitioning_AlphaofEquilibrium) / SendingCompartment.Chemical.WaterColumnDissolvedPartitioning_TimeToReachAlphaofEquilibrium]];1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Macrophyte to Surface Water(AlgInstID_1544),Hg;k2;;Algorithm.k1 * SendingCompartment.Chemical.WaterColumnDissolvedPartitioning_PartitionCoefficient;1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Macrophyte to Surface Water(AlgInstID_1544),Hg;mate;;<Unset>;;Text Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Macrophyte to Surface Water(AlgInstID_1544),Hg;receivingChemicalName;;ReplaceMe;;Text Property;2011/01/27 22:34;
@@ -21203,7 +21203,7 @@ Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk s
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Agriculture, Cd(AlgInstID_1932);doesTransportChemical;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Agriculture, Cd(AlgInstID_1932);enabled;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Agriculture, Cd(AlgInstID_1932);isDefaultForCategory;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
-Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Agriculture, Cd(AlgInstID_1932);k1;;#NAME?;1/day;Formula;2011/01/27 22:34;
+Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Agriculture, Cd(AlgInstID_1932);k1;;[[-ln(1 - SendingCompartment.Chemical.Root_RootZonePartitioningBulkSoil_AlphaofSteadyState) / SendingCompartment.Chemical.Root_RootZonePartitioningBulkSoil_TimetoReachAlphaofSteadyState]];1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Agriculture, Cd(AlgInstID_1932);k2;;Algorithm.k1 * SendingCompartment.Chemical.Root_RootZonePartitioningBulkSoil_PartitionCoefficient;1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Agriculture, Cd(AlgInstID_1932);mate;;<Unset>;;Text Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Agriculture, Cd(AlgInstID_1932);receivingChemicalName;;ReplaceMe;;Text Property;2011/01/27 22:34;
@@ -21217,7 +21217,7 @@ Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk s
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Agriculture, Hg(AlgInstID_1932);doesTransportChemical;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Agriculture, Hg(AlgInstID_1932);enabled;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Agriculture, Hg(AlgInstID_1932);isDefaultForCategory;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
-Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Agriculture, Hg(AlgInstID_1932);k1;;#NAME?;1/day;Formula;2011/01/27 22:34;
+Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Agriculture, Hg(AlgInstID_1932);k1;;[[-ln(1 - SendingCompartment.Chemical.Root_RootZonePartitioningBulkSoil_AlphaofSteadyState) / SendingCompartment.Chemical.Root_RootZonePartitioningBulkSoil_TimetoReachAlphaofSteadyState]];1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Agriculture, Hg(AlgInstID_1932);k2;;Algorithm.k1 * SendingCompartment.Chemical.Root_RootZonePartitioningBulkSoil_PartitionCoefficient;1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Agriculture, Hg(AlgInstID_1932);mate;;<Unset>;;Text Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Agriculture, Hg(AlgInstID_1932);receivingChemicalName;;ReplaceMe;;Text Property;2011/01/27 22:34;
@@ -21231,7 +21231,7 @@ Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk s
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Grasses/Herbs, Cd(AlgInstID_1933);doesTransportChemical;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Grasses/Herbs, Cd(AlgInstID_1933);enabled;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Grasses/Herbs, Cd(AlgInstID_1933);isDefaultForCategory;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
-Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Grasses/Herbs, Cd(AlgInstID_1933);k1;;#NAME?;1/day;Formula;2011/01/27 22:34;
+Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Grasses/Herbs, Cd(AlgInstID_1933);k1;;[[-ln(1 - SendingCompartment.Chemical.Root_RootZonePartitioningBulkSoil_AlphaofSteadyState) / SendingCompartment.Chemical.Root_RootZonePartitioningBulkSoil_TimetoReachAlphaofSteadyState]];1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Grasses/Herbs, Cd(AlgInstID_1933);k2;;Algorithm.k1 * SendingCompartment.Chemical.Root_RootZonePartitioningBulkSoil_PartitionCoefficient;1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Grasses/Herbs, Cd(AlgInstID_1933);mate;;<Unset>;;Text Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Grasses/Herbs, Cd(AlgInstID_1933);receivingChemicalName;;ReplaceMe;;Text Property;2011/01/27 22:34;
@@ -21245,7 +21245,7 @@ Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk s
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Grasses/Herbs, Hg(AlgInstID_1933);doesTransportChemical;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Grasses/Herbs, Hg(AlgInstID_1933);enabled;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Grasses/Herbs, Hg(AlgInstID_1933);isDefaultForCategory;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
-Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Grasses/Herbs, Hg(AlgInstID_1933);k1;;#NAME?;1/day;Formula;2011/01/27 22:34;
+Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Grasses/Herbs, Hg(AlgInstID_1933);k1;;[[-ln(1 - SendingCompartment.Chemical.Root_RootZonePartitioningBulkSoil_AlphaofSteadyState) / SendingCompartment.Chemical.Root_RootZonePartitioningBulkSoil_TimetoReachAlphaofSteadyState]];1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Grasses/Herbs, Hg(AlgInstID_1933);k2;;Algorithm.k1 * SendingCompartment.Chemical.Root_RootZonePartitioningBulkSoil_PartitionCoefficient;1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Grasses/Herbs, Hg(AlgInstID_1933);mate;;<Unset>;;Text Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Grasses/Herbs, Hg(AlgInstID_1933);receivingChemicalName;;ReplaceMe;;Text Property;2011/01/27 22:34;
@@ -21259,7 +21259,7 @@ Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with soil p
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with soil pore water - Agriculture, Organics;doesTransportChemical;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with soil pore water - Agriculture, Organics;enabled;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with soil pore water - Agriculture, Organics;isDefaultForCategory;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
-Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with soil pore water - Agriculture, Organics;k1;;#NAME?;1/day;Formula;2011/01/27 22:34;
+Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with soil pore water - Agriculture, Organics;k1;;[[-ln(1 - SendingCompartment.Chemical.RootSoilWaterInteraction_Alpha) / SendingCompartment.Chemical.RootSoilWaterInteraction_t_alpha]];1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with soil pore water - Agriculture, Organics;k2;;Algorithm.k1 * (SendingCompartment.WaterContent + SendingCompartment.LipidContent * SendingChemical.K_ow ** SendingCompartment.CorrectionExponent) * SendingCompartment.Density;1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with soil pore water - Agriculture, Organics;mate;;<Unset>;;Text Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with soil pore water - Agriculture, Organics;receivingChemicalName;;ReplaceMe;;Text Property;2011/01/27 22:34;
@@ -21273,7 +21273,7 @@ Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with soil p
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with soil pore water - Grasses/Herbs, Organics(AlgInstID_1929);doesTransportChemical;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with soil pore water - Grasses/Herbs, Organics(AlgInstID_1929);enabled;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with soil pore water - Grasses/Herbs, Organics(AlgInstID_1929);isDefaultForCategory;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
-Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with soil pore water - Grasses/Herbs, Organics(AlgInstID_1929);k1;;#NAME?;1/day;Formula;2011/01/27 22:34;
+Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with soil pore water - Grasses/Herbs, Organics(AlgInstID_1929);k1;;[[-ln(1 - SendingCompartment.Chemical.RootSoilWaterInteraction_Alpha) / SendingCompartment.Chemical.RootSoilWaterInteraction_t_alpha]];1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with soil pore water - Grasses/Herbs, Organics(AlgInstID_1929);k2;;Algorithm.k1 * (SendingCompartment.WaterContent + SendingCompartment.LipidContent * SendingChemical.K_ow ** SendingCompartment.CorrectionExponent) * SendingCompartment.Density;1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with soil pore water - Grasses/Herbs, Organics(AlgInstID_1929);mate;;<Unset>;;Text Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root to Root Zone, Interacts with soil pore water - Grasses/Herbs, Organics(AlgInstID_1929);receivingChemicalName;;ReplaceMe;;Text Property;2011/01/27 22:34;
@@ -21299,7 +21299,7 @@ Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk s
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Agriculture, Cd(AlgInstID_1953);doesTransportChemical;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Agriculture, Cd(AlgInstID_1953);enabled;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Agriculture, Cd(AlgInstID_1953);isDefaultForCategory;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
-Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Agriculture, Cd(AlgInstID_1953);k1;;#NAME?;1/day;Formula;2011/01/27 22:34;
+Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Agriculture, Cd(AlgInstID_1953);k1;;[[-ln(1 - ReceivingCompartment.Chemical.Root_RootZonePartitioningBulkSoil_AlphaofSteadyState) / ReceivingCompartment.Chemical.Root_RootZonePartitioningBulkSoil_TimetoReachAlphaofSteadyState]];1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Agriculture, Cd(AlgInstID_1953);k2;;Algorithm.k1 * ReceivingCompartment.Chemical.Root_RootZonePartitioningBulkSoil_PartitionCoefficient;1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Agriculture, Cd(AlgInstID_1953);mate;;<Unset>;;Text Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Agriculture, Cd(AlgInstID_1953);receivingChemicalName;;ReplaceMe;;Text Property;2011/01/27 22:34;
@@ -21313,7 +21313,7 @@ Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk s
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Agriculture, Hg(AlgInstID_1953);doesTransportChemical;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Agriculture, Hg(AlgInstID_1953);enabled;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Agriculture, Hg(AlgInstID_1953);isDefaultForCategory;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
-Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Agriculture, Hg(AlgInstID_1953);k1;;#NAME?;1/day;Formula;2011/01/27 22:34;
+Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Agriculture, Hg(AlgInstID_1953);k1;;[[-ln(1 - ReceivingCompartment.Chemical.Root_RootZonePartitioningBulkSoil_AlphaofSteadyState) / ReceivingCompartment.Chemical.Root_RootZonePartitioningBulkSoil_TimetoReachAlphaofSteadyState]];1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Agriculture, Hg(AlgInstID_1953);k2;;Algorithm.k1 * ReceivingCompartment.Chemical.Root_RootZonePartitioningBulkSoil_PartitionCoefficient;1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Agriculture, Hg(AlgInstID_1953);mate;;<Unset>;;Text Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Agriculture, Hg(AlgInstID_1953);receivingChemicalName;;ReplaceMe;;Text Property;2011/01/27 22:34;
@@ -21327,7 +21327,7 @@ Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk s
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Grasses/Herbs,Cd(AlgInstID_1952);doesTransportChemical;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Grasses/Herbs,Cd(AlgInstID_1952);enabled;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Grasses/Herbs,Cd(AlgInstID_1952);isDefaultForCategory;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
-Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Grasses/Herbs,Cd(AlgInstID_1952);k1;;#NAME?;1/day;Formula;2011/01/27 22:34;
+Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Grasses/Herbs,Cd(AlgInstID_1952);k1;;[[-ln(1 - ReceivingCompartment.Chemical.Root_RootZonePartitioningBulkSoil_AlphaofSteadyState) / ReceivingCompartment.Chemical.Root_RootZonePartitioningBulkSoil_TimetoReachAlphaofSteadyState]];1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Grasses/Herbs,Cd(AlgInstID_1952);k2;;Algorithm.k1 * ReceivingCompartment.Chemical.Root_RootZonePartitioningBulkSoil_PartitionCoefficient;1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Grasses/Herbs,Cd(AlgInstID_1952);mate;;<Unset>;;Text Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Grasses/Herbs,Cd(AlgInstID_1952);receivingChemicalName;;ReplaceMe;;Text Property;2011/01/27 22:34;
@@ -21341,7 +21341,7 @@ Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk s
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Grasses/Herbs,Hg(AlgInstID_1952);doesTransportChemical;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Grasses/Herbs,Hg(AlgInstID_1952);enabled;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Grasses/Herbs,Hg(AlgInstID_1952);isDefaultForCategory;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
-Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Grasses/Herbs,Hg(AlgInstID_1952);k1;;#NAME?;1/day;Formula;2011/01/27 22:34;
+Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Grasses/Herbs,Hg(AlgInstID_1952);k1;;[[-ln(1 - ReceivingCompartment.Chemical.Root_RootZonePartitioningBulkSoil_AlphaofSteadyState) / ReceivingCompartment.Chemical.Root_RootZonePartitioningBulkSoil_TimetoReachAlphaofSteadyState]];1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Grasses/Herbs,Hg(AlgInstID_1952);k2;;Algorithm.k1 * ReceivingCompartment.Chemical.Root_RootZonePartitioningBulkSoil_PartitionCoefficient;1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Grasses/Herbs,Hg(AlgInstID_1952);mate;;<Unset>;;Text Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Grasses/Herbs,Hg(AlgInstID_1952);receivingChemicalName;;ReplaceMe;;Text Property;2011/01/27 22:34;
@@ -21355,7 +21355,7 @@ Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with soil p
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with soil pore water - Agriculture, Organics;doesTransportChemical;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with soil pore water - Agriculture, Organics;enabled;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with soil pore water - Agriculture, Organics;isDefaultForCategory;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
-Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with soil pore water - Agriculture, Organics;k1;;#NAME?;1/day;Formula;2011/01/27 22:34;
+Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with soil pore water - Agriculture, Organics;k1;;[[-ln(1 - ReceivingCompartment.Chemical.RootSoilWaterInteraction_Alpha) / ReceivingCompartment.Chemical.RootSoilWaterInteraction_t_alpha]];1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with soil pore water - Agriculture, Organics;k2;;Algorithm.k1 * (ReceivingCompartment.WaterContent + ReceivingCompartment.LipidContent * SendingChemical.K_ow ** ReceivingCompartment.CorrectionExponent) * ReceivingCompartment.Density;1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with soil pore water - Agriculture, Organics;mate;;<Unset>;;Text Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with soil pore water - Agriculture, Organics;receivingChemicalName;;Benzo(A)Pyrene;;Text Property;2011/01/27 22:34;
@@ -21369,7 +21369,7 @@ Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with soil p
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with soil pore water - Grasses/Herbs, Organics(AlgInstID_1949);doesTransportChemical;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with soil pore water - Grasses/Herbs, Organics(AlgInstID_1949);enabled;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with soil pore water - Grasses/Herbs, Organics(AlgInstID_1949);isDefaultForCategory;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
-Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with soil pore water - Grasses/Herbs, Organics(AlgInstID_1949);k1;;#NAME?;1/day;Formula;2011/01/27 22:34;
+Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with soil pore water - Grasses/Herbs, Organics(AlgInstID_1949);k1;;[[-ln(1 - ReceivingCompartment.Chemical.RootSoilWaterInteraction_Alpha) / ReceivingCompartment.Chemical.RootSoilWaterInteraction_t_alpha]];1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with soil pore water - Grasses/Herbs, Organics(AlgInstID_1949);k2;;Algorithm.k1 * (ReceivingCompartment.WaterContent + ReceivingCompartment.LipidContent * SendingChemical.K_ow ** ReceivingCompartment.CorrectionExponent) * ReceivingCompartment.Density;1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with soil pore water - Grasses/Herbs, Organics(AlgInstID_1949);mate;;<Unset>;;Text Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Root, Interacts with soil pore water - Grasses/Herbs, Organics(AlgInstID_1949);receivingChemicalName;;Benzo(A)Pyrene;;Text Property;2011/01/27 22:34;
@@ -21407,7 +21407,7 @@ Algorithm;Time-dependent Partition from Root Zone to Worm, Interacts with soil p
 Algorithm;Time-dependent Partition from Root Zone to Worm, Interacts with soil pore water, Organics;doesTransportChemical;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Worm, Interacts with soil pore water, Organics;enabled;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Worm, Interacts with soil pore water, Organics;isDefaultForCategory;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
-Algorithm;Time-dependent Partition from Root Zone to Worm, Interacts with soil pore water, Organics;k1;;#NAME?;1/day;Formula;2011/01/27 22:34;
+Algorithm;Time-dependent Partition from Root Zone to Worm, Interacts with soil pore water, Organics;k1;;[[-ln(1 - ReceivingCompartment.Chemical.WormSoilWaterInteraction_alpha) / ReceivingCompartment.Chemical.WormSoilWaterInteraction_t_alpha]];1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Worm, Interacts with soil pore water, Organics;k2;;(Algorithm.k1 * ReceivingCompartment.Chemical.WormSoilWaterPartitionCoefficient_organics * SendingCompartment.Chemical.FractionMass_Dissolved * ReceivingCompartment.Density_kg_m3) / (SendingCompartment.Chemical.VolumeFraction_liquid * Constants.L_per_m3);1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Worm, Interacts with soil pore water, Organics;mate;;<Unset>;;Text Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Root Zone to Worm, Interacts with soil pore water, Organics;receivingChemicalName;;ReplaceMe;;Text Property;2011/01/27 22:34;
@@ -21421,7 +21421,7 @@ Algorithm;Time-dependent Partition from Sediment to Benthic Invertebrate(AlgInst
 Algorithm;Time-dependent Partition from Sediment to Benthic Invertebrate(AlgInstID_1438);doesTransportChemical;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Sediment to Benthic Invertebrate(AlgInstID_1438);enabled;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Sediment to Benthic Invertebrate(AlgInstID_1438);isDefaultForCategory;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
-Algorithm;Time-dependent Partition from Sediment to Benthic Invertebrate(AlgInstID_1438);k1;;#NAME?;1/day;Formula;2011/01/27 22:34;
+Algorithm;Time-dependent Partition from Sediment to Benthic Invertebrate(AlgInstID_1438);k1;;[[-ln(1 - ReceivingCompartment.Chemical.SedimentPartitioning_AlphaofEquilibrium) / ReceivingCompartment.Chemical.SedimentPartitioning_TimeToReachAlphaofEquilibrium]];1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Sediment to Benthic Invertebrate(AlgInstID_1438);k2;;Algorithm.k1 * ReceivingCompartment.Chemical.SedimentPartitioning_PartitionCoefficient;1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Sediment to Benthic Invertebrate(AlgInstID_1438);mate;;<Unset>;;Text Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Sediment to Benthic Invertebrate(AlgInstID_1438);receivingChemicalName;;ReplaceMe;;Text Property;2011/01/27 22:34;
@@ -21447,7 +21447,7 @@ Algorithm;Time-dependent Partition from Surface Water to Macrophyte, Cd(AlgInstI
 Algorithm;Time-dependent Partition from Surface Water to Macrophyte, Cd(AlgInstID_1549);doesTransportChemical;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Surface Water to Macrophyte, Cd(AlgInstID_1549);enabled;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Surface Water to Macrophyte, Cd(AlgInstID_1549);isDefaultForCategory;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
-Algorithm;Time-dependent Partition from Surface Water to Macrophyte, Cd(AlgInstID_1549);k1;;#NAME?;1/day;Formula;2011/01/27 22:34;
+Algorithm;Time-dependent Partition from Surface Water to Macrophyte, Cd(AlgInstID_1549);k1;;[[-ln(1 - ReceivingCompartment.Chemical.WaterColumnDissolvedPartitioning_AlphaofEquilibrium) / ReceivingCompartment.Chemical.WaterColumnDissolvedPartitioning_TimeToReachAlphaofEquilibrium]];1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Surface Water to Macrophyte, Cd(AlgInstID_1549);k2;;Algorithm.k1 * ReceivingCompartment.Chemical.WaterColumnDissolvedPartitioning_PartitionCoefficient;1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Surface Water to Macrophyte, Cd(AlgInstID_1549);mate;;<Unset>;;Text Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Surface Water to Macrophyte, Cd(AlgInstID_1549);receivingChemicalName;;ReplaceMe;;Text Property;2011/01/27 22:34;
@@ -21461,7 +21461,7 @@ Algorithm;Time-dependent Partition from Surface Water to Macrophyte, Hg(AlgInstI
 Algorithm;Time-dependent Partition from Surface Water to Macrophyte, Hg(AlgInstID_1549);doesTransportChemical;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Surface Water to Macrophyte, Hg(AlgInstID_1549);enabled;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Surface Water to Macrophyte, Hg(AlgInstID_1549);isDefaultForCategory;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
-Algorithm;Time-dependent Partition from Surface Water to Macrophyte, Hg(AlgInstID_1549);k1;;#NAME?;1/day;Formula;2011/01/27 22:34;
+Algorithm;Time-dependent Partition from Surface Water to Macrophyte, Hg(AlgInstID_1549);k1;;[[-ln(1 - ReceivingCompartment.Chemical.WaterColumnDissolvedPartitioning_AlphaofEquilibrium) / ReceivingCompartment.Chemical.WaterColumnDissolvedPartitioning_TimeToReachAlphaofEquilibrium]];1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Surface Water to Macrophyte, Hg(AlgInstID_1549);k2;;Algorithm.k1 * ReceivingCompartment.Chemical.WaterColumnDissolvedPartitioning_PartitionCoefficient;1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Surface Water to Macrophyte, Hg(AlgInstID_1549);mate;;<Unset>;;Text Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Surface Water to Macrophyte, Hg(AlgInstID_1549);receivingChemicalName;;ReplaceMe;;Text Property;2011/01/27 22:34;
@@ -21475,7 +21475,7 @@ Algorithm;Time-dependent Partition from Worm to Root Zone, Interacts with bulk s
 Algorithm;Time-dependent Partition from Worm to Root Zone, Interacts with bulk soil, Hg(AlgInstID_20);doesTransportChemical;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Worm to Root Zone, Interacts with bulk soil, Hg(AlgInstID_20);enabled;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Worm to Root Zone, Interacts with bulk soil, Hg(AlgInstID_20);isDefaultForCategory;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
-Algorithm;Time-dependent Partition from Worm to Root Zone, Interacts with bulk soil, Hg(AlgInstID_20);k1;;#NAME?;1/day;Formula;2011/01/27 22:34;
+Algorithm;Time-dependent Partition from Worm to Root Zone, Interacts with bulk soil, Hg(AlgInstID_20);k1;;[[-ln(1 - SendingCompartment.Chemical.WormSoilInteraction_alpha) / SendingCompartment.Chemical.WormSoilInteraction_t_alpha]];1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Worm to Root Zone, Interacts with bulk soil, Hg(AlgInstID_20);mate;;<Unset>;;Text Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Worm to Root Zone, Interacts with bulk soil, Hg(AlgInstID_20);receivingChemicalName;;ReplaceMe;;Text Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Worm to Root Zone, Interacts with bulk soil, Hg(AlgInstID_20);receivingCompartmentCategory;;Abiotic | Soil | Root Zone | Root Zone - Default;;Category Property;2011/01/27 22:34;
@@ -21488,7 +21488,7 @@ Algorithm;Time-dependent Partition from Worm to Root Zone, Interacts with bulk s
 Algorithm;Time-dependent Partition from Worm to Root Zone, Interacts with bulk soil, Organics;doesTransportChemical;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Worm to Root Zone, Interacts with bulk soil, Organics;enabled;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Worm to Root Zone, Interacts with bulk soil, Organics;isDefaultForCategory;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
-Algorithm;Time-dependent Partition from Worm to Root Zone, Interacts with bulk soil, Organics;k1;;#NAME?;1/day;Formula;2011/01/27 22:34;
+Algorithm;Time-dependent Partition from Worm to Root Zone, Interacts with bulk soil, Organics;k1;;[[-ln(1 - SendingCompartment.Chemical.WormSoilInteraction_alpha) / SendingCompartment.Chemical.WormSoilInteraction_t_alpha]];1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Worm to Root Zone, Interacts with bulk soil, Organics;mate;;<Unset>;;Text Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Worm to Root Zone, Interacts with bulk soil, Organics;receivingChemicalName;;ReplaceMe;;Text Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Worm to Root Zone, Interacts with bulk soil, Organics;receivingCompartmentCategory;;Abiotic | Soil | Root Zone | Root Zone - Default;;Category Property;2011/01/27 22:34;
@@ -21501,7 +21501,7 @@ Algorithm;Time-dependent Partition from Worm to Root Zone, Interacts with soil p
 Algorithm;Time-dependent Partition from Worm to Root Zone, Interacts with soil pore water, Organics;doesTransportChemical;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Worm to Root Zone, Interacts with soil pore water, Organics;enabled;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Worm to Root Zone, Interacts with soil pore water, Organics;isDefaultForCategory;;TRUE;;True/False (Boolean) Property;2011/01/27 22:34;
-Algorithm;Time-dependent Partition from Worm to Root Zone, Interacts with soil pore water, Organics;k1;;#NAME?;1/day;Formula;2011/01/27 22:34;
+Algorithm;Time-dependent Partition from Worm to Root Zone, Interacts with soil pore water, Organics;k1;;[[-ln(1 - SendingCompartment.Chemical.WormSoilWaterInteraction_alpha) / SendingCompartment.Chemical.WormSoilWaterInteraction_t_alpha]];1/day;Formula;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Worm to Root Zone, Interacts with soil pore water, Organics;mate;;<Unset>;;Text Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Worm to Root Zone, Interacts with soil pore water, Organics;receivingChemicalName;;ReplaceMe;;Text Property;2011/01/27 22:34;
 Algorithm;Time-dependent Partition from Worm to Root Zone, Interacts with soil pore water, Organics;receivingCompartmentCategory;;Abiotic | Soil | Root Zone | Root Zone - Default;;Category Property;2011/01/27 22:34;

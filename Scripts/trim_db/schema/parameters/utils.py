@@ -12,6 +12,14 @@ __all__ = ['ureg', 'as_quantity', 'is_number']
 
 ureg = pint.UnitRegistry(autoconvert_offset_to_baseunit=True)
 
+EMPERICALLY_DIMENSIONLESS = [
+    '[length] ** 3 / [mass]',
+    '[mass] / [length] ** 3',
+    '[temperature] ** 2'
+]
+
+ALLOW_ZERO_DIVISION = True
+EMPERICAL_ZERO_DIVISION = 0
 
 BRACKETED = re.compile('\[.*?\]')  # noqa
 NOEXPOSYMBL = re.compile('[a-zA-Z]\d')  # noqa
@@ -21,7 +29,8 @@ def is_number(val):
     check = str(val).strip()
     if not check:
         return False
-    check = check.replace('.', '').replace('-', '').replace('+', '').split('e')
+    check = check.replace('.', '').replace('-', '').replace('+', '')
+    check = check.split('e')
     for part in check:
         if not part.isnumeric():
             return False
@@ -59,11 +68,11 @@ def as_quantity(val, unit=''):
 
     if not is_number(val):
         raise TypeError(f'Invalid magnitude: "{val}"')
-    import tokenize
-    try:
-        tmp = ureg(unit)
-    except tokenize.TokenError as msg:
-        print(f"{msg} ---> {unit}")
+    # import tokenize
+    # try:
+    #     tmp = ureg(unit)
+    # except tokenize.TokenError as msg:
+    #     print(f"{msg} ---> {unit}")
 
     quantity = val * ureg(unit)
 
@@ -76,6 +85,25 @@ def as_quantity(val, unit=''):
 def auto_sync_emperical_with_quantity(f):
     @wraps(f)
     def synced(a, b, strict_dimensions=False, strict_offset=False):
+        if not strict_dimensions:
+            if hasattr(a, 'dimensionality'):
+                if a.to_base_units().to_compact().units == 'dimensionless':
+                    a = a.magnitude
+                elif a.dimensionality in EMPERICALLY_DIMENSIONLESS:
+                    a = a.magnitude * ureg('')
+                # TODO: UGH! Couldn't find a better way to deal with empirical relationship for Diffusion
+                #  from surface water to air
+                elif a.dimensionality == '[mass] ** 0.67 * [time] / [length] ** 3.01':
+                    a = a.magnitude * ureg('day / meter')
+            if hasattr(b, 'dimensionality'):
+                if b.to_base_units().to_compact().units == 'dimensionless':
+                    b = b.magnitude
+                elif b.dimensionality in EMPERICALLY_DIMENSIONLESS:
+                    b = b.magnitude * ureg('')
+                # TODO: UGH! Couldn't find a better way to deal with empirical relationship for Diffusion
+                #  from surface water to air
+                elif b.dimensionality == '[mass] ** 0.67 * [time] / [length] ** 3.01':
+                    b = b.magnitude * ureg('day / meter')
         try:
             return f(a, b)
         except pint.errors.DimensionalityError as e:
@@ -133,8 +161,12 @@ def safe_sub_quantity(a, b):
 
 @auto_sync_emperical_with_quantity
 def safe_div_quantity(a, b):
-    return op.truediv(a, b)
-
+    try:
+        return op.truediv(a, b)
+    except ZeroDivisionError:
+        if ALLOW_ZERO_DIVISION:
+            return EMPERICAL_ZERO_DIVISION
+        raise
 
 simpleeval.MAX_POWER = 100_000_000
 
@@ -143,7 +175,7 @@ def safe_power_quantity(a, b):
     a_mag = a.magnitude if hasattr(a, 'dimensionality') else a
     b_mag = b.magnitude if hasattr(b, 'dimensionality') else b
     if a_mag != a:
-        unit = a.units
+        unit = a.units ** b_mag
     else:
         unit = ''
     return as_quantity(simpleeval.safe_power(a_mag, b_mag), unit)
@@ -245,8 +277,20 @@ def log_quantity(x, *args, **kwargs):
         return math.log(x, *args, **kwargs)
 
 
+def log10_quantity(x, *args, **kwargs):
+    try:
+        return math.log10(x.magnitude, *args, **kwargs)
+    except AttributeError:
+        return math.log10(x, *args, **kwargs)
+
+
+def sqrt_quantity(x, *args, **kwargs):
+    return x ** 0.5
+
 UREG_CUSTOM_FUNCTIONS = {
     **simpleeval.DEFAULT_FUNCTIONS,
     'safe_exp': exp_quantity,
-    'safe_log': log_quantity
+    'safe_log': log_quantity,
+    'safe_log10': log10_quantity,
+    'safe_sqrt': sqrt_quantity
 }

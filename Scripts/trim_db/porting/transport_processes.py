@@ -1,144 +1,12 @@
 from ..services import TransportProcessService, FormulaService, \
     ChemicalService, CompartmentService
 from ..schema.parameters.equations import deconstruct_equation
-from .environment import MEDIA_MAP
+from .config import MEDIA_MAP
 
 __all__ = ['parse_transport_processes']
 
 
-TRANSFER_ALGORITHMS = [
-    'Degradation/Reaction Sink in Sediment(AlgInstID_4565)',
-    'Degradation/Reaction Sink in Surface Water(AlgInstID_4585)',
-    'Demethylation(MHg -> Hg2) in Abiotic Media, Rate is input(AlgInstID_1892)',  # noqa
-    'Diffusion from Sediment to Surface Water, Fugacity-based(AlgInstID_2195)',
-    'Diffusion from Surface Water to Sediment, Fugacity-based(AlgInstID_2149)',
-    'Methylation(Hg2 -> MHg) in Abiotic Media, Rate is input(AlgInstID_1891)',
-    'Oxidation(Hg0 -> Hg2) in Abiotic Media, Rate is input(AlgInstID_1894)',
-    'Reduction(Hg2 -> Hg0) in Abiotic Media, Rate is input(AlgInstID_1893)',
-    'Resuspension from Sediment to Surface Water, General(AlgInstID_2190)',
-    'Sediment Burial from Sediment to Sediment Burial Sink, Zero net deposition, General(AlgInstID_4135)',  # noqa
-    'Sediment Deposition from Surface Water to Sediment, General(AlgInstID_2139)',  # noqa
-
-    'Fish Bioenergetic Model - Ingestion of Algae by Fish(AlgInstID_1527)',
-    'Fish Bioenergetic Model - Ingestion of Algae by Zooplankton',
-    'Fish Bioenergetic Model - Ingestion of Benthic Carnivore by Benthic Omnivore(AlgInstID_1455)',  # noqa
-    'Fish Bioenergetic Model - Ingestion of Benthic Carnivore by Water Column Carnivore(AlgInstID_2245)',  # noqa
-    'Fish Bioenergetic Model - Ingestion of Benthic Carnivore by Water Column Omnivore(AlgInstID_2277)',  # noqa
-    'Fish Bioenergetic Model - Ingestion of Benthic Invertebrate by Benthic Carnivore(ICFID_08-001)',  # noqa
-    'Fish Bioenergetic Model - Ingestion of Benthic Invertebrate by Benthic Omnivore(AlgInstID_1467)',  # noqa
-    'Fish Bioenergetic Model - Ingestion of Benthic Invertebrate by Water Column Carnivore(AlgInstID_2255)',  # noqa
-    'Fish Bioenergetic Model - Ingestion of Benthic Invertebrate by Water Column Herbivore(AlgInstID_2270)',  # noqa
-    'Fish Bioenergetic Model - Ingestion of Benthic Invertebrate by Water Column Omnivore(AlgInstID_2287)',  # noqa
-    'Fish Bioenergetic Model - Ingestion of Benthic Omnivore by Benthic Carnivore(AlgInstID_1447)',  # noqa
-    'Fish Bioenergetic Model - Ingestion of Benthic Omnivore by Water Column Carnivore(AlgInstID_2250)',  # noqa
-    'Fish Bioenergetic Model - Ingestion of Benthic Omnivore by Water Column Omnivore(AlgInstID_2282)',  # noqa
-    'Fish Bioenergetic Model - Ingestion of Macrophyte by Water Column Herbivore(AlgInstID_1646)',  # noqa
-    'Fish Bioenergetic Model - Ingestion of Macrophyte by Water Column Omnivore(AlgInstID_1655)',  # noqa
-    'Fish Bioenergetic Model - Ingestion of Water Column Carnivore by Benthic Carnivore(AlgInstID_2158)',  # noqa
-    'Fish Bioenergetic Model - Ingestion of Water Column Carnivore by Benthic Omnivore(AlgInstID_2175)',  # noqa
-    'Fish Bioenergetic Model - Ingestion of Water Column Carnivore by Water Column Omnivore(AlgInstID_1618)',  # noqa
-    'Fish Bioenergetic Model - Ingestion of Water Column Herbivore by Benthic Carnivore(AlgInstID_2163)',  # noqa
-    'Fish Bioenergetic Model - Ingestion of Water Column Herbivore by Benthic Omnivore(AlgInstID_2180)',  # noqa
-    'Fish Bioenergetic Model - Ingestion of Water Column Herbivore by Water Column Carnivore(AlgInstID_1600)',  # noqa
-    'Fish Bioenergetic Model - Ingestion of Water Column Herbivore by Water Column Omnivore(AlgInstID_1638)',  # noqa
-    'Fish Bioenergetic Model - Ingestion of Water Column Omnivore by Benthic Carnivore(AlgInstID_2168)',  # noqa
-    'Fish Bioenergetic Model - Ingestion of Water Column Omnivore by Benthic Omnivore(AlgInstID_2185)',  # noqa
-    'Fish Bioenergetic Model - Ingestion of Water Column Omnivore by Water Column Carnivore(AlgInstID_1610)',  # noqa
-    'Fish Bioenergetic Model - Ingestion of Zooplankton by Water Column Herbivore',  # noqa
-
-    'Exchange from Macrophyte to Surface Water(AlgInstID_1547)',
-    'Degradation/Reaction Sink in Macrophyte',
-    # 'Oxidation(Hg0 -> Hg2) in Macrophytes',  # Covered by Fish
-    'Time-dependent Partition from Surface Water to Macrophyte, Hg(AlgInstID_1549)',  # noqa
-    'Time-dependent Partition from Macrophyte to Surface Water(AlgInstID_1544),Hg',  # noqa
-
-    'Time-dependent Partition from Sediment to Benthic Invertebrate(AlgInstID_1438)',  # noqa
-    'Time-dependent Partition from Benthic Invertebrate to Sediment(AlgInstID_1433)',  # noqa
-
-    'Degradation/Reaction Sink in Zooplankton(AlgInstID_4570_Z)',
-    # 'Elimination from Zooplankton to Surface Water',  # Covered by Fish
-    'Elimination from Fish to Surface Water(AlgInstID_1512)',
-
-    'Demethylation (MHg->Hg2) in Fish(AlgInstID_1446)',
-    'Oxidation(Hg0 -> Hg2) in Fish(AlgInstID_1443)',
-    'Reduction(Hg2 -> Hg0) in Fish(AlgInstID_1444)',
-
-    'Bulk Advection from Surface Water to Flush-rate Advection Sink, General(AlgInstID_4125)',  # noqa
-    'Diffusion from Surface Water to Air, Two Film(AlgInstID_4080)-Hg',
-    'Algae Deposition from Surface Water to Sediment, General(AlgInstID_2144)',
-
-    'Diffusion from DryVaporSource to Plant Leaf, Hg0',
-    'Diffusion from DryVaporSource to Plant Leaf, MHg',
-    'Diffusion from DryVaporSource to Plant Leaf, Organics',
-    'Diffusion from DryVaporSource to Surface Soil, Hg0',
-    'Diffusion from DryVaporSource to Surface Soil, MHg',
-    'Diffusion from DryVaporSource to Surface Soil, Organics',
-
-    'Diffusion from Surface Soil to Air, Hg0(AlgInstID_3997)',
-    'Diffusion from Surface Soil to Air, MHg(AlgInstID_3999)',
-    'Diffusion from Surface Soil to Air, Organics(AlgInstID_3995)',
-    'Diffusion from Plant Leaf to Air, Hg0, Default (Bennett 1998)(AlgInstID_4005)',
-
-    'Diffusion from Plant Leaf to Air, MHg, Default (Bennett 1998)(AlgInstID_4005)',
-    'Diffusion from Plant Leaf to Air, Organics, Default (Bennett 1998)(AlgInstID_4005)',
-    'Diffusion from Surface Soil to Root Zone(AlgInstID_1919)',
-    'Diffusion from Root Zone to Surface Soil(AlgInstID_1939)',
-    'Diffusion from Root Zone to Vadose Zone(AlgInstID_1904)',
-    'Diffusion from Vadose Zone to Root Zone(AlgInstID_1914)',
-    'Diffusion from Vadose Zone to Vadose Zone(AlgInstID_2445)',
-
-    'Runoff from Surface Soil to Soil Advection Sink',
-    'Runoff from Surface Soil to Surface Soil, General(AlgInstID_2465)',
-    'Runoff from Surface Soil to Surface Water, General(AlgInstID_3520)',
-
-    'Erosion from Surface Soil to Surface Soil, General(AlgInstID_2460)',
-    'Erosion from Surface Soil to Surface Water, General(AlgInstID_3515)',
-    'Erosion from Surface Soil to Soil Advection Sink',
-
-    'Recharge from Groundwater to Surface Water, General(AlgInstID_3510)',
-
-    'Litterfall from Leaves to Soil(AlgInstID_1088)',
-    'Litterfall of Leaf Particle to Soil(AlgInstID_1098)',
-
-    'Particles Blown off from Plant Leaf to Air (DRY)(AlgInstID_4010)',
-    'Particles Washed off Leaf onto Ground(AlgInstID_1103)',
-
-    'Demethylation(MHg -> Hg2) in Plant Leaves, Rate is input(AlgInstID_1249)',
-    'Demethylation(MHg -> Hg2) in Plant Stem, Rate is input(AlgInstID_1271)',
-    'Methylation(Hg2 -> MHg) in Plant Leaves, Rate is input(AlgInstID_1248)',
-    'Methylation(Hg2 -> MHg) in Plant Stem, Rate is input(AlgInstID_1270)',
-
-    'Percolation from Surface Soil to Root Zone(AlgInstID_1924)',
-    'Percolation from Vadose Zone to Groundwater(AlgInstID_1899)',
-    'Percolation from Root Zone to Vadose Zone(AlgInstID_1909)',
-
-    'Degradation/Reaction Sink in Root Zone(AlgInstID_4155)',
-    'Degradation/Reaction Sink in Vadose Zone(AlgInstID_4150)',
-    'Degradation/Reaction Sink in Groundwater(AlgInstID_4145)',
-
-    'Resuspension from Surface Soil to Air, Set to Deposition rate of particles(AlgInstID_4000)',
-    
-    'Waterflow from Surface Water to Surface Water, General(AlgInstID_3685)',
-
-    'Direct Transfer from PseudoSource to Surface water',
-
-    'Transfer from Leaf Particle on Surface to Leaf, Hg(AlgInstID_1250)',
-    'Transfer from Leaf to Leaf Particle on Surface, Hg(AlgInstID_1255)',
-    'Transfer from Leaf to Stem - Agriculture, Hg(AlgInstID_1265)',
-    'Transfer from Leaf to Stem - Grasses/Herbs, Hg',
-    'Transfer from Root Zone to Stem - Agriculture, Hg',
-    'Transfer from Root Zone to Stem - Grasses/Herbs, Hg(AlgInstID_1944)',
-    'Transfer from Stem to Leaf - Agriculture, Hg',
-    'Transfer from Stem to Leaf - Grasses/Herbs, Hg(AlgInstID_1260)',
-
-    'Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Agriculture, Hg(AlgInstID_1953)',
-    'Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Grasses/Herbs,Hg(AlgInstID_1952)',
-    'Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Agriculture, Hg(AlgInstID_1932)',
-    'Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Grasses/Herbs, Hg(AlgInstID_1933)'
-]
-
-
-def parse_transport_processes(algorithm_parameters):
+def parse_transport_processes(algorithm_parameters, restrict_to=None):
     print(f'Loading algorithms from library data ...')
 
     def get_param(params, name, default=None):
@@ -172,8 +40,7 @@ def parse_transport_processes(algorithm_parameters):
         CompartmentService.media.get_or_create(category=m)
 
     for name, params in algorithm_parameters.items():
-
-        if name not in TRANSFER_ALGORITHMS:
+        if restrict_to and name not in restrict_to:
             continue
 
         equation = get_equation(params)
@@ -214,14 +81,23 @@ def parse_transport_processes(algorithm_parameters):
             requirements.append(f'(chemical.id == {sending_chem.id})')
         # print(sending_chem)
 
+        try:
+            chem_cat = get_param(params, 'chemicalCategory')
+            if chem_cat and (chem_cat.upper().strip() != 'ALL'):
+                requirements.append(f'chemical.isa("{chem_cat}")')
+        except Exception:
+            pass
+
         require_comps = [
             ('sendingCompartmentCategory', 'sender'),
             ('receivingCompartmentCategory', 'receiver')
         ]
         for param, name in require_comps:
             m_name = get_param(params, param)
+            if m_name.upper().strip() == 'ALL':
+                continue
 
-            if m_name.lower() == 'pseudosource':
+            if m_name.lower().startswith('pseudosource'):
                 m_name = 'Source'
             elif 'Sink' in m_name:
                 m_name = m_name.lower()
@@ -265,6 +141,50 @@ def parse_transport_processes(algorithm_parameters):
                     f'{name}.media.isa("{m.category}")' for m in media
                 ]
                 requirements.append(f'({" or ".join(or_media)})')
+
+        comp_relationship = get_param(params, 'compartmentRelationship')
+        if comp_relationship == 'ABOVE_OR_BELOW':
+            requirements.append('sender.id != receiver.id')
+            requirements.append(
+                'sender.volume_element.parcel.id'
+                ' == receiver.volume_element.parcel.id'
+            )
+        elif comp_relationship in [
+            'IN_SAME_VOLUME_ELEMENT', 'IN_SAME_COMPOSITE'
+        ]:
+            requirements.append('sender.id != receiver.id')
+            requirements.append(
+                'sender.volume_element.id'
+                ' == receiver.volume_element.id'
+            )
+        elif comp_relationship == 'NEXT_TO':
+            requirements.append(
+                'sender.is_next_to(receiver)'
+            )
+        elif comp_relationship == 'SENDER_ABOVE':
+            requirements.append('sender.id != receiver.id')
+            requirements.append(
+                'sender.volume_element.parcel.id'
+                ' == receiver.volume_element.parcel.id'
+            )
+            requirements.append(
+                'sender.volume_element.bottom >'
+                ' receiver.volume_element.bottom'
+            )
+        elif comp_relationship == 'SENDER_BELOW':
+            requirements.append('sender.id != receiver.id')
+            requirements.append(
+                'sender.volume_element.parcel.id'
+                ' == receiver.volume_element.parcel.id'
+            )
+            requirements.append(
+                'sender.volume_element.top <'
+                ' receiver.volume_element.top'
+            )
+        elif comp_relationship == 'SAME':
+            requirements.append(
+                'sender.id == receiver.id'
+            )
 
         # print(requirements)
         if requirements:

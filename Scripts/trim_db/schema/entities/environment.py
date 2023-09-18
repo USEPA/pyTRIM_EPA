@@ -1,8 +1,5 @@
 import json
-import logging
-import time
-
-# import pathspec
+import pandas as pd
 import sqlalchemy as sa
 from shapely.geometry import Polygon
 from pyproj import Geod
@@ -61,7 +58,7 @@ class Parcel(Model):
         geod = Geod(ellps="WGS84")
         poly = wkt.loads(
             f'''POLYGON (({", ".join([str(tpl[0]) + " " + str(tpl[1]) for tpl in self.vertices])}))''')
-        return abs(geod.geometry_area_perimeter(poly)[0])
+        return abs(geod.geometry_area_perimeter(poly)[0]) * ureg('m^2')
 
     def get_volume_element(self, name):
         for ve in self.volume_elements:
@@ -593,29 +590,63 @@ class VolumeElement(Model):
         return (self.top - self.bottom) * ureg('m')
 
     @property
+    def depth(self):
+        # CAREFUL: we assume dimensions are in meters ...
+        return abs(self.top - self.bottom) * ureg('m')
+
+    @property
     def volume(self):
         return self.parcel.area * self.height
 
-    def vol_elem_agg(self, type, prop, media_name):
-        val = 0
-        if type == "sum":
-            comp_vals = [c[prop] for c in self.compartments if c.media.isa(media_name)]
-            val = sum(comp_vals)
-        return val
+    def agg(
+        self, func, prop, chemical=None, compartment_name=None, compartment_media=None,
+        *args, **kwargs
+    ):
+        comps = self.get_compartment(name=compartment_name, media=compartment_media)
+        if not isinstance(comps, list):
+            comps = [comps]
 
-    def overlap_with(self, volume_element):
+        def get_prop(c):
+            if args or kwargs:
+                if chemical is not None:
+                    return getattr(chemical, prop)(c, *args, **kwargs)
+                return getattr(c, prop)(*args, **kwargs)
+            else:
+                if chemical is not None:
+                    return getattr(chemical, prop)(c)
+                return getattr(c, prop)
+
+        def eval_prop(c):
+            p = get_prop(c)
+            if isinstance(p, ParameterDefinition):
+                return p.default_value
+            elif isinstance(p, CustomParameter):
+                return p.value
+            else:
+                return p
+
+        if func == 'sum':
+            props = []
+            for c in comps:
+                p = eval_prop(c)
+                if pd.isna(p):
+                    return pd.NA
+                props.append(p)
+            return sum(props)
+
+        raise AssertionError('Unknown function!')
+
+    def interface_with(self, volume_element):
         polygon_a = self.parcel.polygon
         polygon_b = volume_element.parcel.polygon
 
         is_neighbor = polygon_a.intersects(polygon_b)
         if not is_neighbor:
-            return 0 * ureg('m^3')
+            # CAREFUL: we assume dimensions are in meters ...
+            return 0 * ureg('m^3')  # technically m^2 ...
 
         intersection = polygon_a.intersection(polygon_b)
-        xy_overlap = intersection.area
-        if xy_overlap == 0:
-            # the borders must just touch
-            xy_overlap = intersection.length
+        xy_overlap = intersection.length
 
         top_a = self.top
         top_b = volume_element.top
@@ -623,7 +654,44 @@ class VolumeElement(Model):
         bottom_a = self.bottom
         bottom_b = volume_element.bottom
 
-        if top_a == bottom_b or top_b == bottom_a:
+        if (top_a == bottom_b or top_b == bottom_a) and intersection.area > 0:  # for overlying parcels:
+            z_overlap = 1
+
+        elif top_a >= top_b and top_b > bottom_a:
+            z_overlap = top_b - bottom_a
+
+        elif top_b >= top_a and top_a > bottom_b:
+            z_overlap = top_a - bottom_b
+
+        else:
+            z_overlap = 0
+
+        # CAREFUL: we assume dimensions are in meters ...
+        return (z_overlap * xy_overlap) * ureg('m^3')  # technically m^2 ...
+
+    def overlap_with(self, volume_element):
+        if self.interface_with(volume_element) <= 0:
+            return 0 * ureg('m^3')
+
+        polygon_a = self.parcel.polygon
+        polygon_b = volume_element.parcel.polygon
+
+        is_neighbor = polygon_a.intersects(polygon_b)
+        if not is_neighbor:
+            # CAREFUL: we assume dimensions are in meters ...
+            return 0 * ureg('m^3')
+
+        intersection = polygon_a.intersection(polygon_b)
+        xy_overlap = intersection.area
+
+        top_a = self.top
+        top_b = volume_element.top
+
+        bottom_a = self.bottom
+        bottom_b = volume_element.bottom
+
+        if (top_a == bottom_b or top_b == bottom_a) and intersection.area > 0:  # for overlying parcels:
+            # for overlying parcels
             z_overlap = 1
 
         elif top_a >= top_b and top_b > bottom_a:
@@ -637,6 +705,17 @@ class VolumeElement(Model):
 
         # CAREFUL: we assume dimensions are in meters ...
         return (z_overlap * xy_overlap) * ureg('m^3')
+
+    def midpoint_distance(self, volume_element):
+        if isinstance(volume_element, Compartment):
+            volume_element = volume_element.volume_element
+
+        polygon_a = self.parcel.polygon
+        polygon_b = volume_element.parcel.polygon
+
+        # CAREFUL: we assume dimensions are in meters ...
+        return polygon_a.centroid.distance(polygon_b.centroid) * ureg('m^2')
+
 
     def get_compartment(self, name=None, media=None):
         if name is None and media is None:
@@ -656,11 +735,6 @@ class VolumeElement(Model):
     __table_args__ = (
         sa.UniqueConstraint('parcel_id', 'name'),
     )
-
-    # def get_all_leaf(self):
-    #     if self.name == "SurfSoil":
-    #         return [c for c in self.compartments if c.media.name.lower().endswith("leaf")]
-    #     return None
 
     def as_serializable(self):
         return {
@@ -726,7 +800,7 @@ class Media(Model):
 
     def isa(self, name_or_media):
         if isinstance(name_or_media, str):
-            # check asterisk in the beginning
+            # check wildcard in the beginning
             if name_or_media.startswith(GLOBAL_WILDCARD):
                 if (
                         self.name.endswith(name_or_media[1:])
@@ -740,7 +814,10 @@ class Media(Model):
                 ):
                     return True
             else:
-                if name_or_media == self.name or name_or_media == self.category:
+                if (
+                    name_or_media == self.name
+                    or name_or_media == self.category
+                ):
                     return True
         elif isinstance(name_or_media, Media):
             if name_or_media.id == self.id:
@@ -824,14 +901,24 @@ class Compartment(Model):
         if self.volume_element == compartment.volume_element:
             return True  # We're in the same "space"!
 
-        elif self.volume_element.overlap_with(compartment.volume_element) > 0:
-            return True  # Our "spaces" overlap!
+        elif self.volume_element.interface_with(compartment.volume_element) > 0:
+            return True  # Our "spaces" touch!
 
         elif compartment in self.custom_linked_compartments:
             return True
 
         # To bad, we just didn't connect
         return False
+
+    def is_next_to(self, compartment):
+        if self.volume_element == compartment.volume_element:
+            return False  # We're actually in the same "space" ...
+
+        if self.volume_element.interface_with(compartment.volume_element) > 0:
+            return True  # Our "spaces" touch!
+
+        return False
+
 
     def get_links(self, compartment):
         comp_links = [
@@ -849,41 +936,6 @@ class Compartment(Model):
     __table_args__ = (
         sa.UniqueConstraint('volume_element_id', 'name'),
     )
-
-    @property
-    def comp_parcel_area(self):
-        return self.volume_element.parcel.area
-
-    @property
-    def comp_vol_elem_depth(self):
-        return abs(self.volume_element.top - self.volume_element.bottom)
-
-    def comp_vol_elem_sum_of(self, prop, media):
-        ve_sum = 0
-        if prop == "Area":
-            ve_sum = max([c.volume_element.parcel.area for c in self.volume_element.compartments if
-                          c.media.isa(media)] + [0])
-        elif prop.startswith("chemical."):
-            f = eval(prop)
-            if f:
-                ve_sum = sum([f(c) for c in self.volume_element.compartments if c.media.isa(media)])
-        else:
-            comps = [c for c in self.volume_element.compartments if c.media.isa(media)]
-            for comp in comps:
-                if isinstance(comp.parameters.get(prop), ParameterDefinition):
-                    ve_sum += comp.parameters[prop].default_value or 0
-                elif isinstance(comp.parameters.get(prop), CustomParameter):
-                    ve_sum += comp.parameters[prop].value or 0
-        return ve_sum
-
-    def within_composite_compartment(self, prop, media):
-        composite_comp = self.linked_compartments(media=media)[0]
-        val = 0
-        if isinstance(composite_comp.parameters.get(prop), ParameterDefinition):
-            val = composite_comp.parameters[prop].default_value or 0
-        elif isinstance(composite_comp.parameters.get(prop), CustomParameter):
-            val = composite_comp.parameters[prop].value or 0
-        return val
 
     def as_serializable(self):
         return {

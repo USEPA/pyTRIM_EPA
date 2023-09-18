@@ -1,21 +1,45 @@
 import re
 import pandas as pd
+from numpy import timedelta64
 from functools import partial
-from ..schema.parameters.equations import *
 from pyproj import CRS, Transformer
+from .config import MEDIA_MAP
+from ..schema.parameters.equations import *
 from ..services import *
 
 __all__ = [
     'read_master_library',
+    'read_external_data',
     'safe_name', 'clean_prop', 'clean_unit',
+    'clean_compartment_name',
     'UNIT_SUFFIXES',
     'split_unit_suffix',
     'clean_equation',
     'transform_coordinates_to_decimal'
 ]
 
+MET_DATA_MAP = {
+        'Scenario': {
+            'wt_av_rain': 'Rain',
+            'wt_av_airtemperature': 'AirTemperature',
+            'wt_av_horizontalwindspeed': 'horizontalWindSpeed',
+            'wt_av_winddirection': 'windDirection',
+            'wt_av_isday': 'isDay_Dynamic',
+            'wt_av_cumulativerain': 'cumulativeRain',
+        },
+        'Compartment': {
+            'wt_av_allowexchange': ['AllowExchange_Dynamic', 'Flora'],
+            'wt_av_litterfallrate': ['LitterFallRate', '$Leaf']
+        },
+        'ignore': ['wt_av_mixingheight',
+                   'frac_time_rain',
+                   'frac_time_exchange_no_rain',
+                   'frac_time_exchange_rain',
+                   'frac_time_exchange_day',
+                   'frac_time_exchange_not_day']
+    }
 
-def read_master_library(filepath):
+def read_master_library(filepath, import_rules={}):
     print(f'Reading master library from "{filepath}" ...')
     read_lib = partial(
         pd.read_csv, filepath,
@@ -24,46 +48,50 @@ def read_master_library(filepath):
 
     df_lib = read_lib(skiprows=[0], names=read_lib(nrows=0).columns.values)
 
-    from trim_db.schema import Scenario, Compartment
+    from trim_db.schema import Scenario
 
-    constants = [
-        ('g_per_kg', 1000, 'g/kg'),
-        ('IdealGasConstant', 8.314, '(Pa*m^3)/(mol*K)'),
-        ('kg_per_g', 1e-3, 'kg/g'),
-        ('kg_per_m3_Water', 1000, 'kg/m^3'),
-        ('kg_per_ug', 1e6, 'kg/ug'),
-        ('L_per_m3', 1000, 'L/m^3'),
-        ('m3_per_kg_Water', 1e-3, 'm^3/kg'),
-        ('m3_per_L', 1e-3, 'm^3/L'),
-        ('m3_per_um3', 1e-18, 'm^3/um^3'),
-        ('pi', 3.14159265358979323846, None),
-        ('ug_per_kg', 1e6, 'ug/kg'),
-        ('um3_per_m3', 1e18, 'um^3/m^3'),
-        ('vonKarmensConstant', 0.74, None),
-        ('waterMeltingPoint', 273.15, 'K'),
-        ('erosionRateCalcSource', 1, None)
-    ]
+    default_entries = import_rules.get('default_entries', {})
 
-    compartment_default_params = [
-        ('unitSoilLoss', 0.00036, 'kg/m^2/d', 'Compartment [Surface_Soil]'),
-        ('sedimentDeliveryRatioSlopeCoef', 0.125, None, 'Compartment [Surface_Soil]'),
-        ('soilTillage', 0, None, None),
-        ('waterEvaporationRate', 0.7, 'm[water]/year', 'Compartment [Surface_Water]'),
-        ('BedDensity', 2600, 'kg[sediment particles]/m^3[sediment particles]', 'Compartment [Sediment]'),
-        ('ExternalSedimentInflow', 0, 'kg[sediment particles]/day', 'Compartment [Surface_Water]')
-    ]
-
-    for const in constants:
+    for const in default_entries.get('constants', []):
         Scenario.parameters.add(const[0], value=const[1], unit=const[2])
 
-    for param in compartment_default_params:
-        if param[3] is None:
-            Compartment.parameters.add(param[0], value=param[1], unit=param[2])
-        else:
-            par_domain = ParameterService.domains.get(name=param[3])
-            Compartment.parameters.add(param[0], value=param[1], unit=param[2], domain=par_domain)
-
     parsed = parse_master_library_params(df_lib)
+
+    return parsed
+
+
+def read_external_data(filepaths, scenario_name):
+    for file_type, filepath in filepaths.items():
+        print(f'Reading external data: {file_type} from "{filepath}" ...')
+        read_lib = partial(
+            pd.read_csv, filepath,
+            sep=',', encoding='windows-1252', low_memory=False
+        )
+        if file_type == "met_file":
+            df_met = read_lib(skiprows=[0], names=[i.lower() for i in read_lib(nrows=0).columns.values])
+        elif file_type == "allowexchange_file":
+            df_ae = read_lib(skiprows=[0], names=[i.lower() for i in read_lib(nrows=0).columns.values])
+        elif file_type == "litterfall_file":
+            df_lf = read_lib(skiprows=[0], names=[i.lower() for i in read_lib(nrows=0).columns.values])
+
+    parsed = parse_met_data(df_met, df_ae, df_lf)
+
+    from trim_db.services import ScenarioService, CompartmentService
+
+    scenario = ScenarioService.get(name=scenario_name)
+    for k, v in parsed.items():
+        if k in list(MET_DATA_MAP.get("Scenario").keys()):
+            par = scenario.parameters.get(MET_DATA_MAP["Scenario"][k])
+            par.value = v
+        elif k in list(MET_DATA_MAP.get("Compartment").keys()):
+            compartments = [c for c in scenario.compartments if c.media.isa(MET_DATA_MAP.get("Compartment")[k][1])
+                            and not c.media.isa("Coniferous_Forest")]
+            for comp in compartments:
+                par = comp.parameters.get(MET_DATA_MAP["Compartment"][k][0])
+                par.value = v
+
+    ScenarioService.commit()
+    CompartmentService.commit()
 
     return parsed
 
@@ -95,7 +123,7 @@ def parse_master_library_params(library_df):
                 val = clean_prop(param_data.PropertyValue)
 
                 if isinstance(val, str):
-                    val = clean_equation(val)
+                    val = clean_equation(val, object_type)
 
                 if val is None or str(val) == 'None':
                     continue
@@ -137,6 +165,138 @@ def parse_master_library_params(library_df):
     return params
 
 
+def parse_met_data(df, df2, df3):  # one time process all met weighted averages
+    df['dlist'] = df['date'].str.split('/')  # split date column into list
+    df = df[df.dlist.str.len() == 3]  # drop rows that have less than three elements
+    df[['Month', 'Day', 'Year']] = df.date.str.split("/", expand=True)
+    df['Month'] = pd.to_numeric(df['Month'], errors='coerce')
+    df['Day'] = pd.to_numeric(df['Day'], errors='coerce')
+    df['Year'] = pd.to_numeric(df['Year'], errors='coerce')
+    df['Hour'] = pd.to_numeric(df['xhour'], errors='coerce')
+    df = df.loc[(df.Month < 13) & (df.Day < 32) & (df.Year < 2100) & (df.Hour < 25)]  # drop faulty
+
+    metcol_dict = {'rain': (0, 1), 'airtemperature': (200, 373), 'horizontalwindspeed': (0, 100),
+                   'winddirection': (-360, 360), 'mixingheight': (0, 1000), 'isday': (0, 1),
+                   'cumulativerain': (0, 1.6)}  # k, v represent name and min-max
+    for k, v in metcol_dict.items():
+        df['metcol'] = pd.to_numeric(df[k], errors='coerce')
+        df = df[(df['metcol'] <= v[1]) & (df['metcol'] >= v[0])]  # keep rows within min max bounds
+
+    df['DT'] = list(pd.to_datetime(df[['Year', 'Month', 'Day', 'Hour']], errors='coerce'))
+    df['date_delta'] = (df['DT'] - df['DT'].min()) / timedelta64(1, 'D')
+    df['time_delta'] = df['date_delta'].diff()
+    df['time_delta'] = df['time_delta'].shift(
+        -1)  # shift up the column 1 so that applicability of met condition is aligned to duration
+
+    # clean up non sequential dates. slow
+
+    df['DT_Check'] = df.DT >= (df.DT.shift())
+    df = df[df['DT_Check']]
+    # df=df[(df['time_delta']<0.05)&(df['time_delta']>0)]# assume all observations valid for an hour since this is an hourly met file. eliminate overinfluential observations. not sure if needed but checking.
+    # df=df[df['time_delta']>0]# assume all observations valid for an hour since this is an hourly met file. eliminate overinfluential observations. not sure if needed but checking.
+    # df=df[(df['time_delta']<1)&(df['time_delta']>0)]# assume all observations valid for an hour since this is an hourly met file. eliminate overinfluential observations. not sure if needed but checking.
+
+    # need to clean up messy met file to get reasonable averages. This shouldnt be required with a quality met file.
+
+    met_dict = {}
+
+    for k, v in metcol_dict.items():
+        df['metcol'] = pd.to_numeric(df[k], errors='coerce')
+        df['prod'] = df['metcol'] * df['time_delta']
+        wt_ave = df['prod'].sum() / df['time_delta'].sum()
+        met_dict['wt_av_' + k] = wt_ave
+    df['rain'] = pd.to_numeric(df['rain'], errors='coerce')
+    df['is_rain'] = [1 if x > 0 else 0 for x in df['rain']]
+    df['raintime'] = df['is_rain'] * df['time_delta']
+    rain_frac_time = df['raintime'].sum() / df['time_delta'].sum()
+    met_dict['frac_time_rain'] = rain_frac_time
+    # met_dict['wt_av_rain']=rain_frac_time # overwrite wt_av_rain with rain_frac_time (superior method, i think)
+
+    # process AE file ## has unusual data column header -- not interfered with original data. Ignored hour resolution.
+    df2['dlist'] = df2['##date'].str.split('/')  # split date column into list
+    df2 = df2[df2.dlist.str.len() == 3]  # drop rows that have less than three elements
+    df2[['Month', 'Day', 'Year']] = df2['##date'].str.split("/", expand=True)
+    df2['Month'] = pd.to_numeric(df2['Month'], errors='coerce')
+    df2['Day'] = pd.to_numeric(df2['Day'], errors='coerce')
+    df2['Year'] = pd.to_numeric(df2['Year'], errors='coerce')
+    df2 = df2.loc[(df2.Month < 13) & (df2.Day < 32) & (df2.Year < 2100)]  # drop faulty
+
+    df2['DT'] = list(pd.to_datetime(df2[['Year', 'Month', 'Day']], errors='coerce'))
+    df2['date_delta'] = (df2['DT'] - df2['DT'].min()) / timedelta64(1, 'D')
+    df2['time_delta'] = df2['date_delta'].diff()
+    df2['time_delta'] = df2['time_delta'].shift(
+        -1)  # shift up the column 1 so that applicability of met condition is aligned to duration
+
+    df2['ae'] = pd.to_numeric(df2['allowexchange'], errors='coerce')
+    df2['prod'] = df2['ae'] * df2['time_delta']
+    wt_ave = df2['prod'].sum() / df2['time_delta'].sum()
+    met_dict['wt_av_allowexchange'] = wt_ave
+
+    df = df.merge(df2[['DT', 'ae']], how='left', on='DT', indicator=True)  # merge in AE
+
+    first_ind = df.loc[df['_merge'] == 'both'].index[0]  # index first date in AE file
+    if first_ind != 0:  # if the first value in the ae file is greater than the first date in the met file assume the opposite condition is true
+        first_ae_val = df.loc[first_ind, 'ae']  # first ae value
+        if first_ae_val == 1:
+            df.loc[0, 'ae'] = 0
+        else:
+            df.loc[0, 'ae'] = 1
+
+    df.ae.fillna(value=pd.NA, inplace=True)  # fill None values with nan
+
+    df['ae'].fillna(method='ffill', inplace=True)  # fill nan values with previous non nan value
+
+    df['exch_no_rain'] = df['ae'] * (1 - df['is_rain'])
+    df['exch_rain'] = df['ae'] * df['is_rain']
+    df['exchnoraintime'] = df['exch_no_rain'] * df['time_delta']
+    df['exchraintime'] = df['exch_rain'] * df['time_delta']
+    exch_no_rain_frac_time = df['exchnoraintime'].sum() / df['time_delta'].sum()
+    exch_rain_frac_time = df['exchraintime'].sum() / df['time_delta'].sum()
+
+    met_dict['frac_time_exchange_no_rain'] = exch_no_rain_frac_time
+    met_dict['frac_time_exchange_rain'] = exch_rain_frac_time
+
+    ### Compute interaction between isday and allow exchange.
+    df = df
+    df['isday'] = pd.to_numeric(df['isday'], errors='coerce')
+    df = df.loc[(df.isday == 1) | (df.isday == 0)]  # keep only valid isday data
+    df['ae_isday'] = df['ae'] * df.isday
+    df['aeisdaytime'] = df['ae_isday'] * df['time_delta']
+    exch_day_frac_time = df['aeisdaytime'].sum() / df['time_delta'].sum()
+    met_dict['frac_time_exchange_day'] = exch_day_frac_time
+
+    df['ae_notday'] = df['ae'] * (1 - df.isday)
+    df['aenotdaytime'] = df['ae_notday'] * df['time_delta']
+    exch_not_day_frac_time = df['aenotdaytime'].sum() / df['time_delta'].sum()
+    met_dict['frac_time_exchange_not_day'] = exch_not_day_frac_time
+
+    # process LF file
+    df3['dlist'] = df3['##date'].str.split('/')  # split date column into list
+    df3 = df3[df3.dlist.str.len() == 3]  # drop rows that have less than three elements
+    df3[['Month', 'Day', 'Year']] = df3['##date'].str.split("/", expand=True)
+    df3['Month'] = pd.to_numeric(df3['Month'], errors='coerce')
+    df3['Day'] = pd.to_numeric(df3['Day'], errors='coerce')
+    df3['Year'] = pd.to_numeric(df3['Year'], errors='coerce')
+    # df3['Hour']=pd.to_numeric(df3['hour'], errors='coerce')
+    # df3=df3.loc[(df3.Month<13) & (df3.Day<32) & (df3.Year<2100)&(df3.Hour<25)] # drop faulty
+    df3 = df3.loc[(df.Month < 13) & (df3.Day < 32) & (df3.Year < 2100)]  # drop faulty
+
+    df3['DT'] = list(pd.to_datetime(df3[['Year', 'Month', 'Day']], errors='coerce'))
+    # df['DT']=list(pd.to_datetime(df[['Year', 'Month', 'Day','Hour']],errors='coerce'))
+    df3['date_delta'] = (df3['DT'] - df3['DT'].min()) / timedelta64(1, 'D')
+    df3['time_delta'] = df3['date_delta'].diff()
+    df3['time_delta'] = df3['time_delta'].shift(
+        -1)  # shift up the column 1 so that applicability of met condition is aligned to duration
+
+    df3['lf'] = pd.to_numeric(df3['litterfallrate'], errors='coerce')
+    df3['prod'] = df3['lf'] * df3['time_delta']
+    wt_ave = df3['prod'].sum() / df3['time_delta'].sum()
+    met_dict['wt_av_litterfallrate'] = wt_ave
+    # met_dict['wt_av_litterfallrate']=0.0745 # fix
+    # met_dict['wt_av_allowexchange']=5/12
+
+    return met_dict
+
 ILLEGAL_NAME_CHARS = re.compile('[^0-9a-zA-Z]+')
 
 
@@ -155,10 +315,19 @@ def safe_name(name):
     return name
 
 
+def clean_compartment_name(name):
+    name = name.replace(' - ', '_').replace(' / ', '_')
+    name = name.replace('-', '_').replace('/', '_')
+    name = name.strip().replace(' ', '_')
+    name = '_'.join(name.split('_'))  # remove multiple __ in a row
+    return name
+
+
 VAR_SPLITTER = '______'
 
 GLOBAL_REPLACE = {
     'Constants': 'environment',
+    'constants': 'environment',
     'containingScenario': 'environment',
 
     'Chemical.': 'chemical.',
@@ -197,6 +366,8 @@ GLOBAL_REPLACE = {
     'totalMass': 'TotalMass',
     'Surfsoil': 'SurfSoil',
     'Halflife': 'HalfLife',
+    'isFlowing': 'IsFlowing',
+    'D_pureair': 'D_PureAir',
     'D_purewater': 'D_PureWater',
     'D_Purewater': 'D_PureWater',
     'FractionMass_vapor': 'FractionMass_Vapor',
@@ -222,17 +393,23 @@ GLOBAL_REPLACE = {
     'Z_vapor': 'Z_Vapor',
     'z_vapor': 'Z_Vapor',
     'Z_pureair': 'Z_PureAir',
+    'Z_pureAir': 'Z_PureAir',
     'Z_colloid': 'Z_Colloid',
     'Z_purewater': 'Z_PureWater',
     'Z_total': 'Z_Total',
+    'Depth_times_gamma': 'Depth_times_Gamma',
     'conc_colloid': 'conc_Colloid',
     'Kd_colloid': 'Kd_Colloid',
     'rho_colloid': 'rho_Colloid',
+    'Depurationrate': 'DepurationRate',
+    'Fractionofareaavailableforerosion': 'FractionofAreaAvailableforErosion',
+
 
     'self.Volume': 'compartment.volume_element.volume',
     'self.Height': 'compartment.volume_element.height',
     'compartment.Volume': 'compartment.volume_element.volume',
     'compartment.Height': 'compartment.volume_element.height',
+    'DistanceBetweenMidpoints': '.volume_element.midpoint_distance',
 
     'Algorithm.': 'algorithm.',
 
@@ -240,18 +417,42 @@ GLOBAL_REPLACE = {
     'TheLink.FractionSpecificcompartmentDiet': '1',
     'theLink.': 'link.',
     'TheLink.': 'link.',
-    'TheLink.InterfacialArea': 'sender.volume_element.overlap_with(receiver.volume_element)',  # noqa
-    'Thelink.InterfacialArea': 'sender.volume_element.overlap_with(receiver.volume_element)',  # noqa
+    'TheLink.InterfacialArea': 'sender.volume_element.interface_with(receiver.volume_element)',  # noqa
+    'Thelink.InterfacialArea': 'sender.volume_element.interface_with(receiver.volume_element)',  # noqa
 
     'SendingChemical.': 'chemical.',
     'SendingCompartment.Chemical.': f'sender{VAR_SPLITTER}chemical.',  # noqa
     'sendingCompartment.Chemical.': f'sender{VAR_SPLITTER}chemical.',  # noqa
     'Sendingcompartment.Chemical.': f'sender{VAR_SPLITTER}chemical.',  # noqa
     'sendingcompartment.Chemical.': f'sender{VAR_SPLITTER}chemical.',  # noqa
+    'ReceivingCompartment.Volume': 'receiver.volume_element.volume',
+    'receivingCompartment.Volume': 'receiver.volume_element.volume',
+    'Receivingcompartment.Volume': 'receiver.volume_element.volume',
+    'receivingcompartment.Volume': 'receiver.volume_element.volume',
     'SendingCompartment.Volume': 'sender.volume_element.volume',
     'sendingCompartment.Volume': 'sender.volume_element.volume',
     'Sendingcompartment.Volume': 'sender.volume_element.volume',
     'sendingcompartment.Volume': 'sender.volume_element.volume',
+    'ReceivingCompartment.Area': 'receiver.volume_element.parcel.area',
+    'Receivingcompartment.Area': 'receiver.volume_element.parcel.area',
+    'receivingcompartment.Area': 'receiver.volume_element.parcel.area',
+    'receivingCompartment.Area': 'receiver.volume_element.parcel.area',
+    'SendingCompartment.Area': 'sender.volume_element.parcel.area',
+    'Sendingcompartment.Area': 'sender.volume_element.parcel.area',
+    'sendingcompartment.Area': 'sender.volume_element.parcel.area',
+    'sendingCompartment.Area': 'sender.volume_element.parcel.area',
+    'ReceivingCompartment.Depth': 'receiver.volume_element.depth',
+    'Receivingcompartment.Depth': 'receiver.volume_element.depth',
+    'receivingcompartment.Depth': 'receiver.volume_element.depth',
+    'receivingCompartment.Depth': 'receiver.volume_element.depth',
+    'SendingCompartment.Depth': 'sender.volume_element.depth',
+    'Sendingcompartment.Depth': 'sender.volume_element.depth',
+    'sendingcompartment.Depth': 'sender.volume_element.depth',
+    'sendingCompartment.Depth': 'sender.volume_element.depth',
+    'ReceivingCompartment.': 'receiver.',
+    'receivingCompartment.': 'receiver.',
+    'Receivingcompartment.': 'receiver.',
+    'receivingcompartment.': 'receiver.',
     'SendingCompartment.': 'sender.',
     'sendingCompartment.': 'sender.',
     'Sendingcompartment.': 'sender.',
@@ -261,88 +462,29 @@ GLOBAL_REPLACE = {
     'Receivingcompartment.Chemical.': f'receiver{VAR_SPLITTER}chemical.',  # noqa
     'receivingcompartment.chemical.': f'receiver{VAR_SPLITTER}chemical.',  # noqa
     'Receivingchemical.': f'receiver{VAR_SPLITTER}chemical.',  # noqa
-    'ReceivingCompartment.Volume': 'receiver.volume_element.volume',
-    'receivingCompartment.Volume': 'receiver.volume_element.volume',
-    'Receivingcompartment.Volume': 'receiver.volume_element.volume',
-    'receivingcompartment.Volume': 'receiver.volume_element.volume',
-    'ReceivingCompartment.Area': 'receiver.comp_parcel_area',
-    'Receivingcompartment.Area': 'receiver.comp_parcel_area',
-    'receivingcompartment.Area': 'receiver.comp_parcel_area',
-    'ReceivingCompartment.Depth': 'receiver.comp_vol_elem_depth',
-    'Receivingcompartment.Depth': 'receiver.comp_vol_elem_depth',
-    'receivingcompartment.Depth': 'receiver.comp_vol_elem_depth',
-    'ReceivingCompartment.': 'receiver.',
-    'receivingCompartment.': 'receiver.',
-    'Receivingcompartment.': 'receiver.',
-    'receivingcompartment.': 'receiver.',
+    'ReceivingChemical.': f'receiver{VAR_SPLITTER}chemical.',  # noqa
     'link.': f'receiver{VAR_SPLITTER}sender.',
 
-    'receivingVolumeElementSumOf[Terrestrial Plant | Leaf].AllowExchange_forAir':
-        'receiver.comp_vol_elem_sum_of("AllowExchange_forAir", "$Leaf")',
+    'Fractionofareaavailableforverticaldiffusion': 'FractionofAreaAvailableforVerticalDiffusion',
 
-    'receivingVolumeElementSumOf[Terrestrial Plant | Leaf].LeafAreaIndex':
-        'receiver.comp_vol_elem_sum_of("LeafAreaIndex", "$Leaf")',
+    'MassTransferCoefficientonAirSideofAirSoilBoundary': 'MassTransferCoefficientOnAirSideofAirSoilBoundary',
 
-    'receivingVolumeElementSumOf[Terrestrial Plant | Leaf].isDay_forAir':
-        'receiver.comp_vol_elem_sum_of("IsDay_forAir", "$Leaf")',
+    'SendingwithinCompositeCompartment': 'SendingWithinCompositeCompartment',
+    'sendingWithinCompositeCompartment': 'SendingWithinCompositeCompartment',
+    'sendingwithincompositecompartment': 'SendingWithinCompositeCompartment',
 
-    'receivingVolumeElementSumOf[Terrestrial Plant | Leaf].Chemical.TotalStomatalConductance':
-        'receiver.comp_vol_elem_sum_of("chemical.TotalStomatalConductance", "$Leaf")',
+    'withinCompositeCompartment': 'WithinCompositeCompartment',
+    'WithinCompositeCompartment': 'WithinCompositeCompartment',
+    'withincompositecompartment': 'WithinCompositeCompartment',
 
-    'receivingVolumeElementSumOf[Terrestrial Plant | Leaf].Chemical.TotalCuticularConductance':
-        'receiver.comp_vol_elem_sum_of("chemical.TotalCuticularConductance", "$Leaf")',
+    'withinContainingVolumeElement': 'WithinContainingVolumeElement',
+    'WithinContainingVolumeElement': 'WithinContainingVolumeElement',
+    'withincontainingvolumeelement': 'WithinContainingVolumeElement',
 
-    'sendingVolumeElementSumOf[Terrestrial Plant | Leaf].DryDepInterceptionFraction':
-        'sender.comp_vol_elem_sum_of("DryDepInterceptionFraction", "$Leaf")',
-
-    'sendingVolumeElementSumOf[Terrestrial Plant | Leaf].AllowExchange_forAir':
-        'sender.comp_vol_elem_sum_of("AllowExchange_forAir", "$Leaf")',
-
-    'SendingwithinCompositeCompartment[Terrestrial Plant | Leaf].DryDepInterceptionFraction':
-        'sender.within_composite_compartment("DryDepInterceptionFraction", "$Leaf")',
-
-    'SendingwithinCompositeCompartment[Terrestrial Plant | Leaf].WetDepInterceptionFraction':
-        'sender.within_composite_compartment("WetDepInterceptionFraction", "$Leaf")',
-
-    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil - Default].Area':
-        'receiver.comp_vol_elem_sum_of("Area", "Surface_Soil")',
-
-    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil - Default].FractionofAreaAvailableforVerticalDiffusion':
-        'receiver.comp_vol_elem_sum_of("Fractionofareaavailableforverticaldiffusion", "Surface_Soil")',
-
-    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil - Default].Depth':
-        'receiver.comp_vol_elem_sum_of("Depth", "Surface_Soil")',
-
-    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil - Default].Chemical.MassTransferCoefficientOnAirSideofAirSoilBoundary':
-        'receiver.comp_vol_elem_sum_of("chemical.MassTransferCoefficientOnAirSideofAirSoilBoundary", "Surface_Soil")',
-
-    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil - Default].Chemical.Z_Total':
-        'receiver.comp_vol_elem_sum_of("chemical.Z_Total", "Surface_Soil")',
-
-    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil - Default].Chemical.D_effective':
-        'receiver.comp_vol_elem_sum_of("chemical.D_effective", "Surface_Soil")',
-
-    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil].Area':
-        'receiver.comp_vol_elem_sum_of("Area", "Surface_Soil")',
-
-    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil].FractionofAreaAvailableforVerticalDiffusion':
-        'receiver.comp_vol_elem_sum_of("Fractionofareaavailableforverticaldiffusion", "Surface_Soil")',
-
-    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil].Depth':
-        'receiver.comp_vol_elem_sum_of("Depth", "Surface_Soil")',
-
-    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil].Chemical.MassTransferCoefficientOnAirSideofAirSoilBoundary':
-        'receiver.comp_vol_elem_sum_of("chemical.MassTransferCoefficientOnAirSideofAirSoilBoundary", "Surface_Soil")',
-
-    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil].Chemical.Z_Total':
-        'receiver.comp_vol_elem_sum_of("chemical.Z_Total", "Surface_Soil")',
-
-    'receivingVolumeElementSumOf[Abiotic | Soil | Surface Soil | Surface Soil].Chemical.D_effective':
-        'receiver.comp_vol_elem_sum_of("chemical.D_effective", "Surface_Soil")'
+    'LitterfallRate': 'LitterFallRate',
+    'FractionofTotalErosion': 'FractionOfTotalErosion',
+    'FractionofTotalRunoff': 'FractionOfTotalRunoff'
 }
-# TODO-1: Convert sums above to Methods for ORM classes
-# TODO-2: Formula Arguments wrong for the plant and abiotic fixes above. Why? Need to fix?
-# TODO-3: Use eq tester in root folder to test equations and find out why some cannot be evaluated when computing TM
 
 
 def clean_prop(prop, custom_replace={}):
@@ -378,12 +520,12 @@ def clean_prop(prop, custom_replace={}):
         v = replacements[k]
         # Here we implement a better way to handle case insensitivity for legacy properties in order to eliminate
         # repetition of case variants of the same property
-        if str(k).lower() in str(val).lower():
-            idx = [i for i in range(len(val)) if str(val).lower().startswith(str(k).lower(), i)]
-            rep_k = [val[i:i + len(str(k))] for i in idx]
-            for rk in rep_k:
-                val = val.replace(str(rk), str(v))
-        # val = val.replace(str(k), str(v))
+        # if str(k).lower() in str(val).lower():
+        #     idx = [i for i in range(len(val)) if str(val).lower().startswith(str(k).lower(), i)]
+        #     rep_k = [val[i:i + len(str(k))] for i in idx]
+        #     for rk in rep_k:
+        #         val = val.replace(str(rk), str(v))
+        val = val.replace(str(k), str(v))
 
     val = hacky_value_cleaning(val)
 
@@ -396,6 +538,12 @@ def hacky_value_cleaning(val):
     val = val.replace('volume_element.volumeM', 'VolumeM')
     val = val.replace('volume_element.volumeF', 'VolumeF')
     val = val.replace('math.math.', 'math.')
+
+    for x in ['receiver', 'sender', 'compartment']:
+        val = val.replace(
+            f'.volume_element.midpoint_distance({x})',
+            f'.volume_element.midpoint_distance({x}.volume_element)'
+        )
 
     return val
 
@@ -454,6 +602,7 @@ def hacky_unit_cleaning(val):
     # HACKS
 
     val = val.replace('[um^2  *  day  *  nmol]', 'um^2  *  day  *  nmol')
+    val = val.replace(' [m/m]', '[m/m]')
 
     if (
         val.startswith('degrees clockwise')
@@ -519,7 +668,17 @@ def split_unit_suffix(val):
     return stripped + args, unit_suff
 
 
-def clean_equation(equation):
+AGGREGATE_FUNCTIONS = {
+    'SumOf': 'sum'
+}
+
+COMPOSITE_COMPARTMENT_FUNCTIONS = {
+    'SendingWithinCompositeCompartment': 'sender',
+    'WithinCompositeCompartment': 'self',
+    'WithinContainingVolumeElement': 'self'
+}
+
+def clean_equation(equation, object_type=None):
     equation = str(equation).strip()
     eq = deconstruct_equation(equation)
     args = find_arguments(equation, combine_partial_args=False)
@@ -551,8 +710,21 @@ def clean_equation(equation):
         cleaned = cleaned.replace(f'{brackets[0]} ', brackets[0])
         cleaned = cleaned.replace(f' {brackets[1]}', brackets[1])
 
+    for agg_expression in AGGREGATE_FUNCTIONS:
+        if f'volumeelement{agg_expression.lower()}' in cleaned.lower():
+            cleaned = convert_property_aggregates(cleaned, agg_expression)
+
     if 'linkedcompartment' in cleaned.lower():
         cleaned = convert_linked_compartments(cleaned)
+
+    # Must be done AFTER normal linkedcompartment replacement,
+    # since this hijacks that functionality
+    for k, v in COMPOSITE_COMPARTMENT_FUNCTIONS.items():
+        if k.lower() in cleaned.lower():
+            cleaned = cleaned.replace(k, 'linkedCompartment')
+            cleaned = convert_linked_compartments(
+                cleaned, from_compartment=v, restrict_parcel=True
+            )
 
     if '?' in cleaned and ':' in cleaned:
         cleaned = convert_ternary(cleaned)
@@ -567,14 +739,78 @@ def clean_equation(equation):
             'chemical.log10_K_OA', 'math.log10(chemical.K_OA)'
         )
 
-    cleaned = hacky_equation_cleaning(cleaned)
+    cleaned = hacky_equation_cleaning(cleaned, object_type)
 
     return cleaned
 
 
-def convert_linked_compartments(expression):
-    from .environment import MEDIA_MAP
+def convert_property_aggregates(expression, agg_expression):
+    agg_func = AGGREGATE_FUNCTIONS[agg_expression]
 
+    cleaned = expression
+    if f'VolumeElement{agg_expression}' not in cleaned:
+        if f'volumeelement{agg_expression.lower()}' in cleaned:
+            cleaned = cleaned.replace(
+                f'volumeelement{agg_expression.lower()}',
+                f'VolumeElement{agg_expression}'
+            )
+        else:
+            return cleaned
+
+    temp = cleaned.split(f'ingVolumeElement{agg_expression}[')
+    cleaned = [temp[0]]
+    for el in temp[1:]:
+        if ']' not in el:
+            raise AssertionError
+        suff = ''
+        if '[' in el:
+            el = el.rsplit('[', 1)
+            suff = el[1]
+            if suff:
+                suff = f'[{suff}'
+            el = el[0]
+
+        el = el.rsplit(']', 1)
+        suff = el[1] + suff
+        suff = suff.split(' ', 1)
+        if len(suff) > 1:
+            nxt = suff[1]
+        else:
+            nxt = ''
+        suff = suff[0]
+
+        paren = ''
+        while suff.endswith(')'):
+            paren += ')'
+            suff = suff[:-1]
+
+        if suff.lower() in ['.area', '.depth']:
+            suff = suff.lower().replace('area', 'parcel.area')
+            cleaned.append(f'{suff.lower()}{paren} {nxt}')
+            continue
+
+        m = clean_compartment_name(el[0].split('|')[-1])
+        if m == 'Surface_Soil_Default':
+            m = 'Surface_Soil'
+        m = MEDIA_MAP.get(m, m)
+        if m == 'Leaf':
+            m = '$Leaf'
+        c = suff.lower().startswith('.chemical.')
+        if c:
+            suff = '.' + suff.split('emical.', 1)[-1]
+        cleaned.append(f'.agg("{agg_func}", "{suff[1:]}",')
+        if c:
+            cleaned[-1] += ' chemical=chemical,'
+        cleaned[-1] += f' compartment_media="{m}"){paren} {nxt}'
+
+    cleaned = 'er.volume_element'.join(cleaned).strip()
+
+    return cleaned
+
+
+def convert_linked_compartments(
+    expression, from_compartment='compartment', restrict_parcel=False
+):
     if 'linkedCompartment' not in expression:
         if 'linkedcompartment' in expression:
             expression = expression.replace(
@@ -595,15 +831,38 @@ def convert_linked_compartments(expression):
         if '[' in el:
             el = el.rsplit('[', 1)
             suff = el[1]
+            if suff:
+                suff = f'[{suff}'
             el = el[0]
+
         el = el.rsplit(']', 1)
         suff = el[1] + suff
-        m = el[0].split('|')[-1].strip().replace(' ', '_')
+        suff = suff.split(' ', 1)
+        if len(suff) > 1:
+            nxt = suff[1]
+        else:
+            nxt = ''
+        suff = suff[0]
+
+        paren = ''
+        while suff.endswith(')'):
+            paren += ')'
+            suff = suff[:-1]
+
+        if suff.lower() in ['.area', '.depth']:
+            suff = suff.lower().replace('area', 'volume_element.parcel.area')
+            cleaned.append(f'{suff.lower()}{paren} {nxt}')
+            continue
+
+        m = clean_compartment_name(el[0].split('|')[-1])
         m = MEDIA_MAP.get(m, m)
-        cleaned.append(
-            f'.linked_compartments(media="{m}")[0]{suff}'
-        )
-    return 'compartment'.join(cleaned)
+        if m == 'Leaf':
+            m = '$Leaf'
+        compartment_finder = f'.linked_compartments(media="{m}"'
+        if restrict_parcel:
+            compartment_finder += ', same_parcel=True'
+        cleaned.append(f'{compartment_finder})[0]{suff}{paren} {nxt}')
+    return from_compartment.join(cleaned)
 
 
 def convert_ternary(expression):
@@ -668,6 +927,15 @@ def unit_conversions_to_pint(expression):
             '.to("K") - 273', '.to("degC")'
         )
 
+    if '"mg/L"' in cleaned:
+        cleaned = cleaned.replace(
+            '.to("mg/L") <', '.to("mg/L").magnitude <'
+        )
+    if '"mg / L"' in cleaned:
+        cleaned = cleaned.replace(
+            '.to("mg / L") <', '.to("mg / L").magnitude <'
+        )
+
     for x in ['SedimentDepositionRate', 'SedimentResuspensionRate']:
         if x in cleaned:
             for c in [
@@ -695,11 +963,25 @@ def unit_conversions_to_pint(expression):
     return cleaned
 
 
-def hacky_equation_cleaning(val):
+def hacky_equation_cleaning(val, object_type):
     # HACKS
 
-    # if 'math.' in val:
-    #     val = val.replace('math.math.', 'math.')
+    if '.Porosity' in val:
+        for x in ['chemical', 'self']:
+            val = val.replace(
+                f'compartment.{x}.Porosity', f'{x}.Porosity(compartment)'
+            )
+
+    if object_type == 'compartment':
+        for x in ['sender', 'receiver', 'compartment']:
+            val = val.replace(f' {x}.', ' self.')
+    elif object_type == 'chemical':
+        for x in ['chemical']:
+            val = val.replace(f' {x}.', ' self.')
+
+    # This is specific for "Particles Blown off from Plant Leaf to Air (DRY)(AlgInstID_4010)"
+    if " if (environment.Rain == 0 and sender.volume_element.volume > 0) else 0" in val:
+        val = val.replace(" if (environment.Rain == 0 and sender.volume_element.volume > 0) else 0", "")
 
     return val
 

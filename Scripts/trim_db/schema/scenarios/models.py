@@ -22,6 +22,18 @@ class Scenario(Model, TrackUpdatesMixin):
     def chemicals(self, value):
         self._chemicals = value
 
+    def get_chemical(self, name_or_cas):
+        for c in self.chemicals:
+            if c.name == name_or_cas or c.cas_number == name_or_cas:
+                return c
+        return None
+
+    def get_parcel(self, name):
+        for p in self.parcels:
+            if p.name == name:
+                return p
+        return None
+
     @property
     def volume_elements(self):
         volume_els = []
