@@ -3,6 +3,8 @@ import subprocess
 import sys
 import time
 
+os.environ['TEST_DB_SERVERLESS'] = ''
+
 EXPOSE = False
 
 WEBAPP_PORT = 6060
