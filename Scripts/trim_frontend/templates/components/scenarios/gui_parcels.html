@@ -241,7 +241,7 @@
                 // TRIM.api.createParcels(shapes.features.reverse()[0])
                 TRIM.api.createParcels(parcel.toGeoJSON()).on('load', function() {
                     let resp = JSON.parse(this.responseText)
-                    if (resp.success) {
+                    if (resp) {
                         $('#root').data('createdParcel',resp);
                         let new_parcel = $('#root').data('createdParcel')
                         parcel.feature.properties.parcelid = new_parcel["scenario"]["id"]
@@ -608,7 +608,7 @@
 
             function retrieveSavedParcels() {
                 let loadedData = $('#root').data('loadedParcels')
-                if (loadedData.scenario.length > 0 && loadedData.success) {
+                if (loadedData.scenario.length > 0) {
                     let lat_means = []
                     let lon_means = []
                     loadedData['scenario'].forEach(function(e,i) {
@@ -723,7 +723,7 @@
                 TRIM.api.parseFiles(this).on('load', function() {
                     try {
                         var data = JSON.parse(this.responseText);
-                        if (data.success) {
+                        if (data) {
                             if (!$('#parcel_file_fields_div').is(":visible")) {
                                 $('#parcel_file_fields_div').show()
                             }

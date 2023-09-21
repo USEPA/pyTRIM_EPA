@@ -503,7 +503,7 @@
         document.body.addEventListener('parcels:loaded', function() {
             let loadedData = $('#root').data('loadedParcels')
             let abiotic_data = []
-            if (loadedData && loadedData.success) {
+            if (loadedData.scenario.length > 0) {
                 loadedData['scenario'].forEach(function (e, i) {
                     abiotic_data.push(
                         {
