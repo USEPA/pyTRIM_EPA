@@ -958,7 +958,7 @@
              let sed_data = []
              let water_properties = Object.keys(default_water_data)
              let sed_properties = Object.keys(default_sed_data)
-             if (loadedData && loadedData.success) {
+             if (loadedData.scenario.length > 0) {
                  water_properties.forEach(function (p, i) {
                      let this_water_property = {}
                      loadedData['scenario'].forEach(function (e, i) {
