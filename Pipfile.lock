@@ -267,7 +267,7 @@
         "flask-api": {
             "editable": true,
             "git": "https://github.com/josiahfmccoy/flask-api",
-            "ref": "afdaf375e7bb92d629d8dbc0ae80a1a4afcefe1f"
+            "ref": "bba6567067e831347b8f1771ddca8bcb781aa9e4"
         },
         "flask-assets": {
             "hashes": [
