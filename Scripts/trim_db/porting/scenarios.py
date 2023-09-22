@@ -97,6 +97,12 @@ def parse_scenario(
             s, parsed, parameter_library.get('Link', {})
         )
 
+    prop_file = [f for f in files if f.endswith('Other Properties.txt')]
+    if prop_file:
+        other_parsed = parse_props(prop_file[0])
+
+        add_scenario_properties(s, other_parsed)
+
     fr_prop_file = [f for f in files if f.endswith('FlushRate.txt')]
     if fr_prop_file:
         fr_parsed = parse_props(fr_prop_file[0])
@@ -155,11 +161,14 @@ TRANSFER_RULES = {
             'Area',
             'category',
             'concentrationOutputUnits',
-            'Volume',
+            # 'Volume',
             'image'
         ],
         'unit_map': {
-            'SuspendedSedimentConcentration': 'kg/m^3'
+            'SuspendedSedimentConcentration': 'kg/m^3',
+            'MethylationRate': '1 / day',
+            'DemethylationRate': '1 / day',
+            'ReductionRate': '1 / day'
         }
     },
     'Link': {
@@ -310,6 +319,7 @@ def parse_props(props_file, oneline_keyvals=False, rules=TRANSFER_RULES):
 
 def add_scenario_properties(scenario, parsed_props, library_link_properties={}):
     # Add non-Link properties to DB
+    link_props = {}
     for prop_type, prop_data in parsed_props.items():
         if prop_type == 'Link':
             continue
@@ -332,44 +342,69 @@ def add_scenario_properties(scenario, parsed_props, library_link_properties={}):
                 print(entity_name)
 
             for opts in entity_params:
+                # we need to handle some compartment dependent chemical parameters parsed from ...Other Properties.txt
+                if prop_type == 'Compartment' and str(opts['equation']).startswith('{'):
+                    c = opts.get('equation')
+                    if c:
+                        chem = c.split('}', 1)[0].split('{')[-1].strip()
+                        chem = scenario.get_chemical(chem)
+                        if chem:
+                            param = opts.pop('name')
+                            val = c.replace(f'{{{chem.name}}}', '').strip()
+                            val = float(val)
+                            if not val:
+                                val = opts.get('value')
+                            unit = opts.get('unit')
+                            link_props.setdefault(
+                                obj, {}
+                            ).setdefault(
+                                obj.media.name, {}
+                            ).setdefault(
+                                param, opts
+                            ).setdefault('for_chemicals', []).append({
+                                'target': chem.name,
+                                'value': val,
+                                'unit': unit
+                            })
+                            continue
+
                 obj.parameters.add(
                     opts['name'], value=opts['value'],
                     formula=opts['equation'],
                     unit=opts['unit']
                 )
-
     # Add Link properties to DB
-    link_props = {}
-    for link_name, link_params in parsed_props['Link'].items():
-        compartments = link_name.split(' to ', 1)
-        if len(compartments) != 2:
-            continue
-        sender = find_compartment(scenario, clean_prop(compartments[0]))
-        receiver = find_compartment(scenario, clean_prop(compartments[1]))
+    if parsed_props.get("Link"):
+        for link_name, link_params in parsed_props['Link'].items():
+            compartments = link_name.split(' to ', 1)
+            if len(compartments) != 2:
+                continue
+            sender = find_compartment(scenario, clean_prop(compartments[0]))
+            receiver = find_compartment(scenario, clean_prop(compartments[1]))
 
-        if not sender or not receiver:
-            print(f'{compartments}\nsender = {sender}\nreceiver = {receiver}')
-            raise AssertionError
+            if not sender or not receiver:
+                print(f'{compartments}\nsender = {sender}\nreceiver = {receiver}')
+                raise AssertionError
 
-        if not sender.connects_to(receiver):
-            CompartmentService.links.create(sender=sender, receiver=receiver)
+            if not sender.connects_to(receiver):
+                CompartmentService.links.create(sender=sender, receiver=receiver)
 
-        link_prop_data = link_props.setdefault(
-            sender, {}
-        ).setdefault(sender.media.name, {})
-        for param_data in link_params:
-            param = param_data.pop('name')
-            val = param_data.get('value')
-            if val is None:
-                val = param_data.get('equation')
-            unit = param_data.get('unit')
-            link_prop_data.setdefault(
-                param, param_data
-            ).setdefault('for_compartments', []).append({
-                'target': receiver.standard_name,
-                'value': val,
-                'unit': unit
-            })
+            link_prop_data = link_props.setdefault(
+                sender, {}
+            ).setdefault(sender.media.name, {})
+            for param_data in link_params:
+                param = param_data.pop('name')
+                val = param_data.get('value')
+                if val is None:
+                    val = param_data.get('equation')
+                unit = param_data.get('unit')
+                link_prop_data.setdefault(
+                    param, param_data
+                ).setdefault('for_compartments', []).append({
+                    'target': receiver.standard_name,
+                    'value': val,
+                    'unit': unit
+                })
 
     for sender, link_prop_data in link_props.items():
         parse_compartment_props(
