@@ -99,8 +99,6 @@ def make_transfer_matrix(scenario):
                                     transfer_factor = transfer_factor.magnitude
                             elif pd.isna(transfer_factor):
                                 print(f"{20 * '*'} NAN PROBLEM {20 * '*'}")
-                                if transport_proc.algorithm_id in [2478, 2501, 2502]:
-                                    print(transport_proc.algorithm_id)
                                 problem_tfm_file.write(
                                     f"NAN PROBLEM: {sender.name} -> {receiver.name}: {transport_proc.name}, id: "
                                     f"{transport_proc.algorithm_id}\n")

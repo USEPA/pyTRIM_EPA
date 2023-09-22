@@ -2,6 +2,7 @@ import json
 import pandas as pd
 import sqlalchemy as sa
 from shapely.geometry import Polygon
+from pyproj import CRS, Transformer
 from pyproj import Geod
 from shapely import wkt
 from ..parameters.utils import ureg
@@ -51,14 +52,28 @@ class Parcel(Model):
         return Polygon(self.vertices)
 
     @property
+    def utm_vertices(self):
+        proj = 'PROJCS["WGS_1984_UTM_Zone_16N",GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]],PROJECTION["Transverse_Mercator"],PARAMETER["False_Easting",500000.0],PARAMETER["False_Northing",0.0],PARAMETER["Central_Meridian",-87.0],PARAMETER["Scale_Factor",0.9996],PARAMETER["Latitude_Of_Origin",0.0],UNIT["Meter",1.0]]'
+        from_crs = CRS.from_epsg(4326)
+        to_crs = CRS.from_wkt(proj)
+        transformer = Transformer.from_crs(from_crs, to_crs)
+        utm_vert = [transformer.transform(pt[1], pt[0]) for pt in self.vertices]
+        return utm_vert
+
+    @property
+    def utm_polygon(self):
+        return Polygon(self.utm_vertices)
+
+    @property
     def area(self):
         # CAREFUL: we assume dimensions are in meters ...
         # return self.polygon.area * ureg('m^2')
         # CAREFUL-2: we assume ellipsoid is WGS84 ...
-        geod = Geod(ellps="WGS84")
-        poly = wkt.loads(
-            f'''POLYGON (({", ".join([str(tpl[0]) + " " + str(tpl[1]) for tpl in self.vertices])}))''')
-        return abs(geod.geometry_area_perimeter(poly)[0]) * ureg('m^2')
+        # geod = Geod(ellps="WGS84")
+        # poly = wkt.loads(
+        #     f'''POLYGON (({", ".join([str(tpl[0]) + " " + str(tpl[1]) for tpl in self.vertices])}))''')
+        # return abs(geod.geometry_area_perimeter(poly)[0]) * ureg('m^2')
+        return self.utm_polygon.area * ureg('m^2')
 
     def get_volume_element(self, name):
         for ve in self.volume_elements:
@@ -637,8 +652,8 @@ class VolumeElement(Model):
         raise AssertionError('Unknown function!')
 
     def interface_with(self, volume_element):
-        polygon_a = self.parcel.polygon
-        polygon_b = volume_element.parcel.polygon
+        polygon_a = self.parcel.utm_polygon
+        polygon_b = volume_element.parcel.utm_polygon
 
         is_neighbor = polygon_a.intersects(polygon_b)
         if not is_neighbor:
@@ -646,7 +661,11 @@ class VolumeElement(Model):
             return 0 * ureg('m^3')  # technically m^2 ...
 
         intersection = polygon_a.intersection(polygon_b)
-        xy_overlap = intersection.length
+
+        if self.parcel.id == volume_element.parcel.id:  # polygon_a.almost_equals(polygon_b): # This is deprecated
+            xy_overlap = self.parcel.area.magnitude  # This is in meters. We are good!
+        else:
+            xy_overlap = intersection.length  # TODO: This returns arc-degree units and not meter! Conversion needed!
 
         top_a = self.top
         top_b = volume_element.top
@@ -874,9 +893,12 @@ class Compartment(Model):
 
     def linked_compartments(self, media=None, same_parcel=False):
         # Check cache
-        cache_k = f'{media}--{same_parcel}'
+        cache_k = f'{self.volume_element.parcel.name}--{media}--{same_parcel}'
         if cache_k in self._linked_compartment_cache:
-            return self._linked_compartment_cache[cache_k]
+            # This does not work if in a loop two parcels have generic media naming (i.e. $Leaf);
+            # It gets compartments of the other parcel that was cached first. Berk turned this off...
+            # return self._linked_compartment_cache[cache_k]
+            self._linked_compartment_cache.clear()
 
         linked = {
             c.id: c for c in self.custom_linked_compartments

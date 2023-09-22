@@ -87,7 +87,7 @@ def auto_sync_emperical_with_quantity(f):
     def synced(a, b, strict_dimensions=False, strict_offset=False):
         if not strict_dimensions:
             if hasattr(a, 'dimensionality'):
-                if a.to_base_units().to_compact().units == 'dimensionless':
+                if a.to_base_units().to_compact().units == ureg('dimensionless'):
                     a = a.magnitude
                 elif a.dimensionality in EMPERICALLY_DIMENSIONLESS:
                     a = a.magnitude * ureg('')
@@ -96,7 +96,7 @@ def auto_sync_emperical_with_quantity(f):
                 elif a.dimensionality == '[mass] ** 0.67 * [time] / [length] ** 3.01':
                     a = a.magnitude * ureg('day / meter')
             if hasattr(b, 'dimensionality'):
-                if b.to_base_units().to_compact().units == 'dimensionless':
+                if b.to_base_units().to_compact().units == ureg('dimensionless'):
                     b = b.magnitude
                 elif b.dimensionality in EMPERICALLY_DIMENSIONLESS:
                     b = b.magnitude * ureg('')
