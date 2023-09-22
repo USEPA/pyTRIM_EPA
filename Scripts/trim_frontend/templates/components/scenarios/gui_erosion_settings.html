@@ -465,14 +465,19 @@
                     $(this).prev("input").focus()
                     $(this).hide();
                 })
-                $('input.editableCell').focusout(function () {
-                    const data = $(this).val()
-                    $(this).hide()
-                    $(this).next("label").show().text(data)
-                    let parcel_info = $(this).data('parcelinfo')
-                    if (parcel_info) {
-                        parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                        TRIM.api.updateParcel(parcel_info)
+                $('input.editableCell').blur(function () {
+                    ErrorValidation.isPositiveValue(this)
+                    let is_valid = elementIsValid($(this).parent());
+
+                    if (is_valid){
+                        const data = $(this).val()
+                        $(this).hide()
+                        $(this).next("label").show().text(data)
+                        let parcel_info = $(this).data('parcelinfo')
+                        if (parcel_info) {
+                            parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
+                            TRIM.api.updateParcel(parcel_info)
+                        }
                     }
                 })
                 $('input.erosion_inp_opt2,input.erosion_inp_opt3').change(function () {
@@ -844,18 +849,23 @@
                             let row_idx = displayed_parcels.indexOf(parcel) + 1
                             if (row_idx > 0) {
                                 let this_tr = 'tr:eq(' + row_idx.toString() + ')'
+                                let this_td_R = 'td:eq(3)'
                                 let this_td_K = 'td:eq(4)'
                                 let this_td_S = 'td:eq(5)'
                                 let this_td_L = 'td:eq(6)'
                                 let this_row = $(this_opt_table_id).find(this_tr)
+                                let this_cell_R = $(this_row).find(this_td_R)
                                 let this_cell_K = $(this_row).find(this_td_K)
                                 let this_cell_S = $(this_row).find(this_td_S)
                                 let this_cell_L = $(this_row).find(this_td_L)
+                                let cls_R = $(this_cell_R).find('input.editableCell').attr('class')
                                 let cls_K = $(this_cell_K).find('input.editableCell').attr('class')
                                 let cls_S = $(this_cell_S).find('input.editableCell').attr('class')
                                 let cls_L = $(this_cell_L).find('input.editableCell').attr('class')
-                                if (cls_K && cls_S && cls_L ) {
+                                if (cls_R && cls_K && cls_S && cls_L ) {
                                     let this_parcel_data = JSON.parse(soil_data[parcel])
+                                    $(this_cell_R).find('label.editableCell').text(this_parcel_data["R"])
+                                    $(this_cell_R).find('input.editableCell').val(this_parcel_data["R"])
                                     $(this_cell_K).find('label.editableCell').text(new Intl.NumberFormat('en-US', {notation: "scientific"}).format(this_parcel_data.kwfact["0"]))
                                     $(this_cell_K).find('input.editableCell').val(new Intl.NumberFormat('en-US', {notation: "scientific"}).format(this_parcel_data.kwfact["0"]))
                                     $(this_cell_S).find('label.editableCell').text(this_parcel_data.slope_r["0"].toFixed(2))

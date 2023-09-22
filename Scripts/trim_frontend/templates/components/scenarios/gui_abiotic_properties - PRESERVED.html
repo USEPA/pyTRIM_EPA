@@ -211,9 +211,8 @@
                             parcel_info = JSON.stringify(parcel_info)
                             let this_cell_data = row.hasAir == "Yes" ? data : "N/A"
                             let this_cell_prop = row.hasAir == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
-                            let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return "<input "+this_err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                                "<label "+this_err_html+" class='"+ this_cell_prop + "'>" + this_cell_data + "</label>"
+                            return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
+                                "<label class='"+ this_cell_prop +"'>" + this_cell_data + "</label>"
                         }
                     },
                     {
@@ -236,9 +235,8 @@
                             parcel_info = JSON.stringify(parcel_info)
                             let this_cell_data = row.hasAir == "Yes" ? data : "N/A"
                             let this_cell_prop = row.hasAir == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
-                            let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return "<input "+this_err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                                "<label "+this_err_html+" class='" + this_cell_prop + "'>" + this_cell_data + "</label>"
+                            return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
+                                "<label class='" + this_cell_prop + "'>" + this_cell_data + "</label>"
                         }
                     },
                     {
@@ -261,9 +259,8 @@
                             parcel_info = JSON.stringify(parcel_info)
                             let this_cell_data = row.hasAir == "Yes" ? data : "N/A"
                             let this_cell_prop = row.hasAir == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
-                            let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return "<input "+this_err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                                "<label "+this_err_html+" class='" + this_cell_prop +"'>" + this_cell_data + "</label>"
+                            return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
+                                "<label class='" + this_cell_prop +"'>" + this_cell_data + "</label>"
                         }
                     },
                     {
@@ -286,9 +283,8 @@
                             parcel_info = JSON.stringify(parcel_info)
                             let this_cell_data = row.hasAir == "Yes" ? data : "N/A"
                             let this_cell_prop = row.hasAir == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
-                            let this_err_html = 'onblur="ErrorValidation.isValidFraction(this)"';
-                            return "<input "+this_err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                                "<label "+this_err_html+" class='" + this_cell_prop +" '>" + this_cell_data + "</label>"
+                            return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
+                                "<label class='" + this_cell_prop +" '>" + this_cell_data + "</label>"
                         }
                     },
                     {
@@ -311,14 +307,13 @@
                             parcel_info = JSON.stringify(parcel_info)
                             let this_cell_data = row.hasAir == "Yes" ? data : "N/A"
                             let this_cell_prop = row.hasAir == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
-                            let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return "<input "+this_err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                                "<label "+this_err_html+" class='" + this_cell_prop + "'>" + this_cell_data + "</label>"
+                            return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
+                                "<label class='" + this_cell_prop + "'>" + this_cell_data + "</label>"
                         }
                     },
                     {
                         data: "Tillage",
-                        'render': function (data, type, row) {
+                        render: function (data, type, row) {
                             let parcel_info = [{
                                 'type': 'data',
                                 'name': 'id',
@@ -362,9 +357,8 @@
                             parcel_info = JSON.stringify(parcel_info)
                             let this_cell_data = row.hasLand == "Yes" ? data : "N/A"
                             let this_cell_prop = row.hasLand == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
-                            let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return "<input "+this_err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                                "<label "+this_err_html+" class='" + this_cell_prop + "'>" + this_cell_data + "</label>"
+                            return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
+                                "<label class='" + this_cell_prop + "'>" + this_cell_data + "</label>"
                         }
                     },
                     {
@@ -387,9 +381,8 @@
                             parcel_info = JSON.stringify(parcel_info)
                             let this_cell_data = row.hasLand == "Yes" ? data : "N/A"
                             let this_cell_prop = row.hasLand == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
-                            let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return "<input "+this_err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                                "<label "+this_err_html+" class='" + this_cell_prop + "'>" + this_cell_data + "</label>"
+                            return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
+                                "<label class='" + this_cell_prop + "'>" + this_cell_data + "</label>"
                         }
                     },
                     {
@@ -412,9 +405,8 @@
                             parcel_info = JSON.stringify(parcel_info)
                             let this_cell_data = row.hasLand == "Yes" ? Number.parseFloat(data).toFixed(5) : "N/A"
                             let this_cell_prop = row.hasLand == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
-                            let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return "<input "+this_err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                                "<label "+this_err_html+" class='" + this_cell_prop + "'>" + this_cell_data + "</label>"
+                            return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
+                                "<label class='" + this_cell_prop + "'>" + this_cell_data + "</label>"
                         }
                     },
                     {
@@ -437,9 +429,8 @@
                             parcel_info = JSON.stringify(parcel_info)
                             let this_cell_data = row.hasLand == "Yes" ? data : "N/A"
                             let this_cell_prop = row.hasLand == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
-                            let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return "<input "+this_err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                                "<label "+this_err_html+" class='" + this_cell_prop + "'>" + this_cell_data + "</label>"
+                            return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
+                                "<label class='" + this_cell_prop + "'>" + this_cell_data + "</label>"
                         }
                     }
                 ],
@@ -467,24 +458,18 @@
                 $(this).hide();
             });
 
-            // save modified cell
             $('input.editableCell,select.editableCell').blur(function () {
-                let is_valid = elementIsValid($(this).parent());
-
-                if (is_valid) {
-                    let data = $(this).val()
-                    let $label = $(this).next("label")
-                    $label.siblings().hide()
-                    $label.show().text(data)
-
-                    let parcel_info = $(this).data('parcelinfo')
-                    if (parcel_info) {
-                        parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                        console.log(parcel_info)
-                        TRIM.api.updateParcel(parcel_info)
-                        table_data = get_Data_from_table('#AbioticTable')
-                        TableRedraw(table_data)
-                    }
+                let data = $(this).val()
+                let $label = $(this).next("label")
+                $label.siblings().hide()
+                $label.show().text(data)
+                let parcel_info = $(this).data('parcelinfo')
+                if (parcel_info) {
+                    parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
+                    console.log(parcel_info)
+                    TRIM.api.updateParcel(parcel_info)
+                    table_data = get_Data_from_table('#AbioticTable')
+                    TableRedraw(table_data)
                 }
             })
         }
