@@ -15,12 +15,12 @@ def print_header(msg):
 def run_webapp():
     print_header("Starting WebApp")
 
-    webapp_command = f"pipenv run python webapp.py -p {WEBAPP_PORT}"
+    webapp_command = f"python webapp.py -p {WEBAPP_PORT}"
     if EXPOSE:
         webapp_command += " --expose"
 
     proc = subprocess.Popen(
-        webapp_command,  # shell=True,
+        webapp_command, shell=True,
         stdout=sys.stdout, stderr=sys.stderr
     )
     wait_for_output(proc, 10)

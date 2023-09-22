@@ -12,7 +12,7 @@ from flask_security import login_required
 from flask_api import ApiException, ApiResult
 from trim_frontend import api
 from ..utils.logging import make_logger
-from .helpers import UsdaApi, UsleClimateApi
+from .helpers import UsdaApi, UsleClimateApi, convert_to_geojson
 from pyproj import CRS, Transformer
 from trim_db import ParcelService
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
@@ -45,6 +45,13 @@ def get_soil_data(tillage):
         sd.run()
         no_till_soil_data_json = sd.scenario_no_till_results
         tilled_soil_data_json = sd.scenario_tilled_results
+
+        usle_r_data = UsleRData()
+        climate_data_file = ""
+        r_usle_data_json = usle_r_data.run(parcels, climate_data_file)
+
+        no_till_soil_data_json = usle_r_data.insert_rusle_into_soil_data(r_usle_data_json, no_till_soil_data_json)
+        tilled_soil_data_json = usle_r_data.insert_rusle_into_soil_data(r_usle_data_json, tilled_soil_data_json)
     except Exception as e:
         logger.error(traceback.format_exc())
 
@@ -57,37 +64,7 @@ def get_soil_data(tillage):
                                  "no_till_data": no_till_soil_data_json}
     return result_soil_data_json
 
-
-@external_api_r.route('/api/usledata/', methods=['GET'])
-@login_required
-def get_soil_data():
-    logger = make_logger('external_api_call')
-    logger.info(f"Obtaining parcel soil data from USDA.gov")
-    try:
-        from_url = request.referrer
-        this_scenario_id = int(re.findall('/scenario/(\d+)/', from_url)[0])
-        if not this_scenario_id:
-            raise ApiException("No Scenario defined")
-        p = ParcelService.get_all(scenario_id=this_scenario_id)
-        parcels = {}
-        for this_p in p:
-            this_parcel_data = this_p.as_serializable()
-            parcels[this_parcel_data['name']] = [(t[1], t[0]) for t in this_parcel_data['vertices']]
-        usle_r_data = UsleRData()
-        climate_data_file = ""
-        result_usle_data_json = usle_r_data.run(parcels, climate_data_file)
-        return result_usle_data_json
-    except Exception as e:
-        logger.error(traceback.format_exc())
-
-
 class SoilData:
-    parcel_vertices = {'E1': [(44.236310391612264, -85.510151405931794),
-                              (44.209436004143171, -85.517352504159717),
-                              (44.222723195504940, -85.579030393476131),
-                              (44.254395937119604, -85.565839168593385),
-                              (44.236310391612264, -85.510151405931794)]}
-
     no_tilled_layers = {'surface': {'bounds': [0, 1]},
                         'root': {'bounds': [1, 80]},
                         'vadose': {'bounds': [80, 220]},
@@ -364,15 +341,31 @@ class UsleRData:
     @staticmethod
     def run(parcels, ClimateData):
         logger = make_logger('external_api_call')
+
         WORKING_DIR = os.path.dirname(__file__)
         qgis_interpreter = "C:\\Program Files\\QGIS 3.30.0\\apps\\Python39\\python3.exe"
         RUSLE_script = os.path.join(WORKING_DIR, "helpers", "RUSLE_Script_Final.py")
 
-        p = subprocess.Popen([qgis_interpreter, RUSLE_script, json.dumps(parcels)],                     
-                            stdout = subprocess.PIPE, 
-                            stderr = subprocess.PIPE)
-        stdout, stderr = p.communicate()
-        if stderr:
-            logger.error(stderr.strip().decode('utf-8'))
-        return stdout.strip().decode('utf-8')
+        parcels_fp = convert_to_geojson.GeoJson(parcels).convert_json()
+        try:
+            p = subprocess.Popen([qgis_interpreter, RUSLE_script, parcels_fp],                     
+                                stdout = subprocess.PIPE, 
+                                stderr = subprocess.PIPE)
+            stdout, stderr = p.communicate()
+            if stderr:
+                logger.error(stderr.strip().decode('utf-8'))
+        except Exception as e:
+            logger.error(e)
+            
+        os.remove(parcels_fp)
+        r_usle_result = json.loads(stdout.strip().decode('utf-8'))
+        return r_usle_result
 
+    def insert_rusle_into_soil_data(self, rusle, soil):
+        # unpack string
+        for parcel in soil:
+            soil[parcel] = json.loads(soil[parcel])
+            if rusle.get(parcel, None):
+                soil[parcel]["R"] = rusle[parcel]
+            soil[parcel] = json.dumps(soil[parcel])
+        return soil
