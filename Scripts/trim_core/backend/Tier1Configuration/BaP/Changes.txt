@@ -1,0 +1,24 @@
+1.Changed file name inputs
+2.convert lc must be done separately (one time) otherwise met dict line in fate_runner will not run. Find a fix later.
+3. Commented out prop3 file related code in prop.py
+4. Update parcel list in comp
+5. fish transfer efficiency neeeded hardcoded fix in mlib define comp classes code for multiple if then else indented ternary statement
+6. added coniferous by using all comps and algs available (unlike previously only some were selected)
+7. made change to mlib to alter syntax of withincompositecompartment in define comp classes similar to deciduous
+8. various changes to create trans mat to allow appropriate links with degradation sinks.
+9. various changes to connect algorithms (ie. compartment category exceptions to compartment types specified in algorithm matrix)
+10. changes to create trans mat to model tfs between psources and untilled surface soil comps
+11. changed util function met processing to comment out overwriting of wt av rain by frac time rain
+12. made hack to mlib to set coniferous allow exchange to 1 in comp_classes
+13. sediment degradation sink added 
+
+NEXT STEP
+
+INVESTIGATE: WHY WAS THERE NO CONNECITON IN FOUNDRIES TO SEDIMENT BURIAL SINK? IN THE HTMl/ORIGINAL RUN
+ANSWER -- IN HG FOUNDRIES, BURIAL RATE WAS ACTUALLY ZERO. SO NOT HAVING SEDIMENT SINK IS OKAY. QUESTION REMAINING IS -- WHY DID INCLUSION OF BURIAL SINK FOR HG BAP CODE RESULT IN WRONG LAKE AND SED VALUES?
+	  IN BAP TNC0, BURIAL RATE IS POSITIVE AND CORRECTLY HANDLED.
+
+TO BE DONE -- PUT BACK SEDIMENT SINK COMPARTMENT IN BAP HG, AND SEE WHY BURIAL IS NOT ZERO?		
+
+
+

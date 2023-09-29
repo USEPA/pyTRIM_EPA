@@ -74,8 +74,10 @@ class UserMixin(ActiveFlagMixin):
 
     @property
     def is_admin(self):
-        return (self.is_superuser() or
-                False)
+        return (
+            self.is_superuser()
+            or False
+        )
 
     def get_preferred_name(self):
         if self.first_name:
@@ -86,7 +88,7 @@ class UserMixin(ActiveFlagMixin):
 
     @property
     def active_scenarios(self):
-        all_scenarios = [*self.created_scenarios, *self.joined_scenarios]
+        all_scenarios = [*self.created_scenarios]  # , *self.joined_scenarios]
         return all_scenarios
 
     def __repr__(self):

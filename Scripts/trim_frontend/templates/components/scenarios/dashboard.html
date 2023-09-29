@@ -35,6 +35,25 @@
                     >
                         View
                     </a>
+                    <div class="text-center">
+                        <div class="btn-group">
+                            <form action="{{ url_for('scenario_api.copy_scenario') }}" method="POST">
+                                <input name="user_id" value="{{logged_in_user.id}}" type=hidden>
+                                <input name="scenario_id" value="{{scenario.id}}" type=hidden>
+                                <button type="submit" class="btn btn-block btn-outline-primary">
+                                Copy
+                                {{ scenario_form.csrf_token }}
+                            </button>
+                            </form>
+                            <form action="{{ url_for('scenario_api.delete_scenario') }}" method="POST">
+                                <input name="scenario_id" value="{{scenario.id}}" type=hidden>
+                                <button type="submit" class="btn btn-block btn-outline-primary">
+                                Delete
+                                {{ scenario_form.csrf_token }}
+                            </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

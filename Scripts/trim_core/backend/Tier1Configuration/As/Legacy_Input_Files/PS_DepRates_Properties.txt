@@ -1,0 +1,470 @@
+Version: 1
+Scenario: TNC0
+
+Run: BaseRun
+Scenario: TNC0
+
+
+
+PointSource: DryParticleSource for Source
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 1e-11
+    Value: {Arsenic} 1e-11
+    Value: {Cadmium} 1e-11
+    Value: {2,3,7,8-TCDD} 1e-11
+    Value: {Divalent Mercury} 1e-11
+    Value: {MethylMercury} 1e-11
+
+
+PointSource: WetParticleSource for Source
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 2e-11
+    Value: {Arsenic} 2e-11
+    Value: {Cadmium} 2e-11
+    Value: {2,3,7,8-TCDD} 2e-11
+    Value: {Divalent Mercury} 2e-11
+    Value: {MethylMercury} 2e-11
+ 
+
+PointSource: DryVaporSource for Source
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 3e-11
+    Value: {Arsenic} 0e-11
+    Value: {Cadmium} 0e-11
+    Value: {2,3,7,8-TCDD} 3e-11
+    Value: {Divalent Mercury} 3e-11
+    Value: {MethylMercury} 3e-11
+
+
+PointSource: WetVaporSource for Source
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 4e-11
+    Value: {Arsenic} 0e-11
+    Value: {Cadmium} 0e-11
+    Value: {2,3,7,8-TCDD} 4e-11
+    Value: {Divalent Mercury} 4e-11
+    Value: {MethylMercury} 4e-11
+ 
+
+
+PointSource: DryParticleSource for N1
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 1e-11
+    Value: {Arsenic} 1e-11
+    Value: {Cadmium} 1e-11
+    Value: {2,3,7,8-TCDD} 1e-11
+    Value: {Divalent Mercury} 1e-11
+    Value: {MethylMercury} 1e-11
+
+
+PointSource: WetParticleSource for N1
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 2e-11
+    Value: {Arsenic} 2e-11
+    Value: {Cadmium} 2e-11
+    Value: {2,3,7,8-TCDD} 2e-11
+    Value: {Divalent Mercury} 2e-11
+    Value: {MethylMercury} 2e-11
+ 
+PointSource: DryVaporSource for N1
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 3e-11
+    Value: {Arsenic} 0e-11
+    Value: {Cadmium} 0e-11
+    Value: {2,3,7,8-TCDD} 3e-11
+    Value: {Divalent Mercury} 3e-11
+    Value: {MethylMercury} 3e-11
+
+
+PointSource: WetVaporSource for N1
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 4e-11
+    Value: {Arsenic} 0e-11
+    Value: {Cadmium} 0e-11
+    Value: {2,3,7,8-TCDD} 4e-11
+    Value: {Divalent Mercury} 4e-11
+    Value: {MethylMercury} 4e-11
+
+PointSource: DryParticleSource for N6
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 1e-11
+    Value: {Arsenic} 1e-11
+    Value: {Cadmium} 1e-11
+    Value: {2,3,7,8-TCDD} 1e-11
+    Value: {Divalent Mercury} 1e-11
+    Value: {MethylMercury} 1e-11
+ 
+
+PointSource: WetParticleSource for N6
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 2e-11
+    Value: {Arsenic} 2e-11
+    Value: {Cadmium} 2e-11
+    Value: {2,3,7,8-TCDD} 2e-11
+    Value: {Divalent Mercury} 2e-11
+    Value: {MethylMercury} 2e-11
+ 
+
+PointSource: DryVaporSource for N6
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 3e-11
+    Value: {Arsenic} 0e-11
+    Value: {Cadmium} 0e-11
+    Value: {2,3,7,8-TCDD} 3e-11
+    Value: {Divalent Mercury} 3e-11
+    Value: {MethylMercury} 3e-11
+ 
+
+PointSource: WetVaporSource for N6
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 4e-11
+    Value: {Arsenic} 0e-11
+    Value: {Cadmium} 0e-11
+    Value: {2,3,7,8-TCDD} 4e-11
+    Value: {Divalent Mercury} 4e-11
+    Value: {MethylMercury} 4e-11
+
+PointSource: DryParticleSource for N7
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 1e-11
+    Value: {Arsenic} 2e-11
+    Value: {Cadmium} 2e-11
+    Value: {2,3,7,8-TCDD} 2e-11
+    Value: {Divalent Mercury} 2e-11
+    Value: {MethylMercury} 2e-11
+ 
+
+PointSource: WetParticleSource for N7
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 2e-11
+    Value: {Arsenic} 2e-11
+    Value: {Cadmium} 2e-11
+    Value: {2,3,7,8-TCDD} 2e-11
+    Value: {Divalent Mercury} 2e-11
+    Value: {MethylMercury} 2e-11
+ 
+
+PointSource: DryVaporSource for N7
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 3e-11
+    Value: {Arsenic} 0e-11
+    Value: {Cadmium} 0e-11
+    Value: {2,3,7,8-TCDD} 3e-11
+    Value: {Divalent Mercury} 3e-11
+    Value: {MethylMercury} 3e-11
+ 
+
+PointSource: WetVaporSource for N7
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 4e-11
+    Value: {Arsenic} 0e-11
+    Value: {Cadmium} 0e-11
+    Value: {2,3,7,8-TCDD} 4e-11
+    Value: {Divalent Mercury} 4e-11
+    Value: {MethylMercury} 4e-11
+ 
+PointSource: DryParticleSource for N3
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 1e-11
+    Value: {Arsenic} 1e-11
+    Value: {Cadmium} 1e-11
+    Value: {2,3,7,8-TCDD} 1e-11
+    Value: {Divalent Mercury} 1e-11
+    Value: {MethylMercury} 1e-11
+ 
+
+PointSource: WetParticleSource for N3
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 2e-11
+    Value: {Arsenic} 2e-11
+    Value: {Cadmium} 2e-11
+    Value: {2,3,7,8-TCDD} 2e-11
+    Value: {Divalent Mercury} 2e-11
+    Value: {MethylMercury} 2e-11
+ 
+PointSource: DryVaporSource for N3
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 3e-11
+    Value: {Arsenic} 0e-11
+    Value: {Cadmium} 0e-11
+    Value: {2,3,7,8-TCDD} 3e-11
+    Value: {Divalent Mercury} 3e-11
+    Value: {MethylMercury} 3e-11
+ 
+
+PointSource: WetVaporSource for N3
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 4e-11
+    Value: {Arsenic} 0e-11
+    Value: {Cadmium} 0e-11
+    Value: {2,3,7,8-TCDD} 4e-11
+    Value: {Divalent Mercury} 4e-11
+    Value: {MethylMercury} 4e-11
+ 
+PointSource: DryParticleSource for N4
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 1e-11
+    Value: {Arsenic} 1e-11
+    Value: {Cadmium} 1e-11
+    Value: {2,3,7,8-TCDD} 1e-11
+    Value: {Divalent Mercury} 1e-11
+    Value: {MethylMercury} 1e-11
+
+PointSource: WetParticleSource for N4
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 2e-11
+    Value: {Arsenic} 2e-11
+    Value: {Cadmium} 2e-11
+    Value: {2,3,7,8-TCDD} 2e-11
+    Value: {Divalent Mercury} 2e-11
+    Value: {MethylMercury} 2e-11
+ 
+PointSource: DryVaporSource for N4
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 3e-11
+    Value: {Arsenic} 0e-11
+    Value: {Cadmium} 0e-11
+    Value: {2,3,7,8-TCDD} 3e-11
+    Value: {Divalent Mercury} 3e-11
+    Value: {MethylMercury} 3e-11
+ 
+PointSource: WetVaporSource for N4
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 4e-11
+    Value: {Arsenic} 0e-11
+    Value: {Cadmium} 0e-11
+    Value: {2,3,7,8-TCDD} 4e-11
+    Value: {Divalent Mercury} 4e-11
+    Value: {MethylMercury} 4e-11
+ 
+
+PointSource: DryParticleSource for N5
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 1e-11
+    Value: {Arsenic} 1e-11
+    Value: {Cadmium} 1e-11
+    Value: {2,3,7,8-TCDD} 1e-11
+    Value: {Divalent Mercury} 1e-11
+    Value: {MethylMercury} 1e-11
+
+PointSource: WetParticleSource for N5
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 2e-11
+    Value: {Arsenic} 2e-11
+    Value: {Cadmium} 2e-11
+    Value: {2,3,7,8-TCDD} 2e-11
+    Value: {Divalent Mercury} 2e-11
+    Value: {MethylMercury} 2e-11
+ 
+PointSource: DryVaporSource for N5
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 3e-11
+    Value: {Arsenic} 0e-11
+    Value: {Cadmium} 0e-11
+    Value: {2,3,7,8-TCDD} 3e-11
+    Value: {Divalent Mercury} 3e-11
+    Value: {MethylMercury} 3e-11
+ 
+PointSource: WetVaporSource for N5
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 4e-11
+    Value: {Arsenic} 0e-11
+    Value: {Cadmium} 0e-11
+    Value: {2,3,7,8-TCDD} 4e-11
+    Value: {Divalent Mercury} 4e-11
+    Value: {MethylMercury} 4e-11
+ 
+PointSource: DryParticleSource for S1
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 1e-11
+    Value: {Arsenic} 1e-11
+    Value: {Cadmium} 1e-11
+    Value: {2,3,7,8-TCDD} 1e-11
+    Value: {Divalent Mercury} 1e-11
+    Value: {MethylMercury} 1e-11
+ 
+PointSource: WetParticleSource for S1
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 2e-11
+    Value: {Arsenic} 2e-11
+    Value: {Cadmium} 2e-11
+    Value: {2,3,7,8-TCDD} 2e-11
+    Value: {Divalent Mercury} 2e-11
+    Value: {MethylMercury} 2e-11
+ 
+
+PointSource: DryVaporSource for S1
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 3e-11
+    Value: {Arsenic} 0e-11
+    Value: {Cadmium} 0e-11
+    Value: {2,3,7,8-TCDD} 3e-11
+    Value: {Divalent Mercury} 3e-11
+    Value: {MethylMercury} 3e-11
+
+PointSource: WetVaporSource for S1
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 4e-11
+    Value: {Arsenic} 0e-11
+    Value: {Cadmium} 0e-11
+    Value: {2,3,7,8-TCDD} 4e-11
+    Value: {Divalent Mercury} 4e-11
+    Value: {MethylMercury} 4e-11
+
+PointSource: DryParticleSource for Pond
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 1e-11
+    Value: {Arsenic} 1e-11
+    Value: {Cadmium} 1e-11
+    Value: {2,3,7,8-TCDD} 1e-11
+    Value: {Divalent Mercury} 1e-11
+    Value: {MethylMercury} 1e-11
+ 
+PointSource: WetParticleSource for Pond
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 2e-11
+    Value: {Arsenic} 2e-11
+    Value: {Cadmium} 2e-11
+    Value: {2,3,7,8-TCDD} 2e-11
+    Value: {Divalent Mercury} 2e-11
+    Value: {MethylMercury} 2e-11
+ 
+
+PointSource: DryVaporSource for Pond
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 3e-11
+    Value: {Arsenic} 0e-11
+    Value: {Cadmium} 0e-11
+    Value: {2,3,7,8-TCDD} 3e-11
+    Value: {Divalent Mercury} 3e-11
+    Value: {MethylMercury} 3e-11
+ 
+PointSource: WetVaporSource for Pond
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 4e-11
+    Value: {Arsenic} 0e-11
+    Value: {Cadmium} 0e-11
+    Value: {2,3,7,8-TCDD} 4e-11
+    Value: {Divalent Mercury} 4e-11
+    Value: {MethylMercury} 4e-11
+
+PointSource: DryParticleSource for S4
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 1e-11
+    Value: {Arsenic} 1e-11
+    Value: {Cadmium} 1e-11
+    Value: {2,3,7,8-TCDD} 1e-11
+    Value: {Divalent Mercury} 1e-11
+    Value: {MethylMercury} 1e-11
+ 
+PointSource: WetParticleSource for S4
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 2e-11
+    Value: {Arsenic} 2e-11
+    Value: {Cadmium} 2e-11
+    Value: {2,3,7,8-TCDD} 2e-11
+    Value: {Divalent Mercury} 2e-11
+    Value: {MethylMercury} 2e-11
+ 
+
+PointSource: DryVaporSource for S4
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 3e-11
+    Value: {Arsenic} 0e-11
+    Value: {Cadmium} 0e-11
+    Value: {2,3,7,8-TCDD} 3e-11
+    Value: {Divalent Mercury} 3e-11
+    Value: {MethylMercury} 3e-11
+ 
+
+PointSource: WetVaporSource for S4
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 4e-11
+    Value: {Arsenic} 0e-11
+    Value: {Cadmium} 0e-11
+    Value: {2,3,7,8-TCDD} 4e-11
+    Value: {Divalent Mercury} 4e-11
+    Value: {MethylMercury} 4e-11
+ 
+PointSource: DryParticleSource for S5
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 1e-11
+    Value: {Arsenic} 1e-11
+    Value: {Cadmium} 1e-11
+    Value: {2,3,7,8-TCDD} 1e-11
+    Value: {Divalent Mercury} 1e-11
+    Value: {MethylMercury} 1e-11
+ 
+PointSource: WetParticleSource for S5
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 2e-11
+    Value: {Arsenic} 2e-11
+    Value: {Cadmium} 2e-11
+    Value: {2,3,7,8-TCDD} 2e-11
+    Value: {Divalent Mercury} 2e-11
+    Value: {MethylMercury} 2e-11
+ 
+
+PointSource: DryVaporSource for S5
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 3e-11
+    Value: {Arsenic} 0e-11
+    Value: {Cadmium} 0e-11
+    Value: {2,3,7,8-TCDD} 3e-11
+    Value: {Divalent Mercury} 3e-11
+    Value: {MethylMercury} 3e-11
+ 
+
+PointSource: WetVaporSource for S5
+    Property: surfaceDepositionRate
+    Form: Constant
+    Value: {Benzo(A)Pyrene} 4e-11
+    Value: {Arsenic} 0e-11
+    Value: {Cadmium} 0e-11
+    Value: {2,3,7,8-TCDD} 4e-11
+    Value: {Divalent Mercury} 4e-11
+    Value: {MethylMercury} 4e-11
+ 

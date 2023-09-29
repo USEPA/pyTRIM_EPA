@@ -1,0 +1,2981 @@
+### note: this is an auto generated script
+import pandas as pd
+import os
+from constants import *
+from define_scenario import *
+from define_ve import *
+from define_pve import *
+from define_algs import *
+from define_ps_algs import *
+from util_functions import *
+
+
+def get_met_ave(mfn,mfcol):
+    mfpn=os.path.join(mfp,mfn)
+    df=pd.read_csv(mfpn) 
+    try:
+        ave=pd.to_numeric(df[mfcol], errors='coerce').mean()
+    except:
+        ave=0
+    return(ave)
+        
+wt_av_rain=0.004106108729329538
+wt_av_airtemperature=298.0
+wt_av_horizontalwindspeed=2.8
+wt_av_winddirection=167.15026840076376
+wt_av_mixingheight=865.0
+wt_av_isday=1.0
+wt_av_cumulativerain=0.0
+frac_time_rain=0.4286126022264654
+wt_av_allowexchange=0.6653047470620446
+frac_time_exchange_no_rain=0.310192023633678
+frac_time_exchange_rain=0.23258997730302267
+frac_time_exchange_day=0.5427820009367007
+frac_time_exchange_not_day=0.0
+wt_av_litterfallrate=0.01192360404969274
+
+try:
+	tnc0.totalerosionrate_kg_m2_day=1.13848064422184e-02
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_source.totalerosionrate_kg_m2_day=1.13848064422184e-02
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n1.totalerosionrate_kg_m2_day=5.74032731904327e-03
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n6.totalerosionrate_kg_m2_day=1.20143641903568e-02
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n7.totalerosionrate_kg_m2_day=5.58018961632054e-03
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n3.totalerosionrate_kg_m2_day=4.15059734807294e-03
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n4.totalerosionrate_kg_m2_day=3.33104780095033e-03
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n5.totalerosionrate_kg_m2_day=2.11585737790382e-03
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s1.totalerosionrate_kg_m2_day=5.74032731904327e-03
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s4.totalerosionrate_kg_m2_day=3.33104780095033e-03
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s5.totalerosionrate_kg_m2_day=2.11585737790382e-03
+except:
+	pass
+try:
+	sw_pond.watertemperature_k=298
+except:
+	pass
+try:
+	surface_water_in_sw_pond.algaedensityinwatercolumn_g_l=0.0025
+except:
+	pass
+try:
+	surface_water_in_sw_pond.chlorideconcentration_mg_l=8
+except:
+	pass
+try:
+	surface_water_in_sw_pond.chlorophyllconcentration_mg_l=0.0029
+except:
+	pass
+try:
+	surface_water_in_sw_pond.organiccarboncontent=0.02
+except:
+	pass
+try:
+	surface_water_in_sw_pond.ph=7.3
+except:
+	pass
+try:
+	surface_water_in_sw_pond.suspendedsedimentconcentration=0.05
+except:
+	pass
+try:
+	surface_water_in_sw_pond.watertemperature_k=298
+except:
+	pass
+try:
+	surface_water_in_sw_pond.flushes_per_year=12.1666666666667
+except:
+	pass
+try:
+	surface_water_in_sw_pond.isflowing=False
+except:
+	pass
+try:
+	surface_water_in_sw_pond.currentvelocity=0
+except:
+	pass
+try:
+	sediment_in_sed_pond.organiccarboncontent=0.02
+except:
+	pass
+try:
+	sediment_in_sed_pond.ph=7.3
+except:
+	pass
+try:
+	sediment_in_sed_pond.rho=2600
+except:
+	pass
+try:
+	sediment_in_sed_pond.sedimentresuspensionvelocity=6.68799700375953e-05
+except:
+	pass
+try:
+	macrophyte_in_sw_pond.biomassperarea_kg_m2=0.5
+except:
+	pass
+try:
+	macrophyte_in_sw_pond.fractiondietalgae=0
+except:
+	pass
+try:
+	macrophyte_in_sw_pond.fractiondietmacrophyte=0
+except:
+	pass
+try:
+	macrophyte_in_sw_pond.fractiondietzooplankton=0
+except:
+	pass
+try:
+	macrophyte_in_sw_pond.fractiondietbenthicinvertebrate=0
+except:
+	pass
+try:
+	macrophyte_in_sw_pond.fractiondietfishherbivore=0
+except:
+	pass
+try:
+	macrophyte_in_sw_pond.fractiondietfishbenthicomnivore=0
+except:
+	pass
+try:
+	macrophyte_in_sw_pond.fractiondietfishomnivore=0
+except:
+	pass
+try:
+	macrophyte_in_sw_pond.fractiondietfishbenthiccarnivore=0
+except:
+	pass
+try:
+	macrophyte_in_sw_pond.fractiondietfishcarnivore=0
+except:
+	pass
+try:
+	zooplankton_in_sw_pond.biomassperarea_kg_m2=0.00636
+except:
+	pass
+try:
+	zooplankton_in_sw_pond.bw=0.000000057
+except:
+	pass
+try:
+	zooplankton_in_sw_pond.fractiondietalgae=1
+except:
+	pass
+try:
+	zooplankton_in_sw_pond.fractiondietmacrophyte=0
+except:
+	pass
+try:
+	zooplankton_in_sw_pond.fractiondietzooplankton=0
+except:
+	pass
+try:
+	zooplankton_in_sw_pond.fractiondietbenthicinvertebrate=0
+except:
+	pass
+try:
+	zooplankton_in_sw_pond.fractiondietfishherbivore=0
+except:
+	pass
+try:
+	zooplankton_in_sw_pond.fractiondietfishbenthicomnivore=0
+except:
+	pass
+try:
+	zooplankton_in_sw_pond.fractiondietfishomnivore=0
+except:
+	pass
+try:
+	zooplankton_in_sw_pond.fractiondietfishbenthiccarnivore=0
+except:
+	pass
+try:
+	zooplankton_in_sw_pond.fractiondietfishcarnivore=0
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_pond.biomassperarea_kg_m2=0.02
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_pond.bw=0.000255
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_pond.fractiondietalgae=0
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_pond.fractiondietmacrophyte=0
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_pond.fractiondietzooplankton=0
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_pond.fractiondietbenthicinvertebrate=0
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_pond.fractiondietfishherbivore=0
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_pond.fractiondietfishbenthicomnivore=0
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_pond.fractiondietfishomnivore=0
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_pond.fractiondietfishbenthiccarnivore=0
+except:
+	pass
+try:
+	benthic_invertebrate_in_sed_pond.fractiondietfishcarnivore=0
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_pond.biomassperarea_kg_m2=0.002
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_pond.bw=0.025
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_pond.fractiondietalgae=0
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_pond.fractiondietmacrophyte=0
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_pond.fractiondietzooplankton=1
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_pond.fractiondietbenthicinvertebrate=0
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_pond.fractiondietfishherbivore=0
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_pond.fractiondietfishbenthicomnivore=0
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_pond.fractiondietfishomnivore=0
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_pond.fractiondietfishbenthiccarnivore=0
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_pond.fractiondietfishcarnivore=0
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_pond.biomassperarea_kg_m2=0.002
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_pond.bw=0.25
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_pond.fractiondietalgae=0
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_pond.fractiondietmacrophyte=0
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_pond.fractiondietzooplankton=0
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_pond.fractiondietbenthicinvertebrate=1
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_pond.fractiondietfishherbivore=0
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_pond.fractiondietfishbenthicomnivore=0
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_pond.fractiondietfishomnivore=0
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_pond.fractiondietfishbenthiccarnivore=0
+except:
+	pass
+try:
+	benthic_omnivore_in_sed_pond.fractiondietfishcarnivore=0
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_pond.biomassperarea_kg_m2=0.0005
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_pond.bw=0.25
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_pond.fractiondietalgae=0
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_pond.fractiondietmacrophyte=0
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_pond.fractiondietzooplankton=0
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_pond.fractiondietbenthicinvertebrate=0
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_pond.fractiondietfishherbivore=1
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_pond.fractiondietfishbenthicomnivore=0
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_pond.fractiondietfishomnivore=0
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_pond.fractiondietfishbenthiccarnivore=0
+except:
+	pass
+try:
+	water_column_omnivore_in_sw_pond.fractiondietfishcarnivore=0
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_pond.biomassperarea_kg_m2=0.001
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_pond.bw=2
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_pond.fractiondietalgae=0
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_pond.fractiondietmacrophyte=0
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_pond.fractiondietzooplankton=0
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_pond.fractiondietbenthicinvertebrate=0.5
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_pond.fractiondietfishherbivore=0
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_pond.fractiondietfishbenthicomnivore=0.5
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_pond.fractiondietfishomnivore=0
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_pond.fractiondietfishbenthiccarnivore=0
+except:
+	pass
+try:
+	benthic_carnivore_in_sed_pond.fractiondietfishcarnivore=0
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_pond.biomassperarea_kg_m2=0.0002
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_pond.bw=2
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_pond.fractiondietalgae=0
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_pond.fractiondietmacrophyte=0
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_pond.fractiondietzooplankton=0
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_pond.fractiondietbenthicinvertebrate=0
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_pond.fractiondietfishherbivore=0
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_pond.fractiondietfishbenthicomnivore=0
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_pond.fractiondietfishomnivore=1
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_pond.fractiondietfishbenthiccarnivore=0
+except:
+	pass
+try:
+	water_column_carnivore_in_sw_pond.fractiondietfishcarnivore=0
+except:
+	pass
+try:
+	tnc0.outputdir='c\\trim\\pseudo\\tnc0_2022\\output'
+except:
+	pass
+try:
+	tnc0.simulationbegindatetime='01_01_1990_000000_est'
+except:
+	pass
+try:
+	tnc0.simulationenddatetime='01_01_2040_000000_est'
+except:
+	pass
+try:
+	tnc0.evaluatehtmlpropertiesattime='06_15_2039_120000_est'
+except:
+	pass
+try:
+	tnc0.simulationtimestep=1
+except:
+	pass
+try:
+	tnc0.simulationstepsperoutputstep=4
+except:
+	pass
+try:
+	tnc0.simulatesteadystate=False
+except:
+	pass
+try:
+	tnc0.averageresultsfiles=True
+except:
+	pass
+try:
+	tnc0.averaginginterval='annual'
+except:
+	pass
+try:
+	tnc0.enableboundarycontributions=False
+except:
+	pass
+try:
+	tnc0.exportallresultstodb=False
+except:
+	pass
+try:
+	tnc0.exportavgresultstodb=False
+except:
+	pass
+try:
+	tnc0.exportingestioninputs=False
+except:
+	pass
+try:
+	tnc0.exportdeposition=True
+except:
+	pass
+try:
+	tnc0.exportbiotaintakerates=False
+except:
+	pass
+try:
+	tnc0.exportoutdoorenvironmentbeforerun=True
+except:
+	pass
+try:
+	tnc0.exportpropertiesbeforerun=True
+except:
+	pass
+try:
+	tnc0.exportriskecoinputs=False
+except:
+	pass
+try:
+	tnc0.fractioninitialconcentrations=0
+except:
+	pass
+try:
+	tnc0.exportmass=True
+except:
+	pass
+try:
+	tnc0.exportconcentration=True
+except:
+	pass
+try:
+	tnc0.exporthtml=True
+except:
+	pass
+try:
+	tnc0.exporttimestepsdown=True
+except:
+	pass
+try:
+	tnc0.significantdigits=4
+except:
+	pass
+try:
+	tnc0.isday_steadystate_forair=0
+except:
+	pass
+try:
+	tnc0.isday_steadystate_forother=0
+except:
+	pass
+try:
+	tnc0.verticalwindspeed=0
+except:
+	pass
+try:
+	tnc0.airtemperature_k=wt_av_airtemperature
+except:
+	pass
+try:
+	tnc0.horizontalwindspeed=wt_av_horizontalwindspeed
+except:
+	pass
+try:
+	tnc0.winddirection=wt_av_winddirection
+except:
+	pass
+try:
+	tnc0.rain=wt_av_rain
+except:
+	pass
+try:
+	tnc0.cumulativerain=wt_av_cumulativerain
+except:
+	pass
+try:
+	tnc0.isday_dynamic=wt_av_isday
+except:
+	pass
+try:
+	air_source.top=wt_av_mixingheight
+except:
+	pass
+try:
+	air_n1.top=wt_av_mixingheight
+except:
+	pass
+try:
+	air_n6.top=wt_av_mixingheight
+except:
+	pass
+try:
+	air_n7.top=wt_av_mixingheight
+except:
+	pass
+try:
+	air_n3.top=wt_av_mixingheight
+except:
+	pass
+try:
+	air_n4.top=wt_av_mixingheight
+except:
+	pass
+try:
+	air_n5.top=wt_av_mixingheight
+except:
+	pass
+try:
+	air_s1.top=wt_av_mixingheight
+except:
+	pass
+try:
+	air_pond.top=wt_av_mixingheight
+except:
+	pass
+try:
+	air_s4.top=wt_av_mixingheight
+except:
+	pass
+try:
+	air_s5.top=wt_av_mixingheight
+except:
+	pass
+try:
+	upperair_source.bottom=wt_av_mixingheight
+except:
+	pass
+try:
+	air_in_air_source.dustload=0.0000000615
+except:
+	pass
+try:
+	air_in_air_n1.dustload=0.0000000615
+except:
+	pass
+try:
+	air_in_air_n6.dustload=0.0000000615
+except:
+	pass
+try:
+	air_in_air_n7.dustload=0.0000000615
+except:
+	pass
+try:
+	air_in_air_n3.dustload=0.0000000615
+except:
+	pass
+try:
+	air_in_air_n4.dustload=0.0000000615
+except:
+	pass
+try:
+	air_in_air_n5.dustload=0.0000000615
+except:
+	pass
+try:
+	air_in_air_s1.dustload=0.0000000615
+except:
+	pass
+try:
+	air_in_air_pond.dustload=0.0000000615
+except:
+	pass
+try:
+	air_in_air_s4.dustload=0.0000000615
+except:
+	pass
+try:
+	air_in_air_s5.dustload=0.0000000615
+except:
+	pass
+try:
+	air_in_air_source.airdensity_g_cm3=0.0012
+except:
+	pass
+try:
+	air_in_air_n1.airdensity_g_cm3=0.0012
+except:
+	pass
+try:
+	air_in_air_n6.airdensity_g_cm3=0.0012
+except:
+	pass
+try:
+	air_in_air_n7.airdensity_g_cm3=0.0012
+except:
+	pass
+try:
+	air_in_air_n3.airdensity_g_cm3=0.0012
+except:
+	pass
+try:
+	air_in_air_n4.airdensity_g_cm3=0.0012
+except:
+	pass
+try:
+	air_in_air_n5.airdensity_g_cm3=0.0012
+except:
+	pass
+try:
+	air_in_air_s1.airdensity_g_cm3=0.0012
+except:
+	pass
+try:
+	air_in_air_pond.airdensity_g_cm3=0.0012
+except:
+	pass
+try:
+	air_in_air_s4.airdensity_g_cm3=0.0012
+except:
+	pass
+try:
+	air_in_air_s5.airdensity_g_cm3=0.0012
+except:
+	pass
+try:
+	air_in_air_source.dustdensity=1400
+except:
+	pass
+try:
+	air_in_air_n1.dustdensity=1400
+except:
+	pass
+try:
+	air_in_air_n6.dustdensity=1400
+except:
+	pass
+try:
+	air_in_air_n7.dustdensity=1400
+except:
+	pass
+try:
+	air_in_air_n3.dustdensity=1400
+except:
+	pass
+try:
+	air_in_air_n4.dustdensity=1400
+except:
+	pass
+try:
+	air_in_air_n5.dustdensity=1400
+except:
+	pass
+try:
+	air_in_air_s1.dustdensity=1400
+except:
+	pass
+try:
+	air_in_air_pond.dustdensity=1400
+except:
+	pass
+try:
+	air_in_air_s4.dustdensity=1400
+except:
+	pass
+try:
+	air_in_air_s5.dustdensity=1400
+except:
+	pass
+try:
+	air_in_air_source.fractionorganicmatteronparticulates=0.2
+except:
+	pass
+try:
+	air_in_air_n1.fractionorganicmatteronparticulates=0.2
+except:
+	pass
+try:
+	air_in_air_n6.fractionorganicmatteronparticulates=0.2
+except:
+	pass
+try:
+	air_in_air_n7.fractionorganicmatteronparticulates=0.2
+except:
+	pass
+try:
+	air_in_air_n3.fractionorganicmatteronparticulates=0.2
+except:
+	pass
+try:
+	air_in_air_n4.fractionorganicmatteronparticulates=0.2
+except:
+	pass
+try:
+	air_in_air_n5.fractionorganicmatteronparticulates=0.2
+except:
+	pass
+try:
+	air_in_air_s1.fractionorganicmatteronparticulates=0.2
+except:
+	pass
+try:
+	air_in_air_pond.fractionorganicmatteronparticulates=0.2
+except:
+	pass
+try:
+	air_in_air_s4.fractionorganicmatteronparticulates=0.2
+except:
+	pass
+try:
+	air_in_air_s5.fractionorganicmatteronparticulates=0.2
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_source.volumefraction_vapor=0.28
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n1.volumefraction_vapor=0.28
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n6.volumefraction_vapor=0.28
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n7.volumefraction_vapor=0.28
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n3.volumefraction_vapor=0.28
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n4.volumefraction_vapor=0.28
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n5.volumefraction_vapor=0.28
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s1.volumefraction_vapor=0.28
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s4.volumefraction_vapor=0.28
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s5.volumefraction_vapor=0.28
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_source.averageverticalvelocity=0.000821917808219178
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n1.averageverticalvelocity=0.000821917808219178
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n6.averageverticalvelocity=0.000821917808219178
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n7.averageverticalvelocity=0.000821917808219178
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n3.averageverticalvelocity=0.000821917808219178
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n4.averageverticalvelocity=0.000821917808219178
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n5.averageverticalvelocity=0.000821917808219178
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s1.averageverticalvelocity=0.000821917808219178
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s4.averageverticalvelocity=0.000821917808219178
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s5.averageverticalvelocity=0.000821917808219178
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_source.airsoilboundarythickness=0.005
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n1.airsoilboundarythickness=0.005
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n6.airsoilboundarythickness=0.005
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n7.airsoilboundarythickness=0.005
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n3.airsoilboundarythickness=0.005
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n4.airsoilboundarythickness=0.005
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n5.airsoilboundarythickness=0.005
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s1.airsoilboundarythickness=0.005
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s4.airsoilboundarythickness=0.005
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s5.airsoilboundarythickness=0.005
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_source.rho=2600
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n1.rho=2600
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n6.rho=2600
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n7.rho=2600
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n3.rho=2600
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n4.rho=2600
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n5.rho=2600
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s1.rho=2600
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s4.rho=2600
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s5.rho=2600
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_source.fractionofareaavailableforerosion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n1.fractionofareaavailableforerosion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n6.fractionofareaavailableforerosion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n7.fractionofareaavailableforerosion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n3.fractionofareaavailableforerosion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n4.fractionofareaavailableforerosion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n5.fractionofareaavailableforerosion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s1.fractionofareaavailableforerosion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s4.fractionofareaavailableforerosion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s5.fractionofareaavailableforerosion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_source.fractionofareaavailableforrunoff=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n1.fractionofareaavailableforrunoff=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n6.fractionofareaavailableforrunoff=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n7.fractionofareaavailableforrunoff=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n3.fractionofareaavailableforrunoff=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n4.fractionofareaavailableforrunoff=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n5.fractionofareaavailableforrunoff=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s1.fractionofareaavailableforrunoff=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s4.fractionofareaavailableforrunoff=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s5.fractionofareaavailableforrunoff=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_source.fractionofareaavailableforverticaldiffusion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n1.fractionofareaavailableforverticaldiffusion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n6.fractionofareaavailableforverticaldiffusion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n7.fractionofareaavailableforverticaldiffusion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n3.fractionofareaavailableforverticaldiffusion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n4.fractionofareaavailableforverticaldiffusion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n5.fractionofareaavailableforverticaldiffusion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s1.fractionofareaavailableforverticaldiffusion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s4.fractionofareaavailableforverticaldiffusion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s5.fractionofareaavailableforverticaldiffusion=1
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_source.fractionsand=0.25
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n1.fractionsand=0.25
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n6.fractionsand=0.25
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n7.fractionsand=0.25
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n3.fractionsand=0.25
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n4.fractionsand=0.25
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n5.fractionsand=0.25
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s1.fractionsand=0.25
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s4.fractionsand=0.25
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s5.fractionsand=0.25
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_source.organiccarboncontent=0.008
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n1.organiccarboncontent=0.008
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n6.organiccarboncontent=0.008
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n7.organiccarboncontent=0.008
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n3.organiccarboncontent=0.008
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n4.organiccarboncontent=0.008
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n5.organiccarboncontent=0.008
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s1.organiccarboncontent=0.008
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s4.organiccarboncontent=0.008
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s5.organiccarboncontent=0.008
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_source.ph=6.8
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n1.ph=6.8
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n6.ph=6.8
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n7.ph=6.8
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n3.ph=6.8
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n4.ph=6.8
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n5.ph=6.8
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s1.ph=6.8
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s4.ph=6.8
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s5.ph=6.8
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_source.totalrunoffrate_m3_m2_day=1.6438e-03
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n1.totalrunoffrate_m3_m2_day=1.6438e-03
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n6.totalrunoffrate_m3_m2_day=1.6438e-03
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n7.totalrunoffrate_m3_m2_day=1.6438e-03
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n3.totalrunoffrate_m3_m2_day=1.6438e-03
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n4.totalrunoffrate_m3_m2_day=1.6438e-03
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n5.totalrunoffrate_m3_m2_day=1.6438e-03
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s1.totalrunoffrate_m3_m2_day=1.6438e-03
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s4.totalrunoffrate_m3_m2_day=1.6438e-03
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s5.totalrunoffrate_m3_m2_day=1.6438e-03
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_source.volumefraction_liquid=0.19
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n1.volumefraction_liquid=0.19
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n6.volumefraction_liquid=0.19
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n7.volumefraction_liquid=0.19
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n3.volumefraction_liquid=0.19
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n4.volumefraction_liquid=0.19
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_n5.volumefraction_liquid=0.19
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s1.volumefraction_liquid=0.19
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s4.volumefraction_liquid=0.19
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_s5.volumefraction_liquid=0.19
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_source.volumefraction_vapor=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n1.volumefraction_vapor=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n6.volumefraction_vapor=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n7.volumefraction_vapor=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n3.volumefraction_vapor=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n4.volumefraction_vapor=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n5.volumefraction_vapor=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s1.volumefraction_vapor=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s4.volumefraction_vapor=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s5.volumefraction_vapor=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_source.averageverticalvelocity=0.000821917808219178
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n1.averageverticalvelocity=0.000821917808219178
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n6.averageverticalvelocity=0.000821917808219178
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n7.averageverticalvelocity=0.000821917808219178
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n3.averageverticalvelocity=0.000821917808219178
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n4.averageverticalvelocity=0.000821917808219178
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n5.averageverticalvelocity=0.000821917808219178
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s1.averageverticalvelocity=0.000821917808219178
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s4.averageverticalvelocity=0.000821917808219178
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s5.averageverticalvelocity=0.000821917808219178
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_source.rho=2600
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n1.rho=2600
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n6.rho=2600
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n7.rho=2600
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n3.rho=2600
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n4.rho=2600
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n5.rho=2600
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s1.rho=2600
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s4.rho=2600
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s5.rho=2600
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_source.fractionsand=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n1.fractionsand=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n6.fractionsand=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n7.fractionsand=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n3.fractionsand=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n4.fractionsand=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n5.fractionsand=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s1.fractionsand=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s4.fractionsand=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s5.fractionsand=0.25
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_source.organiccarboncontent=0.008
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n1.organiccarboncontent=0.008
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n6.organiccarboncontent=0.008
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n7.organiccarboncontent=0.008
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n3.organiccarboncontent=0.008
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n4.organiccarboncontent=0.008
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n5.organiccarboncontent=0.008
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s1.organiccarboncontent=0.008
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s4.organiccarboncontent=0.008
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s5.organiccarboncontent=0.008
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_source.ph=6.8
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n1.ph=6.8
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n6.ph=6.8
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n7.ph=6.8
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n3.ph=6.8
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n4.ph=6.8
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n5.ph=6.8
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s1.ph=6.8
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s4.ph=6.8
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s5.ph=6.8
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_source.volumefraction_liquid=0.21
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n1.volumefraction_liquid=0.21
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n6.volumefraction_liquid=0.21
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n7.volumefraction_liquid=0.21
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n3.volumefraction_liquid=0.21
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n4.volumefraction_liquid=0.21
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_n5.volumefraction_liquid=0.21
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s1.volumefraction_liquid=0.21
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s4.volumefraction_liquid=0.21
+except:
+	pass
+try:
+	soil_root_zone_in_rootsoil_s5.volumefraction_liquid=0.21
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_source.volumefraction_vapor=0.22
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n1.volumefraction_vapor=0.22
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n6.volumefraction_vapor=0.22
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n7.volumefraction_vapor=0.22
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n3.volumefraction_vapor=0.22
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n4.volumefraction_vapor=0.22
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n5.volumefraction_vapor=0.22
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s1.volumefraction_vapor=0.22
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s4.volumefraction_vapor=0.22
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s5.volumefraction_vapor=0.22
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_source.averageverticalvelocity=0.000821917808219178
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n1.averageverticalvelocity=0.000821917808219178
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n6.averageverticalvelocity=0.000821917808219178
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n7.averageverticalvelocity=0.000821917808219178
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n3.averageverticalvelocity=0.000821917808219178
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n4.averageverticalvelocity=0.000821917808219178
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n5.averageverticalvelocity=0.000821917808219178
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s1.averageverticalvelocity=0.000821917808219178
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s4.averageverticalvelocity=0.000821917808219178
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s5.averageverticalvelocity=0.000821917808219178
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_source.rho=2600
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n1.rho=2600
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n6.rho=2600
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n7.rho=2600
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n3.rho=2600
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n4.rho=2600
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n5.rho=2600
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s1.rho=2600
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s4.rho=2600
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s5.rho=2600
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_source.fractionsand=0.35
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n1.fractionsand=0.35
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n6.fractionsand=0.35
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n7.fractionsand=0.35
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n3.fractionsand=0.35
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n4.fractionsand=0.35
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n5.fractionsand=0.35
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s1.fractionsand=0.35
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s4.fractionsand=0.35
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s5.fractionsand=0.35
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_source.organiccarboncontent=0.003
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n1.organiccarboncontent=0.003
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n6.organiccarboncontent=0.003
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n7.organiccarboncontent=0.003
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n3.organiccarboncontent=0.003
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n4.organiccarboncontent=0.003
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n5.organiccarboncontent=0.003
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s1.organiccarboncontent=0.003
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s4.organiccarboncontent=0.003
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s5.organiccarboncontent=0.003
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_source.ph=6.8
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n1.ph=6.8
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n6.ph=6.8
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n7.ph=6.8
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n3.ph=6.8
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n4.ph=6.8
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n5.ph=6.8
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s1.ph=6.8
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s4.ph=6.8
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s5.ph=6.8
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_source.volumefraction_liquid=0.21
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n1.volumefraction_liquid=0.21
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n6.volumefraction_liquid=0.21
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n7.volumefraction_liquid=0.21
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n3.volumefraction_liquid=0.21
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n4.volumefraction_liquid=0.21
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_n5.volumefraction_liquid=0.21
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s1.volumefraction_liquid=0.21
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s4.volumefraction_liquid=0.21
+except:
+	pass
+try:
+	soil_vadose_zone_in_vadosesoil_s5.volumefraction_liquid=0.21
+except:
+	pass
+try:
+	groundwater_in_gw_source.fractionsand=0.4
+except:
+	pass
+try:
+	groundwater_in_gw_n1.fractionsand=0.4
+except:
+	pass
+try:
+	groundwater_in_gw_n6.fractionsand=0.4
+except:
+	pass
+try:
+	groundwater_in_gw_n7.fractionsand=0.4
+except:
+	pass
+try:
+	groundwater_in_gw_n3.fractionsand=0.4
+except:
+	pass
+try:
+	groundwater_in_gw_n4.fractionsand=0.4
+except:
+	pass
+try:
+	groundwater_in_gw_n5.fractionsand=0.4
+except:
+	pass
+try:
+	groundwater_in_gw_s1.fractionsand=0.4
+except:
+	pass
+try:
+	groundwater_in_gw_s4.fractionsand=0.4
+except:
+	pass
+try:
+	groundwater_in_gw_s5.fractionsand=0.4
+except:
+	pass
+try:
+	groundwater_in_gw_source.organiccarboncontent=0.004
+except:
+	pass
+try:
+	groundwater_in_gw_n1.organiccarboncontent=0.004
+except:
+	pass
+try:
+	groundwater_in_gw_n6.organiccarboncontent=0.004
+except:
+	pass
+try:
+	groundwater_in_gw_n7.organiccarboncontent=0.004
+except:
+	pass
+try:
+	groundwater_in_gw_n3.organiccarboncontent=0.004
+except:
+	pass
+try:
+	groundwater_in_gw_n4.organiccarboncontent=0.004
+except:
+	pass
+try:
+	groundwater_in_gw_n5.organiccarboncontent=0.004
+except:
+	pass
+try:
+	groundwater_in_gw_s1.organiccarboncontent=0.004
+except:
+	pass
+try:
+	groundwater_in_gw_s4.organiccarboncontent=0.004
+except:
+	pass
+try:
+	groundwater_in_gw_s5.organiccarboncontent=0.004
+except:
+	pass
+try:
+	groundwater_in_gw_source.ph=6.8
+except:
+	pass
+try:
+	groundwater_in_gw_n1.ph=6.8
+except:
+	pass
+try:
+	groundwater_in_gw_n6.ph=6.8
+except:
+	pass
+try:
+	groundwater_in_gw_n7.ph=6.8
+except:
+	pass
+try:
+	groundwater_in_gw_n3.ph=6.8
+except:
+	pass
+try:
+	groundwater_in_gw_n4.ph=6.8
+except:
+	pass
+try:
+	groundwater_in_gw_n5.ph=6.8
+except:
+	pass
+try:
+	groundwater_in_gw_s1.ph=6.8
+except:
+	pass
+try:
+	groundwater_in_gw_s4.ph=6.8
+except:
+	pass
+try:
+	groundwater_in_gw_s5.ph=6.8
+except:
+	pass
+try:
+	groundwater_in_gw_source.porosity=0.2
+except:
+	pass
+try:
+	groundwater_in_gw_n1.porosity=0.2
+except:
+	pass
+try:
+	groundwater_in_gw_n6.porosity=0.2
+except:
+	pass
+try:
+	groundwater_in_gw_n7.porosity=0.2
+except:
+	pass
+try:
+	groundwater_in_gw_n3.porosity=0.2
+except:
+	pass
+try:
+	groundwater_in_gw_n4.porosity=0.2
+except:
+	pass
+try:
+	groundwater_in_gw_n5.porosity=0.2
+except:
+	pass
+try:
+	groundwater_in_gw_s1.porosity=0.2
+except:
+	pass
+try:
+	groundwater_in_gw_s4.porosity=0.2
+except:
+	pass
+try:
+	groundwater_in_gw_s5.porosity=0.2
+except:
+	pass
+try:
+	groundwater_in_gw_source.rho=2600
+except:
+	pass
+try:
+	groundwater_in_gw_n1.rho=2600
+except:
+	pass
+try:
+	groundwater_in_gw_n6.rho=2600
+except:
+	pass
+try:
+	groundwater_in_gw_n7.rho=2600
+except:
+	pass
+try:
+	groundwater_in_gw_n3.rho=2600
+except:
+	pass
+try:
+	groundwater_in_gw_n4.rho=2600
+except:
+	pass
+try:
+	groundwater_in_gw_n5.rho=2600
+except:
+	pass
+try:
+	groundwater_in_gw_s1.rho=2600
+except:
+	pass
+try:
+	groundwater_in_gw_s4.rho=2600
+except:
+	pass
+try:
+	groundwater_in_gw_s5.rho=2600
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_n4.allowexchange_dynamic=1
+except:
+	pass
+try:
+	leaf_particle_coniferous_forest_in_coniferous_forest_in_surfsoil_n4.allowexchange_dynamic=1
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_n5.allowexchange_dynamic=1
+except:
+	pass
+try:
+	leaf_particle_coniferous_forest_in_coniferous_forest_in_surfsoil_n5.allowexchange_dynamic=1
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_s4.allowexchange_dynamic=1
+except:
+	pass
+try:
+	leaf_particle_coniferous_forest_in_coniferous_forest_in_surfsoil_s4.allowexchange_dynamic=1
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_s5.allowexchange_dynamic=1
+except:
+	pass
+try:
+	leaf_particle_coniferous_forest_in_coniferous_forest_in_surfsoil_s5.allowexchange_dynamic=1
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_n4.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_particle_coniferous_forest_in_coniferous_forest_in_surfsoil_n4.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_n5.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_particle_coniferous_forest_in_coniferous_forest_in_surfsoil_n5.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_s4.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_particle_coniferous_forest_in_coniferous_forest_in_surfsoil_s4.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_s5.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_particle_coniferous_forest_in_coniferous_forest_in_surfsoil_s5.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_n4.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_particle_coniferous_forest_in_coniferous_forest_in_surfsoil_n4.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_n5.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_particle_coniferous_forest_in_coniferous_forest_in_surfsoil_n5.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_s4.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_particle_coniferous_forest_in_coniferous_forest_in_surfsoil_s4.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_s5.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_particle_coniferous_forest_in_coniferous_forest_in_surfsoil_s5.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_n4.litterfallrate=0.0021
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_n5.litterfallrate=0.0021
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_s4.litterfallrate=0.0021
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_s5.litterfallrate=0.0021
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_n4.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_particle_coniferous_forest_in_coniferous_forest_in_surfsoil_n4.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_n5.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_particle_coniferous_forest_in_coniferous_forest_in_surfsoil_n5.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_s4.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_particle_coniferous_forest_in_coniferous_forest_in_surfsoil_s4.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_s5.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_particle_coniferous_forest_in_coniferous_forest_in_surfsoil_s5.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_n4.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_particle_coniferous_forest_in_coniferous_forest_in_surfsoil_n4.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_n5.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_particle_coniferous_forest_in_coniferous_forest_in_surfsoil_n5.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_s4.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_particle_coniferous_forest_in_coniferous_forest_in_surfsoil_s4.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_s5.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_particle_coniferous_forest_in_coniferous_forest_in_surfsoil_s5.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n1.allowexchange_dynamic=wt_av_allowexchange
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_n1.allowexchange_dynamic=wt_av_allowexchange
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_n1.allowexchange_dynamic=wt_av_allowexchange
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_n1.allowexchange_dynamic=wt_av_allowexchange
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n7.allowexchange_dynamic=wt_av_allowexchange
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_n7.allowexchange_dynamic=wt_av_allowexchange
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_n7.allowexchange_dynamic=wt_av_allowexchange
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_n7.allowexchange_dynamic=wt_av_allowexchange
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n3.allowexchange_dynamic=wt_av_allowexchange
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_n3.allowexchange_dynamic=wt_av_allowexchange
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_n3.allowexchange_dynamic=wt_av_allowexchange
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_n3.allowexchange_dynamic=wt_av_allowexchange
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.allowexchange_dynamic=wt_av_allowexchange
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.allowexchange_dynamic=wt_av_allowexchange
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.allowexchange_dynamic=wt_av_allowexchange
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.allowexchange_dynamic=wt_av_allowexchange
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_n1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_n1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_n1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n7.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_n7.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_n7.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_n7.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n3.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_n3.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_n3.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_n3.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.allowexchange_steadystate_forair=1
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_n1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_n1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_n1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n7.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_n7.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_n7.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_n7.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n3.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_n3.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_n3.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_n3.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.allowexchange_steadystate_forother=1
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n1.litterfallrate=wt_av_litterfallrate
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n7.litterfallrate=wt_av_litterfallrate
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n3.litterfallrate=wt_av_litterfallrate
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.litterfallrate=wt_av_litterfallrate
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_n1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_n1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_n1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n7.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_n7.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_n7.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_n7.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n3.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_n3.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_n3.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_n3.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.calculatewetdepinterceptionfraction=False
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_n1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_n1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_n1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n7.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_n7.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_n7.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_n7.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n3.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_n3.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_n3.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_n3.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_particle_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	root_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	stem_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.wetdepinterceptionfraction_usersupplied=0.2
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n1.isday_forair=1-0.448
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n7.isday_forair=1-0.448
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n3.isday_forair=1-0.448
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_n4.isday_forair=1-0.448
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_n5.isday_forair=1-0.448
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.isday_forair=1-0.448
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_s4.isday_forair=1-0.448
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_s5.isday_forair=1-0.448
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n1.isday_forother=1-0.391
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n7.isday_forother=1-0.391
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_n3.isday_forother=1-0.391
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_n4.isday_forother=1-0.391
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_n5.isday_forother=1-0.391
+except:
+	pass
+try:
+	leaf_grasses_herbs_in_grasses_herbs_in_surfsoil_s1.isday_forother=1-0.391
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_s4.isday_forother=1-0.391
+except:
+	pass
+try:
+	leaf_coniferous_forest_in_coniferous_forest_in_surfsoil_s5.isday_forother=1-0.391
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_source.totalerosionrate_kg_m2_day=0
+except:
+	pass
+try:
+	soil_surface_in_surfsoil_source.totalrunoffrate_m3_m2_day=0
+except:
+	pass
+try:
+	tnc0.airtemperature_k=298
+except:
+	pass
+try:
+	tnc0.cumulativerain=0
+except:
+	pass
+try:
+	tnc0.isday_dynamic=1
+except:
+	pass
+try:
+	air_source.top=710
+except:
+	pass
+try:
+	air_n1.top=710
+except:
+	pass
+try:
+	air_n6.top=710
+except:
+	pass
+try:
+	air_n7.top=710
+except:
+	pass
+try:
+	air_n3.top=710
+except:
+	pass
+try:
+	air_n4.top=710
+except:
+	pass
+try:
+	air_n5.top=710
+except:
+	pass
+try:
+	air_s1.top=710
+except:
+	pass
+try:
+	air_pond.top=710
+except:
+	pass
+try:
+	air_s4.top=710
+except:
+	pass
+try:
+	air_s5.top=710
+except:
+	pass
+try:
+	upperair_source.bottom=710
+except:
+	pass
+try:
+	upperair_source.fractionoftotalerosion=1
+except:
+	pass
+try:
+	upperair_source.fractionoftotalrunoff=1
+except:
+	pass
+try:
+	upperair_source.enabled=True
+except:
+	pass
+try:
+	upperair_source.fractionoftotalerosion=0
+except:
+	pass
+try:
+	upperair_source.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	upperair_source.enabled=False
+except:
+	pass
+try:
+	upperair_source.fractionoftotalerosion=1
+except:
+	pass
+try:
+	upperair_source.fractionoftotalrunoff=1
+except:
+	pass
+try:
+	upperair_source.enabled=True
+except:
+	pass
+try:
+	upperair_source.fractionoftotalerosion=0
+except:
+	pass
+try:
+	upperair_source.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	upperair_source.enabled=False
+except:
+	pass
+try:
+	upperair_source.fractionoftotalerosion=1
+except:
+	pass
+try:
+	upperair_source.fractionoftotalrunoff=1
+except:
+	pass
+try:
+	upperair_source.enabled=True
+except:
+	pass
+try:
+	upperair_source.fractionoftotalerosion=0
+except:
+	pass
+try:
+	upperair_source.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	upperair_source.enabled=False
+except:
+	pass
+try:
+	upperair_source.fractionoftotalerosion=1
+except:
+	pass
+try:
+	upperair_source.fractionoftotalrunoff=1
+except:
+	pass
+try:
+	upperair_source.enabled=True
+except:
+	pass
+try:
+	upperair_source.fractionoftotalerosion=0
+except:
+	pass
+try:
+	upperair_source.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	upperair_source.enabled=False
+except:
+	pass
+try:
+	upperair_source.fractionoftotalerosion=1
+except:
+	pass
+try:
+	upperair_source.fractionoftotalrunoff=1
+except:
+	pass
+try:
+	upperair_source.enabled=True
+except:
+	pass
+try:
+	upperair_source.fractionoftotalerosion=0
+except:
+	pass
+try:
+	upperair_source.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	upperair_source.enabled=False
+except:
+	pass
+try:
+	upperair_source.fractionoftotalerosion=1
+except:
+	pass
+try:
+	upperair_source.fractionoftotalrunoff=1
+except:
+	pass
+try:
+	upperair_source.enabled=True
+except:
+	pass
+try:
+	upperair_source.fractionoftotalerosion=0
+except:
+	pass
+try:
+	upperair_source.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	upperair_source.enabled=False
+except:
+	pass
+try:
+	upperair_source.fractionoftotalerosion=0.5
+except:
+	pass
+try:
+	upperair_source.fractionoftotalrunoff=0.5
+except:
+	pass
+try:
+	upperair_source.enabled=True
+except:
+	pass
+try:
+	upperair_source.fractionoftotalerosion=0.5
+except:
+	pass
+try:
+	upperair_source.fractionoftotalrunoff=0.5
+except:
+	pass
+try:
+	upperair_source.enabled=True
+except:
+	pass
+try:
+	upperair_source.fractionoftotalerosion=0
+except:
+	pass
+try:
+	upperair_source.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	upperair_source.enabled=False
+except:
+	pass
+try:
+	upperair_source.fractionoftotalerosion=1
+except:
+	pass
+try:
+	upperair_source.fractionoftotalrunoff=1
+except:
+	pass
+try:
+	upperair_source.enabled=True
+except:
+	pass
+try:
+	upperair_source.fractionoftotalerosion=0
+except:
+	pass
+try:
+	upperair_source.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	upperair_source.enabled=False
+except:
+	pass
+try:
+	upperair_source.fractionoftotalerosion=1
+except:
+	pass
+try:
+	upperair_source.fractionoftotalrunoff=1
+except:
+	pass
+try:
+	upperair_source.enabled=True
+except:
+	pass
+try:
+	upperair_source.fractionoftotalerosion=0
+except:
+	pass
+try:
+	upperair_source.fractionoftotalrunoff=0
+except:
+	pass
+try:
+	upperair_source.enabled=False
+except:
+	pass
+try:
+	upperair_source.fractionoftotalerosion=1
+except:
+	pass
+try:
+	upperair_source.fractionoftotalrunoff=1
+except:
+	pass
+try:
+	upperair_source.enabled=True
+except:
+	pass
+try:
+	zooplankton_in_sw_pond.absorptionrateconstant=0.0
+except:
+	pass
+try:
+	zooplankton_in_sw_pond.eliminationrateconstant=0.0
+except:
+	pass
+try:
+	water_column_herbivore_in_sw_pond.assimilationefficiencyfromplankton=0.0
+except:
+	pass
+### note: this is to write other properties
