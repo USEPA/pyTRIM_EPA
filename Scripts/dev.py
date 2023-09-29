@@ -3,6 +3,8 @@ import subprocess
 import sys
 import time
 
+os.environ['TEST_DB_SERVERLESS'] = ''
+
 EXPOSE = False
 
 WEBAPP_PORT = 6060
@@ -20,7 +22,7 @@ def run_webapp():
         webapp_command += " --expose"
 
     proc = subprocess.Popen(
-        webapp_command, shell=True,
+        webapp_command, shell=True, env=os.environ,
         stdout=sys.stdout, stderr=sys.stderr
     )
     wait_for_output(proc, 10)

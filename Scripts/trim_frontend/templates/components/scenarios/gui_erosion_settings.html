@@ -73,7 +73,7 @@
                 let data1 = []
                 let data2 = []
                 let data3 = []
-                if (loadedData && loadedData.success) {
+                if (loadedData.scenario.length > 0) {
                      loadedData['scenario'].forEach(function(e,i) {
                          let a_param = default_data["a"]
                          let area_in_sq_mile = (e.area/1E6).toFixed(2) / 2.58998811
@@ -819,7 +819,7 @@
                 TRIM.api.parseFiles(this).on('load', function () {
                     try {
                         var data = JSON.parse(this.responseText);
-                        if (data.success) {
+                        if (data.files[me.attr('name')]) {
                             var myData = data.files[me.attr('name')];
                             me.attr(
                                 'data-filedata',

@@ -83,9 +83,8 @@ class TestConfig(DevConfig):
 
 
 def init_config(app, testing=False):
-    env = os.getenv('FLASK_ENV', 'production')
-    # app.logger.info(f'************ Flask_env is {env}, Root is {root} and App_folder is {app_folder} ***************')
-    if env == 'development':
+    # app.logger.info(f'************ Root is {root} and App_folder is {app_folder} ***************')
+    if os.getenv('FLASK_DEBUG'):
         if testing:
             app.config.from_object(TestConfig)
         else:
