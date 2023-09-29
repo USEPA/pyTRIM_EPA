@@ -18,7 +18,7 @@ class DataBase:
     def _create_engine(self):
         self.engine = sa.create_engine(
             self.uri, connect_args={'check_same_thread': False},
-            # echo=os.getenv('FLASK_ENV', '').lower() == 'development'
+            # echo=bool(os.getenv('FLASK_DEBUG'))
         )
         print("Created new database connection")
         self._session = None

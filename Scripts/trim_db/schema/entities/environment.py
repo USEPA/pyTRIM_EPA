@@ -495,7 +495,7 @@ class Parcel(Model):
             'name': self.name,
             'description': self.description,
             'vertices': self.vertices,
-            'area': self.area,
+            'area': self.area.m_as('m^2'),
             'hasAir': self.has_air,
             'airDensity': self.air_density,
             'airHeight': self.air_height,

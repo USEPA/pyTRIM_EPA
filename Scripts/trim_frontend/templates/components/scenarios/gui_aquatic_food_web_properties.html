@@ -610,7 +610,7 @@
              let diet_data = []
              let aquatic_properties = Object.keys(default_aquatic_data)
              let diet_properties = Object.keys(default_diet_data)
-             if (loadedData && loadedData.success) {
+             if (loadedData.scenario.length > 0) {
                  aquatic_properties.forEach(function (p, i) {
                      let this_aquatic_property = {}
                      loadedData['scenario'].forEach(function (e, i) {

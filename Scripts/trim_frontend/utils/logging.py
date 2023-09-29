@@ -17,11 +17,11 @@ def make_logger(
     filepath=None
 ):
     if level is None:
-        env = os.getenv('FLASK_ENV', 'production')
-        if env == 'production':
-            level = logging.INFO
-        else:
+        is_debug = os.getenv('FLASK_DEBUG')
+        if is_debug:
             level = logging.DEBUG
+        else:
+            level = logging.INFO
 
     if isinstance(level, str):
         try:
