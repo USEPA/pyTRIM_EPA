@@ -295,7 +295,24 @@ def parse_met_data(df, df2, df3):  # one time process all met weighted averages
     # met_dict['wt_av_litterfallrate']=0.0745 # fix
     # met_dict['wt_av_allowexchange']=5/12
 
-    return met_dict
+    arun_met_dict = {  # THIS IS FROM ARUN
+        'frac_time_exchange_day': 0.16225754122155972,
+        'frac_time_exchange_no_rain': 0.3262149134948966,
+        'frac_time_exchange_not_day': 0.18755320057229782,
+        'frac_time_exchange_rain': 0.02359582829896095,
+        'frac_time_rain': 0.07951431920086095,
+        'wt_av_airtemperature': 280.1595898155025,
+        'wt_av_allowexchange': 0.38056526683795966,
+        'wt_av_cumulativerain': 0.0006524559583347348,
+        'wt_av_horizontalwindspeed': 2.9321140206308054,
+        'wt_av_isday': 0.43829251065306357,
+        'wt_av_litterfallrate': 0.01235169116344962,
+        'wt_av_mixingheight': 308.88146200993845,
+        'wt_av_rain': 0.07951431920086095,
+        'wt_av_winddirection': 189.88241670957274
+    }
+
+    return arun_met_dict
 
 ILLEGAL_NAME_CHARS = re.compile('[^0-9a-zA-Z]+')
 
@@ -311,7 +328,8 @@ def safe_name(name):
 
     name = ILLEGAL_NAME_CHARS.sub('_', name)
     # name = re.sub('_+', '_', name)
-    name = name.replace('Halflife', 'HalfLife')
+    # name = name.replace('Halflife', 'HalfLife')
+    name = clean_prop(name)
     return name
 
 
@@ -333,10 +351,14 @@ GLOBAL_REPLACE = {
     'Chemical.': 'chemical.',
     'currentChemical.': 'chemical.',
     'Compartment.': 'compartment.',
+    'compartment.Chemical.UseInputCharacteristicDepth_0_MeansNo_ElseYes': 'chemical.UseInputCharacteristicDepth_0_MeansNo_ElseYes',
     'compartment.Chemical.': f'compartment{VAR_SPLITTER}chemical.',  # noqa
 
     'containingVolumeElement.Area': 'compartment.volume_element.parcel.area',
+    'containingVolumeElement.Volume': 'compartment.volume_element.volume',
     'containingVolumeElement.': 'compartment.volume_element.',
+
+    'CumulativeRain': 'cumulativeRain',
 
     'Min(': 'min(',
     'Max(': 'max(',
@@ -388,6 +410,7 @@ GLOBAL_REPLACE = {
     'volumefraction_solid': 'VolumeFraction_Solid',
     'VolumeFraction_solid': 'VolumeFraction_Solid',
     'volumeFraction_solid': 'VolumeFraction_Solid',
+    'WetVolumeperArea': 'WetVolumePerArea',
     'Z_algae': 'Z_Algae',
     'z_liquid': 'Z_Liquid',
     'Z_vapor': 'Z_Vapor',
@@ -405,9 +428,11 @@ GLOBAL_REPLACE = {
     'Fractionofareaavailableforerosion': 'FractionofAreaAvailableforErosion',
 
 
-    'self.Volume': 'compartment.volume_element.volume',
+    # 'self.Volume': 'compartment.volume_element.volume',
+    'self.Volume': 'compartment.Volume',
     'self.Height': 'compartment.volume_element.height',
-    'compartment.Volume': 'compartment.volume_element.volume',
+    # 'compartment.Volume': 'compartment.volume_element.volume',
+    # 'compartment.Volume': 'compartment.Volume',
     'compartment.Height': 'compartment.volume_element.height',
     'DistanceBetweenMidpoints': '.volume_element.midpoint_distance',
 
@@ -419,20 +444,24 @@ GLOBAL_REPLACE = {
     'TheLink.': 'link.',
     'TheLink.InterfacialArea': 'sender.volume_element.interface_with(receiver.volume_element)',  # noqa
     'Thelink.InterfacialArea': 'sender.volume_element.interface_with(receiver.volume_element)',  # noqa
+    'TheLink.RechargeRate': 'sender.RechargeRate',
+    'Thelink.RechargeRate': 'sender.RechargeRate',
 
     'SendingChemical.': 'chemical.',
     'SendingCompartment.Chemical.': f'sender{VAR_SPLITTER}chemical.',  # noqa
     'sendingCompartment.Chemical.': f'sender{VAR_SPLITTER}chemical.',  # noqa
     'Sendingcompartment.Chemical.': f'sender{VAR_SPLITTER}chemical.',  # noqa
     'sendingcompartment.Chemical.': f'sender{VAR_SPLITTER}chemical.',  # noqa
-    'ReceivingCompartment.Volume': 'receiver.volume_element.volume',
-    'receivingCompartment.Volume': 'receiver.volume_element.volume',
-    'Receivingcompartment.Volume': 'receiver.volume_element.volume',
-    'receivingcompartment.Volume': 'receiver.volume_element.volume',
-    'SendingCompartment.Volume': 'sender.volume_element.volume',
-    'sendingCompartment.Volume': 'sender.volume_element.volume',
-    'Sendingcompartment.Volume': 'sender.volume_element.volume',
-    'sendingcompartment.Volume': 'sender.volume_element.volume',
+    # 'ReceivingCompartment.Volume': 'receiver.volume_element.volume',
+    # 'SendingCompartment.Volume': 'sender.volume_element.volume',
+    # 'sendingCompartment.Volume': 'sender.volume_element.volume',
+    # 'Sendingcompartment.Volume': 'sender.volume_element.volume',
+    # 'sendingcompartment.Volume': 'sender.volume_element.volume',
+    'ReceivingCompartment.Volume': 'receiver.Volume',
+    'SendingCompartment.Volume': 'sender.Volume',
+    'sendingCompartment.Volume': 'sender.Volume',
+    'Sendingcompartment.Volume': 'sender.Volume',
+    'sendingcompartment.Volume': 'sender.Volume',
     'ReceivingCompartment.Area': 'receiver.volume_element.parcel.area',
     'Receivingcompartment.Area': 'receiver.volume_element.parcel.area',
     'receivingcompartment.Area': 'receiver.volume_element.parcel.area',
@@ -849,7 +878,8 @@ def convert_linked_compartments(
             paren += ')'
             suff = suff[:-1]
 
-        if suff.lower() in ['.area', '.depth']:
+        if suff.lower() in ['.area', '.depth']:  # '.volume'
+            # suff = suff.lower().replace('volume', 'volume_element.volume')
             suff = suff.lower().replace('area', 'volume_element.parcel.area')
             cleaned.append(f'{suff.lower()}{paren} {nxt}')
             continue
@@ -873,6 +903,12 @@ def convert_ternary(expression):
     colon = expression.find(':', question_mark)
     if (colon < 0):
         return expression
+
+    # some expressions are uncleaned and are enclosed in "(" and ")". We need to clean them
+    if expression.startswith("(") and expression.endswith(")") and expression.count("(") == 1 and expression.count(")") == 1:
+        expression = expression.replace("(", "").replace(")", "")
+    # need to update position of "?"
+    question_mark = expression.find('?')
 
     # extract outer if condition and expression parts (True & False)
     condition = expression[:question_mark]
@@ -980,9 +1016,22 @@ def hacky_equation_cleaning(val, object_type):
             val = val.replace(f' {x}.', ' self.')
 
     # This is specific for "Particles Blown off from Plant Leaf to Air (DRY)(AlgInstID_4010)"
-    if " if (environment.Rain == 0 and sender.volume_element.volume > 0) else 0" in val:
-        val = val.replace(" if (environment.Rain == 0 and sender.volume_element.volume > 0) else 0", "")
+    if " if (environment.Rain == 0 and sender.Volume > 0) else 0" in val:
+        val = val.replace(" if (environment.Rain == 0 and sender.Volume > 0) else 0", "")
 
+    # Some instances of Z_Pure air parsed as receiver dependent chemical prop but it is a constant. Fix it here:
+    if "chemical.Z_PureAir(receiver)" in val:
+        val = val.replace("chemical.Z_PureAir(receiver)", "chemical.Z_PureAir")
+
+    # These are steady state meteorology hacks to account for rain being static rather than time-dependent value
+    if ("sender.AllowExchange_forOther" in val or "receiver.AllowExchange_forOther" in val) and \
+            "ParticleVolumetricWetDepositionRate" in val:
+        val = val.replace("sender.AllowExchange_forOther", "0.02359582829896095")
+        val = val.replace("receiver.AllowExchange_forOther", "0.02359582829896095")
+    if ("sender.AllowExchange_forOther" in val or "receiver.AllowExchange_forOther" in val) and \
+            "ParticleVolumetricDRYDepositionRate" in val:
+        val = val.replace("sender.AllowExchange_forOther", "0.3262149134948966")
+        val = val.replace("receiver.AllowExchange_forOther", "0.3262149134948966")
     return val
 
 
