@@ -6,8 +6,16 @@ window.TRIM = (function(trim) {
 
     var urls = {
         'scenario_api.get_scenario': '{{ url_for("scenario_api.get_scenario", id=0) }}',
+        'scenario_api.update_scenario': '{{ url_for("scenario_api.update_scenario", id=0) }}',
+        'scenario_api.copy_scenario': '{{ url_for("scenario_api.copy_scenario") }}',
+        'scenario_api.delete_scenario': '{{ url_for("scenario_api.delete_scenario") }}',
+        'parcels_api.create':'{{ url_for("parcels_api.create_parcels") }}',
+        'parcels_api.get':'{{ url_for("parcels_api.get_parcels") }}',
+        'parcels_api.update': '{{ url_for("parcels_api.update_parcel") }}',
+        'parcels_api.delete':'{{ url_for("parcels_api.delete_parcels") }}',
         'file_api.parse': '{{ url_for("file_api.parse") }}',
         'file_api.load_json_form': '{{ url_for("file_api.load_json_form") }}',
+        'external_api.get_soil_data' : '{{ url_for("external_api_soil.get_soil_data", tillage="both") }}',
         'static': '{{ url_for("static", filename='/') }}'.replace('//', '/')
     };
 
@@ -22,5 +30,4 @@ window.TRIM = (function(trim) {
     trim.api = api;
     return trim;
 })(window.TRIM || {});
-
 </script>

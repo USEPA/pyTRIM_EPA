@@ -33,6 +33,16 @@
         'gui': 'gui_abiotic_properties.html'
     },
     {
+        'id': 'lake-props-tab',
+        'title': 'Water Body Properties',
+        'gui': 'gui_lake_properties.html'
+    },
+    {
+        'id': 'aquatic-food-web-tab',
+        'title': 'Aquatic Food Web',
+        'gui': 'gui_aquatic_food_web_properties.html'
+    },
+    {
         'id': 'Erosion-tab',
         'title': 'Erosion Settings',
         'gui': 'gui_erosion_settings.html'
@@ -68,7 +78,7 @@
                     {% endfor %}
                 </nav>
             </div>
-            <div class="col-sm p-2 pl-sm-3">
+            <div class="col-sm-8 col-md-9 col-lg-10 p-2 pl-sm-3">
                 <div class="tab-content mb-3">
                     {% for tab in tabs %}
 
@@ -101,24 +111,32 @@
         // Show a loading screen while we pre-load
         // the current scenario data into editor forms
         LoadingScreen.show('scenario_loading');
-
         // Load current scenario values
-        TRIM.api.getScenario('{{ scenario.id }}').on('load', function() {
+        TRIM.api.getScenario('{{ scenario.id }}').on('load', function () {
             try {
                 if (this.responseJSON) {
-                    populateForms(this.responseJSON.scenario);
+                    let scenarioJSON = this.responseJSON
+
+                    TRIM.api.getParcels().on('load', function() {
+                        $('#root').data('loadedParcels',JSON.parse(this.responseText));
+
+                        var parcelsLoadEvent = document.createEvent('Event');
+                        parcelsLoadEvent.initEvent('parcels:loaded', true, true);
+                        document.body.dispatchEvent(parcelsLoadEvent);
+
+                        populateForms(scenarioJSON.scenario);
+                    });
                 }
-            }
-            catch {
+            } catch {
                 LoadingScreen.hide('scenario_loading');
             }
         });
+
         function populateForms(scenario) {
             if (!scenario) {
                 return; // if we didn't get a scenario, just give up
                 // TODO: alert the user that something went wrong
             }
-
             // Check if all json-generated forms have loaded
             var forms = $('form[data-async-form]');
             if (forms.filter(':not(.form-loaded)').length) {
@@ -127,6 +145,7 @@
                 setTimeout(function() { populateForms(scenario); }, 1000);
                 return;
             }
+
 
             // Populate each form with data from the current scenario
             forms.each(function() {
@@ -165,9 +184,16 @@
         // Save new scenario values
         $('#save-btn').click(function(e) {
             e.preventDefault();
+            window.location.reload()
             console.log('TODO: save data')
-            alert('TODO')
+            // alert('TODO')
         });
+
+        // {% for tab in tabs %}
+        //     $("#{{ tab['id'] }}-pill").click(function (event, ui) {
+        //         $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+        //     })
+        // {% endfor %}
     });
 </script>
 

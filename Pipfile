@@ -4,20 +4,24 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [requires]
-python_version = "3.8"
+python_version = "3.10"
 
 [dev-packages]
 pipenv = "*"
 pytest = "*"
 
 [packages]
+shapely = "*"
 pandas = "*"
 ipdb = "*"
+pint = "*"
+simpleeval = "*"
+scipy = "*"
 sqlalchemy = "*"
 psycopg2-binary = "*"
 alembic = "*"
 python-dotenv = "*"
-flask = "*"
+flask = "==2.2.5"
 flask-admin = "*"
 flask-sqlalchemy = "*"
 wtforms-sqlalchemy = "*"
@@ -29,3 +33,11 @@ libsass = "*"
 cssmin = "*"
 pyscss = "*"
 email_validator = "*"
+boto = "*"
+requests = "*"
+xmltodict = "*"
+pyproj = "*"
+pyshp = "*"
+flask-wtf = "==1.0.1"
+
+flask-api = {editable = true, ref = "main", git = "https://github.com/josiahfmccoy/flask-api"}

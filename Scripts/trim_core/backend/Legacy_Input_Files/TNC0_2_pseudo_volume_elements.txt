@@ -1,0 +1,117 @@
+// (contains ONLY pseudo-source volume elements)
+// TRIM.FaTE scenario spatial layout
+// Volume elements and primary abiotic compartments
+
+// TNC0
+// Recreation of Tier 1 Thresholds
+
+// Generated:  9/19/2022 2:31:20 PM
+// Coordinates: UTM Zone 14, WGS1984 Ellipsoid
+
+start_volume_element_file
+version 1
+
+start_points
+// PointID x y
+p1 600875 4540125
+p2 600875 4539875
+p3 601125 4539875
+p4 601125 4540000
+p5 601125 4540125
+p6 601500 4540186.71
+p7 601500 4540000
+p8 601500 4539813.29
+p9 602000 4540268.99
+p10 602000 4540000
+p11 602000 4539997.7
+p12 602000 4539731.01
+p13 603000 4540433.54
+p14 603000 4540000
+p15 603000 4539997.7
+p16 603000 4539566.46
+p17 606000 4540927.22
+p18 606000 4540000
+p19 606000 4539997.7
+p20 606000 4539072.78
+p21 611000 4541750
+p22 611000 4540000
+p23 611000 4539997.7
+p24 611000 4538250
+p25 601700 4540219.62
+p26 601700 4540000
+end_points
+
+start_parcels
+// parcel_name, #points, pointIDs
+Source 5 p1 p2 p3 p4 p5
+N1 4 p5 p4 p7 p6
+N6 4 p6 p7 p26 p25
+N7 4 p25 p26 p10 p9
+N3 4 p9 p10 p14 p13
+N4 4 p13 p14 p18 p17
+N5 4 p17 p18 p22 p21
+S1 4 p4 p3 p8 p7
+Pond 4 p7 p8 p16 p14
+S4 4 p14 p16 p20 p18
+S5 4 p18 p20 p24 p22
+end_parcels
+
+start_volume_elements
+
+// ********************************** //
+// Volume elements for pseudo-sources //
+// ********************************** //
+// Pseudo-sources were created for parcels whose
+// names matched the following [include] pattern:
+//     '.+'
+//
+// unless the name matched the following [exclude] pattern:
+//     '^$'
+
+DryVaporSource_S4 S4 "DryVaporSource" -13.2 -5.2
+WetVaporSource_S4 S4 "WetVaporSource" -21.2 -13.2
+DryParticleSource_S1 S1 "DryParticleSource" -13.2 -5.2
+WetParticleSource_S1 S1 "WetParticleSource" -21.2 -13.2
+DryParticleSource_Source Source "DryParticleSource" -13.2 -5.2
+DryVaporSource_Source Source "DryVaporSource" -21.2 -13.2
+WetParticleSource_Source Source "WetParticleSource" -29.2 -21.2
+WetVaporSource_Source Source "WetVaporSource" -37.2 -29.2
+DryParticleSource_N1 N1 "DryParticleSource" -13.2 -5.2
+WetParticleSource_N1 N1 "WetParticleSource" -21.2 -13.2
+DryParticleSource_N7 N7 "DryParticleSource" -13.2 -5.2
+WetParticleSource_N7 N7 "WetParticleSource" -21.2 -13.2
+DryParticleSource_N3 N3 "DryParticleSource" -13.2 -5.2
+WetParticleSource_N3 N3 "WetParticleSource" -21.2 -13.2
+DryVaporSource_S1 S1 "DryVaporSource" -29.2 -21.2
+WetVaporSource_S1 S1 "WetVaporSource" -37.2 -29.2
+DryParticleSource_S5 S5 "DryParticleSource" -13.2 -5.2
+WetParticleSource_S5 S5 "WetParticleSource" -21.2 -13.2
+DryParticleSource_S4 S4 "DryParticleSource" -29.2 -21.2
+WetParticleSource_S4 S4 "WetParticleSource" -37.2 -29.2
+DryVaporSource_S5 S5 "DryVaporSource" -29.2 -21.2
+WetVaporSource_S5 S5 "WetVaporSource" -37.2 -29.2
+DryVaporSource_N5 N5 "DryVaporSource" -13.2 -5.2
+WetVaporSource_N5 N5 "WetVaporSource" -21.2 -13.2
+DryVaporSource_N4 N4 "DryVaporSource" -13.2 -5.2
+WetVaporSource_N4 N4 "WetVaporSource" -21.2 -13.2
+DryVaporSource_N3 N3 "DryVaporSource" -29.2 -21.2
+WetVaporSource_N3 N3 "WetVaporSource" -37.2 -29.2
+DryVaporSource_N1 N1 "DryVaporSource" -29.2 -21.2
+WetVaporSource_N1 N1 "WetVaporSource" -37.2 -29.2
+DryVaporSource_N7 N7 "DryVaporSource" -29.2 -21.2
+WetVaporSource_N7 N7 "WetVaporSource" -37.2 -29.2
+DryParticleSource_N4 N4 "DryParticleSource" -29.2 -21.2
+WetParticleSource_N4 N4 "WetParticleSource" -37.2 -29.2
+DryParticleSource_N5 N5 "DryParticleSource" -29.2 -21.2
+WetParticleSource_N5 N5 "WetParticleSource" -37.2 -29.2
+DryParticleSource_N6 N6 "DryParticleSource" -13.2 -5.2
+DryVaporSource_N6 N6 "DryVaporSource" -21.2 -13.2
+WetParticleSource_N6 N6 "WetParticleSource" -29.2 -21.2
+WetVaporSource_N6 N6 "WetVaporSource" -37.2 -29.2
+DryParticleSource_Pond Pond "DryParticleSource" -11.23 -3.23
+DryVaporSource_Pond Pond "DryVaporSource" -19.23 -11.23
+WetParticleSource_Pond Pond "WetParticleSource" -27.23 -19.23
+WetVaporSource_Pond Pond "WetVaporSource" -35.23 -27.23
+end_volume_elements
+
+end_volume_element_file

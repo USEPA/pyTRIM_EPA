@@ -1,2 +1,3 @@
 # Ignore cache files
 **/.webassets-cache/*
+*.geojson

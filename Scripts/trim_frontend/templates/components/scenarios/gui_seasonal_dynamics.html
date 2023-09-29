@@ -134,7 +134,7 @@
                 TRIM.api.parseFiles(this).on('load', function() {
                     try {
                         var data = JSON.parse(this.responseText);
-                        if (data.success) {
+                        if (data.files[me.attr('name')]) {
                             var myData = data.files[me.attr('name')];
                             me.attr(
                                 'data-filedata',
