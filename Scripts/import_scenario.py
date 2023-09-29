@@ -88,11 +88,21 @@ def load_data(trim_file_root, scenario_name, import_rules):
         from trim_db.schema import Compartment
 
     for param in default_entries.get('compartment_default_params', []):
-        if param[3] is None:
-            Compartment.parameters.add(param[0], value=param[1], unit=param[2])
+        if param[4] == "Update":
+            if param[3] is None:
+                par_domain = ParameterService.domains.get(name="Compartment")
+            else:
+                par_domain = ParameterService.domains.get(name=param[3])
+            par_def = [pd for pd in ParameterService.definitions.get_all() if
+                       pd.variable_name == param[0] and pd.domain_id == par_domain.id]
+            if len(par_def) > 0:
+                par_def[0].default_value = param[1]
         else:
-            par_domain = ParameterService.domains.get(name=param[3])
-            Compartment.parameters.add(param[0], value=param[1], unit=param[2], domain=par_domain)
+            if param[3] is None:
+                Compartment.parameters.add(param[0], value=param[1], unit=param[2])
+            else:
+                par_domain = ParameterService.domains.get(name=param[3])
+                Compartment.parameters.add(param[0], value=param[1], unit=param[2], domain=par_domain)
 
     non_emitting_media = import_rules.get('media', {}).get(
         'restrict_emissions', []
