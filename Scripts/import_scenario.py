@@ -88,21 +88,11 @@ def load_data(trim_file_root, scenario_name, import_rules):
         from trim_db.schema import Compartment
 
     for param in default_entries.get('compartment_default_params', []):
-        if param[4] == "Update":
-            if param[3] is None:
-                par_domain = ParameterService.domains.get(name="Compartment")
-            else:
-                par_domain = ParameterService.domains.get(name=param[3])
-            par_def = [pd for pd in ParameterService.definitions.get_all() if
-                       pd.variable_name == param[0] and pd.domain_id == par_domain.id]
-            if len(par_def) > 0:
-                par_def[0].default_value = param[1]
+        if param[3] is None:
+            Compartment.parameters.add(param[0], value=param[1], unit=param[2])
         else:
-            if param[3] is None:
-                Compartment.parameters.add(param[0], value=param[1], unit=param[2])
-            else:
-                par_domain = ParameterService.domains.get(name=param[3])
-                Compartment.parameters.add(param[0], value=param[1], unit=param[2], domain=par_domain)
+            par_domain = ParameterService.domains.get(name=param[3])
+            Compartment.parameters.add(param[0], value=param[1], unit=param[2], domain=par_domain)
 
     non_emitting_media = import_rules.get('media', {}).get(
         'restrict_emissions', []
@@ -122,10 +112,15 @@ def load_data(trim_file_root, scenario_name, import_rules):
 
     # Load met, litter fall and allow exchange files and update params
     for file in default_entries.get('external_data_files', {}):
-        default_entries["external_data_files"][file] = os.path.join(trim_file_root, default_entries["external_data_files"][file])
-    ext_dict = read_external_data(default_entries.get('external_data_files', {}), scenario_name)
+        default_entries["external_data_files"][file] = os.path.join(
+            trim_file_root, default_entries["external_data_files"][file]
+        )
+    ext_dict = read_external_data(
+        default_entries.get('external_data_files', {}), scenario_name
+    )
 
-    print(ext_dict)
+    # print(ext_dict)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

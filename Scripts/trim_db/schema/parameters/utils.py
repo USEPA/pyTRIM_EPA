@@ -7,7 +7,7 @@ import re
 import simpleeval
 from functools import wraps
 
-__all__ = ['ureg', 'as_quantity', 'is_number']
+__all__ = ['ureg', 'as_quantity', 'is_number', 'NoneParameter']
 
 
 ureg = pint.UnitRegistry(autoconvert_offset_to_baseunit=True)
@@ -25,6 +25,32 @@ BRACKETED = re.compile('\[.*?\]')  # noqa
 NOEXPOSYMBL = re.compile('[a-zA-Z]\d')  # noqa
 
 
+class NoneParameter(type(np.nan)):
+    def __bool__(self):
+        return False
+
+    def __call__(self, *args, **kwargs):
+        return np.nan
+
+    @classmethod
+    def instance(cls):
+        try:
+            obj = cls._instance
+        except AttributeError:
+            obj = super().__new__(cls)
+            cls._instance = obj
+        return obj
+
+    def __init__(self):
+        raise TypeError(
+            f'{self.__class__.__qualname__} is a singleton,'
+            ' and must be accessed using `instance()`.'
+        )
+
+    def __repr__(self):
+        return 'NaN'
+
+
 def is_number(val):
     check = str(val).strip()
     if not check:
@@ -38,7 +64,7 @@ def is_number(val):
 
 
 def as_quantity(val, unit=''):
-    if val is None or np.isnan(val):
+    if val is None or np.isnan(val) or isinstance(val, NoneParameter):
         return None
 
     unit = str(unit or '')

@@ -32,14 +32,14 @@ def parse_scenario(
     ps_vol_file = [
         f for f in files if f.endswith('pseudo_volume_elements.txt')
     ]
-    for vf in [vol_file, ps_vol_file]:
+    for vf in (vol_file + ps_vol_file):
         if not vf:
             continue
-        parse_volume_elements(s, vf[0])
+        parse_volume_elements(s, vf)
 
     comp_file = [f for f in files if f.endswith('Compartments.txt')]
-    if comp_file:
-        parse_compartments(s, comp_file[0])
+    for cf in comp_file:
+        parse_compartments(s, cf)
 
     def merge_props_with_master(master, props):
         props = {
@@ -89,25 +89,19 @@ def parse_scenario(
     if parameter_library:
         parse_compartment_props(s, parameter_library.get('Compartment', {}))
 
-    prop_file = [f for f in files if f.endswith('Properties.txt')]
-    if prop_file:
-        parsed = parse_props(prop_file[0])
+    add_library_link_properties(s, parameter_library.get('Link', {}))
 
-        add_scenario_properties(
-            s, parsed, parameter_library.get('Link', {})
+    prop_files = [
+        f for f in files
+        if (
+            f.endswith('Properties.txt')
+            or f.endswith('OtherProperties.txt')
+            or f.endswith('FlushRate.txt')
         )
-
-    prop_file = [f for f in files if f.endswith('Other Properties.txt')]
-    if prop_file:
-        other_parsed = parse_props(prop_file[0])
-
-        add_scenario_properties(s, other_parsed)
-
-    fr_prop_file = [f for f in files if f.endswith('FlushRate.txt')]
-    if fr_prop_file:
-        fr_parsed = parse_props(fr_prop_file[0])
-
-        add_scenario_properties(s, fr_parsed)
+    ]
+    for prop_file in prop_files:
+        parsed = parse_props(prop_file)
+        add_scenario_properties(s, parsed)
 
     prop_types = [f for f in files if f.endswith('PropertyType_Exporter.txt')]
     if prop_types:
@@ -161,14 +155,18 @@ TRANSFER_RULES = {
             'Area',
             'category',
             'concentrationOutputUnits',
-            # 'Volume',
             'image'
         ],
+        'prop_map': {
+            'height': 'CustomHeight',
+            'volume': 'CustomVolume',
+            'area': 'CustomArea'
+        },
         'unit_map': {
             'SuspendedSedimentConcentration': 'kg/m^3',
-            'MethylationRate': '1 / day',
-            'DemethylationRate': '1 / day',
-            'ReductionRate': '1 / day'
+            'MethylationRate': '1/day',
+            'DemethylationRate': '1/day',
+            'ReductionRate': '1/day'
         }
     },
     'Link': {
@@ -317,9 +315,32 @@ def parse_props(props_file, oneline_keyvals=False, rules=TRANSFER_RULES):
     return parsed
 
 
-def add_scenario_properties(scenario, parsed_props, library_link_properties={}):
-    # Add non-Link properties to DB
+def add_scenario_properties(scenario, parsed_props):
     link_props = {}
+
+    def handle_oneline_link_prop(obj, eq, opts):
+        chem = eq.split('}', 1)[0].split('{')[-1].strip()
+        chem = scenario.get_chemical(chem)
+        if chem:
+            param = opts.pop('name')
+            val = eq.replace(f'{{{chem.name}}}', '').strip()
+            val = float(val)
+            if not val:
+                val = opts.get('value')
+            unit = opts.get('unit')
+            link_props.setdefault(
+                obj, {}
+            ).setdefault(
+                obj.media.name, {}
+            ).setdefault(
+                param, opts
+            ).setdefault('for_chemicals', []).append({
+                'target': chem.name,
+                'value': val,
+                'unit': unit
+            })
+
+    # Add non-Link properties to DB
     for prop_type, prop_data in parsed_props.items():
         if prop_type == 'Link':
             continue
@@ -341,40 +362,41 @@ def add_scenario_properties(scenario, parsed_props, library_link_properties={}):
                 print(prop_type)
                 print(entity_name)
 
+            prop_map = TRANSFER_RULES.get(prop_type, {}).get('prop_map', {})
+
             for opts in entity_params:
-                # we need to handle some compartment dependent chemical parameters parsed from ...Other Properties.txt
-                if prop_type == 'Compartment' and str(opts['equation']).startswith('{'):
-                    c = opts.get('equation')
-                    if c:
-                        chem = c.split('}', 1)[0].split('{')[-1].strip()
-                        chem = scenario.get_chemical(chem)
-                        if chem:
-                            param = opts.pop('name')
-                            val = c.replace(f'{{{chem.name}}}', '').strip()
-                            val = float(val)
-                            if not val:
-                                val = opts.get('value')
-                            unit = opts.get('unit')
-                            link_props.setdefault(
-                                obj, {}
-                            ).setdefault(
-                                obj.media.name, {}
-                            ).setdefault(
-                                param, opts
-                            ).setdefault('for_chemicals', []).append({
-                                'target': chem.name,
-                                'value': val,
-                                'unit': unit
-                            })
-                            continue
+                nm = opts['name']
+                nm = prop_map.get(nm.lower(), nm)
+                eq = opts.get('equation')
+
+                if prop_type == 'Compartment':
+                    if (
+                        nm == 'CustomArea'
+                        and str(eq).lower() == 'self.volume_element.parcel.area'
+                    ):
+                        continue
+                    if (
+                        nm == 'CustomHeight'
+                        and str(eq).lower() == 'self.volume_element.height'
+                    ):
+                        continue
+                    if (
+                        nm == 'CustomVolume'
+                        and str(eq).lower() == 'self.volume_element.volume'
+                    ):
+                        continue
+                    if str(opts['equation']).startswith('{'):
+                        handle_oneline_link_prop(obj, eq, opts)
+                        continue
 
                 obj.parameters.add(
-                    opts['name'], value=opts['value'],
-                    formula=opts['equation'],
+                    nm, value=opts['value'],
+                    formula=eq,
                     unit=opts['unit']
                 )
-    # Add Link properties to DB
-    if parsed_props.get("Link"):
+
+    if 'Link' in parsed_props:
+        # Extract Link properties
         for link_name, link_params in parsed_props['Link'].items():
             compartments = link_name.split(' to ', 1)
             if len(compartments) != 2:
@@ -406,12 +428,15 @@ def add_scenario_properties(scenario, parsed_props, library_link_properties={}):
                     'unit': unit
                 })
 
+    # Add Link properties to DB
     for sender, link_prop_data in link_props.items():
         parse_compartment_props(
             scenario, link_prop_data, compartment=sender,
             silent=True
         )
 
+
+def add_library_link_properties(scenario, library_link_properties):
     for name, props in library_link_properties.items():
         try:
             sender = find_compartment(
@@ -469,6 +494,7 @@ def parse_compartment_props(
     from functools import partial
 
     ignore = TRANSFER_RULES['Compartment']['ignore']
+    prop_map = TRANSFER_RULES['Compartment']['prop_map']
     unit_map = TRANSFER_RULES['Compartment']['unit_map']
 
     relative_params = {
@@ -499,6 +525,7 @@ def parse_compartment_props(
         )
 
         for prop, prop_data in params.items():
+            prop = prop_map.get(prop.lower(), prop)
             if prop in ignore or not prop_data:
                 continue
 
@@ -578,6 +605,24 @@ def parse_compartment_props(
                     'value': val,
                     'formula': formula
                 }
+                if (
+                    prop == 'CustomArea'
+                    and (
+                        str(formula).lower() == 'self.volume_element.parcel.area'
+                        or str(formula).lower() == 'self.volume_element.area'
+                    )
+                ):
+                    continue
+                if (
+                    prop == 'CustomHeight'
+                    and str(formula).lower() == 'self.volume_element.height'
+                ):
+                    continue
+                if (
+                    prop == 'CustomVolume'
+                    and str(formula).lower() == 'self.volume_element.volume'
+                ):
+                    continue
                 if prop in unit_map:
                     new_data['unit'] = unit_map[prop]
                 prop_data.update(new_data)
