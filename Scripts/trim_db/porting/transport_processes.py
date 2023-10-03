@@ -20,6 +20,7 @@ def parse_transport_processes(algorithm_parameters, restrict_to=None):
 
     def get_equation(params):
         equation = str(get_param(params, 'transferFactor', ''))
+
         if not equation:
             return None
 
@@ -65,6 +66,11 @@ def parse_transport_processes(algorithm_parameters, restrict_to=None):
             proc.category += f'|{cat}'
 
         if proc.algorithm is None or proc.algorithm.equation != equation:
+
+            # This for handling 0 transfer coefficient for methyl-mercury for soil to air transfer (causes division by zero; Arun ignored this algorithm)
+            if ("chemical.MassTransferCoefficientOnAirSideofAirSoilBoundary(sender)" in equation):
+                equation = equation + " if chemical.MassTransferCoefficientOnAirSideofAirSoilBoundary(sender) > 0 else 0"
+
             f = FormulaService.create(equation=equation, no_commit=True)
             proc.algorithm = f
 
@@ -98,7 +104,16 @@ def parse_transport_processes(algorithm_parameters, restrict_to=None):
                 continue
 
             if m_name.lower().startswith('pseudosource'):
-                m_name = 'Source'
+                if "dry" in m_name.lower() and "particle" in m_name.lower():
+                    m_name = 'DryParticleSource'
+                elif "dry" in m_name.lower() and "vapor" in m_name.lower():
+                    m_name = 'DryVaporSource'
+                elif "wet" in m_name.lower() and "particle" in m_name.lower():
+                    m_name = 'WetParticleSource'
+                elif "wet" in m_name.lower() and "vapor" in m_name.lower():
+                    m_name = 'WetVaporSource'
+                else:
+                    m_name = 'Source'
             elif 'Sink' in m_name:
                 m_name = m_name.lower()
                 if 'degradation' in m_name:
