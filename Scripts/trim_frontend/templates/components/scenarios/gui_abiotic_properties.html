@@ -4,56 +4,38 @@
     data-form-src="scenario_abiotic_props_form"
 >
     <section class="container px-0">
-<!--        <div class="row py-2">-->
-<!--            <div class="col-sm">-->
-<!--                <h5 class="text-center">-->
-<!--                    Air Compartments-->
-<!--                </h5>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--        <div class="row mb-1">-->
-<!--            <div class="col-md">-->
-<!--                <div data-slot="true" data-target="dust_concentration"></div>-->
-<!--                <div data-slot="true" data-target="air_density"></div>-->
-<!--                <div data-slot="true" data-target="air_volume_height"></div>-->
-<!--            </div>-->
-<!--            <div class="col-md">-->
-<!--                <div data-slot="true" data-target="dust_density"></div>-->
-<!--                <div data-slot="true" data-target="dust_organic_matter"></div>-->
-<!--            </div>-->
-<!--        </div>-->
+        <div class="row">
+            <div class="col-md">
+                <div class="pill pill-alert col-sm">
+                    <small>
+                        <strong>
+                            <u>Click on the table cells to edit properties.</u>Please note that the values displayed in the table at the time of the "Save" operation are the values that will be incorporated into the calculations
+                        </strong>
+                    </small>
+                </div>
+                <table data-slot="true" class="hover" id="AbioticTable">
+                    <!-- 
+                    <thead>
+                        <tr>
+                            <th data-slot="true" data-target="dust_concentration"></th>
+                            <th data-slot="true" data-target="air_density"></th>
+                            <th data-slot="true" data-target="air_volume_height"></th>
+                            <th data-slot="true" data-target="dust_density"></th>
+                            <th data-slot="true" data-target="dust_organic_matter"></th>
+                            <th data-slot="true" data-target="surface_soil_tilled_thickness"></th>
+                            <th data-slot="true" data-target="surface_soil_untilled_thickness"></th>
+                            <th data-slot="true" data-target="root_soil_tilled_thickness"></th>
+                            <th data-slot="true" data-target="root_soil_untilled_thickness"></th>
+                            <th data-slot="true" data-target="vadose_soil_thickness"></th>
+                            <th data-slot="true" data-target="groundwater_thickness"></th>
+                        </tr>
+                    </thead>
+                -->
+                </table>
+            </div>
+        </div>
 
-<!--        <div class="row py-2">-->
-<!--            <div class="col-sm">-->
-<!--                <h5 class="text-center">-->
-<!--                    Other Volume Elements-->
-<!--                </h5>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--        <div class="row mb-1">-->
-<!--            <div class="col-md">-->
-<!--                <div data-slot="true" data-target="surface_soil_tilled_thickness"></div>-->
-<!--            </div>-->
-<!--            <div class="col-md">-->
-<!--                <div data-slot="true" data-target="surface_soil_untilled_thickness"></div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--        <div class="row mb-1">-->
-<!--            <div class="col-md">-->
-<!--                <div data-slot="true" data-target="root_soil_tilled_thickness"></div>-->
-<!--            </div>-->
-<!--            <div class="col-md">-->
-<!--                <div data-slot="true" data-target="root_soil_untilled_thickness"></div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--        <div class="row mb-1">-->
-<!--            <div class="col-md">-->
-<!--                <div data-slot="true" data-target="vadose_soil_thickness"></div>-->
-<!--            </div>-->
-<!--            <div class="col-md">-->
-<!--                <div data-slot="true" data-target="groundwater_thickness"></div>-->
-<!--            </div>-->
-<!--        </div>-->
+        <!--
         <div class="row">
             <div class="col-md">
                 <div class="pill pill-alert col-sm">
@@ -151,7 +133,7 @@
                     </thead>
                 </table>
             </div>
-        </div>
+        </div>-->
     </section>
 </form>
 <script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}">

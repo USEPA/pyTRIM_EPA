@@ -761,7 +761,12 @@ window.TRIM = (function(trim) {
         TRIM.api.loadForms(src).on('load', function() {
             try {
                 var data = this.responseJSON;
-                if (data && data[src]) {
+                if (src.includes("abiotic")){
+                    forms.tableDraw(data[src], template);
+                    template.className = template.className + ' form-loaded';
+                    template.dispatchEvent(formLoadEvent);
+                }
+                else if (data && data[src]) {
                     forms.draw(data[src], template);
                     template.className = template.className + ' form-loaded';
                     template.dispatchEvent(formLoadEvent);
@@ -772,6 +777,80 @@ window.TRIM = (function(trim) {
             }
         });
     }
+
+    //////////////////////////////// WIP TABLE BUILDER
+    function create_element(EleToCreate, parent) {
+        let child = document.createElement(EleToCreate);
+        parent.appendChild(child);
+        return child;
+    }
+
+    // template = html page
+    // data = form.json
+    forms.tableDraw = function(data, template, prefix) {
+        if (!template.tagName.toLowerCase() == 'form' &&
+            !template.hasAttribute('data-slot')) {
+            return;
+        }
+
+        if (!template.hasAttribute('data-async-form')) {
+            template.setAttribute('data-async-form', 'true');
+        }
+
+        // TODO make more formal
+        let tableSlot = document.querySelector('#'+data.table_id);
+
+        // thead for now
+        let thead = create_element('thead', tableSlot);
+        let tr = create_element('tr', thead);
+
+        let fields = data.fields || [];
+        for (var i = 0, len = fields.length; i < len; i++) {          
+            let th = create_element('th', tr)
+            forms.renderTableHeader(fields[i], th);
+        }
+    };
+
+    // NOTE more or less ripped from forms.renderLabel... probably merge with that eventually
+    /*
+    Problems:
+        - Need to remove embedded HTML in help text
+        - tooltop hovering does not work
+    */
+    forms.renderTableHeader = function(fieldDef, th) {
+        let labelText = fieldDef.label;
+        let tooltip = fieldDef.tooltip;
+        let help = fieldDef.help;
+
+        let label = create_element("label", th);
+        label.innerHTML = labelText;
+        label.setAttribute('date-toggle', 'tooltip');
+        label.setAttribute('data-placement', 'top');
+        label.setAttribute('data-html', 'true');
+        if (tooltip) {
+            label.title = "";
+            label.setAttribute('data-original-title', tooltip);
+        }
+        if (help) {
+            forms.renderTableHelp(help, labelText, th)
+        }
+        return label;
+    }
+
+    forms.renderTableHelp = function(note, title, node){
+        let marker = create_element("sup", node);
+
+        let toggle = create_element("a", marker);
+        toggle.href = 'javascript:void(0);';
+        toggle.setAttribute('data-toggle', 'popover');
+        //toggle.setAttribute('data-placement', 'left');
+        toggle.setAttribute('data-original-title', title);
+        toggle.setAttribute('data-content', note);
+
+        let symbol = create_element("i", toggle);
+        symbol.className = 'fa fa-question';
+    }
+
 
     trim.forms = forms;
     return trim;
