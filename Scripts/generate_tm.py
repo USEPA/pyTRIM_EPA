@@ -95,6 +95,8 @@ def make_transition_matrix(scenario):
                     if not receiver.media.can_absorb:
                         continue
 
+                    # print(sender.standard_name, '>', receiver.standard_name)
+
                     links = sender.get_links(receiver)
                     if not links:
                         continue
@@ -111,7 +113,9 @@ def make_transition_matrix(scenario):
                     # print_vals.append(links)
 
                     for link in links:
+                        # print(link)
                         for transport_proc in link.transport_processes(chem):
+                            # print('\t', transport_proc.name)
                             check_alg = False
                             transfer_factor = np.nan
                             try:
@@ -123,6 +127,7 @@ def make_transition_matrix(scenario):
                             except:
                                 print_vals.append(f'Unable to evaluate {transport_proc.name}')
                                 check_alg = True
+                            # print('\t\ttf =', transfer_factor)
                             try:
                                 transfer_factor = transfer_factor.magnitude
                             except Exception:

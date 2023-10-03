@@ -1,7 +1,6 @@
-import numpy as np
 from ..schema.scenarios.models import Scenario
 from ..schema.parameters.models import *
-from ..schema.parameters.utils import as_quantity
+from ..schema.parameters.utils import as_quantity, NoneParameter
 from ..schema.utils.caching import CacheManager
 from .generic import GenericService
 
@@ -55,32 +54,6 @@ class ParameterService(GenericService):
 
     class definitions(GenericService):
         __model__ = ParameterDefinition
-
-
-class NoneParameter(type(np.nan)):
-    def __bool__(self):
-        return False
-
-    def __call__(self, *args, **kwargs):
-        return np.nan
-
-    @classmethod
-    def instance(cls):
-        try:
-            obj = cls._instance
-        except AttributeError:
-            obj = super().__new__(cls)
-            cls._instance = obj
-        return obj
-
-    def __init__(self):
-        raise TypeError(
-            f'{self.__class__.__qualname__} is a singleton,'
-            ' and must be accessed using `instance()`.'
-        )
-
-    def __repr__(self):
-        return 'NaN'
 
 
 class classproperty:
@@ -247,6 +220,12 @@ def parameterize(cls, default_scenario=None):
             full_name=None, description=None,
             requirements=None, domain_name=None
         ):
+            # if (
+            #     str(formula).endswith('.Volume')
+            #     or '.Volume ' in str(formula)
+            #     or '.Volume)' in str(formula)
+            # ):
+            #     raise AssertionError(formula)
             requirements = (requirements or '').strip()
 
             if domain is None:

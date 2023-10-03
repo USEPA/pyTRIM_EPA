@@ -30,21 +30,29 @@
             ["erosionRateCalcSource", 1, null]
         ],
         "compartment_default_params": [
-            ["Density", 0.0012, "g/cm^3", "Compartment [Air]", ""],
-            ["unitSoilLoss", 0.00036, "kg/m^2/day", "Compartment [Surface_Soil]", ""],
-            ["sedimentDeliveryRatioSlopeCoef", 0.125, null, "Compartment [Surface_Soil]", ""],
-            ["soilTillage", 0, null, null, ""],
-            ["waterEvaporationRate", 0.7, "m[water]/year", "Compartment [Surface_Water]", ""],
-            ["BedDensity", 2600, "kg[sediment particles]/m^3[sediment particles]", "Compartment [Sediment]", ""],
-            ["ExternalSedimentInflow", 0, "kg[sediment particles]/day", "Compartment [Surface_Water]", ""],
-            ["RechargeRate", 0.000142, "(m^3[water]/m^2[interface])/day", "Compartment [Groundwater]", ""],
-            ["DiffusiveExchangeCoefficient", 0.000225, "m^2/day", "Compartment [Surface_Water]", ""],
-            ["CalculateWetDepInterceptionFraction", 0, null, null, "Update"],
-            ["CalculateWetDepInterceptionFraction", 0, null, "Compartment [Agriculture_Leaf]", ""],
-            ["CalculateWetDepInterceptionFraction", 0, null, "Compartment [Coniferous_Leaf]", "Update"],
-            ["CalculateWetDepInterceptionFraction", 0, null, "Compartment [Deciduous_Leaf]", "Update"],
-            ["CalculateWetDepInterceptionFraction", 0, null, "Compartment [Grass_Leaf]", "Update"],
-            ["SedimentResuspensionVelocity", 9.64763202734353e-05, "m/day", null, "Update"]
+            ["unitSoilLoss", 0.00036, "kg/m^2/day", "Compartment [Surface_Soil]"],
+            ["sedimentDeliveryRatioSlopeCoef", 0.125, null, "Compartment [Surface_Soil]"],
+            ["soilTillage", 0, null, null],
+            ["waterEvaporationRate", 0.7, "m[water]/year", "Compartment [Surface_Water]"],
+            ["BedDensity", 2600, "kg[sediment particles]/m^3[sediment particles]", "Compartment [Sediment]"],
+            ["ExternalSedimentInflow", 0, "kg[sediment particles]/day", "Compartment [Surface_Water]"],
+            ["RechargeRate", 0.000142, "(m^3[water]/m^2[interface])/day", "Compartment [Groundwater]"],
+            ["DiffusiveExchangeCoefficient", 0.000225, "m^2/day", "Compartment [Surface_Water]"],
+            ["Density", 0.0012, "g/cm^3", "Compartment [Air]"],
+            ["unitSoilLoss", 0.00036, "kg/m^2/day", "Compartment [Surface_Soil]"],
+            ["sedimentDeliveryRatioSlopeCoef", 0.125, null, "Compartment [Surface_Soil]"],
+            ["soilTillage", 0, null, null],
+            ["waterEvaporationRate", 0.7, "m[water]/year", "Compartment [Surface_Water]"],
+            ["BedDensity", 2600, "kg[sediment particles]/m^3[sediment particles]", "Compartment [Sediment]"],
+            ["ExternalSedimentInflow", 0, "kg[sediment particles]/day", "Compartment [Surface_Water]"],
+            ["RechargeRate", 0.000142, "(m^3[water]/m^2[interface])/day", "Compartment [Groundwater]"],
+            ["DiffusiveExchangeCoefficient", 0.000225, "m^2/day", "Compartment [Surface_Water]"],
+            ["CalculateWetDepInterceptionFraction", 0, null, null],
+            ["CalculateWetDepInterceptionFraction", 0, null, "Compartment [Agriculture_Leaf]"],
+            ["CalculateWetDepInterceptionFraction", 0, null, "Compartment [Coniferous_Leaf]"],
+            ["CalculateWetDepInterceptionFraction", 0, null, "Compartment [Deciduous_Leaf]"],
+            ["CalculateWetDepInterceptionFraction", 0, null, "Compartment [Grass_Leaf]"],
+            ["SedimentResuspensionVelocity", 9.64763202734353e-05, "m/day", null]
         ],
         "external_data_files": {
             "met_file": "MetData_streamlined.csv",
@@ -288,10 +296,6 @@
         "Wet Deposition of Vapor Phase to Plant Leaf from Air, Organics(AlgInstID_2510)"
     ],
     "_notes": {
-        "transport_processes": [
-            "'Oxidation(Hg0 -> Hg2) in Macrophytes' is covered by Fish",
-            "'Elimination from Zooplankton to Surface Water' is covered by Fish"
-        ]
     }
 }
 

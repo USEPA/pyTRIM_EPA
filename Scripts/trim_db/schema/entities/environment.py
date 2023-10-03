@@ -3,11 +3,11 @@ import pandas as pd
 import sqlalchemy as sa
 from shapely.geometry import Polygon
 from pyproj import CRS, Transformer
-from pyproj import Geod
 from shapely import wkt
 from ..parameters.utils import ureg
 from ..parameters.models import ParameterDefinition, CustomParameter
 from ..utils.base import Model
+from ..utils.caching import CacheManager
 
 
 __all__ = [
@@ -32,6 +32,9 @@ class Parcel(Model):
     # Store as a string, but make a property to access as an array
     _vertices = sa.Column('vertices', sa.JSON(), nullable=False)
 
+    _utm_polygon = None
+    _polygon = None
+
     @property
     def vertices(self):
         return self._vertices
@@ -46,34 +49,49 @@ class Parcel(Model):
                 raise
         else:
             self._vertices = value
-
-    @property
-    def polygon(self):
-        return Polygon(self.vertices)
+        self._utm_polygon = None
+        self._polygon = None
 
     @property
     def utm_vertices(self):
-        proj = 'PROJCS["WGS_1984_UTM_Zone_16N",GEOGCS["GCS_WGS_1984",DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]],PRIMEM["Greenwich",0.0],UNIT["Degree",0.0174532925199433]],PROJECTION["Transverse_Mercator"],PARAMETER["False_Easting",500000.0],PARAMETER["False_Northing",0.0],PARAMETER["Central_Meridian",-87.0],PARAMETER["Scale_Factor",0.9996],PARAMETER["Latitude_Of_Origin",0.0],UNIT["Meter",1.0]]'
+        # CAREFUL: we assume ellipsoid is WGS84 ..
+        proj = (
+            'PROJCS['
+            '"WGS_1984_UTM_Zone_16N",'
+            'GEOGCS['
+            '"GCS_WGS_1984",'
+            'DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]],'
+            'PRIMEM["Greenwich",0.0],'
+            'UNIT["Degree",0.0174532925199433]'
+            '],'
+            'PROJECTION["Transverse_Mercator"],'
+            'PARAMETER["False_Easting",500000.0],'
+            'PARAMETER["False_Northing",0.0],'
+            'PARAMETER["Central_Meridian",-87.0],'
+            'PARAMETER["Scale_Factor",0.9996],'
+            'PARAMETER["Latitude_Of_Origin",0.0],'
+            'UNIT["Meter",1.0]'
+            ']'
+        )
         from_crs = CRS.from_epsg(4326)
         to_crs = CRS.from_wkt(proj)
         transformer = Transformer.from_crs(from_crs, to_crs)
         utm_vert = [transformer.transform(pt[1], pt[0]) for pt in self.vertices]
         return utm_vert
 
-    @property
-    def utm_polygon(self):
-        return Polygon(self.utm_vertices)
+    def polygon(self, utm=True):
+        if utm:
+            if self._utm_polygon is None:
+                self._utm_polygon = Polygon(self.utm_vertices)
+            return self._utm_polygon
+        if self._polygon is None:
+            self._polygon = Polygon(self.vertices)
+        return self._polygon
 
     @property
     def area(self):
         # CAREFUL: we assume dimensions are in meters ...
-        # return self.polygon.area * ureg('m^2')
-        # CAREFUL-2: we assume ellipsoid is WGS84 ...
-        # geod = Geod(ellps="WGS84")
-        # poly = wkt.loads(
-        #     f'''POLYGON (({", ".join([str(tpl[0]) + " " + str(tpl[1]) for tpl in self.vertices])}))''')
-        # return abs(geod.geometry_area_perimeter(poly)[0]) * ureg('m^2')
-        return self.utm_polygon.area * ureg('m^2')
+        return self.polygon().area * ureg('m^2')
 
     def get_volume_element(self, name):
         for ve in self.volume_elements:
@@ -600,14 +618,17 @@ class VolumeElement(Model):
         return f'{self.name}_{self.parcel.name}'
 
     @property
+    def area(self):
+        return self.parcel.area
+
+    @property
     def height(self):
         # CAREFUL: we assume dimensions are in meters ...
         return (self.top - self.bottom) * ureg('m')
 
     @property
     def depth(self):
-        # CAREFUL: we assume dimensions are in meters ...
-        return abs(self.top - self.bottom) * ureg('m')
+        return abs(self.height)
 
     @property
     def volume(self):
@@ -651,21 +672,20 @@ class VolumeElement(Model):
 
         raise AssertionError('Unknown function!')
 
+    # CAREFUL: we assume dimensions are in meters ...
     def interface_with(self, volume_element):
-        polygon_a = self.parcel.utm_polygon
-        polygon_b = volume_element.parcel.utm_polygon
+        polygon_a = self.parcel.polygon()
+        polygon_b = volume_element.parcel.polygon()
 
-        is_neighbor = polygon_a.intersects(polygon_b)
-        if not is_neighbor:
-            # CAREFUL: we assume dimensions are in meters ...
-            return 0 * ureg('m^3')  # technically m^2 ...
+        if not polygon_a.intersects(polygon_b):
+            # Not horizontally contiguous
+            return 0 * ureg('m^2')
 
         intersection = polygon_a.intersection(polygon_b)
 
-        if self.parcel.id == volume_element.parcel.id:  # polygon_a.almost_equals(polygon_b): # This is deprecated
-            xy_overlap = self.parcel.area.magnitude  # This is in meters. We are good!
-        else:
-            xy_overlap = intersection.length  # TODO: This returns arc-degree units and not meter! Conversion needed!
+        if self.parcel.id == volume_element.parcel.id:
+            # Total horizontal overlap; same parcel
+            return self.parcel.area
 
         top_a = self.top
         top_b = volume_element.top
@@ -673,68 +693,34 @@ class VolumeElement(Model):
         bottom_a = self.bottom
         bottom_b = volume_element.bottom
 
-        if (top_a == bottom_b or top_b == bottom_a) and intersection.area > 0:  # for overlying parcels:
-            z_overlap = 1
+        if top_a < bottom_b or top_b < bottom_a:
+            # No vertical overlap
+            return 0 * ureg('m^2')
 
-        elif top_a >= top_b and top_b > bottom_a:
-            z_overlap = top_b - bottom_a
-
-        elif top_b >= top_a and top_a > bottom_b:
-            z_overlap = top_a - bottom_b
-
+        if top_a > top_b:
+            z_side = top_b - bottom_a
         else:
-            z_overlap = 0
+            z_side = top_a - bottom_b
 
-        # CAREFUL: we assume dimensions are in meters ...
-        return (z_overlap * xy_overlap) * ureg('m^3')  # technically m^2 ...
+        if intersection.area > 0:
+            # Both vertical AND horizontal overlap!
+            # The interface is actually an area?
+            return (z_side * intersection.area) * ureg('m^3')
 
-    def overlap_with(self, volume_element):
-        if self.interface_with(volume_element) <= 0:
-            return 0 * ureg('m^3')
+        # Else, only vertical overlap
+        xy_side = intersection.length  # Is this arc units?
 
-        polygon_a = self.parcel.polygon
-        polygon_b = volume_element.parcel.polygon
-
-        is_neighbor = polygon_a.intersects(polygon_b)
-        if not is_neighbor:
-            # CAREFUL: we assume dimensions are in meters ...
-            return 0 * ureg('m^3')
-
-        intersection = polygon_a.intersection(polygon_b)
-        xy_overlap = intersection.area
-
-        top_a = self.top
-        top_b = volume_element.top
-
-        bottom_a = self.bottom
-        bottom_b = volume_element.bottom
-
-        if (top_a == bottom_b or top_b == bottom_a) and intersection.area > 0:  # for overlying parcels:
-            # for overlying parcels
-            z_overlap = 1
-
-        elif top_a >= top_b and top_b > bottom_a:
-            z_overlap = top_b - bottom_a
-
-        elif top_b >= top_a and top_a > bottom_b:
-            z_overlap = top_a - bottom_b
-
-        else:
-            z_overlap = 0
-
-        # CAREFUL: we assume dimensions are in meters ...
-        return (z_overlap * xy_overlap) * ureg('m^3')
+        return (z_side * xy_side) * ureg('m^2')
 
     def midpoint_distance(self, volume_element):
         if isinstance(volume_element, Compartment):
             volume_element = volume_element.volume_element
 
-        polygon_a = self.parcel.polygon
-        polygon_b = volume_element.parcel.polygon
+        polygon_a = self.parcel.polygon()
+        polygon_b = volume_element.parcel.polygon()
 
         # CAREFUL: we assume dimensions are in meters ...
         return polygon_a.centroid.distance(polygon_b.centroid) * ureg('m^2')
-
 
     def get_compartment(self, name=None, media=None):
         if name is None and media is None:
@@ -889,35 +875,65 @@ class Compartment(Model):
     def custom_linked_compartments(self):
         return [x.receiver for x in self._links]
 
-    _linked_compartment_cache = {}
+    @property
+    def area(self):
+        if 'CustomArea' in self.parameters:
+            return self.CustomArea
+        # By default, assume Compartment.area == volumeElement.area
+        # unless BOTH Compartment.volume and Compartment.height are custom
+        if (
+            'CustomHeight' in self.parameters
+            and 'CustomVolume' in self.parameters
+        ):
+            return self.CustomVolume / self.CustomHeight
+        return self.volume_element.area
+
+    @property
+    def height(self):
+        if 'CustomHeight' in self.parameters:
+            return self.CustomHeight
+        if 'CustomVolume' in self.parameters:
+            # By using Compartment.area,
+            # we don't have to check CustomArea here
+            return self.CustomVolume / self.area
+        return self.volume_element.height
+
+    @property
+    def volume(self):
+        if 'CustomVolume' in self.parameters:
+            return self.CustomVolume
+        # Using Compartment.area and Compartment.height
+        # makes sure the geometry always makes sense,
+        # unless the user has customized all three
+        # (area, height, volume),
+        # in which case it's their fault if they broke it.
+        # The frontend should probably warn them if they try
+        return self.area * self.height
+
+    @property
+    def depth(self):
+        return abs(self.height)
 
     def linked_compartments(self, media=None, same_parcel=False):
-        # Check cache
-        cache_k = f'{self.volume_element.parcel.name}--{media}--{same_parcel}'
-        if cache_k in self._linked_compartment_cache:
-            # This does not work if in a loop two parcels have generic media naming (i.e. $Leaf);
-            # It gets compartments of the other parcel that was cached first. Berk turned this off...
-            # return self._linked_compartment_cache[cache_k]
-            self._linked_compartment_cache.clear()
-
-        linked = {
-            c.id: c for c in self.custom_linked_compartments
-            if (media is None or c.media.isa(media))
-        }
-        linked.update({
-            c.id: c for c in self.volume_element.parcel.compartments
-            if (
-                c != self and self.get_links(c)
-                and (media is None or c.media.isa(media))
-            )
-        })
-
-        linked = list(linked.values())
-
-        # Set cache
-        self._linked_compartment_cache[cache_k] = linked
-
-        return linked
+        @CacheManager.with_caching(f'linked_compartments::{self.id}')
+        def cached_links(media, same_parcel):
+            linked = {
+                c.id: c for c in self.custom_linked_compartments
+                if (media is None or c.media.isa(media))
+            }
+            if same_parcel:
+                comps = self.volume_element.parcel.compartments
+            else:
+                comps = self.volume_element.parcel.scenario.compartments
+            for c in comps:
+                if c.id == self.id:
+                    continue
+                if (media is not None) and (not c.media.isa(media)):
+                    continue
+                if self.connects_to(c):
+                    linked[c.id] = c
+            return list(linked.values())
+        return cached_links(media, same_parcel)
 
     def connects_to(self, compartment):
         if self.volume_element == compartment.volume_element:
@@ -940,7 +956,6 @@ class Compartment(Model):
             return True  # Our "spaces" touch!
 
         return False
-
 
     def get_links(self, compartment):
         comp_links = [

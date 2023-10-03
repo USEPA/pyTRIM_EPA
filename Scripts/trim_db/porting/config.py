@@ -45,16 +45,16 @@ MEDIA_MAP = {
         'Source'
     ),
     'DryVaporSource': (
-        'Source|Dry_Vapor'
+        'Source|Vapor|Dry_Vapor'
     ),
     'WetVaporSource': (
-        'Source|Wet_Vapor'
+        'Source|Vapor|Wet_Vapor'
     ),
     'DryParticleSource': (
-        'Source|Dry_Particle'
+        'Source|Particle|Dry_Particle'
     ),
     'WetParticleSource': (
-        'Source|Wet_Particle'
+        'Source|Particle|Wet_Particle'
     ),
     'Soil_Sink': (
         'Sink|Abiotic_Sink|Soil_Sink'
