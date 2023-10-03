@@ -815,7 +815,6 @@ window.TRIM = (function(trim) {
     /*
     Problems:
         - Need to remove embedded HTML in help text
-        - tooltop hovering does not work
     */
     forms.renderTableHeader = function(fieldDef, th) {
         let labelText = fieldDef.label;
@@ -824,13 +823,14 @@ window.TRIM = (function(trim) {
 
         let label = create_element("label", th);
         label.innerHTML = labelText;
-        label.setAttribute('date-toggle', 'tooltip');
-        label.setAttribute('data-placement', 'top');
+        label.setAttribute('data-toggle', 'tooltip');
+        label.setAttribute('data-placement', 'auto');
         label.setAttribute('data-html', 'true');
         if (tooltip) {
             label.title = "";
             label.setAttribute('data-original-title', tooltip);
         }
+
         if (help) {
             forms.renderTableHelp(help, labelText, th)
         }
@@ -843,7 +843,6 @@ window.TRIM = (function(trim) {
         let toggle = create_element("a", marker);
         toggle.href = 'javascript:void(0);';
         toggle.setAttribute('data-toggle', 'popover');
-        //toggle.setAttribute('data-placement', 'left');
         toggle.setAttribute('data-original-title', title);
         toggle.setAttribute('data-content', note);
 
