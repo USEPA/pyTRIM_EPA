@@ -45,16 +45,16 @@ MEDIA_MAP = {
         'Source'
     ),
     'DryVaporSource': (
-        'Source|Vapor'
+        'Source|Dry_Vapor'
     ),
     'WetVaporSource': (
-        'Source|Vapor'
+        'Source|Wet_Vapor'
     ),
     'DryParticleSource': (
-        'Source|Particle'
+        'Source|Dry_Particle'
     ),
     'WetParticleSource': (
-        'Source|Particle'
+        'Source|Wet_Particle'
     ),
     'Soil_Sink': (
         'Sink|Abiotic_Sink|Soil_Sink'
@@ -75,7 +75,7 @@ MEDIA_MAP = {
         'Sink|Degradation_Reaction'
     ),
     'Fish': (
-        'Biotic|Aquatic'
+        'Biotic|Aquatic|Fish'
     ),
     'Macrophyte': (
         'Biotic|Aquatic|Macrophyte'
@@ -84,22 +84,22 @@ MEDIA_MAP = {
         'Biotic|Aquatic|Plankton'
     ),
     'Water_Column_Herbivore': (
-        'Biotic|Aquatic|Water_Column|Water_Column_Herbivore'
+        'Biotic|Aquatic|Fish|Water_Column|Water_Column_Herbivore'
     ),
     'Water_Column_Omnivore': (
-        'Biotic|Aquatic|Water_Column|Water_Column_Omnivore'
+        'Biotic|Aquatic|Fish|Water_Column|Water_Column_Omnivore'
     ),
     'Water_Column_Carnivore': (
-        'Biotic|Aquatic|Water_Column|Water_Column_Carnivore'
+        'Biotic|Aquatic|Fish|Water_Column|Water_Column_Carnivore'
     ),
     'Benthic_Invertebrate': (
-        'Biotic|Aquatic|Benthic|Benthic_Invertebrate'
+        'Biotic|Aquatic|Fish|Benthic|Benthic_Invertebrate'
     ),
     'Benthic_Omnivore': (
-        'Biotic|Aquatic|Benthic|Benthic_Omnivore'
+        'Biotic|Aquatic|Fish|Benthic|Benthic_Omnivore'
     ),
     'Benthic_Carnivore': (
-        'Biotic|Aquatic|Benthic|Benthic_Carnivore'
+        'Biotic|Aquatic|Fish|Benthic|Benthic_Carnivore'
     ),
     'Leaf_Agriculture_General': (
         'Biotic|Terrestrial|Flora|Agriculture|Agriculture_Leaf'
