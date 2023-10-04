@@ -47,146 +47,63 @@
                         'data': "DustParticleConcentration",
                         'bSortable': false,
                         'render': function (data, type, row) {
-                            let parcel_info = [{
-                                'type': 'data',
-                                'name': 'id',
-                                'value': row.parcelid,
-                            },{
-                                'type': 'data',
-                                'name': 'field',
-                                'value': 'dustLoad'
-                            },{
-                                'type': 'input',
-                                'name': 'dustLoad',
-                                'value': data
-                            }]
-                            parcel_info = JSON.stringify(parcel_info)
+                            let parcel_info = create_parcel_object('dustLoad', row, data);
                             let this_cell_data = row.hasAir == "Yes" ? data : "N/A"
                             let this_cell_prop = row.hasAir == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
                             let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return "<input "+this_err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                                "<label "+this_err_html+" class='"+ this_cell_prop + "'>" + this_cell_data + "</label>"
+                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html=this_err_html);
                         }
                     },
                     {
                         'data': "DustParticleDensity",
                         'bSortable': false,
                         'render': function (data, type, row) {
-                            let parcel_info = [{
-                                'type': 'data',
-                                'name': 'id',
-                                'value': row.parcelid,
-                            },{
-                                'type': 'data',
-                                'name': 'field',
-                                'value': 'dustDensity'
-                            },{
-                                'type': 'input',
-                                'name': 'dustDensity',
-                                'value': data
-                            }]
-                            parcel_info = JSON.stringify(parcel_info)
+                            let parcel_info = create_parcel_object('dustDensity', row, data);
                             let this_cell_data = row.hasAir == "Yes" ? data : "N/A"
                             let this_cell_prop = row.hasAir == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
                             let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return "<input "+this_err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                                "<label "+this_err_html+" class='" + this_cell_prop + "'>" + this_cell_data + "</label>"
+                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html=this_err_html);
                         }
                     },
                     {
                         'data': "AirDensity",
                         'bSortable': false,
                         'render': function (data, type, row) {
-                            let parcel_info = [{
-                                'type': 'data',
-                                'name': 'id',
-                                'value': row.parcelid,
-                            },{
-                                'type': 'data',
-                                'name': 'field',
-                                'value': 'airDensity'
-                            },{
-                                'type': 'input',
-                                'name': 'airDensity',
-                                'value': data
-                            }]
-                            parcel_info = JSON.stringify(parcel_info)
+                            let parcel_info = create_parcel_object('airDensity', row, data);
                             let this_cell_data = row.hasAir == "Yes" ? data : "N/A"
                             let this_cell_prop = row.hasAir == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
                             let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return "<input "+this_err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                                "<label "+this_err_html+" class='" + this_cell_prop +"'>" + this_cell_data + "</label>"
+                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html=this_err_html);
                         }
                     },
                     {
                         'data': "DustParticleOrganicMatter",
                         'bSortable': false,
                         'render': function (data, type, row) {
-                            let parcel_info = [{
-                                'type': 'data',
-                                'name': 'id',
-                                'value': row.parcelid,
-                            },{
-                                'type': 'data',
-                                'name': 'field',
-                                'value': 'fractionOrganicMatteronParticulates'
-                            },{
-                                'type': 'input',
-                                'name': 'fractionOrganicMatteronParticulates',
-                                'value': data
-                            }]
-                            parcel_info = JSON.stringify(parcel_info)
+                            let parcel_info = create_parcel_object('fractionOrganicMatteronParticulates', row, data);
                             let this_cell_data = row.hasAir == "Yes" ? data : "N/A"
                             let this_cell_prop = row.hasAir == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
                             let this_err_html = 'onblur="ErrorValidation.isValidFraction(this)"';
-                            return "<input "+this_err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                                "<label "+this_err_html+" class='" + this_cell_prop +" '>" + this_cell_data + "</label>"
+                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html=this_err_html);
                         }
                     },
                     {
                         'data': "AirHeight",
                         'bSortable': false,
                         'render': function (data, type, row) {
-                            let parcel_info = [{
-                                'type': 'data',
-                                'name': 'id',
-                                'value': row.parcelid,
-                            },{
-                                'type': 'data',
-                                'name': 'field',
-                                'value': 'airHeight'
-                            },{
-                                'type': 'input',
-                                'name': 'airHeight',
-                                'value': data
-                            }]
-                            parcel_info = JSON.stringify(parcel_info)
+                            let parcel_info = create_parcel_object('airHeight', row, data);
                             let this_cell_data = row.hasAir == "Yes" ? data : "N/A"
                             let this_cell_prop = row.hasAir == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
                             let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return "<input "+this_err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                                "<label "+this_err_html+" class='" + this_cell_prop + "'>" + this_cell_data + "</label>"
+                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html=this_err_html);
                         }
                     },
                     {
                         data: "Tillage",
                         'render': function (data, type, row) {
-                            let parcel_info = [{
-                                'type': 'data',
-                                'name': 'id',
-                                'value': row.parcelid,
-                            },{
-                                'type': 'data',
-                                'name': 'field',
-                                'value': 'tillage'
-                            }, {
-                                'type': 'input',
-                                'name': 'tillage',
-                                'value': data
-                            }]
+                            let parcel_info = create_parcel_object('tillage', row, data);
                             let this_cell_data = row.hasLand == "Yes" ? data : "N/A"
                             let this_cell_prop = row.hasLand == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
-                            parcel_info = JSON.stringify(parcel_info)
                             return "<select class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' name='select_tillage' style='display:none'>" +
                                         "<option value='Yes'>Yes</option>" +
                                         "<option value='No'>No</option>" +
@@ -198,100 +115,44 @@
                         'data': "SurfaceSoilThick",
                         'bSortable': false,
                         'render': function (data, type, row) {
-                            let parcel_info = [{
-                                'type': 'data',
-                                'name': 'id',
-                                'value': row.parcelid,
-                            },{
-                                'type': 'data',
-                                'name': 'field',
-                                'value': 'surfaceSoilThickness'
-                            },{
-                                'type': 'input',
-                                'name': 'surfaceSoilThickness',
-                                'value': data
-                            }]
-                            parcel_info = JSON.stringify(parcel_info)
+                            let parcel_info = create_parcel_object('surfaceSoilThickness', row, data);
                             let this_cell_data = row.hasLand == "Yes" ? data : "N/A"
                             let this_cell_prop = row.hasLand == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
                             let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return "<input "+this_err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                                "<label "+this_err_html+" class='" + this_cell_prop + "'>" + this_cell_data + "</label>"
+                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html=this_err_html);
                         }
                     },
                     {
                         'data': "RootSoilThick",
                         'bSortable': false,
                         'render': function (data, type, row) {
-                            let parcel_info = [{
-                                'type': 'data',
-                                'name': 'id',
-                                'value': row.parcelid,
-                            },{
-                                'type': 'data',
-                                'name': 'field',
-                                'value': 'rootSoilThickness'
-                            },{
-                                'type': 'input',
-                                'name': 'rootSoilThickness',
-                                'value': data
-                            }]
-                            parcel_info = JSON.stringify(parcel_info)
+                            let parcel_info = create_parcel_object('rootSoilThickness', row, data);
                             let this_cell_data = row.hasLand == "Yes" ? data : "N/A"
                             let this_cell_prop = row.hasLand == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
                             let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return "<input "+this_err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                                "<label "+this_err_html+" class='" + this_cell_prop + "'>" + this_cell_data + "</label>"
+                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html=this_err_html);
                         }
                     },
                     {
                         'data': "VadoseZoneSoilThick",
                         'bSortable': false,
                         'render': function (data, type, row) {
-                            let parcel_info = [{
-                                'type': 'data',
-                                'name': 'id',
-                                'value': row.parcelid,
-                            },{
-                                'type': 'data',
-                                'name': 'field',
-                                'value': 'vadoseZoneSoilThick'
-                            },{
-                                'type': 'input',
-                                'name': 'vadoseZoneSoilThick',
-                                'value': data
-                            }]
-                            parcel_info = JSON.stringify(parcel_info)
+                            let parcel_info = create_parcel_object('vadoseZoneSoilThick', row, data);
                             let this_cell_data = row.hasLand == "Yes" ? Number.parseFloat(data).toFixed(5) : "N/A"
                             let this_cell_prop = row.hasLand == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
                             let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return "<input "+this_err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                                "<label "+this_err_html+" class='" + this_cell_prop + "'>" + this_cell_data + "</label>"
+                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html=this_err_html);
                         }
                     },
                     {
                         'data': "GroundwaterZoneSoilThick",
                         'bSortable': false,
                         'render': function (data, type, row) {
-                            let parcel_info = [{
-                                'type': 'data',
-                                'name': 'id',
-                                'value': row.parcelid,
-                            },{
-                                'type': 'data',
-                                'name': 'field',
-                                'value': 'groundwaterZoneSoilThick'
-                            },{
-                                'type': 'input',
-                                'name': 'groundwaterZoneSoilThick',
-                                'value': data
-                            }]
-                            parcel_info = JSON.stringify(parcel_info)
+                            let parcel_info = create_parcel_object('groundwaterZoneSoilThick', row, data);
                             let this_cell_data = row.hasLand == "Yes" ? data : "N/A"
                             let this_cell_prop = row.hasLand == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
                             let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return "<input "+this_err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                                "<label "+this_err_html+" class='" + this_cell_prop + "'>" + this_cell_data + "</label>"
+                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html=this_err_html);
                         }
                     }
                 ],
@@ -344,6 +205,28 @@
         var form = document.getElementById('abiotic-props-gui');
         form.addEventListener('form:loaded', function() {
         });
+
+        function create_parcel_object(id, row, data){
+            let parcel_info = [{
+                                'type': 'data',
+                                'name': 'id',
+                                'value': row.parcelid,
+                            },{
+                                'type': 'data',
+                                'name': 'field',
+                                'value': id
+                            },{
+                                'type': 'input',
+                                'name': id,
+                                'value': data
+                            }]
+            return JSON.stringify(parcel_info)
+        }
+
+        function create_cell_html(parcel_info, data, cell_prop, cell_data, err_html=""){
+            return "<input "+err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
+                    "<label "+err_html+" class='" + cell_prop + "'>" + cell_data + "</label>"
+        }
 
         function get_Data_from_table(thisTableID){
             var myRows = [];
