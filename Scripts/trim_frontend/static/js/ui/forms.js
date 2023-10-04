@@ -781,8 +781,7 @@ window.TRIM = (function(trim) {
     //////////////////////////////// WIP TABLE BUILDER
     function create_element(EleToCreate, parent) {
         let child = document.createElement(EleToCreate);
-        parent.appendChild(child);
-        return child;
+        return parent.appendChild(child);
     }
 
     // template = html page
@@ -797,10 +796,7 @@ window.TRIM = (function(trim) {
             template.setAttribute('data-async-form', 'true');
         }
 
-        // TODO make more formal
         let tableSlot = document.querySelector('#'+data.table_id);
-
-        // thead for now
         let thead = create_element('thead', tableSlot);
         let tr = create_element('tr', thead);
 
@@ -817,12 +813,17 @@ window.TRIM = (function(trim) {
         - Need to remove embedded HTML in help text
     */
     forms.renderTableHeader = function(fieldDef, th) {
+        let labelId = fieldDef.id;
         let labelText = fieldDef.label;
         let tooltip = fieldDef.tooltip;
+        let default_val = JSON.stringify(fieldDef.default);
         let help = fieldDef.help;
 
         let label = create_element("label", th);
         label.innerHTML = labelText;
+        label.setAttribute('data-id', labelId);
+        label.setAttribute('data-default', default_val);
+
         label.setAttribute('data-toggle', 'tooltip');
         label.setAttribute('data-placement', 'auto');
         label.setAttribute('data-html', 'true');
@@ -850,6 +851,11 @@ window.TRIM = (function(trim) {
         symbol.className = 'fa fa-question';
     }
 
+    forms.fetchDefault = function(id){
+        let ele = $('[data-id="'+id+'"]')[0];
+        let val = ele.getAttribute("data-default");
+        return JSON.parse(val);
+    }
 
     trim.forms = forms;
     return trim;
