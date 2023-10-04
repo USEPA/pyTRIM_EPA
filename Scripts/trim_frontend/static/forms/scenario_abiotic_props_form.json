@@ -6,114 +6,88 @@
             "id": "parcel_name",
             "label": "Parcel Name",
             "data_type": "str",
-            "default": "name"
+            "default": ""
         },
         {
-            "id": "dust_concentration",
+            "id": "DustParticleConcentration",
             "label": "Dust Particle Concentration",
             "data_type": "float",
-            "min": 0,
-            "step": 1e-10,
             "default": 6.15e-8,
             "tooltip": "(kg dust/m<sup>3</sup> air)",
             "help": "Enter the concentration of dust particles in the air compartments. Valid values are >= 0. The default value of 6.15E-08 is the value used for California residential sites by version 1.5 of the CalTOX model (see Table VI of: CalEPA (California Environmental Protection Agency), Department of Toxic Substances Control. 1993. Parameter Values and Ranges for CalTOX. Draft (July). Available online from a university at: <a href='https://emhea.uta.cloud/wp-content/uploads/2018/08/CalTOX_Parameter-values-and-ranges.pdf' target='_blank'>https://emhea.uta.cloud/wp-content/uploads/2018/08/CalTOX_Parameter-values-and-ranges.pdf</a>.)"
         },
         {
-            "id": "air_density",
-            "label": "Density of Air",
-            "data_type": "float",
-            "min": 0,
-            "step": 0.0001,
-            "default": 0.0012,
-            "tooltip": "(g/cm<sup>3</sup>)",
-            "help": "Enter the density of air in the air compartments. Valid values are >= 0. The default value of 0.0012 (1.19E-03) is from Table B-1 of U.S. EPA (U.S. Environmental Protection Agency). 1997. Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment. EPA-452/R-97-005. Office of Air Quality Planning and Standards and Office of Research and Development. December.  Available online at: <a href='https://www3.epa.gov/ttn/atw/112nmerc/volume3.pdf' target='_blank'>https://www3.epa.gov/ttn/atw/112nmerc/volume3.pdf</a>."
-        },
-        {
-            "id": "air_volume_height",
-            "label": "Default Height of Air Volume Elements",
-            "data_type": "integer",
-            "min": 20,
-            "step": 1,
-            "default": 226,
-            "tooltip": "(m)",
-            "help": "Enter the default height of air volume elements. Valid values are >= 20. The default value of 226 is a health-protective choice from: approximately the 5th percentile of median hourly mixing heights, derived from data at 824 meteorological stations paired with upper-air stations across the United States from January 1–December 31, 2016. You may later override this value using site-specific a single value or a time series of mixing heights."
-        },
-        {
-            "id": "dust_density",
+            "id": "DustParticleDensity",
             "label": "Density of Dust Particles",
             "data_type": "float",
-            "min": 0,
-            "step": 1,
             "default": 1400,
             "tooltip": "(kg/cm<sup>3</sup>)",
             "help": "Enter the density of dust particles in the air compartments. Valid values are >= 0. The default value of 1400 (1.4 g/cm<sup>3</sup>)  is from Page 2 of Bidleman, T.F. 1988. Atmospheric processes. Environmental Science and Technology 22:361-367."
         },
         {
-            "id": "dust_organic_matter",
+            "id": "AirDensity",
+            "label": "Density of Air",
+            "data_type": "float",
+            "default": 0.0012,
+            "tooltip": "(g/cm<sup>3</sup>)",
+            "help": "Enter the density of air in the air compartments. Valid values are >= 0. The default value of 0.0012 (1.19E-03) is from Table B-1 of U.S. EPA (U.S. Environmental Protection Agency). 1997. Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment. EPA-452/R-97-005. Office of Air Quality Planning and Standards and Office of Research and Development. December.  Available online at: <a href='https://www3.epa.gov/ttn/atw/112nmerc/volume3.pdf' target='_blank'>https://www3.epa.gov/ttn/atw/112nmerc/volume3.pdf</a>."
+        },
+        {
+            "id": "DustParticleOrganicMatter",
             "label": "Fraction Organic Matter of Dust Particles",
             "data_type": "float",
-            "min": 0,
-            "max": 1,
-            "step": 0.1,
             "default": 0.2,
             "help": "Enter the fraction organic matter of dust particles in the air compartments. Valid values are 0 to 1. The default value of 0.2 (20%) is from page 1601 of Harner, T., and Bidleman, T.F. 1998. Octanol-air partition coefficient for describing particle/gas partitioning of aromatic compounds in urban air. Environmental Science and Technology 32:1494‑1502."
         },
         {
-            "id": "surface_soil_tilled_thickness",
-            "label": "Surface Soil Tilled Thickness",
-            "data_type": "float",
-            "min": 0.01,
-            "step": 0.01,
-            "default": 0.2,
+            "id": "AirHeight",
+            "label": "Height of Air Volume Elements",
+            "data_type": "integer",
+            "default": 226,
             "tooltip": "(m)",
-            "help": "Enter the thickness of a tilled layer of surface soil. Valid values are > 0. The default value of 0.20 is from Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities (including the Hazardous Waste Companion Database of chemical-specific parameter values). U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response, Washington, DC. EPA-530-R-05-006. September. Available online at: <a href='https://archive.epa.gov/epawaste/hazard/tsd/td/web/html/risk.html' target='_blank'>https://archive.epa.gov/epawaste/hazard/tsd/td/web/html/risk.html</a>."
+            "help": "Enter the default height of air volume elements. Valid values are >= 20. The default value of 226 is a health-protective choice from: approximately the 5th percentile of median hourly mixing heights, derived from data at 824 meteorological stations paired with upper-air stations across the United States from January 1–December 31, 2016. You may later override this value using site-specific a single value or a time series of mixing heights."
         },
         {
-            "id": "surface_soil_untilled_thickness",
-            "label": "Surface Soil Untilled Thickness",
-            "data_type": "float",
-            "min": 0.01,
-            "step": 0.01,
-            "default": 0.01,
-            "tooltip": "(m)",
-            "help": "Enter the thickness of an untilled layer of surface soil. Valid values are > 0. The default value of 0.01 is from p. 30 of McKone, T.E., A. Bodnar, and E. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. University of California at Berkeley. Supported by U.S. Environmental Protection Agency (Sustainable Technology Division, National Risk Management Research Laboratory) and Environmental Defense Fund. July. LBNL-43722. Available online at: <a href='https://escholarship.org/uc/item/9f1164rk' target='_blank'>https://escholarship.org/uc/item/9f1164rk.</a>."
+            "id": "Tillage",
+            "label": "Tillage",
+            "data_type": "str",
+            "default": "No",
+            "help": "Indicate if the soil in the parcel undergone tilling. This changes the thickness of the surface and root soil compartments."
         },
         {
-            "id": "root_soil_tilled_thickness",
-            "label": "Root Soil Tilled Thickness",
+            "id": "SurfaceSoilThick",
+            "label": "Surface Soil Thickness",
             "data_type": "float",
-            "min": 0.01,
-            "step": 0.01,
-            "default": 0.6,
+            "default": {
+                "tilled": 0.2,
+                "untilled": 0.01
+            },
             "tooltip": "(m)",
-            "help": "Enter the thickness of a tilled layer of root-zone soil. Valid values are > 0. The default value of 0.60 assumes that the total thickness of the surface-soil layer and root-zone layer is 0.8 (0.01 for untilled surface soil [from p. 30 of McKone, T.E., A. Bodnar, and E. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. University of California at Berkeley. Supported by U.S. Environmental Protection Agency (Sustainable Technology Division, National Risk Management Research Laboratory) and Environmental Defense Fund. July. LBNL-43722. Available online at: https://escholarship.org/uc/item/9f1164rk.] + 0.79 for untilled root zone [from Table 16 - U.S. Average from McKone, T.E., A. Bodnar, and E. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. University of California at Berkeley. Supported by U.S. Environmental Protection Agency (Sustainable Technology Division, National Risk Management Research Laboratory) and Environmental Defense Fund. July. LBNL-43722. Available online at: <a href='https://escholarship.org/uc/item/9f1164rk' target='_blank'>https://escholarship.org/uc/item/9f1164rk</a>]). If the thickness of a tilled surface soil layer is 0.2 (from Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities (including the Hazardous Waste Companion Database of chemical-specific parameter values). U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response, Washington, DC. EPA-530-R-05-006. September. Available online at: <a href='https://archive.epa.gov/epawaste/hazard/tsd/td/web/html/risk.html' target='_blank'>https://archive.epa.gov/epawaste/hazard/tsd/td/web/html/risk.html</a>.), then the thickness of a tilled root zone is 0.8-0.2=0.6."
+            "help": "Enter the thickness of an tilled/untilled layer of surface soil. Valid values are > 0. The default value of 0.01 is from p. 30 of McKone, T.E., A. Bodnar, and E. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. University of California at Berkeley. Supported by U.S. Environmental Protection Agency (Sustainable Technology Division, National Risk Management Research Laboratory) and Environmental Defense Fund. July. LBNL-43722. Available online at: <a href='https://escholarship.org/uc/item/9f1164rk' target='_blank'>https://escholarship.org/uc/item/9f1164rk.</a>."
         },
         {
-            "id": "root_soil_untilled_thickness",
-            "label": "Root Soil Untilled Thickness",
+            "id": "RootSoilThick",
+            "label": "Root Soil Thickness",
             "data_type": "float",
-            "min": 0.01,
-            "step": 0.01,
-            "default": 0.79,
+            "default": {
+                "tilled": 0.6,
+                "untilled": 0.79
+            },
             "tooltip": "(m)",
-            "help": "Enter the thickness of an untilled layer of root-zone soil. Valid values are > 0. The default value of 0.79 is from p. 30 of McKone, T.E., A. Bodnar, and E. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. University of California at Berkeley. Supported by U.S. Environmental Protection Agency (Sustainable Technology Division, National Risk Management Research Laboratory) and Environmental Defense Fund. July. LBNL-43722. Available online at: <a href='https://escholarship.org/uc/item/9f1164rk' target='_blank'>https://escholarship.org/uc/item/9f1164rk</a>."
+            "help": "Enter the thickness of a tilled/untilled layer of root-zone soil. Valid values are > 0. The default value of 0.60 assumes that the total thickness of the surface-soil layer and root-zone layer is 0.8 (0.01 for untilled surface soil [from p. 30 of McKone, T.E., A. Bodnar, and E. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. University of California at Berkeley. Supported by U.S. Environmental Protection Agency (Sustainable Technology Division, National Risk Management Research Laboratory) and Environmental Defense Fund. July. LBNL-43722. Available online at: https://escholarship.org/uc/item/9f1164rk.] + 0.79 for untilled root zone [from Table 16 - U.S. Average from McKone, T.E., A. Bodnar, and E. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. University of California at Berkeley. Supported by U.S. Environmental Protection Agency (Sustainable Technology Division, National Risk Management Research Laboratory) and Environmental Defense Fund. July. LBNL-43722. Available online at: <a href='https://escholarship.org/uc/item/9f1164rk' target='_blank'>https://escholarship.org/uc/item/9f1164rk</a>]). If the thickness of a tilled surface soil layer is 0.2 (from Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities (including the Hazardous Waste Companion Database of chemical-specific parameter values). U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response, Washington, DC. EPA-530-R-05-006. September. Available online at: <a href='https://archive.epa.gov/epawaste/hazard/tsd/td/web/html/risk.html' target='_blank'>https://archive.epa.gov/epawaste/hazard/tsd/td/web/html/risk.html</a>.), then the thickness of a tilled root zone is 0.8-0.2=0.6."
         },
         {
-            "id": "vadose_soil_thickness",
+            "id": "VadoseZoneSoilThick",
             "label": "Vadose Zone Soil Thickness",
             "data_type": "float",
-            "min": 0.01,
-            "step": 0.01,
             "default": 1.4,
             "tooltip": "(m)",
             "help": "Enter the thickness of the vadose zone. Valid values are > 0. The default value of 1.4 is from Table 17 - U.S. Average from McKone, T.E., A. Bodnar, and E. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. University of California at Berkeley. Supported by U.S. Environmental Protection Agency (Sustainable Technology Division, National Risk Management Research Laboratory) and Environmental Defense Fund. July. LBNL-43722. Available online at: <a href='https://escholarship.org/uc/item/9f1164rk' target='_blank'>https://escholarship.org/uc/item/9f1164rk</a>."
         },
         {
-            "id": "groundwater_thickness",
-            "label": "Groundwater Thickness",
+            "id": "GroundwaterZoneSoilThick",
+            "label": "Groundwater Zone Soil Thickness",
             "data_type": "float",
-            "min": 0,
-            "step": 0.1,
             "default": 3,
             "tooltip": "(m)",
             "help": "Enter the thickness of the groundwater layer. Valid values are > 0. The default value of 3 is from Table 3 - Thickness of the aquifer layer from McKone, T.E., A. Bodnar, and E. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. University of California at Berkeley. Supported by U.S. Environmental Protection Agency (Sustainable Technology Division, National Risk Management Research Laboratory) and Environmental Defense Fund. July. LBNL-43722. Available online at: <a href='https://escholarship.org/uc/item/9f1164rk' target='_blank'>https://escholarship.org/uc/item/9f1164rk</a>."
