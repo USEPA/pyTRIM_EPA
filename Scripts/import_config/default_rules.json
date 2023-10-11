@@ -29,7 +29,7 @@
             ["waterMeltingPoint", 273.15, "K"],
             ["erosionRateCalcSource", 1, null]
         ],
-        "compartment_default_params": [
+        "compartment_extra_params": [
             ["unitSoilLoss", 0.00036, "kg/m^2/day", "Compartment [Surface_Soil]"],
             ["sedimentDeliveryRatioSlopeCoef", 0.125, null, "Compartment [Surface_Soil]"],
             ["soilTillage", 0, null, null],
@@ -46,7 +46,9 @@
             ["BedDensity", 2600, "kg[sediment particles]/m^3[sediment particles]", "Compartment [Sediment]"],
             ["ExternalSedimentInflow", 0, "kg[sediment particles]/day", "Compartment [Surface_Water]"],
             ["RechargeRate", 0.000142, "(m^3[water]/m^2[interface])/day", "Compartment [Groundwater]"],
-            ["DiffusiveExchangeCoefficient", 0.000225, "m^2/day", "Compartment [Surface_Water]"],
+            ["DiffusiveExchangeCoefficient", 0.000225, "m^2/day", "Compartment [Surface_Water]"]
+        ],
+        "compartment_overwrite_params": [
             ["CalculateWetDepInterceptionFraction", 0, null, null],
             ["CalculateWetDepInterceptionFraction", 0, null, "Compartment [Agriculture_Leaf]"],
             ["CalculateWetDepInterceptionFraction", 0, null, "Compartment [Coniferous_Leaf]"],
