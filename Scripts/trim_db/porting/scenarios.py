@@ -103,6 +103,12 @@ def parse_scenario(
 
         add_scenario_properties(s, other_parsed)
 
+    prop_file = [f for f in files if f.endswith('_DepRates_Properties.txt')]
+    if prop_file:
+        source_parsed = parse_props(prop_file[0])
+
+        add_scenario_properties(s, source_parsed)
+
     fr_prop_file = [f for f in files if f.endswith('FlushRate.txt')]
     if fr_prop_file:
         fr_parsed = parse_props(fr_prop_file[0])
@@ -232,7 +238,11 @@ def parse_props(props_file, oneline_keyvals=False, rules=TRANSFER_RULES):
                     current_els = []
                     got_prop = False
                 copying = {prop_type: True}
-                new_name = val
+                if props_file.endswith("_DepRates_Properties.txt") and prop_type == "PointSource":
+                    chem = lines[i+3].split(":")[1].split("}")[0].replace("{", "").strip()
+                    new_name = val + f" for {chem}"
+                else:
+                    new_name = val
                 if not new_name and oneline_keyvals:
                     new_name = str(i)
                 current_els.append(
@@ -320,6 +330,8 @@ def parse_props(props_file, oneline_keyvals=False, rules=TRANSFER_RULES):
 def add_scenario_properties(scenario, parsed_props, library_link_properties={}):
     # Add non-Link properties to DB
     link_props = {}
+    transform_props = {}
+    source_props = {}
     for prop_type, prop_data in parsed_props.items():
         if prop_type == 'Link':
             continue
@@ -335,6 +347,11 @@ def add_scenario_properties(scenario, parsed_props, library_link_properties={}):
 
             elif prop_type == 'Compartment':
                 obj = find_compartment(scenario, entity_name)
+
+            elif prop_type == 'Source':
+                entity = " for ".join(entity_name.split(" for ")[:-1])
+                source_compartment_name = f'{entity.split(" for ")[0]} in {entity.replace(" for ", "_")}'
+                obj = find_compartment(scenario, source_compartment_name)
 
             if obj is None:
                 print(scenario)
@@ -355,7 +372,7 @@ def add_scenario_properties(scenario, parsed_props, library_link_properties={}):
                             if not val:
                                 val = opts.get('value')
                             unit = opts.get('unit')
-                            link_props.setdefault(
+                            transform_props.setdefault(
                                 obj, {}
                             ).setdefault(
                                 obj.media.name, {}
@@ -367,7 +384,28 @@ def add_scenario_properties(scenario, parsed_props, library_link_properties={}):
                                 'unit': unit
                             })
                             continue
-
+                # we need to handle some compartment and chemical dependent source parameters parsed
+                # from ...DepRates_Properties.txt
+                if prop_type == 'Source' and str(opts['equation']).startswith('{'):
+                    c = opts.get('equation')
+                    if c:
+                        chem = c.split('}', 1)[0].split('{')[-1].strip()
+                        chem = scenario.get_chemical(chem)
+                        if chem:
+                            param = opts.pop('name')
+                            val = c.replace(f'{{{chem.name}}}', '').strip()
+                            val = float(val)
+                            if val is None:
+                                val = opts.get('value')
+                            unit = opts.get('unit')
+                            source_props.setdefault(
+                                obj, {}
+                            ).setdefault(param, []).append({
+                                'target': chem.id,
+                                'value': val * obj.volume_element.parcel.area.magnitude,
+                                'unit': 'g / day'
+                            })
+                            continue
                 obj.parameters.add(
                     opts['name'], value=opts['value'],
                     formula=opts['equation'],
@@ -411,6 +449,43 @@ def add_scenario_properties(scenario, parsed_props, library_link_properties={}):
             scenario, link_prop_data, compartment=sender,
             silent=True
         )
+
+    new_prop = {}
+    for comp, comp_prop_data in transform_props.items():
+        for med, med_data in comp_prop_data.items():
+            for prop, prop_data in med_data.items():
+                chem = prop_data['for_chemicals'][0]['target']
+                value = prop_data['for_chemicals'][0]['value']
+                new_prop.setdefault(chem, {}).setdefault(prop, {}).setdefault(value, []).append(comp.id)
+
+    for chem, prop_type_data in new_prop.items():
+        chem_obj = ChemicalService.get(name=chem)
+        for prop_name, prop_data in prop_type_data.items():
+            eqn = ""
+            for val, ids in prop_data.items():
+                eqn += f"{val} if compartment.id in {{{str(ids).replace(']', '').replace('[', '')}}} else "
+            if eqn:
+                try:
+                    eqn = eqn + chem_obj.parameters.get(prop_name).default_formula.equation
+                except AttributeError:
+                    eqn = eqn + chem_obj.parameters.get(prop_name).formula.equation
+            chem_obj.parameters.add(
+                prop_name, formula=eqn, unit="1 / day",
+                domain=chem_obj.domains[0]
+            )
+
+    for comp, source_prop_data in source_props.items():
+        for source_param, source_values in source_prop_data.items():
+            eqn = ""
+            for source_data in source_values:
+                eqn = eqn + f"{source_data['value']} if chemical.id == {source_data['target']} else "
+                unit = source_data['unit']
+            if eqn:
+                eqn = eqn + " 0"
+            comp.parameters.add(
+                source_param, formula=eqn, unit=unit,
+                domain=sorted(comp.domains, key=lambda x: len(str(x.requirements or '')))[-1]
+            )
 
     for name, props in library_link_properties.items():
         try:
