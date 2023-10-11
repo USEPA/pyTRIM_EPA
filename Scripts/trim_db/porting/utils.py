@@ -154,6 +154,15 @@ def parse_master_library_params(library_df):
                 if isinstance(val, str):
                     val = clean_equation(val, object_type)
 
+                    check = val.split('.')
+                    if len(check) == 2 and check[1] == prop:
+                        # This looks like a self-referential relative value?
+                        # E.g., x.Param(y) = x.Param
+                        # So just skip it??
+                        # Any calls to x.Param(y) will be routed to x.Param
+                        # by default anyway if the y arg does nothing ...
+                        continue
+
                 if val is None or str(val) == 'None':
                     continue
 
