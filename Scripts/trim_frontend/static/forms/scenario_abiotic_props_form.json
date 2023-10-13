@@ -1,6 +1,8 @@
 {
     "title": "Abiotic Properties",
     "table_id": "AbioticTable",
+    "pivot": false,
+    "header": "",
     "fields": [
         {
             "id": "parcel_name",

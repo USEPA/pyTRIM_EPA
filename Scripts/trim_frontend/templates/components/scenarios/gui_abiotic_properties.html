@@ -266,7 +266,7 @@
                             'parcelType': e.parcelType,
                             'DustParticleConcentration': (e.dustLoad ? e.dustLoad : TRIM.forms.fetchDefault('DustParticleConcentration')),
                             'DustParticleDensity': (e.dustDensity ? e.dustDensity : TRIM.forms.fetchDefault('DustParticleDensity')),
-                            'AirDensity': (e.airDensity ? e.airDensity : default_data.AirDensity),
+                            'AirDensity': (e.airDensity ? e.airDensity : TRIM.forms.fetchDefault('AirDensity')),
                             'DustParticleOrganicMatter': (e.fractionOrganicMatteronParticulates ? e.fractionOrganicMatteronParticulates : TRIM.forms.fetchDefault('DustParticleOrganicMatter')),
                             'AirHeight': (e.airHeight ? e.airHeight : TRIM.forms.fetchDefault('AirHeight')),
                             'Tillage': (e.soilTillage ? e.soilTillage : TRIM.forms.fetchDefault('Tillage')),

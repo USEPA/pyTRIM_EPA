@@ -1,7 +1,7 @@
 
 <form id="aquatic-food-web-props-gui"
     data-async-form="true"
-    data-form-src="scenario_aquatic_food_web_props_form"
+    data-form-src="scenario_lake_props_form"
 >
     <section class="container px-0">
         <div class="row">
@@ -24,7 +24,12 @@
                         </strong>
                     </small>
                 </div>
-                <table data-slot="true" class="hover" id="AquaticTable">
+                <table class="hover" id="AquaticTable">
+                    <thead>
+                        <tr>
+                            <th>Property</th>
+                        </tr>
+                    </thead>
                 </table>
             </div>
         </div>
@@ -156,8 +161,7 @@
 </script>
 <script>
     onDomLoad(function() {
-        //let aqTable = $('#AquaticTable').removeAttr('width').DataTable()
-        let aqTable = null;
+        let aqTable = $('#AquaticTable').removeAttr('width').DataTable()
         let divDietTables = $('#DietTables')
         let default_aquatic_data = {
             'Standing Biomass – Macrophyte':{
@@ -372,10 +376,8 @@
             if (table_type == "aquatic") {
                 let tblHandle = aqTable
                 let tblId = '#AquaticTable'
-                if (tblHandle) {
-                    tblHandle.clear().draw();
-                    tblHandle.destroy();
-                }
+                tblHandle.clear().draw();
+                tblHandle.destroy()
                 tblHandle = $(tblId).removeAttr('width').DataTable({
                     data : table_data,
                     paging: false,
@@ -602,103 +604,75 @@
             return myRows
         }
 
-        function load_aquatic_parcels(loadedData){
-            let aquatic_data = [];
-            $("#AquaticTable").find("[data-id]").each(function (i, p) {
-                let row_data = {};
-                let ids = JSON.parse(p.getAttribute("data-id"));
+         document.body.addEventListener('parcels:loaded', function() {
+                          let loadedData = $('#root').data('loadedParcels')
+             let aquatic_data = []
+             let diet_data = []
+             let aquatic_properties = Object.keys(default_aquatic_data)
+             let diet_properties = Object.keys(default_diet_data)
+             if (loadedData.scenario.length > 0) {
+                 aquatic_properties.forEach(function (p, i) {
+                     let this_aquatic_property = {}
+                     loadedData['scenario'].forEach(function (e, i) {
+                         if (e.hasFishFoodWeb == "Yes") {
+                             let prop = "aquatic_bw"
+                             if (p.indexOf("Biomass") > 0) {
+                                 prop = "aquatic_biomass"
+                             }
+                             this_aquatic_property['Property'] = p
+                             this_aquatic_property[e.name] = e[prop][default_aquatic_data[p]['comp_name']] ? e[prop][default_aquatic_data[p]['comp_name']] : default_aquatic_data[p]['default_value']
+                             this_aquatic_property["helpText"] = default_aquatic_data[p]['helpText'] ? default_aquatic_data[p]['helpText'] : "Some text"
+                             this_aquatic_property["unit"] = default_aquatic_data[p]['unit'] ? default_aquatic_data[p]['unit'] : "No units"
+                             this_aquatic_property["shortProperty"] = default_aquatic_data[p]['short_name']
+                         }
+                     })
+                     aquatic_data.push(this_aquatic_property)
+                 })
+                 TableRedraw(aquatic_data, "aquatic")
+                 loadedData['scenario'].forEach(function (e, i) {
+                     if (e.hasFishFoodWeb == "Yes") {
+                         let this_matrix = $(diet_table_template)
+                         let matrix_data = e.aquatic_diet_fractions
+                         let clean_matrix_data = {};
+                         Object.keys(matrix_data).forEach(function(e){
+                             clean_matrix_data[e] = {}
+                             Object.keys(matrix_data[e]).forEach(ee=>clean_matrix_data[e][ee.replaceAll("Fish","")]=matrix_data[e][ee])})
+                         let mat_table = $($(this_matrix)[1])
+                         $(mat_table).attr("data-parcelid",e.id)
+                         let col_headers = $(mat_table).find("thead > tr > th > div > span").map((i,e) => e.innerHTML)
+                         $(mat_table).find("tbody > tr").each(function(){
+                             let row_header = $(this).find("td > strong").text()
+                             $(this).find("td").each(function (i,e){
+                                 if ($(e).find("strong").length == 0) {
+                                     let row_name = row_header.replaceAll(" ","_")
+                                     let col_name = "FractionDiet" + col_headers[i-1].replaceAll(" ","").replaceAll("WaterColumn","")
+                                     let this_cell_data = clean_matrix_data[row_name][col_name]
+                                     $(this).find("label").text(this_cell_data)
+                                     $(this).find("input").val(this_cell_data)
+                                 }
+                             })
+                         })
 
-                loadedData['scenario'].forEach(function (e, i) {
-                    if (e.hasFishFoodWeb == "Yes") {
-                        let prop = ids["type"];
-                        let comp_name = ids["comp_name"];
-                        let default_val = JSON.parse(p.getAttribute("data-default"));
+                         $($(this_matrix)[0]).text(e.name)
 
-                        row_data['Property'] = p; // HTML
-                        row_data[e.name] = e[prop][comp_name] ? e[prop][comp_name] : default_val;
-                    }
-                })
-                aquatic_data.push(row_data);
-            })          
-            return aquatic_data;
-        }
-
-        document.body.addEventListener('parcels:loaded', function() {
-            let loadedData = $('#root').data('loadedParcels')
-            let aquatic_data = []
-            let diet_data = []
-            let aquatic_properties = Object.keys(default_aquatic_data)
-            let diet_properties = Object.keys(default_diet_data)
-            if (loadedData.scenario.length > 0) {
-                aquatic_properties.forEach(function (p, i) {
-                    let this_aquatic_property = {}
-                    loadedData['scenario'].forEach(function (e, i) {
-                        if (e.hasFishFoodWeb == "Yes") {
-                            let prop = "aquatic_bw"
-                            if (p.indexOf("Biomass") > 0) {
-                                prop = "aquatic_biomass"
-                            }
-                            this_aquatic_property['Property'] = p
-                            this_aquatic_property[e.name] = e[prop][default_aquatic_data[p]['comp_name']] ? e[prop][default_aquatic_data[p]['comp_name']] : default_aquatic_data[p]['default_value']
-                            this_aquatic_property["helpText"] = default_aquatic_data[p]['helpText'] ? default_aquatic_data[p]['helpText'] : "Some text"
-                            this_aquatic_property["unit"] = default_aquatic_data[p]['unit'] ? default_aquatic_data[p]['unit'] : "No units"
-                            this_aquatic_property["shortProperty"] = default_aquatic_data[p]['short_name']
-                        }
-                    })
-                    aquatic_data.push(this_aquatic_property)
-                })
-                ////////////////////////////////////////////////////////////////////////////////
-                // can grab from first column in row: property, help text, unit, shortProperty
-                // next steps: incorporate into datatable
-                load_aquatic_parcels(loadedData);
-
-
-                ////////////////////////////////////////////////////////////////////////////////
-                TableRedraw(aquatic_data, "aquatic")
-                loadedData['scenario'].forEach(function (e, i) {
-                    if (e.hasFishFoodWeb == "Yes") {
-                        let this_matrix = $(diet_table_template)
-                        let matrix_data = e.aquatic_diet_fractions
-                        let clean_matrix_data = {};
-                        Object.keys(matrix_data).forEach(function(e){
-                            clean_matrix_data[e] = {}
-                            Object.keys(matrix_data[e]).forEach(ee=>clean_matrix_data[e][ee.replaceAll("Fish","")]=matrix_data[e][ee])})
-                        let mat_table = $($(this_matrix)[1])
-                        $(mat_table).attr("data-parcelid",e.id)
-                        let col_headers = $(mat_table).find("thead > tr > th > div > span").map((i,e) => e.innerHTML)
-                        $(mat_table).find("tbody > tr").each(function(){
-                            let row_header = $(this).find("td > strong").text()
-                            $(this).find("td").each(function (i,e){
-                                if ($(e).find("strong").length == 0) {
-                                    let row_name = row_header.replaceAll(" ","_")
-                                    let col_name = "FractionDiet" + col_headers[i-1].replaceAll(" ","").replaceAll("WaterColumn","")
-                                    let this_cell_data = clean_matrix_data[row_name][col_name]
-                                    $(this).find("label").text(this_cell_data)
-                                    $(this).find("input").val(this_cell_data)
-                                }
-                            })
-                        })
-
-                        $($(this_matrix)[0]).text(e.name)
-
-                        divDietTables.append(this_matrix)
-                    }
-                })
-                diet_properties.forEach(function (p, i) {
-                    let this_diet_property = {}
-                    loadedData['scenario'].forEach(function (e, i) {
-                        if (e.hasFishFoodWeb == "Yes") {
-                            this_diet_property['Property'] = p
-                            this_diet_property[e.name] = e[default_diet_data[p]['short_name']] ? e[default_diet_data[p]['short_name']] : default_diet_data[p]['default_value'],
-                                this_diet_property["helpText"] = default_diet_data[p]['helpText'] ? default_diet_data[p]['helpText'] : "Some text"
-                            this_diet_property["unit"] = default_diet_data[p]['unit'] ? default_diet_data[p]['unit'] : "No units"
-                            this_diet_property["shortProperty"] = default_diet_data[p]['short_name']
-                        }
-                    })
-                    diet_data.push(this_diet_property)
-                })
-                TableRedraw(diet_data, "diet")
-            }
-        })
+                         divDietTables.append(this_matrix)
+                     }
+                 })
+                 diet_properties.forEach(function (p, i) {
+                     let this_diet_property = {}
+                     loadedData['scenario'].forEach(function (e, i) {
+                         if (e.hasFishFoodWeb == "Yes") {
+                             this_diet_property['Property'] = p
+                             this_diet_property[e.name] = e[default_diet_data[p]['short_name']] ? e[default_diet_data[p]['short_name']] : default_diet_data[p]['default_value'],
+                                 this_diet_property["helpText"] = default_diet_data[p]['helpText'] ? default_diet_data[p]['helpText'] : "Some text"
+                             this_diet_property["unit"] = default_diet_data[p]['unit'] ? default_diet_data[p]['unit'] : "No units"
+                             this_diet_property["shortProperty"] = default_diet_data[p]['short_name']
+                         }
+                     })
+                     diet_data.push(this_diet_property)
+                 })
+                 TableRedraw(diet_data, "diet")
+             }
+         })
     });
 </script>

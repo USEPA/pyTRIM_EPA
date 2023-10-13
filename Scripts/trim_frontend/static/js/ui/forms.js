@@ -739,53 +739,6 @@ window.TRIM = (function(trim) {
         }
     };
 
-    // On dom load, auto-draw forms that are labelled async
-    var formLoadEvent = document.createEvent('Event');
-    formLoadEvent.initEvent('form:loaded', true, true);
-    document.addEventListener("DOMContentLoaded", function(e) {
-        var formTemplates = document.getElementsByTagName('form');
-        for (var i = 0, len = formTemplates.length; i < len; i++) {
-            var template = formTemplates[i];
-            if (!template.getAttribute('data-async-form')) {
-                continue;
-            }
-            var src = template.getAttribute('data-form-src')
-            if (!src) {
-                continue;
-            }
-            loadAsyncForm(template, src);
-        }
-    });
-    function loadAsyncForm(template, src) {
-        LoadingScreen.show(src);
-        TRIM.api.loadForms(src).on('load', function() {
-            try {
-                var data = this.responseJSON;
-                if (src.includes("abiotic")){
-                    forms.tableDraw(data[src], template);
-                    template.className = template.className + ' form-loaded';
-                    template.dispatchEvent(formLoadEvent);
-                }
-                else if (data && data[src]) {
-                    forms.draw(data[src], template);
-                    template.className = template.className + ' form-loaded';
-                    template.dispatchEvent(formLoadEvent);
-                }
-            }
-            finally {
-                LoadingScreen.hide(src);
-            }
-        });
-    }
-
-    //////////////////////////////// WIP TABLE BUILDER
-    function create_element(EleToCreate, parent) {
-        let child = document.createElement(EleToCreate);
-        return parent.appendChild(child);
-    }
-
-    // template = html page
-    // data = form.json
     forms.tableDraw = function(data, template, prefix) {
         if (!template.tagName.toLowerCase() == 'form' &&
             !template.hasAttribute('data-slot')) {
@@ -797,23 +750,35 @@ window.TRIM = (function(trim) {
         }
 
         let tableSlot = document.querySelector('#'+data.table_id);
-        let thead = create_element('thead', tableSlot);
-        let tr = create_element('tr', thead);
 
-        let fields = data.fields || [];
-        for (var i = 0, len = fields.length; i < len; i++) {          
-            let th = create_element('th', tr)
-            forms.renderTableHeader(fields[i], th);
+        if (data.pivot) {
+            tableSlot.innerHTML += data.header;
+
+            let tbody = create_element('tbody', tableSlot);
+            let fields = data.fields || [];
+            for (var i = 0, len = fields.length; i < len; i++) {  
+                let tr = create_element('tr', tbody);        
+                let td = create_element('td', tr)
+                forms.renderTableHeader(fields[i], td);
+            }
+        }
+        else {
+            let thead = create_element('thead', tableSlot);
+            let tr = create_element('tr', thead);
+            let fields = data.fields || [];
+            for (var i = 0, len = fields.length; i < len; i++) {          
+                let th = create_element('th', tr)
+                forms.renderTableHeader(fields[i], th);
+            }
         }
     };
 
-    // NOTE more or less ripped from forms.renderLabel... probably merge with that eventually
-    /*
-    Problems:
-        - Need to remove embedded HTML in help text
-    */
+    // TODO: Need to remove embedded HTML in help text
     forms.renderTableHeader = function(fieldDef, th) {
         let labelId = fieldDef.id;
+        if (typeof labelId !== 'string' && !(labelId instanceof String)) {
+            labelId = JSON.stringify(fieldDef.id);
+        }
         let labelText = fieldDef.label;
         let tooltip = fieldDef.tooltip;
         let default_val = JSON.stringify(fieldDef.default);
@@ -851,10 +816,56 @@ window.TRIM = (function(trim) {
         symbol.className = 'fa fa-question';
     }
 
+    // Helper method
+    function create_element(EleToCreate, parent) {
+        let child = document.createElement(EleToCreate);
+        return parent.appendChild(child);
+    }
+
+    // Grab default value stuck in column header
     forms.fetchDefault = function(id){
         let ele = $('[data-id="'+id+'"]')[0];
         let val = ele.getAttribute("data-default");
         return JSON.parse(val);
+    }
+
+    // On dom load, auto-draw forms that are labelled async
+    var formLoadEvent = document.createEvent('Event');
+    formLoadEvent.initEvent('form:loaded', true, true);
+    document.addEventListener("DOMContentLoaded", function(e) {
+        var formTemplates = document.getElementsByTagName('form');
+        for (var i = 0, len = formTemplates.length; i < len; i++) {
+            var template = formTemplates[i];
+            if (!template.getAttribute('data-async-form')) {
+                continue;
+            }
+            var src = template.getAttribute('data-form-src')
+            if (!src) {
+                continue;
+            }
+            loadAsyncForm(template, src);
+        }
+    });
+    function loadAsyncForm(template, src) {
+        LoadingScreen.show(src);
+        TRIM.api.loadForms(src).on('load', function() {
+            try {
+                var data = this.responseJSON;
+                if (data && data[src]) {
+                    if (data[src].table_id) {
+                        forms.tableDraw(data[src], template);
+                    }
+                    else {
+                        forms.draw(data[src], template);
+                    }
+                    template.className = template.className + ' form-loaded';
+                    template.dispatchEvent(formLoadEvent);
+                }
+            }
+            finally {
+                LoadingScreen.hide(src);
+            }
+        });
     }
 
     trim.forms = forms;
