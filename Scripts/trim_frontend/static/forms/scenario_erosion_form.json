@@ -2,11 +2,37 @@
     "title": "Erosion Settings",
     "fields": [
         {
-            "id": "erosion_params_file",
-            "label": "Erosion Parameters File",
-            "data_type": "file",
+            "id": "erosion_input_options",
+            "label": "Erosion data source",
+            "data_type": "string",
+            "widget": "select",
+            "choices": ["Option 1: Directly supply total effective erosion rate",
+                "Option 2: Supply unit soil loss and sediment-delivery ratio",
+                "Option 3: Supply Universal Soil Loss Equation parameters and sediment-delivery ratio"
+            ],
             "required": true,
-            "help": "Indicate the file of erosion parameters."
+            "help": "Select how you will estimate parcel erosion—either directly supply the total effective erosion rates, or supply the parameter values needed to calculate them."
+        },
+        {
+            "id": "erosion_inputs_opt1",
+            "label": "Total Effective Erosion Rate Input",
+            "data_type": "form",
+            "form_definition": "subforms/erosion/erosion_parameters.json",
+            "separator": "_"
+        },
+        {
+            "id": "erosion_inputs_opt2",
+            "label": "Unit Soil Loss & Sediment Delivery Ratio Input",
+            "data_type": "form",
+            "form_definition": "subforms/erosion/erosion_parameters.json",
+            "separator": "_"
+        },
+        {
+            "id": "erosion_inputs_opt3",
+            "label": "Universal Soil Loss Equation Parameters & Sediment Delivery Ratio Input",
+            "data_type": "form",
+            "form_definition": "subforms/erosion/erosion_parameters.json",
+            "separator": "_"
         }
     ]
 }

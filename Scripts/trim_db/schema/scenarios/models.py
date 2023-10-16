@@ -4,13 +4,65 @@ from ..utils.mixins import TrackUpdatesMixin
 
 
 __all__ = [
-    'Scenario', 'Team'
+    'Scenario'
 ]
 
 
 class Scenario(Model, TrackUpdatesMixin):
     name = sa.Column(sa.String(120), nullable=False)
     description = sa.Column(sa.String(255))
+
+    @property
+    def chemicals(self):
+        for c in self._chemicals:
+            c.current_scenario(self)
+        return self._chemicals
+
+    @chemicals.setter
+    def chemicals(self, value):
+        self._chemicals = value
+
+    def get_chemical(self, name_or_cas):
+        for c in self.chemicals:
+            if c.name == name_or_cas or c.cas_number == name_or_cas:
+                return c
+        return None
+
+    def get_parcel(self, name):
+        for p in self.parcels:
+            if p.name == name:
+                return p
+        return None
+
+    @property
+    def volume_elements(self):
+        volume_els = []
+        for p in self.parcels:
+            for ve in p.volume_elements:
+                ve.current_scenario(self)
+                volume_els.append(ve)
+        return list(sorted(volume_els, key=lambda x: x.name))
+
+    def get_volume_element(self, name):
+        for ve in self.volume_elements:
+            if ve.name == name or ve.standard_name == name:
+                return ve
+        return None
+
+    @property
+    def compartments(self):
+        comps = []
+        for ve in self.volume_elements:
+            for c in ve.compartments:
+                c.current_scenario(self)
+                comps.append(c)
+        return list(sorted(comps, key=lambda x: x.name))
+
+    def get_compartment(self, name):
+        for c in self.compartments:
+            if c.name == name or c.standard_name == name:
+                return c
+        return None
 
     @property
     def safe_name(self):
@@ -37,36 +89,26 @@ class Scenario(Model, TrackUpdatesMixin):
         'User', backref=sa.orm.backref('created_scenarios', lazy='dynamic')
     )
 
-    team_members = sa.orm.relationship(
-        'User', secondary='team',
-        backref=sa.orm.backref('joined_scenarios', lazy='dynamic')
-    )
-
     @property
-    def team(self):
-        all_members = [self.creator, *self.team_members]
-        return all_members
+    def erosion_rate_data_source(self):
+        for cp in self.custom_params:
+            if cp.definition.variable_name == "erosionRateCalcSource":
+                return cp.value
+            else:
+                continue
+        return 1
 
     def as_serializable(self):
         return {
             'id': self.id,
             'name': self.name,
-            'description': self.description
+            'description': self.description,
+            'erosionRateSource': self.erosion_rate_data_source
         }
 
-
-class Team(Model):
-    scenario_id = sa.Column(
-        sa.Integer(), sa.ForeignKey('scenario.id'), primary_key=True
-    )
-    scenario = sa.orm.relationship('Scenario')
-
-    member_id = sa.Column(
-        sa.Integer(), sa.ForeignKey('user.id'), primary_key=True
-    )
-    member = sa.orm.relationship('User')
-
-    # Each user should have only one position per project
-    __table_args__ = (
-        sa.UniqueConstraint('scenario_id', 'member_id'),
-    )
+    def __repr__(self):
+        return (
+            f'{self.__class__.__qualname__}('
+            f'"{self.name}"'
+            ')'
+        )

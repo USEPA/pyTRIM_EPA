@@ -7,3 +7,6 @@ from .utils.base import Model  # noqa
 # 2. Import all model files
 from .users.models import *  # noqa
 from .scenarios.models import *  # noqa
+from .parameters.models import *  # noqa
+from .entities.chemicals import *  # noqa
+from .entities.environment import *  # noqa

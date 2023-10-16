@@ -13,3 +13,8 @@
 
 # Ignore shell files
 **/*.bat
+
+**/temp*
+!**/templates*
+
+**/*.csv

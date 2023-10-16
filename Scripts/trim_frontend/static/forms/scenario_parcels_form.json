@@ -25,14 +25,14 @@
             "help": "Indicate the field name for the names of the parcels from your file. Note: parcel names should not begin with Air, SW, Sed, SurfSoil, RootSoil, VadoseSoil, or GW, as these prefixes will be added to the parcel names to create names of volume elements associated with those parcels. Also note: parcel names should not have any spaces."
         },
         {
-            "id": "parcel_air_field",
-            "label": "Field Name for Air Designation",
+            "id": "parcel_type_field",
+            "label": "Field Name for Parcel Type",
             "data_type": "string",
             "widget": "select",
             "choices": [],
             "default": "Air",
             "required": true,
-            "help": "Indicate the field name showing whether a parcel is an air parcel (valid values are Yes and No). Note: air-parcel boundaries can exactly match parcel boundaries for land and water, such that a parcel can be selected as both air and grasses/herbs, for example."
+            "help": "Indicate the field name showing whether a parcel is an air parcel (valid value is air), or a surface parcel (valid values are land, land & air, water, water & air). Note: air-parcel boundaries can exactly match parcel boundaries for land or water, such that a parcel can be selected as both land and air, for example."
         },
         {
             "id": "parcel_land_use_field",
