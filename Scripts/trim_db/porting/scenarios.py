@@ -32,14 +32,14 @@ def parse_scenario(
     ps_vol_file = [
         f for f in files if f.endswith('pseudo_volume_elements.txt')
     ]
-    for vf in [vol_file, ps_vol_file]:
+    for vf in (vol_file + ps_vol_file):
         if not vf:
             continue
-        parse_volume_elements(s, vf[0])
+        parse_volume_elements(s, vf)
 
     comp_file = [f for f in files if f.endswith('Compartments.txt')]
-    if comp_file:
-        parse_compartments(s, comp_file[0])
+    for cf in comp_file:
+        parse_compartments(s, cf)
 
     def merge_props_with_master(master, props):
         props = {
@@ -88,32 +88,22 @@ def parse_scenario(
 
     if parameter_library:
         parse_compartment_props(s, parameter_library.get('Compartment', {}))
+        add_library_link_properties(s, parameter_library.get('Link', {}))
 
-    prop_file = [f for f in files if f.endswith('Properties.txt')]
-    if prop_file:
-        parsed = parse_props(prop_file[0])
-
-        add_scenario_properties(
-            s, parsed, parameter_library.get('Link', {})
+    prop_files = [
+        f for f in files
+        if (
+            f.endswith('Properties.txt')
+            or f.endswith('FlushRate.txt')
+            or f.endswith('_DepRates_Properties.txt')
         )
-
-    prop_file = [f for f in files if f.endswith('Other Properties.txt')]
-    if prop_file:
-        other_parsed = parse_props(prop_file[0])
-
-        add_scenario_properties(s, other_parsed)
-
-    prop_file = [f for f in files if f.endswith('_DepRates_Properties.txt')]
-    if prop_file:
-        source_parsed = parse_props(prop_file[0])
-
-        add_scenario_properties(s, source_parsed)
-
-    fr_prop_file = [f for f in files if f.endswith('FlushRate.txt')]
-    if fr_prop_file:
-        fr_parsed = parse_props(fr_prop_file[0])
-
-        add_scenario_properties(s, fr_parsed)
+    ]
+    for prop_file in prop_files:
+        parsed = parse_props(prop_file)
+        force_update = (
+            prop_file.endswith('FlushRate.txt')
+        )
+        add_scenario_properties(s, parsed, force_update=force_update)
 
     prop_types = [f for f in files if f.endswith('PropertyType_Exporter.txt')]
     if prop_types:
@@ -167,14 +157,18 @@ TRANSFER_RULES = {
             'Area',
             'category',
             'concentrationOutputUnits',
-            # 'Volume',
             'image'
         ],
+        'prop_map': {
+            'height': 'CustomHeight',
+            'volume': 'CustomVolume',
+            'area': 'CustomArea'
+        },
         'unit_map': {
             'SuspendedSedimentConcentration': 'kg/m^3',
-            'MethylationRate': '1 / day',
-            'DemethylationRate': '1 / day',
-            'ReductionRate': '1 / day'
+            'MethylationRate': '1/day',
+            'DemethylationRate': '1/day',
+            'ReductionRate': '1/day'
         }
     },
     'Link': {
@@ -201,32 +195,46 @@ def parse_props(props_file, oneline_keyvals=False, rules=TRANSFER_RULES):
     with open(props_file, 'r') as f:
         lines = f.readlines()
 
+    DEBUG_FILE = 'DepRates_Properties.txt'
+
     # Parse the lines in the properties file
     # into an easier format to manipulate
-    copying = {}
-    parsed_lines = {x: {} for x in prop_types}
-    current_els = []
-    prop_name = None
-    got_prop = False
-    multi_line = ""
+    parsed_lines = {x: {} for x in prop_types}  # stores the data we parse out
+    copying = {}  # tracks which prop_type we're working on at the moment
+    current_els = []  # tracks which elements we're working on (e.g., chemicals)
+    prop_name = None  # tracks the property we're working on at the moment
+    got_prop = False  # tracks whether we've reached the end of a definition
+    multi_line = ''  # tracks multi-line expressions
     for i, line in enumerate(lines):
-        line = line.split('//')[0].strip()  # remove comment
+        line = line.split('//')[0].strip()  # remove comments
         if not line:
             continue  # Nothing to see here
 
-        if line.count("(") > line.count(")") or line.count("[") > line.count("]") or (not multi_line == ""):
-            multi_line += line.replace("\n", "")
-            if multi_line.count("(") > multi_line.count(")") or multi_line.count("[") > multi_line.count("]"):
-                continue
-            else:
-                line = multi_line
-        multi_line = ""
+        # Some property values are defined over multiple lines;
+        # check if this is one of those
+        multi_line += line.replace('\n', '')
+        if (
+            multi_line.count('(') > multi_line.count(')')
+            or multi_line.count('[') > multi_line.count(']')
+        ):
+            # This is an incomplete expression,
+            # so it must be part of a multi-line value!
+            # Be sure to string all lines together first
+            continue
+        # We've found a complete expression; now we can parse it all
+        line = multi_line
+        multi_line = ''  # reset to empty
 
+        # Split into key/value
         line = line.split(':', 1)
         if not len(line) > 1:
             if oneline_keyvals:
+                # Some files define the prop_type without an element name
+                # (e.g., Links, which don't have individual names);
+                # this must be a prop_type, so just add a blank value
                 line.append('')
             else:
+                # Not a valid key/value line
                 continue
 
         key = line[0].strip()
@@ -234,33 +242,53 @@ def parse_props(props_file, oneline_keyvals=False, rules=TRANSFER_RULES):
 
         for prop_type in prop_types:
             if prop_type == key:
+                # We should start parsing properties of this type!
                 if got_prop or not copying.get(prop_type):
+                    # Clear the data we've been keeping track of
+                    # and start keeping track of the new lines
                     current_els = []
                     got_prop = False
+                # Indicate that we're working on this property type
                 copying = {prop_type: True}
-                if props_file.endswith("_DepRates_Properties.txt") and prop_type == "PointSource":
-                    chem = lines[i+3].split(":")[1].split("}")[0].replace("{", "").strip()
-                    new_name = val + f" for {chem}"
-                else:
-                    new_name = val
+                # val should be the name of the new element
+                # (i.e., compartment name if prop_type is Compartment)
+                new_name = val
                 if not new_name and oneline_keyvals:
+                    # If this is a file that defines prop_types without a name,
+                    # just give it a dummy unique name based on the line number
                     new_name = str(i)
+                # Add an entry for the new element under its prop_type,
+                # and add it to the list of elements we're working on!
                 current_els.append(
                     parsed_lines[prop_type].setdefault(new_name, {})
                 )
             elif copying.get(prop_type):
-                if key == 'Property':
+                # We're in the middle of parsing properties of this type!
+                if oneline_keyvals:
+                    # All these lines are prop_name/value by definition,
+                    # so the key is the new property
+                    prop_name = key
+                elif key == 'Property':
+                    # This line starts a new property
                     prop_name = clean_prop(val)
-                elif key == 'Value' and prop_name:
+                if prop_name and (key == 'Value' or oneline_keyvals):
+                    # We're currently working on a property,
+                    # and this must be its value!
+                    pn = safe_name(prop_name)
+                    v = clean_prop(val)
                     for el in current_els:
-                        el[safe_name(prop_name)] = clean_prop(val)
-                    prop_name = None
-                    got_prop = True
-                elif oneline_keyvals:
-                    for el in current_els:
-                        el[safe_name(clean_prop(key))] = clean_prop(val)
-                    prop_name = None
-                    got_prop = True
+                        # Add this property & value
+                        # to every element we're working on
+                        if pn not in el:
+                            el[pn] = []
+                        el[pn].append(v)
+                    got_prop = True  # this is a full definition!
+                    prop_name = None  # we are done working on this property!
+
+    if (props_file.endswith(DEBUG_FILE)):
+        with open('temp_props_lines.json', 'w') as f:
+            import json
+            json.dump(parsed_lines, f)
 
     # Parse the properties into a dict format,
     # collating values from other prop files
@@ -270,68 +298,95 @@ def parse_props(props_file, oneline_keyvals=False, rules=TRANSFER_RULES):
     for prop_type in prop_types:
         disallowed = rules.get(prop_type, {}).get('ignore', {})
         for name, props in parsed_lines[prop_type].items():
-            for prop, val in props.items():
+            for prop, vals in props.items():
                 if prop in disallowed:
                     continue
 
-                if isinstance(val, str) and 'C:\\' in val:
-                    val = val.split('\\')[-1].split(',')
-                    if len(val) > 1:
-                        fname = val[0].strip()
-                        colname = val[1].strip()
-                        if fname not in prop_files:
-                            prop_files[fname] = pd.read_csv(
-                                os.path.join(props_root, fname),
-                                low_memory=False
-                            )
-                        df = prop_files[fname]
-                        try:
-                            val = pd.to_numeric(
-                                df[colname], errors='coerce'
-                            ).mean()
-                        except Exception:
-                            val = 0
-                    else:
-                        continue
+                for val in vals:
+                    if isinstance(val, str) and 'C:\\' in val:
+                        val = val.split('\\')[-1].split(',')
+                        if len(val) > 1:
+                            fname = val[0].strip()
+                            colname = val[1].strip()
+                            if fname not in prop_files:
+                                prop_files[fname] = pd.read_csv(
+                                    os.path.join(props_root, fname),
+                                    low_memory=False
+                                )
+                            df = prop_files[fname]
+                            try:
+                                val = pd.to_numeric(
+                                    df[colname], errors='coerce'
+                                ).mean()
+                            except Exception:
+                                val = 0
+                        else:
+                            continue
 
-                eq = None
-                try:
-                    val = pd.to_numeric(val)
-                except Exception:
-                    eq = val
-                    val = None
+                    eq = None
+                    try:
+                        val = pd.to_numeric(val)
+                    except Exception:
+                        eq = val
+                        val = None
 
-                if eq is not None:
-                    eq = clean_equation(eq, prop_type.lower())
+                    if eq is not None:
+                        eq = clean_equation(eq, prop_type.lower())
 
-                unit = None
-                for k, v in iter_by_longest_key(UNIT_SUFFIXES):
-                    if prop.endswith(k):
-                        prop = prop.rstrip(k)
-                        unit = v
-                        break
+                    unit = None
+                    for k, v in iter_by_longest_key(UNIT_SUFFIXES):
+                        if prop.endswith(k):
+                            prop = prop.rstrip(k)
+                            unit = v
+                            break
 
-                prop_type_name = rules.get(prop_type, {}).get(
-                    'name', prop_type
-                )
+                    prop_type_name = rules.get(prop_type, {}).get(
+                        'name', prop_type
+                    )
 
-                parsed.setdefault(prop_type_name, {}).setdefault(
-                    name, []
-                ).append({
-                    'name': prop,
-                    'value': val,
-                    'equation': eq,
-                    'unit': unit
-                })
+                    parsed.setdefault(prop_type_name, {}).setdefault(
+                        name, []
+                    ).append({
+                        'name': prop,
+                        'value': val,
+                        'equation': eq,
+                        'unit': unit
+                    })
+
+    if (props_file.endswith(DEBUG_FILE)):
+        with open('temp_props_dict.json', 'w') as f:
+            import json
+            json.dump(parsed, f)
 
     return parsed
 
 
-def add_scenario_properties(scenario, parsed_props, library_link_properties={}):
-    # Add non-Link properties to DB
+def add_scenario_properties(scenario, parsed_props, force_update=False):
     link_props = {}
-    transform_props = {}
-    source_props = {}
+
+    def handle_oneline_link_prop(obj, eq, opts):
+        chem = eq.split('}', 1)[0].split('{')[-1].strip()
+        chem = scenario.get_chemical(chem)
+        if chem:
+            param = opts.pop('name')
+            val = eq.replace(f'{{{chem.name}}}', '').strip()
+            val = float(val)
+            if not val:
+                val = opts.get('value')
+            unit = opts.get('unit')
+            link_props.setdefault(
+                obj, {}
+            ).setdefault(
+                obj.media.name, {}
+            ).setdefault(
+                param, opts
+            ).setdefault('for_chemicals', []).append({
+                'target': chem.name,
+                'value': val,
+                'unit': unit
+            })
+
+    # Add non-Link properties to DB
     for prop_type, prop_data in parsed_props.items():
         if prop_type == 'Link':
             continue
@@ -345,74 +400,50 @@ def add_scenario_properties(scenario, parsed_props, library_link_properties={}):
             elif prop_type == 'VolumeElement':
                 obj = scenario.get_volume_element(entity_name)
 
-            elif prop_type == 'Compartment':
+            elif prop_type in ['Compartment', 'Source']:
                 obj = find_compartment(scenario, entity_name)
-
-            elif prop_type == 'Source':
-                entity = " for ".join(entity_name.split(" for ")[:-1])
-                source_compartment_name = f'{entity.split(" for ")[0]} in {entity.replace(" for ", "_")}'
-                obj = find_compartment(scenario, source_compartment_name)
 
             if obj is None:
                 print(scenario)
                 print(prop_type)
                 print(entity_name)
 
+            prop_map = TRANSFER_RULES.get(prop_type, {}).get('prop_map', {})
+
             for opts in entity_params:
-                # we need to handle some compartment dependent chemical parameters parsed from ...Other Properties.txt
-                if prop_type == 'Compartment' and str(opts['equation']).startswith('{'):
-                    c = opts.get('equation')
-                    if c:
-                        chem = c.split('}', 1)[0].split('{')[-1].strip()
-                        chem = scenario.get_chemical(chem)
-                        if chem:
-                            param = opts.pop('name')
-                            val = c.replace(f'{{{chem.name}}}', '').strip()
-                            val = float(val)
-                            if not val:
-                                val = opts.get('value')
-                            unit = opts.get('unit')
-                            transform_props.setdefault(
-                                obj, {}
-                            ).setdefault(
-                                obj.media.name, {}
-                            ).setdefault(
-                                param, opts
-                            ).setdefault('for_chemicals', []).append({
-                                'target': chem.name,
-                                'value': val,
-                                'unit': unit
-                            })
-                            continue
-                # we need to handle some compartment and chemical dependent source parameters parsed
-                # from ...DepRates_Properties.txt
-                if prop_type == 'Source' and str(opts['equation']).startswith('{'):
-                    c = opts.get('equation')
-                    if c:
-                        chem = c.split('}', 1)[0].split('{')[-1].strip()
-                        chem = scenario.get_chemical(chem)
-                        if chem:
-                            param = opts.pop('name')
-                            val = c.replace(f'{{{chem.name}}}', '').strip()
-                            val = float(val)
-                            if val is None:
-                                val = opts.get('value')
-                            unit = opts.get('unit')
-                            source_props.setdefault(
-                                obj, {}
-                            ).setdefault(param, []).append({
-                                'target': chem.id,
-                                'value': val * obj.volume_element.parcel.area.magnitude,
-                                'unit': 'g / day'
-                            })
-                            continue
+                nm = opts['name']
+                nm = prop_map.get(nm.lower(), nm)
+                eq = opts.get('equation')
+
+                if prop_type in ['Compartment', 'Source']:
+                    if (
+                        nm == 'CustomArea'
+                        and str(eq).lower() == 'self.volume_element.parcel.area'
+                    ):
+                        continue
+                    if (
+                        nm == 'CustomHeight'
+                        and str(eq).lower() == 'self.volume_element.height'
+                    ):
+                        continue
+                    if (
+                        nm == 'CustomVolume'
+                        and str(eq).lower() == 'self.volume_element.volume'
+                    ):
+                        continue
+                    if str(opts['equation']).startswith('{'):
+                        handle_oneline_link_prop(obj, eq, opts)
+                        continue
+
                 obj.parameters.add(
-                    opts['name'], value=opts['value'],
-                    formula=opts['equation'],
-                    unit=opts['unit']
+                    nm, value=opts['value'],
+                    formula=eq,
+                    unit=opts['unit'],
+                    force_update=force_update
                 )
-    # Add Link properties to DB
-    if parsed_props.get("Link"):
+
+    if 'Link' in parsed_props:
+        # Extract Link properties
         for link_name, link_params in parsed_props['Link'].items():
             compartments = link_name.split(' to ', 1)
             if len(compartments) != 2:
@@ -444,49 +475,18 @@ def add_scenario_properties(scenario, parsed_props, library_link_properties={}):
                     'unit': unit
                 })
 
+    # Add Link properties to DB
+    # with open('./temp.json', 'w') as f:
+    #     f.write(str(link_props))
     for sender, link_prop_data in link_props.items():
         parse_compartment_props(
             scenario, link_prop_data, compartment=sender,
+            force_update=force_update,
             silent=True
         )
 
-    new_prop = {}
-    for comp, comp_prop_data in transform_props.items():
-        for med, med_data in comp_prop_data.items():
-            for prop, prop_data in med_data.items():
-                chem = prop_data['for_chemicals'][0]['target']
-                value = prop_data['for_chemicals'][0]['value']
-                new_prop.setdefault(chem, {}).setdefault(prop, {}).setdefault(value, []).append(comp.id)
 
-    for chem, prop_type_data in new_prop.items():
-        chem_obj = ChemicalService.get(name=chem)
-        for prop_name, prop_data in prop_type_data.items():
-            eqn = ""
-            for val, ids in prop_data.items():
-                eqn += f"{val} if compartment.id in {{{str(ids).replace(']', '').replace('[', '')}}} else "
-            if eqn:
-                try:
-                    eqn = eqn + chem_obj.parameters.get(prop_name).default_formula.equation
-                except AttributeError:
-                    eqn = eqn + chem_obj.parameters.get(prop_name).formula.equation
-            chem_obj.parameters.add(
-                prop_name, formula=eqn, unit="1 / day",
-                domain=chem_obj.domains[0]
-            )
-
-    for comp, source_prop_data in source_props.items():
-        for source_param, source_values in source_prop_data.items():
-            eqn = ""
-            for source_data in source_values:
-                eqn = eqn + f"{source_data['value']} if chemical.id == {source_data['target']} else "
-                unit = source_data['unit']
-            if eqn:
-                eqn = eqn + " 0"
-            comp.parameters.add(
-                source_param, formula=eqn, unit=unit,
-                domain=sorted(comp.domains, key=lambda x: len(str(x.requirements or '')))[-1]
-            )
-
+def add_library_link_properties(scenario, library_link_properties):
     for name, props in library_link_properties.items():
         try:
             sender = find_compartment(
@@ -504,15 +504,23 @@ def add_scenario_properties(scenario, parsed_props, library_link_properties={}):
             raise AssertionError
 
         if not sender.connects_to(receiver):
-            CompartmentService.links.create(sender=sender, receiver=receiver)
-        else:
             print(
-                f'"{sender.standard_name}" already connects'
+                f'Adding compartment link from "{sender.standard_name}"'
                 f' to "{receiver.standard_name}"'
             )
+            CompartmentService.links.create(sender=sender, receiver=receiver)
+        # else:
+        #     print(
+        #         f'"{sender.standard_name}" already connects'
+        #         f' to "{receiver.standard_name}"'
+        #     )
 
 
 def find_compartment(scenario, name):
+    if ' for ' in name:
+        # This is a source?
+        name = name.split(' for ')
+        name = f' in {name[0]}_'.join(name)
     if ' in ' in name:
         name = name.split(' in ')
         name = ' in '.join([
@@ -530,7 +538,8 @@ def find_compartment(scenario, name):
 
 
 def parse_compartment_props(
-    s, compartment_parameters, compartment=None, silent=False
+    s, compartment_parameters, compartment=None,
+    force_update=False, silent=False
 ):
     if not compartment_parameters:
         return
@@ -544,6 +553,7 @@ def parse_compartment_props(
     from functools import partial
 
     ignore = TRANSFER_RULES['Compartment']['ignore']
+    prop_map = TRANSFER_RULES['Compartment']['prop_map']
     unit_map = TRANSFER_RULES['Compartment']['unit_map']
 
     relative_params = {
@@ -574,6 +584,7 @@ def parse_compartment_props(
         )
 
         for prop, prop_data in params.items():
+            prop = prop_map.get(prop.lower(), prop)
             if prop in ignore or not prop_data:
                 continue
 
@@ -653,15 +664,42 @@ def parse_compartment_props(
                     'value': val,
                     'formula': formula
                 }
+                if (
+                    prop == 'CustomArea'
+                    and (
+                        str(formula).lower() == 'self.volume_element.parcel.area'
+                        or str(formula).lower() == 'self.volume_element.area'
+                    )
+                ):
+                    continue
+                if (
+                    prop == 'CustomHeight'
+                    and str(formula).lower() == 'self.volume_element.height'
+                ):
+                    continue
+                if (
+                    prop == 'CustomVolume'
+                    and str(formula).lower() == 'self.volume_element.volume'
+                ):
+                    continue
                 if prop in unit_map:
                     new_data['unit'] = unit_map[prop]
                 prop_data.update(new_data)
                 if for_specific_compartment:
-                    compartment.parameters.add(prop, **prop_data)
+                    compartment.parameters.add(
+                        prop, force_update=force_update, **prop_data
+                    )
                 else:
-                    Compartment.parameters.add(prop, **prop_data)
+                    Compartment.parameters.add(
+                        prop, force_update=force_update, **prop_data
+                    )
 
         CompartmentService.commit()
+
+    # with open('./temp_rel.json', 'w') as f:
+    #     import json
+    #     print('saving temp_rel')
+    #     json.dump(relative_params, f)
 
     target_id_path = (
         'compartment.id' if for_specific_compartment
@@ -719,6 +757,12 @@ def parse_compartment_props(
                 )
 
         if rel_type == 'chemicals':
+            # with open('./temp_rel_chems.json', 'w') as f:
+            #     import json
+            #     print('saving temp_rel_chems')
+            #     json.dump(rel_params, f)
+            # input('Continue ...')
+
             from .chemicals import parse_chemicals
             parse_chemicals(rel_params, scenario=s, message=(
                 'Loading compartment-chemical properties from library data ...'
