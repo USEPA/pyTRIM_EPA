@@ -467,7 +467,7 @@
                 if (parcel_info) {
                     parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
                     console.log(parcel_info)
-                    TRIM.api.updateParcel(parcel_info)
+                    TRIM.api.updateParcel('{{ scenario.id }}', parcel_info)
                     table_data = get_Data_from_table('#AbioticTable')
                     TableRedraw(table_data)
                 }

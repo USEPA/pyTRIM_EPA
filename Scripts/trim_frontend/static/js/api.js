@@ -116,39 +116,39 @@ window.TRIM = (function(trim) {
         });
     };
 
-    api.createParcels = function(parcels) {
+    api.createParcels = function(scenarioId, parcels) {
         var url = api.getUrl('parcels_api.create');
         var data = makeFormData(parcels);
         return AJAX.call({
             method: 'POST',
-            url: url,
+            url: url.replace('/0/', '/' + scenarioId + '/'),
             data: data
         });
     };
 
-    api.getParcels = function() {
+    api.getParcels = function(scenarioId) {
         var url = api.getUrl('parcels_api.get');
         return AJAX.call({
-            url: url
+            url: url.replace('/0/', '/' + scenarioId + '/')
         });
     };
 
-    api.updateParcel = function(parcel) {
+    api.updateParcel = function(scenarioId, parcel) {
         var url = api.getUrl('parcels_api.update');
         var data = makeFormData(parcel);
         return AJAX.call({
             method: 'POST',
-            url: url,
+            url: url.replace('/0/', '/' + scenarioId + '/').replace('/-1/', '/' + data.get('id') + '/'),
             data: data
         });
     };
 
-    api.deleteParcels = function(parcels) {
+    api.deleteParcels = function(scenarioId, parcel) {
         var url = api.getUrl('parcels_api.delete');
-        var data = makeFormData(parcels);
+        var data = makeFormData(parcel);
         return AJAX.call({
             method: 'POST',
-            url: url,
+            url: url.replace('/0/', '/' + scenarioId + '/').replace('/-1/', '/' + data.get('id') + '/'),
             data: data
         });
     };
