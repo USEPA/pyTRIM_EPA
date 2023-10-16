@@ -682,7 +682,7 @@
                 let parcel_info = $(this).data('parcelinfo')
                 if (parcel_info) {
                     parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                    TRIM.api.updateParcel(parcel_info)
+                    TRIM.api.updateParcel('{{ scenario.id }}', parcel_info)
                     // table_data = get_Data_from_table(tblId)
                     let wc_table_data = get_Data_from_table("#LakeTable")
                     let sed_table_data = get_Data_from_table("#SedTable")

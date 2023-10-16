@@ -476,7 +476,7 @@
                         let parcel_info = $(this).data('parcelinfo')
                         if (parcel_info) {
                             parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                            TRIM.api.updateParcel(parcel_info)
+                            TRIM.api.updateParcel('{{ scenario.id }}', parcel_info)
                         }
                     }
                 })
@@ -735,7 +735,7 @@
                     'value': ER
                 }]
                 if (!firstLoad) {
-                    TRIM.api.updateParcel(parcel_info)
+                    TRIM.api.updateParcel('{{ scenario.id }}', parcel_info)
                 }
                 return ER
             } else {
@@ -765,7 +765,7 @@
                     'value': ER
                 }]
                 if (!firstLoad) {
-                    TRIM.api.updateParcel(parcel_info)
+                    TRIM.api.updateParcel('{{ scenario.id }}', parcel_info)
                 }
                 return ER
             } else {
