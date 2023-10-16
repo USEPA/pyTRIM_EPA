@@ -31,13 +31,15 @@ MET_DATA_MAP = {
             'wt_av_allowexchange': ['AllowExchange_Dynamic', 'Flora'],
             'wt_av_litterfallrate': ['LitterFallRate', '$Leaf']
         },
-        'ignore': ['wt_av_mixingheight',
-                   'frac_time_rain',
-                   'frac_time_exchange_no_rain',
-                   'frac_time_exchange_rain',
-                   'frac_time_exchange_day',
-                   'frac_time_exchange_not_day']
-    }
+        'ignore': [
+            'wt_av_mixingheight',
+            'frac_time_rain',
+            'frac_time_exchange_no_rain',
+            'frac_time_exchange_rain',
+            'frac_time_exchange_day',
+            'frac_time_exchange_not_day'
+        ]
+}
 
 def read_master_library(filepath, import_rules={}):
     print(f'Reading master library from "{filepath}" ...')
@@ -61,6 +63,7 @@ def read_master_library(filepath, import_rules={}):
 
 
 def read_external_data(filepaths, scenario_name):
+    external_dfs = {}
     for file_type, filepath in filepaths.items():
         print(f'Reading external data: {file_type} from "{filepath}" ...')
         read_lib = partial(
@@ -68,27 +71,53 @@ def read_external_data(filepaths, scenario_name):
             sep=',', encoding='windows-1252', low_memory=False
         )
         if file_type == "met_file":
-            df_met = read_lib(skiprows=[0], names=[i.lower() for i in read_lib(nrows=0).columns.values])
+            external_dfs['df_met'] = read_lib(
+                skiprows=[0],
+                names=[i.lower() for i in read_lib(nrows=0).columns.values]
+            )
         elif file_type == "allowexchange_file":
-            df_ae = read_lib(skiprows=[0], names=[i.lower() for i in read_lib(nrows=0).columns.values])
+            external_dfs['df_ae'] = read_lib(
+                skiprows=[0],
+                names=[i.lower() for i in read_lib(nrows=0).columns.values]
+            )
         elif file_type == "litterfall_file":
-            df_lf = read_lib(skiprows=[0], names=[i.lower() for i in read_lib(nrows=0).columns.values])
+            external_dfs['df_lf'] = read_lib(
+                skiprows=[0],
+                names=[i.lower() for i in read_lib(nrows=0).columns.values]
+            )
 
-    parsed = parse_met_data(df_met, df_ae, df_lf)
+    parsed = parse_met_data(**external_dfs)
 
     from trim_db.services import ScenarioService, CompartmentService
 
     scenario = ScenarioService.get(name=scenario_name)
     for k, v in parsed.items():
-        if k in list(MET_DATA_MAP.get("Scenario").keys()):
-            par = scenario.parameters.get(MET_DATA_MAP["Scenario"][k])
-            par.value = v
-        elif k in list(MET_DATA_MAP.get("Compartment").keys()):
-            compartments = [c for c in scenario.compartments if c.media.isa(MET_DATA_MAP.get("Compartment")[k][1])
-                            and not c.media.isa("Coniferous_Forest")]
-            for comp in compartments:
-                par = comp.parameters.get(MET_DATA_MAP["Compartment"][k][0])
+        if k in MET_DATA_MAP["Scenario"]:
+            n = clean_prop(MET_DATA_MAP["Scenario"][k])
+            par = scenario.parameters.get(n)
+            if par is None:
+                print(
+                    f'"{n}" not found in {scenario}! Adding "{n}" = {v} ...'
+                )
+                par = scenario.parameters.add(n, value=v)
+            else:
                 par.value = v
+        elif k in MET_DATA_MAP["Compartment"]:
+            n = clean_prop(MET_DATA_MAP["Compartment"][k][0])
+            m = MET_DATA_MAP["Compartment"][k][1]
+            compartments = [
+                c for c in scenario.compartments
+                if c.media.isa(m) and not c.media.isa("Coniferous_Forest")
+            ]
+            for comp in compartments:
+                par = comp.parameters.get(n)
+                if par is None:
+                    print(
+                        f'"{n}" not found in {comp}! Adding "{n}" = {v} ...'
+                    )
+                    par = comp.parameters.add(n, value=v)
+                else:
+                    par.value = v
 
     ScenarioService.commit()
     CompartmentService.commit()
@@ -124,6 +153,15 @@ def parse_master_library_params(library_df):
 
                 if isinstance(val, str):
                     val = clean_equation(val, object_type)
+
+                    check = val.split('.')
+                    if len(check) == 2 and check[1] == prop:
+                        # This looks like a self-referential relative value?
+                        # E.g., x.Param(y) = x.Param
+                        # So just skip it??
+                        # Any calls to x.Param(y) will be routed to x.Param
+                        # by default anyway if the y arg does nothing ...
+                        continue
 
                 if val is None or str(val) == 'None':
                     continue
@@ -165,137 +203,11 @@ def parse_master_library_params(library_df):
     return params
 
 
-def parse_met_data(df, df2, df3):  # one time process all met weighted averages
-    df['dlist'] = df['date'].str.split('/')  # split date column into list
-    df = df[df.dlist.str.len() == 3]  # drop rows that have less than three elements
-    df[['Month', 'Day', 'Year']] = df.date.str.split("/", expand=True)
-    df['Month'] = pd.to_numeric(df['Month'], errors='coerce')
-    df['Day'] = pd.to_numeric(df['Day'], errors='coerce')
-    df['Year'] = pd.to_numeric(df['Year'], errors='coerce')
-    df['Hour'] = pd.to_numeric(df['xhour'], errors='coerce')
-    df = df.loc[(df.Month < 13) & (df.Day < 32) & (df.Year < 2100) & (df.Hour < 25)]  # drop faulty
-
-    metcol_dict = {'rain': (0, 1), 'airtemperature': (200, 373), 'horizontalwindspeed': (0, 100),
-                   'winddirection': (-360, 360), 'mixingheight': (0, 1000), 'isday': (0, 1),
-                   'cumulativerain': (0, 1.6)}  # k, v represent name and min-max
-    for k, v in metcol_dict.items():
-        df['metcol'] = pd.to_numeric(df[k], errors='coerce')
-        df = df[(df['metcol'] <= v[1]) & (df['metcol'] >= v[0])]  # keep rows within min max bounds
-
-    df['DT'] = list(pd.to_datetime(df[['Year', 'Month', 'Day', 'Hour']], errors='coerce'))
-    df['date_delta'] = (df['DT'] - df['DT'].min()) / timedelta64(1, 'D')
-    df['time_delta'] = df['date_delta'].diff()
-    df['time_delta'] = df['time_delta'].shift(
-        -1)  # shift up the column 1 so that applicability of met condition is aligned to duration
-
-    # clean up non sequential dates. slow
-
-    df['DT_Check'] = df.DT >= (df.DT.shift())
-    df = df[df['DT_Check']]
-    # df=df[(df['time_delta']<0.05)&(df['time_delta']>0)]# assume all observations valid for an hour since this is an hourly met file. eliminate overinfluential observations. not sure if needed but checking.
-    # df=df[df['time_delta']>0]# assume all observations valid for an hour since this is an hourly met file. eliminate overinfluential observations. not sure if needed but checking.
-    # df=df[(df['time_delta']<1)&(df['time_delta']>0)]# assume all observations valid for an hour since this is an hourly met file. eliminate overinfluential observations. not sure if needed but checking.
-
-    # need to clean up messy met file to get reasonable averages. This shouldnt be required with a quality met file.
-
-    met_dict = {}
-
-    for k, v in metcol_dict.items():
-        df['metcol'] = pd.to_numeric(df[k], errors='coerce')
-        df['prod'] = df['metcol'] * df['time_delta']
-        wt_ave = df['prod'].sum() / df['time_delta'].sum()
-        met_dict['wt_av_' + k] = wt_ave
-    df['rain'] = pd.to_numeric(df['rain'], errors='coerce')
-    df['is_rain'] = [1 if x > 0 else 0 for x in df['rain']]
-    df['raintime'] = df['is_rain'] * df['time_delta']
-    rain_frac_time = df['raintime'].sum() / df['time_delta'].sum()
-    met_dict['frac_time_rain'] = rain_frac_time
-    # met_dict['wt_av_rain']=rain_frac_time # overwrite wt_av_rain with rain_frac_time (superior method, i think)
-
-    # process AE file ## has unusual data column header -- not interfered with original data. Ignored hour resolution.
-    df2['dlist'] = df2['##date'].str.split('/')  # split date column into list
-    df2 = df2[df2.dlist.str.len() == 3]  # drop rows that have less than three elements
-    df2[['Month', 'Day', 'Year']] = df2['##date'].str.split("/", expand=True)
-    df2['Month'] = pd.to_numeric(df2['Month'], errors='coerce')
-    df2['Day'] = pd.to_numeric(df2['Day'], errors='coerce')
-    df2['Year'] = pd.to_numeric(df2['Year'], errors='coerce')
-    df2 = df2.loc[(df2.Month < 13) & (df2.Day < 32) & (df2.Year < 2100)]  # drop faulty
-
-    df2['DT'] = list(pd.to_datetime(df2[['Year', 'Month', 'Day']], errors='coerce'))
-    df2['date_delta'] = (df2['DT'] - df2['DT'].min()) / timedelta64(1, 'D')
-    df2['time_delta'] = df2['date_delta'].diff()
-    df2['time_delta'] = df2['time_delta'].shift(
-        -1)  # shift up the column 1 so that applicability of met condition is aligned to duration
-
-    df2['ae'] = pd.to_numeric(df2['allowexchange'], errors='coerce')
-    df2['prod'] = df2['ae'] * df2['time_delta']
-    wt_ave = df2['prod'].sum() / df2['time_delta'].sum()
-    met_dict['wt_av_allowexchange'] = wt_ave
-
-    df = df.merge(df2[['DT', 'ae']], how='left', on='DT', indicator=True)  # merge in AE
-
-    first_ind = df.loc[df['_merge'] == 'both'].index[0]  # index first date in AE file
-    if first_ind != 0:  # if the first value in the ae file is greater than the first date in the met file assume the opposite condition is true
-        first_ae_val = df.loc[first_ind, 'ae']  # first ae value
-        if first_ae_val == 1:
-            df.loc[0, 'ae'] = 0
-        else:
-            df.loc[0, 'ae'] = 1
-
-    df.ae.fillna(value=pd.NA, inplace=True)  # fill None values with nan
-
-    df['ae'].fillna(method='ffill', inplace=True)  # fill nan values with previous non nan value
-
-    df['exch_no_rain'] = df['ae'] * (1 - df['is_rain'])
-    df['exch_rain'] = df['ae'] * df['is_rain']
-    df['exchnoraintime'] = df['exch_no_rain'] * df['time_delta']
-    df['exchraintime'] = df['exch_rain'] * df['time_delta']
-    exch_no_rain_frac_time = df['exchnoraintime'].sum() / df['time_delta'].sum()
-    exch_rain_frac_time = df['exchraintime'].sum() / df['time_delta'].sum()
-
-    met_dict['frac_time_exchange_no_rain'] = exch_no_rain_frac_time
-    met_dict['frac_time_exchange_rain'] = exch_rain_frac_time
-
-    ### Compute interaction between isday and allow exchange.
-    df = df
-    df['isday'] = pd.to_numeric(df['isday'], errors='coerce')
-    df = df.loc[(df.isday == 1) | (df.isday == 0)]  # keep only valid isday data
-    df['ae_isday'] = df['ae'] * df.isday
-    df['aeisdaytime'] = df['ae_isday'] * df['time_delta']
-    exch_day_frac_time = df['aeisdaytime'].sum() / df['time_delta'].sum()
-    met_dict['frac_time_exchange_day'] = exch_day_frac_time
-
-    df['ae_notday'] = df['ae'] * (1 - df.isday)
-    df['aenotdaytime'] = df['ae_notday'] * df['time_delta']
-    exch_not_day_frac_time = df['aenotdaytime'].sum() / df['time_delta'].sum()
-    met_dict['frac_time_exchange_not_day'] = exch_not_day_frac_time
-
-    # process LF file
-    df3['dlist'] = df3['##date'].str.split('/')  # split date column into list
-    df3 = df3[df3.dlist.str.len() == 3]  # drop rows that have less than three elements
-    df3[['Month', 'Day', 'Year']] = df3['##date'].str.split("/", expand=True)
-    df3['Month'] = pd.to_numeric(df3['Month'], errors='coerce')
-    df3['Day'] = pd.to_numeric(df3['Day'], errors='coerce')
-    df3['Year'] = pd.to_numeric(df3['Year'], errors='coerce')
-    # df3['Hour']=pd.to_numeric(df3['hour'], errors='coerce')
-    # df3=df3.loc[(df3.Month<13) & (df3.Day<32) & (df3.Year<2100)&(df3.Hour<25)] # drop faulty
-    df3 = df3.loc[(df.Month < 13) & (df3.Day < 32) & (df3.Year < 2100)]  # drop faulty
-
-    df3['DT'] = list(pd.to_datetime(df3[['Year', 'Month', 'Day']], errors='coerce'))
-    # df['DT']=list(pd.to_datetime(df[['Year', 'Month', 'Day','Hour']],errors='coerce'))
-    df3['date_delta'] = (df3['DT'] - df3['DT'].min()) / timedelta64(1, 'D')
-    df3['time_delta'] = df3['date_delta'].diff()
-    df3['time_delta'] = df3['time_delta'].shift(
-        -1)  # shift up the column 1 so that applicability of met condition is aligned to duration
-
-    df3['lf'] = pd.to_numeric(df3['litterfallrate'], errors='coerce')
-    df3['prod'] = df3['lf'] * df3['time_delta']
-    wt_ave = df3['prod'].sum() / df3['time_delta'].sum()
-    met_dict['wt_av_litterfallrate'] = wt_ave
-    # met_dict['wt_av_litterfallrate']=0.0745 # fix
-    # met_dict['wt_av_allowexchange']=5/12
-
-    arun_met_dict = {  # THIS IS FROM ARUN
+def parse_met_data(df_met, df_ae, df_lf):  # one time process all met weighted averages
+    # THIS IS FROM ARUN
+    # MAYBE DO THIS DIFFERENTLY? Is this just for Foundries?
+    # Scenario-specific stuff shouldn't go here!
+    arun_met_dict = {
         'frac_time_exchange_day': 0.16225754122155972,
         'frac_time_exchange_no_rain': 0.3262149134948966,
         'frac_time_exchange_not_day': 0.18755320057229782,
@@ -311,8 +223,138 @@ def parse_met_data(df, df2, df3):  # one time process all met weighted averages
         'wt_av_rain': 0.07951431920086095,
         'wt_av_winddirection': 189.88241670957274
     }
-
     return arun_met_dict
+
+    df_met['dlist'] = df_met['date'].str.split('/')  # split date column into list
+    df_met = df_met[df_met.dlist.str.len() == 3]  # drop rows that have less than three elements
+    df_met[['Month', 'Day', 'Year']] = df_met.date.str.split("/", expand=True)
+    df_met['Month'] = pd.to_numeric(df_met['Month'], errors='coerce')
+    df_met['Day'] = pd.to_numeric(df_met['Day'], errors='coerce')
+    df_met['Year'] = pd.to_numeric(df_met['Year'], errors='coerce')
+    df_met['Hour'] = pd.to_numeric(df_met['xhour'], errors='coerce')
+    df_met = df_met.loc[(df_met.Month < 13) & (df_met.Day < 32) & (df_met.Year < 2100) & (df_met.Hour < 25)]  # drop faulty
+
+    metcol_dict = {'rain': (0, 1), 'airtemperature': (200, 373), 'horizontalwindspeed': (0, 100),
+                   'winddirection': (-360, 360), 'mixingheight': (0, 1000), 'isday': (0, 1),
+                   'cumulativerain': (0, 1.6)}  # k, v represent name and min-max
+    for k, v in metcol_dict.items():
+        df_met['metcol'] = pd.to_numeric(df_met[k], errors='coerce')
+        df_met = df_met[(df_met['metcol'] <= v[1]) & (df_met['metcol'] >= v[0])]  # keep rows within min max bounds
+
+    df_met['DT'] = list(pd.to_datetime(df_met[['Year', 'Month', 'Day', 'Hour']], errors='coerce'))
+    df_met['date_delta'] = (df_met['DT'] - df_met['DT'].min()) / timedelta64(1, 'D')
+    df_met['time_delta'] = df_met['date_delta'].diff()
+    df_met['time_delta'] = df_met['time_delta'].shift(
+        -1)  # shift up the column 1 so that applicability of met condition is aligned to duration
+
+    # clean up non sequential dates. slow
+
+    df_met['DT_Check'] = df_met.DT >= (df_met.DT.shift())
+    df_met = df_met[df_met['DT_Check']]
+    # df_met=df_met[(df_met['time_delta']<0.05)&(df_met['time_delta']>0)]# assume all observations valid for an hour since this is an hourly met file. eliminate overinfluential observations. not sure if needed but checking.
+    # df_met=df_met[df_met['time_delta']>0]# assume all observations valid for an hour since this is an hourly met file. eliminate overinfluential observations. not sure if needed but checking.
+    # df_met=df_met[(df_met['time_delta']<1)&(df_met['time_delta']>0)]# assume all observations valid for an hour since this is an hourly met file. eliminate overinfluential observations. not sure if needed but checking.
+
+    # need to clean up messy met file to get reasonable averages. This shouldnt be required with a quality met file.
+
+    met_dict = {}
+
+    for k, v in metcol_dict.items():
+        df_met['metcol'] = pd.to_numeric(df_met[k], errors='coerce')
+        df_met['prod'] = df_met['metcol'] * df_met['time_delta']
+        wt_ave = df_met['prod'].sum() / df_met['time_delta'].sum()
+        met_dict['wt_av_' + k] = wt_ave
+    df_met['rain'] = pd.to_numeric(df_met['rain'], errors='coerce')
+    df_met['is_rain'] = [1 if x > 0 else 0 for x in df_met['rain']]
+    df_met['raintime'] = df_met['is_rain'] * df_met['time_delta']
+    rain_frac_time = df_met['raintime'].sum() / df_met['time_delta'].sum()
+    met_dict['frac_time_rain'] = rain_frac_time
+    # met_dict['wt_av_rain']=rain_frac_time # overwrite wt_av_rain with rain_frac_time (superior method, i think)
+
+    # process AE file ## has unusual data column header -- not interfered with original data. Ignored hour resolution.
+    df_ae['dlist'] = df_ae['##date'].str.split('/')  # split date column into list
+    df_ae = df_ae[df_ae.dlist.str.len() == 3]  # drop rows that have less than three elements
+    df_ae[['Month', 'Day', 'Year']] = df_ae['##date'].str.split("/", expand=True)
+    df_ae['Month'] = pd.to_numeric(df_ae['Month'], errors='coerce')
+    df_ae['Day'] = pd.to_numeric(df_ae['Day'], errors='coerce')
+    df_ae['Year'] = pd.to_numeric(df_ae['Year'], errors='coerce')
+    df_ae = df_ae.loc[(df_ae.Month < 13) & (df_ae.Day < 32) & (df_ae.Year < 2100)]  # drop faulty
+
+    df_ae['DT'] = list(pd.to_datetime(df_ae[['Year', 'Month', 'Day']], errors='coerce'))
+    df_ae['date_delta'] = (df_ae['DT'] - df_ae['DT'].min()) / timedelta64(1, 'D')
+    df_ae['time_delta'] = df_ae['date_delta'].diff()
+    df_ae['time_delta'] = df_ae['time_delta'].shift(
+        -1)  # shift up the column 1 so that applicability of met condition is aligned to duration
+
+    df_ae['ae'] = pd.to_numeric(df_ae['allowexchange'], errors='coerce')
+    df_ae['prod'] = df_ae['ae'] * df_ae['time_delta']
+    wt_ave = df_ae['prod'].sum() / df_ae['time_delta'].sum()
+    met_dict['wt_av_allowexchange'] = wt_ave
+
+    df_met = df_met.merge(df_ae[['DT', 'ae']], how='left', on='DT', indicator=True)  # merge in AE
+
+    first_ind = df_met.loc[df_met['_merge'] == 'both'].index[0]  # index first date in AE file
+    if first_ind != 0:  # if the first value in the ae file is greater than the first date in the met file assume the opposite condition is true
+        first_ae_val = df_met.loc[first_ind, 'ae']  # first ae value
+        if first_ae_val == 1:
+            df_met.loc[0, 'ae'] = 0
+        else:
+            df_met.loc[0, 'ae'] = 1
+
+    df_met.ae.fillna(value=pd.NA, inplace=True)  # fill None values with nan
+
+    df_met['ae'].fillna(method='ffill', inplace=True)  # fill nan values with previous non nan value
+
+    df_met['exch_no_rain'] = df_met['ae'] * (1 - df_met['is_rain'])
+    df_met['exch_rain'] = df_met['ae'] * df_met['is_rain']
+    df_met['exchnoraintime'] = df_met['exch_no_rain'] * df_met['time_delta']
+    df_met['exchraintime'] = df_met['exch_rain'] * df_met['time_delta']
+    exch_no_rain_frac_time = df_met['exchnoraintime'].sum() / df_met['time_delta'].sum()
+    exch_rain_frac_time = df_met['exchraintime'].sum() / df_met['time_delta'].sum()
+
+    met_dict['frac_time_exchange_no_rain'] = exch_no_rain_frac_time
+    met_dict['frac_time_exchange_rain'] = exch_rain_frac_time
+
+    ### Compute interaction between isday and allow exchange.
+    df_met = df_met
+    df_met['isday'] = pd.to_numeric(df_met['isday'], errors='coerce')
+    df_met = df_met.loc[(df_met.isday == 1) | (df_met.isday == 0)]  # keep only valid isday data
+    df_met['ae_isday'] = df_met['ae'] * df_met.isday
+    df_met['aeisdaytime'] = df_met['ae_isday'] * df_met['time_delta']
+    exch_day_frac_time = df_met['aeisdaytime'].sum() / df_met['time_delta'].sum()
+    met_dict['frac_time_exchange_day'] = exch_day_frac_time
+
+    df_met['ae_notday'] = df_met['ae'] * (1 - df_met.isday)
+    df_met['aenotdaytime'] = df_met['ae_notday'] * df_met['time_delta']
+    exch_not_day_frac_time = df_met['aenotdaytime'].sum() / df_met['time_delta'].sum()
+    met_dict['frac_time_exchange_not_day'] = exch_not_day_frac_time
+
+    # process LF file
+    df_lf['dlist'] = df_lf['##date'].str.split('/')  # split date column into list
+    df_lf = df_lf[df_lf.dlist.str.len() == 3]  # drop rows that have less than three elements
+    df_lf[['Month', 'Day', 'Year']] = df_lf['##date'].str.split("/", expand=True)
+    df_lf['Month'] = pd.to_numeric(df_lf['Month'], errors='coerce')
+    df_lf['Day'] = pd.to_numeric(df_lf['Day'], errors='coerce')
+    df_lf['Year'] = pd.to_numeric(df_lf['Year'], errors='coerce')
+    # df_lf['Hour']=pd.to_numeric(df_lf['hour'], errors='coerce')
+    # df_lf=df_lf.loc[(df_lf.Month<13) & (df_lf.Day<32) & (df_lf.Year<2100)&(df_lf.Hour<25)] # drop faulty
+    df_lf = df_lf.loc[(df_met.Month < 13) & (df_lf.Day < 32) & (df_lf.Year < 2100)]  # drop faulty
+
+    df_lf['DT'] = list(pd.to_datetime(df_lf[['Year', 'Month', 'Day']], errors='coerce'))
+    # df_met['DT']=list(pd.to_datetime(df_met[['Year', 'Month', 'Day','Hour']],errors='coerce'))
+    df_lf['date_delta'] = (df_lf['DT'] - df_lf['DT'].min()) / timedelta64(1, 'D')
+    df_lf['time_delta'] = df_lf['date_delta'].diff()
+    df_lf['time_delta'] = df_lf['time_delta'].shift(
+        -1)  # shift up the column 1 so that applicability of met condition is aligned to duration
+
+    df_lf['lf'] = pd.to_numeric(df_lf['litterfallrate'], errors='coerce')
+    df_lf['prod'] = df_lf['lf'] * df_lf['time_delta']
+    wt_ave = df_lf['prod'].sum() / df_lf['time_delta'].sum()
+    met_dict['wt_av_litterfallrate'] = wt_ave
+    # met_dict['wt_av_litterfallrate']=0.0745 # fix
+    # met_dict['wt_av_allowexchange']=5/12
+
+    return met_dict
 
 ILLEGAL_NAME_CHARS = re.compile('[^0-9a-zA-Z]+')
 
@@ -327,9 +369,7 @@ def safe_name(name):
         pass
 
     name = ILLEGAL_NAME_CHARS.sub('_', name)
-    # name = re.sub('_+', '_', name)
-    # name = name.replace('Halflife', 'HalfLife')
-    name = clean_prop(name)
+    name = do_replacements(name, GLOBAL_REPLACE)
     return name
 
 
@@ -354,11 +394,8 @@ GLOBAL_REPLACE = {
     'compartment.Chemical.UseInputCharacteristicDepth_0_MeansNo_ElseYes': 'chemical.UseInputCharacteristicDepth_0_MeansNo_ElseYes',
     'compartment.Chemical.': f'compartment{VAR_SPLITTER}chemical.',  # noqa
 
-    'containingVolumeElement.Area': 'compartment.volume_element.parcel.area',
-    'containingVolumeElement.Volume': 'compartment.volume_element.volume',
+    'containingVolumeElement.Area': 'compartment.volume_element.area',
     'containingVolumeElement.': 'compartment.volume_element.',
-
-    'CumulativeRain': 'cumulativeRain',
 
     'Min(': 'min(',
     'Max(': 'max(',
@@ -372,6 +409,7 @@ GLOBAL_REPLACE = {
     'Unset': 'None',
     '"Unset"': 'None',
 
+    'cumulativeRain': 'CumulativeRain',
     'molecularWeight': 'MolecularWeight',
     'NumberofZooplanktonpersquaremeter': 'NumberofZooplanktonPerSquareMeter',
     'BoundaryLayerThicknessbelowWater': 'BoundaryLayerThicknessBelowWater',
@@ -410,6 +448,7 @@ GLOBAL_REPLACE = {
     'volumefraction_solid': 'VolumeFraction_Solid',
     'VolumeFraction_solid': 'VolumeFraction_Solid',
     'volumeFraction_solid': 'VolumeFraction_Solid',
+    'volumeParticlePerAreaLeaf': 'VolumeParticlePerAreaLeaf',
     'WetVolumeperArea': 'WetVolumePerArea',
     'Z_algae': 'Z_Algae',
     'z_liquid': 'Z_Liquid',
@@ -427,14 +466,15 @@ GLOBAL_REPLACE = {
     'Depurationrate': 'DepurationRate',
     'Fractionofareaavailableforerosion': 'FractionofAreaAvailableforErosion',
 
+    '.Height': '.height',
 
-    # 'self.Volume': 'compartment.volume_element.volume',
     'self.Volume': 'compartment.Volume',
-    'self.Height': 'compartment.volume_element.height',
-    # 'compartment.Volume': 'compartment.volume_element.volume',
-    # 'compartment.Volume': 'compartment.Volume',
-    'compartment.Height': 'compartment.volume_element.height',
-    'DistanceBetweenMidpoints': '.volume_element.midpoint_distance',
+    'self.Height': 'compartment.height',
+    'self.Area': 'compartment.area',
+    'compartment.Volume': 'compartment.Volume',
+    'compartment.Height': 'compartment.height',
+    'compartment.Area': 'compartment.area',
+    '.DistanceBetweenMidpoints': '.volume_element.midpoint_distance',
 
     'Algorithm.': 'algorithm.',
 
@@ -452,32 +492,30 @@ GLOBAL_REPLACE = {
     'sendingCompartment.Chemical.': f'sender{VAR_SPLITTER}chemical.',  # noqa
     'Sendingcompartment.Chemical.': f'sender{VAR_SPLITTER}chemical.',  # noqa
     'sendingcompartment.Chemical.': f'sender{VAR_SPLITTER}chemical.',  # noqa
-    # 'ReceivingCompartment.Volume': 'receiver.volume_element.volume',
-    # 'SendingCompartment.Volume': 'sender.volume_element.volume',
-    # 'sendingCompartment.Volume': 'sender.volume_element.volume',
-    # 'Sendingcompartment.Volume': 'sender.volume_element.volume',
-    # 'sendingcompartment.Volume': 'sender.volume_element.volume',
     'ReceivingCompartment.Volume': 'receiver.Volume',
+    'receivingCompartment.Volume': 'receiver.Volume',
+    'Receivingcompartment.Volume': 'receiver.Volume',
+    'receivingcompartment.Volume': 'receiver.Volume',
     'SendingCompartment.Volume': 'sender.Volume',
     'sendingCompartment.Volume': 'sender.Volume',
     'Sendingcompartment.Volume': 'sender.Volume',
     'sendingcompartment.Volume': 'sender.Volume',
-    'ReceivingCompartment.Area': 'receiver.volume_element.parcel.area',
-    'Receivingcompartment.Area': 'receiver.volume_element.parcel.area',
-    'receivingcompartment.Area': 'receiver.volume_element.parcel.area',
-    'receivingCompartment.Area': 'receiver.volume_element.parcel.area',
-    'SendingCompartment.Area': 'sender.volume_element.parcel.area',
-    'Sendingcompartment.Area': 'sender.volume_element.parcel.area',
-    'sendingcompartment.Area': 'sender.volume_element.parcel.area',
-    'sendingCompartment.Area': 'sender.volume_element.parcel.area',
-    'ReceivingCompartment.Depth': 'receiver.volume_element.depth',
-    'Receivingcompartment.Depth': 'receiver.volume_element.depth',
-    'receivingcompartment.Depth': 'receiver.volume_element.depth',
-    'receivingCompartment.Depth': 'receiver.volume_element.depth',
-    'SendingCompartment.Depth': 'sender.volume_element.depth',
-    'Sendingcompartment.Depth': 'sender.volume_element.depth',
-    'sendingcompartment.Depth': 'sender.volume_element.depth',
-    'sendingCompartment.Depth': 'sender.volume_element.depth',
+    'ReceivingCompartment.Area': 'receiver.area',
+    'Receivingcompartment.Area': 'receiver.area',
+    'receivingcompartment.Area': 'receiver.area',
+    'receivingCompartment.Area': 'receiver.area',
+    'SendingCompartment.Area': 'sender.area',
+    'Sendingcompartment.Area': 'sender.area',
+    'sendingcompartment.Area': 'sender.area',
+    'sendingCompartment.Area': 'sender.area',
+    'ReceivingCompartment.Depth': 'receiver.depth',
+    'Receivingcompartment.Depth': 'receiver.depth',
+    'receivingcompartment.Depth': 'receiver.depth',
+    'receivingCompartment.Depth': 'receiver.depth',
+    'SendingCompartment.Depth': 'sender.depth',
+    'Sendingcompartment.Depth': 'sender.depth',
+    'sendingcompartment.Depth': 'sender.depth',
+    'sendingCompartment.Depth': 'sender.depth',
     'ReceivingCompartment.': 'receiver.',
     'receivingCompartment.': 'receiver.',
     'Receivingcompartment.': 'receiver.',
@@ -516,6 +554,15 @@ GLOBAL_REPLACE = {
 }
 
 
+def do_replacements(val, replacements):
+    # Replace longest keys first to avoid substring issues
+    keys = sorted(list(replacements), key=lambda x: len(x))
+    for k in reversed(keys):
+        v = replacements[k]
+        val = val.replace(str(k), str(v))
+    return val
+
+
 def clean_prop(prop, custom_replace={}):
     if prop is None or pd.isna(prop):
         return None
@@ -543,18 +590,7 @@ def clean_prop(prop, custom_replace={}):
     if custom_replace:
         replacements.update(custom_replace)
 
-    # Replace longest keys first to avoid substring issues
-    keys = sorted(list(replacements), key=lambda x: len(x))
-    for k in reversed(keys):
-        v = replacements[k]
-        # Here we implement a better way to handle case insensitivity for legacy properties in order to eliminate
-        # repetition of case variants of the same property
-        # if str(k).lower() in str(val).lower():
-        #     idx = [i for i in range(len(val)) if str(val).lower().startswith(str(k).lower(), i)]
-        #     rep_k = [val[i:i + len(str(k))] for i in idx]
-        #     for rk in rep_k:
-        #         val = val.replace(str(rk), str(v))
-        val = val.replace(str(k), str(v))
+    val = do_replacements(val, replacements)
 
     val = hacky_value_cleaning(val)
 
@@ -563,6 +599,9 @@ def clean_prop(prop, custom_replace={}):
 
 def hacky_value_cleaning(val):
     # HACKS
+
+    if val.lower() in ['area', 'height', 'volume']:
+        return val.lower()
 
     val = val.replace('volume_element.volumeM', 'VolumeM')
     val = val.replace('volume_element.volumeF', 'VolumeF')
@@ -814,7 +853,6 @@ def convert_property_aggregates(expression, agg_expression):
             suff = suff[:-1]
 
         if suff.lower() in ['.area', '.depth']:
-            suff = suff.lower().replace('area', 'parcel.area')
             cleaned.append(f'{suff.lower()}{paren} {nxt}')
             continue
 
@@ -878,9 +916,7 @@ def convert_linked_compartments(
             paren += ')'
             suff = suff[:-1]
 
-        if suff.lower() in ['.area', '.depth']:  # '.volume'
-            # suff = suff.lower().replace('volume', 'volume_element.volume')
-            suff = suff.lower().replace('area', 'volume_element.parcel.area')
+        if suff.lower() in ['.area', '.depth']:
             cleaned.append(f'{suff.lower()}{paren} {nxt}')
             continue
 
@@ -903,12 +939,16 @@ def convert_ternary(expression):
     colon = expression.find(':', question_mark)
     if (colon < 0):
         return expression
-
-    # some expressions are uncleaned and are enclosed in "(" and ")". We need to clean them
-    if expression.startswith("(") and expression.endswith(")") and expression.count("(") == 1 and expression.count(")") == 1:
-        expression = expression.replace("(", "").replace(")", "")
-    # need to update position of "?"
-    question_mark = expression.find('?')
+    
+    # some expressions are uncleaned and are enclosed in "(" and ")"
+    if (
+        expression.startswith("(")
+        and expression.endswith(")")
+        and expression.count("(") == 1
+        and expression.count(")") == 1
+    ):
+        expression = expression[1:-1]  # Drop enclosing chars
+        question_mark = question_mark - 1  # need to update position of "?"
 
     # extract outer if condition and expression parts (True & False)
     condition = expression[:question_mark]
@@ -1002,6 +1042,12 @@ def unit_conversions_to_pint(expression):
 def hacky_equation_cleaning(val, object_type):
     # HACKS
 
+    if val.endswith('.Volume'):
+        val = val[:-len('.Volume')] + '.volume'
+
+    val = val.replace('.Volume ', '.volume ')
+    val = val.replace('.Volume)', '.volume)')
+
     if '.Porosity' in val:
         for x in ['chemical', 'self']:
             val = val.replace(
@@ -1016,22 +1062,32 @@ def hacky_equation_cleaning(val, object_type):
             val = val.replace(f' {x}.', ' self.')
 
     # This is specific for "Particles Blown off from Plant Leaf to Air (DRY)(AlgInstID_4010)"
-    if " if (environment.Rain == 0 and sender.Volume > 0) else 0" in val:
-        val = val.replace(" if (environment.Rain == 0 and sender.Volume > 0) else 0", "")
+    if " if (environment.Rain == 0 and sender.volume > 0) else 0" in val:
+        val = val.replace(" if (environment.Rain == 0 and sender.volume > 0) else 0", "")
 
-    # Some instances of Z_Pure air parsed as receiver dependent chemical prop but it is a constant. Fix it here:
-    if "chemical.Z_PureAir(receiver)" in val:
-        val = val.replace("chemical.Z_PureAir(receiver)", "chemical.Z_PureAir")
-
-    # These are steady state meteorology hacks to account for rain being static rather than time-dependent value
-    if ("sender.AllowExchange_forOther" in val or "receiver.AllowExchange_forOther" in val) and \
-            "ParticleVolumetricWetDepositionRate" in val:
+    # These are steady state meteorology hacks
+    # to account for rain being static rather than time-dependent value
+    # MAYBE DO THIS DIFFERENTLY? Is this just for Foundries?
+    # Scenario-specific stuff shouldn't go here!
+    if (
+        (
+            "sender.AllowExchange_forOther" in val
+            or "receiver.AllowExchange_forOther" in val
+        )
+        and "ParticleVolumetricWetDepositionRate" in val
+    ):
         val = val.replace("sender.AllowExchange_forOther", "0.02359582829896095")
         val = val.replace("receiver.AllowExchange_forOther", "0.02359582829896095")
-    if ("sender.AllowExchange_forOther" in val or "receiver.AllowExchange_forOther" in val) and \
-            "ParticleVolumetricDRYDepositionRate" in val:
+    if (
+        (
+            "sender.AllowExchange_forOther" in val
+            or "receiver.AllowExchange_forOther" in val
+        )
+        and "ParticleVolumetricDRYDepositionRate" in val
+    ):
         val = val.replace("sender.AllowExchange_forOther", "0.3262149134948966")
         val = val.replace("receiver.AllowExchange_forOther", "0.3262149134948966")
+
     return val
 
 
