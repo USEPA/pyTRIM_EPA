@@ -71,15 +71,7 @@ api.use_api_errors(scenario_api)
 @login_required
 def get_scenario(id):
     s = ScenarioService.get(id)
-
-    if s is not None:
-        s = s.as_serializable()
-        s['emissions_sources'] = [
-            {'name': 'alpha', 'chemicals': [{'rate': 100}]},
-            {'name': 'beta', 'chemicals': [{'chemical': 'Chromium'}]}
-        ]
-
-    return ApiResult({'scenario': s})
+    return ApiResult({'scenario': s.as_serializable()})
 
 
 @scenario_api.route('/api/scenario/update', methods=['POST'])

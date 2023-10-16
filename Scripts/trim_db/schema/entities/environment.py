@@ -8,6 +8,7 @@ from ..parameters.utils import ureg
 from ..parameters.models import ParameterDefinition, CustomParameter
 from ..utils.base import Model
 from ..utils.caching import CacheManager
+from ..utils.serialize import register_serializer
 
 
 __all__ = [
@@ -507,72 +508,6 @@ class Parcel(Model):
     def sed_soil_erosion_to_sw(self):
         return 100
 
-    def as_serializable(self):
-        return {
-            'id': self.id,
-            'name': self.name,
-            'description': self.description,
-            'vertices': self.vertices,
-            'area': self.area.m_as('m^2'),
-            'hasAir': self.has_air,
-            'airDensity': self.air_density,
-            'airHeight': self.air_height,
-            'surfaceSoilThickness': self.surface_soil_height,
-            'rootSoilThickness': self.root_soil_height,
-            'vadoseSoilThickness': self.vadose_soil_height,
-            "groundwaterZoneThickness": self.groundwater_height,
-            'parcelType': self.parcel_type,
-            'hasLand': self.has_land,
-            'landUse': self.land_use,
-            'hasFarmFoodChain': self.has_farm_food_chain,
-            'hasFishFoodWeb': self.has_fish_food_web,
-            'hasWetland': self.has_wetland,
-            'dustLoad': self.dust_load,
-            'dustDensity': self.dust_density,
-            'fractionOrganicMatteronParticulates': self.fraction_organic_matter_on_particulates,
-            'soilTillage': self.soil_tillage,
-            'totalErosionRate': self.total_erosion_rate,
-            'aquatic_diet_fractions': self.aquatic_diet_fractions,
-            'aquatic_biomass': self.aquatic_property("BiomassPerArea"),
-            'aquatic_bw': self.aquatic_property("BW"),
-            'precip_rate': self.precipitation_rate,
-            'precip_runoff_watershed_area': self.runoff_watershed_area,
-            'precip_seepage_vol_rate_to_GW': self.seepage_vol_rate_to_gw,
-            'precip_runoff_vol_rate_to_SW': self.runoff_vol_rate_to_sw,
-            'precip_vol_rate_to_SW': self.precipitation_vol_rate_to_sw,
-            'sed_soil_erosion_to_SW': self.sed_soil_erosion_to_sw,
-            'surface_water': None if self.parcel_type not in ["Water Only", "Water & Air"] else {
-                'wc_props':  {
-                    'flush_rate': 0.48,  # self.wc_properties("Flushes"),
-                    'suspended_sed_conc': 0.05,  # self.wc_properties("SuspendedSedimentConcentration"),
-                    'algae_density': 1.23E-2,  # self.wc_properties("AlgaeDensityInWaterColumn"),
-                    'chloride_conc': 7,  # self.wc_properties("ChlorideConcentration"),
-                    'chlorophyll_conc': 0.003,  # self.wc_properties("ChlorophyllConcentration"),
-                    'mean_depth': 3.6,  # self.wc_properties("MeanWaterDepth"),
-                    'evaporation_rate': 0.7,  # self.wc_properties("waterEvaporationRate"),
-                    'evaporation_vol_rate': self.evaporation_vol_rate,
-                    'suspended_organic_carbon': 0.05,  # self.wc_properties("OrganicCarbonContent"),
-                    'water_ph': 8.5,  # self.wc_properties("pH"),
-                    'sed_deposition_vel': 2,  # self.wc_properties("SedimentDepositionVelocity"),
-                    'water_temp': 286.15,  # self.wc_properties("WaterTemperature"),
-                    'sed_inflow': 0,  # self.wc_properties("ExternalSedimentInflow"),
-                    'discharge_vol_rate': self.wc_discharge_vol_rate,
-                    'sed_discharge_rate': self.wc_sed_discharge_rate
-                },
-                'sed_props': {
-                    'bed_density': 2600,  # self.sed_properties("BedDensity"),
-                    'organic_carbon_frac': 0.02,  # self.sed_properties("OrganicCarbonContent"),
-                    'bed_pH': 7.3,  # self.sed_properties("pH"),
-                    'bed_porosity': 0.6,  # self.sed_properties("Porosity"),
-                    'bed_thickness': self.sed_properties("MeanThickness"),
-                    'sed_burial_vol_rate': self.sed_burial_vol_rate,
-                    'sed_deposition_vol_rate': self.sed_deposition_vol_rate,
-                    'sed_resuspension_vel': self.sed_resuspension_vel,
-                    'sed_soil_erosion_to_sw': self.sed_soil_erosion_to_sw
-                }
-            }
-        }
-
     def calc_default_erosion_rate_sdr(self):
         for c in self.compartments:
             if c.name == "Soil_Surface":
@@ -598,6 +533,18 @@ class Parcel(Model):
             f'"{self.name}", area={self.area}'
             ')'
         )
+
+
+@register_serializer(Parcel)
+def serialize_parcel(pcl: Parcel):
+    s = {
+        'id': pcl.id,
+        'name': pcl.name,
+        'description': pcl.description,
+        'vertices': pcl.vertices,
+        'area': pcl.area.m_as('m^2')
+    }
+    return s
 
 
 class VolumeElement(Model):
@@ -741,19 +688,22 @@ class VolumeElement(Model):
         sa.UniqueConstraint('parcel_id', 'name'),
     )
 
-    def as_serializable(self):
-        return {
-            'id': self.id,
-            'name': self.name,
-            'top': self.top,
-            'bottom': self.bottom,
-            'volume': self.volume
-        }
-
     def __repr__(self):
         return (
             f'{self.__class__.__qualname__}("{self.standard_name}")'
         )
+
+
+@register_serializer(VolumeElement)
+def serialize_volume_element(vol: VolumeElement):
+    s = {
+        'id': vol.id,
+        'name': vol.name,
+        'top': vol.top,
+        'bottom': vol.bottom,
+        'volume': vol.volume
+    }
+    return s
 
 
 class Media(Model):
@@ -835,19 +785,22 @@ class Media(Model):
 
         return False
 
-    def as_serializable(self):
-        return {
-            'id': self.id,
-            'name': self.name,
-            'category': self.category
-        }
-
     def __repr__(self):
         return (
             f'{self.__class__.__qualname__}('
             f'"{self.category}"'
             ')'
         )
+
+
+@register_serializer(Media)
+def serialize_media(med: Media):
+    s = {
+        'id': med.id,
+        'name': med.name,
+        'category': med.category
+    }
+    return s
 
 
 class Compartment(Model):
@@ -974,12 +927,6 @@ class Compartment(Model):
         sa.UniqueConstraint('volume_element_id', 'name'),
     )
 
-    def as_serializable(self):
-        return {
-            'id': self.id,
-            'name': self.name
-        }
-
     def __repr__(self):
         if self.name != self.media.category:
             return (
@@ -991,6 +938,15 @@ class Compartment(Model):
             return (
                 f'{self.__class__.__qualname__}("{self.standard_name}")'
             )
+
+
+@register_serializer(Compartment)
+def serialize_compartment(comp: Compartment):
+    s = {
+        'id': comp.id,
+        'name': comp.name
+    }
+    return s
 
 
 class DummyLink:
