@@ -83,6 +83,200 @@ class classproperty:
 #         return self.__quantity__.__str__(*args, **kwargs)
 
 
+def strip_spaces(s):
+    return ''.join(s.split(' '))
+
+
+def matches_parameter_def(param, **kwargs):
+    characteristics = get_parameter_characteristics(param)
+    for k, v in characteristics.items():
+        d_v = kwargs.get(k)
+        if isinstance(v, str):
+            v = strip_spaces(v)
+        if isinstance(d_v, str):
+            d_v = strip_spaces(d_v)
+        if (v is None or v == '') and (d_v is None or d_v == ''):
+            continue
+        if v != d_v:
+            return False
+    return True
+
+
+def merge_formulas(f1, f2):
+    if f1 is None:
+        return f2
+    if f2 is None:
+        return f1
+
+    def is_ternary(formula):
+        if ' if ' not in formula:
+            return False
+        if ' else ' not in formula:
+            return False
+        # Contains a ternary ... but is the ternary at the ROOT?
+        check = formula.split(' if ')
+        if '(' in check[0] and check[0].split('(')[0].strip():
+            # Something was before the ternary (e.g., "2 * (1 if False else 0)")
+            return False
+        check = formula.split(' else ')
+        if ')' in check[-1] and check[-1].split(')')[-1].strip():
+            # Something was after the ternary (e.g., "(1 if False else 0) * 2")
+            return False
+        # Looks like the root was a ternary!
+        return True
+
+    def break_down_ternary(formula):
+        def split_or_conditions(cond):
+            if ' or ' not in cond:
+                return cond
+            parts = []
+            for x in cond.split(' or '):
+                while x.count('(') > x.count(')'):
+                    if not x.startswith('('):
+                        return cond  # Unable to break this down
+                    x = x[1:]
+                while x.count(')') > x.count('('):
+                    if not x.endswith(')'):
+                        return cond  # Unable to break this down
+                    x = x[:-1]
+                parts.append(x)
+            return parts
+
+        f = formula.split(' else ')
+        cases = {}
+        for s in f:
+            while s.count('(') > s.count(')'):
+                if not s.startswith('('):
+                    break
+                s = s[1:]
+            while s.count(')') > s.count('('):
+                if not s.endswith(')'):
+                    break
+                s = s[:-1]
+            s = s.split(' if ')
+            v = s[0]
+            while v.startswith('(') and v.endswith(')'):
+                v = v[1:-1]
+            if len(s) > 1:
+                cond = s[1]
+            else:
+                cond = None
+            if cond:
+                cond = split_or_conditions(cond)
+            if not isinstance(cond, list):
+                cond = [cond]
+            cases.setdefault(v, []).extend(cond)
+        return cases
+
+    def merge_conditions(conditions):
+        def parse_val(v):
+            v = v.strip()
+            try:
+                v = int(v)
+            except ValueError:
+                try:
+                    v = float(v)
+                except ValueError:
+                    pass
+            return v
+
+        merged_conditions = []
+        check_in = {}
+        for cond in conditions:
+            while cond[0] in '(' and cond[-1] in ')':
+                cond = cond[1:-1]
+            c = cond.split(' in ')
+            if len(c) != 2:
+                merged_conditions.append(cond)
+                continue
+            expression = c[0]
+            contained_by = c[1]
+            if not ((contained_by[0] in '{[') and (contained_by[-1] in ']}')):
+                merged_conditions.append(cond)
+                continue
+            contained_by = contained_by[1:-1]
+            contained_by = [parse_val(x) for x in contained_by.split(',')]
+            check_in.setdefault(expression, []).extend(contained_by)
+        for k, v in check_in.items():
+            merged_conditions.append(f'{k} in {set(v)}')
+        return merged_conditions
+
+    if not (is_ternary(f1) and is_ternary(f2)):
+        raise AssertionError('Can only merge ternary expressions!')
+
+    f1 = break_down_ternary(f1)
+    f2 = break_down_ternary(f2)
+
+    merged = {}
+    for k, v in f1.items():
+        merged[k] = []
+        merged[k].extend(v)
+    for k, v in f2.items():
+        merged.setdefault(k, [])
+        for x in v:
+            if x in merged[k]:
+                continue
+            merged[k].append(x)
+
+    merged_ternary = []
+    default = None
+    for v, cond in merged.items():
+        if None in cond:
+            default = v
+            cond = [x for x in cond if x is not None]
+        if not cond:
+            continue
+        old = cond
+        cond = merge_conditions(cond)
+        if len(cond) > 1:
+            cond = '((' + ') or ('.join(cond) + '))'
+        else:
+            cond = cond[0]
+        merged_ternary.append(f'{v} if {cond} else')
+
+    # Make sure ternaries are ordered so that more specific conditions
+    # are hit first, if possible (i.e., object id > media id > other)
+    cond_types = {'id': [], 'media': [], 'other': []}
+    for x in merged_ternary:
+        if '.media.id' in x:
+            cond_types['media'].append(x)
+        elif '.id' in x:
+            cond_types['id'].append(x)
+        else:
+            cond_types['other'].append(x)
+    merged_ternary = (
+        cond_types['id'] + cond_types['media'] + cond_types['other']
+    )
+
+    merged = '(' + ' ('.join(merged_ternary) + f' {default}' + ')'
+    while merged.count(')') < merged.count('('):
+        merged += ')'
+
+    return merged
+
+
+def get_parameter_characteristics(param):
+    if isinstance(param, ParameterDefinition):
+        return {
+            'requirements': '',
+            'value': param.default_value,
+            'unit': param.default_unit,
+            'formula': (
+                None if not param.default_formula
+                else param.default_formula.equation
+            )
+        }
+    return {
+        'requirements': param.requirements,
+        'value': param.value,
+        'unit': param.unit,
+        'formula': (
+            None if not param.formula
+            else param.formula.equation
+        )
+    }
+
+
 def parameterize(cls, default_scenario=None):
     cls_name = cls.__name__
 
@@ -218,7 +412,8 @@ def parameterize(cls, default_scenario=None):
             self, name, domain=None,
             value=None, unit=None, formula=None,
             full_name=None, description=None,
-            requirements=None, domain_name=None
+            requirements=None, domain_name=None,
+            force_update=False
         ):
             # if (
             #     str(formula).endswith('.Volume')
@@ -251,6 +446,125 @@ def parameterize(cls, default_scenario=None):
                         name=domain_name, entity_type=cls_name,
                         requirements=requirements
                     )
+
+            if self.entity != cls:
+                if requirements:
+                    requirements = f'({requirements}) and '
+                requirements += f'(self.id == {self.entity.id})'
+
+            existing = self.get(name)
+            if self.entity != cls and isinstance(existing, ParameterDefinition):
+                existing = None
+
+            if existing and existing.domain == domain:
+                if matches_parameter_def(
+                    existing,
+                    value=value, unit=unit, formula=formula,
+                    requirements=requirements
+                ):
+                    # This parameter, with this exact definition,
+                    # already exists!
+                    return
+
+                # Otherwise, check if we can reconcile
+                # the existing definition and the new definition
+
+                ex_chars = get_parameter_characteristics(existing)
+                existing_formula = ex_chars['formula']
+
+                if formula is not None and existing_formula is None:
+                    # If the new definition has a formula
+                    # where the old definition had a static value,
+                    # check if the static value is the else condition
+                    # of the new formula.
+                    # If it is, that's ok, and we can clear the value
+                    # and use the formula!
+                    ex_val = existing.value
+                    if ex_val is not None:
+                        ex_val = str(ex_val)
+                        was_number = ex_val.replace('.', '').isnumeric()
+                        if was_number:
+                            ex_val = float(ex_val)
+                        if f'else {ex_val})' in formula:
+                            ex_chars['value'] = value
+                            existing.value = value
+                        elif was_number:
+                            ex_val = int(ex_val)
+                            if f'else {ex_val})' in formula:
+                                ex_chars['value'] = value
+                                existing.value = value
+
+                elif formula is None and existing_formula is not None:
+                    # If the old definition had a formula
+                    # where the new definition has a static value,
+                    # check if the static value is the else condition
+                    # of the old formula.
+                    # If it is, that's ok, and we can clear the value
+                    # and use the existing_formula!
+                    new_val = value
+                    if new_val is not None:
+                        new_val = str(new_val)
+                        is_number = new_val.replace('.', '').isnumeric()
+                        if is_number:
+                            new_val = float(new_val)
+                        if f'else {new_val})' in existing_formula:
+                            value = existing.value
+                            formula = existing_formula
+                        elif is_number:
+                            new_val = int(new_val)
+                            if f'else {new_val})' in existing_formula:
+                                value = existing.value
+                                formula = existing_formula
+
+                merged = None
+                old = None
+                # By passing existing_formula instead of formula,
+                # we prove that if this is true then all the other
+                # components must match
+                if matches_parameter_def(
+                    existing,
+                    value=value, unit=unit, formula=existing_formula,
+                    requirements=requirements
+                ):
+                    # Everything EXCEPT the formula matches!
+                    # Maybe we can merge them?
+                    try:
+                        merged = merge_formulas(existing_formula, formula)
+                    except Exception as e:
+                        # We don't know how to merge these
+                        import traceback
+                        traceback.print_exc()
+                        merged = None
+                    if merged is not None:
+                        # We figured out how to merge them!
+                        old = formula
+                        formula = merged or formula
+
+                new_def = {
+                    'requirements': requirements,
+                    'value': value,
+                    'unit': unit,
+                    'formula': formula
+                }
+                changelog = '<changelog>'
+                for k, v in new_def.items():
+                    old_v = ex_chars.get(k)
+                    sym = '==' if v == old_v else '>>'
+                    changelog += f'\n\t{k} : {old_v} {sym} {v}'
+                changelog +='\n</changelog>'
+                if merged is None:
+                    # The new definition is incompatible with the existing one
+                    if force_update:
+                        # We're just going to overwrite the existing definition
+                        print(
+                            f'WARNING! Updating existing value:\n{changelog}'
+                        )
+                    else:
+                        # We can't do this
+                        raise AssertionError(
+                            f'Trying to add incompatible definition for'
+                            f' "{name}" ({domain.name}):\n{changelog}'
+                        )
 
             pd_base = ParameterService.definitions.get(
                 variable_name=name,
@@ -297,10 +611,6 @@ def parameterize(cls, default_scenario=None):
                 # If this was called on an instance of the class
                 # (e.g., Entity().parameters.add),
                 # add a custom parameter for that instance
-                if requirements:
-                    requirements = f'({requirements}) and '
-                requirements += f'(self.id == {self.entity.id})'
-
                 current_scenario_id = _get_current_scenario(self.entity).id
 
                 cp = ParameterService.get_or_create(
