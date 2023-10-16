@@ -4,8 +4,8 @@ import traceback
 from flask import Blueprint, request
 from flask_security import login_required
 from werkzeug.utils import secure_filename
-from Scripts.custom.flask_api import ApiException, ApiResult
-from Scripts.trim_frontend import api
+from flask_api import ApiException, ApiResult
+from trim_frontend import api
 from ..utils.file_io import csv_to_df
 from ..utils.forms import assemble_json_form
 from ..utils.logging import make_logger
@@ -30,6 +30,8 @@ def parse():
         fields = []
         entries = 0
         preview = None
+        file_data = None
+        truncated = False
         try:
             fname = secure_filename(f.filename)
 
@@ -43,6 +45,14 @@ def parse():
                 preview = df.head().where(
                     pd.notnull(df), None
                 ).to_dict('records')
+                if entries < 10000:
+                    file_data = df.where(
+                        pd.notnull(df), None
+                    ).to_dict('records')
+                else:
+                    file_data = df.head(10000).where(
+                        pd.notnull(df), None
+                    ).to_dict('records')
 
         except Exception as e:
             logger.error(traceback.format_exc())
@@ -57,7 +67,8 @@ def parse():
             'filename': fname,
             'fields': fields,
             'entry_count': entries,
-            'preview': preview
+            'preview': preview,
+            'file_data': file_data
         }
 
     return ApiResult({'files': data})

@@ -1,0 +1,17 @@
+// TRIM.FaTE scenario properties (manually added)
+
+// TNC0
+// Recreation of Tier 1 Thresholds
+
+// Generated:  9/19/2022 2:31:23 PM
+
+// *****************************************************
+//  NOTE: These are manually added TRIM.FaTE properties;
+//   this tool will not verify or validate any of the information added below.
+// *****************************************************
+
+Version:1
+Scenario: TNC0
+Run: BaseRun
+
+// add other property-file input below this line ----------------------------------------

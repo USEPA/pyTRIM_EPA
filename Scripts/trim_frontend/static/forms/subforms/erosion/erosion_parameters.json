@@ -1,0 +1,249 @@
+{
+    "title": "Erosion Input",
+    "fields": [
+        {
+            "id": "erosion_params_file_opt1",
+            "label": "Total Effective Erosion Rate File",
+            "data_type": "file",
+            "required": false,
+            "help": "Indicate the file containing total effective erosion rate information. You may later choose to manually enter values on the screen for certain parameters, \n\trather than use the file. This file must contain the names of the surface parcels as well values for the erosion parameters you wish to provide. \n\tAny required parameters that are not imported will be assigned default values which you can later update"
+        },
+        {
+            "id": "erosion_params_file_opt2",
+            "label": "Unit Soil Loss & Sediment Delivery Ratio File",
+            "data_type": "file",
+            "required": false,
+            "help": "Indicate the file containing unit soil loss and sediment delivery rate information. You may later choose to manually enter values on the screen for certain parameters, \n\trather than use the file. This file must contain the names of the surface parcels as well values for the erosion parameters you wish to provide. \n\tAny required parameters that are not imported will be assigned default values which you can later update"
+        },
+        {
+            "id": "erosion_params_file_opt3",
+            "label": "Universal Soil Loss Equation Parameters & Sediment Delivery Ratio File",
+            "data_type": "file",
+            "required": false,
+            "help": "Indicate the file containing universal soil loss equation parameters and sediment delivery rate information. You may later choose to manually enter values on the screen for certain parameters, \n\trather than use the file. This file must contain the names of the surface parcels as well values for the erosion parameters you wish to provide. \n\tAny required parameters that are not imported will be assigned default values which you can later update"
+        },
+        {
+            "id": "have_user_file_opt2_USL",
+            "label": "Use Unit Soil Loss values from input file",
+            "data_type": "boolean",
+            "default": false,
+            "help": "Check this box to use values from input file."
+        },
+        {
+            "id": "have_user_file_opt2_SDR",
+            "label": "Use Sediment Delivery Ratio values from input file",
+            "data_type": "boolean",
+            "default": false,
+            "help": "Check this box to use values from input file."
+        },
+        {
+            "id": "have_user_file_opt3_R",
+            "label": "Use rainfall erosivity index values from input file",
+            "data_type": "boolean",
+            "default": false,
+            "help": "Check this box to use values from input file."
+        },
+        {
+            "id": "have_user_file_opt3_K",
+            "label": "Use erodibility index values from input file",
+            "data_type": "boolean",
+            "default": false,
+            "help": "Check this box to use values from input file."
+        },
+        {
+            "id": "have_user_file_opt3_S",
+            "label": "Use slope gradient values from input file",
+            "data_type": "boolean",
+            "default": false,
+            "help": "Check this box to use values from input file."
+        },
+        {
+            "id": "have_user_file_opt3_L",
+            "label": "Use slope length values from input file",
+            "data_type": "boolean",
+            "default": false,
+            "help": "Check this box to use values from input file."
+        },
+        {
+            "id": "have_user_file_opt3_LS",
+            "label": "Use topographical length-slope factor from input file",
+            "data_type": "boolean",
+            "default": false,
+            "help": "Check this box to use values from input file."
+        },
+        {
+            "id": "have_user_file_opt3_C",
+            "label": "Use cover/management factor from input file",
+            "data_type": "boolean",
+            "default": false,
+            "help": "Check this box to use values from input file."
+        },
+        {
+            "id": "have_user_file_opt3_P",
+            "label": "Use supporting practices factor from input file",
+            "data_type": "boolean",
+            "default": false,
+            "help": "Check this box to use values from input file."
+        },
+        {
+            "id": "have_user_file_opt3_USL",
+            "label": "Use unit soil loss values from input file",
+            "data_type": "boolean",
+            "default": false,
+            "help": "Check this box to use values from input file."
+        },
+        {
+            "id": "have_user_file_opt3_SDR",
+            "label": "Use sediment delivery ratio values from input file",
+            "data_type": "boolean",
+            "default": false,
+            "help": "Check this box to use values from input file."
+        },
+        {
+            "id": "field_name_opt1_PN",
+            "label": "Field Name for Parcel Names",
+            "data_type": "string",
+            "widget": "select",
+            "choices": ["Parcel Name"],
+            "required": false,
+            "help": "Indicate the field name for the total effective erosion rate values."
+        },
+        {
+            "id": "field_name_opt1_ER",
+            "label": "Field Name for Total Effective Erosion Rate (kg/m<sup>2</sup>-d)",
+            "data_type": "string",
+            "widget": "select",
+            "choices": ["Total Effective Erosion Rate"],
+            "required": false,
+            "help": "Indicate the field name for the total effective erosion rate values."
+        },
+        {
+            "id": "field_name_opt2_PN",
+            "label": "Field Name for Parcel Names",
+            "data_type": "string",
+            "widget": "select",
+            "choices": ["Parcel Name"],
+            "required": false,
+            "help": "Indicate the field name for the total effective erosion rate values."
+        },
+        {
+            "id": "field_name_opt2_USL",
+            "label": "Field Name for Unit Soil Loss (kg/m<sup>2</sup>-d)",
+            "data_type": "string",
+            "widget": "select",
+            "choices": ["Unit Soil Loss"],
+            "required": false,
+            "help": "Indicate the field name for unit soil loss values.",
+            "if_true": ["have_user_file_opt2_USL"]
+        },
+        {
+            "id": "field_name_opt2_SDR",
+            "label": "Field Name for Sediment Delivery Ratio (SDR) (unitless)",
+            "data_type": "string",
+            "widget": "select",
+            "choices": ["SDR"],
+            "required": false,
+            "help": "Indicate the field name for unit soil loss values.",
+            "if_true": ["have_user_file_opt2_SDR"]
+        },
+        {
+            "id": "field_name_opt3_PN",
+            "label": "Field Name for Parcel Names",
+            "data_type": "string",
+            "widget": "select",
+            "choices": ["Parcel Name"],
+            "required": false,
+            "help": "Indicate the field name for the total effective erosion rate values."
+        },
+        {
+            "id": "field_name_opt3_R",
+            "label": "Field Name for Rainfall Erosivity Index (100 ft-ton/acre)",
+            "data_type": "string",
+            "widget": "select",
+            "choices": ["R"],
+            "required": false,
+            "help": "Indicate the field name for the rainfall erosivity index values.",
+            "if_true": ["have_user_file_opt3_R"]
+        },
+        {
+            "id": "field_name_opt3_K",
+            "label": "Erodibility Index (tons/area/[100 ft-ton/acre])",
+            "data_type": "string",
+            "widget": "select",
+            "choices": ["K"],
+            "required": false,
+            "help": "Indicate the field name for the erodibility index values.",
+            "if_true": ["have_user_file_opt3_K"]
+        },
+        {
+            "id": "field_name_opt3_S",
+            "label": "Field Name for Slope Gradient (%)",
+            "data_type": "string",
+            "widget": "select",
+            "choices": ["S"],
+            "required": false,
+            "help": "Indicate the field name for the slope gradient values.",
+            "if_true": ["have_user_file_opt3_S"]
+        },
+        {
+            "id": "field_name_opt3_L",
+            "label": "Field Name for Slope Length (ft)",
+            "data_type": "string",
+            "widget": "select",
+            "choices": ["L"],
+            "required": false,
+            "help": "Indicate the field name for the slope gradient values.",
+            "if_true": ["have_user_file_opt3_L"]
+        },
+        {
+            "id": "field_name_opt3_LS",
+            "label": "Field Name for Topographical Length-Slope Factor (unitless)",
+            "data_type": "string",
+            "widget": "select",
+            "choices": ["LS"],
+            "required": false,
+            "help": "Indicate the field name for the slope gradient values.",
+            "if_true": ["have_user_file_opt3_LS"]
+        },
+        {
+            "id": "field_name_opt3_C",
+            "label": "Field Name for Cover/Management Factor (unitless)",
+            "data_type": "string",
+            "widget": "select",
+            "choices": ["C"],
+            "required": false,
+            "help": "Indicate the field name for the slope gradient values.",
+            "if_true": ["have_user_file_opt3_C"]
+        },
+        {
+            "id": "field_name_opt3_P",
+            "label": "Field Name for Supporting Practices Factor (unitless)",
+            "data_type": "string",
+            "widget": "select",
+            "choices": ["P"],
+            "required": false,
+            "help": "Indicate the field name for the slope gradient values.",
+            "if_true": ["have_user_file_opt3_P"]
+        },
+        {
+            "id": "field_name_opt3_USL",
+            "label": "Field Name for Unit Soil Loss (kg/m<sup>2</sup>-d)",
+            "data_type": "string",
+            "widget": "select",
+            "choices": ["Unit Soil Loss"],
+            "required": false,
+            "help": "Indicate the field name for unit soil loss values.",
+            "if_true": ["have_user_file_opt3_USL"]
+        },
+        {
+            "id": "field_name_opt3_SDR",
+            "label": "Field Name for Sediment Delivery Ratio (SDR) (unitless)",
+            "data_type": "string",
+            "widget": "select",
+            "choices": ["SDR"],
+            "required": false,
+            "help": "Indicate the field name for sediment delivery ratio values.",
+            "if_true": ["have_user_file_opt3_SDR"]
+        }
+    ]
+}

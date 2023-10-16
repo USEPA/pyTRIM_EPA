@@ -1,0 +1,7 @@
+TCDD
+
+1.Fixed -- chem name processor changed in util functions
+2. Fixed -- False connection between vegetation n6 surface soil and surrounding root soil in both directions. INVESTIGATE. It is correct, logically. Surface soil for tilled is thicker. But somehow no connection in legacy.
+3. Fixed -- air algorithm was missing. diffusion for organics. 3995.
+4. Soil to air algorithm 4000 not working for vegetationless compartments. fix will require change to algorithm definition. Make exception and hardcode like in plib.
+5. Fixed. Benthic invertebrate algorithms not initialized for TCDD in LEGACY run. Rerun legacy for TCDD only.
