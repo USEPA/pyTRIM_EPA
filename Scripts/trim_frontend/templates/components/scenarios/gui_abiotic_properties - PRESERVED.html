@@ -274,10 +274,10 @@
                             },{
                                 'type': 'data',
                                 'name': 'field',
-                                'value': 'fractionOrganicMatteronParticulates'
+                                'value': 'fractionOrganicMatterOnParticulates'
                             },{
                                 'type': 'input',
-                                'name': 'fractionOrganicMatteronParticulates',
+                                'name': 'fractionOrganicMatterOnParticulates',
                                 'value': data
                             }]
                             parcel_info = JSON.stringify(parcel_info)
@@ -515,7 +515,7 @@
                             'DustParticleConcentration': (e.dustLoad ? e.dustLoad : default_data.DustParticleConcentration),
                             'DustParticleDensity': (e.dustDensity ? e.dustDensity : default_data.DustParticleDensity),
                             'AirDensity': (e.airDensity ? e.airDensity : default_data.AirDensity),
-                            'DustParticleOrganicMatter': (e.fractionOrganicMatteronParticulates ? e.fractionOrganicMatteronParticulates : default_data.DustParticleOrganicMatter),
+                            'DustParticleOrganicMatter': (e.fractionOrganicMatterOnParticulates ? e.fractionOrganicMatterOnParticulates : default_data.DustParticleOrganicMatter),
                             'AirHeight': (e.airHeight ? e.airHeight : default_data.AirVEDefaultHeight),
                             'Tillage': (e.soilTillage ? e.soilTillage : default_data.Tillage),
                             'SurfaceSoilThick': (e.surfaceSoilThickness ? e.surfaceSoilThickness : (e.tillage == "Yes" ? default_data.SurfaceSoilTilledThick : default_data.SurfaceSoilUntilledThick)),

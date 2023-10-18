@@ -49,7 +49,7 @@ def create_parcel(scenario_id):
         ParcelService.commit()
         # Add default compartments, media and parameters
         initialize_parcel_contents(p)
-        media = CompartmentService.media.land_use_media_list
+        media = LAND_USE_TYPES
     except Exception as e:
         logger.error(traceback.format_exc())
 
@@ -67,7 +67,7 @@ def get_parcels(scenario_id):
         if not s:
             raise ApiException("Unknown Scenario")
         p = ParcelService.get_all(scenario_id=scenario_id)
-        m = CompartmentService.media.land_use_media_list
+        m = LAND_USE_TYPES
         parcels = []
         media = m
 
@@ -93,6 +93,8 @@ def update_parcel(id, scenario_id):
         # Get the specified parcel
         p = ParcelService.get(id)
         parcels_data = request.form.to_dict()
+
+        land_use = get_land_use(p)
 
         # Update the specified property
         field_name = parcels_data["field"]
@@ -126,8 +128,8 @@ def update_parcel(id, scenario_id):
             if parcels_data['landUse'] in ['Coniferous Forest', 'Deciduous Forest', 'Agriculture - General',
                                            'Grasses/Herbs', 'Tilled Soil', 'Untilled Soil', 'Impervious']:
                 # COMPARTMENT CHANGE
-                if not parcels_data['landUse'] == p.land_use:
-                    create_base_land_compartments(parcels_data, p)
+                if not parcels_data['landUse'] == land_use:
+                    create_base_land_compartments(parcels_data, p, land_use)
             if parcels_data['landUse'] not in ['Tilled Soil', 'Untilled Soil']:
                 ve = p.get_volume_element("SurfSoil")
                 if ve:
@@ -142,50 +144,55 @@ def update_parcel(id, scenario_id):
                         CompartmentService.delete(cmp, False)
 
         if field_name == "hasFarmFoodChain":
+            biotic_ve = dict(Land_Parcel_VolElem_defaults)
+            biotic_ve["SurfSoil"]["Compartments"] = dict(Farm_Biota_SurfSoil_Compartment_defaults["Compartments"])
             if parcels_data['hasFarmFoodChain'] == "Yes":
-                if p.get_volume_element("SurfSoil"):
-                    ve = p.get_volume_element("SurfSoil")
-                    c = CompartmentService.get_or_create(name="Farm", volume_element_id=ve.id, media_id=53)
-                if not p.get_volume_element("SurfSoil"):
+                surfsoil = p.get_volume_element("SurfSoil")
+                if surfsoil:
+                    initialize_parcel_contents(p, biotic_ve)
+                else:
                     raise ValueError("Cannot create or get Farm Compartment")
             if parcels_data['hasFarmFoodChain'] == "No":
-                if p.get_volume_element("SurfSoil"):
-                    ve = p.get_volume_element("SurfSoil")
-                    if ve.get_compartment("Farm"):
-                        cmp = ve.get_compartment("Farm")
-                        CompartmentService.delete(cmp, False)
+                for vek, vev in biotic_ve.items():
+                    ve = p.get_volume_element(vek)
+                    if ve:
+                        for k, v in biotic_ve[vek]["Compartments"].items():
+                            cmp = ve.get_compartment(v["name"])
+                            if cmp:
+                                logger.info(f"Deleted {cmp.name}")
+                                CompartmentService.delete(cmp, False)
         if field_name == "hasFishFoodWeb":
             biotic_ve = dict(Water_Parcel_VolElem_defaults)
             biotic_ve["Sed"]["Compartments"] = dict(Aquatic_Biota_Sed_Compartment_defaults["Compartments"])
             biotic_ve["SW"]["Compartments"] = dict(Aquatic_Biota_SW_Compartment_defaults["Compartments"])
             if parcels_data['hasFishFoodWeb'] == "Yes":
-                if p.get_volume_element("SW"):
-                    # ve = p.get_volume_element("SW")
-                    # c = CompartmentService.get_or_create(name="Fish", volume_element_id=ve.id, media_id=54)
+                sw = p.get_volume_element("SW")
+                if sw:
                     initialize_parcel_contents(p, biotic_ve)
-                if not p.get_volume_element("SW"):
+                else:
                     raise ValueError("Cannot create or get Fish Compartment")
             if parcels_data['hasFishFoodWeb'] == "No":
                 for vek, vev in biotic_ve.items():
-                    if p.get_volume_element(vek):
-                        ve = p.get_volume_element(vek)
+                    ve = p.get_volume_element(vek)
+                    if ve:
                         for k, v in biotic_ve[vek]["Compartments"].items():
-                            if ve.get_compartment(v["name"]):
-                                cmp = ve.get_compartment(v["name"])
+                            cmp = ve.get_compartment(v["name"])
+                            if cmp:
                                 logger.info(f"Deleted {cmp.name}")
                                 CompartmentService.delete(cmp, False)
         if field_name == "hasWetland":
             if parcels_data['hasWetland'] == "Yes":
-                if p.get_volume_element("SurfSoil"):
-                    ve = p.get_volume_element("SurfSoil")
-                    c = CompartmentService.get_or_create(name="Wetland", volume_element_id=ve.id, media_id=58)
-                if not p.get_volume_element("SurfSoil"):
+                ve = p.get_volume_element("SurfSoil")
+                if ve:
+                    m = CompartmentService.media.get_or_create(category='Surface_Soil|Wetland')
+                    c = CompartmentService.get_or_create(name="Wetland", volume_element_id=ve.id, media_id=m.id)
+                else:
                     raise ValueError("Cannot create or get Wetland Compartment")
             if parcels_data['hasWetland'] == "No":
-                if p.get_volume_element("SurfSoil"):
-                    ve = p.get_volume_element("SurfSoil")
-                    if ve.get_compartment("Wetland"):
-                        cmp = ve.get_compartment("Wetland")
+                ve = p.get_volume_element("SurfSoil")
+                if ve:
+                    cmp = ve.get_compartment("Wetland")
+                    if cmp:
                         CompartmentService.delete(cmp, False)
         if field_name == "description":
             p.description = parcels_data['description']
@@ -198,7 +205,7 @@ def update_parcel(id, scenario_id):
         Air_params = [('dustLoad', "DustLoad"),
                       ("dustDensity", "DustDensity"),
                       ("airDensity", "AirDensity"),
-                      ("fractionOrganicMatteronParticulates", "FractionOrganicMatteronParticulates")]
+                      ("fractionOrganicMatterOnParticulates", "FractionOrganicMatterOnParticulates")]
         if field_name in [k for k, v in Air_params]:
             par_name = [v for k, v in Air_params if k == field_name][0]
             # TODO the below part generates error due to missing par for dustLoad, dustDensity etc...
@@ -416,6 +423,29 @@ def delete_parcel(id, scenario_id):
     return "success"
 
 
+def get_land_use(pcl):
+    land = False
+    land_use = 'Impervious'
+    for comp in pcl.compartments:
+        if comp.media.isa('Surface_Soil'):
+            land = True
+        elif comp.media.isa('Coniferous_Forest'):  # Check land use
+            land_use = 'Coniferous Forest'
+        elif comp.media.isa('Deciduous_Forest'):
+            land_use = 'Deciduous Forest'
+        elif comp.media.isa('Agriculture'):
+            land_use = 'Agriculture - General'
+        elif comp.media.isa('Grass'):
+            land_use = 'Grasses/Herbs'
+        elif comp.media.isa('Tilled_Soil'):
+            land_use = 'Tilled Soil'
+        elif comp.media.isa('Untilled_Soil'):
+            land_use = 'Untilled Soil'
+    if not land:
+        land_use = 'N/A'  # No land use for air-only and water-only parcels
+    return land_use
+
+
 def initialize_parcel_contents(new_parcel, vol_elem_defaults=None):
     if vol_elem_defaults is None:
         vol_elem_defaults = dict(Land_Parcel_VolElem_defaults)
@@ -445,9 +475,30 @@ def initialize_parcel_contents(new_parcel, vol_elem_defaults=None):
                 ter_obj = [pp for pp in ParameterService.definitions.get_all() if pp.full_name == "TotalErosionRate"]
                 ter = ParameterService.get_or_create(definition_id=ter_obj[0].id, scenario_id=new_parcel.scenario_id,
                                                      requirements=f'(self.id == {nc.id})',
-                                                     value=new_parcel.calc_default_erosion_rate_sdr(),
+                                                     value=calc_default_erosion_rate_sdr(new_parcel),
                                                      unit="kg/m^2/day")
            # elif nc.name == "Surface_water" or nc.name == "Sediment":
+
+
+def calc_default_erosion_rate_sdr(pcl):
+    for c in pcl.compartments:
+        if not c.media.isa("Soil_Surface"):
+            continue
+        unit_soil_loss = c.parameters["unitSoilLoss"].default_value
+        area_in_sq_mile = (pcl.area / 1E6) / 2.58998811
+        if area_in_sq_mile <= 0.1:
+            intercept_coef = 2.1
+        elif 0.1 < area_in_sq_mile <= 1:
+            intercept_coef = 1.9
+        elif 1 < area_in_sq_mile <= 10:
+            intercept_coef = 1.4
+        elif 10 < area_in_sq_mile <= 100:
+            intercept_coef = 1.2
+        else:
+            intercept_coef = 0.6
+        slope_coef = c.parameters["sedimentDeliveryRatioSlopeCoef"].default_value
+        sed_delivery_ratio = intercept_coef * (pcl.area ** (-1 * slope_coef))
+        return unit_soil_loss * sed_delivery_ratio
 
 
 def delete_parcel_contents(del_parcel):
@@ -470,18 +521,18 @@ def delete_parcel_contents(del_parcel):
         VolumeElementService.delete(ve, False)
 
 
-def create_base_land_compartments(parcels_data, p):
+def create_base_land_compartments(parcels_data, p, land_use):
     ve_surfsoil = VolumeElementService.get(name="SurfSoil", parcel_id=p.id)
     c_surfsoil = CompartmentService.get(name="Soil_Surface", volume_element_id=ve_surfsoil.id)
     custom_param_erosion = ParameterService.get(requirements=f'(self.id == {c_surfsoil.id})',
                                                 definition_id=517)
     # delete existing compartments
-    if p.land_use in ['Tilled Soil', 'Untilled Soil', 'Impervious']:
+    if land_use in ['Tilled Soil', 'Untilled Soil', 'Impervious']:
         # Revert Soil_surface compartment to default media (Surface_Soil [id = 7])
         c_surfsoil.media_id = 7  # Surface Soil
         # if switching from Impervious, calculate Total erosion rate
-        if p.land_use == 'Impervious':
-            custom_param_erosion.value = p.calc_default_erosion_rate_sdr()
+        if land_use == 'Impervious':
+            custom_param_erosion.value = calc_default_erosion_rate_sdr(p)
     else:
         # it is flora so delete compartments with a flora parent
         for c in p.compartments:

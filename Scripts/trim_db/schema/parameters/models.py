@@ -290,6 +290,10 @@ class ParameterDefinition(Model):
     default_formula = sa.orm.relationship('Formula')
 
     @property
+    def value(self):
+        return self.default_value
+
+    @property
     def quantity(self):
         return self.default_quantity
 
