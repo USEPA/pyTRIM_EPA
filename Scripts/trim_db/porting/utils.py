@@ -465,6 +465,7 @@ GLOBAL_REPLACE = {
     'rho_colloid': 'rho_Colloid',
     'Depurationrate': 'DepurationRate',
     'Fractionofareaavailableforerosion': 'FractionofAreaAvailableforErosion',
+    'FractionOrganicMatteronParticulates': 'FractionOrganicMatterOnParticulates',
 
     '.Height': '.height',
 
