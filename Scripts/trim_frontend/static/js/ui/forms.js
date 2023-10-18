@@ -739,6 +739,96 @@ window.TRIM = (function(trim) {
         }
     };
 
+    forms.tableDraw = function(data, template, prefix) {
+        if (!template.tagName.toLowerCase() == 'form' &&
+            !template.hasAttribute('data-slot')) {
+            return;
+        }
+
+        if (!template.hasAttribute('data-async-form')) {
+            template.setAttribute('data-async-form', 'true');
+        }
+
+        let tableSlot = document.querySelector('#'+data.table_id);
+
+        if (data.pivot) {
+            tableSlot.innerHTML += data.header;
+
+            let tbody = create_element('tbody', tableSlot);
+            let fields = data.fields || [];
+            for (var i = 0, len = fields.length; i < len; i++) {  
+                let tr = create_element('tr', tbody);        
+                let td = create_element('td', tr)
+                forms.renderTableHeader(fields[i], td);
+            }
+        }
+        else {
+            let thead = create_element('thead', tableSlot);
+            let tr = create_element('tr', thead);
+            let fields = data.fields || [];
+            for (var i = 0, len = fields.length; i < len; i++) {          
+                let th = create_element('th', tr)
+                forms.renderTableHeader(fields[i], th);
+            }
+        }
+    };
+
+    // TODO: Need to remove embedded HTML in help text
+    forms.renderTableHeader = function(fieldDef, th) {
+        let labelId = fieldDef.id;
+        if (typeof labelId !== 'string' && !(labelId instanceof String)) {
+            labelId = JSON.stringify(fieldDef.id);
+        }
+        let labelText = fieldDef.label;
+        let tooltip = fieldDef.tooltip;
+        let default_val = JSON.stringify(fieldDef.default);
+        let help = fieldDef.help;
+
+        let label = create_element("label", th);
+        label.innerHTML = labelText;
+        label.setAttribute('data-id', labelId);
+        label.setAttribute('data-default', default_val);
+
+        label.setAttribute('data-toggle', 'tooltip');
+        label.setAttribute('data-placement', 'auto');
+        label.setAttribute('data-html', 'true');
+        if (tooltip) {
+            label.title = "";
+            label.setAttribute('data-original-title', tooltip);
+        }
+
+        if (help) {
+            forms.renderTableHelp(help, labelText, th)
+        }
+        return label;
+    }
+
+    forms.renderTableHelp = function(note, title, node){
+        let marker = create_element("sup", node);
+
+        let toggle = create_element("a", marker);
+        toggle.href = 'javascript:void(0);';
+        toggle.setAttribute('data-toggle', 'popover');
+        toggle.setAttribute('data-original-title', title);
+        toggle.setAttribute('data-content', note);
+
+        let symbol = create_element("i", toggle);
+        symbol.className = 'fa fa-question';
+    }
+
+    // Helper method
+    function create_element(EleToCreate, parent) {
+        let child = document.createElement(EleToCreate);
+        return parent.appendChild(child);
+    }
+
+    // Grab default value stuck in column header
+    forms.fetchDefault = function(id){
+        let ele = $('[data-id="'+id+'"]')[0];
+        let val = ele.getAttribute("data-default");
+        return JSON.parse(val);
+    }
+
     // On dom load, auto-draw forms that are labelled async
     var formLoadEvent = document.createEvent('Event');
     formLoadEvent.initEvent('form:loaded', true, true);
@@ -762,7 +852,12 @@ window.TRIM = (function(trim) {
             try {
                 var data = this.responseJSON;
                 if (data && data[src]) {
-                    forms.draw(data[src], template);
+                    if (data[src].table_id) {
+                        forms.tableDraw(data[src], template);
+                    }
+                    else {
+                        forms.draw(data[src], template);
+                    }
                     template.className = template.className + ' form-loaded';
                     template.dispatchEvent(formLoadEvent);
                 }

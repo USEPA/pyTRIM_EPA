@@ -5,7 +5,7 @@ from ..utils.forms import json_form
 
 __all__ = [
     'ScenarioDefinitionForm', 'ScenarioInfoForm',
-    'ScenarioParcelsForm', 'ScenarioMeteorologicalSettingsForm',
+    'ScenarioMeteorologicalSettingsForm',
     'ScenarioSeasonalDynamicsForm', 'ScenarioAbioticPropertiesForm',
     'ScenarioEmissionsForm', 'ScenarioErosionForm',
     'ScenarioExportSettingsForm'
@@ -55,13 +55,6 @@ class ScenarioAbioticPropertiesForm(FlaskForm):
     f'{forms}/scenario_seasonal_dynamics_form.json'
 ))
 class ScenarioSeasonalDynamicsForm(FlaskForm):
-    pass
-
-
-@json_form(os.path.abspath(
-    f'{forms}/scenario_parcels_form.json'
-))
-class ScenarioParcelsForm(FlaskForm):
     pass
 
 

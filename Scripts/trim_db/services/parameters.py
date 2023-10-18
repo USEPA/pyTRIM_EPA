@@ -49,6 +49,11 @@ class FormulaService(GenericService):
 class ParameterService(GenericService):
     __model__ = CustomParameter
 
+    @classmethod
+    def commit(cls):
+        super().commit()
+        CacheManager.clear_cache(f'entity_param_dicts')
+
     class domains(GenericService):
         __model__ = ParameterDomain
 
@@ -343,6 +348,49 @@ def parameterize(cls, default_scenario=None):
 
     setattr(cls, 'domains', classproperty(get_domains))
 
+    @CacheManager.with_caching(f'entity_param_dicts')
+    def get_param_dict(entity):
+        if entity == cls:
+            # If called on the class
+            # (e.g., Entity.parameters),
+            # return all possible definitions
+            return {
+                pd.name: pd
+                for d in sorted(
+                    # Sort to make sure sub-domains override parents
+                    entity.domains,
+                    key=lambda x: len(str(x.requirements or ''))
+                )
+                for pd in d.parameter_definitions
+            }
+        else:
+            # If called on an instance
+            # (e.g., Entity().parameters),
+            # return custom implementations of each definition,
+            # or the definition itself
+            # if no specific version applies
+            p = {}
+            got_custom = {}
+            for d in sorted(
+                # Sort to make sure sub-domains override parents
+                entity.domains,
+                key=lambda x: len(str(x.requirements or ''))
+            ):
+                for pd in d.parameter_definitions:
+                    if pd.name not in got_custom:
+                        # If a higher domain had a custom parameter
+                        # for this entity, don't overwrite it with
+                        # the default for this subdomain;
+                        # only custom parameters should overwrite
+                        # custom parameters
+                        p[pd.name] = pd
+                    for cp in pd.instances:
+                        if cp.validate(entity):
+                            got_custom[pd.name] = True
+                            p[pd.name] = cp
+                            break
+            return p
+
     # A class that allows you to get/set parameter definitions
     # (both globally for the class and custom for an instance of the class)
     class ParameterManager:
@@ -352,46 +400,7 @@ def parameterize(cls, default_scenario=None):
 
         @property
         def _params(self):
-            if self.entity == cls:
-                # If called on the class
-                # (e.g., Entity.parameters),
-                # return all possible definitions
-                return {
-                    pd.name: pd
-                    for d in sorted(
-                        # Sort to make sure sub-domains override parents
-                        self.entity.domains,
-                        key=lambda x: len(str(x.requirements or ''))
-                    )
-                    for pd in d.parameter_definitions
-                }
-            else:
-                # If called on an instance
-                # (e.g., Entity().parameters),
-                # return custom implementations of each definition,
-                # or the definition itself
-                # if no specific version applies
-                p = {}
-                got_custom = {}
-                for d in sorted(
-                    # Sort to make sure sub-domains override parents
-                    self.entity.domains,
-                    key=lambda x: len(str(x.requirements or ''))
-                ):
-                    for pd in d.parameter_definitions:
-                        if pd.name not in got_custom:
-                            # If a higher domain had a custom parameter
-                            # for this entity, don't overwrite it with
-                            # the default for this subdomain;
-                            # only custom parameters should overwrite
-                            # custom parameters
-                            p[pd.name] = pd
-                        for cp in pd.instances:
-                            if cp.validate(self.entity):
-                                got_custom[pd.name] = True
-                                p[pd.name] = cp
-                                break
-                return p
+            return get_param_dict(self.entity)
 
         def __len__(self):
             return len(self._params)
