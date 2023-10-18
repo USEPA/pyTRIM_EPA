@@ -24,22 +24,16 @@ def parse_chemicals(
         prop_entity = chem  # Attach properties to this chemical
         if scenario is not None:
             if scenario.chemicals and chem not in scenario.chemicals:
-                # Add parameter definitions, but ignore the specific parameters
-                prop_entity = Chemical
-            else:
-                # Make sure this is set so we don't add global parameters
-                chem.current_scenario(scenario)
-
-        elif 'mercury' not in name.lower():  # REMOVE FOR PROD
-            continue
+                continue
+            # Make sure this is set so we don't add global parameters
+            chem.current_scenario(scenario)
 
         for prop, prop_data in params.items():
             if prop in CHEMICAL_PROPS_DONT_TRANSFER:
                 continue
 
-            elif prop == 'category':
-                if isinstance(prop_entity, Chemical):
-                    chem.category = prop_data['value']
+            if prop == 'category':
+                chem.category = prop_data['value']
                 continue
 
             val = prop_data.get('value')

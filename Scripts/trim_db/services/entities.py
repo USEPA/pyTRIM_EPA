@@ -38,9 +38,6 @@ class CompartmentService(GenericService):
     class media(GenericService):
         __model__ = Media
 
-        land_use_media_list = ['Impervious', 'Tilled Soil', 'Untilled Soil', 'Agriculture (General)', 'Grasses/Herbs',
-                               'Deciduous Forest', 'Coniferous Forest']
-
         @classmethod
         def create(
             cls, *, category=None,
@@ -49,14 +46,19 @@ class CompartmentService(GenericService):
             if category is not None:
                 m = None
                 for name in category.split('|'):
+                    parent = m
                     m = cls.get_or_create(
                         name=name,
-                        parent_id=m.id if m is not None else None
+                        no_commit=True
                     )
+                    if m.parent_id is None and parent:
+                        m.parent = parent
+                if not no_commit:
+                    cls.commit()
                 return m
             else:
                 return super().create(
-                    no_commit=False, check_unique=True, **kwargs
+                    no_commit=no_commit, check_unique=check_unique, **kwargs
                 )
 
         @classmethod

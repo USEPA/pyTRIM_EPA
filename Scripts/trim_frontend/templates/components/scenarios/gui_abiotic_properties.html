@@ -80,7 +80,7 @@
                         'data': "DustParticleOrganicMatter",
                         'bSortable': false,
                         'render': function (data, type, row) {
-                            let parcel_info = create_parcel_object('fractionOrganicMatteronParticulates', row, data);
+                            let parcel_info = create_parcel_object('fractionOrganicMatterOnParticulates', row, data);
                             let this_cell_data = row.hasAir == "Yes" ? data : "N/A"
                             let this_cell_prop = row.hasAir == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
                             let this_err_html = 'onblur="ErrorValidation.isValidFraction(this)"';
@@ -194,7 +194,7 @@
                     if (parcel_info) {
                         parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
                         console.log(parcel_info)
-                        TRIM.api.updateParcel(parcel_info)
+                        TRIM.api.updateParcel('{{ scenario.id }}', parcel_info)
                         table_data = get_Data_from_table('#AbioticTable')
                         TableRedraw(table_data)
                     }
@@ -267,7 +267,7 @@
                             'DustParticleConcentration': (e.dustLoad ? e.dustLoad : TRIM.forms.fetchDefault('DustParticleConcentration')),
                             'DustParticleDensity': (e.dustDensity ? e.dustDensity : TRIM.forms.fetchDefault('DustParticleDensity')),
                             'AirDensity': (e.airDensity ? e.airDensity : TRIM.forms.fetchDefault('AirDensity')),
-                            'DustParticleOrganicMatter': (e.fractionOrganicMatteronParticulates ? e.fractionOrganicMatteronParticulates : TRIM.forms.fetchDefault('DustParticleOrganicMatter')),
+                            'DustParticleOrganicMatter': (e.fractionOrganicMatterOnParticulates ? e.fractionOrganicMatterOnParticulates : TRIM.forms.fetchDefault('DustParticleOrganicMatter')),
                             'AirHeight': (e.airHeight ? e.airHeight : TRIM.forms.fetchDefault('AirHeight')),
                             'Tillage': (e.soilTillage ? e.soilTillage : TRIM.forms.fetchDefault('Tillage')),
                             'SurfaceSoilThick': (e.surfaceSoilThickness ? e.surfaceSoilThickness : TRIM.forms.fetchDefault('SurfaceSoilThick')[till_val]),

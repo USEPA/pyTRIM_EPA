@@ -238,8 +238,8 @@
                 parcel.feature.properties.wetland = "No";
                 map.closePopup();
                 // WRITE TO DATABASE
-                // TRIM.api.createParcels(shapes.features.reverse()[0])
-                TRIM.api.createParcels(parcel.toGeoJSON()).on('load', function() {
+                // TRIM.api.createParcels('{{ scenario.id }}', shapes.features.reverse()[0])
+                TRIM.api.createParcels('{{ scenario.id }}', parcel.toGeoJSON()).on('load', function() {
                     let resp = JSON.parse(this.responseText)
                     if (resp) {
                         $('#root').data('createdParcel',resp);
@@ -600,7 +600,7 @@
                     let parcel_info = $(this).data('parcelinfo')
                     if (parcel_info) {
                         parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                        TRIM.api.updateParcel(parcel_info)
+                        TRIM.api.updateParcel('{{ scenario.id }}', parcel_info)
                         mapTableRedraw()
                     }
                 })

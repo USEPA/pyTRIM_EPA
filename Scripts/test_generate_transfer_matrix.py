@@ -19,6 +19,9 @@ if input('Continue? [Y/N] ').upper() != 'Y':
 # import termios
 import time
 import types
+import numpy as np
+from scipy.integrate import odeint
+import pandas as pd
 
 from trim_db.porting import *
 from trim_db.schema import *
@@ -30,8 +33,8 @@ CHEMICAL_CATEGORY = 'Mercury'
 
 
 def make_transfer_matrix(scenario):
-    import pandas as pd
-    import numpy as np
+    # import pandas as pd
+    # import numpy as np
 
     chem_list = list(sorted(
         scenario.chemicals, key=lambda xcl: xcl.name
@@ -70,8 +73,9 @@ def make_transfer_matrix(scenario):
         for x, sender in enumerate(comp_list):
             tm_x = int(chem_idx * n_comp + x)
             index_names[tm_x] = chem.name + '_' + sender.standard_name
-            dr = sender.deposition_rate(chemical=chem)
-            source_matrix[tm_x] += dr
+            dr = sender.surfaceDepositionRate(chem)
+            if not (str(dr) == 'nan'):
+                source_matrix[tm_x] += dr.magnitude
             if not sender.media.can_emit:
                 continue
             for y, receiver in enumerate(comp_list):
@@ -146,7 +150,45 @@ def make_transfer_matrix(scenario):
     df_sm = pd.DataFrame(
         source_matrix, index=index_names,
         columns=['deposition_rate_g_day-1'])
-    return df_tm
+    return transition_matrix, df_tm, source_matrix, df_sm
+
+
+def ode_sim(tm, df_tm, sm,
+            df_sm, nyear):  # need to add start time and end time of simulation as arguments. currently assuming 50 years
+
+    tm = np.nan_to_num(tm, copy=True, nan=0.0, posinf=None, neginf=None)  # replace nans with zero
+    steps_per_day = 24  # steps per day for integration and output -- will need to be input / argument eventually
+
+    def m(t):  # transition matrix
+        m = tm  #
+        return (m)
+
+    def s(t):  # source term
+        s = sm
+        #        s=sm/steps_per_day # adjusts emission rate to g/integration time step --not required odeint understands from the linspace statement that the
+        return (s)
+
+    def dn_dt(n, t):  # derivative function
+        n_prime = np.matmul(m(t), n) + s(t)
+        return (n_prime)
+
+    ndim = sm.shape[0]  # number of compartments
+
+    ts = np.linspace(0, 365 * nyear,
+                     365 * nyear * steps_per_day)  # time line in hours for nyear years, tstart and tend should be inputs
+
+    n0 = np.zeros(ndim)  # zero mass initial condition
+    nt = odeint(dn_dt, n0, ts, hmax=24)  # mass at time t
+
+    df_nt = pd.DataFrame(nt)
+    cols = list(df_sm.index)
+    df_nt.columns = cols
+    df_nt['time_in_hours'] = ts
+    cols_ordered = ['time_in_hours'] + cols
+    #
+    df_nt = df_nt[cols_ordered]
+
+    return (nt, df_nt)
 
 
 if __name__ == '__main__':
@@ -159,6 +201,15 @@ if __name__ == '__main__':
     SCENARIO_NAME = 'Foundries_SS'
     scn = ScenarioService.get(name=SCENARIO_NAME)
 
-    tm = make_transfer_matrix(scn)
-    tm.to_csv("Transfer_Matrix_test.csv")
+    # get transition matrix and source matrix
+    (tm, df_tm, sm, df_sm) = make_transfer_matrix(scn)
+
+    # get result
+    (nt, df_nt) = ode_sim(tm, df_tm, sm, df_sm, 5)
+
+    # Output components as csv
+    df_tm.to_csv("Transfer_Matrix_test.csv")
+    df_sm.to_csv("Source_Matrix_test.csv")
+    df_nt.to_csv("Concentration_Matrix_test.csv")
+
     print(tm)
