@@ -436,7 +436,7 @@
 
                     parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data                
                     console.log(parcel_info)
-                    TRIM.api.updateParcel(parcel_info)
+                    TRIM.api.updateParcel('{{ scenario.id }}', parcel_info)
                 } else {
                     return
                 }
@@ -487,7 +487,7 @@
                     let is_valid_row = elementIsValid(this);
                     if (is_valid_row){
                         console.log(parcel_info)
-                        TRIM.api.updateParcel(parcel_info)   
+                        TRIM.api.updateParcel('{{ scenario.id }}', parcel_info)   
                     }
                 })
             }

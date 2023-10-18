@@ -290,6 +290,10 @@ class ParameterDefinition(Model):
     default_formula = sa.orm.relationship('Formula')
 
     @property
+    def value(self):
+        return self.default_value
+
+    @property
     def quantity(self):
         return self.default_quantity
 
@@ -304,9 +308,10 @@ class ParameterDefinition(Model):
     def evaluate(self, entity):
         if not self.domain.validate(entity):
             raise TypeError(
-                f'"{self.name}" is not defined for {type(entity)} entities'
+                f'"{self.name}" is not defined'
+                f' for {type(entity)} entities'
             )
-        for customized in self.instance:
+        for customized in self.instances:
             if customized.validate(entity):
                 return customized.quantity
         return self.default_quantity
@@ -337,6 +342,14 @@ class CustomParameter(Model):
         'Scenario', backref=sa.orm.backref('custom_params', lazy='dynamic')
     )
 
+    @property
+    def domain(self):
+        return self.definition.domain
+
+    @property
+    def domain_id(self):
+        return self.definition.domain_id
+
     requirements = sa.Column(sa.String())
 
     def validate(self, entity):
@@ -366,6 +379,14 @@ class CustomParameter(Model):
     @property
     def default_quantity(self):
         return self.definition.default_quantity
+
+    def evaluate(self, entity):
+        if not self.validate(entity):
+            raise TypeError(
+                f'"{self.definition.name}" is not customized'
+                f' for {type(entity)} entities'
+            )
+        return self.quantity
 
     def __repr__(self):
         return (
