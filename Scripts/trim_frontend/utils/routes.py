@@ -4,7 +4,8 @@ def init_routes(app):
     from ..errors.handlers import errors
     from ..file_io.routes import file_api
     from ..external_API.routes import external_api_soil, external_api_r
-    from ..scenarios.routes import scenario, scenario_api, parcels_api
+    from ..parcels.routes import parcels_api
+    from ..scenarios.routes import scenario, scenario_api
 
     app.register_blueprint(base)
     app.register_blueprint(errors)

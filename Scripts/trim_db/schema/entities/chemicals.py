@@ -1,5 +1,6 @@
 import sqlalchemy as sa
 from ..utils.base import Model
+from ..utils.serialize import register_serializer
 
 __all__ = ['Chemical']
 
@@ -37,20 +38,23 @@ class Chemical(Model):
 
         return False
 
-    def as_serializable(self):
-        return {
-            'id': self.id,
-            'name': self.name,
-            'cas_number': self.cas_number,
-            'category': self.category
-        }
-
     def __repr__(self):
         return (
             f'{self.__class__.__qualname__}('
             f'"{self.name}", {self.cas_number}'
             ')'
         )
+
+
+@register_serializer(Chemical)
+def serialize_chemical(chem: Chemical):
+    s = {
+        'id': chem.id,
+        'name': chem.name,
+        'cas_number': chem.cas_number,
+        'category': chem.category
+    }
+    return s
 
 
 scenario_chemicals = sa.Table(

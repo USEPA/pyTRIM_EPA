@@ -1,0 +1,188 @@
+{
+    "title": "Aquatic Food Web Properties",
+    "table_id": "AquaticTable",
+    "pivot": true,
+    "header": "<thead><tr><th>Property</th></tr></thead>",
+    "fields": [
+        {
+            "id": {
+                "short_name": "MacrophyteBiomass",
+                "comp_name": "Macrophyte",
+                "type": "aquatic_biomass"
+            },
+            "label": "Standing Biomass – Macrophyte",
+            "data_type": "float",
+            "default": 0.5,
+            "tooltip": "kg ww/m<sup>2</sup>",
+            "help": "Enter the macrophyte standing biomass. Macrophyte include hydrilla and milfoil. The default value of 0.5 is from professional judgement: biomass assumptions are based on typical biomass by trophic level found in northeastern U.S. lakes and ponds and the diet habits of the fish and fish sizes are simplified to match. Note that more biomass would dilute bioaccumulation. Note that while macrophytes can remove some chemical from the water, they generally do not transport chemicals from sediments through the blades/leaves of plants, so they are not an important part of chemical transport in aquatic ecosystems in most U.S. regions. The exception is the southern US, where carp may regularly consume macrophytes."
+        },
+        {
+            "id": {
+                "short_name": "ZooplanktonBiomass",
+                "comp_name": "Zooplankton",
+                "type": "aquatic_biomass"
+            },
+            "label": "Standing Biomass – Zooplankton",
+            "data_type": "float",
+            "default": 0.0064,
+            "tooltip": "kg ww/m<sup>2</sup>",
+            "help": "Enter the zooplankton standing biomass. Zooplankton include water fleas, rotifers, and protozoans. The default value of 0.0064 is from professional judgement: biomass assumptions are based on typical biomass by trophic level found in northeastern U.S. lakes and ponds and the diet habits of the fish and fish sizes are simplified to match. Note that more biomass would dilute bioaccumulation."
+        },
+        {
+            "id": {
+                "short_name": "ZooplanktonWeight",
+                "comp_name": "Zooplankton",
+                "type": "aquatic_bw"
+            },
+            "label": "Single organism body weight – Zooplankton",
+            "data_type": "float",
+            "default": 5.7E-08,
+            "tooltip": "kg",
+            "help": "Enter the zooplankton single organism body weight. Zooplankton include water fleas, rotifers, and protozoans. The default value of 5.7E-08 is from professional judgement: organism body weights are estimated based on many typical species that have the specified default diets, and also with the basic assumption that body weights increase by roughly an order of magnitude between herbivores to omnivores to carnivores."
+        },
+        {
+            "id": {
+                "short_name": "BenthicInvertebrateBiomass",
+                "comp_name": "Benthic_Invertebrate",
+                "type": "aquatic_biomass"
+            },
+            "label": "Standing Biomass – Benthic invertebrate",
+            "data_type": "float",
+            "default": 0.02,
+            "tooltip": "kg ww/m<sup>2</sup>",
+            "help": "Enter the benthic invertebrate standing biomass. Benthic invertebrate include aquatic insects (e.g., nymphs of mayflies, caddisflies, dragonflies, and other species that emerge from the water when they become adults), crustaceans (e.g., amphipods, crayfish), and mollusks (e.g., snails, mussels). The default value of 0.02 is from professional judgement: biomass assumptions are based on typical biomass by trophic level found in northeastern U.S. lakes and ponds and the diet habits of the fish and fish sizes are simplified to match. Note that more biomass would dilute bioaccumulation."
+        },
+        {
+            "id": {
+                "short_name": "BenthicInvertebrateWeight",
+                "comp_name": "Benthic_Invertebrate",
+                "type": "aquatic_bw"
+            },
+            "label": "Single organism body weight – Benthic invertebrate",
+            "data_type": "float",
+            "default": 2.6E-04,
+            "tooltip": "kg",
+            "help": "Enter the benthic invertebrate single organism body weight. Benthic invertebrate include aquatic insects (e.g., nymphs of mayflies, caddisflies, dragonflies, and other species that emerge from the water when they become adults), crustaceans (e.g., amphipods, crayfish), and mollusks (e.g., snails, mussels). The default value of 2.6E-04 is from professional judgement: organism body weights are estimated based on many typical species that have the specified default diets, and also with the basic assumption that body weights increase by roughly an order of magnitude between herbivores to omnivores to carnivores."
+        },
+        {
+            "id": {
+                "short_name": "WaterColumnHerbivoreBiomass",
+                "comp_name": "Water_Column_Herbivore",
+                "type": "aquatic_biomass"
+            },
+            "label": "Standing Biomass – Water column herbivore",
+            "data_type": "float",
+            "default": 0.002,
+            "tooltip": "kg ww/m<sup>2</sup>",
+            "help": "Enter the water column herbivore standing biomass. Water column herbivore include young-of-the-year minnows. The default value of 0.002 is from professional judgement: biomass assumptions are based on typical biomass by trophic level found in northeastern U.S. lakes and ponds and the diet habits of the fish and fish sizes are simplified to match. Note that more biomass would dilute bioaccumulation."
+        },
+        {
+            "id": {
+                "short_name": "WaterColumnHerbivoreWeight",
+                "comp_name": "Water_Column_Herbivore",
+                "type": "aquatic_bw"
+            },
+            "label": "Single organism body weight – Water column herbivore",
+            "data_type": "float",
+            "default": 0.025,
+            "tooltip": "kg",
+            "help": "Enter the water column herbivore single organism body weight. Water column herbivore include young-of-the-year minnows. The default value of 0.025 is from professional judgement: organism body weights are estimated based on many typical species that have the specified default diets, and also with the basic assumption that body weights increase by roughly an order of magnitude between herbivores to omnivores to carnivores."
+        },
+        {
+            "id": {
+                "short_name": "BenthicOmnivoreBiomass",
+                "comp_name": "Benthic_Omnivore",
+                "type": "aquatic_biomass"
+            },
+            "label": "Standing Biomass – Benthic omnivore",
+            "data_type": "float",
+            "default": 0.002,
+            "tooltip": "kg ww/m<sup>2</sup>",
+            "help": "Enter the benthic omnivore standing biomass. Benthic omnivore include small catfish and rock bass. The default value of 0.002 is from professional judgement: biomass assumptions are based on typical biomass by trophic level found in northeastern U.S. lakes and ponds and the diet habits of the fish and fish sizes are simplified to match. Note that more biomass would dilute bioaccumulation"
+        },
+        {
+            "id": {
+                "short_name": "BenthicOmnivoreWeight",
+                "comp_name": "Benthic_Omnivore",
+                "type": "aquatic_bw"
+            },
+            "label": "Single organism body weight – Benthic omnivore",
+            "data_type": "float",
+            "default": 0.25,
+            "tooltip": "kg",
+            "help": "Enter the benthic omnivore single organism body weight. Benthic omnivore include small catfish and rock bass. The default value of 0.25 is from professional judgement: organism body weights are estimated based on many typical species that have the specified default diets, and also with the basic assumption that body weights increase by roughly an order of magnitude between herbivores to omnivores to carnivores."
+        },
+        {
+            "id": {
+                "short_name": "WaterColumnOmnivoreBiomass",
+                "comp_name": "Water_Column_Omnivore",
+                "type": "aquatic_biomass"
+            },
+            "label": "Standing Biomass – Water column omnivore",
+            "data_type": "float",
+            "default": 0.0005,
+            "tooltip": "kg ww/m<sup>2</sup>",
+            "help": "Enter the water column omnivore standing biomass. Water column omnivore include bluegill and white perch. The default value of 0.0005 is from professional judgement: biomass assumptions are based on typical biomass by trophic level found in northeastern U.S. lakes and ponds and the diet habits of the fish and fish sizes are simplified to match. Note that more biomass would dilute bioaccumulation."
+        },
+        {
+            "id": {
+                "short_name": "WaterColumnOmnivoreWeight",
+                "comp_name": "Water_Column_Omnivore",
+                "type": "aquatic_bw"
+            },
+            "label": "Single organism body weight – Water column omnivore",
+            "data_type": "float",
+            "default": 0.25,
+            "tooltip": "kg",
+            "help": "Enter the water column omnivore single organism body weight. Water column omnivore include bluegill and white perch. The default value of 0.25 is from professional judgement: organism body weights are estimated based on many typical species that have the specified default diets, and also with the basic assumption that body weights increase by roughly an order of magnitude between herbivores to omnivores to carnivores."
+        },
+        {
+            "id": {
+                "short_name": "BenthicCarnivoreBiomass",
+                "comp_name": "Benthic_Carnivore",
+                "type": "aquatic_biomass"
+            },
+            "label": "Standing Biomass – Benthic carnivore",
+            "data_type": "float",
+            "default": 0.001,
+            "tooltip": "kg ww/m<sup>2</sup>",
+            "help": "Enter the benthic carnivore standing biomass. Benthic carnivore include large catfish and sculpins. The default value of 0.001 is from professional judgement: biomass assumptions are based on typical biomass by trophic level found in northeastern U.S. lakes and ponds and the diet habits of the fish and fish sizes are simplified to match. Note that more biomass would dilute bioaccumulation."
+        },
+        {
+            "id": {
+                "short_name": "BenthicCarnivoreWeight",
+                "comp_name": "Benthic_Carnivore",
+                "type": "aquatic_bw"
+            },
+            "label": "Single organism body weight – Benthic carnivore",
+            "data_type": "float",
+            "default": 2,
+            "tooltip": "kg",
+            "help": "Enter the benthic carnivore single organism body weight. Benthic carnivore include large catfish and sculpins. The default value of 2 is from professional judgement: organism body weights are estimated based on many typical species that have the specified default diets, and also with the basic assumption that body weights increase by roughly an order of magnitude between herbivores to omnivores to carnivores."
+        },
+        {
+            "id": {
+                "short_name": "WaterColumnCarnivoreBiomass",
+                "comp_name": "Water_Column_Carnivore",
+                "type": "aquatic_biomass"
+            },
+            "label": "Standing Biomass – Water column carnivore",
+            "data_type": "float",
+            "default": 0.0002,
+            "tooltip": "kg ww/m<sup>2</sup>",
+            "help": "Enter the water column carnivore standing biomass. Water column carnivore include largemouth bass and walleye. The default value of 0.0002 is from professional judgement: biomass assumptions are based on typical biomass by trophic level found in northeastern U.S. lakes and ponds and the diet habits of the fish and fish sizes are simplified to match. Note that more biomass would dilute bioaccumulation."
+        },
+        {
+            "id": {
+                "short_name": "WaterColumnCarnivoreWeight",
+                "comp_name": "Water_Column_Carnivore",
+                "type": "aquatic_bw"
+            },
+            "label": "Single organism body weight – Water column carnivore",
+            "data_type": "float",
+            "default": 2,
+            "tooltip": "kg",
+            "help": "Enter the water column carnivore single organism body weight. Water column carnivore include largemouth bass and walleye. The default value of 2.0 is from professional judgement: organism body weights are estimated based on many typical species that have the specified default diets, and also with the basic assumption that body weights increase by roughly an order of magnitude between herbivores to omnivores to carnivores."
+        }
+    ]
+}

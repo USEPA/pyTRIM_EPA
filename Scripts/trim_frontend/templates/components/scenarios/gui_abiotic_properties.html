@@ -4,56 +4,6 @@
     data-form-src="scenario_abiotic_props_form"
 >
     <section class="container px-0">
-<!--        <div class="row py-2">-->
-<!--            <div class="col-sm">-->
-<!--                <h5 class="text-center">-->
-<!--                    Air Compartments-->
-<!--                </h5>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--        <div class="row mb-1">-->
-<!--            <div class="col-md">-->
-<!--                <div data-slot="true" data-target="dust_concentration"></div>-->
-<!--                <div data-slot="true" data-target="air_density"></div>-->
-<!--                <div data-slot="true" data-target="air_volume_height"></div>-->
-<!--            </div>-->
-<!--            <div class="col-md">-->
-<!--                <div data-slot="true" data-target="dust_density"></div>-->
-<!--                <div data-slot="true" data-target="dust_organic_matter"></div>-->
-<!--            </div>-->
-<!--        </div>-->
-
-<!--        <div class="row py-2">-->
-<!--            <div class="col-sm">-->
-<!--                <h5 class="text-center">-->
-<!--                    Other Volume Elements-->
-<!--                </h5>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--        <div class="row mb-1">-->
-<!--            <div class="col-md">-->
-<!--                <div data-slot="true" data-target="surface_soil_tilled_thickness"></div>-->
-<!--            </div>-->
-<!--            <div class="col-md">-->
-<!--                <div data-slot="true" data-target="surface_soil_untilled_thickness"></div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--        <div class="row mb-1">-->
-<!--            <div class="col-md">-->
-<!--                <div data-slot="true" data-target="root_soil_tilled_thickness"></div>-->
-<!--            </div>-->
-<!--            <div class="col-md">-->
-<!--                <div data-slot="true" data-target="root_soil_untilled_thickness"></div>-->
-<!--            </div>-->
-<!--        </div>-->
-<!--        <div class="row mb-1">-->
-<!--            <div class="col-md">-->
-<!--                <div data-slot="true" data-target="vadose_soil_thickness"></div>-->
-<!--            </div>-->
-<!--            <div class="col-md">-->
-<!--                <div data-slot="true" data-target="groundwater_thickness"></div>-->
-<!--            </div>-->
-<!--        </div>-->
         <div class="row">
             <div class="col-md">
                 <div class="pill pill-alert col-sm">
@@ -63,92 +13,7 @@
                         </strong>
                     </small>
                 </div>
-                <table class="hover" id="AbioticTable">
-                    <thead>
-                        <tr>
-                            <th data-toggle="tooltip" data-placement="top" data-html="true" title="">Parcel Name</th>
-                            <th>
-                                <label class="sortClass" data-toggle="tooltip" data-placement="top" data-html="true" title="(kg dust/m<sup>3</sup> air)">Dust Particle Concentration</label>
-                                <sup>
-                                    <a href="javascript:void(0);" title="Dust Particle Concentration" data-toggle="popover" data-html="true" data-placement="left" data-content="Enter the concentration of dust particles in the air compartments. Valid values are >= 0. The default value of 6.15E-08 is the value used for California residential sites by version 1.5 of the CalTOX model (see Table VI of: CalEPA (California Environmental Protection Agency), Department of Toxic Substances Control. 1993. Parameter Values and Ranges for CalTOX. Draft (July). Available online from a university at: <a href='https://emhea.uta.cloud/wp-content/uploads/2018/08/CalTOX_Parameter-values-and-ranges.pdf' target='_blank'>https://emhea.uta.cloud/wp-content/uploads/2018/08/CalTOX_Parameter-values-and-ranges.pdf</a>.)">
-                                        <i class="fa fa-question"></i>
-                                    </a>
-                                </sup>
-                            </th>
-                            <th>
-                                <label class="sortClass" data-toggle="tooltip" data-placement="top" data-html="true" title="(kg/m<sup>3</sup>)">Density of Dust Particles</label>
-                                <sup>
-                                    <a href="javascript:void(0);" title="Density of Dust Particles" data-toggle="popover" data-html="true" data-placement="left" data-content="Enter the density of dust particles in the air compartments. Valid values are >= 0. The default value of 1400 (1.4 g/cm<sup>3</sup>)  is from Page 2 of Bidleman, T.F. 1988. Atmospheric processes. Environmental Science and Technology 22:361-367.">
-                                        <i class="fa fa-question"></i>
-                                    </a>
-                                </sup>
-                            </th>
-                            <th>
-                                <label class="sortClass" data-toggle="tooltip" data-placement="top" data-html="true" title="(g/cm<sup>3</sup>)">Density of Air</label>
-                                <sup>
-                                    <a href="javascript:void(0);" title="Density of Air" data-toggle="popover" data-html="true" data-placement="left" data-content="Enter the density of air in the air compartments. Valid values are >= 0. The default value of 0.0012 (1.19E-03) is from Table B-1 of U.S. EPA (U.S. Environmental Protection Agency). 1997. Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment. EPA-452/R-97-005. Office of Air Quality Planning and Standards and Office of Research and Development. December.  Available online at: <a href='https://www3.epa.gov/ttn/atw/112nmerc/volume3.pdf' target='_blank'>https://www3.epa.gov/ttn/atw/112nmerc/volume3.pdf</a>.">
-                                        <i class="fa fa-question"></i>
-                                    </a>
-                                </sup>
-                            </th>
-                            <th>
-                                <label class="sortClass" data-toggle="tooltip" data-placement="top" data-html="true" title="">Fraction Organic Matter of Dust Particles</label>
-                                <sup>
-                                    <a href="javascript:void(0);" title="Fraction Organic Matter of Dust Particles" data-html="true" data-toggle="popover" data-html="true" data-placement="left" data-content="Enter the fraction organic matter of dust particles in the air compartments. Valid values are 0 to 1. The default value of 0.2 (20%) is from page 1601 of Harner, T., and Bidleman, T.F. 1998. Octanol-air partition coefficient for describing particle/gas partitioning of aromatic compounds in urban air. Environmental Science and Technology 32:1494‑1502.">
-                                        <i class="fa fa-question"></i>
-                                    </a>
-                                </sup>
-                            </th>
-                            <th>
-                                <label class="sortClass" data-toggle="tooltip" data-placement="top" data-html="true" title="(m)">Height of Air Volume Element</label>
-                                 <sup>
-                                    <a href="javascript:void(0);" title="Height of Air Volume Element" data-html="true" data-toggle="popover" data-html="true" data-placement="left" data-content="Enter the default height of air volume elements. Valid values are >= 20. The default value of 226 is a health-protective choice from: approximately the 5th percentile of median hourly mixing heights, derived from data at 824 meteorological stations paired with upper-air stations across the United States from January 1–December 31, 2016. You may later override this value using site-specific a single value or a time series of mixing heights.">
-                                        <i class="fa fa-question"></i>
-                                    </a>
-                                </sup>
-                            </th>
-                            <th>
-                                <label class="sortClass">Tillage</label>
-                                <sup>
-                                    <a href="javascript:void(0);" title="Tillage" data-html="true" data-toggle="popover" data-html="true" data-placement="left" data-content="Indicate if the soil in the parcel undergone tilling. This changes the thickness of the surface and root soil compartments.">
-                                        <i class="fa fa-question"></i>
-                                    </a>
-                                </sup>
-                            </th>
-                            <th>
-                                <label class="sortClass" data-toggle="tooltip" data-placement="top" data-html="true" title="(m)">Surface Soil Thickness</label>
-                                <sup>
-                                    <a href="javascript:void(0);" title="Surface Soil Thickness" data-html="true" data-toggle="popover" data-html="true" data-placement="left" data-content="Enter the thickness of an tilled/untilled layer of surface soil. Valid values are > 0. The default value of 0.01 is from p. 30 of McKone, T.E., A. Bodnar, and E. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. University of California at Berkeley. Supported by U.S. Environmental Protection Agency (Sustainable Technology Division, National Risk Management Research Laboratory) and Environmental Defense Fund. July. LBNL-43722. Available online at: <a href='https://escholarship.org/uc/item/9f1164rk' target='_blank'>https://escholarship.org/uc/item/9f1164rk.</a>.">
-                                        <i class="fa fa-question"></i>
-                                    </a>
-                                </sup>
-                            </th>
-                            <th>
-                                <label class="sortClass" data-toggle="tooltip" data-placement="top" data-html="true" title="(m)">Root Soil Thickness</label>
-                                <sup>
-                                    <a href="javascript:void(0);" title="Root Soil Thickness" data-html="true" data-toggle="popover" data-html="true" data-placement="left" data-content="Enter the thickness of a tilled/untilled layer of root-zone soil. Valid values are > 0. The default value of 0.60 assumes that the total thickness of the surface-soil layer and root-zone layer is 0.8 (0.01 for untilled surface soil [from p. 30 of McKone, T.E., A. Bodnar, and E. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. University of California at Berkeley. Supported by U.S. Environmental Protection Agency (Sustainable Technology Division, National Risk Management Research Laboratory) and Environmental Defense Fund. July. LBNL-43722. Available online at: https://escholarship.org/uc/item/9f1164rk.] + 0.79 for untilled root zone [from Table 16 - U.S. Average from McKone, T.E., A. Bodnar, and E. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. University of California at Berkeley. Supported by U.S. Environmental Protection Agency (Sustainable Technology Division, National Risk Management Research Laboratory) and Environmental Defense Fund. July. LBNL-43722. Available online at: <a href='https://escholarship.org/uc/item/9f1164rk' target='_blank'>https://escholarship.org/uc/item/9f1164rk</a>]). If the thickness of a tilled surface soil layer is 0.2 (from Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities (including the Hazardous Waste Companion Database of chemical-specific parameter values). U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response, Washington, DC. EPA-530-R-05-006. September. Available online at: <a href='https://archive.epa.gov/epawaste/hazard/tsd/td/web/html/risk.html' target='_blank'>https://archive.epa.gov/epawaste/hazard/tsd/td/web/html/risk.html</a>.), then the thickness of a tilled root zone is 0.8-0.2=0.6.">
-                                        <i class="fa fa-question"></i>
-                                    </a>
-                                </sup>
-                            </th>
-                            <th>
-                                <label class="sortClass" data-toggle="tooltip" data-placement="top" data-html="true" title="(m)">Vadose Zone Soil Thickness</label>
-                                <sup>
-                                    <a href="javascript:void(0);" title="Vadose Zone Soil Thickness" data-html="true" data-toggle="popover" data-html="true" data-placement="left" data-content="Enter the thickness of the vadose zone. Valid values are > 0. The default value of 1.4 is from Table 17 - U.S. Average from McKone, T.E., A. Bodnar, and E. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. University of California at Berkeley. Supported by U.S. Environmental Protection Agency (Sustainable Technology Division, National Risk Management Research Laboratory) and Environmental Defense Fund. July. LBNL-43722. Available online at: <a href='https://escholarship.org/uc/item/9f1164rk' target='_blank'>https://escholarship.org/uc/item/9f1164rk</a>.">
-                                        <i class="fa fa-question"></i>
-                                    </a>
-                                </sup>
-                            </th>
-                            <th>
-                                <label class="sortClass" data-toggle="tooltip" data-placement="top" data-html="true" title="(m)">Groundwater Zone Soil Thickness</label>
-                                <sup>
-                                    <a href="javascript:void(0);" title="Groundwater Zone Soil Thickness" data-html="true" data-toggle="popover" data-html="true" data-placement="left" data-content="Enter the thickness of the groundwater layer. Valid values are > 0. The default value of 3 is from Table 3 - Thickness of the aquifer layer from McKone, T.E., A. Bodnar, and E. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. University of California at Berkeley. Supported by U.S. Environmental Protection Agency (Sustainable Technology Division, National Risk Management Research Laboratory) and Environmental Defense Fund. July. LBNL-43722. Available online at: <a href='https://escholarship.org/uc/item/9f1164rk' target='_blank'>https://escholarship.org/uc/item/9f1164rk</a>.">
-                                        <i class="fa fa-question"></i>
-                                    </a>
-                                </sup>
-                            </th>
-                        </tr>
-                    </thead>
+                <table data-slot="true" class="hover" id="AbioticTable">
                 </table>
             </div>
         </div>
@@ -162,25 +27,12 @@
 </script>
 <script>
     onDomLoad(function() {
-        let apTable = $('#AbioticTable').removeAttr('width').DataTable()
-        let default_data = {
-            "Surface Parcel": "",
-            "DustParticleConcentration": 6.15E-8,
-            "DustParticleDensity": 1400,
-            "AirDensity": 0.0012,
-            "DustParticleOrganicMatter": 0.2,
-            "AirVEDefaultHeight": 226,
-            "Tillage": "No",
-            "SurfaceSoilTilledThick": 0.2,
-            "SurfaceSoilUntilledThick": 0.01,
-            "RootSoilTilledThick": 0.6,
-            "RootSoilUntilledThick": 0.79,
-            "VadoseZoneSoilThick": 1.4,
-            "GroundwaterZoneSoilThick": 3
-        }
+        let apTable = null;
         function TableRedraw(table_data) {
-            apTable.clear().draw();
-            apTable.destroy()
+            if (apTable) {
+                apTable.clear().draw();
+                apTable.destroy()
+            }
             apTable =  $('#AbioticTable').removeAttr('width').dataTable({
                 data : table_data,
                 paging: false,
@@ -195,146 +47,63 @@
                         'data': "DustParticleConcentration",
                         'bSortable': false,
                         'render': function (data, type, row) {
-                            let parcel_info = [{
-                                'type': 'data',
-                                'name': 'id',
-                                'value': row.parcelid,
-                            },{
-                                'type': 'data',
-                                'name': 'field',
-                                'value': 'dustLoad'
-                            },{
-                                'type': 'input',
-                                'name': 'dustLoad',
-                                'value': data
-                            }]
-                            parcel_info = JSON.stringify(parcel_info)
+                            let parcel_info = create_parcel_object('dustLoad', row, data);
                             let this_cell_data = row.hasAir == "Yes" ? data : "N/A"
                             let this_cell_prop = row.hasAir == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
                             let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return "<input "+this_err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                                "<label "+this_err_html+" class='"+ this_cell_prop + "'>" + this_cell_data + "</label>"
+                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html=this_err_html);
                         }
                     },
                     {
                         'data': "DustParticleDensity",
                         'bSortable': false,
                         'render': function (data, type, row) {
-                            let parcel_info = [{
-                                'type': 'data',
-                                'name': 'id',
-                                'value': row.parcelid,
-                            },{
-                                'type': 'data',
-                                'name': 'field',
-                                'value': 'dustDensity'
-                            },{
-                                'type': 'input',
-                                'name': 'dustDensity',
-                                'value': data
-                            }]
-                            parcel_info = JSON.stringify(parcel_info)
+                            let parcel_info = create_parcel_object('dustDensity', row, data);
                             let this_cell_data = row.hasAir == "Yes" ? data : "N/A"
                             let this_cell_prop = row.hasAir == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
                             let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return "<input "+this_err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                                "<label "+this_err_html+" class='" + this_cell_prop + "'>" + this_cell_data + "</label>"
+                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html=this_err_html);
                         }
                     },
                     {
                         'data': "AirDensity",
                         'bSortable': false,
                         'render': function (data, type, row) {
-                            let parcel_info = [{
-                                'type': 'data',
-                                'name': 'id',
-                                'value': row.parcelid,
-                            },{
-                                'type': 'data',
-                                'name': 'field',
-                                'value': 'airDensity'
-                            },{
-                                'type': 'input',
-                                'name': 'airDensity',
-                                'value': data
-                            }]
-                            parcel_info = JSON.stringify(parcel_info)
+                            let parcel_info = create_parcel_object('airDensity', row, data);
                             let this_cell_data = row.hasAir == "Yes" ? data : "N/A"
                             let this_cell_prop = row.hasAir == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
                             let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return "<input "+this_err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                                "<label "+this_err_html+" class='" + this_cell_prop +"'>" + this_cell_data + "</label>"
+                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html=this_err_html);
                         }
                     },
                     {
                         'data': "DustParticleOrganicMatter",
                         'bSortable': false,
                         'render': function (data, type, row) {
-                            let parcel_info = [{
-                                'type': 'data',
-                                'name': 'id',
-                                'value': row.parcelid,
-                            },{
-                                'type': 'data',
-                                'name': 'field',
-                                'value': 'fractionOrganicMatteronParticulates'
-                            },{
-                                'type': 'input',
-                                'name': 'fractionOrganicMatteronParticulates',
-                                'value': data
-                            }]
-                            parcel_info = JSON.stringify(parcel_info)
+                            let parcel_info = create_parcel_object('fractionOrganicMatterOnParticulates', row, data);
                             let this_cell_data = row.hasAir == "Yes" ? data : "N/A"
                             let this_cell_prop = row.hasAir == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
                             let this_err_html = 'onblur="ErrorValidation.isValidFraction(this)"';
-                            return "<input "+this_err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                                "<label "+this_err_html+" class='" + this_cell_prop +" '>" + this_cell_data + "</label>"
+                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html=this_err_html);
                         }
                     },
                     {
                         'data': "AirHeight",
                         'bSortable': false,
                         'render': function (data, type, row) {
-                            let parcel_info = [{
-                                'type': 'data',
-                                'name': 'id',
-                                'value': row.parcelid,
-                            },{
-                                'type': 'data',
-                                'name': 'field',
-                                'value': 'airHeight'
-                            },{
-                                'type': 'input',
-                                'name': 'airHeight',
-                                'value': data
-                            }]
-                            parcel_info = JSON.stringify(parcel_info)
+                            let parcel_info = create_parcel_object('airHeight', row, data);
                             let this_cell_data = row.hasAir == "Yes" ? data : "N/A"
                             let this_cell_prop = row.hasAir == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
                             let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return "<input "+this_err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                                "<label "+this_err_html+" class='" + this_cell_prop + "'>" + this_cell_data + "</label>"
+                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html=this_err_html);
                         }
                     },
                     {
                         data: "Tillage",
                         'render': function (data, type, row) {
-                            let parcel_info = [{
-                                'type': 'data',
-                                'name': 'id',
-                                'value': row.parcelid,
-                            },{
-                                'type': 'data',
-                                'name': 'field',
-                                'value': 'tillage'
-                            }, {
-                                'type': 'input',
-                                'name': 'tillage',
-                                'value': data
-                            }]
+                            let parcel_info = create_parcel_object('tillage', row, data);
                             let this_cell_data = row.hasLand == "Yes" ? data : "N/A"
                             let this_cell_prop = row.hasLand == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
-                            parcel_info = JSON.stringify(parcel_info)
                             return "<select class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' name='select_tillage' style='display:none'>" +
                                         "<option value='Yes'>Yes</option>" +
                                         "<option value='No'>No</option>" +
@@ -346,100 +115,44 @@
                         'data': "SurfaceSoilThick",
                         'bSortable': false,
                         'render': function (data, type, row) {
-                            let parcel_info = [{
-                                'type': 'data',
-                                'name': 'id',
-                                'value': row.parcelid,
-                            },{
-                                'type': 'data',
-                                'name': 'field',
-                                'value': 'surfaceSoilThickness'
-                            },{
-                                'type': 'input',
-                                'name': 'surfaceSoilThickness',
-                                'value': data
-                            }]
-                            parcel_info = JSON.stringify(parcel_info)
+                            let parcel_info = create_parcel_object('surfaceSoilThickness', row, data);
                             let this_cell_data = row.hasLand == "Yes" ? data : "N/A"
                             let this_cell_prop = row.hasLand == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
                             let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return "<input "+this_err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                                "<label "+this_err_html+" class='" + this_cell_prop + "'>" + this_cell_data + "</label>"
+                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html=this_err_html);
                         }
                     },
                     {
                         'data': "RootSoilThick",
                         'bSortable': false,
                         'render': function (data, type, row) {
-                            let parcel_info = [{
-                                'type': 'data',
-                                'name': 'id',
-                                'value': row.parcelid,
-                            },{
-                                'type': 'data',
-                                'name': 'field',
-                                'value': 'rootSoilThickness'
-                            },{
-                                'type': 'input',
-                                'name': 'rootSoilThickness',
-                                'value': data
-                            }]
-                            parcel_info = JSON.stringify(parcel_info)
+                            let parcel_info = create_parcel_object('rootSoilThickness', row, data);
                             let this_cell_data = row.hasLand == "Yes" ? data : "N/A"
                             let this_cell_prop = row.hasLand == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
                             let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return "<input "+this_err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                                "<label "+this_err_html+" class='" + this_cell_prop + "'>" + this_cell_data + "</label>"
+                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html=this_err_html);
                         }
                     },
                     {
                         'data': "VadoseZoneSoilThick",
                         'bSortable': false,
                         'render': function (data, type, row) {
-                            let parcel_info = [{
-                                'type': 'data',
-                                'name': 'id',
-                                'value': row.parcelid,
-                            },{
-                                'type': 'data',
-                                'name': 'field',
-                                'value': 'vadoseZoneSoilThick'
-                            },{
-                                'type': 'input',
-                                'name': 'vadoseZoneSoilThick',
-                                'value': data
-                            }]
-                            parcel_info = JSON.stringify(parcel_info)
+                            let parcel_info = create_parcel_object('vadoseZoneSoilThick', row, data);
                             let this_cell_data = row.hasLand == "Yes" ? Number.parseFloat(data).toFixed(5) : "N/A"
                             let this_cell_prop = row.hasLand == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
                             let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return "<input "+this_err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                                "<label "+this_err_html+" class='" + this_cell_prop + "'>" + this_cell_data + "</label>"
+                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html=this_err_html);
                         }
                     },
                     {
                         'data': "GroundwaterZoneSoilThick",
                         'bSortable': false,
                         'render': function (data, type, row) {
-                            let parcel_info = [{
-                                'type': 'data',
-                                'name': 'id',
-                                'value': row.parcelid,
-                            },{
-                                'type': 'data',
-                                'name': 'field',
-                                'value': 'groundwaterZoneSoilThick'
-                            },{
-                                'type': 'input',
-                                'name': 'groundwaterZoneSoilThick',
-                                'value': data
-                            }]
-                            parcel_info = JSON.stringify(parcel_info)
+                            let parcel_info = create_parcel_object('groundwaterZoneSoilThick', row, data);
                             let this_cell_data = row.hasLand == "Yes" ? data : "N/A"
                             let this_cell_prop = row.hasLand == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
                             let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return "<input "+this_err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                                "<label "+this_err_html+" class='" + this_cell_prop + "'>" + this_cell_data + "</label>"
+                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html=this_err_html);
                         }
                     }
                 ],
@@ -481,16 +194,39 @@
                     if (parcel_info) {
                         parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
                         console.log(parcel_info)
-                        TRIM.api.updateParcel(parcel_info)
+                        TRIM.api.updateParcel('{{ scenario.id }}', parcel_info)
                         table_data = get_Data_from_table('#AbioticTable')
                         TableRedraw(table_data)
                     }
                 }
             })
         }
+
         var form = document.getElementById('abiotic-props-gui');
         form.addEventListener('form:loaded', function() {
         });
+
+        function create_parcel_object(id, row, data){
+            let parcel_info = [{
+                                'type': 'data',
+                                'name': 'id',
+                                'value': row.parcelid,
+                            },{
+                                'type': 'data',
+                                'name': 'field',
+                                'value': id
+                            },{
+                                'type': 'input',
+                                'name': id,
+                                'value': data
+                            }]
+            return JSON.stringify(parcel_info)
+        }
+
+        function create_cell_html(parcel_info, data, cell_prop, cell_data, err_html=""){
+            return "<input "+err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
+                    "<label "+err_html+" class='" + cell_prop + "'>" + cell_data + "</label>"
+        }
 
         function get_Data_from_table(thisTableID){
             var myRows = [];
@@ -520,6 +256,7 @@
             let abiotic_data = []
             if (loadedData.scenario.length > 0) {
                 loadedData['scenario'].forEach(function (e, i) {
+                    let till_val = e.tillage == "Yes" ? "tilled" : "untilled";
                     abiotic_data.push(
                         {
                             'parcelid': e.id,
@@ -527,16 +264,16 @@
                             'hasAir': e.hasAir,
                             'hasLand': e.hasLand,
                             'parcelType': e.parcelType,
-                            'DustParticleConcentration': (e.dustLoad ? e.dustLoad : default_data.DustParticleConcentration),
-                            'DustParticleDensity': (e.dustDensity ? e.dustDensity : default_data.DustParticleDensity),
-                            'AirDensity': (e.airDensity ? e.airDensity : default_data.AirDensity),
-                            'DustParticleOrganicMatter': (e.fractionOrganicMatteronParticulates ? e.fractionOrganicMatteronParticulates : default_data.DustParticleOrganicMatter),
-                            'AirHeight': (e.airHeight ? e.airHeight : default_data.AirVEDefaultHeight),
-                            'Tillage': (e.soilTillage ? e.soilTillage : default_data.Tillage),
-                            'SurfaceSoilThick': (e.surfaceSoilThickness ? e.surfaceSoilThickness : (e.tillage == "Yes" ? default_data.SurfaceSoilTilledThick : default_data.SurfaceSoilUntilledThick)),
-                            'RootSoilThick': (e.rootSoilThickness ? e.rootSoilThickness : (e.tillage == "Yes" ? default_data.RootSoilTilledThick : default_data.RootSoilUntilledThick)),
-                            'VadoseZoneSoilThick': (e.vadoseSoilThickness ? e.vadoseSoilThickness : default_data.VadoseZoneSoilThick),
-                            'GroundwaterZoneSoilThick': (e.groundwaterZoneThickness ? e.groundwaterZoneThickness : default_data.GroundwaterZoneSoilThick)
+                            'DustParticleConcentration': (e.dustLoad ? e.dustLoad : TRIM.forms.fetchDefault('DustParticleConcentration')),
+                            'DustParticleDensity': (e.dustDensity ? e.dustDensity : TRIM.forms.fetchDefault('DustParticleDensity')),
+                            'AirDensity': (e.airDensity ? e.airDensity : TRIM.forms.fetchDefault('AirDensity')),
+                            'DustParticleOrganicMatter': (e.fractionOrganicMatterOnParticulates ? e.fractionOrganicMatterOnParticulates : TRIM.forms.fetchDefault('DustParticleOrganicMatter')),
+                            'AirHeight': (e.airHeight ? e.airHeight : TRIM.forms.fetchDefault('AirHeight')),
+                            'Tillage': (e.soilTillage ? e.soilTillage : TRIM.forms.fetchDefault('Tillage')),
+                            'SurfaceSoilThick': (e.surfaceSoilThickness ? e.surfaceSoilThickness : TRIM.forms.fetchDefault('SurfaceSoilThick')[till_val]),
+                            'RootSoilThick': (e.rootSoilThickness ? e.rootSoilThickness : TRIM.forms.fetchDefault('RootSoilThick')[till_val]),
+                            'VadoseZoneSoilThick': (e.vadoseSoilThickness ? e.vadoseSoilThickness : TRIM.forms.fetchDefault('VadoseZoneSoilThick')),
+                            'GroundwaterZoneSoilThick': (e.groundwaterZoneThickness ? e.groundwaterZoneThickness : TRIM.forms.fetchDefault('GroundwaterZoneSoilThick'))
                         }
                     )
                 })

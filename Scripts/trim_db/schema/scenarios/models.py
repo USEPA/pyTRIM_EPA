@@ -1,6 +1,7 @@
 import sqlalchemy as sa
 from ..utils.base import Model
 from ..utils.mixins import TrackUpdatesMixin
+from ..utils.serialize import register_serializer
 
 
 __all__ = [
@@ -98,17 +99,20 @@ class Scenario(Model, TrackUpdatesMixin):
                 continue
         return 1
 
-    def as_serializable(self):
-        return {
-            'id': self.id,
-            'name': self.name,
-            'description': self.description,
-            'erosionRateSource': self.erosion_rate_data_source
-        }
-
     def __repr__(self):
         return (
             f'{self.__class__.__qualname__}('
             f'"{self.name}"'
             ')'
         )
+
+
+@register_serializer(Scenario)
+def serialize_scenario(scen: Scenario):
+    s = {
+        'id': scen.id,
+        'name': scen.name,
+        'description': scen.description,
+        'erosionRateSource': scen.erosion_rate_data_source
+    }
+    return s

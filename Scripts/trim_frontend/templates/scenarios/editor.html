@@ -117,7 +117,7 @@
                 if (this.responseJSON) {
                     let scenarioJSON = this.responseJSON
 
-                    TRIM.api.getParcels().on('load', function() {
+                    TRIM.api.getParcels('{{ scenario.id }}').on('load', function() {
                         $('#root').data('loadedParcels',JSON.parse(this.responseText));
 
                         var parcelsLoadEvent = document.createEvent('Event');
