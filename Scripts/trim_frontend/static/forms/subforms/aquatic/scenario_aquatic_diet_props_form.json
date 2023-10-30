@@ -1,0 +1,20 @@
+{
+    "title": "Aquatic Food Web Properties",
+    "table_id": "AquaticTable",
+    "pivot": true,
+    "header": "",
+    "fields": [
+        {
+            "id": {
+                "short_name": "MacrophyteBiomass",
+                "comp_name": "Macrophyte",
+                "type": "aquatic_biomass"
+            },
+            "label": "Standing Biomass – Macrophyte",
+            "data_type": "float",
+            "default": 0.5,
+            "tooltip": "kg ww/m<sup>2</sup>",
+            "help": "Enter the macrophyte standing biomass. Macrophyte include hydrilla and milfoil. The default value of 0.5 is from professional judgement: biomass assumptions are based on typical biomass by trophic level found in northeastern U.S. lakes and ponds and the diet habits of the fish and fish sizes are simplified to match. Note that more biomass would dilute bioaccumulation. Note that while macrophytes can remove some chemical from the water, they generally do not transport chemicals from sediments through the blades/leaves of plants, so they are not an important part of chemical transport in aquatic ecosystems in most U.S. regions. The exception is the southern US, where carp may regularly consume macrophytes."
+        }
+    ]
+}

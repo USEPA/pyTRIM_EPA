@@ -627,6 +627,15 @@ window.TRIM = (function(trim) {
             template.setAttribute('data-async-form', 'true');
         }
 
+        if (data.table_id) {
+            forms.drawTable(data, template, prefix);
+        } 
+        else {
+            forms.drawForm(data, template, prefix);
+        }
+    }
+
+    forms.drawForm = function(data, template, prefix) {
         var slotElements = template.querySelectorAll('[data-slot]');
         var slots = {};
         for (var i = 0, len = slotElements.length; i < len; i++) {
@@ -739,18 +748,8 @@ window.TRIM = (function(trim) {
         }
     };
 
-    forms.tableDraw = function(data, template, prefix) {
-        if (!template.tagName.toLowerCase() == 'form' &&
-            !template.hasAttribute('data-slot')) {
-            return;
-        }
-
-        if (!template.hasAttribute('data-async-form')) {
-            template.setAttribute('data-async-form', 'true');
-        }
-
+    forms.drawTable = function(data, template, prefix) {
         let tableSlot = document.querySelector('#'+data.table_id);
-
         if (data.pivot) {
             tableSlot.innerHTML += data.header;
 
@@ -796,7 +795,6 @@ window.TRIM = (function(trim) {
             label.title = "";
             label.setAttribute('data-original-title', tooltip);
         }
-
         if (help) {
             forms.renderTableHelp(help, labelText, th)
         }
@@ -852,12 +850,7 @@ window.TRIM = (function(trim) {
             try {
                 var data = this.responseJSON;
                 if (data && data[src]) {
-                    if (data[src].table_id) {
-                        forms.tableDraw(data[src], template);
-                    }
-                    else {
-                        forms.draw(data[src], template);
-                    }
+                    forms.draw(data[src], template);
                     template.className = template.className + ' form-loaded';
                     template.dispatchEvent(formLoadEvent);
                 }
