@@ -1,0 +1,11 @@
+{
+    "title": "Aquatic Food Web",
+    "fields": [
+        {
+            "id": "AquaticTable",
+            "label": "Aquatic Food Web Properties",
+            "data_type": "form",
+            "form_definition": "subforms/aquatic/scenario_aquatic_food_web_props_form.json"
+        }
+    ]
+}
