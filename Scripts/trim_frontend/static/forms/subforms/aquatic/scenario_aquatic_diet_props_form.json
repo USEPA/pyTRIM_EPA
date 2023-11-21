@@ -1,20 +1,44 @@
 {
-    "title": "Aquatic Food Web Properties",
-    "table_id": "AquaticTable",
+    "title": "Aquatic Diet Properties",
+    "table_id": "DietTables",
     "pivot": true,
-    "header": "",
+    "render": false,
     "fields": [
         {
-            "id": {
-                "short_name": "MacrophyteBiomass",
-                "comp_name": "Macrophyte",
-                "type": "aquatic_biomass"
-            },
-            "label": "Standing Biomass – Macrophyte",
+            "id": "Zooplankton",
+            "label": "Zooplankton",
             "data_type": "float",
-            "default": 0.5,
-            "tooltip": "kg ww/m<sup>2</sup>",
-            "help": "Enter the macrophyte standing biomass. Macrophyte include hydrilla and milfoil. The default value of 0.5 is from professional judgement: biomass assumptions are based on typical biomass by trophic level found in northeastern U.S. lakes and ponds and the diet habits of the fish and fish sizes are simplified to match. Note that more biomass would dilute bioaccumulation. Note that while macrophytes can remove some chemical from the water, they generally do not transport chemicals from sediments through the blades/leaves of plants, so they are not an important part of chemical transport in aquatic ecosystems in most U.S. regions. The exception is the southern US, where carp may regularly consume macrophytes."
+            "default": 0.1
+        },
+        {
+            "id": "WaterColumnHerbivore",
+            "label": "Water Column Herbivore",
+            "data_type": "float",
+            "default": 0.1
+        },
+        {
+            "id": "BenthicOmnivore",
+            "label": "Benthic Omnivore",
+            "data_type": "float",
+            "default": 0.1
+        },
+        {
+            "id": "WaterColumnOmnivore",
+            "label": "Water Column Omnivore",
+            "data_type": "float",
+            "default": 0.1
+        },
+        {
+            "id": "BenthicCarnivore",
+            "label": "Benthic Carnivore",
+            "data_type": "float",
+            "default": 0.1
+        },
+        {
+            "id": "WaterColumnCarnivore",
+            "label": "Water Column Carnivore",
+            "data_type": "float",
+            "default": 0.1
         }
     ]
 }

@@ -622,7 +622,6 @@ window.TRIM = (function(trim) {
             !template.hasAttribute('data-slot')) {
             return;
         }
-
         if (!template.hasAttribute('data-async-form')) {
             template.setAttribute('data-async-form', 'true');
         }
@@ -632,6 +631,10 @@ window.TRIM = (function(trim) {
         } 
         else {
             forms.drawForm(data, template, prefix);
+        }
+
+        if (data.render === false) {
+            $("#"+data.table_id).hide()
         }
     }
 
@@ -751,8 +754,6 @@ window.TRIM = (function(trim) {
     forms.drawTable = function(data, template, prefix) {
         let tableSlot = document.querySelector('#'+data.table_id);
         if (data.pivot) {
-            tableSlot.innerHTML += data.header;
-
             let tbody = create_element('tbody', tableSlot);
             let fields = data.fields || [];
             for (var i = 0, len = fields.length; i < len; i++) {  

@@ -6,6 +6,12 @@
             "label": "Aquatic Food Web Properties",
             "data_type": "form",
             "form_definition": "subforms/aquatic/scenario_aquatic_food_web_props_form.json"
+        },
+        {
+            "id": "DietTables",
+            "label": "Aquatic Diet Properties",
+            "data_type": "form",
+            "form_definition": "subforms/aquatic/scenario_aquatic_diet_props_form.json"
         }
     ]
 }
