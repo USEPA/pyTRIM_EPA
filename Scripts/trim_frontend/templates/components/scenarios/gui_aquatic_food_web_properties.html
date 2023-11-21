@@ -25,6 +25,11 @@
                     </small>
                 </div>
                 <table data-slot="true" data-target="AquaticTable" class="hover" id="AquaticTable">
+                    <thead>
+                        <tr>
+                            <th>Property</th>
+                        </tr>
+                    </thead>
                 </table>
             </div>
         </div>
@@ -56,7 +61,6 @@
         <div class="row">
             <div class="col-md">
                 <div id="DietTables">
-
                 </div>
             </div>
         </div>
@@ -410,42 +414,10 @@
                             'value': data
                         }]
                         parcel_info = JSON.stringify(parcel_info)
-                        let calc_info = JSON.stringify({'property':ids["short_name"], 'parcel':e.name})
-                        let auto_calc_button = Auto_calculable.indexOf(row.Property) >= 0 ? "<p><button data-active='False' data-calcinfo='" + calc_info +"' class='btn btn-sm btn-outline-dark auto_calc'><small>Auto-calculate</small></button></p>" : ""
-                        let link_options = []
-                        loadedData['scenario'].forEach(function (el, i) {
-                            if (el.hasFishFoodWeb == "Yes") {
-                                if (el.name != e.name) {
-                                    link_options.push(el.name)
-                                }
-                            }
-                        })
-                        let multi_select_html = "<div><div data-parcelname='"+ e.name +"' class='parcelMultiselect'>" +
-                            "<div id='psl_" + e.name + "' class='parcelSelectLabel selectBox'>" +
-                            "<select class='form-select'>" +
-                            "<option>Select Parcel(s)</option>" +
-                            "</select>" +
-                            "<div class='overSelect'>" +
-                            "</div>" +
-                            "</div>" +
-                            "<div class='parcelSelectOptions'>" +
-                            "</div>" +
-                            "</div></div>"
-                            let hq_ms = new $(multi_select_html)
-                        link_options.forEach(function(p,i) {
-                            $(hq_ms).find('div.parcelSelectOptions').append("<label for='MS_" + p + "'>" +
-                            "<input type='checkbox' id='MS_" + p + "' value='" + p + "' />" + p +
-                            "</label>")
-                        })
-                        let linked_prop_input = linked_data.indexOf(row.Property) >= 0 ? $(hq_ms).html() : ""
-                        // let linked_prop_input = linked_data.indexOf(row.Property) >= 0 ? "<p><select class='form-select'>" + link_options.map(el => "<option>" + el + "</option>").join("") + "</select></p>" : ""
                         let this_cell_data =  data
                         let this_cell_prop = 'editableCell badge badge-light'
-                        if (linked_data.indexOf(row.Property) >= 0) {
-                            return "<div class='divLinkedPropBtn'><label>" + this_cell_data + "</label></div>" + auto_calc_button + linked_prop_input
-                        }
                         return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'/>" +
-                            "<label class='"+ this_cell_prop +"'>" + this_cell_data + "</label>" + auto_calc_button
+                            "<label class='"+ this_cell_prop +"'>" + this_cell_data + "</label>"
                     }
                 })
             })
@@ -533,22 +505,6 @@
                         divDietTables.append(this_matrix)
                     }
                 })
-
-                // never gets ran...?
-                diet_properties.forEach(function (p, i) {
-                    let this_diet_property = {}
-                    loadedData['scenario'].forEach(function (e, i) {
-                        if (e.hasFishFoodWeb == "Yes") {
-                            this_diet_property['Property'] = p
-                            this_diet_property[e.name] = e[default_diet_data[p]['short_name']] ? e[default_diet_data[p]['short_name']] : default_diet_data[p]['default_value']
-                            this_diet_property["helpText"] = default_diet_data[p]['helpText'] ? default_diet_data[p]['helpText'] : "Some text"
-                            this_diet_property["unit"] = default_diet_data[p]['unit'] ? default_diet_data[p]['unit'] : "No units"
-                            this_diet_property["shortProperty"] = default_diet_data[p]['short_name']
-                        }
-                    })
-                    diet_data.push(this_diet_property)
-                })
-                //TableRedraw(diet_data, "diet")
             }
         })
     });
