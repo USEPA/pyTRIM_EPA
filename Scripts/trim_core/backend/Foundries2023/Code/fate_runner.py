@@ -95,7 +95,7 @@ if __name__=='__main__':
     print ('time to run analysis in minutes = ',round(analysis_time/60,2))
     print ('% time to tm_start = ',round(100*(tm_start-start)/analysis_time,2),'%')
     print ('% time to create tm = ',round(100*(ode_start-tm_start)/analysis_time,2),'%')    
-    print ('time to create tm = ',round((ode_start-tm_start)/60,2),' seconds')  
+    print ('time to create tm in minutes = ',round((ode_start-tm_start)/60,2))  
     print ('% time to run odes = ',round(100*(ode_end-ode_start)/analysis_time,2),'%')
     print ('% time to calculate concentrations = ',round(100*(conc_end-ode_end)/analysis_time,2),'%')
     print ('% time to calculate averages = ',round(100*(av_end-conc_end)/analysis_time,2),'%')
