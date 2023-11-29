@@ -49,8 +49,8 @@ def ode_sim(inputs,tm,df_tm,sm,df_sm,df_n0): # need to add start time and end ti
     df_nt=pd.DataFrame(nt)
     cols=list(df_sm.index)
     df_nt.columns=cols
-    df_nt['time_in_hours']=ts
-    cols_ordered=['time_in_hours']+cols
+    df_nt['time_in_days']=ts
+    cols_ordered=['time_in_days']+cols
 #    
     df_nt=df_nt[cols_ordered]
     

@@ -9,7 +9,7 @@ trim.fate backend runner script
 import os
 import time
 
-import convert_lc,mlib,plib,vol_elem,comp,prop,dep_rates,solve_ode,gen_conc # import supporting modules to process inputs and auto generate code to define objects
+import convert_lc,mlib,plib,vol_elem,comp,prop,dep_rates,solve_ode,gen_conc,gen_avg # import supporting modules to process inputs and auto generate code to define objects
 from util_functions import process_met
 
 runner_full_path = os.path.realpath(__file__) # full path to this runner script
@@ -75,6 +75,8 @@ if __name__=='__main__':
     ode_end=time.time()
     df_conc=gen_conc.compute_conc(nt,df_nt,vmu,df_vmu) # compute concentrations time series 
     conc_end=time.time()
+    dfn_avg,dfc_avg=gen_avg.gen_avg(df_nt,df_conc,inputs) # compute annual average mass and conc time series
+    av_end=time.time()
     ### output results (temp)
     ofpn=os.path.join(path_output,'results.csv')
     df_nt.to_csv(ofpn,index=False)
@@ -84,14 +86,19 @@ if __name__=='__main__':
     df_sm.to_csv(ofpn,index=True)
     ofpn=os.path.join(path_output,'results_conc.csv')
     df_conc.to_csv(ofpn,index=False) 
+    ofpn=os.path.join(path_output,'time_series_mass.csv')
+    dfn_avg.to_csv(ofpn,index=False) 
+    ofpn=os.path.join(path_output,'time_series_conc.csv')
+    dfc_avg.to_csv(ofpn,index=False) 
     output_end=time.time()
     analysis_time=round((time.time()-start),2)
-    print ('time to run analysis in seconds = ',analysis_time)
+    print ('time to run analysis in minutes = ',round(analysis_time/60,2))
     print ('% time to tm_start = ',round(100*(tm_start-start)/analysis_time,2),'%')
     print ('% time to create tm = ',round(100*(ode_start-tm_start)/analysis_time,2),'%')    
-    print ('time to create tm = ',round((ode_start-tm_start),2),' seconds')  
+    print ('time to create tm = ',round((ode_start-tm_start)/60,2),' seconds')  
     print ('% time to run odes = ',round(100*(ode_end-ode_start)/analysis_time,2),'%')
     print ('% time to calculate concentrations = ',round(100*(conc_end-ode_end)/analysis_time,2),'%')
-    print ('% time to write output = ',round(100*(output_end-conc_end)/analysis_time,2),'%')    
+    print ('% time to calculate averages = ',round(100*(av_end-conc_end)/analysis_time,2),'%')
+    print ('% time to write output = ',round(100*(output_end-av_end)/analysis_time,2),'%')    
 
     

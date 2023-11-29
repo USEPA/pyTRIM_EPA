@@ -73,7 +73,7 @@ df_py=df_py.describe() # get means and summ stats
 pyvars=list(df_py.loc['mean'].index) 
 
 pyvars=[x for x in pyvars if ('sink' not in x and 'source' not in x and 'air' not in x)] # cut out sinks and sources and air
-
+pyvars=[x for x in pyvars if x!='year']# year is created in the gen_avg function
 ## create empty output data structures
 
 op_dic={}
