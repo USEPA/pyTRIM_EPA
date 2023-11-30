@@ -29,7 +29,7 @@ def compute_conc(nt,df_nt,vmu,df_vmu): # arguments are the chemical mass array (
 
 
     df_conc=pd.DataFrame()
-    df_conc['time_in_days']=df_nt['time_in_days'] # add time column
+    df_conc['time']=df_nt['time'] # add time column
     
     for i in index_list:
         conv_fact=df_vmu.loc[i,'Mass_to_Conc_Conv_Factor']
