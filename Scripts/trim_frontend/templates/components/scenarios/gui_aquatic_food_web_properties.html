@@ -308,6 +308,11 @@
             });
 
             $('input.editableCell,select.editableCell').blur(function () {     
+                let focusTblId = $(this).closest(`table`).attr('id');
+                if (`#${focusTblId}` !== tblId) {
+                    return;
+                }
+                
                 // NOTE -- by putting this here, will run check against
                 // all cells in every table 
                 ErrorValidation.isPositiveValue(this);
