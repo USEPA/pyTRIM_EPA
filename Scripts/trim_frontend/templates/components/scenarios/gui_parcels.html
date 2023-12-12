@@ -334,6 +334,8 @@
 
             let mapTable = $('#mapTable').removeAttr('width').DataTable()
             function mapTableRedraw() {
+                let tblId = "#mapTable"
+
                 mapTable.clear().draw();
                 mapTable.destroy()
                 mapTable =  $('#mapTable').removeAttr('width').DataTable({
@@ -592,6 +594,11 @@
                 });
 
                 $('input.editableCell,select.editableCell').blur(function () {
+                    let focusTblId = $(this).closest(`table`).attr('id');
+                    if (`#${focusTblId}` !== tblId) {
+                        return;
+                    }
+                    
                     let data = $(this).val()
                     $(this).hide()
                     $(this).next("label").show().text(data)
