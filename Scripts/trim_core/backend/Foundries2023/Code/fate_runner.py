@@ -9,7 +9,7 @@ trim.fate backend runner script
 import os
 import time
 
-import convert_lc,mlib,plib,vol_elem,comp,prop,dep_rates,solve_ode,gen_conc,gen_avg # import supporting modules to process inputs and auto generate code to define objects
+import convert_lc,mlib,plib,vol_elem,comp,prop,dep_rates,solve_ode,gen_conc,gen_avg,write_output # import supporting modules to process inputs and auto generate code to define objects
 from util_functions import process_met
 
 runner_full_path = os.path.realpath(__file__) # full path to this runner script
@@ -46,6 +46,7 @@ inputs['dep_rates_file']=r'foundries_ps_deprates_properties.txt'
 inputs['simulation_chemicals']=['elemental mercury','divalent mercury','methylmercury']
 inputs['simulation_start_date']='1/1/1990' # string format. assumes starting from 0000 hours
 inputs['simulation_end_date']='1/1/2040' # string format. assumes ending at 0000  hours
+inputs['hourly_output']=False
 
 convert_lc.convert_lc(inputs) # convert legacy input files to lower case and write into new location
 met_dict=process_met(inputs) # get processed average met values    
@@ -77,19 +78,8 @@ if __name__=='__main__':
     conc_end=time.time()
     dfn_avg,dfc_avg=gen_avg.gen_avg(df_nt,df_conc,inputs) # compute annual average mass and conc time series
     av_end=time.time()
-    ### output results (temp)
-    # ofpn=os.path.join(path_output,'results.csv')
-    # df_nt.to_csv(ofpn,index=False)
-    ofpn=os.path.join(path_output,'tm.csv')
-    df_tm.to_csv(ofpn,index=True)
-    ofpn=os.path.join(path_output,'sm.csv')
-    df_sm.to_csv(ofpn,index=True)
-    # ofpn=os.path.join(path_output,'results_conc.csv')
-    # df_conc.to_csv(ofpn,index=False) 
-    ofpn=os.path.join(path_output,'time_series_mass.csv')
-    dfn_avg.to_csv(ofpn,index=False) 
-    ofpn=os.path.join(path_output,'time_series_conc.csv')
-    dfc_avg.to_csv(ofpn,index=False) 
+    ### output results 
+    write_output.write_output(df_tm, df_sm, df_nt, df_conc, dfc_avg, dfn_avg, inputs)
     output_end=time.time()
     analysis_time=round((time.time()-start),2)
     print ('time to run analysis in minutes = ',round(analysis_time/60,2))
