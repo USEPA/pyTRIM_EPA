@@ -6,6 +6,7 @@ from trim_db.schema.utils.serialize import register_serializer
 def serialize_parcel(pcl: Parcel):
     general_params = get_general_params(pcl)
     water_params = get_water_params(pcl, general_params['parcelType'])
+    source_params = get_source_params(pcl)
 
     s = {
         'id': pcl.id,
@@ -13,8 +14,10 @@ def serialize_parcel(pcl: Parcel):
         'description': pcl.description,
         'vertices': pcl.vertices,
         'area': pcl.area.m_as('m^2'),
+        'compartment_map': {ve.name: [c.name for c in ve.compartments] for ve in pcl.volume_elements},
         **general_params,
-        **water_params
+        **water_params,
+        **source_params
     }
 
     return s
@@ -302,6 +305,25 @@ def get_water_params(pcl, parcel_type):
         }
     water_params['surface_water'] = sw_params
     return water_params
+
+
+def get_source_params(pcl):
+    chem_objs = chem_objs={c for c in pcl.scenario.chemicals}
+    chems = {c.name: {} for c in pcl.scenario.chemicals}
+    source_params = {"sources": chems}
+    for chem in chem_objs:
+        for comp in pcl.compartments:
+            # if comp.surfaceDepositionRate(chem) is not None:
+            #     try:
+            #         source_params["sources"][chem.name] = comp.surfaceDepositionRate(chem).magnitude
+            #     except:
+            #         source_params["sources"][chem.name] = comp.surfaceDepositionRate(chem)
+            if comp.media.isa("Source"):
+                try:
+                    source_params["sources"][chem.name] = {comp.volume_element.name: {comp.name: comp.surfaceDepositionRate(chem).magnitude}}
+                except:
+                    source_params["sources"][chem.name] = {comp.volume_element.name: {comp.name: comp.surfaceDepositionRate(chem)}}
+    return source_params
 
 
 def get_fish_params(comp):

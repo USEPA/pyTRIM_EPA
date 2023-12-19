@@ -736,6 +736,9 @@ def parse_compartment_props(
                     if rel_type == 'compartments':
                         formula = formula.replace('compartment.', 'receiver.')
                     formula = formula.replace('self.', 'compartment.')
+                    if "compartment.chemical.VolumeFraction_Solid" in formula:
+                        formula = formula.replace("compartment.chemical.VolumeFraction_Solid",
+                                                  "chemical.VolumeFraction_Solid(compartment)")
                 else:
                     formula = None
 

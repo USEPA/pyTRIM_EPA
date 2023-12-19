@@ -7,10 +7,34 @@ from trim_db import ScenarioService, ParcelService, \
 from trim_frontend import api
 from .forms import *
 from ..utils.logging import make_logger
+from trim_core.algorithms.full_model_run import run_full_model
 
 import traceback
 
 scenario = Blueprint('scenario', __name__)
+
+param_map = {
+    'meteo': {
+        'meteo_ambient_air_static_value': 'AirTemperature',
+        'meteo_wind_speed_static_value': 'horizontalWindSpeed',
+        'meteo_wind_direction_static_value': 'windDirection',
+        'meteo_mixing_height_static_value': 'mixingHeight',
+        'meteo_daytime_indicator_static_value': 'isDay_Dynamic',
+        'meteo_precipitation_static_value_rate': 'Rain',
+        'meteo_interception_fractions_static_deciduous': ['Deciduous_Leaf', 'WetDepInterceptionFraction_UserSupplied'],
+        'meteo_interception_fractions_static_grass': ['Grass_Leaf', 'WetDepInterceptionFraction_UserSupplied'],
+        'meteo_interception_fractions_static_coniferous': ['Coniferous_Leaf', 'WetDepInterceptionFraction_UserSupplied'],
+        'meteo_interception_fractions_static_agriculture': ['Agriculture_Leaf', 'WetDepInterceptionFraction_UserSupplied'],
+        'meteo_interception_fractions_calculated_deciduous': ['Deciduous_Leaf', 'CalculateWetDepInterceptionFraction'],
+        'meteo_interception_fractions_calculated_grass': ['Grass_Leaf', 'CalculateWetDepInterceptionFraction'],
+        'meteo_interception_fractions_calculated_coniferous': ['Coniferous_Leaf', 'CalculateWetDepInterceptionFraction'],
+        'meteo_interception_fractions_calculated_agriculture': ['Agriculture_Leaf', 'CalculateWetDepInterceptionFraction']
+    },
+    'seasonal': {
+        'seasonal_deciduous_forest_static_value_litterfall': ['Deciduous_Leaf', 'LitterFallRate'],
+        'seasonal_deciduous_forest_static_value_allow_exchange': ['Deciduous_Leaf', 'AllowExchange_Dynamic'],
+    }
+}
 
 
 @scenario.route('/scenario')
@@ -22,7 +46,7 @@ def view_scenarios():
     return render_template(
         'scenarios/view_all.html', scenarios=scenarios,
         scenario_form=scenario_form,
-        logged_in_user = current_user
+        logged_in_user=current_user
     )
 
 
@@ -96,6 +120,24 @@ def update_scenario():
             #     if cp.definition.variable_name == "erosionRateCalcSource":
             #         cp.value = ercs
             ParameterService.commit()
+        elif field_name.startswith("meteo_"):
+            if "_interception_" not in field_name:
+                param_name = param_map["meteo"].get(field_name)
+                if s.parameters.get(param_name):
+                    s.parameters.get(param_name).value = scenario_data[field_name]
+                    ScenarioService.update(s)
+                    s2 = ScenarioService.get(int(scenario_data['id']))
+                    print(s2.parameters.get(param_name).value)
+            else:
+                param_media = param_map["meteo"].get(field_name)[0]
+                param_name = param_map["meteo"].get(field_name)[1]
+                comp_list = [c for c in s.compartments if c.media.isa(param_media)]
+                for c in comp_list:
+                    c.parameters.get(param_name).value = scenario_data[field_name]
+                CompartmentService.commit()
+        elif field_name.startswith("seasonal_"):
+            param_name = param_map["seasonal"].get(field_name)
+
     except Exception as e:
         logger.error(traceback.format_exc())
     ScenarioService.update(s)
@@ -188,3 +230,42 @@ def delete_scenario():
         print("Failed to delete scenario...")
 
     return redirect(request.referrer)
+
+@scenario_api.route('/api/scenario/run/', methods=['POST'])
+@login_required
+def run_result_scenario():
+    exec_data = request.form.to_dict()
+    if not exec_data.get('scenario_id'):
+        raise AssertionError("Scenario ID cannot be blank.")
+    scenario_id = int(exec_data['scenario_id'])
+    s = ScenarioService.get(scenario_id)
+
+    try:
+        print("Starting Model Run...")
+        json_n_avg, json_c_avg = run_full_model(s)
+
+        data_resp = {'mass': json_n_avg, 'conc': json_c_avg}
+    except Exception as e:
+        print(e)
+
+    return ApiResult(data_resp)
+
+
+@scenario_api.route('/api/scenario/poll/<int:id>', methods=['GET'])
+@login_required
+def poll_model_run_scenario(id):
+    s = ScenarioService.get(id)
+    return ApiResult({'status': s.description})
+
+
+@scenario_api.route('/api/scenario/poll/', methods=['POST'])
+@login_required
+def reset_poll_model_run_scenario():
+    scenario_data = request.form.to_dict()
+    if not scenario_data.get('scenario_id'):
+        raise AssertionError("Scenario ID cannot be blank.")
+    scenario_id = int(scenario_data['scenario_id'])
+    s = ScenarioService.get(scenario_id)
+    s.description = ""
+    ScenarioService.commit()
+    return "success"

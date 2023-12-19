@@ -287,7 +287,7 @@ class ParameterDefinition(Model):
     default_formula_id = sa.Column(
         sa.Integer(), sa.ForeignKey('formula.id')
     )
-    default_formula = sa.orm.relationship('Formula')
+    default_formula = sa.orm.relationship('Formula', lazy='subquery')  # , lazy='subquery' ASK JOSIAH
 
     @property
     def value(self):
@@ -366,7 +366,7 @@ class CustomParameter(Model):
     formula_id = sa.Column(
         sa.Integer(), sa.ForeignKey('formula.id')
     )
-    formula = sa.orm.relationship('Formula')
+    formula = sa.orm.relationship('Formula', lazy='subquery')  # , lazy='subquery' ASK JOSIAH
 
     @property
     def quantity(self):

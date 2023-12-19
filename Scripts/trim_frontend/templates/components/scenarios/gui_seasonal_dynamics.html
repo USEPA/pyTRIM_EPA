@@ -80,8 +80,71 @@
     onDomLoad(function(e) {
         var form = document.getElementById('seasonal-gui');
         form.addEventListener('form:loaded', function() {
-            enableFieldUpdates();
+            document.body.addEventListener('parcels:loaded', function () {
+                enableFieldUpdates();
+                let loadedData = $('#root').data('loadedParcels')
+                let seasonal_dyn_obj = loadedData.scenario_head.seasonal_dynamics
+                let leaves = ["coniferous", "deciduous", "grass", "agriculture"]
+                leaves.forEach((e, i) => {
+                    let search_cbx_str = `input[type="checkbox"][id^="${e}"]`
+                    let search_txt_lf_str = `input[type="number"][id^="${e}"][id$="litterfall"]`
+                    let search_txt_ae_str = `input[type="number"][id^="${e}"][id$="allow_exchange"]`
+                    let this_chkbx = $('#seasonal-gui').find(search_cbx_str)
+                    let this_text_lf = $('#seasonal-gui').find(search_txt_lf_str)
+                    let this_text_ae = $('#seasonal-gui').find(search_txt_ae_str)
+                    let val_lf = seasonal_dyn_obj[`litterfall_${e}`]
+                    let val_ae = seasonal_dyn_obj[`allow_exchange_${e}`]
+                    if (val_lf == -1 && val_ae == -1) {
+                        this_chkbx.closest('div[data-slot=true]').css('display', 'none')
+                    }
+                    $(this_text_lf).val(val_lf)
+                    $(this_text_ae).val(val_ae)
+                    // Add Listeners for time varying input.
+                    this_chkbx.change(function () {
+
+                    })
+                    $(this_text_lf).add(this_text_ae).blur(function () {
+                        submit_seasonal_dyn_value(this)
+                    })
+                })
+            })
         });
+
+        function get_form_data(elem) {
+            ErrorValidation.isPositiveValue(elem);
+            let param_name = $(elem).attr("name")
+            let param_info = [
+                {
+                    'type': 'data',
+                    'name': 'id',
+                    'value': scenario_id
+                }, {
+                    'type': 'data',
+                    'name': 'field',
+                    'value': 'seasonal_' + param_name
+                }, {
+                    'type': 'input',
+                    'name': 'seasonal_' + param_name,
+                    'value': ''
+                }
+            ]
+            let param_data = ""
+            if ($(elem).attr('type') == "number") {
+                param_data = $(elem).val()
+            }
+
+            param_info[param_info.findIndex(e => e.type == 'input')].value =param_data
+            return param_info
+        }
+
+        function submit_seasonal_dyn_value(elem) {
+            let param_info = get_form_data(elem)
+            if (elementIsValid($(elem).parent())){
+                TRIM.api.updateScenario(param_info)
+            } else {
+                return
+            }
+        }
 
         function enableFieldUpdates() {
             var gui = $('#seasonal-gui');
