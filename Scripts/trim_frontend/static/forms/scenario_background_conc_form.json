@@ -1,0 +1,19 @@
+{
+    "title": "Background Concentrations",
+    "fields": [
+        {
+            "id": "background_chemicals",
+            "label": "Background Chemicals",
+            "data_type": "field_list",
+            "list_view": "page",
+            "field": {
+                "id": "background_chemical",
+                "label": "Background Chemical",
+                "data_type": "form",
+                "form_definition": "subforms/backgroundConc/chemical_backgroundConc.json",
+                "separator": "_"
+            },
+            "min_entries": 0
+        }
+    ]
+}
