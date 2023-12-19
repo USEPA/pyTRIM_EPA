@@ -207,6 +207,7 @@ def parse_met_data(df_met, df_ae, df_lf):  # one time process all met weighted a
     # THIS IS FROM ARUN
     # MAYBE DO THIS DIFFERENTLY? Is this just for Foundries?
     # Scenario-specific stuff shouldn't go here!
+    # TODO Move this to default_rules.json. Directly use the keys in the mapper
     arun_met_dict = {
         'frac_time_exchange_day': 0.16225754122155972,
         'frac_time_exchange_no_rain': 0.3262149134948966,

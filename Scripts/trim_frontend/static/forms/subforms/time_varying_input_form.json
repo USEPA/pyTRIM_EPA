@@ -5,7 +5,7 @@
             "id": "time_varying",
             "label": "Use Time-Varying Value",
             "data_type": "boolean",
-            "default": true,
+            "default": false,
             "help": "Check this box to use values that vary in time."
         },
         {

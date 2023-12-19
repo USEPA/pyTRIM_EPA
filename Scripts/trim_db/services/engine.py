@@ -24,7 +24,7 @@ class DataBase:
         self._session = None
 
     def _make_session(self):
-        s = sa.orm.Session(bind=self.engine)
+        s = sa.orm.Session(bind=self.engine)  # , expire_on_commit=False ASK JOSIAH
         return s
 
     def _init_model_base(self, model_base):
