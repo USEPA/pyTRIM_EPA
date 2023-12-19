@@ -21,7 +21,7 @@ window.TRIM = (function(trim) {
     };
 
     api.copyScenario = function(scenario) {
-        var url = api.getUrl('secnario_api.copy_scenario');
+        var url = api.getUrl('scenario_api.copy_scenario');
         var data = makeFormData(scenario);
         return AJAX.call({
             method: 'POST',
@@ -31,7 +31,7 @@ window.TRIM = (function(trim) {
     }
 
     api.deleteScenario = function(scenario) {
-        var url = api.getUrl('secnario_api.delete_scenario');
+        var url = api.getUrl('scenario_api.delete_scenario');
         var data = makeFormData(scenario);
         return AJAX.call({
             method: 'POST',

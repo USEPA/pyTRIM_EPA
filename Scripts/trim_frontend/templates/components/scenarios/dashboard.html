@@ -37,7 +37,7 @@
                     </a>
                     <div class="text-center">
                         <div class="btn-group">
-                            <form action="{{ url_for('scenario_api.copy_scenario') }}" method="POST">
+                            <form action="{{ url_for('scenario_api.copy_scenario') }}" id="copy-scenario-form" method="POST">
                                 <input name="user_id" value="{{logged_in_user.id}}" type=hidden>
                                 <input name="scenario_id" value="{{scenario.id}}" type=hidden>
                                 <button type="submit" class="btn btn-block btn-outline-primary">
@@ -45,7 +45,7 @@
                                 {{ scenario_form.csrf_token }}
                             </button>
                             </form>
-                            <form action="{{ url_for('scenario_api.delete_scenario') }}" method="POST">
+                            <form action="{{ url_for('scenario_api.delete_scenario') }}" id="delete-scenario-form" method="POST">
                                 <input name="scenario_id" value="{{scenario.id}}" type=hidden>
                                 <button type="submit" class="btn btn-block btn-outline-primary">
                                 Delete
@@ -98,6 +98,11 @@
                 // for our required fields)
                 $('#create-scenario-form [type="submit"]').click();
             });
+            
+            $("#copy-scenario-form, #delete-scenario-form").on("submit", function(){
+                var loadingRequest = 'load_' + this.id;
+                LoadingScreen.show(loadingRequest);
+            })
         });
     </script>
 {% endset %}

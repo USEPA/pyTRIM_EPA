@@ -5,6 +5,7 @@ from datetime import datetime
 from trim_db import ScenarioService, ParcelService, \
     CompartmentService, VolumeElementService, ParameterService, ChemicalService
 from trim_frontend import api
+from trim_frontend.parcels.routes import delete_parcel_contents
 from .forms import *
 from ..utils.logging import make_logger
 
@@ -155,7 +156,8 @@ def copy_scenario():
                 CompartmentService.links.create(sender_id=cmp_map[lnk.sender_id], receiver_id=cmp_map[lnk.receiver_id])
         CompartmentService.commit()
         res = "Success"
-    except:
+    except Exception as e:
+        print(e)
         print("Failed to copy scenario...")
 
     # return ApiResult({'result': res})
@@ -184,7 +186,8 @@ def delete_scenario():
 
         # Delete scenario
         ScenarioService.delete(s.id)
-    except:
+    except Exception as e:
+        print(e)
         print("Failed to delete scenario...")
 
     return redirect(request.referrer)
