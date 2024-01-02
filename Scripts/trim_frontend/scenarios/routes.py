@@ -119,7 +119,21 @@ def copy_scenario():
 
     try:
         # Create new Scenario
-        new_name = f'{s.name}_{"{:%Y-%m-%d_%H_%M_%S}".format(datetime.now())}'
+        # Version counter
+        if len(s.name) >= 120:
+            new_name = f"{s.name[:114]}"
+        else:
+            new_name = s.name
+
+        rname = new_name[::-1]
+        ridx = rname.find("#V_")
+        if ridx == -1:
+            new_name = f"{new_name}_V#1"
+        else:    
+            version = int(rname[:ridx][::-1])
+            new_name = rname.replace(rname[:ridx], "", 1)
+            new_name = new_name[::-1] + str(version + 1)
+             
         ns = ScenarioService.create(name=new_name, description=f'Copy of {s.name} on {datetime.now()}', creator_id=user_id)
         ScenarioService.commit()
 

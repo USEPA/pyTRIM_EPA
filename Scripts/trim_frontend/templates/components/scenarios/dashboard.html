@@ -96,6 +96,11 @@
                 // Forward this click to the ACTUAL submit button for the form
                 // (This lets us get nice browser-handled validation 
                 // for our required fields)
+                let scenario_name = $("input#name");
+                if (scenario_name.val().length > 120) {
+                    alert("Enter a short name for your scenario (120 characters or less)");
+                    return;
+                }
                 $('#create-scenario-form [type="submit"]').click();
             });
             
