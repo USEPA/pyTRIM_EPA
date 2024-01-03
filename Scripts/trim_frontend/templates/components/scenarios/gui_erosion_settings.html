@@ -799,7 +799,7 @@
                         if (!me.closest('.div_checkbox').is(":visible")) {
                             me.closest('.div_checkbox').show()
                         }
-                        TRIM.forms.updateSelect(this, fields);
+                        TRIM.forms.updateSelect(this, fields, true);
                         // ** Enable only the _PN and add event to enable rest when value for _PN selected
                         if (me.attr("id").endsWith("_PN")) {
                             me.removeAttr('disabled');
