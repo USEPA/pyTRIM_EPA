@@ -52,8 +52,8 @@ class UserMixin(ActiveFlagMixin):
             'Role', secondary=roles_users,
             enable_typechecks=False,
             backref=sa.orm.backref(
-                'users', lazy='dynamic', enable_typechecks=False
-            )
+                'users', enable_typechecks=False,
+                lazy='subquery')  # ASK JOSIAH lazy='dynamic'
         )
 
     def has_any_role(self, roles):

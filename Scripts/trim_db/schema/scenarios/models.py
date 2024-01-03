@@ -87,7 +87,7 @@ class Scenario(Model, TrackUpdatesMixin):
         sa.Integer(), sa.ForeignKey('user.id'), nullable=False
     )
     creator = sa.orm.relationship(
-        'User', backref=sa.orm.backref('created_scenarios', lazy='dynamic')
+        'User', backref=sa.orm.backref('created_scenarios', lazy='subquery')  # ASK JOSIAH lazy='dynamic'
     )
 
     @property
@@ -115,7 +115,7 @@ def serialize_scenario(scen: Scenario):
         # TODO Need to figure out why agriculture_leaf does not have CalculateWIF
         wi_data = []
         if wi_type == 1:
-            wi_data = [c.WetDepInterceptionFraction for c in scen.compartments if c.media.isa(media_name)]
+            wi_data = [c.WetDepInterceptionFraction_UserSupplied for c in scen.compartments if c.media.isa(media_name)]
         elif wi_type == 2:
             wi_data = [c.CalculateWetDepInterceptionFraction for c in scen.compartments if c.media.isa(media_name)]
         elif wi_type == 3:
@@ -166,9 +166,9 @@ def serialize_scenario(scen: Scenario):
             'wet_dep_interception_frac_coniferous_leaf': get_wet_interception_params(1, "Coniferous_Leaf"),
             'calc_wet_dep_interception_frac_coniferous_leaf': get_wet_interception_params(2, "Coniferous_Leaf"),
             'wet_dep_interception_frac_coniferous_leaf_calculated': get_wet_interception_params(3, "Coniferous_Leaf"),
-            'wet_dep_interception_frac_deciduous_leaf': get_wet_interception_params(1, "Deciduous_Forest"),
-            'calc_wet_dep_interception_frac_deciduous_leaf': get_wet_interception_params(2, "Deciduous_Forest"),
-            'wet_dep_interception_frac_deciduous_leaf_calculated': get_wet_interception_params(3, "Deciduous_Forest"),
+            'wet_dep_interception_frac_deciduous_leaf': get_wet_interception_params(1, "Deciduous_Leaf"),
+            'calc_wet_dep_interception_frac_deciduous_leaf': get_wet_interception_params(2, "Deciduous_Leaf"),
+            'wet_dep_interception_frac_deciduous_leaf_calculated': get_wet_interception_params(3, "Deciduous_Leaf"),
             'wet_dep_interception_frac_grass_leaf': get_wet_interception_params(1, "Grass_Leaf"),
             'calc_wet_dep_interception_frac_grass_leaf': get_wet_interception_params(2, "Grass_Leaf"),
             'wet_dep_interception_frac_grass_leaf_calculated': get_wet_interception_params(3, "Grass_Leaf"),
