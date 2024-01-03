@@ -1069,8 +1069,7 @@ def hacky_equation_cleaning(val, object_type):
 
     # These are steady state meteorology hacks
     # to account for rain being static rather than time-dependent value
-    # MAYBE DO THIS DIFFERENTLY? Is this just for Foundries?
-    # Scenario-specific stuff shouldn't go here!
+    # TODO MAYBE DO THIS DIFFERENTLY? Is this just for Foundries? Scenario-specific stuff shouldn't go here!
     if (
         (
             "sender.AllowExchange_forOther" in val

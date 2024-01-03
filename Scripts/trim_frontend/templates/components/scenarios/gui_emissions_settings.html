@@ -111,7 +111,7 @@
                     populate_values($($("#emissions-settings-gui").find("table.compMap")[i+1]))
                 })
 
-                window.TRIM.forms.updateSelect($('#chemical')[0],$('#root').data('loadedParcels').scenario_head.all_chem)
+                window.TRIM.forms.updateSelect($('#chemical')[0],$('#root').data('loadedParcels').scenario_head.all_chem, true)
 
                 $('#chemical').on('change',function(e){
                     $('#add-chemicals-btn').removeAttr('disabled')

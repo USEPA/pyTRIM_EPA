@@ -2,7 +2,7 @@
 window.TRIM = (function(trim) {
     var forms = trim.forms || {};
 
-    forms.updateSelect = function(select, options) {
+    forms.updateSelect = function(select, options, sel_values) {
         if (typeof(select) === typeof('')) {
             select = document.getElementById(select);
         }
@@ -25,7 +25,7 @@ window.TRIM = (function(trim) {
             option.innerText = opt.label;
             select.appendChild(option);
 
-            if (defaultVal !== undefined && defaultVal == opt.value) {
+            if (sel_values && defaultVal !== undefined && defaultVal == opt.value) {
                 selectIndex = i;
             }
         }
@@ -182,7 +182,7 @@ window.TRIM = (function(trim) {
             if (defaultVal !== undefined) {
                 field.setAttribute('data-default', defaultVal);
             }
-            forms.updateSelect(field, fieldDef.choices);
+            forms.updateSelect(field, fieldDef.choices, true);
         }
         else if (widget == 'textarea') {
             field = document.createElement('textarea');
