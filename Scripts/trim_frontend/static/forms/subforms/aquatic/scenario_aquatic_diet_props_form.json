@@ -1,0 +1,44 @@
+{
+    "title": "Aquatic Diet Properties",
+    "table_id": "DietTables",
+    "pivot": true,
+    "render": false,
+    "fields": [
+        {
+            "id": "Zooplankton",
+            "label": "Zooplankton",
+            "data_type": "float",
+            "default": 0.1
+        },
+        {
+            "id": "WaterColumnHerbivore",
+            "label": "Water Column Herbivore",
+            "data_type": "float",
+            "default": 0.1
+        },
+        {
+            "id": "BenthicOmnivore",
+            "label": "Benthic Omnivore",
+            "data_type": "float",
+            "default": 0.1
+        },
+        {
+            "id": "WaterColumnOmnivore",
+            "label": "Water Column Omnivore",
+            "data_type": "float",
+            "default": 0.1
+        },
+        {
+            "id": "BenthicCarnivore",
+            "label": "Benthic Carnivore",
+            "data_type": "float",
+            "default": 0.1
+        },
+        {
+            "id": "WaterColumnCarnivore",
+            "label": "Water Column Carnivore",
+            "data_type": "float",
+            "default": 0.1
+        }
+    ]
+}
