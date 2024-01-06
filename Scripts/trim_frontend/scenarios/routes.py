@@ -8,6 +8,7 @@ from datetime import datetime
 from trim_db import ScenarioService, ParcelService, \
     CompartmentService, VolumeElementService, ParameterService, ChemicalService
 from trim_frontend import api
+from trim_frontend.parcels.routes import delete_parcel_contents
 from .forms import *
 from ..utils.logging import make_logger
 from trim_core.algorithms.full_model_run import run_full_model
@@ -321,7 +322,21 @@ def copy_scenario():
 
     try:
         # Create new Scenario
-        new_name = f'{s.name}_{"{:%Y-%m-%d_%H_%M_%S}".format(datetime.now())}'
+        # Version counter
+        if len(s.name) >= 120:
+            new_name = f"{s.name[:114]}"
+        else:
+            new_name = s.name
+
+        rname = new_name[::-1]
+        ridx = rname.find("#V_")
+        if ridx == -1:
+            new_name = f"{new_name}_V#1"
+        else:    
+            version = int(rname[:ridx][::-1])
+            new_name = rname.replace(rname[:ridx], "", 1)
+            new_name = new_name[::-1] + str(version + 1)
+             
         ns = ScenarioService.create(name=new_name, description=f'Copy of {s.name} on {datetime.now()}', creator_id=user_id)
         ScenarioService.commit()
 
@@ -358,7 +373,8 @@ def copy_scenario():
                 CompartmentService.links.create(sender_id=cmp_map[lnk.sender_id], receiver_id=cmp_map[lnk.receiver_id])
         CompartmentService.commit()
         res = "Success"
-    except:
+    except Exception as e:
+        print(e)
         print("Failed to copy scenario...")
 
     # return ApiResult({'result': res})
@@ -387,7 +403,8 @@ def delete_scenario():
 
         # Delete scenario
         ScenarioService.delete(s.id)
-    except:
+    except Exception as e:
+        print(e)
         print("Failed to delete scenario...")
 
     return redirect(request.referrer)

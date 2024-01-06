@@ -29,11 +29,14 @@
     onDomLoad(function() {
         let apTable = null;
         function TableRedraw(table_data) {
+            let tblId = "#AbioticTable";
+            /*
             if (apTable) {
-                apTable.clear().draw();
-                apTable.destroy()
-            }
-            apTable =  $('#AbioticTable').removeAttr('width').dataTable({
+                $('#AbioticTable').dataTable().fnClearTable();
+                $('#AbioticTable').dataTable().fnDraw();
+                $('#AbioticTable').dataTable().fnDestroy();
+            }*/
+            apTable =  $(tblId).removeAttr('width').dataTable({
                 data : table_data,
                 paging: false,
                 bFilter: false,
@@ -157,7 +160,7 @@
                     }
                 ],
                 initComplete: function (settings, json) {
-                    $("#AbioticTable").wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
                 }
@@ -166,7 +169,7 @@
             let sort_order = "asc"
             $('.sortClass').click(function(e){
                 e.preventDefault();
-                let Table = $('#AbioticTable').dataTable()
+                let Table = $(tblId).dataTable()
                 let cellIndex = $(this).closest("th").index()
                 Table.fnSort([[cellIndex,sort_order]]);//use asc/desc as you want
                 sort_order= sort_order == "desc" ? "asc" : "desc"
@@ -181,9 +184,13 @@
             });
 
             // save modified cell
-            $('input.editableCell,select.editableCell').blur(function () {
-                let is_valid = elementIsValid($(this).parent());
+            $(`input.editableCell, select.editableCell`).blur(function () {
+                let focusTblId = $(this).closest(`table`).attr('id');
+                if (`#${focusTblId}` !== tblId) {
+                    return;
+                }
 
+                let is_valid = elementIsValid($(this).parent());
                 if (is_valid) {
                     let data = $(this).val()
                     let $label = $(this).next("label")
@@ -195,8 +202,8 @@
                         parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
                         console.log(parcel_info)
                         TRIM.api.updateParcel('{{ scenario.id }}', parcel_info)
-                        table_data = get_Data_from_table('#AbioticTable')
-                        TableRedraw(table_data)
+                        table_data = get_Data_from_table(tblId)
+                        //TableRedraw(table_data)
                     }
                 }
             })

@@ -671,6 +671,10 @@
             }
 
             $('input.editableCell,select.editableCell').blur(function() {
+                let focusTblId = $(this).closest(`table`).attr('id');
+                if (`#${focusTblId}` !== tblId) {
+                    return;
+                }
                 let parcel_name = $($(this).closest("table").find("thead > tr > th")[$(this).closest("td").prevAll().length]).text()
                 let loadedData = $('#root').data('loadedParcels')
                 let area = Number(loadedData.scenario.find(e => e.name == parcel_name).area)
