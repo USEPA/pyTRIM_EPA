@@ -120,6 +120,7 @@ def copy_scenario():
     try:
         # Create new Scenario
         # Version counter
+        # TODO lookup s.name in db to see if existing incremented version exists first
         if len(s.name) >= 120:
             new_name = f"{s.name[:114]}"
         else:
