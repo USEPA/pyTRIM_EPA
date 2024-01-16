@@ -1,60 +1,55 @@
-{% from 'macros/modal_macros.html' import render_modal %}
-{% from 'macros/form_macros.html' import render_field %}
 
-<form id="emissions-settings-gui"
+<form id="background-conc-gui"
     data-async-form="true"
-    data-form-src="scenario_emissions_form"
+    data-form-src="scenario_background_conc_form"
 >
     <section class="container px-0">
         <div class="row mb-1">
             <div class="col-sm">
-                <div data-slot="true" data-target="chemicals">
+                <div data-slot="true" data-target="background_chemicals">
                     <div class="row mb-1">
                         <div class="col-sm">
                             <h5>Chemical Name:</h5><h6><span class="chemInfo"></span></h6>
                         </div>
-                        <div class="col-sm">
-                            <h5>Chemical Species:</h5><h6><span class="stateInfo"></span></h6>
-                        </div>
                     </div>
                     <div class="row mb-1">
                         <div class="col-sm">
-                            <div data-slot="true" data-target="emissions_sources">
+                            <div>
                                 <div class="row mb-1">
                                     <div class="col-sm">
-                                        <div data-slot="true" data-target="have_AERMOD_file"></div>
-                                        <div data-slot="true" data-target="emissions_source_file"></div>
-                                        <div class="form-text mb-2">
-                                            <small class="text-muted" style="display: none">
-                                                <a href="{{ url_for(
-                                                    'static', filename='templates/source_definitions.csv'
-                                                ) }}">Click here</a> to download the template for creating a CSV file containing emissions sources.
-                                            </small>
+                                        <div data-slot="true" data-target="have_input_file"></div>
+                                        <div class="form-group">
+                                            <div data-slot="true" data-target="concentration_source_file"></div>
+                                            <div class="form-text mb-2">
+                                                <small class="text-muted">
+                                                    <a href="{{ url_for(
+                                                        'static', filename='templates/source_definitions.csv'
+                                                    ) }}">Click here</a> to download the template for creating a CSV file containing initial concentrations.
+                                                </small>
+                                            </div>
                                         </div>
-                                        <div data-slot="true" data-target="spacing"></div>
                                     </div>
                                 </div>
                                 <div class="row mb-1">
                                     <div class="col-sm">
-<!--                                        <div data-slot="true" data-target="location"></div>-->
-<!--                                    </div>-->
                                         <button class="comp_show_all btn btn-warning">Show All</button>
                                         <button class="comp_hide_all btn btn-warning">Hide All</button>
                                         <button class="comp_show_nz btn btn-outline-success">Show Non-Zero</button>
                                         <div class="dropdown d-inline">
-                                            <button class="btn_show_emission_comp btn btn-outline-success dropdown-toggle" type="button" data-toggle="dropdown">
+                                            <button class="btn_show_comp btn btn-outline-success dropdown-toggle" type="button" data-toggle="dropdown">
                                                 Show Compartment
                                             </button>
                                             <div class="dropdown-menu">
                                             </div>
                                         </div>
+                                        <button class="comp_reset_all btn btn-danger">Reset All to Zero</button>
                                         <table class="compMap" style="border-collapse: collapse" cellpadding="6">
                                             <thead>
                                                 <tr>
                                                     <th>Parcel</th>
                                                     <th>Volume Element</th>
                                                     <th>Compartment</th>
-                                                    <th>Emission</th>
+                                                    <th>Initial Concentration</th>
                                                 </tr>
                                             </thead>
                                         </table>
@@ -68,65 +63,31 @@
         </div>
     </section>
 </form>
-<style>
-    tr.level0 td:first-child, tr.level0 td:nth-child(2), tr.level0 td:nth-child(3){
-        background-color: lightgray;
-    }
-    tr.level1 td:nth-child(2), tr.level1 td:nth-child(3){
-        background-color: darkgray;
-    }
-    tr.level2 td:nth-child(3) {
-        background-color: #818181;
-    }
 
-</style>
+<script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}">
+</script>
+<script src="{{ url_for('static', filename='js/lib/dataTables/jquery.dataTables.min.js') }}">
+</script>
+<script src="{{ url_for('static', filename='js/lib/dataTables/dataTables.bootstrap4.min.js') }}">
+</script>
 <script>
-    onDomLoad(function(e) {
-        var form = document.getElementById('emissions-settings-gui');
+        onDomLoad(function(e) {
+        var form = document.getElementById('background-conc-gui');
         form.addEventListener('form:loaded', function() {
             document.body.addEventListener('parcels:loaded', function() {
-                let fieldset = $('#chemicals-add-btn').closest("fieldset")
+                let fieldset = $('#background_chemicals-add-btn').closest("fieldset")
+                $('#background_chemicals-add-btn').hide()
                 let loadedData = $('#root').data('loadedParcels')
-                var chem_spec = {}
-                loadedData.scenario.forEach(p =>
-                    Object.keys(p.sources).forEach(ch =>
-                        Object.keys(p.sources[ch]).forEach(function(ve){
-                            Object.keys(p.sources[ch][ve]).forEach(function(co){
-                                chem_spec[ch]=co
-                            })
-                        })
-                    )
-                )
                 loadedData.scenario_head.scenario_chem.forEach((sc, i) => {
                     window.TRIM.functions.addTabToFieldList(fieldset[0], sc)
 
-                    let spec = chem_spec[sc].indexOf("Vapor") > -1 ? "Gaseous" : "Particulate"
+                    $("#background-conc-gui").find("span.chemInfo")[i+1].innerHTML = sc
+                    $(initialize_compartment_map()).insertAfter($($("#background-conc-gui").find("table.compMap")[i+1]).find("thead"))
 
-                    $("#emissions-settings-gui").find("span.chemInfo")[i+1].innerHTML = sc
-                    $("#emissions-settings-gui").find("span.stateInfo")[i+1].innerHTML = spec
-                    $(initialize_compartment_map(spec)).insertAfter($($("#emissions-settings-gui").find("table.compMap")[i+1]).find("thead"))
-
-                    let dd_menu = $($("#emissions-settings-gui").find("table.compMap")[i+1]).prev("div.dropdown").find("div.dropdown-menu")
+                    let dd_menu = $($("#background-conc-gui").find("table.compMap")[i+1]).prev("div.dropdown").find("div.dropdown-menu")
                     populate_comp_dd(dd_menu);
-                    populate_values($($("#emissions-settings-gui").find("table.compMap")[i+1]))
                 })
 
-                window.TRIM.forms.updateSelect($('#chemical')[0],$('#root').data('loadedParcels').scenario_head.all_chem, true)
-
-                $('#chemical').on('change',function(e){
-                    $('#add-chemicals-btn').removeAttr('disabled')
-                })
-
-                $('#add-chemicals-btn').on('click', function(e){
-                    let chem = $('#chemical').find(":selected").val()
-                    let spec = $('#state').find(":selected").val()
-                    window.TRIM.functions.addTabToFieldList(fieldset[0], chem)
-                    $("#chemicals-modal").find("button.close")[0].click()
-                    let i = Number($("#emissions-settings-gui").find("a.nav-link.p-2.active").attr("id").split("-")[1])
-                    $("#emissions-settings-gui").find("span.chemInfo")[i+1].innerHTML = chem
-                    $("#emissions-settings-gui").find("span.stateInfo")[i+1].innerHTML = spec
-                    $(initialize_compartment_map(spec)).insertAfter($($("#emissions-settings-gui").find("table.compMap")[i+1]).find("thead"))
-                })
 
                 $('tr.colps').on('click', function() {
                     toggle_expand_icon(this, null)
@@ -156,7 +117,7 @@
                     $(this_table).find("tr.colps").show();
                     $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "down"))
                     $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "down"))
-                    $(this).closest("div").find("button.btn_show_emission_comp").text("Show Compartment")
+                    $(this).closest("div").find("button.btn_show_comp").text("Show Compartment")
                 });
 
                 $('button.comp_hide_all').on('click', function(e) {
@@ -165,7 +126,7 @@
                     $(this_table).find("tr.colps:not([data-depth='0'])").hide();
                     $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "up"))
                     $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "up"))
-                    $(this).closest("div").find("button.btn_show_emission_comp").text("Show Compartment")
+                    $(this).closest("div").find("button.btn_show_comp").text("Show Compartment")
                 });
 
                 $('button.comp_show_nz').on('click', function(e) {
@@ -175,7 +136,12 @@
                     let non_zeros = $(this_table).find("tr.colps.level2").filter((i,e) => $(e).find("td.ems").text() > 0);
                     $(non_zeros).show()
                     $(non_zeros).prev("tr.level1").show()
-                    $(this).closest("div").find("button.btn_show_emission_comp").text("Show Compartment")
+                    $(this).closest("div").find("button.btn_show_comp").text("Show Compartment")
+                });
+
+                $('button.comp_reset_all').on('click', function(e) {
+                    e.preventDefault()
+                    let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap");
                 });
 
                 $(document).ready(function() {
@@ -247,14 +213,14 @@
                 var map_html = "<tbody>"
                 let exclude = spec == "Particulate" ? "VaporSource" : "ParticleSource"
                 loadedData.scenario.forEach( function(e,i){
-                    map_html = map_html + "<tr data-depth='0' class='level0 colps'><td data-pcl-name='" + e.name + "'>" + e.name + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
+                    map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>" + e.name + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
                     for (ve in e.compartment_map) {
                         if (ve.indexOf(exclude) == -1) {
-                            map_html = map_html + "<tr data-depth='1' class='level1 colps'><td data-pcl-name='" + e.name + "'></td><td data-ve-name='" + ve + "'>" + ve + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td></tr>"
+                            map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td>" + ve + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td></tr>"
                         }
                         for (comp in e.compartment_map[ve]) {
                             if (e.compartment_map[ve][comp].indexOf(exclude) == -1){
-                                map_html = map_html + "<tr data-depth='2' class='level2 colps'><td data-pcl-name='" + e.name + "'></td><td data-ve-name='" + ve + "'></td><td class='comp' data-comp-name='" + e.compartment_map[ve][comp] + "'>" + e.compartment_map[ve][comp] + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='editableCell badge badge-light'>0</label></td></tr>"
+                                map_html = map_html + "<tr data-depth='2' class='level2 colps'><td></td><td></td><td class='comp'>" + e.compartment_map[ve][comp] + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='editableCell badge badge-light'>0</label></td></tr>"
                             }
                         }
                     }
@@ -263,29 +229,6 @@
                 return map_html
             }
 
-            function populate_values(cmap) {
-                let this_chem = $(cmap).closest("div.tab-pane").data("tab-name")
-                let loadedData = $('#root').data('loadedParcels')
-                loadedData.scenario.forEach(function(p,i){
-                    Object.keys(p.sources).forEach(function(chem,j) {
-                        if (chem == this_chem) {
-                            let ves = Object.keys(p.sources[chem])
-                            ves.forEach(function(ve,k) {
-                                let comps = Object.keys(p.sources[chem][ve])
-                                comps.forEach(function(comp,l){
-                                    let pcl_find_str = "td[data-pcl-name='" + p.name + "']"
-                                    let ve_find_str = "td[data-ve-name='" + ve + "']"
-                                    let comp_find_str = "td[data-comp-name='" + comp + "']"
-                                    let ems_cell = $(cmap).find(pcl_find_str).next(ve_find_str).next(comp_find_str).next("td.ems")
-                                    let ems_val =  Number(p.sources[chem][ve][comp]).toExponential()
-                                    $(ems_cell).find("input").val(ems_val)
-                                    $(ems_cell).find("label.editableCell").text(ems_val)
-                                })
-                            })
-                        }
-                    })
-                })
-            }
             function populate_comp_dd(dd_menu){
                 let comp_array = []
                 let loadedData = $('#root').data('loadedParcels')
@@ -304,7 +247,7 @@
                 $("a.dropdown-item.comp-item").on("click",function (e){
                     e.preventDefault()
                     let this_table = $(this).closest("div.dropdown").next("table.compMap")
-                    let this_dd_btn = $(this).closest("div.dropdown").find("button.btn_show_emission_comp")
+                    let this_dd_btn = $(this).closest("div.dropdown").find("button.btn_show_comp")
                     $('button.comp_hide_all').trigger('click');
                     let only_comps = $(this_table).find("tr.colps.level2").filter((i,tr) => $(tr).find("td.comp").text() == $(this).text());
 

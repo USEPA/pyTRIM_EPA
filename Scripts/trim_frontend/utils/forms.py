@@ -29,6 +29,8 @@ def assemble_json_form(path):
         if os.path.isfile(src):
             with open(src, mode='r', encoding='utf-8') as f:
                 data = json.load(f)
+        else:
+            print(src)
     except Exception:
         return None
 

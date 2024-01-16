@@ -712,7 +712,7 @@
                     var fields = data.fields;
                     selects.each(function() {
                         var me = $(this);
-                        TRIM.forms.updateSelect(this, fields);
+                        TRIM.forms.updateSelect(this, fields, true);
                         this.removeAttribute('disabled');
                     });
                 }

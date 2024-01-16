@@ -1,48 +1,17 @@
-import warnings
-# warnings.warn(
-#     (
-#         '\n'
-#         '\n============================================================='
-#         '\nDEPRECATED'
-#         '\n-------------------------------------------------------------'
-#         '\nThis version of the code for generating a transfer matrix'
-#         ' has been deprecated; check out Scripts/generate_tm.py instead!'
-#         '\n============================================================='
-#         '\n'
-#     ),
-#     DeprecationWarning
-# )
-# if input('Continue? [Y/N] ').upper() != 'Y':
-#     import sys
-#     sys.exit()
-
-# import termios
-import time
 import types
 import numpy as np
-from scipy.integrate import odeint
 import pandas as pd
+from scipy.integrate import odeint
 
 from trim_db.porting import *
 from trim_db.schema import *
 from trim_db.services import *
 
 
-SCENARIO_NAME = 'Foundries_SS'
-CHEMICAL_CATEGORY = 'Mercury'
-
-
 def make_transfer_matrix(scenario):
-    # import pandas as pd
-    # import numpy as np
-
     chem_list = list(sorted(
         scenario.chemicals, key=lambda xcl: xcl.name
     ))
-
-    # -- TEMPORARILY SHORTEN CHEMICAL LIST (COMMENT OUT FOR TM COMPARISON)
-    # chem_list = [chem_list[0]]
-    # -- --
 
     comp_list = list(sorted(
         scenario.compartments, key=lambda xl: xl.standard_name
@@ -65,25 +34,26 @@ def make_transfer_matrix(scenario):
         c: i for i, c in enumerate(chem_list)
     }
 
-    problem_tfm_file = open("Problem_TFM_components.txt", "a")
     for chem_idx, chem in enumerate(chem_list):
-        problem_tfm_file.write(f"{20*'-'} Chemical: {chem} {20*'-'} Scenario: {chem.current_scenario()} {20*'-'} \n")
         print('\n' + '==' * 28)
         print(f'Chemical = {chem.name} **** Scenario: {chem.current_scenario()}')
         print('==' * 28)
         for x, sender in enumerate(comp_list):
             tm_x = int(chem_idx * n_comp + x)
             index_names[tm_x] = chem.name + '_' + sender.standard_name
+
             dr = sender.surfaceDepositionRate(chem)
 
             if sender.Volume:  # if sending compartment has volume (m3)
                 vol = sender.Volume.magnitude
             else:
                 vol = np.nan
+
             if sender.TotalMass:  # if sending compartment has mass (kg)
                 mass = sender.TotalMass.magnitude
             else:
                 mass = np.nan
+
             # if sending compartment has concentration output factor
             if sender.concentrationOutputFactor:
                 try:
@@ -142,7 +112,6 @@ def make_transfer_matrix(scenario):
                             print(f"{sender.name} -> {receiver.name}: ")
                         except Exception as err:
                             print(f"{20*'*'} EVAL PROBLEM {20*'*'} {sender.name} -> {receiver.name}: {transport_proc.name}\n{str(err)}")
-                            problem_tfm_file.write(f"EVAL PROBLEM: {sender.name} -> {receiver.name}: {transport_proc.name}: {str(err)}\n")
                             pass
                         try:
                             if not isinstance(transfer_factor, float) and not isinstance(transfer_factor, int):
@@ -152,15 +121,10 @@ def make_transfer_matrix(scenario):
                                     transfer_factor = transfer_factor.magnitude
                             elif pd.isna(transfer_factor):
                                 print(f"{20 * '*'} NAN PROBLEM {20 * '*'}")
-                                problem_tfm_file.write(
-                                    f"NAN PROBLEM: {sender.name} -> {receiver.name}: {transport_proc.name}, id: "
-                                    f"{transport_proc.algorithm_id}\n")
                             print(f"{transport_proc.name}: {transfer_factor} ({transport_proc.algorithm_id})\n")
                         except Exception as err:
                             print(
                                 f"{20 * '*'} MAG PROBLEM {20 * '*'} {sender.name} -> {receiver.name}: {transport_proc.name}")
-                            problem_tfm_file.write(
-                                f"MAG PROBLEM: {sender.name} -> {receiver.name}: {transport_proc.name}: {str(err)}\n")
                             pass
                         try:
                             if (not transfer_factor or pd.isna(transfer_factor)):
@@ -168,8 +132,6 @@ def make_transfer_matrix(scenario):
                         except ValueError as err:
                             print(
                                 f"{20 * '*'} VALUE PROBLEM {20 * '*'} {sender.name} -> {receiver.name}: {transport_proc.name}")
-                            problem_tfm_file.write(
-                                f"VALUE PROBLEM: {sender.name} -> {receiver.name}: {transport_proc.name}: {str(err)}\n")
                             pass
                         if transport_proc.is_transform:
                             try:
@@ -187,11 +149,7 @@ def make_transfer_matrix(scenario):
                         except Exception as err:
                             print(
                                 f"{20 * '*'} TM PROBLEM {20 * '*'} {sender.name} -> {receiver.name}: {transport_proc.name}")
-                            problem_tfm_file.write(
-                                f"TM PROBLEM: {sender.name} -> {receiver.name}: {transport_proc.name}: {str(err)}\n")
                             pass
-
-    problem_tfm_file.close()
 
     df_tm = pd.DataFrame(
         transition_matrix, index=index_names,
@@ -202,13 +160,11 @@ def make_transfer_matrix(scenario):
     df_vmu = pd.DataFrame(vmu, index=index_names,
                           columns=['comp_name', 'volume_m3', 'mass_kg', 'concentrationOutputUnits',
                                    'concentrationOutputFactor', 'denominator'])
-    df_vmu.to_csv('VMU_DATA.csv')
 
     return transition_matrix, df_tm, source_matrix, df_sm, df_vmu
 
 
 def ode_sim(tm, df_tm, sm, df_sm, scn):
-
     tm = np.nan_to_num(tm, copy=True, nan=0.0, posinf=None, neginf=None)  # replace nans with zero
     steps_per_day = 24  # steps per day for integration and output -- will need to be input / argument eventually
 
@@ -234,11 +190,7 @@ def ode_sim(tm, df_tm, sm, df_sm, scn):
     time_range_d = pd.date_range(simulation_start_date, simulation_end_date,
                                  freq='D')  # pandas datetimes series in days over the simulation period
     ndays = len(time_range_d) - 1  # last day is not a full day
-    # nhours = len(time_range_h) - 1  # last hour is not modelled
     ts = np.linspace(0, ndays, ndays * 24)  # array of hours to be modelled (in units of days because TFs are in /d)
-
-    # ts = np.linspace(0, 365 * nyear,
-    #                  365 * nyear * steps_per_day)  # time line in hours for nyear years, tstart and tend should be inputs
 
     n0 = np.zeros(ndim)  # zero mass initial condition
     nt = odeint(dn_dt, n0, ts, hmax=24)  # mass at time t
@@ -285,31 +237,3 @@ def compute_concentration(df_nt, df_vmu):  # arguments are the chemical mass arr
         df_conc[col_name + '_units'] = units
 
     return (df_conc)
-
-
-if __name__ == '__main__':
-    from trim_db.utils.users_roles import implement_users_roles
-    try:
-        implement_users_roles()
-    except Exception as e:
-        print(f'-- Unable to create Users/Roles.\n{e}')
-
-    SCENARIO_NAME = 'Foundries_SS'
-    scn = ScenarioService.get(name=SCENARIO_NAME)
-
-    # get transition matrix and source matrix
-    (tm, df_tm, sm, df_sm, df_vmu) = make_transfer_matrix(scn)
-
-    # get result
-    (nt, df_nt) = ode_sim(tm, df_tm, sm, df_sm, scn)
-
-    # make concentration output
-    df_conc = compute_concentration(df_nt, df_vmu)
-
-    # Output components as csv
-    df_tm.to_csv("Transfer_Matrix_test.csv")
-    df_sm.to_csv("Source_Matrix_test.csv")
-    df_nt.to_csv("Result_Matrix_test.csv")
-    df_conc.to_csv("Concentration_Result_Matrix_test.csv")
-
-    print(tm)

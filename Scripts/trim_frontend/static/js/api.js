@@ -153,6 +153,34 @@ window.TRIM = (function(trim) {
         });
     };
 
+    api.runModel = function(scenario_info) {
+        let url = api.getUrl('scenario_api.run_result_scenario');
+        let data = makeFormData(scenario_info);
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: data
+        });
+    }
+
+    api.poll = function(scenario_id) {
+        let url = TRIM.api.getUrl('scenario_api.poll_model_run_scenario').replace('/0', '/' + scenario_id);
+        return AJAX.call({
+            method: 'GET',
+            url: url
+        });
+    }
+
+    api.resetPoll = function(scenario_info) {
+        let data = makeFormData(scenario_info);
+        let url = api.getUrl('scenario_api.reset_poll_model_run_scenario')
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: data
+        });
+    }
+
     trim.api = api;
     return trim;
 })(window.TRIM || {});

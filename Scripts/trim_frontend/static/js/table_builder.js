@@ -16,9 +16,17 @@ function ErrToolTip(ele, is_valid, message) {
     if (!is_valid) {
         let tt = '<label class="warningTT" data-toggle="tooltip" data-placement="top" data-html="true" title="'+message+'"><i class="ml-1 fas fa-exclamation-triangle"></i></label>';
         let this_cell = $(ele).closest("td");
-        $("label.warningTT").tooltip('hide');
-        $(this_cell).append(tt);
-        $(this_cell).find("label.warningTT").tooltip('show');
+        if (this_cell.length > 0) {
+            $("label.warningTT").tooltip('hide');
+            $(this_cell).append(tt);
+            $(this_cell).find("label.warningTT").tooltip('show');
+        } else {
+            let this_txt = $(ele).closest("div");
+            $("label.warningTT").tooltip('hide');
+            $(this_txt).prepend(tt);
+            $(this_txt).find("label.warningTT").tooltip('show');
+        }
+
     }
     return is_valid
 }

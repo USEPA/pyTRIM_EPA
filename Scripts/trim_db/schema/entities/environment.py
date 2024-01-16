@@ -27,7 +27,7 @@ class Parcel(Model):
         sa.Integer(), sa.ForeignKey('scenario.id'), nullable=False
     )
     scenario = sa.orm.relationship(
-        'Scenario', backref=sa.orm.backref('parcels', lazy='dynamic')
+        'Scenario', backref=sa.orm.backref('parcels', lazy='subquery')  # ASK JOSIAH lazy='dynamic'
     )
 
     # Store as a string, but make a property to access as an array
@@ -156,7 +156,7 @@ class VolumeElement(Model):
         sa.Integer(), sa.ForeignKey('parcel.id'), nullable=False
     )
     parcel = sa.orm.relationship(
-        'Parcel', backref=sa.orm.backref('volume_elements', lazy='dynamic')
+        'Parcel', backref=sa.orm.backref('volume_elements', lazy='subquery')  # ASK JOSIAH lazy='dynamic'
     )
 
     top = sa.Column(sa.Float(), nullable=False)
@@ -412,14 +412,14 @@ class Compartment(Model):
         sa.Integer(), sa.ForeignKey('volume_element.id'), nullable=False
     )
     volume_element = sa.orm.relationship(
-        'VolumeElement', backref=sa.orm.backref('compartments', lazy='dynamic')
+        'VolumeElement', backref=sa.orm.backref('compartments', lazy='subquery')  # ASK JOSIAH lazy='dynamic'
     )
 
     media_id = sa.Column(
         sa.Integer(), sa.ForeignKey('media.id'), nullable=False
     )
     media = sa.orm.relationship(
-        'Media', backref=sa.orm.backref('compartments', lazy='dynamic')
+        'Media', backref=sa.orm.backref('compartments', lazy='subquery')  # ASK JOSIAH lazy='dynamic'
     )
 
     @property
@@ -571,7 +571,7 @@ class CompartmentLink(Model):
     sender = sa.orm.relationship(
         'Compartment',
         foreign_keys=[sender_id],
-        backref=sa.orm.backref('_links', lazy='dynamic')
+        backref=sa.orm.backref('_links', lazy='subquery')  # ASK JOSIAH lazy='dynamic'
     )
 
     receiver_id = sa.Column(
