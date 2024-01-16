@@ -308,8 +308,8 @@
                 'is_editable': false,
                 'default_value': 0,
                 'unit': 'm<sup>3</sup> [sediment] /m<sup>2</sup> [sediment bed interface] /d',
-                'helpText': 'Volume of sediment received per day by the water body’s sediment bed (per unit area) from the suspended sediment in the water column. Ratio of the product of the water column sediment deposition velocity (2 m [water] / d; source unknown) and the Water Column Suspended Sediment Concentration to the Water Body Sediment Bed Density.' +
-                    '<strong><p>= (water column sediment deposition velocity (2 m [water] / d) * Water Column Suspended Sediment Concentration / Water Body Sediment Bed Density)</p></strong>'
+                'helpText': 'Volume of sediment received per day by the water body’s sediment bed (per unit area) from the suspended sediment in the water column. Ratio of the product of the water column sediment deposition velocity (2 m [water] / d; source unknown) and the Water Column Suspended Sediment Concentration to the Sediment Bed Density.' +
+                    '<strong><p>= (water column sediment deposition velocity (2 m [water] / d) * Water Column Suspended Sediment Concentration / Sediment Bed Density)</p></strong>'
             },
             'Soil Erosion Rate to Water Body':{
                 'short_name':'sed_soil_erosion_to_sw',
@@ -323,8 +323,8 @@
                 'is_editable': false,
                 'default_value': 0,
                 'unit': 'm<sup>3</sup> [sediment] /m<sup>2</sup> [sediment bed interface] /d',
-                'helpText': 'Volume of sediment buried per day into the sediment bed (per unit area) from the suspended sediment in the water column. Ratio of the difference between the sum (across all contributing water bodies) of the Water Column External Sediment Inflow from Other Water Bodies and the Soil Erosion Rate to Water Body and the Water Column Sediment Discharge Rate to the product of the Water Body Sediment Bed Density and water body surface area.' +
-                    '<strong><p>= (Water Column External Sediment Inflow from Other Water Bodies + Soil Erosion Rate to Water Body - Water Column Sediment Discharge Rate) / (Water Body Sediment Bed Density* water body surface area)</p></strong>'
+                'helpText': 'Volume of sediment buried per day into the sediment bed (per unit area) from the suspended sediment in the water column. Ratio of the difference between the sum (across all contributing water bodies) of the Water Column External Sediment Inflow from Other Water Bodies and the Soil Erosion Rate to Water Body and the Water Column Sediment Discharge Rate to the product of the Sediment Bed Density and water body surface area.' +
+                    '<strong><p>= (Water Column External Sediment Inflow from Other Water Bodies + Soil Erosion Rate to Water Body - Water Column Sediment Discharge Rate) / (Sediment Bed Density* water body surface area)</p></strong>'
             }
         }
 
@@ -385,7 +385,10 @@
             // find and highlight selected row and any associated rows used in calculations
             // NOTE: expects all calcs to include "= ("
             $("#LakeTable, #SedTable").on('click', 'tbody tr', function() {
-                let color_black = "rgb(33, 37, 41)";
+                let color_white = "rgb(255, 255, 255)";
+                let color_hover = "rgb(246, 246, 246)";
+                let color_blue = "rgb(13, 202, 240, .4)";
+                let color_green = "rgba(51, 170, 51, .4)";
 
                 let selected_table = $(this).closest("table").attr("id");
                 selected_table = $(`#${selected_table}`).DataTable();
@@ -394,28 +397,28 @@
                 let lake_table = $("#LakeTable").DataTable();
                 let lake_columns = lake_table.column(0).data();
                 lake_columns.each((name, idx)=>{
-                    let iter_row = $(lake_table.row(idx).node());
-                    if (iter_row.css("color") !== color_black) {
-                        iter_row.css("color", "black");
+                    let iter_row = $(lake_table.row(idx).node());                
+                    if (iter_row.css("background-color") !== color_white) {
+                        iter_row.css("background-color", color_white);
                     }
                     if (row_text.includes("= (") && row_text.includes(name)){
-                        iter_row.css("color", "red");
+                        iter_row.css("background-color", color_blue);
                     }
-                })        
+                })  
 
                 let sed_table = $("#SedTable").DataTable();
                 let sed_columns = sed_table.column(0).data();
                 sed_columns.each((name, idx)=>{
                     let iter_row = $(sed_table.row(idx).node());
-                    if (iter_row.css("color") !== color_black) {
-                        iter_row.css("color", "black");
+                    if (iter_row.css("background-color") !== color_white) {
+                        iter_row.css("background-color", color_white);
                     }
                     if (row_text.includes("= (") && row_text.includes(name)){
-                        iter_row.css("color", "red");
+                        iter_row.css("background-color", color_blue);
                     }
-                })       
+                })
 
-                $(this).css("color", "green");    
+                $(this).css("background-color", color_green);
             })
 
             let sort_order = "asc"
