@@ -563,7 +563,7 @@ def parameterize(cls, default_scenario=None):
                 changelog +='\n</changelog>'
                 if merged is None:
                     # The new definition is incompatible with the existing one
-                    if force_update or name == "Flushes":
+                    if force_update:
                         # We're just going to overwrite the existing definition
                         print(
                             f'WARNING! Updating existing value:\n{changelog}'

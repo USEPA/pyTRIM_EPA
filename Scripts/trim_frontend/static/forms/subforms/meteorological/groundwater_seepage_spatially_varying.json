@@ -5,7 +5,7 @@
         {
             "id": "spatially_varying",
             "data_type": "boolean",
-            "default": false,
+            "default": true,
             "help": "Check the box to enter spatially varying values (i.e., one value per parcel) for fraction of precipitation that seeps into groundwater."
         },
         {

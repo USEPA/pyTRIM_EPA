@@ -70,4 +70,3 @@ class ScenarioErosionForm(FlaskForm):
 ))
 class ScenarioEmissionsForm(FlaskForm):
     pass
-

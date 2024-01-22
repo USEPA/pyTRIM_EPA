@@ -2,7 +2,7 @@
 window.TRIM = (function(trim) {
     var forms = trim.forms || {};
 
-    forms.updateSelect = function(select, options, sel_values) {
+    forms.updateSelect = function(select, options) {
         if (typeof(select) === typeof('')) {
             select = document.getElementById(select);
         }
@@ -25,7 +25,7 @@ window.TRIM = (function(trim) {
             option.innerText = opt.label;
             select.appendChild(option);
 
-            if (sel_values && defaultVal !== undefined && defaultVal == opt.value) {
+            if (defaultVal !== undefined && defaultVal == opt.value) {
                 selectIndex = i;
             }
         }
@@ -182,7 +182,7 @@ window.TRIM = (function(trim) {
             if (defaultVal !== undefined) {
                 field.setAttribute('data-default', defaultVal);
             }
-            forms.updateSelect(field, fieldDef.choices, true);
+            forms.updateSelect(field, fieldDef.choices);
         }
         else if (widget == 'textarea') {
             field = document.createElement('textarea');
@@ -288,13 +288,6 @@ window.TRIM = (function(trim) {
             addTabToFieldList(fieldset);
         }
 
-        let as_modal = fieldListDef.list_view || "page";
-
-        if (as_modal == "modal") {
-            let modalContent = renderModalForm(fieldListDef, template)
-            fieldset.appendChild(modalContent)
-        }
-
         wrapper.appendChild(fieldset);
         return wrapper;
     }
@@ -318,95 +311,11 @@ window.TRIM = (function(trim) {
         addBtn.setAttribute('data-fieldlist-add', 'true');
         addBtn.innerHTML = '<i class="fa fa-plus"></i>&nbsp;Add';
 
-        let as_modal = fieldListDef.list_view || "page";
-
-        if (as_modal == "modal") {
-            addBtn.setAttribute('data-in-modal', 'true');
-            addBtn.setAttribute('data-toggle', "modal");
-            addBtn.setAttribute('data-target', "#" + fieldListDef.id + "-modal")
-        } else {
-            addBtn.setAttribute('data-in-modal', 'false');
-        }
-
         addLi.appendChild(addBtn);
         add.appendChild(addLi);
         header.appendChild(add);
 
         return header;
-    }
-
-    function renderModalForm(fieldListDef, template) {
-        var modal = document.createElement('div');
-        modal.id = fieldListDef.id + '-modal'
-        modal.className = 'modal fade';
-        modal.tabIndex = -1;
-        modal.setAttribute('role', 'dialog');
-        modal.setAttribute('aria-labelledby', fieldListDef.id + '-label');
-
-        let modalDialog = document.createElement('div');
-        modalDialog.className = 'modal-dialog';
-        modalDialog.setAttribute('role','document');
-
-        let modalContent = document.createElement('div');
-        modalContent.className = 'modal-content';
-
-        let modalHeader = document.createElement('div');
-        modalHeader.className = 'modal-header' ;
-
-        let modalTitle = document.createElement('h5');
-        modalTitle.id = fieldListDef.id + '-modal-title'
-        modalTitle.className = 'modal-title';
-        modalTitle.innerHTML = 'Specify ' + fieldListDef.label;
-
-        let modalClose =document.createElement('button');
-        modalClose.type = 'button';
-        modalClose.className = 'close';
-        modalClose.setAttribute('data-dismiss', 'modal');
-        modalClose.setAttribute('aria-label', 'Close');
-        modalClose.innerHTML = '<span aria-hidden="true">&times;</span>';
-
-        modalHeader.appendChild(modalTitle);
-        modalHeader.appendChild(modalClose);
-
-        let modalBody = document.createElement("div");
-        modalBody.className = 'modal-body';
-        let new_fields = JSON.parse(JSON.stringify(fieldListDef.field))
-        let fields = fieldListDef.field.form_definition.fields.filter(function(e,i) {
-            return e.location == "modal"
-        })
-        new_fields.form_definition.fields = fields
-        fields.forEach(function(e,i) {
-            let elem = forms.render(e)
-            modalBody.appendChild(elem)
-        })
-
-
-
-        let modalFooter = document.createElement('div');
-        modalFooter.className = 'modal-footer';
-        let modalFooterCancel =document.createElement('button')
-        modalFooterCancel.className = 'btn btn-light';
-        modalFooterCancel.type = 'button';
-        modalFooterCancel.setAttribute('data-dismiss', 'modal');
-        modalFooterCancel.innerHTML = 'Cancel'
-
-        let modalFooterCreate = document.createElement('button');
-        modalFooterCreate.id = "add-" + fieldListDef.id + "-btn"
-        modalFooterCreate.className = 'btn btn-primary';
-        modalFooterCreate.type = 'button';
-        modalFooterCreate.innerHTML = 'Create';
-        modalFooterCreate.disabled = 'disabled';
-
-        modalFooter.appendChild(modalFooterCancel);
-        modalFooter.appendChild(modalFooterCreate);
-
-        modalContent.appendChild(modalHeader);
-        modalContent.appendChild(modalBody);
-        modalContent.appendChild(modalFooter);
-        modalDialog.appendChild(modalContent);
-        modal.appendChild(modalDialog);
-
-        return modal;
     }
 
     function renderFieldListNav(fieldListDef) {
@@ -487,7 +396,7 @@ window.TRIM = (function(trim) {
         return tabContent;
     }
 
-    function addTabToFieldList(fieldset, custom_label) {
+    function addTabToFieldList(fieldset) {
         var values = JSON.parse(fieldset.getAttribute('data-value'));
         var label = fieldset.getAttribute('data-label');
         var id = fieldset.id;
@@ -509,19 +418,13 @@ window.TRIM = (function(trim) {
 
         var wrapper = document.createElement('div');
         wrapper.innerHTML = pillTemplate.outerHTML
-                .replace(repl, next).replace(/#pillnum;/g, values.length + 1);
-        // if (custom_label) {
-        //     $(wrapper).find("a.nav-link").text(custom_label)
-        // }
+            .replace(repl, next).replace(/#pillnum;/g, values.length + 1);
 
         var newPill = wrapper.children[0];
         newPill.removeAttribute('data-template');
         newPill.setAttribute('data-pill-id', values.length);
         newPill.style.display = '';
         newPill.getElementsByTagName('a')[0].className += ' active';
-        if (custom_label) {
-            $(newPill).find("a.nav-link").text(custom_label)
-        }
         nav.appendChild(newPill);
 
         var tabs = fieldset.querySelector('.tab-content');
@@ -543,9 +446,6 @@ window.TRIM = (function(trim) {
         newTab.setAttribute('data-tab-id', values.length);
         newTab.className += ' show active';
         newTab.style.display = '';
-        if (custom_label) {
-            newTab.setAttribute('data-tab-name', custom_label);
-        }
 
         var remBtn = newTab.querySelector(
             '[data-fieldlist-rem][href="#remove-' + newTab.id + '"]');
@@ -601,17 +501,10 @@ window.TRIM = (function(trim) {
         if (btn == null || !btn.hasAttribute('data-fieldlist-add')) {
             return;
         }
-
-        if (btn.hasAttribute('data-in-modal')) {
-            if (btn.getAttribute('data-in-modal') == "true") {
-                return
-            }
-        }
-
         e.preventDefault();
-        var entity_name = e.currentTarget.entity || null
+
         var fieldset = btn.closest('fieldset');
-        addTabToFieldList(fieldset, entity_name);
+        addTabToFieldList(fieldset);
     });
     // Create a global event listener for removing from field lists
     document.body.addEventListener('click', function(e) {
@@ -673,12 +566,6 @@ window.TRIM = (function(trim) {
         }
 
         document.body.addEventListener('change', function(e) {
-            let tab_num = $(e.target).closest(".tab-pane").attr('data-tab-id')
-            // Take care of fieldset components if dependency is in a fieldList
-            if_true = if_true.map(e=> e.replace("##",tab_num))
-            if_false = if_false.map(e=> e.replace("##",tab_num))
-            field_id = field_id.replace("##",tab_num)
-
             if (if_true.indexOf(e.target.id) < 0 &&
                 if_false.indexOf(e.target.id) < 0) {
                 return;
@@ -975,9 +862,6 @@ window.TRIM = (function(trim) {
         });
     }
 
-    var functions = {addTabToFieldList}
-
     trim.forms = forms;
-    trim.functions = functions
     return trim;
 })(window.TRIM || {});

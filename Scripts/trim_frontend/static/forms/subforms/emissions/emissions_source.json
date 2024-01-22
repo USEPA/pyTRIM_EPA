@@ -1,0 +1,42 @@
+{
+    "title": "Emissions Source",
+    "fields": [
+        {
+            "id": "name",
+            "label": "Name",
+            "data_type": "string",
+            "required": true,
+            "help": "Enter the name of your emission source (keep it short, and do not use spaces)."
+        },
+        {
+            "id": "location",
+            "label": "Location",
+            "data_type": "string",
+            "widget": "select",
+            "choices": [],
+            "required": true,
+            "help": "Indicate the name of the parcel containing the emission source."
+        },
+        {
+            "id": "height",
+            "label": "Height (m)",
+            "data_type": "float",
+            "min": 0,
+            "required": true,
+            "help": "Enter the release height of the emission source (height above ground)."
+        },
+        {
+            "id": "chemicals",
+            "label": "Chemicals",
+            "data_type": "field_list",
+            "field": {
+                "id": "chemical",
+                "label": "Chemical",
+                "data_type": "form",
+                "form_definition": "subforms/emissions/chemical_emissions.json",
+                "separator": "_"
+            },
+            "min_entries": 1
+        }
+    ]
+}

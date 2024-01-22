@@ -1,20 +1,20 @@
 import warnings
-# warnings.warn(
-#     (
-#         '\n'
-#         '\n============================================================='
-#         '\nDEPRECATED'
-#         '\n-------------------------------------------------------------'
-#         '\nThis version of the code for generating a transfer matrix'
-#         ' has been deprecated; check out Scripts/generate_tm.py instead!'
-#         '\n============================================================='
-#         '\n'
-#     ),
-#     DeprecationWarning
-# )
-# if input('Continue? [Y/N] ').upper() != 'Y':
-#     import sys
-#     sys.exit()
+warnings.warn(
+    (
+        '\n'
+        '\n============================================================='
+        '\nDEPRECATED'
+        '\n-------------------------------------------------------------'
+        '\nThis version of the code for generating a transfer matrix'
+        ' has been deprecated; check out Scripts/generate_tm.py instead!'
+        '\n============================================================='
+        '\n'
+    ),
+    DeprecationWarning
+)
+if input('Continue? [Y/N] ').upper() != 'Y':
+    import sys
+    sys.exit()
 
 # import termios
 import time
@@ -50,7 +50,6 @@ def make_transfer_matrix(scenario):
 
     n_chem = len(chem_list)
     n_comp = len(comp_list)
-    vmu = []
 
     matrix_dimensions = n_chem * n_comp
 
@@ -75,54 +74,6 @@ def make_transfer_matrix(scenario):
             tm_x = int(chem_idx * n_comp + x)
             index_names[tm_x] = chem.name + '_' + sender.standard_name
             dr = sender.surfaceDepositionRate(chem)
-
-            if sender.Volume:  # if sending compartment has volume (m3)
-                vol = sender.Volume.magnitude
-            else:
-                vol = np.nan
-            if sender.TotalMass:  # if sending compartment has mass (kg)
-                mass = sender.TotalMass.magnitude
-            else:
-                mass = np.nan
-            # if sending compartment has concentration output factor
-            if sender.concentrationOutputFactor:
-                try:
-                    cof = sender.concentrationOutputFactor.magnitude
-                except AttributeError:
-                    cof = sender.concentrationOutputFactor
-                try:
-                    cou = str(sender.concentrationOutputFactor.units)
-                except AttributeError:
-                    cou = np.nan
-                if not cof:
-                    cof = np.nan
-                if not cou:
-                    cou = ""
-            else:
-                if sender.media.isa("Root_Zone") or sender.media.isa("Surface_Soil"):
-                    cof = chem.concentrationOutputFactor(sender)
-                    cou = "g / g"
-                else:
-                    cof = np.nan
-                    cou = ""
-
-            denom = "mass"  # default denom is mass
-            # if compartment is abiotic
-            if sender.media.isa("Abiotic"):
-                denom = "volume"  # denominator in concentration calculation must be volume
-            # if compartment is leaf or leaf particle (inferred this based on concentration output factor)
-            if sender.media.isa("$Leaf") or sender.media.isa("$Leaf_Particle"):
-                denom = "volume"  # denominator in concentration calculation must be volume
-            # if compartment is surface water note that denom must be in L
-            if sender.media.isa("Surface_Water"):
-                denom = "volume_L"  # denominator in concentration calculation must be volume
-            # if compartment is groundwater note that denom must be in L
-            if sender.media.isa("Groundwater"):
-                denom = "volume_L"  # denominator in concentration calculation must be volume
-            # tuples of volume, mass, units, output factor, and denominator quantity
-            vmu_tup = (sender.name, vol, mass, cou, cof, denom)
-            vmu.append(vmu_tup)
-
             if not (str(dr) == 'nan'):
                 source_matrix[tm_x] += dr.magnitude
             if not sender.media.can_emit:
@@ -199,15 +150,11 @@ def make_transfer_matrix(scenario):
     df_sm = pd.DataFrame(
         source_matrix, index=index_names,
         columns=['deposition_rate_g_day-1'])
-    df_vmu = pd.DataFrame(vmu, index=index_names,
-                          columns=['comp_name', 'volume_m3', 'mass_kg', 'concentrationOutputUnits',
-                                   'concentrationOutputFactor', 'denominator'])
-    df_vmu.to_csv('VMU_DATA.csv')
-
-    return transition_matrix, df_tm, source_matrix, df_sm, df_vmu
+    return transition_matrix, df_tm, source_matrix, df_sm
 
 
-def ode_sim(tm, df_tm, sm, df_sm, scn):
+def ode_sim(tm, df_tm, sm,
+            df_sm, nyear):  # need to add start time and end time of simulation as arguments. currently assuming 50 years
 
     tm = np.nan_to_num(tm, copy=True, nan=0.0, posinf=None, neginf=None)  # replace nans with zero
     steps_per_day = 24  # steps per day for integration and output -- will need to be input / argument eventually
@@ -227,18 +174,8 @@ def ode_sim(tm, df_tm, sm, df_sm, scn):
 
     ndim = sm.shape[0]  # number of compartments
 
-    simulation_start_date = scn.simulationBeginDateTime
-    simulation_end_date = scn.simulationEndDateTime
-    time_range_h = pd.date_range(simulation_start_date, simulation_end_date,
-                                 freq='H')  # pandas datetimes series in hours over the simulation period
-    time_range_d = pd.date_range(simulation_start_date, simulation_end_date,
-                                 freq='D')  # pandas datetimes series in days over the simulation period
-    ndays = len(time_range_d) - 1  # last day is not a full day
-    # nhours = len(time_range_h) - 1  # last hour is not modelled
-    ts = np.linspace(0, ndays, ndays * 24)  # array of hours to be modelled (in units of days because TFs are in /d)
-
-    # ts = np.linspace(0, 365 * nyear,
-    #                  365 * nyear * steps_per_day)  # time line in hours for nyear years, tstart and tend should be inputs
+    ts = np.linspace(0, 365 * nyear,
+                     365 * nyear * steps_per_day)  # time line in hours for nyear years, tstart and tend should be inputs
 
     n0 = np.zeros(ndim)  # zero mass initial condition
     nt = odeint(dn_dt, n0, ts, hmax=24)  # mass at time t
@@ -254,39 +191,6 @@ def ode_sim(tm, df_tm, sm, df_sm, scn):
     return (nt, df_nt)
 
 
-def compute_concentration(df_nt, df_vmu):  # arguments are the chemical mass array (nt), mass dataframe
-
-    df_vmu['Mass_to_Conc_Conv_Factor'] = np.nan
-    index_list = list(df_vmu.index)
-    for i in index_list:  # loop over the rows of the compartment volume mass units dataframe
-        if df_vmu.loc[i, 'concentrationOutputFactor'] == np.nan:
-            pass
-        else:
-            if 'mass' in df_vmu.loc[i, 'denominator']:
-                df_vmu.loc[i, 'Mass_to_Conc_Conv_Factor'] = 1 / df_vmu.loc[i, 'mass_kg'] * df_vmu.loc[
-                    i, 'concentrationOutputFactor']
-            if 'volume' in df_vmu.loc[i, 'denominator']:
-                df_vmu.loc[i, 'Mass_to_Conc_Conv_Factor'] = 1 / df_vmu.loc[i, 'volume_m3'] * df_vmu.loc[
-                    i, 'concentrationOutputFactor']
-            # need to convert volume from m3 to L for these compartments (surface water and groundwater)
-            if 'volume_L' in df_vmu.loc[i, 'denominator']:
-                df_vmu.loc[i, 'Mass_to_Conc_Conv_Factor'] = 1 / (df_vmu.loc[i, 'volume_m3'] * 1000) * df_vmu.loc[
-                    i, 'concentrationOutputFactor']
-
-    df_conc = pd.DataFrame()
-
-    for i in index_list:
-        conv_fact = df_vmu.loc[i, 'Mass_to_Conc_Conv_Factor']
-        units = df_vmu.loc[i, 'concentrationOutputUnits']
-        # col_name=i+'_'+units
-        col_name = i
-        col_val = np.array(df_nt[i]) * conv_fact
-        df_conc[col_name] = col_val
-        df_conc[col_name + '_units'] = units
-
-    return (df_conc)
-
-
 if __name__ == '__main__':
     from trim_db.utils.users_roles import implement_users_roles
     try:
@@ -298,18 +202,14 @@ if __name__ == '__main__':
     scn = ScenarioService.get(name=SCENARIO_NAME)
 
     # get transition matrix and source matrix
-    (tm, df_tm, sm, df_sm, df_vmu) = make_transfer_matrix(scn)
+    (tm, df_tm, sm, df_sm) = make_transfer_matrix(scn)
 
     # get result
-    (nt, df_nt) = ode_sim(tm, df_tm, sm, df_sm, scn)
-
-    # make concentration output
-    df_conc = compute_concentration(df_nt, df_vmu)
+    (nt, df_nt) = ode_sim(tm, df_tm, sm, df_sm, 5)
 
     # Output components as csv
     df_tm.to_csv("Transfer_Matrix_test.csv")
     df_sm.to_csv("Source_Matrix_test.csv")
-    df_nt.to_csv("Result_Matrix_test.csv")
-    df_conc.to_csv("Concentration_Result_Matrix_test.csv")
+    df_nt.to_csv("Concentration_Matrix_test.csv")
 
     print(tm)

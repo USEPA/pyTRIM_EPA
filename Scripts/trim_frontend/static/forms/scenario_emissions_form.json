@@ -2,18 +2,24 @@
     "title": "Emissions",
     "fields": [
         {
-            "id": "chemicals",
-            "label": "Chemicals",
+            "id": "emissions_source_file",
+            "label": "Emissions Source File",
+            "data_type": "file",
+            "required": true,
+            "help": "Indicate the file of emissions data."
+        },
+        {
+            "id": "emissions_sources",
+            "label": "Emissions Sources",
             "data_type": "field_list",
-            "list_view": "modal",
             "field": {
-                "id": "chemical",
-                "label": "Chemical",
+                "id": "source",
+                "label": "Source",
                 "data_type": "form",
-                "form_definition": "subforms/emissions/chemical_emissions.json",
+                "form_definition": "subforms/emissions/emissions_source.json",
                 "separator": "_"
             },
-            "min_entries": 0
+            "min_entries": 1
         }
     ]
 }
