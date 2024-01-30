@@ -12,7 +12,7 @@
             "data_type": "string",
             "widget": "select",
             "choices": [],
-            "default": "LitterfallRate",
+            "default": "LiterfallRate",
             "required": true,
             "help": "Indicate the field name for the time-varying values of litterfall rate.",
             "if_true": ["time_varying"]

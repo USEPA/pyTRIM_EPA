@@ -3,7 +3,7 @@ import subprocess
 import sys
 import time
 
-# os.environ['TEST_DB_SERVERLESS'] = ''
+os.environ['TEST_DB_SERVERLESS'] = ''
 
 EXPOSE = False
 

@@ -6,12 +6,9 @@ window.TRIM = (function(trim) {
 
     var urls = {
         'scenario_api.get_scenario': '{{ url_for("scenario_api.get_scenario", id=0) }}',
-        'scenario_api.update_scenario': '{{ url_for("scenario_api.update_scenario") }}',
+        'scenario_api.update_scenario': '{{ url_for("scenario_api.update_scenario", id=0) }}',
         'scenario_api.copy_scenario': '{{ url_for("scenario_api.copy_scenario") }}',
         'scenario_api.delete_scenario': '{{ url_for("scenario_api.delete_scenario") }}',
-        'scenario_api.run_result_scenario': '{{ url_for("scenario_api.run_result_scenario") }}',
-        'scenario_api.poll_model_run_scenario': '{{ url_for("scenario_api.poll_model_run_scenario", id=0) }}',
-        'scenario_api.reset_poll_model_run_scenario': '{{ url_for("scenario_api.reset_poll_model_run_scenario") }}',
         'parcels_api.create':'{{ url_for("parcels_api.create_parcel", scenario_id=0) }}',
         'parcels_api.get':'{{ url_for("parcels_api.get_parcels", scenario_id=0) }}',
         'parcels_api.update': '{{ url_for("parcels_api.update_parcel", scenario_id=0, id=-1) }}',

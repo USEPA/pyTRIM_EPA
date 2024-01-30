@@ -8,10 +8,10 @@
         },
         {
             "id": "static_value",
-            "data_type": "float",
-            "min": 0 ,
-            "max": 1,
-            "default": 1,
+            "data_type": "int",
+            "widget": "select",
+            "choices": ["0" ,"1"],
+            "default": "1",
             "required": true,
             "help": "Enter a single value to use throughout your model run. The default is constant daytime (value of 1). For constant nighttime select 0"
         }

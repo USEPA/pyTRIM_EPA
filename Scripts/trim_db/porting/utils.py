@@ -207,7 +207,6 @@ def parse_met_data(df_met, df_ae, df_lf):  # one time process all met weighted a
     # THIS IS FROM ARUN
     # MAYBE DO THIS DIFFERENTLY? Is this just for Foundries?
     # Scenario-specific stuff shouldn't go here!
-    # TODO Move this to default_rules.json. Directly use the keys in the mapper
     arun_met_dict = {
         'frac_time_exchange_day': 0.16225754122155972,
         'frac_time_exchange_no_rain': 0.3262149134948966,
@@ -1069,7 +1068,8 @@ def hacky_equation_cleaning(val, object_type):
 
     # These are steady state meteorology hacks
     # to account for rain being static rather than time-dependent value
-    # TODO MAYBE DO THIS DIFFERENTLY? Is this just for Foundries? Scenario-specific stuff shouldn't go here!
+    # MAYBE DO THIS DIFFERENTLY? Is this just for Foundries?
+    # Scenario-specific stuff shouldn't go here!
     if (
         (
             "sender.AllowExchange_forOther" in val

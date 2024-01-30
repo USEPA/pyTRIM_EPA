@@ -187,7 +187,7 @@
                 'default_value': 2,
                 'unit': 'kg [sediment particles]/y',
                 'helpText': 'Volume of suspended sediment lost per year by the water column to discharge. Product of the Water Column Suspended Sediment Concentration and the Water Column Discharge Volumetric Rate\n' +
-                    '<p><strong>= Water Column Suspended Sediment Concentration * Water Column Discharge Volumetric Rate</strong></p>'
+                    '<p><strong>= (Water Column Suspended Sediment Concentration * Water Column Discharge Volumetric Rate)</strong></p>'
             },
             'Water Column Flush Rate':{
                 'short_name':'flush_rate',
@@ -202,7 +202,7 @@
                 'default_value': 2,
                 'unit': 'm<sup>3</sup> [water]/y',
                 'helpText': 'The Water Column Evaporation Volumetric Rate subtracted from the sum of the Precipitation Runoff Volumetric Rate from Land to Water Body, Precipitation Volumetric Rate to Water Body, Precipitation Seepage Volumetric Rate to Groundwater, and Water Column External Inflow from Other Water Bodies, assuming the lake maintains a constant volume (a simplifying assumption). That is, water inputs minus loss to evaporation.' +
-                    '<p><strong>= ( Precipitation Runoff Volumetric Rate from Land to Water Body + Precipitation Volumetric Rate to Water Body + Precipitation Seepage Volumetric Rate to Groundwater + Water Column External Inflow from Other Water Bodies ) - Water Column Evaporation Volumetric Rate.</strong></p>'
+                    '<p><strong>= (Precipitation Runoff Volumetric Rate from Land to Water Body + Precipitation Volumetric Rate to Water Body + Precipitation Seepage Volumetric Rate to Groundwater + Water Column External Water Inflow from Other Water Bodies) - Water Column Evaporation Volumetric Rate.</strong></p>'
             },
             'Water Column Evaporation Rate':{
                 'short_name':'evaporation_rate',
@@ -217,7 +217,7 @@
                 'default_value': 0,
                 'unit': 'm<sup>3</sup> [water]/y',
                 'helpText': 'Volume of water lost per year by the water column to evaporation. Product of the Water Column Evaporation Rate and the water body surface area.' +
-                    '<p><strong>= Water Column Evaporation Rate * water body surface area </strong></p>'
+                    '<p><strong>= (Water Column Evaporation Rate * water body surface area)</strong></p>'
             },
             'Water Column External Water Inflow from Other Water Bodies':{
                 'short_name':'externalWaterInflow',
@@ -239,7 +239,7 @@
                 'default_value': 0,
                 'unit': 'm<sup>3</sup> [water]/y',
                 'helpText': 'Volume of water inflow received per year by the water column from precipitation runoff from the watershed. Product of the precipitation rate, fraction of precipitation that contributes to overland runoff, and Precipitation Runoff Watershed Area' +
-                    '<p><strong>= precipitation rate * fraction of precipitation that contributes to overland runoff * Precipitation Runoff Watershed Area</strong></p>' +
+                    '<p><strong>= (precipitation rate * fraction of precipitation that contributes to overland runoff * Precipitation Runoff Watershed Area)</strong></p>' +
                     '<small>If spatially-varying (i.e., parcel-specific) values are used for fraction of precipitation that contributes to overland runoff, then the math here would be: precipitation rate * sum across all parcels [parcel’s fraction of precipitation that contributes to overland runoff * parcel’s precipitation runoff area]</small>'
             },
             'Precipitation Volumetric Rate to Water Body':{
@@ -248,7 +248,7 @@
                 'default_value': 0,
                 'unit': 'm<sup>3</sup> [water]/y',
                 'helpText': 'Volume of water inflow received per year by the water column from direct precipitation. Product of the precipitation rate and the water body surface area \n' +
-                    '<p><strong>= precipitation rate * water body surface area </strong></p>'
+                    '<p><strong>= (precipitation rate * water body surface area)</strong></p>'
             },
             'Precipitation Seepage Volumetric Rate to Groundwater':{
                 'short_name':'precip_seepage_vol_rate_to_GW',
@@ -256,7 +256,7 @@
                 'default_value': 0,
                 'unit': 'm<sup>3</sup> [water]/y',
                 'helpText': 'Volume of water inflow received per year by groundwater from precipitation seepage in the watershed, all of which is assumed to transfer to the water body water column. Product of the precipitation rate, fraction of precipitation that seeps into groundwater, and the Precipitation Runoff Watershed Area (assumes complete transfer to the water body water column)' +
-                    '<p><strong>= precipitation rate * fraction of precipitation that seeps into groundwater * Precipitation Runoff Watershed Area</strong></p>'
+                    '<p><strong>= (precipitation rate * fraction of precipitation that seeps into groundwater * Precipitation Runoff Watershed Area)</strong></p>'
             }
         }
         let default_sed_data = {
@@ -308,8 +308,8 @@
                 'is_editable': false,
                 'default_value': 0,
                 'unit': 'm<sup>3</sup> [sediment] /m<sup>2</sup> [sediment bed interface] /d',
-                'helpText': 'Volume of sediment received per day by the water body’s sediment bed (per unit area) from the suspended sediment in the water column. Ratio of the product of the water column sediment deposition velocity (2 m [water] / d; source unknown) and the Water Column Suspended Sediment Concentration to the Water Body Sediment Bed Density.' +
-                    '<strong><p>= water column sediment deposition velocity (2 m [water] / d) * Water Column Suspended Sediment Concentration / Water Body Sediment Bed Density</p></strong>'
+                'helpText': 'Volume of sediment received per day by the water body’s sediment bed (per unit area) from the suspended sediment in the water column. Ratio of the product of the water column sediment deposition velocity (2 m [water] / d; source unknown) and the Water Column Suspended Sediment Concentration to the Sediment Bed Density.' +
+                    '<strong><p>= (water column sediment deposition velocity (2 m [water] / d) * Water Column Suspended Sediment Concentration / Sediment Bed Density)</p></strong>'
             },
             'Soil Erosion Rate to Water Body':{
                 'short_name':'sed_soil_erosion_to_sw',
@@ -323,8 +323,8 @@
                 'is_editable': false,
                 'default_value': 0,
                 'unit': 'm<sup>3</sup> [sediment] /m<sup>2</sup> [sediment bed interface] /d',
-                'helpText': 'Volume of sediment buried per day into the sediment bed (per unit area) from the suspended sediment in the water column. Ratio of the difference between the sum (across all contributing water bodies) of the Water Column External Sediment Inflow from Other Water Bodies and the Soil Erosion Rate to Water Body and the Water Column Sediment Discharge Rate to the product of the Water Body Sediment Bed Density and water body surface area.' +
-                    '<strong><p>(Water Column External Sediment Inflow from Other Water Bodies + Soil Erosion Rate to Water Body - Water Column Sediment Discharge Rate) / (Water Body Sediment Bed Density* water body surface area)</p></strong>'
+                'helpText': 'Volume of sediment buried per day into the sediment bed (per unit area) from the suspended sediment in the water column. Ratio of the difference between the sum (across all contributing water bodies) of the Water Column External Sediment Inflow from Other Water Bodies and the Soil Erosion Rate to Water Body and the Water Column Sediment Discharge Rate to the product of the Sediment Bed Density and water body surface area.' +
+                    '<strong><p>= (Water Column External Sediment Inflow from Other Water Bodies + Soil Erosion Rate to Water Body - Water Column Sediment Discharge Rate) / (Sediment Bed Density* water body surface area)</p></strong>'
             }
         }
 
@@ -381,6 +381,45 @@
             tblHandle.on( 'draw', function () {
                 tblHandle.columns.adjust();
             } );
+
+            // find and highlight selected row and any associated rows used in calculations
+            // NOTE: expects all calcs to include "= ("
+            $("#LakeTable, #SedTable").on('click', 'tbody tr', function() {
+                let color_white = "rgb(255, 255, 255)";
+                let color_hover = "rgb(246, 246, 246)";
+                let color_blue = "rgb(13, 202, 240, .4)";
+                let color_green = "rgba(51, 170, 51, .4)";
+
+                let selected_table = $(this).closest("table").attr("id");
+                selected_table = $(`#${selected_table}`).DataTable();
+                let row_text = selected_table.row(this).data().helpText;
+
+                let lake_table = $("#LakeTable").DataTable();
+                let lake_columns = lake_table.column(0).data();
+                lake_columns.each((name, idx)=>{
+                    let iter_row = $(lake_table.row(idx).node());                
+                    if (iter_row.css("background-color") !== color_white) {
+                        iter_row.css("background-color", color_white);
+                    }
+                    if (row_text.includes("= (") && row_text.includes(name)){
+                        iter_row.css("background-color", color_blue);
+                    }
+                })  
+
+                let sed_table = $("#SedTable").DataTable();
+                let sed_columns = sed_table.column(0).data();
+                sed_columns.each((name, idx)=>{
+                    let iter_row = $(sed_table.row(idx).node());
+                    if (iter_row.css("background-color") !== color_white) {
+                        iter_row.css("background-color", color_white);
+                    }
+                    if (row_text.includes("= (") && row_text.includes(name)){
+                        iter_row.css("background-color", color_blue);
+                    }
+                })
+
+                $(this).css("background-color", color_green);
+            })
 
             let sort_order = "asc"
             $('.sortClass').click(function(e){
