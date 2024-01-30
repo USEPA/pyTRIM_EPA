@@ -227,10 +227,10 @@ def ode_sim(tm, df_tm, sm, df_sm, scn):
 
     ndim = sm.shape[0]  # number of compartments
 
-    simulation_start_date = scn.simulationBeginDateTime
-    simulation_end_date = scn.simulationEndDateTime
-    time_range_h = pd.date_range(simulation_start_date, simulation_end_date,
-                                 freq='H')  # pandas datetimes series in hours over the simulation period
+    simulation_start_date = "01/01/2001" # scn.simulationBeginDateTime
+    simulation_end_date = "01/01/2050" # scn.simulationEndDateTime
+    # time_range_h = pd.date_range(simulation_start_date, simulation_end_date,
+    #                              freq='H')  # pandas datetimes series in hours over the simulation period
     time_range_d = pd.date_range(simulation_start_date, simulation_end_date,
                                  freq='D')  # pandas datetimes series in days over the simulation period
     ndays = len(time_range_d) - 1  # last day is not a full day

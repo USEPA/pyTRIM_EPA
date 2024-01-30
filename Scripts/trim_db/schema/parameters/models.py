@@ -231,7 +231,7 @@ class FormulaArgument(Model):
         sa.Integer(), sa.ForeignKey('formula.id'), nullable=False
     )
     formula = sa.orm.relationship(
-        'Formula', backref=sa.orm.backref('_arguments', lazy='subquery')  # ASK JOSIAH lazy='dynamic'
+        'Formula', backref=sa.orm.backref('_arguments', lazy='dynamic')
     )
 
     name = sa.Column(sa.String(60), nullable=False)
@@ -278,7 +278,7 @@ class ParameterDefinition(Model):
     )
     domain = sa.orm.relationship(
         'ParameterDomain',
-        backref=sa.orm.backref('parameter_definitions', lazy='subquery')  # ASK JOSIAH lazy='dynamic'
+        backref=sa.orm.backref('parameter_definitions', lazy='dynamic')
     )
 
     default_value = sa.Column(sa.Float())
@@ -287,7 +287,7 @@ class ParameterDefinition(Model):
     default_formula_id = sa.Column(
         sa.Integer(), sa.ForeignKey('formula.id')
     )
-    default_formula = sa.orm.relationship('Formula', lazy='subquery')  # , lazy='subquery' ASK JOSIAH
+    default_formula = sa.orm.relationship('Formula')  # , lazy='subquery' ASK JOSIAH
 
     @property
     def value(self):
@@ -339,7 +339,7 @@ class CustomParameter(Model):
     # scenario = sa.orm.relationship('Scenario')
 
     scenario = sa.orm.relationship(
-        'Scenario', backref=sa.orm.backref('custom_params', lazy='subquery')  # ASK JOSIAH lazy='dynamic'
+        'Scenario', backref=sa.orm.backref('custom_params', lazy='dynamic')
     )
 
     @property
@@ -366,7 +366,7 @@ class CustomParameter(Model):
     formula_id = sa.Column(
         sa.Integer(), sa.ForeignKey('formula.id')
     )
-    formula = sa.orm.relationship('Formula', lazy='subquery')  # , lazy='subquery' ASK JOSIAH
+    formula = sa.orm.relationship('Formula')  # , lazy='subquery' ASK JOSIAH
 
     @property
     def quantity(self):

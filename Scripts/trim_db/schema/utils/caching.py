@@ -5,7 +5,7 @@ __all__ = ['CacheManager']
 
 class CacheManager:
     _CACHERS = {}
-    DISABLED = False
+    DISABLED = False  # Was False but caching generated multiple problems such as detached db session problem and old values showing up in the UI rather than the updated value
 
     @classmethod
     def cache_key(cls, *args, **kwargs):

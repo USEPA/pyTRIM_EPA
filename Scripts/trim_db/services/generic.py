@@ -8,14 +8,22 @@ __all__ = ['db', 'GenericService', 'PermissionsMixin']
 
 if os.getenv('TEST_DB_SERVERLESS'):
     from .engine import DataBase
-    db_filename = 'database.db'
-    db_path = (
-        'sqlite:///'
-        + f'{os.path.dirname(os.path.abspath(__file__))}/../../'
-        + db_filename
-    )
-    print(f'-- Connecting to local SQLite file\n({db_path})')
-    db = DataBase(db_path, model_base=Model)
+    import urllib.parse
+    USERNAME = "root"
+    PASSWORD = urllib.parse.quote_plus(os.getenv('MYSQLPASSWORD'))
+    HOST = "localhost"
+    PORT = "3306"
+    DBNAME = "pytrim"
+    # db_filename = 'database.db'
+    # db_path = (
+    #     'sqlite:///'
+    #     + f'{os.path.dirname(os.path.abspath(__file__))}/../../'
+    #     + db_filename
+    # )
+    # print(f'-- Connecting to local SQLite file\n({db_path})')
+    # db = DataBase(db_path, model_base=Model)
+    db_uri = f'mysql+pymysql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}'
+    db = DataBase(db_uri, model_base=Model)
 else:
     print('-- Connecting to flask_sqlalchemy db')
     from flask_sqlalchemy import SQLAlchemy

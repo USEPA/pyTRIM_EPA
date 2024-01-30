@@ -87,7 +87,7 @@ class Scenario(Model, TrackUpdatesMixin):
         sa.Integer(), sa.ForeignKey('user.id'), nullable=False
     )
     creator = sa.orm.relationship(
-        'User', backref=sa.orm.backref('created_scenarios', lazy='subquery')  # ASK JOSIAH lazy='dynamic'
+        'User', backref=sa.orm.backref('created_scenarios', lazy='dynamic')
     )
 
     @property
