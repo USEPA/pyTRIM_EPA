@@ -45,6 +45,19 @@ def make_transition_matrix(scenario):
     # gg=VolumeElementService.get(id=1)
     # hg=FormulaService.get(id=1)
 
+    def full_stack():
+        import traceback, sys
+        exc = sys.exc_info()[0]
+        stack = traceback.extract_stack()[:-1]  # last one would be full_stack()
+        if exc is not None:  # i.e. an exception is present
+            del stack[-1]  # remove call of full_stack, the printed exception
+            # will contain the caught exception caller instead
+        trc = 'Traceback (most recent call last):\n'
+        stackstr = trc + ''.join(traceback.format_list(stack))
+        if exc is not None:
+            stackstr += '  ' + traceback.format_exc().lstrip(trc)
+        return stackstr
+
     chem_list = list(sorted(
         scenario.chemicals, key=lambda x: x.name
     ))
@@ -89,9 +102,9 @@ def make_transition_matrix(scenario):
                     dr = sender.surfaceDepositionRate(chem)
                     if not (str(dr) == 'nan'):
                         source_matrix[tm_x] += dr.magnitude
-                except Exception:
+                except Exception as e:
                     print(f'{"*" * 20} Problem with getting Surface Deposition Rate for compartment={sender.name}, '
-                          f'chemical={chem} {"*" * 20}')
+                          f'chemical={chem} {"*" * 20}\nException is {e}')
                     pass
 
                 try:
@@ -145,9 +158,9 @@ def make_transition_matrix(scenario):
                     # tuples of volume, mass, units, output factor, and denominator quantity
                     vmu_tup = (sender.name, vol, mass, cou, cof, denom)
                     vmu.append(vmu_tup)
-                except Exception:
+                except Exception as e:
                     print(f'{"*" * 20} Problem with getting Surface Concentration Output factor for '
-                          f'compartment={sender.name}, chemical={chem} {"*" * 20}')
+                          f'compartment={sender.name}, chemical={chem} {"*" * 20}\nException is {full_stack()}')
 
                 # Some media just don't send anything
                 if not sender.media.can_emit:
@@ -455,11 +468,13 @@ def run_full_model(scn):
     # get transition matrix and source matrix
     scn.description = 'tm'
     ScenarioService.commit()
+    scn = ScenarioService.get(id=scn.id)
     (tm, df_tm, sm, df_sm, df_vmu) = make_transition_matrix(scn)
 
     # get result
     scn.description = 'ode'
     ScenarioService.commit()
+    scn = ScenarioService.get(id=scn.id)
     (nt, df_nt) = ode_sim(tm, sm, df_sm, scn)
 
     # make concentration output
@@ -485,6 +500,7 @@ def run_full_model(scn):
 
     scn.description = 'csv'
     ScenarioService.commit()
+    scn = ScenarioService.get(id=scn.id)
     safe_save_output(dfn_avg, dfc_avg, scn.name, scn.creator_id)
     # safe_save_output(df_nt, df_conc, scn.name, scn.creator_id)
 

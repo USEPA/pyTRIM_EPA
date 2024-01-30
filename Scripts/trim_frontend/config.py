@@ -1,10 +1,16 @@
 import os
+import urllib.parse
 
 
 app_folder = os.path.abspath(os.path.dirname(__file__))
 root = os.path.dirname(app_folder)
 has_mail = os.getenv('MAIL_USERNAME') is not None
 
+USERNAME = "root"
+PASSWORD = urllib.parse.quote_plus(os.getenv('MYSQLPASSWORD'))
+HOST = "localhost"
+PORT = "3306"
+DBNAME = "pytrim"
 
 class AppConfig:
     # Template config
@@ -61,7 +67,8 @@ class ProdConfig(AppConfig):
 class DevConfig(AppConfig):
     SECRET_KEY = 'dcf917c34aec178987494a853bffa479'
     SECURITY_PASSWORD_SALT = ''
-    SQLALCHEMY_DATABASE_URI = f'sqlite:///{root}/database.db'
+    # SQLALCHEMY_DATABASE_URI = f'sqlite:///{root}/database.db'
+    SQLALCHEMY_DATABASE_URI = f'mysql+pymysql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}'
     SQLALCHEMY_ECHO = False
 
 
@@ -71,8 +78,8 @@ class TestConfig(DevConfig):
     WTF_CSRF_ENABLED = False
     BCRYPT_LOG_ROUNDS = 4
     MAIL_SUPPRESS_SEND = True
-    SQLALCHEMY_DATABASE_URI = f'sqlite:///{app_folder}/test.db'
-    # SQLALCHEMY_DATABASE_URI = f'sqlite:///{root}/database.db'
+    # SQLALCHEMY_DATABASE_URI = f'sqlite:///{app_folder}/test.db'
+    SQLALCHEMY_DATABASE_URI = f'mysql+pymysql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}'
 
     # Security config
     SECURITY_CONFIRMABLE = False

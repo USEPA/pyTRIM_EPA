@@ -1,4 +1,3 @@
-# import os
 import sqlalchemy as sa
 from ..schema.utils.base import Model
 
@@ -17,8 +16,7 @@ class DataBase:
 
     def _create_engine(self):
         self.engine = sa.create_engine(
-            self.uri, connect_args={'check_same_thread': False},
-            # echo=bool(os.getenv('FLASK_DEBUG'))
+            self.uri  #, connect_args={'check_same_thread': False}
         )
         print("Created new database connection")
         self._session = None

@@ -1,4 +1,5 @@
 import json
+import time
 
 import pandas as pd
 from flask import Blueprint, request, render_template, redirect, url_for
@@ -6,7 +7,7 @@ from flask_security import login_required, current_user
 from flask_api import ApiResult
 from datetime import datetime
 from trim_db import ScenarioService, ParcelService, \
-    CompartmentService, VolumeElementService, ParameterService, ChemicalService
+    CompartmentService, VolumeElementService, ParameterService, ChemicalService, FormulaService
 from trim_frontend import api
 from trim_frontend.parcels.routes import delete_parcel_contents
 from .forms import *
@@ -209,43 +210,6 @@ def update_scenario():
 
         return met_dict
 
-    def seasonal_wgt_avg_value_from_timeseries(par_dat, param_type):
-        import pandas as pd
-        from numpy import timedelta64
-        seasonal_dict = {}
-        par_dat = json.loads(par_dat)
-        df_seasonal = pd.DataFrame.from_dict(par_dat, orient='columns')
-
-        df_seasonal['dlist'] = df_seasonal['Date'].str.split('/')  # split date column into list
-        df_seasonal = df_seasonal[df_seasonal.dlist.str.len() == 3]  # drop rows that have less than three elements
-        df_seasonal[['Month', 'Day', 'Year']] = df_seasonal['Date'].str.split("/", expand=True)
-        df_seasonal['Month'] = pd.to_numeric(df_seasonal['Month'], errors='coerce')
-        df_seasonal['Day'] = pd.to_numeric(df_seasonal['Day'], errors='coerce')
-        df_seasonal['Year'] = pd.to_numeric(df_seasonal['Year'], errors='coerce')
-        df_seasonal = df_seasonal.loc[
-            (df_seasonal.Month < 13) & (df_seasonal.Day < 32) & (df_seasonal.Year < 2100)]  # drop faulty
-
-        df_seasonal['DT'] = list(pd.to_datetime(df_seasonal[['Year', 'Month', 'Day']], errors='coerce'))
-        df_seasonal['date_delta'] = (df_seasonal['DT'] - df_seasonal['DT'].min()) / timedelta64(1, 'D')
-        df_seasonal['time_delta'] = df_seasonal['date_delta'].diff()
-        # shift up the column 1 so that applicability of met condition is aligned to duration
-        df_seasonal['time_delta'] = df_seasonal['time_delta'].shift(-1)
-
-        if param_type == "AE":
-            # process AE. Ignored hour resolution.
-            df_seasonal['ae'] = pd.to_numeric(df_seasonal['AllowExchange'], errors='coerce')
-            df_seasonal['prod_ae'] = df_seasonal['ae'] * df_seasonal['time_delta']
-            wt_ave = df_seasonal['prod_ae'].sum() / df_seasonal['time_delta'].sum()
-            seasonal_dict['wt_av_allowexchange'] = wt_ave
-        else:
-            # process LF
-            df_seasonal['lf'] = pd.to_numeric(df_seasonal['LitterfallRate'], errors='coerce')
-            df_seasonal['prod_lf'] = df_seasonal['lf'] * df_seasonal['time_delta']
-            wt_ave = df_seasonal['prod_lf'].sum() / df_seasonal['time_delta'].sum()
-            seasonal_dict['wt_av_litterfallrate'] = wt_ave
-
-        return seasonal_dict
-
     try:
         scenario_data = request.form.to_dict()
         if not scenario_data['id']:
@@ -293,7 +257,6 @@ def update_scenario():
                 ret_type = "LF" if field_name.endswith("_litterfall_TS") else "AE"
                 ret_type_name = "wt_av_litterfallrate" if field_name.endswith("_litterfall_TS") else \
                     "wt_av_allowexchange" if field_name.endswith("_allow_exchange_TS") else "None"
-                # ret_val = seasonal_wgt_avg_value_from_timeseries(param_data, ret_type)
                 ret_val = meteo_wgt_avg_value_from_timeseries(param_data, ret_type)
                 if ret_type != "None":
                     update_custom_param(s, comp_list[0], param_name, ret_val[ret_type_name])
@@ -306,9 +269,10 @@ def update_scenario():
     return "success"
 
 
-@scenario_api.route('/api/scenario/copy/', methods=['POST'])
+@scenario_api.route('/api/scenario/copy', methods=['POST'])
 @login_required
 def copy_scenario():
+    logger = make_logger('scenario_copy_process')
     scenario_data = request.form.to_dict()
     if not scenario_data.get('user_id'):
         raise AssertionError("User ID cannot be blank.")
@@ -318,9 +282,9 @@ def copy_scenario():
     scenario_id = int(scenario_data['scenario_id'])
     user_id = int(scenario_data['user_id'])
     s = ScenarioService.get(scenario_id)
-    res = "Fail"
 
     try:
+        copy_start_time = time.time()
         # Create new Scenario
         # Version counter
         if len(s.name) >= 120:
@@ -332,50 +296,84 @@ def copy_scenario():
         ridx = rname.find("#V_")
         if ridx == -1:
             new_name = f"{new_name}_V#1"
-        else:    
+            rname = new_name[::-1]
+            ridx = rname.find("#V_")
+
+        existing_scenario = ScenarioService.get(name=new_name)
+        while existing_scenario:
+            print(f"The Scenario name {new_name} exists... Generating new name...")
             version = int(rname[:ridx][::-1])
             new_name = rname.replace(rname[:ridx], "", 1)
             new_name = new_name[::-1] + str(version + 1)
-             
+            print(f"The new name is {new_name}")
+            rname = new_name[::-1]
+            ridx = rname.find("#V_")
+            existing_scenario = ScenarioService.get(name=new_name)
+
         ns = ScenarioService.create(name=new_name, description=f'Copy of {s.name} on {datetime.now()}', creator_id=user_id)
-        ScenarioService.commit()
+        # ScenarioService.commit()
+
+        # Add scenario properties/parameters
+        logger.info("Adding scenario Properties")
+        for s_par_name, s_par in s.parameters.items():
+            if s_par.__tablename__ == "custom_parameter" and s_par.scenario.id == s.id:
+                ParameterService.create(definition_id=s_par.definition_id, scenario_id=ns.id,
+                                        requirements=f"(self.id == {ns.id})", value=s_par.value,
+                                        unit=s_par.unit, formula_id=s_par.formula_id)
+                # ParameterService.commit()
 
         # Add scenario chemicals
+        logger.info("Adding scenario Chemicals")
         for sc in s.chemicals:
             ns.chemicals.append(sc)
-        ScenarioService.commit()
+            # ScenarioService.commit()
+            # Add Chemical properties/parameters
+            for c_par_name, c_par in sc.parameters.items():
+                if c_par.__tablename__ == "custom_parameter" and c_par.scenario.id == s.id:
+                    ParameterService.create(definition_id=c_par.definition_id, scenario_id=ns.id,
+                                            requirements=f"(self.id == {sc.id})", value=c_par.value,
+                                            unit=c_par.unit, formula_id=c_par.formula_id)
+                    # ParameterService.commit()
+
 
         # Create new parcels
         cmp_map = {}
-        for prc in s.parcels.all():
+        for prc in s.parcels:
             np = ParcelService.create(name=prc.name, description=prc.description, scenario_id=ns.id, vertices=prc.vertices)
-            ParcelService.commit()
+            start_time = time.time()
+            # ParcelService.commit()
             # Create new volume elements
             for ve in prc.volume_elements:
                 nve = VolumeElementService.create(name=ve.name, parcel_id=np.id, top=ve.top, bottom=ve.bottom)
-                VolumeElementService.commit()
+                # VolumeElementService.commit()
                 # Create new volume compartments
                 for cmp in ve.compartments:
                     ncmp = CompartmentService.create(name=cmp.name, volume_element_id=nve.id, media_id=cmp.media_id)
                     cmp_map[cmp.id] = ncmp.id
-                    CompartmentService.commit()
+                    # CompartmentService.commit()
                     # Create new custom parameters for compartments
                     for parn, cpar in cmp.parameters.items():
-                        if cpar.__tablename__ == "custom_parameter":
+                        if cpar.__tablename__ == "custom_parameter" and cpar.scenario.id == s.id:
                             ParameterService.create(definition_id=cpar.definition_id, scenario_id=ns.id,
                                                     requirements=f"(self.id == {ncmp.id})", value=cpar.value,
                                                     unit=cpar.unit, formula_id=cpar.formula_id)
-                            ParameterService.commit()
+                            # ParameterService.commit()
+                logger.info(f"Finished copying {ve.name} for {prc.name}")
+            logger.info(f"{5*'<'} Finished copying {prc.name} in {time.time() - start_time} seconds {5*'>'}\n")
 
         # Create the compartment links using the compartment id map
+        logger.info("Copying Compartment Links ...")
         for lnk in CompartmentService.links.get_all():
             if lnk.sender_id in cmp_map.keys():
                 CompartmentService.links.create(sender_id=cmp_map[lnk.sender_id], receiver_id=cmp_map[lnk.receiver_id])
-        CompartmentService.commit()
-        res = "Success"
+        # CompartmentService.commit()
     except Exception as e:
-        print(e)
-        print("Failed to copy scenario...")
+        logger.error(traceback.format_exc())
+        logger.error(e)
+        logger.info("Failed to copy scenario...")
+    finally:
+        logger.info(f"Copy operation {s.name} -> {ns.name} completed in {time.time() - copy_start_time} seconds!")
+        ScenarioService.commit()
 
     # return ApiResult({'result': res})
     return redirect(request.referrer)
@@ -392,20 +390,34 @@ def delete_scenario():
     s = ScenarioService.get(scenario_id)
 
     try:
+        # Delete chemical custom parameters
+        for sc in s.chemicals:
+            for c_par_name, c_par in sc.parameters.items():
+                if c_par.__tablename__ == "custom_parameter" and c_par.scenario.id == s.id:
+                    ParameterService.delete(c_par)
+            # Remove the scenario chemical
+            s.chemicals.remove(sc)
+            # ScenarioService.commit()
+        # Delete scenario custom parameters
+        for s_par_name, s_par in s.parameters.items():
+            if s_par.__tablename__ == "custom_parameter" and s_par.scenario.id == s.id:
+                ParameterService.delete(s_par)
+        # ParameterService.commit()
+
         # Delete all parcels and contents
-        for parcel in s.parcels.all():
+        for parcel in s.parcels:
             delete_parcel_contents(parcel)
             ParcelService.delete(parcel.id)
-
-        # Delete scenario chemicals
-        for sc in s.chemicals:
-            ChemicalService.delete(sc.id)
+        # ParcelService.commit()
 
         # Delete scenario
         ScenarioService.delete(s.id)
+        # ScenarioService.commit()
     except Exception as e:
         print(e)
         print("Failed to delete scenario...")
+    finally:
+        ScenarioService.commit()
 
     return redirect(request.referrer)
 
