@@ -8,12 +8,20 @@ __all__ = ['db', 'GenericService', 'PermissionsMixin']
 
 if os.getenv('TEST_DB_SERVERLESS'):
     from .engine import DataBase
-    import urllib.parse
-    USERNAME = "root"
-    PASSWORD = urllib.parse.quote_plus(os.getenv('MYSQLPASSWORD'))
-    HOST = "localhost"
-    PORT = "3306"
-    DBNAME = "pytrim"
+
+    if 'RDS_DB_NAME' in os.environ:
+        USERNAME = os.environ['RDS_USERNAME']
+        PASSWORD = os.environ['RDS_PASSWORD']
+        HOST = os.environ['RDS_HOSTNAME']
+        PORT = os.environ['RDS_PORT']
+        DBNAME = os.environ['RDS_DB_NAME']
+    else:
+        import urllib.parse
+        USERNAME = "root"
+        PASSWORD = urllib.parse.quote_plus(os.getenv('MYSQLPASSWORD'))
+        HOST = "localhost"
+        PORT = "3306"
+        DBNAME = "pytrim"
     # db_filename = 'database.db'
     # db_path = (
     #     'sqlite:///'
