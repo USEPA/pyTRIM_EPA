@@ -1,0 +1,83 @@
+{
+    "title": "",
+    "table_id": "mapTable",
+    "fields": [
+        {
+            "id": "name",
+            "label": "Parcel Name",
+            "data_type": "string",
+            "default": ""
+        },
+        {
+            "id": "description",
+            "label": "Description",
+            "data_type": "text",
+            "default": "null"
+        },
+        {
+            "id": "area",
+            "label": "Area",
+            "data_type": "float",
+            "default": 0.0,
+            "tooltip": "(km<sup>2</sup>)"
+        },
+        {
+            "id": "parcelType",
+            "label": "Parcel Type",
+            "data_type": "menu",
+            "choices": [
+                "Air Only",
+                "Water Only",
+                "Land Only",
+                "Land & Air",
+                "Water & Air"
+            ],
+            "default": "N/A"
+        },
+        {
+            "id": "landUse",
+            "label": "Land Use",
+            "data_type": "menu",
+            "choices": [
+                "Impervious",
+                "Tilled Soil",
+                "Untilled Soil",
+                "Agriculture (General)",
+                "Grasses/Herbs",
+                "Deciduous Forest",
+                "Coniferous Forest"
+            ],
+            "default": "N/A"
+        },
+        {
+            "id": "hasFarmFoodChain",
+            "label": "Farm Food Chain",
+            "data_type": "menu",
+            "choices": [
+                "Yes",
+                "No"
+            ],
+            "default": "No"
+        },
+        {
+            "id": "hasFishFoodWeb",
+            "label": "Fish Food Web",
+            "data_type": "menu",
+            "choices": [
+                "Yes",
+                "No"
+            ],
+            "default": "No"
+        },
+        {
+            "id": "hasWetland",
+            "label": "Wetland",
+            "data_type": "menu",
+            "choices": [
+                "Yes",
+                "No"
+            ],
+            "default": "No"
+        }
+    ]
+}
