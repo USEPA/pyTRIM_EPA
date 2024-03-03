@@ -1,8 +1,3 @@
-/*
-Move more generic table stuff in here eventually ...
-*/
-
-// Table error validation
 function isNumber(str) {
     const numberRegex = /^\s*[+-]?(\d+|\d*\.\d+|\d+\.\d*)([Ee][+-]?\d+)?\s*$/
     return numberRegex.test(str)
@@ -27,6 +22,7 @@ function elementIsValid(ele){
     return $(ele).find(".warningTT").length === 0;
 }
 
+// Table error validation
 let ErrorValidation = {
     isPositiveValue : function (ele) {
         if (!this.isValidNumber(ele)) {
@@ -43,9 +39,6 @@ let ErrorValidation = {
     },
     rowTotalIsValid : function (ele) {
         let row = ele.closest("tr");
-        if (!elementIsValid(row)) {
-            return false;
-        }
         let cells = $(row).find("input.editableCell");
         let expected_total = parseFloat($(row).data("rsval"));
         let total = cells.toArray().reduce((ps,e) => ps + parseFloat($(e).val()),0);
