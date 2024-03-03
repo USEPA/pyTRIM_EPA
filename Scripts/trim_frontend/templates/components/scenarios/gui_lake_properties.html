@@ -714,6 +714,9 @@
                 if (`#${focusTblId}` !== tblId) {
                     return;
                 }
+                if (!ErrorValidation.isPositiveValue(this)) {
+                    return;
+                }
                 let parcel_name = $($(this).closest("table").find("thead > tr > th")[$(this).closest("td").prevAll().length]).text()
                 let loadedData = $('#root').data('loadedParcels')
                 let area = Number(loadedData.scenario.find(e => e.name == parcel_name).area)
