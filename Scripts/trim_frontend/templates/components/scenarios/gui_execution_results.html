@@ -12,10 +12,10 @@
                 <div class="row mb-1">
                     <div class="col-sm">
                         <div class="mt-3">
-                            <p id="cb_proc_trm"><span style="display: none"><label class="lds-dual-ring mr-2"></label></span><i class="fas fa-play"></i><label for="cb_proc_trm" class="ml-1">Calculating Transfer Matrix</label></p>
-                            <p id="cb_proc_ode"><span style="display: none"><label class="lds-dual-ring mr-2"></label></span><i class="fas fa-play"></i><label for="cb_proc_ode" class="ml-1">Running ODE Solver</label></p>
-                            <p id="cb_proc_out"><span style="display: none"><label class="lds-dual-ring mr-2"></label></span><i class="fas fa-play"></i><label for="cb_proc_out" class="ml-1">Writing results to CSV file </label></p>
-                            <p id="cb_proc_vis"><span style="display: none"><label class="lds-dual-ring mr-2"></label></span><i class="fas fa-play"></i><label for="cb_proc_vis" class="ml-1">Loading results for visualization </label></p>
+                            <p id="cb_proc_trm"><span style="display: none"><label class="lds-dual-ring mr-2"></label></span><i class="fas fa-play"></i><label for="cb_proc_trm" class="ml-1">Calculating Transfer Matrix</label>&emsp;<label id="lb_perc_trm">(0%)</label></p>
+                            <p id="cb_proc_ode"><span style="display: none"><label class="lds-dual-ring mr-2"></label></span><i class="fas fa-play"></i><label for="cb_proc_ode" class="ml-1">Running ODE Solver</label>&emsp;<label id="lb_perc_ode">(0%)</label></p>
+                            <p id="cb_proc_out"><span style="display: none"><label class="lds-dual-ring mr-2"></label></span><i class="fas fa-play"></i><label for="cb_proc_out" class="ml-1">Writing results to CSV file </label>&emsp;<label id="lb_perc_out">(0%)</label></p>
+                            <p id="cb_proc_vis"><span style="display: none"><label class="lds-dual-ring mr-2"></label></span><i class="fas fa-play"></i><label for="cb_proc_vis" class="ml-1">Loading results for visualization </label>&emsp;<label id="lb_perc_vis">(0%)</label></p>
                         </div>
                     </div>
                 </div>
@@ -263,7 +263,7 @@
                 })
 
                 function initialize_components() {
-                    let dt = JSON.parse(window.sessionStorage["m_results"])
+                    let dt = JSON.parse(window.sessionStorage["m_results_id"+loadedData.scenario_head.id])
                     comp_list = Object.keys(dt).filter(e => ['year','time'].indexOf(e) == -1).map(e=> e.split("_").slice(1).join("_")).filter((v, i, a) => {
                         return a.indexOf(v) === i  // Get unique compartment names
                     })
@@ -290,35 +290,17 @@
                     add_dynamic_props()
                 }
 
-                if (window.sessionStorage["Params_updated"] == "false" && window.sessionStorage["m_results"]) {
+                if (window.sessionStorage["Params_updated_id"+loadedData.scenario_head.id] == "false" && window.sessionStorage["m_results_id"+loadedData.scenario_head.id]) {
                     // $('#btn_execute_model').attr('disabled', "disabled")
-                    setChecked("p#cb_proc_trm", false)
-                    setChecked("p#cb_proc_ode", false)
-                    setChecked("p#cb_proc_out", false)
-                    setChecked("p#cb_proc_vis", false)
+                    setChecked("p#cb_proc_trm", "on")
+                    setChecked("p#cb_proc_ode", "on")
+                    setChecked("p#cb_proc_out", "on")
+                    setChecked("p#cb_proc_vis", "on")
+                    $('#lb_perc_trm').text("(100%)")
+                    $('#lb_perc_ode').text("(100%)")
+                    $('#lb_perc_out').text("(100%)")
+                    $('#lb_perc_vis').text("(100%)")
                     initialize_components()
-                    // let dt = JSON.parse(window.sessionStorage["m_results"])
-                    // comp_list = Object.keys(dt).filter(e => ['year','time'].indexOf(e) == -1).map(e=> e.split("_").slice(1).join("_")).filter((v, i, a) => {
-                    //     return a.indexOf(v) === i  // Get unique compartment names
-                    // })
-                    // comp_list.forEach((e, i) => {
-                    //     $('#plt_comp').find("div#menuItems_searchable_dd").append(`<a class='dropdown-item'> ${e} </a>`)
-                    // })
-                    // ve_list = Object.keys(dt).filter(e => ['year','time'].indexOf(e) == -1).map(e=> e.split(" in ").slice(1)[0].split("_")[0]).filter((v, i, a) => {
-                    //     return a.indexOf(v) === i  // Get unique compartment names
-                    // })
-                    // ve_list.forEach((e, i) => {
-                    //     $('#plt_ve').find("div#menuItems_ve_searchable_dd").append(`<a class='dropdown-item'> ${e} </a>`)
-                    // })
-                    // chem_list = Object.keys(dt).filter(e => ['year','time'].indexOf(e) == -1).map(e=> e.split("_").slice(0,1).join("")).filter((v, i, a) => {
-                    //     return a.indexOf(v) === i  // Get unique chemical names
-                    // })
-                    // chem_list.forEach((e, i) => {
-                    //     $('#plt_chem').find("div.dropdown-menu").append(`<a class='dropdown-item'> ${e} </a>`)
-                    // })
-                    // $('#empty_searchable_dd').hide()
-                    // $('#btn_get_mass_results').show()
-                    // $('#btn_get_conc_results').show()
                     $('#btn_visualize').prop('disabled', false)
                 }
 
@@ -381,7 +363,7 @@
 
                     $('#btn_visualize').on('click', function(e) {
                         e.preventDefault()
-                        $('#res_version').text("Displaying results of last model run on " + window.sessionStorage["Last_run"])
+                        $('#res_version').text("Displaying results of last model run on " + window.sessionStorage["Last_run_id"+loadedData.scenario_head.id])
                         let sel_type = $('#plt_type').find('button.dropdown-toggle').text().trim()
                         if (sel_type == "Time Series") {
                             draw_ts_chart()
@@ -422,21 +404,31 @@
                     })
                 }
 
-                function setChecked(id, uncheck) {
-                    if (uncheck) {
+                function setChecked(id, check) {
+                    if (check == "off") {
                         $(id).find("span").hide()
                         $(id).find("i.fas").show().attr("class", "fas fa-play")
-                    } else {
+                    } else if (check == "on") {
                         $(id).find("span").hide()
                         $(id).find("i.fas").show().attr("class","fas fa-check")
+                    } else if (check == "err") {
+                        $(id).find("span").hide()
+                        $(id).find("i.fas").show().css('color','red')
+                    } else if (check == "run") {
+                        $(id).find("span").show()
+                        $(id).find("i.fas").hide()
                     }
                 }
 
                 function reset_for_run() {
-                    setChecked("p#cb_proc_trm", true)
-                    setChecked("p#cb_proc_ode", true)
-                    setChecked("p#cb_proc_out", true)
-                    setChecked("p#cb_proc_vis", true)
+                    setChecked("p#cb_proc_trm", "off")
+                    setChecked("p#cb_proc_ode", "off")
+                    setChecked("p#cb_proc_out", "off")
+                    setChecked("p#cb_proc_vis", "off")
+                    $('#lb_perc_trm').text("(0%)")
+                    $('#lb_perc_ode').text("(0%)")
+                    $('#lb_perc_out').text("(0%)")
+                    $('#lb_perc_vis').text("(0%)")
                     $('#btn_get_mass_results').css("display","none")
                     $('#btn_get_conc_results').css("display","none")
                     $('#btn_visualize').prop('disabled', true)
@@ -470,69 +462,123 @@
                             'name': 'scenario_name',
                             'value': scenario_head.name
                         }]
+
                     $('p#cb_proc_trm').find("span").show()
                     $('p#cb_proc_trm').find("i.fas").css('display','none')
-
-                    TRIM.api.resetPoll(scenario_info).on('load', function(){
-                        TRIM.api.runModel(scenario_info).on('load',function(){
+                    function exec_model_run(){
+                        var resp = TRIM.api.runModel(scenario_info).on('load',function(){
                             m_results = JSON.parse(JSON.stringify(this.responseJSON.mass))
                             m_results = "{" + m_results.trimStart().trimEnd() + "}"
                             c_results = JSON.parse(JSON.stringify(this.responseJSON.conc))
                             c_results = "{" + c_results.trimStart().trimEnd() + "}"
-                            window.sessionStorage["m_results"] = m_results
-                            window.sessionStorage["c_results"] = c_results
-                            window.sessionStorage["Last_run"] = Date(Date.now)
-                            window.sessionStorage["Params_updated"] = "false"
-                            // TRIM.api["m_results"]=JSON.parse(m_results)
-                            // TRIM.api["c_results"]=JSON.parse(c_results)
-                            // let poll_run = setInterval(function() {
-                                TRIM.api.poll(scenario_head.id).on('load', function() {
-                                    let status = this.responseJSON.status
-                                    if (status == "ode") {
-                                        setChecked("p#cb_proc_trm", false)
-                                    } else if (status == "csv") {
-                                        setChecked("p#cb_proc_trm", false)
-                                        setChecked("p#cb_proc_ode", false)
-                                    } else if (status == "fin") {
-                                        setChecked("p#cb_proc_trm", false)
-                                        setChecked("p#cb_proc_ode", false)
-                                        setChecked("p#cb_proc_out", false)
-                                        setChecked("p#cb_proc_vis", false)
-                                        $('#btn_get_mass_results').show()
-                                        $('#btn_get_conc_results').show()
-                                        $('#btn_visualize').prop('disabled', false)
-                                        // clearInterval(poll_run)
-                                    } else if (status == "" || status == "tm") {
-                                        // clearInterval(poll_run)
-                                        $('p#cb_proc_trm').find("span").css('display','none')
-                                        $('p#cb_proc_trm').find("i.fas").show().css('color','red')
-                                    }
-                                })
-                            // }, 1000)
-                            initialize_components()
+                            let id_sting = "_id" + scenario_info[0]["value"]
+                            window.sessionStorage["m_results" + id_sting] = m_results
+                            window.sessionStorage["c_results" + id_sting] = c_results
+                            window.sessionStorage["Last_run" + id_sting] = Date(Date.now)
+                            window.sessionStorage["Params_updated" + id_sting] = "false"
+                            resp = this.responseJSON
+                            return resp
                         })
-                    })
+                        return resp
+                    }
+
+                    let result = ''
+                    const poll = async function (fn, fnCondition, ms) {
+                        await fn();
+                        while (fnCondition(result)) {
+                            await wait(ms);
+                            TRIM.api.poll(scenario_head.id).on('load', function() {
+                                let status = this.responseJSON.status
+                                result = status;
+                                let percent = this.responseJSON.percent
+                                if (status == "ode") {
+                                    setChecked("p#cb_proc_trm", "on")
+                                    setChecked("p#cb_proc_ode", "run")
+                                    $('#lb_perc_trm').text("(100%)")
+                                    $('#lb_perc_ode').text("(" + percent + "%)")
+                                } else if (status == "csv") {
+                                    setChecked("p#cb_proc_trm", "on")
+                                    setChecked("p#cb_proc_ode", "on")
+                                    $('#lb_perc_ode').text("(100%)")
+                                    setChecked("p#cb_proc_out", "run")
+                                    $('#lb_perc_out').text("(" + percent + "%)")
+                                } else if (status == "fin") {
+                                    setChecked("p#cb_proc_trm", "on")
+                                    setChecked("p#cb_proc_ode", "on")
+                                    setChecked("p#cb_proc_out", "on")
+                                    setChecked("p#cb_proc_vis", "on")
+                                    $('#btn_get_mass_results').show()
+                                    $('#btn_get_conc_results').show()
+                                    $('#btn_visualize').prop('disabled', false)
+                                    $('#lb_perc_vis').text("(100%)")
+                                    $('#lb_perc_ode').text("(100%)")
+                                    $('#lb_perc_out').text("(100%)")
+                                } else if (status == "tm") {
+                                    setChecked("p#cb_proc_trm", "run")
+                                    $('#lb_perc_trm').text("(" + percent + "%)")
+                                } else if (status == "err") {
+                                    setChecked('p#cb_proc_trm', "err")
+                                    setChecked('p#cb_proc_ode', "err")
+                                    setChecked('p#cb_proc_out', "err")
+                                    setChecked('p#cb_proc_vis', "err")
+                                    // $('p#cb_proc_vis').find("span").hide()
+                                    // $('p#cb_proc_vis').find("i.fas").show().css('color','red')
+                                }
+                            })
+
+                            if (result == "fin") {
+                                setChecked("p#cb_proc_trm", "on")
+                                setChecked("p#cb_proc_ode", "on")
+                                setChecked("p#cb_proc_out", "on")
+                                setChecked("p#cb_proc_vis", "on")
+                            }
+
+                            if (result == "err") {
+                                setChecked("p#cb_proc_trm", "err")
+                                setChecked("p#cb_proc_ode", "err")
+                                setChecked("p#cb_proc_out", "err")
+                                setChecked("p#cb_proc_vis", "err")
+                            }
+                        }
+                        setTimeout(function(){
+                            initialize_components()
+                            $($('#plt_type').find('a.dropdown-item')[0]).trigger('click')
+                            $('#btn_visualize').prop('disabled', false).trigger('click')
+                        }, ms)
+                        return result;
+                    };
+
+                    const wait = function (ms = 1000) {
+                        return new Promise(resolve => {
+                            setTimeout(resolve, ms);
+                        });
+                    };
+
+                    let fetchResults = () => exec_model_run();
+                    let validate = status => status !== 'fin';
+                    poll(fetchResults, validate, 5000);
                 }
 
                 // Plot something for the first load
-                if (window.sessionStorage["Params_updated"] == "false" && window.sessionStorage["m_results"]) {
+                if (window.sessionStorage["Params_updated_id"+loadedData.scenario_head.id] == "false" && window.sessionStorage["m_results_id"+loadedData.scenario_head.id]) {
                     $($('#plt_type').find('a.dropdown-item')[0]).trigger('click')
                     $('#btn_visualize').trigger('click')
                 }
             })
 
             function draw_ts_chart() {
+                let loadedData = $('#root').data('loadedParcels')
                 let results = {}
                 let unit_type = ""
                 let unit = ""
                 if ($('#switch_res_conc').prop("checked")) {
-                    results = JSON.parse(window.sessionStorage["c_results"])
+                    results = JSON.parse(window.sessionStorage["c_results_id"+loadedData.scenario_head.id])
                     unit_type = "Concentration"
                     unit = "(g/g)"
                     results["year"]={};
                     Object.keys(results[Object.keys(results)[0]]).forEach((e,i) => results["year"][e]=e)
                 } else {
-                    results = JSON.parse(window.sessionStorage["m_results"])
+                    results = JSON.parse(window.sessionStorage["m_results_id"+loadedData.scenario_head.id])
                     unit_type = "Mass"
                     unit = "(g)"
                 }
@@ -598,17 +644,18 @@
             }
 
             function draw_mass_dist_chart(c_type){
+                let loadedData = $('#root').data('loadedParcels')
                 let results = {}
                 let unit_type = ""
                 let unit = ""
                 if ($('#switch_res_conc').prop("checked")) {
-                    results = JSON.parse(window.sessionStorage["c_results"])
+                    results = JSON.parse(window.sessionStorage["c_results_id"+loadedData.scenario_head.id])
                     unit_type = "Concentration"
                     unit = "(g/g)"
                     results["year"]={};
                     Object.keys(results[Object.keys(results)[0]]).forEach((e,i) => results["year"][e]=e)
                 } else {
-                    results = JSON.parse(window.sessionStorage["m_results"])
+                    results = JSON.parse(window.sessionStorage["m_results_id"+loadedData.scenario_head.id])
                     unit_type = "Mass"
                     unit = "(g)"
                 }
