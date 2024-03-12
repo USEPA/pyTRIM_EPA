@@ -70,7 +70,7 @@ class ServiceMetaClass(type):
         return cls.__cache.pop(key, None)
 
     def clear_cache(cls):
-        cls.__cache = {}
+        cls.__cache.clear()  # = {}
 
 
 class GenericService(metaclass=ServiceMetaClass):
@@ -81,7 +81,9 @@ class GenericService(metaclass=ServiceMetaClass):
 
     @classmethod
     def commit(cls):
-        cls.clear_cache()
+        # cls.clear_cache()
+        for k in CacheManager._CACHERS:
+            CacheManager.clear_cache(k)
         cls.db.session.commit()
 
     @classmethod

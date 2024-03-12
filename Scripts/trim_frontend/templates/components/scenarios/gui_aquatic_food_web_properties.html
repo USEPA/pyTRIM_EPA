@@ -307,8 +307,8 @@
                 $(this).hide();
             });
 
-            $('input.editableCell,select.editableCell').blur(function () {     
-                let focusTblId = $(this).closest(`table`).attr('id');
+            $('input.editableCell,select.editableCell').blur(function () {
+                let focusTblId = $(this).closest('table').attr('id');
                 if (`#${focusTblId}` !== tblId) {
                     return;
                 }

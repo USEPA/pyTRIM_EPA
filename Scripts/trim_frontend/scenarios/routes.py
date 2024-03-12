@@ -1,5 +1,6 @@
 import json
 import time
+from datetime import datetime
 
 import pandas as pd
 from flask import Blueprint, request, render_template, redirect, url_for
@@ -7,7 +8,7 @@ from flask_security import login_required, current_user
 from flask_api import ApiResult
 from datetime import datetime
 from trim_db import ScenarioService, ParcelService, \
-    CompartmentService, VolumeElementService, ParameterService, ChemicalService, FormulaService
+    CompartmentService, VolumeElementService, ParameterService, ChemicalService, FormulaService, ScenarioLoadRunProc
 from trim_frontend import api
 from trim_frontend.parcels.routes import delete_parcel_contents
 from .forms import *
@@ -260,6 +261,20 @@ def update_scenario():
                 ret_val = meteo_wgt_avg_value_from_timeseries(param_data, ret_type)
                 if ret_type != "None":
                     update_custom_param(s, comp_list[0], param_name, ret_val[ret_type_name])
+        elif field_name == "startDate" or field_name == "endDate":
+            date_parts = scenario_data[field_name].split("-")
+            date_obj = datetime(int(date_parts[0]), int(date_parts[1]), int(date_parts[2]))
+            ts_date = time.mktime(date_obj.timetuple())
+            par_name = "simulationBeginDateTime" if field_name == "startDate" else "simulationEndDateTime"
+            par_list = {par_k: par for par_k, par in s.parameters.items() if par_k == par_name}
+            this_param = par_list[par_name]
+            if this_param.__tablename__ != "custom_parameter":
+                ParameterService.create(definition_id=this_param.id, scenario_id=s.id,
+                                        requirements=f"(self.id == {s.id})", value=ts_date)
+            else:
+                this_param.value = ts_date
+                ParameterService.update(this_param)
+            ParameterService.commit()
 
     except Exception as e:
         logger.error(traceback.format_exc())
@@ -445,7 +460,12 @@ def run_result_scenario():
 @login_required
 def poll_model_run_scenario(id):
     s = ScenarioService.get(id)
-    return ApiResult({'status': s.description})
+    if [v for v in s.proc_status][0].is_run_error:
+        run_status = "err"
+        run_percent = "err"
+    else:
+        run_status, run_percent = [v for v in s.proc_status][0].run_step
+    return ApiResult({'status': run_status, 'percent': run_percent})
 
 
 @scenario_api.route('/api/scenario/poll/', methods=['POST'])
@@ -456,6 +476,10 @@ def reset_poll_model_run_scenario():
         raise AssertionError("Scenario ID cannot be blank.")
     scenario_id = int(scenario_data['scenario_id'])
     s = ScenarioService.get(scenario_id)
-    s.description = ""
+    if s.has_process_hist:
+        [v for v in s.proc_status][0].run_status = 'run null null'
+    else:
+        new_proc = ScenarioLoadRunProc(scenario=s, load_status='load 100', run_status='run null null')
+        [s.proc_status][0].add(new_proc)
     ScenarioService.commit()
     return "success"
