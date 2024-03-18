@@ -1,0 +1,13 @@
+image: python:3.8
+
+pipelines:
+  default:
+    - step:
+        name: Sync ICF GitHub Mirror
+        image: alpine/git:latest
+        clone:
+          enabled: false
+        script:
+          - git clone --bare git@bitbucket.org:ICF_HSP_Tools/trim-builder.git
+          - cd trim-builder.git
+          - git push --mirror git@github.com:ICF-Corp/trim-builder.git
