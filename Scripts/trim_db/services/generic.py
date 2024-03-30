@@ -208,6 +208,8 @@ class GenericService(metaclass=ServiceMetaClass):
 
     @classmethod
     def delete(cls, model_or_id, no_commit=False):
+        for k in CacheManager._CACHERS:
+            CacheManager.clear_cache(k)
         if isinstance(model_or_id, int):
             model = cls.get(model_or_id)
         elif isinstance(model_or_id, cls.__model__):

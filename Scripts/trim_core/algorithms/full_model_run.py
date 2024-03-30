@@ -1,12 +1,13 @@
 import os
 import pandas as pd
 import numpy as np
-import math
+import json
 from scipy.integrate import odeint
 from trim_db.schema import *
 from trim_db.schema.parameters.equations import evaluated_args, \
     evaluator, NoEval
 from trim_db.services import *
+from datetime import datetime
 
 __all__ = ['run_full_model']
 
@@ -385,9 +386,9 @@ def gen_avg(df_nt, df_conc, inputs):
     # get simulation start and end dates
     start_date, end_date = inputs['simulation_start_date'], inputs['simulation_end_date']
     # convert the start_date and end_date to datetime objects
-    start_date = pd.to_datetime(start_date, format='%d/%m/%Y')
+    start_date = pd.to_datetime(start_date, format='%Y-%m-%d')
     # convert the start_date and end_date to datetime objects
-    end_date = pd.to_datetime(end_date, format='%d/%m/%Y')
+    end_date = pd.to_datetime(end_date, format='%Y-%m-%d')
     # convert the first col (time in d) to datetime objects
     df_nt.iloc[:, 0] = pd.to_datetime(df_nt.iloc[:, 0], origin=start_date, unit='d')
     # convert the first col (time in d) to datetime objects
@@ -471,9 +472,11 @@ def run_full_model(scn):
     # if none exist create new one
     if scn.has_process_hist:
         [v for v in scn.proc_status][0].run_status = 'run tm 0'
+        [v for v in scn.proc_status][0].run_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     else:
         try:
-            new_proc = ScenarioLoadRunProc(scenario=scn, load_status='load 100', run_status='run null null')
+            new_proc = ScenarioLoadRunProc(scenario=scn, load_status='load 100', run_status='run null null',
+                                           run_datetime=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
             [scn.proc_status][0].add(new_proc)
         except Exception as e:
             print(e)
@@ -506,6 +509,8 @@ def run_full_model(scn):
     json_n_avg = dfn_avg.to_json(orient='columns')[1:-1].replace('},{', '} {')
     json_c_avg = dfc_avg.to_json(orient='columns')[1:-1].replace('},{', '} {')
 
+    outfile_nt, outfile_conc = "", ""
+
     # Output components as csv
     # df_tm.to_csv("Transfer_Matrix_test.csv")
     # df_sm.to_csv("Source_Matrix_test.csv")
@@ -516,30 +521,58 @@ def run_full_model(scn):
     ScenarioService.commit()
     scn = ScenarioService.get(id=scn.id)
     try:
-        outfile_nt, outfile_conc = safe_save_output(dfn_avg, dfc_avg, scn.name, scn.creator_id)
-        # safe_save_output(df_nt, df_conc, scn.name, scn.creator_id)
+        outfile_nt, outfile_conc = safe_save_output(dfn_avg, dfc_avg, scn, filetype='excel')
+        # safe_save_output(df_nt, df_conc, scn, filetype='excel')
         [v for v in scn.proc_status][0].result_file_nt = outfile_nt
         [v for v in scn.proc_status][0].result_file_conc = outfile_conc
         [v for v in scn.proc_status][0].run_status = 'run fin 100'
+        [v for v in scn.proc_status][0].result_nt = json.dumps(json_n_avg, default=str)
+        [v for v in scn.proc_status][0].result_conc = json.dumps(json_c_avg, default=str)
     except Exception:
         [v for v in scn.proc_status][0].run_status = 'err csv 0'
     ScenarioService.commit()
 
-    return json_n_avg, json_c_avg
+    return json_n_avg, json_c_avg, outfile_nt, outfile_conc
 
 
-def safe_save_output(df_nt, df_conc, scn_name, usr_id):
+def safe_save_output(df_nt, df_conc, scn, filetype='csv'):
     try:
+        ts = datetime.now().strftime('%Y-%m-%d--%H_%M_%S')
+        sim_chems = [c.name for c in scn.chemicals]
         if not os.path.isdir('./trim_frontend/static/.output'):
             os.makedirs('./trim_frontend/static/.output')
-        fname_nt = f'./trim_frontend/static/.output/nt_new_{scn_name}_{usr_id}.csv'
-        fname_conc = f'./trim_frontend/static/.output/conc_new_{scn_name}_{usr_id}.csv'
-        df_nt.to_csv(fname_nt)
-        df_conc.to_csv(fname_conc)
-    except Exception:
+        if filetype == 'csv':
+            fname_nt = f'./trim_frontend/static/.output/nt_new_{scn.name}_{scn.creator_id}_{ts}.csv'
+            fname_conc = f'./trim_frontend/static/.output/conc_new_{scn.name}_{scn.creator_id}_{ts}.csv'
+            df_nt.to_csv(fname_nt)
+            df_conc.to_csv(fname_conc)
+        else:
+            path_output_nt = './trim_frontend/static/.output/'
+            fname_nt = f'nt_new_{scn.name}_{scn.creator_id}_{ts}.xlsx'
+            path_output_conc = './trim_frontend/static/.output/'
+            fname_conc = f'conc_new_{scn.name}_{scn.creator_id}_{ts}.xlsx'
+            split_write_files(df_nt, sim_chems, path_output_nt, fname_nt)
+            split_write_files(df_conc, sim_chems, path_output_conc, fname_conc)
+    except Exception as e:
+        print(f'{20 * ">"} Output write exception writing {filetype} file:\n{e}')
         fname_nt = "No File. There was an error while writing output..."
         fname_conc = "No File. There was an error while writing output..."
     return fname_nt, fname_conc
+
+
+def split_write_files(df, sim_chems, path_output, file_name):
+    # Helper function to split and write time series files into excel workbook with multiple worksheets
+    of_pn = os.path.join(path_output, file_name)
+    writer = pd.ExcelWriter(of_pn, engine='xlsxwriter')
+    for chem in sim_chems:  # loop over sim chemicals
+        # prefix = 'chem_'+chem.replace(' ', '_') + '_'  # construct prefix
+        prefix = chem + '_'  # construct prefix
+        dft = df[[df.columns[0]]+[x for x in list(df.columns) if prefix in x]]  # keep time/year and cols with prefix
+        dft.columns = [x.replace(prefix, '') for x in list(dft.columns)]  # strip prefix
+        # Write each dataframe to a different worksheet.
+        dft.to_excel(writer, sheet_name=chem, index=False)
+    writer.close()
+    return()
 
 
 

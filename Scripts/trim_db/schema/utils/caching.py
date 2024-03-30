@@ -2,6 +2,8 @@ from functools import wraps, partial
 
 __all__ = ['CacheManager']
 
+import sqlalchemy.orm.exc
+
 
 class CacheManager:
     _CACHERS = {}
@@ -57,7 +59,13 @@ class CacheManager:
                     self[k] = ans
                     if print_this:
                         print(f'New Cache "{k}" -> {ans}\n')
-
+                # We need to clear cache if any object is stale and in detached state.
+                # This is important when unhandled exceptions occur and uncleared stale
+                # objects in cash prevent scenario load.
+                if isinstance(ans, sqlalchemy.orm.exc.DetachedInstanceError):
+                    for ck in CacheManager._CACHERS:
+                        CacheManager.clear_cache(ck)
+                    return f(*args, **kwargs)
                 if isinstance(ans, Exception):
                     # print(f"key {k} created but this exception occurred: {ans}")
                     raise ans

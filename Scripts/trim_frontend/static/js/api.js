@@ -163,6 +163,16 @@ window.TRIM = (function(trim) {
         });
     }
 
+    api.getResults = function(scenario_info) {
+        let url = api.getUrl('scenario_api.get_result_scenario');
+        let data = makeFormData(scenario_info);
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: data
+        });
+    }
+
     api.poll = function(scenario_id) {
         let url = TRIM.api.getUrl('scenario_api.poll_model_run_scenario').replace('/0', '/' + scenario_id);
         return AJAX.call({

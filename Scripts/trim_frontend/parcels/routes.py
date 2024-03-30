@@ -464,6 +464,7 @@ def initialize_parcel_contents(new_parcel, vol_elem_defaults=None):
         for c in ve[1]["Compartments"].items():
             # Create standard compartments linking them to default volume elements and media for each compartment
             media_id = [m.id for m in CompartmentService.media.get_all() if m.name == c[1]["media_name"]][0]
+
             if new_parcel.get_compartment(c[1]["name"]):
                 nc = new_parcel.get_compartment(c[1]["name"])
             else:
@@ -504,21 +505,44 @@ def calc_default_erosion_rate_sdr(pcl):
 def delete_parcel_contents(del_parcel):
     for c in del_parcel.compartments:
         # Delete Links
-        lr = CompartmentService.links.get_all(receiver_id=c.id)
-        ls = CompartmentService.links.get_all(sender_id=c.id)
+        comp_id = c.id
+        scenario_id = c.current_scenario().id
+        lr = CompartmentService.links.get_all(receiver_id=comp_id)
+        ls = CompartmentService.links.get_all(sender_id=comp_id)
         for lnk_r in lr:
             CompartmentService.links.delete(lnk_r)
         for lnk_s in ls:
             CompartmentService.links.delete(lnk_s)
         # Delete Custom Parameters
-        custom_params = ParameterService.get_all(requirements=f'(self.id == {c.id})')
+        custom_params = ParameterService.get_all(requirements=f'(self.id == {comp_id})')
         for cp in custom_params:
             ParameterService.delete(cp, False)
         # Delete Compartments
         CompartmentService.delete(c, False)
+        # Delete compartment id from formulas with custom values for give compartment (from legacy Trim)
+        formulas = ["MethylationRate", "DemethylationRate", "ReductionRate"]
+        for t in formulas:
+            ins = ParameterService.definitions.get(variable_name=t).instances
+            par = [i for i in ins if i.scenario.id == scenario_id][0]
+            eq = par.formula.equation
+            del_id = c.id
+            eq_parts = eq.split('compartment.id in {')
+            for i, p in enumerate(eq_parts):
+                if i == 0:
+                    continue
+                sub_parts = p.split('}')
+                complist = sub_parts[0].split(",")
+                new_complist = [str(int(i.strip())) for i in complist if int(i.strip()) != del_id]
+                sub_parts[0] = " , ".join(new_complist)
+                eq_parts[i] = "}".join(sub_parts)
+            new_eq = 'compartment.id in {'.join(eq_parts)
+            ParameterService.get(par.id).formula.equation = new_eq
+            ParameterService.commit()
     # Delete Volume Elements
     for ve in del_parcel.volume_elements:
         VolumeElementService.delete(ve, False)
+
+
 
 
 def create_base_land_compartments(parcels_data, p, land_use):
