@@ -1,5 +1,8 @@
 import sqlalchemy as sa
 from datetime import datetime
+
+import sqlalchemy.sql.sqltypes
+
 from ..utils.base import Model
 from ..utils.mixins import TrackUpdatesMixin
 from ..utils.serialize import register_serializer
@@ -142,8 +145,11 @@ class ScenarioLoadRunProc(Model):
     scenario = sa.orm.relationship(
         'Scenario', backref=sa.orm.backref('proc_status', lazy='dynamic')
     )
+    run_datetime = sa.Column(sa.sql.sqltypes.DATETIME)
     result_file_nt = sa.Column(sa.String(255))
     result_file_conc = sa.Column(sa.String(255))
+    result_nt = sa.Column(sa.sql.sqltypes.TEXT)
+    result_conc = sa.Column(sa.sql.sqltypes.TEXT)
 
     @property
     def load_percent(self):

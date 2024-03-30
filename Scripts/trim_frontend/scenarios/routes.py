@@ -64,7 +64,7 @@ param_map = {
 }
 
 
-@scenario.route('/scenario')
+@scenario.route('/scenario', methods=['GET'])
 @login_required
 def view_scenarios():
     scenarios = current_user.active_scenarios
@@ -77,7 +77,7 @@ def view_scenarios():
     )
 
 
-@scenario.route('/scenario/<int:id>')
+@scenario.route('/scenario/<int:id>', methods=['GET'])
 @login_required
 def view_scenario(id):
     s = ScenarioService.get(id=id)
@@ -106,7 +106,7 @@ def create_scenario():
     return redirect(url_for('scenario.edit_scenario', id=s.id))
 
 
-@scenario.route('/scenario/<int:id>/edit')
+@scenario.route('/scenario/<int:id>/edit', methods=['GET'])
 @login_required
 def edit_scenario(id):
     s = ScenarioService.get(id)
@@ -118,7 +118,7 @@ scenario_api = Blueprint('scenario_api', __name__)
 api.use_api_errors(scenario_api)
 
 
-@scenario_api.route('/api/scenario/<int:id>')
+@scenario_api.route('/api/scenario/<int:id>', methods=['GET'])
 @login_required
 def get_scenario(id):
     s = ScenarioService.get(id)
@@ -436,7 +436,7 @@ def delete_scenario():
 
     return redirect(request.referrer)
 
-@scenario_api.route('/api/scenario/run/', methods=['POST'])
+@scenario_api.route('/api/scenario/run/', methods=['POST', 'GET'])
 @login_required
 def run_result_scenario():
     exec_data = request.form.to_dict()
@@ -447,14 +447,45 @@ def run_result_scenario():
 
     try:
         print("Starting Model Run...")
-        json_n_avg, json_c_avg = run_full_model(s)
+        json_n_avg, json_c_avg, output_file_n, output_file_c = run_full_model(s)
 
-        data_resp = {'mass': json_n_avg, 'conc': json_c_avg}
+        data_resp = {"mass": json_n_avg, "conc": json_c_avg, "outputMass": output_file_n, "outputConc": output_file_c}
     except Exception as e:
         print(e)
+        data_resp = {"error": e}
 
     return ApiResult(data_resp)
 
+
+@scenario_api.route('/api/scenario/getresults/', methods=['POST'])
+@login_required
+def get_result_scenario():
+    logger = make_logger('scenario_get_results_process')
+    exec_data = request.form.to_dict()
+    if not exec_data.get('scenario_id'):
+        raise AssertionError("Scenario ID cannot be blank.")
+    scenario_id = int(exec_data['scenario_id'])
+    s = ScenarioService.get(scenario_id)
+
+    try:
+        logger.info(f'Getting Model Run Results for scenario {s.name}...')
+        fin_stat = [v for v in s.proc_status][0].run_status
+        run_date = [v for v in s.proc_status][0].run_datetime
+        output_file_n = [v for v in s.proc_status][0].result_file_nt
+        output_file_c = [v for v in s.proc_status][0].result_file_conc
+        json_n_avg = [v for v in s.proc_status][0].result_nt
+        json_c_avg = [v for v in s.proc_status][0].result_conc
+
+        result_resp = json.loads(json.dumps({"mass": json.loads(json_n_avg), "conc": json.loads(json_c_avg), "final_status": fin_stat, "run_date": run_date, "outputMass": output_file_n, "outputConc": output_file_c}, indent=4, sort_keys=True, default=str))
+    except Exception as e:
+        logger.info(f"Error when attempting to get results: {e}")
+        result_resp = {"error": e}
+    try:
+        resp = ApiResult(result_resp)
+    except Exception as e:
+        resp = ""
+        logger.error(f'Api result conversion error: {e}')
+    return resp
 
 @scenario_api.route('/api/scenario/poll/<int:id>', methods=['GET'])
 @login_required

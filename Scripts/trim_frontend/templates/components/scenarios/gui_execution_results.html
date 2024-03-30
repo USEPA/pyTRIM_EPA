@@ -14,7 +14,7 @@
                         <div class="mt-3">
                             <p id="cb_proc_trm"><span style="display: none"><label class="lds-dual-ring mr-2"></label></span><i class="fas fa-play"></i><label for="cb_proc_trm" class="ml-1">Calculating Transfer Matrix</label>&emsp;<label id="lb_perc_trm">(0%)</label></p>
                             <p id="cb_proc_ode"><span style="display: none"><label class="lds-dual-ring mr-2"></label></span><i class="fas fa-play"></i><label for="cb_proc_ode" class="ml-1">Running ODE Solver</label>&emsp;<label id="lb_perc_ode">(0%)</label></p>
-                            <p id="cb_proc_out"><span style="display: none"><label class="lds-dual-ring mr-2"></label></span><i class="fas fa-play"></i><label for="cb_proc_out" class="ml-1">Writing results to CSV file </label>&emsp;<label id="lb_perc_out">(0%)</label></p>
+                            <p id="cb_proc_out"><span style="display: none"><label class="lds-dual-ring mr-2"></label></span><i class="fas fa-play"></i><label for="cb_proc_out" class="ml-1">Writing results to Excel file </label>&emsp;<label id="lb_perc_out">(0%)</label></p>
                             <p id="cb_proc_vis"><span style="display: none"><label class="lds-dual-ring mr-2"></label></span><i class="fas fa-play"></i><label for="cb_proc_vis" class="ml-1">Loading results for visualization </label>&emsp;<label id="lb_perc_vis">(0%)</label></p>
                         </div>
                     </div>
@@ -24,8 +24,8 @@
         <div class="row mb-1 mt-1">
             <div class="col-sm">
                 <div>
-                    <a id="btn_get_mass_results" class="btn btn-warning" style="display: none" href="{{url_for('static', filename='.output/nt_new_Foundries_SS.csv')}}">Download Mass Results</a>
-                    <a id="btn_get_conc_results" class="btn btn-warning" style="display: none" href="{{url_for('static', filename='.output/conc_new_Foundries_SS.csv')}}">Download Concentration Results</a>
+                    <a id="btn_get_mass_results" class="btn btn-warning" style="display: none" href="_top">Download Mass Results</a>
+                    <a id="btn_get_conc_results" class="btn btn-warning" style="display: none" href="_top">Download Concentration Results</a>
                 </div>
             </div>
         </div>
@@ -300,6 +300,13 @@
                     $('#lb_perc_ode').text("(100%)")
                     $('#lb_perc_out').text("(100%)")
                     $('#lb_perc_vis').text("(100%)")
+                    let m_file = window.sessionStorage["m_file_id" + loadedData.scenario_head.id]
+                    let c_file = window.sessionStorage["c_file_id" + loadedData.scenario_head.id]
+                    let fpath = "{{ url_for('static', filename='.output') }}"
+                    let m_filepath =  fpath + "/" + m_file
+                    let c_filepath =  fpath + "/" + c_file
+                    $('#btn_get_mass_results').attr("href",m_filepath)
+                    $('#btn_get_conc_results').attr("href",c_filepath)
                     initialize_components()
                     $('#btn_visualize').prop('disabled', false)
                 }
@@ -467,19 +474,65 @@
                     $('p#cb_proc_trm').find("i.fas").css('display','none')
                     function exec_model_run(){
                         var resp = TRIM.api.runModel(scenario_info).on('load',function(){
-                            m_results = JSON.parse(JSON.stringify(this.responseJSON.mass))
-                            m_results = "{" + m_results.trimStart().trimEnd() + "}"
-                            c_results = JSON.parse(JSON.stringify(this.responseJSON.conc))
-                            c_results = "{" + c_results.trimStart().trimEnd() + "}"
-                            let id_sting = "_id" + scenario_info[0]["value"]
-                            window.sessionStorage["m_results" + id_sting] = m_results
-                            window.sessionStorage["c_results" + id_sting] = c_results
-                            window.sessionStorage["Last_run" + id_sting] = Date(Date.now)
-                            window.sessionStorage["Params_updated" + id_sting] = "false"
+                            // let m_results = JSON.parse(JSON.stringify(this.responseJSON.mass))
+                            // m_results = "{" + m_results.trimStart().trimEnd() + "}"
+                            // let c_results = JSON.parse(JSON.stringify(this.responseJSON.conc))
+                            // c_results = "{" + c_results.trimStart().trimEnd() + "}"
+                            // let m_file = JSON.parse(JSON.stringify(this.responseJSON.outputMass))
+                            // let c_file = JSON.parse(JSON.stringify(this.responseJSON.outputConc))
+                            // let id_sting = "_id" + scenario_info[0]["value"]
+                            // window.sessionStorage["m_results" + id_sting] = m_results
+                            // window.sessionStorage["c_results" + id_sting] = c_results
+                            // window.sessionStorage["m_file" + id_sting] = m_file
+                            // window.sessionStorage["c_file" + id_sting] = c_file
+                            // window.sessionStorage["Last_run" + id_sting] = Date(Date.now)
+                            // window.sessionStorage["Params_updated" + id_sting] = "false"
+                            // let fpath = "{{ url_for('static', filename='.output') }}"
+                            // let m_filepath =  fpath + "/" + m_file
+                            // let c_filepath =  fpath + "/" + c_file
+                            // $('#btn_get_mass_results').attr("href",m_filepath)
+                            // $('#btn_get_conc_results').attr("href",c_filepath)
                             resp = this.responseJSON
                             return resp
                         })
                         return resp
+                    }
+
+                    function get_result_data(scenario_head){
+                        let scenario_info = [{
+                            'type': 'data',
+                            'name': 'scenario_id',
+                            'value': scenario_head.id
+                        },{
+                            'type': 'data',
+                            'name': 'scenario_name',
+                            'value': scenario_head.name
+                        }]
+                        let results_data = TRIM.api.getResults(scenario_info).on('load',function(){
+                            let result_data = {}
+                            let m_results = JSON.parse(JSON.stringify(this.responseJSON.mass))
+                            result_data["m_results"] = "{" + m_results.trimStart().trimEnd() + "}"
+                            let c_results = JSON.parse(JSON.stringify(this.responseJSON.conc))
+                            result_data["c_results"] = "{" + c_results.trimStart().trimEnd() + "}"
+                            result_data["m_file"] = JSON.parse(JSON.stringify(this.responseJSON.outputMass))
+                            result_data["c_file"] = JSON.parse(JSON.stringify(this.responseJSON.outputConc))
+                            result_data["Last_run"] = JSON.parse(JSON.stringify(this.responseJSON.run_date))
+                            let id_sting = "_id" + scenario_info[0]["value"]
+                            window.sessionStorage["Params_updated" + id_sting] = "false"
+                            window.sessionStorage["m_results" + id_sting] = result_data["m_results"]
+                            window.sessionStorage["c_results" + id_sting] = result_data["c_results"]
+                            window.sessionStorage["m_file" + id_sting] = result_data["m_file"]
+                            window.sessionStorage["c_file" + id_sting] = result_data["c_file"]
+                            window.sessionStorage["Last_run" + id_sting] = result_data["Last_run"]
+                            window.sessionStorage["Params_updated" + id_sting] = "false"
+                            let fpath = "{{ url_for('static', filename='.output') }}"
+                            let m_filepath =  fpath + "/" + result_data["m_file"]
+                            let c_filepath =  fpath + "/" + result_data["c_file"]
+                            $('#btn_get_mass_results').attr("href",m_filepath)
+                            $('#btn_get_conc_results').attr("href",c_filepath)
+                            return result_data
+                        })
+                        return results_data
                     }
 
                     let result = ''
@@ -513,6 +566,7 @@
                                     $('#lb_perc_vis').text("(100%)")
                                     $('#lb_perc_ode').text("(100%)")
                                     $('#lb_perc_out').text("(100%)")
+                                    let result_data = get_result_data(scenario_head)
                                 } else if (status == "tm") {
                                     setChecked("p#cb_proc_trm", "run")
                                     $('#lb_perc_trm').text("(" + percent + "%)")

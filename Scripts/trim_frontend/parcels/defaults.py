@@ -1,5 +1,6 @@
 from trim_db.schema import Parcel
 from trim_db.schema.utils.serialize import register_serializer
+from trim_db.schema.parameters.models import ParameterDefinition
 
 
 @register_serializer(Parcel)
@@ -23,9 +24,22 @@ def serialize_parcel(pcl: Parcel):
     return s
 
 
+# def safe_get_val(comp, k, default=None):
+#     v = default if comp.parameters.get(k) is None else comp.parameters.get(k)
+#     return v if v == default else v.value
+
 def safe_get_val(comp, k, default=None):
-    v = comp.parameters.get(k, default)
-    return v if v == default else v.value
+    if isinstance(comp.parameters.get(k), ParameterDefinition):
+        v = comp.parameters.get(k).default_value
+        if v is None:
+            v = default
+    else:
+        if comp.parameters.get(k) is None:
+            v = default
+        else:
+            v = comp.parameters.get(k).value
+    return v
+
 
 
 def get_general_params(pcl):
@@ -328,7 +342,7 @@ def get_source_params(pcl):
 
 def get_fish_params(comp):
     diet_by_media = {
-        f'FractionDiet{x}': safe_get_val(comp, f'FractionDiet{x}', None)
+        f'FractionDiet{x}': safe_get_val(comp, f'FractionDiet{x}', AQUATIC_DIET[comp.name][f'FractionDiet{x}'])
         for x in AQUATIC_BIOTA
     }
     biomass_by_media = safe_get_val(comp, 'BiomassPerArea', None)
@@ -365,6 +379,97 @@ AQUATIC_BIOTA = [
     'FishCarnivore'
 ]
 
+AQUATIC_DIET = {
+    "Benthic_Carnivore": {
+        "FractionDietAlgae": 0,
+        "FractionDietMacrophyte": 0,
+        "FractionDietZooplankton": 0,
+        "FractionDietBenthicInvertebrate": 0.5,
+        "FractionDietFishHerbivore": 0,
+        "FractionDietFishBenthicOmnivore": 0.5,
+        "FractionDietFishOmnivore": 0,
+        "FractionDietFishBenthicCarnivore": 0,
+        "FractionDietFishCarnivore": 0
+    },
+    "Benthic_Invertebrate": {
+        "FractionDietAlgae": 0,
+        "FractionDietMacrophyte": 0,
+        "FractionDietZooplankton": 0,
+        "FractionDietBenthicInvertebrate": 0,
+        "FractionDietFishHerbivore": 0,
+        "FractionDietFishBenthicOmnivore": 0,
+        "FractionDietFishOmnivore": 0,
+        "FractionDietFishBenthicCarnivore": 0,
+        "FractionDietFishCarnivore": 0
+    },
+    "Benthic_Omnivore": {
+        "FractionDietAlgae": 0,
+        "FractionDietMacrophyte": 0,
+        "FractionDietZooplankton": 0,
+        "FractionDietBenthicInvertebrate": 1,
+        "FractionDietFishHerbivore": 0,
+        "FractionDietFishBenthicOmnivore": 0,
+        "FractionDietFishOmnivore": 0,
+        "FractionDietFishBenthicCarnivore": 0,
+        "FractionDietFishCarnivore": 0
+    },
+    "Macrophyte": {
+        "FractionDietAlgae": 0,
+        "FractionDietMacrophyte": 0,
+        "FractionDietZooplankton": 0,
+        "FractionDietBenthicInvertebrate": 0,
+        "FractionDietFishHerbivore": 0,
+        "FractionDietFishBenthicOmnivore": 0,
+        "FractionDietFishOmnivore": 0,
+        "FractionDietFishBenthicCarnivore": 0,
+        "FractionDietFishCarnivore": 0
+    },
+    "Water_Column_Carnivore": {
+        "FractionDietAlgae": 0,
+        "FractionDietMacrophyte": 0,
+        "FractionDietZooplankton": 0,
+        "FractionDietBenthicInvertebrate": 0,
+        "FractionDietFishHerbivore": 0,
+        "FractionDietFishBenthicOmnivore": 0.5,
+        "FractionDietFishOmnivore": 0.5,
+        "FractionDietFishBenthicCarnivore": 0,
+        "FractionDietFishCarnivore": 0
+    },
+    "Water_Column_Herbivore": {
+        "FractionDietAlgae": 0,
+        "FractionDietMacrophyte": 0,
+        "FractionDietZooplankton": 1,
+        "FractionDietBenthicInvertebrate": 0,
+        "FractionDietFishHerbivore": 0,
+        "FractionDietFishBenthicOmnivore": 0,
+        "FractionDietFishOmnivore": 0,
+        "FractionDietFishBenthicCarnivore": 0,
+        "FractionDietFishCarnivore": 0
+    },
+    "Water_Column_Omnivore": {
+        "FractionDietAlgae": 0,
+        "FractionDietMacrophyte": 0,
+        "FractionDietZooplankton": 0,
+        "FractionDietBenthicInvertebrate": 0,
+        "FractionDietFishHerbivore": 1,
+        "FractionDietFishBenthicOmnivore": 0,
+        "FractionDietFishOmnivore": 0,
+        "FractionDietFishBenthicCarnivore": 0,
+        "FractionDietFishCarnivore": 0
+    },
+    "Zooplankton": {
+        "FractionDietAlgae": 1,
+        "FractionDietMacrophyte": 0,
+        "FractionDietZooplankton": 0,
+        "FractionDietBenthicInvertebrate": 0,
+        "FractionDietFishHerbivore": 0,
+        "FractionDietFishBenthicOmnivore": 0,
+        "FractionDietFishOmnivore": 0,
+        "FractionDietFishBenthicCarnivore": 0,
+        "FractionDietFishCarnivore": 0
+    }
+}
+
 
 Wet_Dry_Source_VolElem_defaults = {
     'DryParticleSource': {
@@ -374,7 +479,7 @@ Wet_Dry_Source_VolElem_defaults = {
         'Compartments': {
             'DryParticleSource': {
                 'name': 'DryParticleSource',
-                'media_name': 'Particle'
+                'media_name': 'Dry_Particle'
             }
         }
     },
@@ -385,7 +490,7 @@ Wet_Dry_Source_VolElem_defaults = {
         'Compartments': {
             'DryVaporSource': {
                 'name': 'DryVaporSource',
-                'media_name': 'Vapor'
+                'media_name': 'Dry_Vapor'
             }
         }
     },
@@ -396,7 +501,7 @@ Wet_Dry_Source_VolElem_defaults = {
         'Compartments': {
             'WetParticleSource': {
                 'name': 'WetParticleSource',
-                'media_name': 'Particle'
+                'media_name': 'Wet_Particle'
             }
         }
     },
@@ -407,7 +512,7 @@ Wet_Dry_Source_VolElem_defaults = {
         'Compartments': {
             'WetVaporSource': {
                 'name': 'WetVaporSource',
-                'media_name': 'Vapor'
+                'media_name': 'Wet_Vapor'
             }
         }
     }
