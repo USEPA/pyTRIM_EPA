@@ -9,6 +9,10 @@ def serialize_parcel(pcl: Parcel):
     water_params = get_water_params(pcl, general_params['parcelType'])
     source_params = get_source_params(pcl)
 
+    if pcl.name == "E1":
+        print(f'GENERAL {general_params}\n')
+        print(f'SOURCE {source_params}')
+
     s = {
         'id': pcl.id,
         'name': pcl.name,
@@ -334,9 +338,9 @@ def get_source_params(pcl):
             #         source_params["sources"][chem.name] = comp.surfaceDepositionRate(chem)
             if comp.media.isa("Source"):
                 try:
-                    source_params["sources"][chem.name] = {comp.volume_element.name: {comp.name: 0.0037}} # TODO fix this back to -> comp.surfaceDepositionRate(chemical=chem).magnitude
-                except:
-                    source_params["sources"][chem.name] = {comp.volume_element.name: {comp.name: comp.surfaceDepositionRate(chemical=chem)}}
+                    source_params["sources"][chem.name][comp.volume_element.name] = {comp.name: comp.surfaceDepositionRate(chemical=chem).magnitude}
+                except AttributeError:
+                    source_params["sources"][chem.name][comp.volume_element.name] = {comp.name: comp.surfaceDepositionRate(chemical=chem)}
     return source_params
 
 

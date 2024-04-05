@@ -54,7 +54,7 @@
                                                     <th>Parcel</th>
                                                     <th>Volume Element</th>
                                                     <th>Compartment</th>
-                                                    <th>Emission</th>
+                                                    <th>Emission (g/day)</th>
                                                 </tr>
                                             </thead>
                                         </table>
@@ -89,29 +89,37 @@
                 let loadedData = $('#root').data('loadedParcels')
                 var chem_spec = {}
                 loadedData.scenario.forEach(p =>
-                    Object.keys(p.sources).forEach(ch =>
-                        Object.keys(p.sources[ch]).forEach(function(ve){
-                            Object.keys(p.sources[ch][ve]).forEach(function(co){
-                                chem_spec[ch]=co
+                    Object.keys(p.sources).forEach(ch => {
+                        chem_spec[ch] = []
+                        Object.keys(p.sources[ch]).forEach(function (ve) {
+                            Object.keys(p.sources[ch][ve]).forEach(function (co) {
+                                chem_spec[ch].push(co)
                             })
                         })
-                    )
+                    })
                 )
+
                 loadedData.scenario_head.scenario_chem.forEach((sc, i) => {
-                    window.TRIM.functions.addTabToFieldList(fieldset[0], sc)
+                    ["Vapor", "Particle"].forEach((st, ii) => {
+                        // let spec = chem_spec[sc][ii].indexOf("Vapor") > -1 ? "Gaseous" : "Particulate"
+                        let spec = st == "Vapor" ? "Gaseous" : "Particulate"
+                        window.TRIM.functions.addTabToFieldList(fieldset[0], sc + " (" +spec + ")")
 
-                    let spec = chem_spec[sc].indexOf("Vapor") > -1 ? "Gaseous" : "Particulate"
+                        let current_index = ($("#emissions-settings-gui").find("span.chemInfo")).length-1
 
-                    $("#emissions-settings-gui").find("span.chemInfo")[i+1].innerHTML = sc
-                    $("#emissions-settings-gui").find("span.stateInfo")[i+1].innerHTML = spec
-                    $(initialize_compartment_map(spec)).insertAfter($($("#emissions-settings-gui").find("table.compMap")[i+1]).find("thead"))
+                        $("#emissions-settings-gui").find("span.chemInfo")[current_index].innerHTML = sc
+                        $("#emissions-settings-gui").find("span.stateInfo")[current_index].innerHTML = spec
+                        $(initialize_compartment_map(spec)).insertAfter($($("#emissions-settings-gui").find("table.compMap")[current_index]).find("thead"))
 
-                    let dd_menu = $($("#emissions-settings-gui").find("table.compMap")[i+1]).prev("div.dropdown").find("div.dropdown-menu")
-                    populate_comp_dd(dd_menu);
-                    populate_values($($("#emissions-settings-gui").find("table.compMap")[i+1]))
+                        let dd_menu = $($("#emissions-settings-gui").find("table.compMap")[current_index]).prev("div.dropdown").find("div.dropdown-menu")
+                        populate_comp_dd(dd_menu);
+                        populate_values($($("#emissions-settings-gui").find("table.compMap")[current_index]))
+                        }
+                    )
                 })
 
                 window.TRIM.forms.updateSelect($('#chemical')[0],$('#root').data('loadedParcels').scenario_head.all_chem, true)
+                $('#chemicals-0-pill').click()
 
                 $('#chemical').on('change',function(e){
                     $('#add-chemicals-btn').removeAttr('disabled')
@@ -119,16 +127,25 @@
 
                 $('#add-chemicals-btn').on('click', function(e){
                     let chem = $('#chemical').find(":selected").val()
-                    let spec = $('#state').find(":selected").val()
-                    window.TRIM.functions.addTabToFieldList(fieldset[0], chem)
+                    // let spec = $('#state').find(":selected").val()
+                    // window.TRIM.functions.addTabToFieldList(fieldset[0], chem)
+                    // let i = Number($("#emissions-settings-gui").find("a.nav-link.p-2.active").attr("id").split("-")[1])
+                    let specs = ["Vapor", "Particle"]
+                    specs.forEach((st, ii) => {
+                        let spec = st == "Vapor" ? "Gaseous" : "Particulate"
+                        window.TRIM.functions.addTabToFieldList(fieldset[0], chem + " (" + spec + ")")
+                        let current_index = ($("#emissions-settings-gui").find("span.chemInfo")).length - 1
+                        $("#emissions-settings-gui").find("span.chemInfo")[current_index].innerHTML = chem
+                        $("#emissions-settings-gui").find("span.stateInfo")[current_index].innerHTML = spec
+                        $(initialize_compartment_map(spec)).insertAfter($($("#emissions-settings-gui").find("table.compMap")[current_index]).find("thead"))
+                        let dd_menu = $($("#emissions-settings-gui").find("table.compMap")[current_index]).prev("div.dropdown").find("div.dropdown-menu")
+                        populate_comp_dd(dd_menu);
+                        populate_values($($("#emissions-settings-gui").find("table.compMap")[current_index]))
+                    })
                     $("#chemicals-modal").find("button.close")[0].click()
-                    let i = Number($("#emissions-settings-gui").find("a.nav-link.p-2.active").attr("id").split("-")[1])
-                    $("#emissions-settings-gui").find("span.chemInfo")[i+1].innerHTML = chem
-                    $("#emissions-settings-gui").find("span.stateInfo")[i+1].innerHTML = spec
-                    $(initialize_compartment_map(spec)).insertAfter($($("#emissions-settings-gui").find("table.compMap")[i+1]).find("thead"))
                 })
 
-                $('tr.colps').on('click', function() {
+                $('tr.colps').not('tr.level2').on('click', function() {
                     toggle_expand_icon(this, null)
                     var findChildren = function(tr) {
                         var depth = tr.data('depth');
@@ -206,20 +223,30 @@
                 });
 
                 $('input.editableCell').blur(function () {
-                    ErrorValidation.isPositiveValue(this);
-                    let parcel_name = $(this).closest("tr.level2")
+                    let parcel_name = $($(this).closest("tr.level2").find("td")[0]).attr("data-pcl-name")
+                    let parcel_id = loadedData.scenario.filter(e => e.name == parcel_name)[0].id
+                    let compartment_name = $($(this).closest("tr.level2").find("td")[2]).attr("data-comp-name")
+                    let chem_name = $(this).closest("div.tab-pane").data("tab-name").split(" (")[0]
                     let parcel_info = [{
                         'type': 'data',
-                        'name': 'id',
-                        'value': "parcel_name"
+                        'name': 'field',
+                        'value': "emission"
                     },{
                         'type': 'data',
-                        'name': 'chemical',
-                        'value': "chemical_name"
+                        'name': 'id',
+                        'value': parcel_id
+                    },{
+                        'type': 'data',
+                        'name': 'chemical_name',
+                        'value': chem_name
+                    },{
+                        'type': 'data',
+                        'name': 'compartment_name',
+                        'value': compartment_name
                     },{
                         'type': 'input',
-                        'name': 'compartment_name',
-                        'value': $(this).val()
+                        'name': 'emission_value',
+                        'value': ''
                     }]
                     if (parcel_info) {
                         submit_emission_value(this, parcel_info);
@@ -227,19 +254,81 @@
                 })
 
                 function submit_emission_value(elem, parcel_info) {
+                    ErrorValidation.isPositiveValue(elem)
                     if (elementIsValid($(this).parent())){
                         let data = $(elem).val() == "" ? 0 : $(elem).val()
+                        parcel_info[4].value = data
                         let $label = $(elem).next("label.editableCell")
                         $label.siblings("input").hide()
                         $label.show().text(data)
 
                         parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                        // TRIM.api.updateParcel(parcel_info)
+                        console.log(parcel_info)
+                        TRIM.api.updateParcel({{ scenario.id }}, parcel_info)
                     } else {
                         return
                     }
                 }
 
+                let gui = $('#emissions-settings-gui');
+                let fileFields = gui.find('[type="file"]');
+
+                fileFields.change(function(e) {
+                    let me = $(this);
+                    let loadingRequest = 'load_' + this.id;
+                    let this_chem_prop =  me.closest("div.tab-pane").data("tab-name").split(" (")
+                    let this_chem = this_chem_prop[0]
+                    let this_spec = this_chem_prop[1].split(")")[0] == "Gaseous" ? "Vapor" : "Particle"
+                    let this_cmap = me.closest("div.tab-pane").find("table.compMap")
+                    LoadingScreen.show(loadingRequest);
+                    let field_data = this
+                    if (!Array.isArray(field_data)) {
+                        field_data = [field_data];
+                    }
+                    let selected_spacing = me.closest("div.tab-pane").find('select').find(':selected').val()
+                    scenario_data = {
+                        'type': 'input',
+                        'name': 'scenario_id',
+                        'value': {{ scenario.id }}
+                    }
+                    spacing_data = {
+                        'type': 'input',
+                        'name': 'spacing',
+                        'value': selected_spacing
+                    }
+                    chem_data = {
+                        'type': 'input',
+                        'name': 'chemical',
+                        'value': this_chem
+                    }
+                    spec_data = {
+                        'type': 'input',
+                        'name': 'species',
+                        'value': this_spec
+                    }
+                    field_data.push(scenario_data)
+                    field_data.push(spacing_data)
+                    field_data.push(chem_data)
+                    field_data.push(spec_data)
+                    me.removeAttr('data-filedata');
+                    TRIM.api.parseAERMODFile(field_data).on('load', function() {
+                        try {
+                            let src_data = JSON.parse(this.responseText);
+                            let updated_data = loadedData
+                            loadedData.scenario.forEach(function(p,i){
+                                let dryval = src_data.aermod_result[p.name]['DrySource']
+                                let wetval = src_data.aermod_result[p.name]['WetSource']
+                                updated_data.scenario[i].sources[this_chem]["Dry"+this_spec+"Source"]["Dry"+this_spec+"Source"]=dryval
+                                updated_data.scenario[i].sources[this_chem]["Wet"+this_spec+"Source"]["Wet"+this_spec+"Source"]=wetval
+                            })
+                            $('#root').data('loadedParcels', updated_data)
+                        }
+                        finally {
+                            populate_values(this_cmap)
+                            LoadingScreen.hide(loadingRequest);
+                        }
+                    });
+                });
             })
 
             function initialize_compartment_map(spec) {
@@ -264,7 +353,7 @@
             }
 
             function populate_values(cmap) {
-                let this_chem = $(cmap).closest("div.tab-pane").data("tab-name")
+                let this_chem = $(cmap).closest("div.tab-pane").data("tab-name").split(" (")[0]
                 let loadedData = $('#root').data('loadedParcels')
                 loadedData.scenario.forEach(function(p,i){
                     Object.keys(p.sources).forEach(function(chem,j) {

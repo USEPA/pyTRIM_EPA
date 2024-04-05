@@ -108,6 +108,18 @@ window.TRIM = (function(trim) {
         });
     };
 
+    api.parseAERMODFile = function(fields) {
+        var url = api.getUrl('file_api.parse_aermod');
+
+        var data = makeFormData(fields);
+
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: data
+        });
+    };
+
     api.getSoilData = function(tillage) {
         var url = api.getUrl('external_api.get_soil_data').replace('/both', '/' + tillage);
 

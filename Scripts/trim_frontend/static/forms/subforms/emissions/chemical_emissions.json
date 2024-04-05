@@ -11,23 +11,10 @@
             "location": "modal"
         },
         {
-            "id": "state",
-            "label": "Chemical Type/State",
-            "data_type": "string",
-            "widget": "select",
-            "location": "modal",
-            "choices": [
-                "Gaseous",
-                "Particulate"
-            ],
-            "required": true,
-            "help": "Select the state of the chemical being emitted"
-        },
-        {
             "id": "have_AERMOD_file",
             "label": "Use Emission values from input file",
             "data_type": "boolean",
-            "default": true,
+            "default": false,
             "help": "Check this box to use Emission values from input file."
         },
         {

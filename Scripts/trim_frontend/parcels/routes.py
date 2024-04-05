@@ -1,8 +1,7 @@
 from flask import Blueprint, request, render_template
 from flask_security import login_required
 from flask_api import ApiResult,  ApiException
-from trim_db import ScenarioService, ParcelService, \
-    CompartmentService, VolumeElementService, ParameterService
+from trim_db.services import *
 from trim_frontend import api
 from .defaults import *
 from .forms import *
@@ -394,6 +393,33 @@ def update_parcel(id, scenario_id):
                                                        unit=this_comp.parameters.get(prop)[0].default_unit)
                     else:
                         this_comp.parameters.get(prop).value = float(parcels_data[field_name])
+        if field_name == "emission":
+            src_comp = [c for c in p.compartments if c.name == parcels_data["compartment_name"]][0]
+            src_par = [par for parn, par in src_comp.parameters.items() if parn == "surfaceDepositionRate"]
+            chem = ChemicalService.get(name=parcels_data["chemical_name"])
+            if len(src_par) > 0:
+                src_par = src_par[0]
+                eq = src_par.formula.equation
+                # We have the chemical in the formula
+                if f'chemical.id == {str(chem.id)}' in eq:
+                    formula_parts = eq.split(f"if chemical.id == {chem.id}")
+                    formula_part = formula_parts[0]
+                    if "else" in formula_part:
+                        arr = formula_part.split("else")[:-1]
+                        formula_part = "else".join(arr + [f' {parcels_data["emission_value"]} '])
+                    else:
+                        formula_part = f'{parcels_data["emission_value"]} '
+                    formula_parts[0] = formula_part
+                    new_formula = f"if chemical.id == {chem.id}".join(formula_parts)
+                    print(new_formula)
+                # We do not have the chemical in the formula. We need to add it...
+                else:
+                    eq_arr = eq.split("else")
+                    eq_arr.insert(-2, f' {parcels_data["emission_value"]} if chemical.id == {chem.id} ')
+                    new_formula = "else".join(eq_arr)
+                    print(new_formula)
+                FormulaService.get(src_par.formula.id).equation = new_formula
+                FormulaService.commit()
 
         # Update record
         ParcelService.update(p)
@@ -541,8 +567,6 @@ def delete_parcel_contents(del_parcel):
     # Delete Volume Elements
     for ve in del_parcel.volume_elements:
         VolumeElementService.delete(ve, False)
-
-
 
 
 def create_base_land_compartments(parcels_data, p, land_use):
