@@ -287,7 +287,7 @@ def parameterize(cls, default_scenario=None):
 
     def get_scenario(obj, scenario=None):
         if scenario is not None:
-            # CacheManager.clear_cache(f'entity_param::{cls_name}')
+            CacheManager.clear_cache(f'entity_param::{cls_name}')
             setattr(obj, '__current_scenario', scenario)
         if getattr(obj, '__current_scenario', None) is None:
             s = None
@@ -716,7 +716,6 @@ def parameterize(cls, default_scenario=None):
     def get_parameter(
         entity, name, strict_units=False, default=NoneParameter.instance()
     ):
-        # print(f'ENTITY IS {entity} name is {name} class_name {cls_name}')
         if name.startswith('_') or name in ['parameters']:
             raise AttributeError()
 

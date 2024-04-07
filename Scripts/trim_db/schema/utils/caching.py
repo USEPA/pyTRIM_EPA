@@ -2,12 +2,10 @@ from functools import wraps, partial
 
 __all__ = ['CacheManager']
 
-import sqlalchemy.orm.exc
-
 
 class CacheManager:
     _CACHERS = {}
-    DISABLED = False  # caching generates multiple problems such as detached db session and old values showing up in the UI rather than the updated value
+    DISABLED = False  # Was False but caching generated multiple problems such as detached db session problem and old values showing up in the UI rather than the updated value
 
     @classmethod
     def cache_key(cls, *args, **kwargs):
@@ -24,10 +22,6 @@ class CacheManager:
         def wrap(self, f):
             @wraps(f)
             def cached(*args, **kwargs):
-                print_this = False
-                # if 'AirTemperature' in args:
-                #     print_this = True
-                #     print(f'\n--- args {args} --- kwargs {kwargs} ---\n f is {f}')
                 if CacheManager.DISABLED:
                     return f(*args, **kwargs)
 
@@ -39,10 +33,7 @@ class CacheManager:
                     #     f' and {k}: {self[k]}'
                     # )
                     ans = self[k]
-                    if print_this:
-                        print(f'Existing Cache "{k}" -> {ans}\n')
                     if isinstance(ans, Exception):
-                        # print(f"key {k} exists but this exception occurred: {ans}")
                         raise ans
                     return ans
 
@@ -57,29 +48,19 @@ class CacheManager:
                     #     f' and {k}'
                     # )
                     self[k] = ans
-                    if print_this:
-                        print(f'New Cache "{k}" -> {ans}\n')
-                # We need to clear cache if any object is stale and in detached state.
-                # This is important when unhandled exceptions occur and uncleared stale
-                # objects in cash prevent scenario load.
-                if isinstance(ans, sqlalchemy.orm.exc.DetachedInstanceError):
-                    for ck in CacheManager._CACHERS:
-                        CacheManager.clear_cache(ck)
-                    return f(*args, **kwargs)
+
                 if isinstance(ans, Exception):
-                    # print(f"key {k} created but this exception occurred: {ans}")
                     raise ans
                 return ans
             return cached
 
     @classmethod
     def subcache(cls, key):
-        # print(f'Making sub-cache with {key} -> {cls._CACHERS.get(key)}"')
+        # print(f'Making sub-cache with "{key}"')
         return cls._CACHERS.setdefault(key, cls.Cacher())
 
     @classmethod
     def clear_cache(cls, key):
-        # print(f"CHACHERS ARE {cls._CACHERS}")
         cls._CACHERS.get(key, {}).clear()
 
     @classmethod
@@ -104,6 +85,5 @@ class CacheManager:
         def decorated(base_key, f):
             if base_key is None:
                 base_key = str(f)
-            # print(f"BASE KEY IS {base_key}")
             return CacheManager.subcache(base_key).wrap(f)
         return partial(decorated, base_key)

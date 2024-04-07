@@ -1,15 +1,11 @@
 import sqlalchemy as sa
-from datetime import datetime
-
-import sqlalchemy.sql.sqltypes
-
 from ..utils.base import Model
 from ..utils.mixins import TrackUpdatesMixin
 from ..utils.serialize import register_serializer
 
 
 __all__ = [
-    'Scenario', 'ScenarioLoadRunProc'
+    'Scenario'
 ]
 
 
@@ -94,39 +90,14 @@ class Scenario(Model, TrackUpdatesMixin):
         'User', backref=sa.orm.backref('created_scenarios', lazy='dynamic')
     )
 
-    # @property
-    # def erosion_rate_data_source(self):
-    #     opt = 1
-    #     try:
-    #         opt = self.erosionRateCalcSource
-    #     except Exception as ex:
-    #         print(f"Erosion rate calculation option not set??\n{ex}")
-    #     finally:
-    #         return opt
-
     @property
-    def sim_begin_end_time(self):
-        # get begin end time param names
-        sim_beg = '2001-01-01'
-        sim_end = '2010-12-31'
-        try:
-            sim_beg = datetime.utcfromtimestamp(int(self.simulationBeginDateTime)).strftime('%Y-%m-%d') or sim_beg
-            sim_end = datetime.utcfromtimestamp(int(self.simulationEndDateTime)).strftime('%Y-%m-%d') or sim_end
-        except Exception as ex:
-            # print(f'Problem getting simulation begin and/or end times!\n{ex}')
-            sim_beg = '2001-01-01'
-            sim_end = '2010-12-31'
-
-        return sim_beg, sim_end
-
-    @property
-    def has_process_hist(self):
-        try:
-            if len([*self.proc_status]) == 0:
-                return False
-        except Exception:
-            return False
-        return True
+    def erosion_rate_data_source(self):
+        for cp in self.custom_params:
+            if cp.definition.variable_name == "erosionRateCalcSource":
+                return cp.value
+            else:
+                continue
+        return 1
 
     def __repr__(self):
         return (
@@ -136,95 +107,12 @@ class Scenario(Model, TrackUpdatesMixin):
         )
 
 
-class ScenarioLoadRunProc(Model):
-    load_status = sa.Column(sa.String(120))
-    run_status = sa.Column(sa.String(120))
-    scenario_id = sa.Column(
-        sa.Integer(), sa.ForeignKey('scenario.id'), nullable=False
-    )
-    scenario = sa.orm.relationship(
-        'Scenario', backref=sa.orm.backref('proc_status', lazy='dynamic')
-    )
-    run_datetime = sa.Column(sa.sql.sqltypes.DATETIME)
-    result_file_nt = sa.Column(sa.String(255))
-    result_file_conc = sa.Column(sa.String(255))
-    result_nt = sa.Column(sa.sql.sqltypes.TEXT)
-    result_conc = sa.Column(sa.sql.sqltypes.TEXT)
-
-    @property
-    def load_percent(self):
-        if self.load_status.startswith("loaded"):
-            perc = int(self.load_status.split(" ")[1])
-        else:
-            perc = -1
-        return perc
-
-    @property
-    def is_load_error(self):
-        if self.load_percent == -1:
-            return True
-        return False
-
-    @property
-    def run_step(self):
-        if self.run_status.startswith("run"):
-            step = self.run_status.split(" ")[1]
-            perc = self.run_status.split(" ")[2]
-            return step, perc
-        return "err"
-
-    @property
-    def is_run_error(self):
-        if self.run_step == "err":
-            return True
-        return False
-
-
 @register_serializer(Scenario)
 def serialize_scenario(scen: Scenario):
     s = {
         'id': scen.id,
         'name': scen.name,
         'description': scen.description,
-        'simulation_start_date': scen.sim_begin_end_time[0],
-        'simulation_end_date': scen.sim_begin_end_time[1],
-        'erosionRateSource': scen.erosionRateCalcSource or 1,
-        'scenario_chem': [c.name for c in scen.chemicals],
-        'all_chem': [c.name for c in ChemicalService.get_all()],
-        'meteo': {
-            'ambient_air_temp': scen.AirTemperature.to("K").magnitude,
-            'horizontal_wind_speed': scen.horizontalWindSpeed,
-            'wind_dir': scen.windDirection,
-            # TODO scen?.mixingHeight??, # it is in Input_files/1Parameters.csv
-            # wired to top of Air comp/VE in Foundries_SS (4) Properties.txt,
-            'mixing_height': scen.mixingHeight if scen.mixingHeight else
-            [a.height.magnitude for a in scen.compartments if a.media.isa("Air") and "Upper" not in a.standard_name][0],
-            'daytime_indicator': scen.isDay_Dynamic,
-            'precipitation': scen.Rain,
-            'cumulative_precip': scen.cumulativeRain},
-        'wet_dep_interception': {
-            'wet_dep_interception_frac_coniferous_leaf': get_wet_interception_params(1, "Coniferous_Leaf"),
-            'calc_wet_dep_interception_frac_coniferous_leaf': get_wet_interception_params(2, "Coniferous_Leaf"),
-            'wet_dep_interception_frac_coniferous_leaf_calculated': get_wet_interception_params(3, "Coniferous_Leaf"),
-            'wet_dep_interception_frac_deciduous_leaf': get_wet_interception_params(1, "Deciduous_Leaf"),
-            'calc_wet_dep_interception_frac_deciduous_leaf': get_wet_interception_params(2, "Deciduous_Leaf"),
-            'wet_dep_interception_frac_deciduous_leaf_calculated': get_wet_interception_params(3, "Deciduous_Leaf"),
-            'wet_dep_interception_frac_grass_leaf': get_wet_interception_params(1, "Grass_Leaf"),
-            'calc_wet_dep_interception_frac_grass_leaf': get_wet_interception_params(2, "Grass_Leaf"),
-            'wet_dep_interception_frac_grass_leaf_calculated': get_wet_interception_params(3, "Grass_Leaf"),
-            'wet_dep_interception_frac_agriculture_leaf': get_wet_interception_params(1, "Agriculture_Leaf"),
-            'calc_wet_dep_interception_frac_agriculture_leaf': get_wet_interception_params(2, "Agriculture_Leaf"),
-            'wet_dep_interception_frac_agriculture_leaf_calculated': get_wet_interception_params(3, "Agriculture_Leaf")
-        },
-        'seasonal_dynamics': {
-            'litterfall_coniferous': get_seasonal_dynamics_params('lf', 'Coniferous_Leaf'),
-            'allow_exchange_coniferous': get_seasonal_dynamics_params('ae', 'Coniferous_Leaf'),
-            'litterfall_deciduous': get_seasonal_dynamics_params('lf', 'Deciduous_Leaf'),
-            'allow_exchange_deciduous': get_seasonal_dynamics_params('ae', 'Deciduous_Leaf'),
-            'litterfall_grass': get_seasonal_dynamics_params('lf', 'Grass_Leaf'),
-            'allow_exchange_grass': get_seasonal_dynamics_params('ae', 'Grass_Leaf'),
-            'litterfall_agriculture': get_seasonal_dynamics_params('lf', 'Agriculture_Leaf'),
-            'allow_exchange_agriculture': get_seasonal_dynamics_params('ae', 'Agriculture_Leaf')
-        }
+        'erosionRateSource': scen.erosion_rate_data_source
     }
     return s

@@ -1,13 +1,11 @@
 import os
 import pandas as pd
 import numpy as np
-import json
 from scipy.integrate import odeint
 from trim_db.schema import *
 from trim_db.schema.parameters.equations import evaluated_args, \
     evaluator, NoEval
 from trim_db.services import *
-from datetime import datetime
 
 __all__ = ['run_full_model']
 
@@ -25,8 +23,8 @@ RESTRICT_COMPARTMENTS = [
     if x.strip()
 ]
 
-sim_begin_date = "01/01/2020"
-sim_end_date = "01/01/2025"
+sim_begin_date = "01/01/1990"
+sim_end_date = "01/01/2040"
 
 def is_compartment_of_interest(comp):
     if not RESTRICT_COMPARTMENTS:
@@ -38,6 +36,15 @@ def is_compartment_of_interest(comp):
 
 
 def make_transition_matrix(scenario):
+    # a=ScenarioService.get(scenario.id)
+    # b=ParcelService.get(id=1)
+    # c=ParameterService.get(id=1)
+    # d=CompartmentService.get(id=1)
+    # e=TransportProcessService.get(id=1)
+    # f=ChemicalService.get(id=1)
+    # gg=VolumeElementService.get(id=1)
+    # hg=FormulaService.get(id=1)
+
     def full_stack():
         import traceback, sys
         exc = sys.exc_info()[0]
@@ -54,7 +61,6 @@ def make_transition_matrix(scenario):
     chem_list = list(sorted(
         scenario.chemicals, key=lambda x: x.name
     ))
-
     comp_list = list(sorted(
         scenario.compartments, key=lambda x: x.standard_name
     ))
@@ -79,13 +85,8 @@ def make_transition_matrix(scenario):
         c: i for i, c in enumerate(chem_list)
     }
 
-    i_perc = int(100/n_chem)
-
     try:
         for chem_idx, chem in enumerate(chem_list):
-            this_perc = i_perc * chem_idx
-            [v for v in scenario.proc_status][0].run_status = f'run tm {this_perc}'
-            ScenarioService.commit()
             # if chem.name != 'Elemental Mercury':
             #     continue
             print('\n' + '==' * 28)
@@ -93,10 +94,6 @@ def make_transition_matrix(scenario):
             print('==' * 28)
 
             for x, sender in enumerate(comp_list):
-                comp_perc = int(this_perc + ((i_perc * x) / n_comp))
-                if (x % 50) == 0:
-                    [v for v in scenario.proc_status][0].run_status = f'run tm {comp_perc}'
-                    ScenarioService.commit()
                 tm_x = int(chem_idx * n_comp + x)
 
                 index_names[tm_x] = chem.name + '_' + sender.standard_name
@@ -317,8 +314,8 @@ def ode_sim(tm, sm, df_sm, scn):
 
     ndim = sm.shape[0]  # number of compartments
 
-    simulation_start_date = scn.sim_begin_end_time[0]
-    simulation_end_date = scn.sim_begin_end_time[1]
+    simulation_start_date = sim_begin_date  # scn.simulationBeginDateTime
+    simulation_end_date = sim_end_date  # scn.simulationEndDateTime
     time_range_h = pd.date_range(simulation_start_date, simulation_end_date,
                                  freq='H')  # pandas date times series in hours over the simulation period
     time_range_d = pd.date_range(simulation_start_date, simulation_end_date,
@@ -386,9 +383,9 @@ def gen_avg(df_nt, df_conc, inputs):
     # get simulation start and end dates
     start_date, end_date = inputs['simulation_start_date'], inputs['simulation_end_date']
     # convert the start_date and end_date to datetime objects
-    start_date = pd.to_datetime(start_date, format='%Y-%m-%d')
+    start_date = pd.to_datetime(start_date, format='%d/%m/%Y')
     # convert the start_date and end_date to datetime objects
-    end_date = pd.to_datetime(end_date, format='%Y-%m-%d')
+    end_date = pd.to_datetime(end_date, format='%d/%m/%Y')
     # convert the first col (time in d) to datetime objects
     df_nt.iloc[:, 0] = pd.to_datetime(df_nt.iloc[:, 0], origin=start_date, unit='d')
     # convert the first col (time in d) to datetime objects
@@ -469,47 +466,31 @@ def check_alg_values(scenario, chemical, alg, sender, receiver):
 
 def run_full_model(scn):
     # get transition matrix and source matrix
-    # if none exist create new one
-    if scn.has_process_hist:
-        [v for v in scn.proc_status][0].run_status = 'run tm 0'
-        [v for v in scn.proc_status][0].run_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    else:
-        try:
-            new_proc = ScenarioLoadRunProc(scenario=scn, load_status='load 100', run_status='run null null',
-                                           run_datetime=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-            [scn.proc_status][0].add(new_proc)
-        except Exception as e:
-            print(e)
+    scn.description = 'tm'
     ScenarioService.commit()
     scn = ScenarioService.get(id=scn.id)
-    try:
-        (tm, df_tm, sm, df_sm, df_vmu) = make_transition_matrix(scn)
-    except Exception:
-        [v for v in scn.proc_status][0].run_status = 'err tm 0'
+    (tm, df_tm, sm, df_sm, df_vmu) = make_transition_matrix(scn)
 
     # get result
-    [v for v in scn.proc_status][0].run_status = 'run ode 0'
+    scn.description = 'ode'
     ScenarioService.commit()
     scn = ScenarioService.get(id=scn.id)
-    try:
-        (nt, df_nt) = ode_sim(tm, sm, df_sm, scn)
-        [v for v in scn.proc_status][0].run_status = 'run ode 50'
-        ScenarioService.commit()
-        # make concentration output
-        df_conc = compute_concentration(df_nt, df_vmu)
-    except Exception:
-        [v for v in scn.proc_status][0].run_status = 'err ode 0'
+    (nt, df_nt) = ode_sim(tm, sm, df_sm, scn)
+
+    # make concentration output
+    df_conc = compute_concentration(df_nt, df_vmu)
+
+    print(df_conc)
 
     # compute annual average mass and conc time series
     inputs = {
-        'simulation_start_date': scn.sim_begin_end_time[0],  # scn.simulationBeginDate,
-        'simulation_end_date': scn.sim_begin_end_time[1]  # scn.simulationEndDate
+        'simulation_start_date': sim_begin_date,  # scn.simulationBeginDate,
+        'simulation_end_date': sim_end_date  # scn.simulationEndDate
     }
+    print(inputs)
     dfn_avg, dfc_avg = gen_avg(df_nt, df_conc, inputs)
     json_n_avg = dfn_avg.to_json(orient='columns')[1:-1].replace('},{', '} {')
     json_c_avg = dfc_avg.to_json(orient='columns')[1:-1].replace('},{', '} {')
-
-    outfile_nt, outfile_conc = "", ""
 
     # Output components as csv
     # df_tm.to_csv("Transfer_Matrix_test.csv")
@@ -517,63 +498,26 @@ def run_full_model(scn):
     # df_nt.to_csv("Result_Matrix_test.csv")
     # df_conc.to_csv("Concentration_Result_Matrix_test.csv")
 
-    [v for v in scn.proc_status][0].run_status = 'run csv 0'
+    scn.description = 'csv'
     ScenarioService.commit()
     scn = ScenarioService.get(id=scn.id)
-    try:
-        outfile_nt, outfile_conc = safe_save_output(dfn_avg, dfc_avg, scn, filetype='excel')
-        # safe_save_output(df_nt, df_conc, scn, filetype='excel')
-        [v for v in scn.proc_status][0].result_file_nt = outfile_nt
-        [v for v in scn.proc_status][0].result_file_conc = outfile_conc
-        [v for v in scn.proc_status][0].run_status = 'run fin 100'
-        [v for v in scn.proc_status][0].result_nt = json.dumps(json_n_avg, default=str)
-        [v for v in scn.proc_status][0].result_conc = json.dumps(json_c_avg, default=str)
-    except Exception:
-        [v for v in scn.proc_status][0].run_status = 'err csv 0'
+    safe_save_output(dfn_avg, dfc_avg, scn.name, scn.creator_id)
+    # safe_save_output(df_nt, df_conc, scn.name, scn.creator_id)
+
+    scn.description = 'fin'
     ScenarioService.commit()
 
-    return json_n_avg, json_c_avg, outfile_nt, outfile_conc
+    return json_n_avg, json_c_avg
 
 
-def safe_save_output(df_nt, df_conc, scn, filetype='csv'):
+def safe_save_output(df_nt, df_conc, scn_name, usr_id):
     try:
-        ts = datetime.now().strftime('%Y-%m-%d--%H_%M_%S')
-        sim_chems = [c.name for c in scn.chemicals]
         if not os.path.isdir('./trim_frontend/static/.output'):
             os.makedirs('./trim_frontend/static/.output')
-        if filetype == 'csv':
-            fname_nt = f'./trim_frontend/static/.output/nt_new_{scn.name}_{scn.creator_id}_{ts}.csv'
-            fname_conc = f'./trim_frontend/static/.output/conc_new_{scn.name}_{scn.creator_id}_{ts}.csv'
-            df_nt.to_csv(fname_nt)
-            df_conc.to_csv(fname_conc)
-        else:
-            path_output_nt = './trim_frontend/static/.output/'
-            fname_nt = f'nt_new_{scn.name}_{scn.creator_id}_{ts}.xlsx'
-            path_output_conc = './trim_frontend/static/.output/'
-            fname_conc = f'conc_new_{scn.name}_{scn.creator_id}_{ts}.xlsx'
-            split_write_files(df_nt, sim_chems, path_output_nt, fname_nt)
-            split_write_files(df_conc, sim_chems, path_output_conc, fname_conc)
-    except Exception as e:
-        print(f'{20 * ">"} Output write exception writing {filetype} file:\n{e}')
-        fname_nt = "No File. There was an error while writing output..."
-        fname_conc = "No File. There was an error while writing output..."
-    return fname_nt, fname_conc
-
-
-def split_write_files(df, sim_chems, path_output, file_name):
-    # Helper function to split and write time series files into excel workbook with multiple worksheets
-    of_pn = os.path.join(path_output, file_name)
-    writer = pd.ExcelWriter(of_pn, engine='xlsxwriter')
-    for chem in sim_chems:  # loop over sim chemicals
-        # prefix = 'chem_'+chem.replace(' ', '_') + '_'  # construct prefix
-        prefix = chem + '_'  # construct prefix
-        dft = df[[df.columns[0]]+[x for x in list(df.columns) if prefix in x]]  # keep time/year and cols with prefix
-        dft.columns = [x.replace(prefix, '') for x in list(dft.columns)]  # strip prefix
-        # Write each dataframe to a different worksheet.
-        dft.to_excel(writer, sheet_name=chem, index=False)
-    writer.close()
-    return()
-
+        df_nt.to_csv(f'./trim_frontend/static/.output/nt_new_{scn_name}_{usr_id}.csv')
+        df_conc.to_csv(f'./trim_frontend/static/.output/conc_new_{scn_name}_{usr_id}.csv')
+    except Exception:
+        pass
 
 
 def print_args(equation, evaluator, new_names={}, depth=0):

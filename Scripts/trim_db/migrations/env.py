@@ -52,23 +52,15 @@ def run_migrations_offline():
     script output.
 
     """
-    if 'RDS_DB_NAME' in os.environ:
-        db_user = os.environ['RDS_USERNAME']
-        db_pass = os.environ['RDS_PASSWORD']
-        db_host = os.environ['RDS_HOSTNAME']
-        db_port = os.environ['RDS_PORT']
-        db_name = os.environ['RDS_DB_NAME']
-    else:
-        import urllib.parse
-        db_user = "root"
-        db_pass = urllib.parse.quote_plus(os.getenv('MYSQLPASSWORD'))
-        db_host = "localhost"
-        db_port = "3306"
-        db_name = "pytrim"
+    import urllib.parse
+    db_user = "root"
+    db_pass = urllib.parse.quote_plus(os.getenv('MYSQLPASSWORD'))
+    db_host = "localhost"
+    db_port = "3306"
 
     url = config.get_main_option("sqlalchemy.url")
     # add values to those {} in connection string in alembic.ini
-    url = url.format(db_user, db_pass, db_host, db_port, db_name)
+    url = url.format(db_user, db_pass, db_host, db_port)
     context.configure(
         url=url, target_metadata=target_metadata, literal_binds=True
     )
