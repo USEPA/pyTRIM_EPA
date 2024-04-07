@@ -1,5 +1,6 @@
 import json
 import time
+from datetime import datetime
 
 import pandas as pd
 from flask import Blueprint, request, render_template, redirect, url_for
@@ -7,7 +8,7 @@ from flask_security import login_required, current_user
 from flask_api import ApiResult
 from datetime import datetime
 from trim_db import ScenarioService, ParcelService, \
-    CompartmentService, VolumeElementService, ParameterService, ChemicalService, FormulaService
+    CompartmentService, VolumeElementService, ParameterService, ChemicalService, FormulaService, ScenarioLoadRunProc
 from trim_frontend import api
 from trim_frontend.parcels.routes import delete_parcel_contents
 from .forms import *
@@ -63,7 +64,7 @@ param_map = {
 }
 
 
-@scenario.route('/scenario')
+@scenario.route('/scenario', methods=['GET'])
 @login_required
 def view_scenarios():
     scenarios = current_user.active_scenarios
@@ -76,7 +77,7 @@ def view_scenarios():
     )
 
 
-@scenario.route('/scenario/<int:id>')
+@scenario.route('/scenario/<int:id>', methods=['GET'])
 @login_required
 def view_scenario(id):
     s = ScenarioService.get(id=id)
@@ -105,7 +106,7 @@ def create_scenario():
     return redirect(url_for('scenario.edit_scenario', id=s.id))
 
 
-@scenario.route('/scenario/<int:id>/edit')
+@scenario.route('/scenario/<int:id>/edit', methods=['GET'])
 @login_required
 def edit_scenario(id):
     s = ScenarioService.get(id)
@@ -117,7 +118,7 @@ scenario_api = Blueprint('scenario_api', __name__)
 api.use_api_errors(scenario_api)
 
 
-@scenario_api.route('/api/scenario/<int:id>')
+@scenario_api.route('/api/scenario/<int:id>', methods=['GET'])
 @login_required
 def get_scenario(id):
     s = ScenarioService.get(id)
@@ -260,6 +261,20 @@ def update_scenario():
                 ret_val = meteo_wgt_avg_value_from_timeseries(param_data, ret_type)
                 if ret_type != "None":
                     update_custom_param(s, comp_list[0], param_name, ret_val[ret_type_name])
+        elif field_name == "startDate" or field_name == "endDate":
+            date_parts = scenario_data[field_name].split("-")
+            date_obj = datetime(int(date_parts[0]), int(date_parts[1]), int(date_parts[2]))
+            ts_date = time.mktime(date_obj.timetuple())
+            par_name = "simulationBeginDateTime" if field_name == "startDate" else "simulationEndDateTime"
+            par_list = {par_k: par for par_k, par in s.parameters.items() if par_k == par_name}
+            this_param = par_list[par_name]
+            if this_param.__tablename__ != "custom_parameter":
+                ParameterService.create(definition_id=this_param.id, scenario_id=s.id,
+                                        requirements=f"(self.id == {s.id})", value=ts_date)
+            else:
+                this_param.value = ts_date
+                ParameterService.update(this_param)
+            ParameterService.commit()
 
     except Exception as e:
         logger.error(traceback.format_exc())
@@ -421,7 +436,7 @@ def delete_scenario():
 
     return redirect(request.referrer)
 
-@scenario_api.route('/api/scenario/run/', methods=['POST'])
+@scenario_api.route('/api/scenario/run/', methods=['POST', 'GET'])
 @login_required
 def run_result_scenario():
     exec_data = request.form.to_dict()
@@ -432,20 +447,56 @@ def run_result_scenario():
 
     try:
         print("Starting Model Run...")
-        json_n_avg, json_c_avg = run_full_model(s)
+        json_n_avg, json_c_avg, output_file_n, output_file_c = run_full_model(s)
 
-        data_resp = {'mass': json_n_avg, 'conc': json_c_avg}
+        data_resp = {"mass": json_n_avg, "conc": json_c_avg, "outputMass": output_file_n, "outputConc": output_file_c}
     except Exception as e:
         print(e)
+        data_resp = {"error": e}
 
     return ApiResult(data_resp)
 
+
+@scenario_api.route('/api/scenario/getresults/', methods=['POST'])
+@login_required
+def get_result_scenario():
+    logger = make_logger('scenario_get_results_process')
+    exec_data = request.form.to_dict()
+    if not exec_data.get('scenario_id'):
+        raise AssertionError("Scenario ID cannot be blank.")
+    scenario_id = int(exec_data['scenario_id'])
+    s = ScenarioService.get(scenario_id)
+
+    try:
+        logger.info(f'Getting Model Run Results for scenario {s.name}...')
+        fin_stat = [v for v in s.proc_status][0].run_status
+        run_date = [v for v in s.proc_status][0].run_datetime
+        output_file_n = [v for v in s.proc_status][0].result_file_nt
+        output_file_c = [v for v in s.proc_status][0].result_file_conc
+        json_n_avg = [v for v in s.proc_status][0].result_nt
+        json_c_avg = [v for v in s.proc_status][0].result_conc
+
+        result_resp = json.loads(json.dumps({"mass": json.loads(json_n_avg), "conc": json.loads(json_c_avg), "final_status": fin_stat, "run_date": run_date, "outputMass": output_file_n, "outputConc": output_file_c}, indent=4, sort_keys=True, default=str))
+    except Exception as e:
+        logger.info(f"Error when attempting to get results: {e}")
+        result_resp = {"error": e}
+    try:
+        resp = ApiResult(result_resp)
+    except Exception as e:
+        resp = ""
+        logger.error(f'Api result conversion error: {e}')
+    return resp
 
 @scenario_api.route('/api/scenario/poll/<int:id>', methods=['GET'])
 @login_required
 def poll_model_run_scenario(id):
     s = ScenarioService.get(id)
-    return ApiResult({'status': s.description})
+    if [v for v in s.proc_status][0].is_run_error:
+        run_status = "err"
+        run_percent = "err"
+    else:
+        run_status, run_percent = [v for v in s.proc_status][0].run_step
+    return ApiResult({'status': run_status, 'percent': run_percent})
 
 
 @scenario_api.route('/api/scenario/poll/', methods=['POST'])
@@ -456,6 +507,10 @@ def reset_poll_model_run_scenario():
         raise AssertionError("Scenario ID cannot be blank.")
     scenario_id = int(scenario_data['scenario_id'])
     s = ScenarioService.get(scenario_id)
-    s.description = ""
+    if s.has_process_hist:
+        [v for v in s.proc_status][0].run_status = 'run null null'
+    else:
+        new_proc = ScenarioLoadRunProc(scenario=s, load_status='load 100', run_status='run null null')
+        [s.proc_status][0].add(new_proc)
     ScenarioService.commit()
     return "success"

@@ -1,8 +1,7 @@
 from flask import Blueprint, request, render_template
 from flask_security import login_required
 from flask_api import ApiResult,  ApiException
-from trim_db import ScenarioService, ParcelService, \
-    CompartmentService, VolumeElementService, ParameterService
+from trim_db.services import *
 from trim_frontend import api
 from .defaults import *
 from .forms import *
@@ -394,6 +393,33 @@ def update_parcel(id, scenario_id):
                                                        unit=this_comp.parameters.get(prop)[0].default_unit)
                     else:
                         this_comp.parameters.get(prop).value = float(parcels_data[field_name])
+        if field_name == "emission":
+            src_comp = [c for c in p.compartments if c.name == parcels_data["compartment_name"]][0]
+            src_par = [par for parn, par in src_comp.parameters.items() if parn == "surfaceDepositionRate"]
+            chem = ChemicalService.get(name=parcels_data["chemical_name"])
+            if len(src_par) > 0:
+                src_par = src_par[0]
+                eq = src_par.formula.equation
+                # We have the chemical in the formula
+                if f'chemical.id == {str(chem.id)}' in eq:
+                    formula_parts = eq.split(f"if chemical.id == {chem.id}")
+                    formula_part = formula_parts[0]
+                    if "else" in formula_part:
+                        arr = formula_part.split("else")[:-1]
+                        formula_part = "else".join(arr + [f' {parcels_data["emission_value"]} '])
+                    else:
+                        formula_part = f'{parcels_data["emission_value"]} '
+                    formula_parts[0] = formula_part
+                    new_formula = f"if chemical.id == {chem.id}".join(formula_parts)
+                    print(new_formula)
+                # We do not have the chemical in the formula. We need to add it...
+                else:
+                    eq_arr = eq.split("else")
+                    eq_arr.insert(-2, f' {parcels_data["emission_value"]} if chemical.id == {chem.id} ')
+                    new_formula = "else".join(eq_arr)
+                    print(new_formula)
+                FormulaService.get(src_par.formula.id).equation = new_formula
+                FormulaService.commit()
 
         # Update record
         ParcelService.update(p)
@@ -464,6 +490,7 @@ def initialize_parcel_contents(new_parcel, vol_elem_defaults=None):
         for c in ve[1]["Compartments"].items():
             # Create standard compartments linking them to default volume elements and media for each compartment
             media_id = [m.id for m in CompartmentService.media.get_all() if m.name == c[1]["media_name"]][0]
+
             if new_parcel.get_compartment(c[1]["name"]):
                 nc = new_parcel.get_compartment(c[1]["name"])
             else:
@@ -504,18 +531,39 @@ def calc_default_erosion_rate_sdr(pcl):
 def delete_parcel_contents(del_parcel):
     for c in del_parcel.compartments:
         # Delete Links
-        lr = CompartmentService.links.get_all(receiver_id=c.id)
-        ls = CompartmentService.links.get_all(sender_id=c.id)
+        comp_id = c.id
+        scenario_id = c.current_scenario().id
+        lr = CompartmentService.links.get_all(receiver_id=comp_id)
+        ls = CompartmentService.links.get_all(sender_id=comp_id)
         for lnk_r in lr:
             CompartmentService.links.delete(lnk_r)
         for lnk_s in ls:
             CompartmentService.links.delete(lnk_s)
         # Delete Custom Parameters
-        custom_params = ParameterService.get_all(requirements=f'(self.id == {c.id})')
+        custom_params = ParameterService.get_all(requirements=f'(self.id == {comp_id})')
         for cp in custom_params:
             ParameterService.delete(cp, False)
         # Delete Compartments
         CompartmentService.delete(c, False)
+        # Delete compartment id from formulas with custom values for give compartment (from legacy Trim)
+        formulas = ["MethylationRate", "DemethylationRate", "ReductionRate"]
+        for t in formulas:
+            ins = ParameterService.definitions.get(variable_name=t).instances
+            par = [i for i in ins if i.scenario.id == scenario_id][0]
+            eq = par.formula.equation
+            del_id = c.id
+            eq_parts = eq.split('compartment.id in {')
+            for i, p in enumerate(eq_parts):
+                if i == 0:
+                    continue
+                sub_parts = p.split('}')
+                complist = sub_parts[0].split(",")
+                new_complist = [str(int(i.strip())) for i in complist if int(i.strip()) != del_id]
+                sub_parts[0] = " , ".join(new_complist)
+                eq_parts[i] = "}".join(sub_parts)
+            new_eq = 'compartment.id in {'.join(eq_parts)
+            ParameterService.get(par.id).formula.equation = new_eq
+            ParameterService.commit()
     # Delete Volume Elements
     for ve in del_parcel.volume_elements:
         VolumeElementService.delete(ve, False)

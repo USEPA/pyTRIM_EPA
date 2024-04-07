@@ -10,12 +10,29 @@
             "required": true
         },
         {
-            "id": "rate",
-            "label": "Emissions (g/day)",
-            "data_type": "float",
-            "min": 0,
+            "id": "have_AERMOD_file",
+            "label": "Use Emission values from input file",
+            "data_type": "boolean",
+            "default": false,
+            "help": "Check this box to use Emission values from input file."
+        },
+        {
+            "id": "emissions_source_file",
+            "label": "AERMOD Deposition File",
+            "data_type": "file",
             "required": true,
-            "help": "Enter the emission rate (grams per day) of each chemical released by the emission source."
+            "help": "Indicate the AERMOD output file of emissions data.",
+            "if_true": ["have_AERMOD_file"]
+        },
+        {
+            "id": "spacing",
+            "label": "spacing",
+            "data_type": "string",
+            "widget": "select",
+            "choices": ["Uniform", "Non-Uniform"],
+            "required": true,
+            "help": "Enter the spacing of your emission sources.",
+            "if_true": ["have_AERMOD_file"]
         }
     ]
 }

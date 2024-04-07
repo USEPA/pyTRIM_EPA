@@ -8,12 +8,20 @@ __all__ = ['db', 'GenericService', 'PermissionsMixin']
 
 if os.getenv('TEST_DB_SERVERLESS'):
     from .engine import DataBase
-    import urllib.parse
-    USERNAME = "root"
-    PASSWORD = urllib.parse.quote_plus(os.getenv('MYSQLPASSWORD'))
-    HOST = "localhost"
-    PORT = "3306"
-    DBNAME = "pytrim"
+
+    if 'RDS_DB_NAME' in os.environ:
+        USERNAME = os.environ['RDS_USERNAME']
+        PASSWORD = os.environ['RDS_PASSWORD']
+        HOST = os.environ['RDS_HOSTNAME']
+        PORT = os.environ['RDS_PORT']
+        DBNAME = os.environ['RDS_DB_NAME']
+    else:
+        import urllib.parse
+        USERNAME = "root"
+        PASSWORD = urllib.parse.quote_plus(os.getenv('MYSQLPASSWORD'))
+        HOST = "localhost"
+        PORT = "3306"
+        DBNAME = "pytrim"
     # db_filename = 'database.db'
     # db_path = (
     #     'sqlite:///'
@@ -62,7 +70,7 @@ class ServiceMetaClass(type):
         return cls.__cache.pop(key, None)
 
     def clear_cache(cls):
-        cls.__cache = {}
+        cls.__cache.clear()  # = {}
 
 
 class GenericService(metaclass=ServiceMetaClass):
@@ -73,7 +81,9 @@ class GenericService(metaclass=ServiceMetaClass):
 
     @classmethod
     def commit(cls):
-        cls.clear_cache()
+        # cls.clear_cache()
+        for k in CacheManager._CACHERS:
+            CacheManager.clear_cache(k)
         cls.db.session.commit()
 
     @classmethod
@@ -198,6 +208,8 @@ class GenericService(metaclass=ServiceMetaClass):
 
     @classmethod
     def delete(cls, model_or_id, no_commit=False):
+        for k in CacheManager._CACHERS:
+            CacheManager.clear_cache(k)
         if isinstance(model_or_id, int):
             model = cls.get(model_or_id)
         elif isinstance(model_or_id, cls.__model__):

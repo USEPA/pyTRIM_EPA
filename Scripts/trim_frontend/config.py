@@ -1,16 +1,23 @@
 import os
-import urllib.parse
 
 
 app_folder = os.path.abspath(os.path.dirname(__file__))
 root = os.path.dirname(app_folder)
 has_mail = os.getenv('MAIL_USERNAME') is not None
 
-USERNAME = "root"
-PASSWORD = urllib.parse.quote_plus(os.getenv('MYSQLPASSWORD'))
-HOST = "localhost"
-PORT = "3306"
-DBNAME = "pytrim"
+if 'RDS_DB_NAME' in os.environ:
+    USERNAME = os.environ['RDS_USERNAME']
+    PASSWORD = os.environ['RDS_PASSWORD']
+    HOST = os.environ['RDS_HOSTNAME']
+    PORT = os.environ['RDS_PORT']
+    DBNAME = os.environ['RDS_DB_NAME']
+else:
+    import urllib.parse
+    USERNAME = "root"
+    PASSWORD = urllib.parse.quote_plus(os.getenv('MYSQLPASSWORD'))
+    HOST = "localhost"
+    PORT = "3306"
+    DBNAME = "pytrim"
 
 class AppConfig:
     # Template config

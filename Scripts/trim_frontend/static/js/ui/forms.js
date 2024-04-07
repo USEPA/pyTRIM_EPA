@@ -521,6 +521,7 @@ window.TRIM = (function(trim) {
     });
 
     function makeDependent(field_id, if_true, if_false, prefix) {
+        let template_field_id = field_id;
         if_true = if_true || [];
         if_false = if_false || [];
         prefix = prefix || '';
@@ -536,12 +537,16 @@ window.TRIM = (function(trim) {
             return;
         }
 
+
         for (var i = 0, len = if_true.length; i < len; i++) {
             if_true[i] = prefix + if_true[i];
         }
         for (var i = 0, len = if_false.length; i < len; i++) {
             if_false[i] = prefix + if_false[i];
         }
+
+        let template_if_true = if_true;
+        let template_if_false = if_false;
 
         function toggleVisible() {
             var field = document.getElementById(field_id);
@@ -566,6 +571,12 @@ window.TRIM = (function(trim) {
         }
 
         document.body.addEventListener('change', function(e) {
+            let tab_num = $(e.target).closest(".tab-pane").attr('data-tab-id')
+            // Take care of fieldset components if dependency is in a fieldList
+            if_true = template_if_true.map(e=> e.replace("##",tab_num))
+            if_false = template_if_false.map(e=> e.replace("##",tab_num))
+            field_id = template_field_id.replace("##",tab_num)
+
             if (if_true.indexOf(e.target.id) < 0 &&
                 if_false.indexOf(e.target.id) < 0) {
                 return;
