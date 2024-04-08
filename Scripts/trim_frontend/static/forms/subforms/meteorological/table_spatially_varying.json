@@ -1,0 +1,24 @@
+{
+    "title": "",
+    "table_id": "spatially_varying_table",
+    "fields": [
+        {
+            "id": "name",
+            "label": "Parcel Name",
+            "data_type": "string",
+            "default": ""
+        },
+        {
+            "id": "GroundwaterSeepageFractions",
+            "label": "Groundwater Seepage Fractions",
+            "data_type": "float",
+            "default": 0.25
+        },
+        {
+            "id": "RunoffFractions",
+            "label": "Runoff Fractions",
+            "data_type": "float",
+            "default": 0.4
+        }
+    ]
+}

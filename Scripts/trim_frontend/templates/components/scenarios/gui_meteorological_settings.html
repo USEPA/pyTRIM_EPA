@@ -99,15 +99,8 @@
             </div>
         </div>
 
-        <div data-slot="true" data-target="groundwater_seepage">
-            {{ dimensionally_varying_subform(
-                is_varying_field='spatially_varying',
-                use_custom_field='use_custom_file',
-                custom_file_field='custom_file',
-                var_name_fields=['field_name'],
-                static_value_fields=['static_value']
-            ) }}
-        </div>
+        <table data-slot="true" data-target="spatially_varying_table" class="hover" id="spatially_varying_table">
+        </table>
 
         <div data-slot="true" data-target="runoff">
             {{ dimensionally_varying_subform(
@@ -398,5 +391,123 @@
                 daytimeIndicator.removeAttr('disabled');
             });
         }
+
+
+        ///////////////// Spatially Varying table
+        document.body.addEventListener('parcels:loaded', function() {
+            let loadedData = $('#root').data('loadedParcels')
+            let spatially_varying_table_data = []
+            if (loadedData.scenario.length > 0) {
+                loadedData['scenario'].forEach(function (e, i) {
+                    spatially_varying_table_data.push(
+                        {
+                            'parcelid': e.id,
+                            'Surface Parcel': e.name,
+                            'GroundwaterSeepageFractions': TRIM.forms.fetchDefault('GroundwaterSeepageFractions'),
+                            'RunoffFractions': TRIM.forms.fetchDefault('RunoffFractions')
+                        }
+                    )
+                })
+            }
+            TableRedraw(spatially_varying_table_data)
+        });
+
+        let apTable = null;
+        function TableRedraw(table_data) {
+            let tblId = "#spatially_varying_table";
+            apTable =  $(tblId).removeAttr('width').dataTable({
+                data : table_data,
+                paging: false,
+                bFilter: false,
+                info: false,
+                bAutoWidth: false,
+                columns: [
+                    {
+                        'data': "Surface Parcel",
+                    },
+                    {
+                        'data': "GroundwaterSeepageFractions",
+                        'bSortable': false,
+                        'render': function (data, type, row) {
+                            let this_cell_prop = 'editableCell badge badge-light';
+                            let parcel_info = create_parcel_object('GroundwaterSeepageFractions', row, data);
+                            return create_cell_html(parcel_info, data, this_cell_prop, data);
+                        }
+                    },
+                    {
+                        'data': "RunoffFractions",
+                        'bSortable': false,
+                        'render': function (data, type, row) {
+                            let this_cell_prop = 'editableCell badge badge-light';
+                            let parcel_info = create_parcel_object('RunoffFractions', row, data);
+                            return create_cell_html(parcel_info, data, this_cell_prop, data);
+                        }
+                    }
+                ],
+                initComplete: function (settings, json) {
+                    $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    $('[data-toggle="tooltip"]').tooltip()
+                    $('[data-toggle="popover"]').popover()
+                }
+            });
+
+            let sort_order = "asc"
+            $('.sortClass').click(function(e){
+                e.preventDefault();
+                let Table = $(tblId).dataTable()
+                let cellIndex = $(this).closest("th").index()
+                Table.fnSort([[cellIndex,sort_order]]);//use asc/desc as you want
+                sort_order= sort_order == "desc" ? "asc" : "desc"
+            });
+
+            $('label.editableCell').click(function () {
+                $(this).siblings("input").show()
+                $(this).siblings("select").show()
+                $(this).prev("input").focus()
+                $(this).prev("select").focus()
+                $(this).hide();
+            });
+
+            function create_cell_html(parcel_info, data, cell_prop, cell_data, err_html=""){
+                return "<input "+err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
+                        "<label "+err_html+" class='" + cell_prop + "'>" + cell_data + "</label>";
+            };
+
+            function create_parcel_object(id, row, data){
+                let parcel_info = [{
+                                    'type': 'data',
+                                    'name': 'id',
+                                    'value': row.parcelid,
+                                },{
+                                    'type': 'data',
+                                    'name': 'field',
+                                    'value': id
+                                },{
+                                    'type': 'input',
+                                    'name': id,
+                                    'value': data
+                                }]
+                return JSON.stringify(parcel_info)
+            };
+
+            // save modified cell
+            $(`input.editableCell, select.editableCell`).blur(function () {
+                let focusTblId = $(this).closest(`table`).attr('id');
+                if (`#${focusTblId}` !== tblId) {
+                    return;
+                }
+
+                let is_valid = ErrorValidation.isValidFraction(this);
+                if (!is_valid) {
+                    return;
+                }
+
+                // FIXME does nothing for now!
+                let data = $(this).val()
+                let $label = $(this).next("label")
+                $label.siblings().hide()
+                $label.show().text(data)
+            });
+        };
     });
 </script>
