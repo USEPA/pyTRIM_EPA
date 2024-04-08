@@ -53,7 +53,7 @@
                         <li>Water column carnivore include largemouth bass and walleye.</li>
                     </ul>
                     <p>
-                        <strong> User instructions: </strong> Enter the consuming organism’s mass fractions of diet of each applicable organism. Valid values are 0 to 1. The default values represent a simplified food chain that captures likely results of chemicals that bioaccumulate or biomagnify in aquatic ecosystems. We simulate 4 trophic levels in the water column and 3.5 trophic levels in the benthic system, with larger organisms feeding on smaller organisms. With the default configuration, the diets of water column biota consist only of smaller water column biota (in terms of body weight), and similarly benthic biota diets consist only of smaller benthic biota. Benthic invertebrates are not consumers of the default organisms as they feed on sediment detritus, which the model simulates using chemical partition coefficients. While benthic carnivores could be simulated to eat only benthic omnivores, the default assumption is that they also feed on benthic invertebrates due to their abundance. While this is not as health protective as the 100% benthic omnivore diet option for chemicals that strongly bioaccumulate and biomagnify, it is health protective for chemicals that strongly sorb to sediment and can biodiminish with successive steps in the food chain. Zooplankton generally feed exclusively on algae in the water column. Typical sources of site-specific values include state departments of fish and wildlife or natural resources, and state or local lake stewardship programs. We do not recommend that users create their own configurations of the aquatic food web unless they are specialists in aquatic ecosystems and have site-specific data. However, the model results (chemical concentrations in aquatic biota) are not very sensitive to modest changes in the configuration, though they are reasonably sensitive to overall biomass relative to size of water body. Freshwater fish in North America consume organisms that they can fit into their mouths whole, so larger fish eat smaller fish and not the reverse.
+                        <strong> User instructions: </strong> Enter the consuming organism's mass fractions of diet of each applicable organism. Valid values are 0 to 1. The default values represent a simplified food chain that captures likely results of chemicals that bioaccumulate or biomagnify in aquatic ecosystems. We simulate 4 trophic levels in the water column and 3.5 trophic levels in the benthic system, with larger organisms feeding on smaller organisms. With the default configuration, the diets of water column biota consist only of smaller water column biota (in terms of body weight), and similarly benthic biota diets consist only of smaller benthic biota. Benthic invertebrates are not consumers of the default organisms as they feed on sediment detritus, which the model simulates using chemical partition coefficients. While benthic carnivores could be simulated to eat only benthic omnivores, the default assumption is that they also feed on benthic invertebrates due to their abundance. While this is not as health protective as the 100% benthic omnivore diet option for chemicals that strongly bioaccumulate and biomagnify, it is health protective for chemicals that strongly sorb to sediment and can biodiminish with successive steps in the food chain. Zooplankton generally feed exclusively on algae in the water column. Typical sources of site-specific values include state departments of fish and wildlife or natural resources, and state or local lake stewardship programs. We do not recommend that users create their own configurations of the aquatic food web unless they are specialists in aquatic ecosystems and have site-specific data. However, the model results (chemical concentrations in aquatic biota) are not very sensitive to modest changes in the configuration, though they are reasonably sensitive to overall biomass relative to size of water body. Freshwater fish in North America consume organisms that they can fit into their mouths whole, so larger fish eat smaller fish and not the reverse.
                     </p>
                 </div>
             </div>
@@ -223,7 +223,7 @@
             '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
             '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
             '</tr>' +
-            '<tr>' +
+            '<tr data-rsval="1">' +
             '<td style="text-align: right; border-right: 1px solid black; padding: 10px"><strong>Water Column Omnivore</strong></td>' +
             '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
             '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
@@ -247,7 +247,7 @@
             '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
             '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
             '</tr>' +
-            '<tr>' +
+            '<tr data-rsval="1">' +
             '<td style="text-align: right; border-right: 1px solid black; padding: 10px"><strong>Water Column Carnivore</strong></td>' +
             '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
             '<td style="text-align: center"><input data-validate="True" data-valtype="rowSum" class="editableCell form-control form-control-sm" data-parcelinfo="" type="text" value="0" style="width: 50px; display:none"/><label class="editableCell badge badge-light">0</label></td>' +
@@ -307,17 +307,20 @@
                 $(this).hide();
             });
 
-            $('input.editableCell,select.editableCell').blur(function () {
-                let focusTblId = $(this).closest('table').attr('id');
-                if (`#${focusTblId}` !== tblId) {
+            $('input.editableCell,select.editableCell').blur(function () {     
+                let focusTblId = $(this).closest(`table`).attr('id');
+                let focusTblClass = $(this).closest(`table`).attr('class');
+                if (!focusTblId?.includes("Aquatic") && !focusTblClass?.includes("diet")) {
                     return;
                 }
                 
                 // NOTE -- by putting this here, will run check against
                 // all cells in every table 
-                ErrorValidation.isPositiveValue(this);
+                if (!ErrorValidation.isPositiveValue(this)) {
+                    return;
+                }
+
                 let parcel_info = $(this).data('parcelinfo');
-                
                 if (parcel_info) {
                     submit_aquatic_table(this, parcel_info);
                 }
@@ -326,25 +329,24 @@
                         submit_diet_tables(this);
                     }
                 }
+
+                let data = $(this).val() == "" ? 0 : $(this).val();
+                let $label = $(this).next("label.editableCell");
+                $label.siblings("input").hide();
+                $label.show().text(data);
             })
 
             function submit_aquatic_table(elem, parcel_info) {
-                if (elementIsValid($(this).parent())){
-                    let data = $(elem).val() == "" ? 0 : $(elem).val()
-                    let $label = $(elem).next("label.editableCell")
-                    $label.siblings("input").hide()
-                    $label.show().text(data)
-
-                    parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                    TRIM.api.updateParcel('{{ scenario.id }}', parcel_info)
-                }
+                let data = $(elem).val() == "" ? 0 : $(elem).val()
+                parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data                
+                TRIM.api.updateParcel('{{ scenario.id }}', parcel_info)
             }
 
             function submit_diet_tables(elem) {
                 // Get all data from table and organize it into array of json form data
-                let this_row = $(elem).closest("tr")
-                let mat_table = $(this_row).closest("table")
-                let col_headers = $(mat_table).find("thead > tr > th > div > span").map((i,e) => e.innerHTML)
+                let this_row = $(elem).closest("tr");
+                let mat_table = $(this_row).closest("table");
+                let col_headers = $(mat_table).find("thead > tr > th > div > span").map((i,e) => e.innerHTML);
 
                 $(mat_table).find("tbody > tr").each(function(){
                     let row_header = $(this).find("td > strong").text()
@@ -508,6 +510,20 @@
                         divDietTables.append(this_matrix)
                     }
                 })
+                diet_properties.forEach(function (p, i) {
+                    let this_diet_property = {}
+                    loadedData['scenario'].forEach(function (e, i) {
+                        if (e.hasFishFoodWeb == "Yes") {
+                            this_diet_property['Property'] = p
+                            this_diet_property[e.name] = e[default_diet_data[p]['short_name']] ? e[default_diet_data[p]['short_name']] : default_diet_data[p]['default_value'],
+                                this_diet_property["helpText"] = default_diet_data[p]['helpText'] ? default_diet_data[p]['helpText'] : "Some text"
+                            this_diet_property["unit"] = default_diet_data[p]['unit'] ? default_diet_data[p]['unit'] : "No units"
+                            this_diet_property["shortProperty"] = default_diet_data[p]['short_name']
+                        }
+                    })
+                    diet_data.push(this_diet_property)
+                })
+                TableRedraw(diet_data, "diet")
             }
         })
     });

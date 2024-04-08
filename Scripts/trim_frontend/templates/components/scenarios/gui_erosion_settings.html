@@ -466,6 +466,11 @@
                     $(this).hide();
                 })
                 $('input.editableCell').blur(function () {
+                    let focusTblId = $(this).closest(`table`).attr('id');
+                    if (!focusTblId?.includes("erosionTable")) {
+                        return;
+                    }
+                    
                     ErrorValidation.isPositiveValue(this)
                     let is_valid = elementIsValid($(this).parent());
 

@@ -223,6 +223,9 @@
                 });
 
                 $('input.editableCell').blur(function () {
+                    if (!$("#Emissions-tab-pill").hasClass("active")) {
+                        return;
+                    }
                     let parcel_name = $($(this).closest("tr.level2").find("td")[0]).attr("data-pcl-name")
                     let parcel_id = loadedData.scenario.filter(e => e.name == parcel_name)[0].id
                     let compartment_name = $($(this).closest("tr.level2").find("td")[2]).attr("data-comp-name")

@@ -172,6 +172,10 @@
                 });
 
                 $('input.editableCell').blur(function () {
+                    if (!$("#Background-Concentrations-tab-pill").hasClass("active")) {
+                        return;
+                    }
+                    
                     ErrorValidation.isPositiveValue(this);
                     let parcel_name = $(this).closest("tr.level2")
                     let parcel_info = [{
