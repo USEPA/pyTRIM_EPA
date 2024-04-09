@@ -5,74 +5,158 @@
     data-form-src="scenario_seasonal_dynamics_form"
 >
     <section class="container px-0">
-        <div class="row">
-            <div class="col-sm">
-                <div data-slot="true" data-target="default_seasonal_file"></div>
-                <div class="form-text mb-2">
-                    <small class="text-muted">
-                        <a href="{{ url_for(
-                            'static',
-                            filename='templates/seasonal_dynamics_time_varying_inputs.csv'
-                        ) }}">Click here</a> to download the template for creating a time-varying inputs file.
-                    </small>
+        <div class="sd_subsection">
+            <div class="row">
+                <div class="col-sm">
+                    <h3 class="text-center">Litterfall</h3>
                 </div>
+            </div>
+            <div class="row">
+                <div class="col-sm">
+                    <div data-slot="true" data-target="default_seasonal_litterfall_file"></div>
+                    <div class="form-text mb-2">
+                        <small class="text-muted">
+                            <a href="{{ url_for(
+                                'static',
+                                filename='templates/seasonal_dynamics_time_varying_litterfall_input.csv'
+                            ) }}">Click here</a> to download the template for creating a time-varying inputs file.
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <div data-slot="true" data-target="coniferous_forest_litterfall">
+                {{ dimensionally_varying_subform(
+                    is_varying_field='time_varying',
+                    use_custom_field='use_custom_file',
+                    custom_file_field='custom_file',
+                    var_name_fields=[
+                        'field_name'
+                    ],
+                    static_value_fields=[
+                        'static_value'
+                    ]
+                ) }}
+            </div>
+
+            <div data-slot="true" data-target="deciduous_forest_litterfall">
+                {{ dimensionally_varying_subform(
+                    is_varying_field='time_varying',
+                    use_custom_field='use_custom_file',
+                    custom_file_field='custom_file',
+                    var_name_fields=[
+                        'field_name'
+                    ],
+                    static_value_fields=[
+                        'static_value'
+                    ]
+                ) }}
+            </div>
+
+            <div data-slot="true" data-target="grasses_herbs_litterfall">
+                {{ dimensionally_varying_subform(
+                    is_varying_field='time_varying',
+                    use_custom_field='use_custom_file',
+                    custom_file_field='custom_file',
+                    var_name_fields=[
+                        'field_name'
+                    ],
+                    static_value_fields=[
+                        'static_value'
+                    ]
+                ) }}
+            </div>
+
+            <div data-slot="true" data-target="agriculture_litterfall">
+                {{ dimensionally_varying_subform(
+                    is_varying_field='time_varying',
+                    use_custom_field='use_custom_file',
+                    custom_file_field='custom_file',
+                    var_name_fields=[
+                        'field_name'
+                    ],
+                    static_value_fields=[
+                        'static_value'
+                    ]
+                ) }}
             </div>
         </div>
 
-        <div data-slot="true" data-target="coniferous_forest">
-            {{ dimensionally_varying_subform(
-                is_varying_field='time_varying',
-                use_custom_field='use_custom_file',
-                custom_file_field='custom_file',
-                var_name_fields=[
-                    'field_name_litterfall', 'field_name_allow_exchange'
-                ],
-                static_value_fields=[
-                    'static_value_litterfall', 'static_value_allow_exchange'
-                ]
-            ) }}
+        <div class="row">
+            <div class="col-sm">
+                <h3 class="text-center">Allow Exchange</h3>
+            </div>
         </div>
+        <div class="sd_subsection">
+            <div class="row">
+                <div class="col-sm">
+                    <div data-slot="true" data-target="default_seasonal_allowexchange_file"></div>
+                    <div class="form-text mb-2">
+                        <small class="text-muted">
+                            <a href="{{ url_for(
+                                'static',
+                                filename='templates/seasonal_dynamics_time_varying_allowexchange_input.csv'
+                            ) }}">Click here</a> to download the template for creating a time-varying inputs file.
+                        </small>
+                    </div>
+                </div>
+            </div>
 
-        <div data-slot="true" data-target="deciduous_forest">
-            {{ dimensionally_varying_subform(
-                is_varying_field='time_varying',
-                use_custom_field='use_custom_file',
-                custom_file_field='custom_file',
-                var_name_fields=[
-                    'field_name_litterfall', 'field_name_allow_exchange'
-                ],
-                static_value_fields=[
-                    'static_value_litterfall', 'static_value_allow_exchange'
-                ]
-            ) }}
-        </div>
+            <div data-slot="true" data-target="coniferous_forest_allowexchange">
+                {{ dimensionally_varying_subform(
+                    is_varying_field='time_varying',
+                    use_custom_field='use_custom_file',
+                    custom_file_field='custom_file',
+                    var_name_fields=[
+                        'field_name'
+                    ],
+                    static_value_fields=[
+                        'static_value'
+                    ]
+                ) }}
+            </div>
 
-        <div data-slot="true" data-target="grasses_herbs">
-            {{ dimensionally_varying_subform(
-                is_varying_field='time_varying',
-                use_custom_field='use_custom_file',
-                custom_file_field='custom_file',
-                var_name_fields=[
-                    'field_name_litterfall', 'field_name_allow_exchange'
-                ],
-                static_value_fields=[
-                    'static_value_litterfall', 'static_value_allow_exchange'
-                ]
-            ) }}
-        </div>
+            <div data-slot="true" data-target="deciduous_forest_allowexchange">
+                {{ dimensionally_varying_subform(
+                    is_varying_field='time_varying',
+                    use_custom_field='use_custom_file',
+                    custom_file_field='custom_file',
+                    var_name_fields=[
+                        'field_name'
+                    ],
+                    static_value_fields=[
+                        'static_value'
+                    ]
+                ) }}
+            </div>
 
-        <div data-slot="true" data-target="agriculture">
-            {{ dimensionally_varying_subform(
-                is_varying_field='time_varying',
-                use_custom_field='use_custom_file',
-                custom_file_field='custom_file',
-                var_name_fields=[
-                    'field_name_litterfall', 'field_name_allow_exchange'
-                ],
-                static_value_fields=[
-                    'static_value_litterfall', 'static_value_allow_exchange'
-                ]
-            ) }}
+            <div data-slot="true" data-target="grasses_herbs_allowexchange">
+                {{ dimensionally_varying_subform(
+                    is_varying_field='time_varying',
+                    use_custom_field='use_custom_file',
+                    custom_file_field='custom_file',
+                    var_name_fields=[
+                        'field_name'
+                    ],
+                    static_value_fields=[
+                        'static_value'
+                    ]
+                ) }}
+            </div>
+
+            <div data-slot="true" data-target="agriculture_allowexchange">
+                {{ dimensionally_varying_subform(
+                    is_varying_field='time_varying',
+                    use_custom_field='use_custom_file',
+                    custom_file_field='custom_file',
+                    var_name_fields=[
+                        'field_name'
+                    ],
+                    static_value_fields=[
+                        'static_value'
+                    ]
+                ) }}
+            </div>
         </div>
     </section>
 </form>
@@ -82,14 +166,14 @@
         var scenario_id = {{ scenario.id }};
         form.addEventListener('form:loaded', function() {
             document.body.addEventListener('parcels:loaded', function () {
-                enableFieldUpdates();
+                $("div.sd_subsection").each((i, subsection) => enableFieldUpdates(subsection))
                 let loadedData = $('#root').data('loadedParcels')
                 let seasonal_dyn_obj = loadedData.scenario_head.seasonal_dynamics
                 let leaves = ["coniferous", "deciduous", "grass", "agriculture"]
                 leaves.forEach((e, i) => {
                     let search_cbx_str = `input[type="checkbox"][id^="${e}"]`
-                    let search_txt_lf_str = `input[type="number"][id^="${e}"][id$="litterfall"]`
-                    let search_txt_ae_str = `input[type="number"][id^="${e}"][id$="allow_exchange"]`
+                    let search_txt_lf_str = `input[type="number"][id^="${e}"][id*="litterfall"]`
+                    let search_txt_ae_str = `input[type="number"][id^="${e}"][id*="allowexchange"]`
                     let this_chkbx = $('#seasonal-gui').find(search_cbx_str)
                     let this_text_lf = $('#seasonal-gui').find(search_txt_lf_str)
                     let this_text_ae = $('#seasonal-gui').find(search_txt_ae_str)
@@ -101,9 +185,9 @@
                     $(this_text_lf).val(val_lf)
                     $(this_text_ae).val(val_ae)
                     // Add Listeners for time varying input.
-                    this_chkbx.change(function () {
-
-                    })
+                    // this_chkbx.change(function () {
+                    //
+                    // })
                     $(this_text_lf).add(this_text_ae).blur(function () {
                         submit_seasonal_dyn_value(this)
                     })
@@ -112,7 +196,7 @@
         });
 
         function get_form_data(elem) {
-            if ($(elem).attr('name').indexOf("_field_name_") === -1) {
+            if ($(elem).attr('name').indexOf("_field_name") === -1) {
                 ErrorValidation.isPositiveValue(elem);
             }
             let param_name = $(elem).attr("name")
@@ -166,8 +250,10 @@
             }
         }
 
-        function enableFieldUpdates() {
-            var gui = $('#seasonal-gui');
+        function enableFieldUpdates(this_subsection) {
+            // var gui = $('#seasonal-gui');
+            let gui = $(this_subsection).closest("div.sd_subsection")
+
             var fileFields = gui.find('[type="file"]');
             var selects = gui.find('select');
             var static_allow_exchange_selects = $('[id$=static_value_allow_exchange]')
@@ -224,7 +310,7 @@
                                 JSON.stringify(myData)
                             );
                         }
-                        updateFields();
+                        updateFields(me);
                     }
                     finally {
                         LoadingScreen.hide(loadingRequest);
@@ -234,10 +320,14 @@
 
             gui.find('select').on('change',function (){
                 let sel = $(this);
-                let section = sel.closest('section');
+                let section = sel.closest('div.sd_subsection');
                 var globalFileFiled = section.find('[type="file"][name^="default_"]');
                 let data = globalFileFiled.attr('data-filedata');
                 let subform = sel.closest('.subform');
+
+                let loadedData = $('#root').data('loadedParcels')
+                let sim_start = Date.parse(loadedData.scenario_head["simulation_start_date"])
+                let sim_end = Date.parse(loadedData.scenario_head["simulation_end_date"])
                 if (subform.find('[type="checkbox"][id$="use_custom_file"]').prop('checked')) {
                     data = subform.find('[type="file"]').attr('data-filedata');
                 }
@@ -245,19 +335,25 @@
                 data = JSON.parse(data);
                 let selected_val = $(sel).val();
                 let def_data_name = $(sel).attr("data-default")
-                // Get only the column for this select
-                let this_sel_data = data.file_data.map((e,i) => {
-                    let this_row = {
-                        'Date': e['Date'],
-                        'Hour': e['Hour'],
-                        'TimeZone': e['TimeZone']
-                    }
-                    this_row[def_data_name]= e[selected_val]
-                    return this_row
-                });
-                sel.attr('data-seasonal',JSON.stringify(this_sel_data))
+                // Restrict file data date range to the simulation period
+                let new_data = data.file_data.filter(e=>Date.parse(e['Date'])>=sim_start & Date.parse(e['Date'])<=sim_end)
+                // make sure we have data in the time window of simulation
+                ErrorValidation.isInSimulationTimeSpan(sel, new_data)
+                // if (elementIsValid($(sel).parent())) {
+                    // Get only the column for this select
+                    let this_sel_data = new_data.map((e, i) => {
+                        let this_row = {
+                            'Date': e['Date'],
+                            'Hour': e['Hour'],
+                            'TimeZone': e['TimeZone']
+                        }
+                        this_row[def_data_name] = e[selected_val]
+                        return this_row
+                    });
+                    sel.attr('data-seasonal', JSON.stringify(this_sel_data))
 
-                submit_seasonal_dyn_value(sel)
+                    submit_seasonal_dyn_value(sel)
+                //}
             })
         }
     });
