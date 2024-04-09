@@ -44,22 +44,22 @@ param_map = {
         'meteo_interception_fractions_calculated_agriculture': ['Agriculture_Leaf', 'CalculateWetDepInterceptionFraction']
     },
     'seasonal': {
-        'seasonal_deciduous_forest_static_value_litterfall': ['Deciduous_Leaf', 'LitterFallRate'],
-        'seasonal_deciduous_forest_field_name_litterfall_TS': ['Deciduous_Leaf', 'LitterFallRate'],
-        'seasonal_deciduous_forest_static_value_allow_exchange': ['Deciduous_Leaf', 'AllowExchange_Dynamic'],
-        'seasonal_deciduous_forest_field_name_allow_exchange_TS': ['Deciduous_Leaf', 'AllowExchange_Dynamic'],
-        'seasonal_coniferous_forest_static_value_litterfall': ['Coniferous_Leaf', 'LitterFallRate'],
-        'seasonal_coniferous_forest_field_name_litterfall_TS': ['Coniferous_Leaf', 'LitterFallRate'],
-        'seasonal_coniferous_forest_static_value_allow_exchange': ['Coniferous_Leaf', 'AllowExchange_Dynamic'],
-        'seasonal_coniferous_forest_field_name_allow_exchange_TS': ['Coniferous_Leaf', 'AllowExchange_Dynamic'],
-        'seasonal_grasses_herbs_static_value_litterfall': ['Grass_Leaf', 'LitterFallRate'],
-        'seasonal_grasses_herbs_field_name_litterfall_TS': ['Grass_Leaf', 'LitterFallRate'],
-        'seasonal_grasses_herbs_static_value_allow_exchange': ['Grass_Leaf', 'AllowExchange_Dynamic'],
-        'seasonal_grasses_herbs_field_name_allow_exchange_TS': ['Grass_Leaf', 'AllowExchange_Dynamic'],
-        'seasonal_agriculture_static_value_litterfall': ['Agriculture_Leaf', 'LitterFallRate'],
-        'seasonal_agriculture_field_name_litterfall_TS': ['Agriculture_Leaf', 'LitterFallRate'],
-        'seasonal_agriculture_static_value_allow_exchange': ['Agriculture_Leaf', 'AllowExchange_Dynamic'],
-        'seasonal_agriculture_field_name_allow_exchange_TS': ['Agriculture_Leaf', 'AllowExchange_Dynamic'],
+        'seasonal_deciduous_forest_litterfall_static_value': ['Deciduous_Leaf', 'LitterFallRate'],
+        'seasonal_deciduous_forest_litterfall_field_name_TS': ['Deciduous_Leaf', 'LitterFallRate'],
+        'seasonal_deciduous_forest_allowexchange_field_name_TS': ['Deciduous_Leaf', 'AllowExchange_Dynamic'],
+        'seasonal_deciduous_forest_allowexchange_static_value': ['Deciduous_Leaf', 'AllowExchange_Dynamic'],
+        'seasonal_coniferous_forest_litterfall_static_value': ['Coniferous_Leaf', 'LitterFallRate'],
+        'seasonal_coniferous_forest_litterfall_field_name_TS': ['Coniferous_Leaf', 'LitterFallRate'],
+        'seasonal_coniferous_forest_allowexchange_static_value': ['Coniferous_Leaf', 'AllowExchange_Dynamic'],
+        'seasonal_coniferous_forest_allowexchange_field_name_TS': ['Coniferous_Leaf', 'AllowExchange_Dynamic'],
+        'seasonal_grasses_herbs_litterfall_static_value': ['Grass_Leaf', 'LitterFallRate'],
+        'seasonal_grasses_herbs_litterfall_field_name_TS': ['Grass_Leaf', 'LitterFallRate'],
+        'seasonal_grasses_herbs_allowexchange_static_value': ['Grass_Leaf', 'AllowExchange_Dynamic'],
+        'seasonal_grasses_herbs_allowexchange_field_name_TS': ['Grass_Leaf', 'AllowExchange_Dynamic'],
+        'seasonal_agriculture_litterfall_static_value': ['Agriculture_Leaf', 'LitterFallRate'],
+        'seasonal_agriculture_litterfall_field_name_TS': ['Agriculture_Leaf', 'LitterFallRate'],
+        'seasonal_agriculture_allowexchange_static_value': ['Agriculture_Leaf', 'AllowExchange_Dynamic'],
+        'seasonal_agriculture_allowexchange_field_name_TS': ['Agriculture_Leaf', 'AllowExchange_Dynamic'],
     }
 }
 
@@ -137,6 +137,15 @@ def update_scenario():
         for c_p in par_list:
             c_p.value = par_val
             ParameterService.update(c_p)
+        ParameterService.commit()
+
+    def update_assumed_all_comp_fixed_params(scen, comp, par_name, par_val):
+        media_name = comp.media.name
+        c_par_list = [c.parameters.get(par_name) for c in scen.compartments if c.media.isa(media_name)]
+        for c_p in c_par_list:
+            c_p.value = par_val
+            ParameterService.update(c_p)
+        ParameterService.commit()
 
     def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
         import pandas as pd
@@ -153,10 +162,11 @@ def update_scenario():
         df_met['Year'] = pd.to_numeric(df_met['Year'], errors='coerce')
         hour_col_name = 'xHour' if param_type == "MET" else 'Hour'
         df_met['Hour'] = pd.to_numeric(df_met[hour_col_name], errors='coerce')
+        df_met = df_met.loc[
+            (df_met.Month < 13) & (df_met.Day < 32) & (df_met.Year < 2100)]  # drop faulty
 
         if param_type == "MET":
-            df_met = df_met.loc[
-                (df_met.Month < 13) & (df_met.Day < 32) & (df_met.Year < 2100) & (df_met.Hour < 25)]  # drop faulty
+            df_met = df_met.loc[(df_met.Hour < 25)]  # drop faulty
             metcol_dict = {'Rain': (0, 1), 'AirTemperature': (200, 373), 'HorizontalWindSpeed': (0, 100),
                            'WindDirection': (-360, 360), 'MixingHeight': (0, 1000), 'isDay': (0, 1),
                            'CumulativeRain': (0, 1.6)}  # k, v represent name and min-max
@@ -171,6 +181,7 @@ def update_scenario():
             # Ignored hour resolution.
             df_met['DT'] = list(pd.to_datetime(df_met[['Year', 'Month', 'Day']], errors='coerce'))
 
+        df_met.sort_values(by='DT', inplace=True)
         df_met['date_delta'] = (df_met['DT'] - df_met['DT'].min()) / timedelta64(1, 'D')
         df_met['time_delta'] = df_met['date_delta'].diff()
         # shift up the column 1 so that applicability of met condition is aligned to duration
@@ -255,12 +266,12 @@ def update_scenario():
             if "_static_" in field_name:
                 update_custom_param(s, comp_list[0], param_name, param_data)
             elif field_name.endswith("_TS"):
-                ret_type = "LF" if field_name.endswith("_litterfall_TS") else "AE"
-                ret_type_name = "wt_av_litterfallrate" if field_name.endswith("_litterfall_TS") else \
-                    "wt_av_allowexchange" if field_name.endswith("_allow_exchange_TS") else "None"
+                ret_type = "LF" if field_name.find("_litterfall_") > 0 else "AE"
+                ret_type_name = "wt_av_litterfallrate" if field_name.find("_litterfall_") > 0 else \
+                    "wt_av_allowexchange" if field_name.find("_allowexchange_") > 0 else "None"
                 ret_val = meteo_wgt_avg_value_from_timeseries(param_data, ret_type)
                 if ret_type != "None":
-                    update_custom_param(s, comp_list[0], param_name, ret_val[ret_type_name])
+                    update_assumed_all_comp_fixed_params(s, comp_list[0], param_name, ret_val[ret_type_name])
         elif field_name == "startDate" or field_name == "endDate":
             date_parts = scenario_data[field_name].split("-")
             date_obj = datetime(int(date_parts[0]), int(date_parts[1]), int(date_parts[2]))

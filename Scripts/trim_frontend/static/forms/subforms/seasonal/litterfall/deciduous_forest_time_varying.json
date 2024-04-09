@@ -1,0 +1,21 @@
+{
+    "title": "Deciduous Forest",
+    "inherits": "subforms/seasonal/litterfall/seasonal_time_varying_input_form.json",
+    "fields": [
+        {
+            "id": "time_varying",
+            "label": "Use Time-Varying Litterfall Rate",
+            "help": "Check the box to use values that vary in time for deciduous forest leaf Litterfall rate (fraction per day of plant leaves falling to the ground). This feature is typically used for this plant type. For non-evergreen leaves, it is typically assumed that litterfall occurs over a 30-day period at a rate of 0.15 /day, allowing 99% of leaves to fall over the period. Litterfall is typically set to start at the typical date of first frost/freeze."
+        },
+        {
+            "id": "field_name",
+            "label": "Field Name for Values of Deciduous Forest Litterfall",
+            "help": "Indicate the field name for the time-varying values of deciduous forest litterfall rate."
+        },
+        {
+            "id": "static_value",
+            "label": "Static Value for Deciduous Forest Litterfall Rate (per day)",
+            "help": "Enter a single value of deciduous forest litterfall rate to use throughout your model run (the default value of 0.0021 for this plant type assumes that 99% of leaves fall over 6 years)."
+        }
+    ]
+}

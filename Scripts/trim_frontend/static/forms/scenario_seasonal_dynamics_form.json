@@ -2,38 +2,73 @@
     "title": "Seasonal Dynamics",
     "fields": [
         {
-            "id": "default_seasonal_file",
-            "label": "Default File for Time-Varying Values",
+            "id": "default_seasonal_litterfall_file",
+            "label": "Default File for Time-Varying Litterfall Values",
+            "data_type": "file",
+            "required": true,
+            "help": "Indicate the default file of time-varying litterfall values."
+        },
+        {
+            "id": "coniferous_forest_litterfall",
+            "label": "",
+            "data_type": "form",
+            "form_definition": "subforms/seasonal/litterfall/coniferous_forest_time_varying.json",
+            "separator": "_"
+        },
+        {
+            "id": "deciduous_forest_litterfall",
+            "label": "",
+            "data_type": "form",
+            "form_definition": "subforms/seasonal/litterfall/deciduous_forest_time_varying.json",
+            "separator": "_"
+        },
+        {
+            "id": "grasses_herbs_litterfall",
+            "label": "",
+            "data_type": "form",
+            "form_definition": "subforms/seasonal/litterfall/grasses_herbs_time_varying.json",
+            "separator": "_"
+        },
+        {
+            "id": "agriculture_litterfall",
+            "label": "",
+            "data_type": "form",
+            "form_definition": "subforms/seasonal/litterfall/agriculture_time_varying.json",
+            "separator": "_"
+        },
+        {
+            "id": "default_seasonal_allowexchange_file",
+            "label": "Default File for Time-Varying Allow Exchange Values",
             "data_type": "file",
             "required": true,
             "help": "Indicate the default file of time-varying values."
         },
         {
-            "id": "coniferous_forest",
+            "id": "coniferous_forest_allowexchange",
             "label": "",
             "data_type": "form",
-            "form_definition": "subforms/seasonal/coniferous_forest_time_varying.json",
+            "form_definition": "subforms/seasonal/allowexchange/coniferous_forest_time_varying.json",
             "separator": "_"
         },
         {
-            "id": "deciduous_forest",
+            "id": "deciduous_forest_allowexchange",
             "label": "",
             "data_type": "form",
-            "form_definition": "subforms/seasonal/deciduous_forest_time_varying.json",
+            "form_definition": "subforms/seasonal/allowexchange/deciduous_forest_time_varying.json",
             "separator": "_"
         },
         {
-            "id": "grasses_herbs",
+            "id": "grasses_herbs_allowexchange",
             "label": "",
             "data_type": "form",
-            "form_definition": "subforms/seasonal/grasses_herbs_time_varying.json",
+            "form_definition": "subforms/seasonal/allowexchange/grasses_herbs_time_varying.json",
             "separator": "_"
         },
         {
-            "id": "agriculture",
+            "id": "agriculture_allowexchange",
             "label": "",
             "data_type": "form",
-            "form_definition": "subforms/seasonal/agriculture_time_varying.json",
+            "form_definition": "subforms/seasonal/allowexchange/agriculture_time_varying.json",
             "separator": "_"
         }
     ]

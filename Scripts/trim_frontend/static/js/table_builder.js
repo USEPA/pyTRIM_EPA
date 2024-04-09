@@ -69,5 +69,9 @@ let ErrorValidation = {
         let data = $(ele).val();
         let is_valid = parseFloat(data) <= 1;
         return ErrToolTip(ele, is_valid, "Fractional value must be no greater than 1.");
+    },
+    isInSimulationTimeSpan: function(ele, datedata){
+        let has_data = datedata.length > 0;
+        return ErrToolTip(ele, has_data, "Input date(s) not in simulation date range.")
     }
 }
