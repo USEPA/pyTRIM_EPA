@@ -412,7 +412,8 @@ def gen_avg(df_nt, df_conc, inputs):
     dct = {k: v for i in
            [{col: agg for col in df_conc.select_dtypes(tp).columns.difference(groupby_cols)} for tp, agg in dct.items()] for
            k, v in i.items()}
-    dfc_avg = df_conc.groupby(groupby_cols).agg(**{k: (k, v) for k, v in dct.items()})
+    dfc_avg = df_conc.groupby(groupby_cols, as_index=True).agg(**{k: (k, v) for k, v in dct.items()}).reset_index()
+
     # drop last line (just one day)
     dfc_avg = dfc_avg.head(len(dfc_avg)-1)
     return dfn_avg, dfc_avg
@@ -539,18 +540,19 @@ def safe_save_output(df_nt, df_conc, scn, filetype='csv'):
     try:
         ts = datetime.now().strftime('%Y-%m-%d--%H_%M_%S')
         sim_chems = [c.name for c in scn.chemicals]
+        safe_name = scn.name.replace("#", "")
         if not os.path.isdir('./trim_frontend/static/.output'):
             os.makedirs('./trim_frontend/static/.output')
         if filetype == 'csv':
-            fname_nt = f'./trim_frontend/static/.output/nt_new_{scn.name}_{scn.creator_id}_{ts}.csv'
-            fname_conc = f'./trim_frontend/static/.output/conc_new_{scn.name}_{scn.creator_id}_{ts}.csv'
+            fname_nt = f'./trim_frontend/static/.output/nt_new_{safe_name}_{scn.creator_id}_{ts}.csv'
+            fname_conc = f'./trim_frontend/static/.output/conc_new_{safe_name}_{scn.creator_id}_{ts}.csv'
             df_nt.to_csv(fname_nt)
             df_conc.to_csv(fname_conc)
         else:
             path_output_nt = './trim_frontend/static/.output/'
-            fname_nt = f'nt_new_{scn.name}_{scn.creator_id}_{ts}.xlsx'
+            fname_nt = f'nt_new_{safe_name}_{scn.creator_id}_{ts}.xlsx'
             path_output_conc = './trim_frontend/static/.output/'
-            fname_conc = f'conc_new_{scn.name}_{scn.creator_id}_{ts}.xlsx'
+            fname_conc = f'conc_new_{safe_name}_{scn.creator_id}_{ts}.xlsx'
             split_write_files(df_nt, sim_chems, path_output_nt, fname_nt)
             split_write_files(df_conc, sim_chems, path_output_conc, fname_conc)
     except Exception as e:
