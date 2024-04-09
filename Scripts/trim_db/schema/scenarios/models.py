@@ -213,7 +213,10 @@ def serialize_scenario(scen: Scenario):
             try:
                 return float(sd_data[0].magnitude)
             except AttributeError:
-                return float(sd_data[0])
+                try:
+                    return float(sd_data[0])
+                except TypeError:
+                    return -1
         else:
             return -1
 
