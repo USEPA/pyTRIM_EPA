@@ -49,11 +49,12 @@ let ErrorValidation = {
         let row = ele.closest("tr");
         let cells = $(row).find("input.editableCell");
         let expected_total = parseFloat($(row).data("rsval"));
-        let total = cells.toArray().reduce((ps,e) => ps + parseFloat($(e).val()),0);
+        let message_entity = $(row).data("entity") || "fractions for given consuming organism"
+        let total = cells.toArray().reduce((ps,e) => ps + parseFloat($(e).val()),0).toFixed(2);  // exact comparison may not be possible due to precision so compare using less precise total
 
-        let is_valid = total === expected_total;
+        let is_valid = total == expected_total;
         ele = $(ele).closest("td")
-        return ErrToolTip(ele, is_valid, "Sum of the fractions for given consuming organism should be "+expected_total)
+        return ErrToolTip(ele, is_valid, `Sum of the ${message_entity} should be ${expected_total}, but the total is ${total}`)
     },
     isValidFraction : function (ele) {
         if (!this.isPositiveValue(ele)) {

@@ -1,6 +1,7 @@
 from trim_db.schema import Parcel
 from trim_db.schema.utils.serialize import register_serializer
 from trim_db.schema.parameters.models import ParameterDefinition
+from trim_db.services import *
 
 
 @register_serializer(Parcel)
@@ -8,10 +9,6 @@ def serialize_parcel(pcl: Parcel):
     general_params = get_general_params(pcl)
     water_params = get_water_params(pcl, general_params['parcelType'])
     source_params = get_source_params(pcl)
-
-    if pcl.name == "E1":
-        print(f'GENERAL {general_params}\n')
-        print(f'SOURCE {source_params}')
 
     s = {
         'id': pcl.id,
@@ -187,38 +184,67 @@ def get_general_params(pcl):
 
 
 def get_water_params(pcl, parcel_type):
-    precipitation_rate = 1
-    precip_runoff_frac_to_sw = 0.001
-    runoff_watershed_area = 1e3
-    precip_seepage_frac_to_gw = 0.001
+    precipitation_rate = pcl.scenario.Rain
+
+    # runoff_watershed_area = 1e3
+    # precip_runoff_frac_to_sw = 0.001
+    comp_surfaceSoil = [c for c in pcl.scenario.compartments
+                        if c.media.isa("Surface_Soil") if c.volume_element.parcel.name == pcl.name]
+    comp_surfaceWater = [c for c in pcl.scenario.compartments
+                         if c.media.isa("Surface_Water")]
+    ch = ChemicalService.get(id=32)
+    ch.current_scenario(pcl.scenario)
+    if len(comp_surfaceSoil) > 0:
+        comp_surfaceSoil = comp_surfaceSoil[0]
+        runoff_watershed_area = (comp_surfaceSoil.area * comp_surfaceSoil.FractionofAreaAvailableforRunoff).magnitude
+        if comp_surfaceSoil.TotalRunoffRate:
+            runoff_fraction = (comp_surfaceSoil.TotalRunoffRate / pcl.scenario.Rain).magnitude
+        else:
+            runoff_fraction = 0
+        precip_runoff_frac_to_sw = 0
+        if len(comp_surfaceWater) > 0:
+            precip_runoff = 0
+            for comp_sw in comp_surfaceWater:
+                comp_link = comp_surfaceSoil.get_links(comp_sw)
+                if len(comp_link) > 0:
+                    tps = comp_link[0].transport_processes(chemical=ch)
+                    precip_runoff += tps[0].eval(sender=comp_surfaceSoil, receiver=comp_sw, chemical=ch)
+            precip_runoff_frac_to_sw = precip_runoff / precipitation_rate
+    else:
+        comp_surfaceSoil = None
+        runoff_watershed_area = 0
+        runoff_fraction = 0
+        precip_runoff_frac_to_sw = 0
+
+    precip_seepage_frac_to_gw = 1 - runoff_fraction
 
     sed_soil_erosion_to_sw = 100
 
-    # try:
-    #     runoff_vol_rate_to_sw = (
-    #         precipitation_rate
-    #         * precip_runoff_frac_to_sw
-    #         * runoff_watershed_area
-    #     )
-    # except Exception:
-    #     runoff_vol_rate_to_sw = None
-    runoff_vol_rate_to_sw = 1
+    try:
+        runoff_vol_rate_to_sw = (
+            precipitation_rate
+            * precip_runoff_frac_to_sw
+            * runoff_watershed_area
+        )
+    except Exception:
+        runoff_vol_rate_to_sw = 0
+    # runoff_vol_rate_to_sw = 1
 
-    # try:
-    #     precipitation_vol_rate_to_sw = precipitation_rate * pcl.area
-    # except Exception:
-    #     precipitation_vol_rate_to_sw = None
-    precipitation_vol_rate_to_sw = 4.8E6
+    try:
+        precipitation_vol_rate_to_sw = (precipitation_rate * pcl.area).magnitude
+    except Exception:
+        precipitation_vol_rate_to_sw = 0
+    # precipitation_vol_rate_to_sw = 4.8E6
 
-    # try:
-    #     seepage_vol_rate_to_gw = (
-    #         precipitation_rate
-    #         * precip_seepage_frac_to_gw
-    #         * runoff_watershed_area
-    #     )
-    # except Exception:
-    #     seepage_vol_rate_to_gw = None
-    seepage_vol_rate_to_gw = 1
+    try:
+        seepage_vol_rate_to_gw = (
+            precipitation_rate
+            * precip_seepage_frac_to_gw
+            * runoff_watershed_area
+        )
+    except Exception:
+        seepage_vol_rate_to_gw = 0
+    # seepage_vol_rate_to_gw = 1
 
     water_params = {
         'precip_rate': precipitation_rate,
@@ -226,7 +252,9 @@ def get_water_params(pcl, parcel_type):
         'precip_seepage_vol_rate_to_GW': seepage_vol_rate_to_gw,
         'precip_runoff_vol_rate_to_SW': runoff_vol_rate_to_sw,
         'precip_vol_rate_to_SW': precipitation_vol_rate_to_sw,
-        'sed_soil_erosion_to_SW': sed_soil_erosion_to_sw
+        'sed_soil_erosion_to_SW': sed_soil_erosion_to_sw,
+        'runoff_fraction': runoff_fraction,
+        'seepage_frac': precip_seepage_frac_to_gw
     }
 
     sw_params = None
@@ -535,7 +563,7 @@ Air_Parcel_VolElem_defaults = {
             },
             'Degradation_Reaction_Sink': {
                 'name': 'Degradation_Reaction_Sink',
-                'media_id': 15,
+                'media_id': 17,
                 'media_name': 'Degradation_Reaction'
             }
         }
@@ -567,27 +595,27 @@ Land_Parcel_VolElem_defaults = {
             },
             'Degradation_Reaction_Sink': {
                 'name': 'Degradation_Reaction_Sink',
-                'media_id': 15,
+                'media_id': 17,
                 'media_name': 'Degradation_Reaction'
             },
             'Leaf_Grasses_Herbs': {
                 'name': 'Leaf_Grasses_Herbs',
-                'media_id': 40,
+                'media_id': 43,
                 'media_name': 'Grass_Leaf'
             },
             'Leaf_Particle_Grasses_Herbs': {
                 'name': 'Leaf_Particle_Grasses_Herbs',
-                'media_id': 44,
+                'media_id': 47,
                 'media_name': 'Grass_Leaf_Particle'
             },
             'Stem_Grasses_Herbs': {
                 'name': 'Stem_Grasses_Herbs',
-                'media_id': 42,
+                'media_id': 51,
                 'media_name': 'Grass_Stem'
             },
             'Root_Grasses_Herbs': {
                 'name': 'Root_Grasses_Herbs',
-                'media_id': 45,
+                'media_id': 49,
                 'media_name': 'Grass_Root'
             },
         }
@@ -612,12 +640,12 @@ Water_Parcel_VolElem_defaults = {
             },
             'Degradation_Reaction_Sink': {
                 'name': 'Degradation_Reaction_Sink',
-                'media_id': 15,
+                'media_id': 17,
                 'media_name': 'Degradation_Reaction'
             },
             'Flush_Rate_Sink': {
                 'name': 'Flush_Rate_Sink',
-                'media_id': 18,
+                'media_id': 20,
                 'media_name': 'Flush_Rate'
             }
         }
@@ -634,7 +662,7 @@ Water_Parcel_VolElem_defaults = {
             },
             'Degradation_Reaction_Sink': {
                 'name': 'Degradation_Reaction_Sink',
-                'media_id': 15,
+                'media_id': 17,
                 'media_name': 'Degradation_Reaction'
             },
         }

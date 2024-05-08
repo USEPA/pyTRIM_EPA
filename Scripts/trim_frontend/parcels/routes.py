@@ -79,6 +79,8 @@ def get_parcels(scenario_id):
     except Exception as e:
         logger.error(traceback.format_exc())
 
+    sh["runoff_matrix"] = get_surface_runoff(scenario_id)
+
     return ApiResult({'scenario_head': sh, 'scenario': parcels, 'media': media})
 
 
@@ -94,6 +96,11 @@ def update_parcel(id, scenario_id):
         parcels_data = request.form.to_dict()
 
         land_use = get_land_use(p)
+
+        Air_params = [('dustLoad', "DustLoad"),
+                      ("dustDensity", "DustDensity"),
+                      ("airDensity", "AirDensity"),
+                      ("fractionOrganicMatterOnParticulates", "FractionOrganicMatterOnParticulates")]
 
         # Update the specified property
         field_name = parcels_data["field"]
@@ -200,11 +207,6 @@ def update_parcel(id, scenario_id):
                 if c.media.isa('Surface_Soil'):
                     par = c.parameters.get('TotalErosionRate')
                     par.value = parcels_data['totalErosionRate']
-
-        Air_params = [('dustLoad', "DustLoad"),
-                      ("dustDensity", "DustDensity"),
-                      ("airDensity", "AirDensity"),
-                      ("fractionOrganicMatterOnParticulates", "FractionOrganicMatterOnParticulates")]
         if field_name in [k for k, v in Air_params]:
             par_name = [v for k, v in Air_params if k == field_name][0]
             # TODO the below part generates error due to missing par for dustLoad, dustDensity etc...
@@ -420,13 +422,75 @@ def update_parcel(id, scenario_id):
                     print(new_formula)
                 FormulaService.get(src_par.formula.id).equation = new_formula
                 FormulaService.commit()
+        if field_name == "runoff_matrix_value":
+            scn = ScenarioService.get(id=parcels_data["id"])
+            sender_parcel_name = parcels_data["sender"].replace("ro_", "")
+            receivers = parcels_data["receiver"].split(",")
+            values = parcels_data["ro_value"].split(",")
+            sp = scn.parcels.where(Parcel.name == sender_parcel_name).first()
+            sender_comp = sp.get_compartment("Soil_Surface")
+            sender_par = [sender_comp.parameters.get("FractionOfTotalRunoff")]
+            if len(sender_par) > 0:
+                sender_par = sender_par[0]
+                eq = sender_par.formula.equation
+                for ri, rec in enumerate(receivers):
+                    receiver_name = rec.replace("ro_", "")
+                    replacing_value = values[ri]
+                    if receiver_name == "sink":  # Runoff goes directly to the sin in same parcel (sender parcel)
+                        receiver_comp = sp.get_compartment(name="Soil_Advection_Sink", media="Advection")
+                        if isinstance(receiver_comp, list):
+                            receiver_comp = receiver_comp[0]
+                    else:
+                        rp = scn.parcels.where(Parcel.name == receiver_name).first()
+                        receiver_comp = rp.get_compartment("Soil_Surface")
+                    entity_name = "receiver"
+                    formula_entity = receiver_comp
+                    # this pattern captures integers, decimals and/or numbers with scientific notations that may or may
+                    # not be in parentheses
+                    val_pattern = re.compile(r"\(?(\d+(?:\.\d+(?:[eE][+\-]?\d+)?))\)?")
+                    # We have the receiver compartment in the formula
+                    # TODO #1 Update formula only if the sender_comp.connects_to(receiver_comp) == True. if there is no
+                    #   connection (this means no custom link and
+                    #   sender_comp.volume_element.interface_with(sender_comp.volume_element) == False), either create
+                    #   a custom link or send error back to be shown as a validation error using async await in api call
+                    if not sender_comp.connects_to(receiver_comp):
+                        return ApiResult({
+                            'message': f'{sender_comp.standard_name} does not connect to {receiver_comp.standard_name}'
+                            })
+                    # TODO #2 if a value is given as zero and it exists in formula remove it from formula paying
+                    #  attention to parenthesis.
+                    if f'{entity_name}.id in {{{str(formula_entity.id)}}}' in eq:
+                        formula_parts = eq.split(f"if {entity_name}.id in {{{formula_entity.id}}}")
+                        formula_part = formula_parts[0]
+                        if "else" in formula_part:
+                            arr = formula_part.split("else")[:-1]
+                            val_part = formula_part.split("else")[-1]
+                            val_to_replace = val_pattern.findall(val_part)
+                            rep_val = val_part.replace(val_to_replace[0], replacing_value)
+                            formula_part = "else".join(arr + [f' {rep_val} '])
+                        else:
+                            val_to_replace = val_pattern.findall(formula_part)
+                            rep_val = formula_part.replace(val_to_replace[0], replacing_value)
+                            formula_part = f'{rep_val}'
+                        formula_parts[0] = formula_part
+                        new_formula = f"if {entity_name}.id in {{{formula_entity.id}}}".join(formula_parts)
+                        print(new_formula)
+                    # We do not have the receiver compartment in the formula. We need to add it...
+                    else:
+                        eq_arr = eq.split("else")
+                        eq_arr.insert(-2, f' ({replacing_value}) if {entity_name}.id in {{{formula_entity.id}}} ')
+                        new_formula = "else".join(eq_arr)
+                        print(new_formula)
+                    eq = new_formula
+                FormulaService.get(sender_par.formula.id).equation = new_formula
+                FormulaService.commit()
 
         # Update record
         ParcelService.update(p)
 
     except Exception as e:
         logger.error(traceback.format_exc())
-    return "success"
+    return ApiResult({'message': 'success'})
 
 
 @parcels_api.route('/api/scenario/<int:scenario_id>/parcel/<int:id>/delete', methods=['POST'])
@@ -507,6 +571,26 @@ def initialize_parcel_contents(new_parcel, vol_elem_defaults=None):
            # elif nc.name == "Surface_water" or nc.name == "Sediment":
 
 
+def get_surface_runoff(scenario_id):
+    scenario = ScenarioService.get(id=scenario_id)
+    soil_comps = [c for c in scenario.compartments if c.media.isa("Surface_Soil")]
+    water_comps = [c for c in scenario.compartments if c.media.isa("Surface_Water")]
+    sink_comps = [c for c in scenario.compartments if
+                  c.media.isa("Sink") & c.media.isa("Advection") & (not c.media.isa("Flush$"))]
+    runoffs = {}
+    for send in soil_comps:
+        sending_parcel = send.volume_element.parcel.name
+        runoffs[sending_parcel] = {}
+        runoffs[sending_parcel]['sink'] = 0
+        for recv in soil_comps + sink_comps + water_comps:
+            receiving_parcel = recv.volume_element.parcel.name
+            if recv in sink_comps:
+                runoffs[sending_parcel]['sink'] += send.FractionOfTotalRunoff(receiver=recv)
+            else:
+                runoffs[sending_parcel][receiving_parcel] = send.FractionOfTotalRunoff(receiver=recv)
+    return runoffs
+
+
 def calc_default_erosion_rate_sdr(pcl):
     for c in pcl.compartments:
         if not c.media.isa("Soil_Surface"):
@@ -573,7 +657,7 @@ def create_base_land_compartments(parcels_data, p, land_use):
     ve_surfsoil = VolumeElementService.get(name="SurfSoil", parcel_id=p.id)
     c_surfsoil = CompartmentService.get(name="Soil_Surface", volume_element_id=ve_surfsoil.id)
     custom_param_erosion = ParameterService.get(requirements=f'(self.id == {c_surfsoil.id})',
-                                                definition_id=517)
+                                                definition_id=596)
     # delete existing compartments
     if land_use in ['Tilled Soil', 'Untilled Soil', 'Impervious']:
         # Revert Soil_surface compartment to default media (Surface_Soil [id = 7])
@@ -608,30 +692,30 @@ def create_base_land_compartments(parcels_data, p, land_use):
         custom_param_erosion.value = 0
     elif parcels_data['landUse'] == 'Coniferous Forest':
         CompartmentService.create(name="Leaf_Coniferous_Forest", volume_element_id=ve_surfsoil.id,
-                                  media_id=36)
+                                  media_id=[m for m in CompartmentService.media.get_all() if m.isa('Coniferous_Leaf')][0].id)
         CompartmentService.create(name="Leaf_Particle_Coniferous_Forest", volume_element_id=ve_surfsoil.id,
-                                  media_id=52)
+                                  media_id=[m for m in CompartmentService.media.get_all() if m.isa('Coniferous_Leaf_Particle')][0].id)
     elif parcels_data['landUse'] == 'Deciduous Forest':
         CompartmentService.create(name="Leaf_Deciduous_Forest", volume_element_id=ve_surfsoil.id,
-                                  media_id=38)
+                                  media_id=[m for m in CompartmentService.media.get_all() if m.isa('Deciduous_Leaf')][0].id)
         CompartmentService.create(name="Leaf_Particle_Deciduous_Forest", volume_element_id=ve_surfsoil.id,
-                                  media_id=43)
+                                  media_id=[m for m in CompartmentService.media.get_all() if m.isa('Deciduous_Leaf_Particle')][0].id)
     elif parcels_data['landUse'] == 'Grasses/Herbs':
         CompartmentService.create(name="Leaf_Grasses_Herbs", volume_element_id=ve_surfsoil.id,
-                                  media_id=40)
+                                  media_id=[m for m in CompartmentService.media.get_all() if m.isa('Grass_Leaf')][0].id)
         CompartmentService.create(name="Leaf_Particle_Grasses_Herbs", volume_element_id=ve_surfsoil.id,
-                                  media_id=44)
+                                  media_id=[m for m in CompartmentService.media.get_all() if m.isa('Grass_Leaf_Particle')][0].id)
         CompartmentService.create(name="Stem_Grasses_Herbs", volume_element_id=ve_surfsoil.id,
-                                  media_id=42)
+                                  media_id=[m for m in CompartmentService.media.get_all() if m.isa('Grass_Stem')][0].id)
         CompartmentService.create(name="Root_Grasses_Herbs", volume_element_id=ve_surfsoil.id,
-                                  media_id=45)
+                                  media_id=[m for m in CompartmentService.media.get_all() if m.isa('Grass_Root')][0].id)
     elif parcels_data['landUse'] == 'Agriculture - General':
         CompartmentService.create(name="Leaf_Agriculture", volume_element_id=ve_surfsoil.id,
-                                  media_id=34)
+                                  media_id=[m for m in CompartmentService.media.get_all() if m.isa('Agriculture_Leaf')][0].id)
         CompartmentService.create(name="Leaf_Particle_Agriculture", volume_element_id=ve_surfsoil.id,
-                                  media_id=50)
+                                  media_id=[m for m in CompartmentService.media.get_all() if m.isa('Agriculture_Leaf_Particle')][0].id)
         CompartmentService.create(name="Stem_Agriculture", volume_element_id=ve_surfsoil.id,
-                                  media_id=41)
+                                  media_id=[m for m in CompartmentService.media.get_all() if m.isa('Agriculture_Stem')][0].id)
         CompartmentService.create(name="Root_Agriculture", volume_element_id=ve_surfsoil.id,
-                                  media_id=51)
+                                  media_id=[m for m in CompartmentService.media.get_all() if m.isa('Agriculture_Root')][0].id)
     CompartmentService.update(c_surfsoil)
