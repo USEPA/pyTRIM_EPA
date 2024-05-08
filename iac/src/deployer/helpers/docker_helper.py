@@ -1,6 +1,7 @@
 import base64, os
 import boto3
 import docker
+from datetime import datetime
 from common import await_stack_completion, extract_output_val, die, figure_parent_dir, whoami_aws, loggy
 
 IMAGE_TAG_NAME = "pytrim_iac"
@@ -9,6 +10,7 @@ class DockerHelper(object):
     def __init__(self):
         try:
             self.docker_client = docker.from_env()
+            print(f"docker client: {self.docker_client}")
         except:
             die("Could not create Docker client; is Docker desktop/etc. running?")
 
@@ -22,8 +24,8 @@ class DockerHelper(object):
     # gcloud-sdk errors when attempting to call build on the image client.
     def build_image(self):
         parent_dir = figure_parent_dir()
-        loggy("building Docker image from src...")
         sep = os.path.sep
+        loggy(f"building Docker image from src '{parent_dir}docker{sep}'...")
         self.docker_client.images.build(
             path = f"{parent_dir}docker{sep}",
             tag = IMAGE_TAG_NAME,
@@ -70,16 +72,21 @@ class DockerHelper(object):
         # low-level API; had trouble doing this with the images client directly
         image = self.docker_client.images.get(IMAGE_TAG_NAME)
 
+        tag = datetime.today().strftime('%Y%m%d%H%M')
+
         # image.tag("{registry}/{ecr_registry_name}", tag="pushtest") # TODO - what tag to really use?
-        image.tag(repo_uri, tag="pushtest2") # TODO - what tag to really use?
+        # image.tag(repo_uri, tag="pushtest2") # TODO - what tag to really use?
+        image.tag(repo_uri, tag=tag)
+        return tag
 
 
     # this is the equivalent of manually running e.g.:
     #
     #       docker push 426714360284.dkr.ecr.us-east-1.amazonaws.com/pytrim_proof_of_concept_repo:firstattempt
-    def push_image_to_ecr(self, username, password):
+    def push_image_to_ecr(self, username, password, repo_uri, img_tag):
         # TODO - don't hardcode the push tag...
-        push_tag = "426714360284.dkr.ecr.us-east-1.amazonaws.com/pytrim-dev-iac/private_ecr_repo:pushtest2"
+        # push_tag = "426714360284.dkr.ecr.us-east-1.amazonaws.com/pytrim-dev-iac/private_ecr_repo:pushtest2"
+        push_tag = f"{repo_uri}:{img_tag}"
         loggy(f"pushing image '{push_tag}' to ECR...")
         # resp = self.docker_client.images.push(push_tag)
         auth = {
@@ -108,6 +115,6 @@ class DockerHelper(object):
         """
         self.build_image()
         registry_url, ecr_username, ecr_password = self.get_login_data()
-        self.tag_image(ecr_repo_uri)
-        self.push_image_to_ecr(ecr_username, ecr_password)
+        img_tag = self.tag_image(ecr_repo_uri)
+        self.push_image_to_ecr(ecr_username, ecr_password, ecr_repo_uri, img_tag)
 

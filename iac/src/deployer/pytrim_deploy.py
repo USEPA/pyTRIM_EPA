@@ -43,7 +43,7 @@ class PyTrimDeployer(object):
             self.configure_ec2_instance()
         """
 
-        if mode == "full" or mode == "push_flask_build":
+        if mode == "_full" or mode == "push_flask_build":
             self.build_and_push_flash_app()
 
     def get_cfg_val(self, path, default_val = None):
