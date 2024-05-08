@@ -158,9 +158,10 @@ window.TRIM = (function(trim) {
     api.deleteParcels = function(scenarioId, parcel) {
         var url = api.getUrl('parcels_api.delete');
         var data = makeFormData(parcel);
+        parcel_id = parcel.properties.parcelid
         return AJAX.call({
             method: 'POST',
-            url: url.replace('/0/', '/' + scenarioId + '/').replace('/-1/', '/' + data.get('id') + '/'),
+            url: url.replace('/0/', '/' + scenarioId + '/').replace('/-1/', '/' + parcel_id + '/'),
             data: data
         });
     };

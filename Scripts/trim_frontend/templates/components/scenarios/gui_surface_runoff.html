@@ -1,0 +1,224 @@
+
+<form id="surface-runoff-gui"
+    data-async-form="true"
+    data-form-src="scenario_surface_runoff_form"
+>
+    <section class="container px-0">
+        <div class="row">
+            <div class="col-md">
+                <div class="pill pill-alert col-sm">
+                    <small>
+                        <strong>
+                            <u>Click on the table cells to edit properties.</u>Please note that the values displayed in the table at the time of the "Save" operation are the values that will be incorporated into the calculations
+                        </strong>
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md">
+            </div>
+            <div class="col-md">
+                <div class="row">
+                    <div class="col-md align-content-center justify-content-center">
+                        <div class="text-center">
+                            <button id="run_getflow" class="btn btn-warning">Run GetFlow</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md">
+                        <div class="text-center">
+                            <small>Click button to auto-calculate runoff values and automatically populate the runoff matrix below</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md">
+                <table class="hover" id="RunoffMatrix">
+                </table>
+            </div>
+        </div>
+    </section>
+</form>
+<style>
+    td.rightBorder {
+        text-align: right; border-right: 1px solid black; padding: 10px
+    }
+</style>
+<script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}">
+</script>
+<script src="{{ url_for('static', filename='js/lib/dataTables/jquery.dataTables.min.js') }}">
+</script>
+<script src="{{ url_for('static', filename='js/lib/dataTables/dataTables.bootstrap4.min.js') }}">
+</script>
+<script>
+    onDomLoad(function() {
+        let roTable = null;
+        function TableRedraw_RO(table_data, cols) {
+            let tblId = "#RunoffMatrix";
+            roTable =  $(tblId).removeAttr('width').dataTable({
+                data : table_data,
+                paging: false,
+                bFilter: false,
+                info: false,
+                bAutoWidth: false,
+                columns: cols,
+                fnCreatedRow: function (row, data, index) {
+                    $(row).attr("data-rsval","1")
+                    $(row).attr("data-entity","run off fractions")
+                },
+                initComplete: function (settings, json) {
+                    $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    $('[data-toggle="tooltip"]').tooltip()
+                    $('[data-toggle="popover"]').popover()
+                }
+            });
+
+            // save modified cell
+            $(`input.editableCell, select.editableCell`).blur(function () {
+                let this_input = this
+                let focusTblId = $(this_input).closest(`table`).attr('id');
+                let focusTblrow = $(this_input).closest(`tr`);
+                if (`#${focusTblId}` !== tblId) {
+                    return;
+                }
+                $(this_input).parent().find('label').addClass('modified')
+
+                // make sure the element and the row is valid before posting the modified elements (all modified elements need to be posted)
+                let is_valid = elementIsValid($(this).closest("tr")); //elementIsValid($(this).parent()) &&
+
+                if (is_valid) {
+                    let updated_inputs = [];
+                    let old_vals = [];
+                    $(focusTblrow).find("label.modified").each(function(i,e)
+                        {
+                            this_input = $(e).parent().find("input.editableCell")
+                            let data = $(this_input).val()
+                            $(e).siblings().hide()
+                            old_vals.push($(e).text())
+                            $(e).show().text(data)
+                            updated_inputs.push(this_input)
+                            $(e).removeClass("modified")
+                        }
+                    )
+                    submit_RO_value(updated_inputs, old_vals)
+                }
+            })
+        }
+
+        function get_form_data(elem_list) {
+            let sender = $(elem_list[0]).attr("data-sender")
+            let param_info = [
+                {
+                    'type': 'data',
+                    'name': 'id',
+                    'value': '{{ scenario.id }}'
+                }, {
+                    'type': 'data',
+                    'name': 'field',
+                    'value': 'runoff_matrix_value'
+                }, {
+                    'type': 'data',
+                    'name': 'sender',
+                    'value': 'ro_' + sender
+                }, {
+                    'type': 'data',
+                    'name': 'receiver',
+                    'value': []
+                }, {
+                    'type': 'input',
+                    'name': 'ro_value',
+                    'value': []
+                }
+            ]
+            elem_list.forEach(function (elem,i){
+                let receiver = $(elem).attr("data-receiver")
+                param_info[3]['value'].push(
+                    'ro_' + receiver
+                    )
+                param_info[4]['value'].push(
+                    $(elem).val()
+                    )
+            })
+            return param_info
+        }
+
+        function submit_RO_value(elem_list, old_vals) {
+            if (elem_list.constructor == Array && elem_list.length > 0) {
+                let parcel_info = get_form_data(elem_list)
+                let elem = elem_list[0]
+                if (elementIsValid($(elem).closest('tr'))){
+                    TRIM.api.updateParcel('{{ scenario.id }}',parcel_info).on('load',function(){
+                        let msg =  this.responseJSON["message"]
+                        if (msg != "success") {
+                            // oops! something went wrong... if there is a message display it as alert and revert to
+                            // unmodified values
+                            elem_list.forEach((e,i) => {
+                                $(e).val(old_vals[i])
+                                $(e).siblings("label").text(old_vals[i])
+                                $(e).siblings("label").removeClass("modified")
+                            })
+                            alert(msg)
+                        }
+                    })
+                } else {
+                    return
+                }
+            }
+        }
+
+        function create_cell_html(data, cell_prop, cell_data, err_html="", sender="", receiver=""){
+            return "<input "+err_html+" class='editableCell form-control form-control-sm type='text' value='" + data +
+                "' data-sender='"+ sender + "' data-receiver='"+ receiver + "' style='display:none'>" +
+                    "<label "+err_html+" class='" + cell_prop + "'>" + cell_data + "</label>"
+        }
+
+        document.body.addEventListener('parcels:loaded', function() {
+            let loadedData = $('#root').data('loadedParcels')
+            let runoff_data = []
+            // Define row headers as sender parcel names
+            let columns = [{
+                'data': 'sender',
+                'title': '<tr>' +
+                    '<td style="border-bottom: 0px; padding: 0px">receiver</td>' +
+                    '<td style="border-bottom: 0px; padding: 0px"><i class="fa fa-arrow-right"></i></td>' +
+                    '</tr>' +
+                    '<tr>' +
+                    '<td style="border-bottom: 0px; padding: 0px">sender</td>' +
+                    '<td style="border-bottom: 0px; padding: 0px"><i class="fa fa-arrow-down"></i></td>' +
+                    '</tr>',
+                'bSortable': false,
+                'className': 'font-weight-bold rightBorder'
+            }]
+            if (loadedData.scenario_head.runoff_matrix) {
+                Object.entries(loadedData.scenario_head['runoff_matrix']).forEach(function ([s, r], i) {
+                    runoff_data.push({
+                        'sender':s
+                    })
+                    Object.entries(r).forEach(([rc, v]) => {
+                        runoff_data[i][rc]=(v).toLocaleString(undefined, { minimumFractionDigits: 4 })
+                        if (i == 0) {
+                            columns.push({
+                                'data': rc,
+                                'title': rc,
+                                'bSortable': false,
+                                'render': function (data, type, row) {
+                                    let this_cell_data = data
+                                    let this_cell_prop = 'editableCell badge badge-light'
+                                    let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this);ErrorValidation.rowTotalIsValid(this)"';
+                                    return create_cell_html(data, this_cell_prop, this_cell_data, err_html = this_err_html, sender=row.sender, receiver=rc);
+                                }
+                            })
+                        }
+                    })
+                })
+            }
+            TableRedraw_RO(runoff_data, columns)
+        });
+    })
+</script>

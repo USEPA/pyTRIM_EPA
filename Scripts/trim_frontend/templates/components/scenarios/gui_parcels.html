@@ -275,7 +275,7 @@
             map.on('pm:remove', ({layer})=>{
                 parcels.removeLayer(layer._leaflet_id)
                 shapes = parcels.toGeoJSON()
-                TRIM.api.deleteParcels(layer.toGeoJSON())
+                TRIM.api.deleteParcels({{ scenario.id }}, layer.toGeoJSON())
                 mapTableRedraw()
             });
 
