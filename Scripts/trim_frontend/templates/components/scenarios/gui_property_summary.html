@@ -6,28 +6,15 @@
         <div class="row mb-1">
             <div class="col-sm">
                 <h3> General Properties </h3>
-                <button class="comp_show_all btn btn-warning">Show All</button>
-                <button class="comp_hide_all btn btn-warning">Hide All</button>
-                <button class="comp_show_nz btn btn-outline-success">Show Non-Zero</button>
-                <div class="dropdown d-inline">
-                    <button class="btn_show_comp btn btn-outline-success dropdown-toggle" type="button" data-toggle="dropdown">
-                        Show Property
-                    </button>
-                    <div class="dropdown-menu">
-                    </div>
-                </div>
+                <button class="scenario_show_all comp_show_all btn btn-warning">Show All</button>
+                <button class="scenario_hide_all comp_hide_all btn btn-warning">Hide All</button>
                 <table class="scenarioMap" style="border-collapse: collapse" cellpadding="6">
                     <thead>
                         <tr>
                             <th>Entity</th>
+                            <th></th>
                             <th>Property</th>
                             <th>Property Value</th>
-                        </tr>
-                        <tr data-depth='0' class='level0 colps'>
-                            <td>Simulation <span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td>
-                        </tr>
-                        <tr data-depth='0' class='level0 colps'>
-                            <td>Scenario <span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td>
                         </tr>
                     </thead>
                 </table>
@@ -47,7 +34,7 @@
                     <div class="dropdown-menu">
                     </div>
                 </div>
-                <table class="scenarioMap" style="border-collapse: collapse" cellpadding="6">
+                <table class="chemMap" style="border-collapse: collapse" cellpadding="6">
                     <thead>
                         <tr>
                             <th>Chemical</th>
@@ -93,6 +80,7 @@
             document.body.addEventListener('parcels:loaded', function() {
                 let loadedData = $('#root').data('loadedParcels')
                 $(initialize_compartment_map()).insertAfter($($("#property-summary-gui").find("table.compMap")[0]).find("thead"))
+                $(initialize_scenario_map()).insertAfter($($("#property-summary-gui").find("table.scenarioMap")[0]).find("thead"))
 
                 let dd_menu = $($("#property-summary-gui").find("table.compMap")[0]).prev("div.dropdown").find("div.dropdown-menu")
                 populate_comp_dd(dd_menu);
@@ -121,6 +109,12 @@
                     }
                 });
 
+                $('button.scenario_show_all').on('click', function(e) {
+                    let this_table =$(this).closest("div[role=tabpanel]").find("table.scenarioMap")
+                    $(this_table).find("tr.colps").show();
+                    $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "down"))
+                    $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "down"))
+                });
                 $('button.comp_show_all').on('click', function(e) {
                     e.preventDefault()
                     let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap")
@@ -130,6 +124,12 @@
                     $(this).closest("div").find("button.btn_show_comp").text("Show Compartment")
                 });
 
+                $('button.scenario_hide_all').on('click', function(e) {
+                    let this_table =$(this).closest("div[role=tabpanel]").find("table.scenarioMap")
+                    $(this_table).find("tr.colps:not([data-depth='0'])").hide();
+                    $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "up"))
+                    $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "up"))
+                });
                 $('button.comp_hide_all').on('click', function(e) {
                     e.preventDefault()
                     let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap")
@@ -154,6 +154,7 @@
                 });
 
                 function toggle_expand_icon(tr, dir){
+                    if ($(tr).find("i.fas").length <= 0) return;
                     if (!dir) {
                         if ($(tr).find("i.fas").attr("class").indexOf("fa-angle-right") > -1) {
                             $(tr).find("i.fas").attr("class", "fas fa-angle-down")
@@ -232,6 +233,35 @@
                 })
                 map_html += "</tbody>"
                 return map_html
+            }
+
+            // FIXME no daytime_indicator
+            function initialize_scenario_map(spec) {
+                let loadedData = $('#root').data('loadedParcels')['scenario_head']
+                var map_html = "<tbody>"
+                let scenario_map = {
+                    "Simulation": {
+                        "simulation_start_date": loadedData['simulation_start_date'],
+                        "simulation_end_date": loadedData['simulation_end_date'],
+                        "erosionRateSource": loadedData['erosionRateSource']
+                    },
+                    "Scenario": {
+                        "name": loadedData['name'],
+                        "description": loadedData['description'],
+                    }
+                }
+                scenario_map["Scenario"] = Object.assign({}, scenario_map["Scenario"], loadedData['meteo'])
+                scenario_map["Scenario"] = Object.assign({}, scenario_map["Scenario"], loadedData['wet_dep_interception'])
+                scenario_map["Scenario"] = Object.assign({}, scenario_map["Scenario"], loadedData['seasonal_dynamics'])
+                
+                for (const [entity_key, entity_value] of Object.entries(scenario_map)) {
+                    map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>" + entity_key + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
+                    for (const [property_key, property_value] of Object.entries(entity_value)) {
+                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td></td><td class='comp'>" + property_key + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted'>"+ property_value +"</label></td></tr>"
+                    }
+                }
+                map_html += "</tbody>"
+                return map_html        
             }
 
             function populate_comp_dd(dd_menu){

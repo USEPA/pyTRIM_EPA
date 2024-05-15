@@ -14,12 +14,12 @@ function ErrToolTip(ele, is_valid, message) {
         if (this_cell.length > 0) {
             $("label.warningTT").tooltip('hide');
             $(this_cell).append(tt);
-            $(this_cell).find("label.warningTT").tooltip('show');
+            $(this_cell).find("label.warningTT").tooltip('show').tooltip('hide');;
         } else {
             let this_txt = $(ele).closest("div");
             $("label.warningTT").tooltip('hide');
             $(this_txt).prepend(tt);
-            $(this_txt).find("label.warningTT").tooltip('show');
+            $(this_txt).find("label.warningTT").tooltip('show').tooltip('hide');;
         }
 
     }
