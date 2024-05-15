@@ -200,6 +200,7 @@
                 });
 
                 function toggle_expand_icon(tr, dir){
+                    if ($(tr).find("i.fas").length <= 0) return;
                     if (!dir) {
                         if ($(tr).find("i.fas").attr("class").indexOf("fa-angle-right") > -1) {
                             $(tr).find("i.fas").attr("class", "fas fa-angle-down")
