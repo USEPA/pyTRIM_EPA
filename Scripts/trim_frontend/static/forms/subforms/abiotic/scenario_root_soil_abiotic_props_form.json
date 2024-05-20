@@ -1,0 +1,81 @@
+{
+  "title": "Root Soil Properties",
+  "table_id": "RootSoilAbioticTable",
+  "pivot": false,
+  "header": "",
+  "fields": [
+    {
+      "id": "parcel_name",
+      "label": "Parcel Name",
+      "data_type": "str",
+      "default": ""
+    },
+    {
+      "id": "RootSoilThick",
+      "label": "Root Soil Thickness",
+      "data_type": "float",
+      "default": {
+          "tilled": 0.6,
+          "untilled": 0.79
+      },
+      "tooltip": "(m)",
+      "help": "Enter the thickness of a tilled/untilled layer of root-zone soil. Valid values are > 0. The default value of 0.60 assumes that the total thickness of the surface-soil layer and root-zone layer is 0.8 (0.01 for untilled surface soil [from p. 30 of McKone, T.E., A. Bodnar, and E. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. University of California at Berkeley. Supported by U.S. Environmental Protection Agency (Sustainable Technology Division, National Risk Management Research Laboratory) and Environmental Defense Fund. July. LBNL-43722. Available online at: https://escholarship.org/uc/item/9f1164rk.] + 0.79 for untilled root zone [from Table 16 - U.S. Average from McKone, T.E., A. Bodnar, and E. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. University of California at Berkeley. Supported by U.S. Environmental Protection Agency (Sustainable Technology Division, National Risk Management Research Laboratory) and Environmental Defense Fund. July. LBNL-43722. Available online at: <a href='https://escholarship.org/uc/item/9f1164rk' target='_blank'>https://escholarship.org/uc/item/9f1164rk</a>]). If the thickness of a tilled surface soil layer is 0.2 (from Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities (including the Hazardous Waste Companion Database of chemical-specific parameter values). U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response, Washington, DC. EPA-530-R-05-006. September. Available online at: <a href='https://archive.epa.gov/epawaste/hazard/tsd/td/web/html/risk.html' target='_blank'>https://archive.epa.gov/epawaste/hazard/tsd/td/web/html/risk.html</a>.), then the thickness of a tilled root zone is 0.8-0.2=0.6."
+    },
+    {
+      "id": "VolumeFraction_Vapor",
+      "label": "Air content",
+      "data_type": "float",
+      "default": 0.28,
+      "tooltip": "volume [air]/volume [compartment]",
+      "help": "Enter the volume fraction of air in the soil layer (volumetric pore space occupied by air). Valid values are 0 to 1. The default value of 0.28 is the U.S. average in Table 15 of McKone, T.E., A. Bodnar, and E. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. University of California at Berkeley. Supported by U.S. Environmental Protection Agency (Sustainable Technology Division, National Risk Management Research Laboratory) and Environmental Defense Fund. July. LBNL-43722. Available online at: <a href='https://escholarship.org/uc/item/9f1164rk' target='_blank'>https://escholarship.org/uc/item/9f1164rk</a>. For wetland parcels, a value of 0.1 might be appropriate (professional judgment)."
+    },
+    {
+      "id": "Average vertical velocity of water (percolation)",
+      "label": "Average vertical velocity of water (percolation)",
+      "data_type": "float",
+      "default": "<<<0.2 * e.precip_rate>>>",
+      "tooltip": "m/day",
+      "help": "Enter the average downward velocity of water in the soil layer. Valid values are >= 0. The default value is calculated based on the assumption of 0.2 multiplied by the average meters of daily precipitation for the modeled site. For wetland parcels, a value of 0 might be appropriate (professional judgment)."
+    },
+    {
+      "id": "rho",
+      "label": "Density of soil solids (dry weight)",
+      "data_type": "float",
+      "default": 2600,
+      "tooltip": "kg [soil]/m<sup>3</sup> [soil]",
+      "help": "Enter the dry weight density of soil solids in the soil layer. Valid values are > 0. The default value of 2,600 is the value used for by the CalTOX model (see Table 1 of: CalEPA (California Environmental Protection Agency), Department of Toxic Substances Control. 1996. The Distribution of California Landscape Variables for CalTOX. Draft (February). For wetland parcels, a value of 500 might be appropriate (professional judgment)."
+    },
+    {
+      "id": "FractionSand",
+      "label": "Fraction sand",
+      "data_type": "float",
+      "default": 0.25,
+      "tooltip": "unitless",
+      "help": "Enter the fraction of the soil layer that is sand. Valid values are 0 to 1. The default value of 0.25 is professional judgment. Typical sources of site-specific values include the U.S. Department of Agriculture's Web Soil Survey (Soil Survey Staff, Natural Resources Conservation Service, United States Department of Agriculture. Web Soil Survey. Available online at https://websoilsurvey.nrcs.usda.gov/.)."
+    },
+    {
+      "id": "OrganicCarbonContent",
+      "label": "Organic carbon fraction",
+      "data_type": "float",
+      "default": 0.008,
+      "tooltip": "unitless",
+      "help": "Enter the mass fraction of the soil solids which is made up of organic carbon in the soil layer. Valid values are > 0. The default value of 0.008 is the U.S. average in Table 16 of McKone, T.E., A. Bodnar, and E. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. University of California at Berkeley. Supported by U.S. Environmental Protection Agency (Sustainable Technology Division, National Risk Management Research Laboratory) and Environmental Defense Fund. July. LBNL-43722. Available online at: https://escholarship.org/uc/item/9f1164rk. Typical sources of site-specific values include the U.S. Department of Agriculture's Web Soil Survey (Soil Survey Staff, Natural Resources Conservation Service, United States Department of Agriculture. Web Soil Survey. Available online at https://websoilsurvey.nrcs.usda.gov/.)."
+    },
+    {
+      "id": "pH",
+      "label": "pH",
+      "data_type": "float",
+      "default": 6.8,
+      "tooltip": "unitless",
+      "help": "Enter the pH of the soil layer. Valid values are 0 to 14. The default value fo 6.8 is professional judgment. Typical sources of site-specific values include the U.S. Department of Agriculture's Web Soil Survey (Soil Survey Staff, Natural Resources Conservation Service, United States Department of Agriculture. Web Soil Survey. Available online at https://websoilsurvey.nrcs.usda.gov/.)."
+    },
+    {
+      "id": "VolumeFraction_Liquid",
+      "label": "Water content",
+      "data_type": "float",
+      "default": "0.19",
+      "tooltip": "volume [water]/volume [compartment]",
+      "help": "Enter the volume fraction of water in the soil layer (volumetric pore space occupied by water). Valid values are 0 to 1. The default value of 0.19 is the U.S. average in Table 15 of McKone, T.E., A. Bodnar, and E. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. University of California at Berkeley. Supported by U.S. Environmental Protection Agency (Sustainable Technology Division, National Risk Management Research Laboratory) and Environmental Defense Fund. July. LBNL-43722. Available online at: https://escholarship.org/uc/item/9f1164rk. Typical sources of site-specific values include the U.S. Department of Agriculture's Web Soil Survey (Soil Survey Staff, Natural Resources Conservation Service, United States Department of Agriculture. Web Soil Survey. Available online at https://websoilsurvey.nrcs.usda.gov/.). For wetland parcels, a value of 0.6 might be appropriate (professional judgment)."
+    }
+  ]
+}

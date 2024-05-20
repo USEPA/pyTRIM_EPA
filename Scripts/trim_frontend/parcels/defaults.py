@@ -2,6 +2,7 @@ from trim_db.schema import Parcel
 from trim_db.schema.utils.serialize import register_serializer
 from trim_db.schema.parameters.models import ParameterDefinition
 from trim_db.services import *
+import pint
 
 
 @register_serializer(Parcel)
@@ -9,6 +10,7 @@ def serialize_parcel(pcl: Parcel):
     general_params = get_general_params(pcl)
     water_params = get_water_params(pcl, general_params['parcelType'])
     source_params = get_source_params(pcl)
+    soil_abiotic_params = get_soil_abiotic_params(pcl)
 
     s = {
         'id': pcl.id,
@@ -19,7 +21,9 @@ def serialize_parcel(pcl: Parcel):
         'compartment_map': {ve.name: [c.name for c in ve.compartments] for ve in pcl.volume_elements},
         **general_params,
         **water_params,
-        **source_params
+        **source_params,
+        **soil_abiotic_params
+
     }
 
     return s
@@ -181,6 +185,75 @@ def get_general_params(pcl):
         'aquatic_bw': bw_by_media
     }
     return general_params
+
+
+def get_soil_abiotic_params(pcl):
+    comps = ["Soil_Surface", "Soil_Root_Zone", "Soil_Vadose_Zone", "Groundwater"]
+    has_surf_soil = True if pcl.get_compartment(name="Soil_Surface") else False
+    has_root_soil = True if pcl.get_compartment(name="Soil_Root_Zone") else False
+    has_vadose_soil = True if pcl.get_compartment(name="Soil_Vadose_Zone") else False
+    has_groundwater = True if pcl.get_compartment(name="Groundwater") else False
+    soil_abiotic_params = {}
+
+    if has_surf_soil and has_root_soil and has_vadose_soil and has_groundwater:
+        # get pH, fractionSand, organicCarbonContent, density
+        for c in comps:
+            params = {"pH": "", "FractionSand": "", "OrganicCarbonContent": "", "rho": ""}
+            for k, _ in params.items():
+                mag = pcl.get_compartment(name=c).__getattr__(k).magnitude if isinstance(
+                    pcl.get_compartment(name=c).__getattr__(k), pint.Quantity) else pcl.get_compartment(
+                    name=c).__getattr__(k)
+                params[k] = mag
+            soil_abiotic_params[c] = params
+
+    if has_groundwater:
+        # get porosity
+        param = soil_abiotic_params.get("Groundwater")
+        if param:
+            param["Porosity"] = pcl.get_compartment("Groundwater").Porosity
+        else:
+            param.setdefault("Groundwater", {"Porosity": pcl.get_compartment("Groundwater").Porosity})
+        soil_abiotic_params["Groundwater"] = param
+
+    comps.pop(comps.index("Groundwater"))
+    if has_root_soil and has_vadose_soil and has_surf_soil:
+        # get VolumeFraction_vapor, AverageVerticalVelocity, VolumeFraction_liquid
+        for c in comps:
+            params = {"VolumeFraction_Vapor": "", "AverageVerticalVelocity": "", "VolumeFraction_Liquid": "", "rho": ""}
+            if soil_abiotic_params.get(c):
+                for k, _ in params.items():
+                    mag = pcl.get_compartment(name=c).__getattr__(k).magnitude if isinstance(
+                        pcl.get_compartment(name=c).__getattr__(k), pint.Quantity) else pcl.get_compartment(
+                        name=c).__getattr__(k)
+                    soil_abiotic_params[c].setdefault(k, mag)
+            else:
+                for k, _ in params.items():
+                    mag = pcl.get_compartment(name=c).__getattr__(k).magnitude if isinstance(
+                        pcl.get_compartment(name=c).__getattr__(k), pint.Quantity) else pcl.get_compartment(
+                        name=c).__getattr__(k)
+                    params[k] = mag
+                soil_abiotic_params[c] = params
+
+    if has_surf_soil:
+        params = {"AirSoilBoundaryThickness": "", "Fractionofareaavailableforerosion": "",
+                  "FractionofAreaAvailableforRunoff": "", "Fractionofareaavailableforverticaldiffusion": "",
+                  "TotalRunoffRate": ""}
+        comp = "Soil_Surface"
+        if soil_abiotic_params.get(comp):
+            for k, _ in params.items():
+                mag = pcl.get_compartment(name=comp).__getattr__(k).magnitude if isinstance(
+                    pcl.get_compartment(name=comp).__getattr__(k), pint.Quantity) else pcl.get_compartment(
+                    name=comp).__getattr__(k)
+                soil_abiotic_params[comp].setdefault(k, mag)
+        else:
+            for k, _ in params.items():
+                mag = pcl.get_compartment(name=comp).__getattr__(k).magnitude if isinstance(
+                    pcl.get_compartment(name=comp).__getattr__(k), pint.Quantity) else pcl.get_compartment(
+                    name=comp).__getattr__(k)
+                params[k] = mag
+            soil_abiotic_params[comp] = params
+
+    return {"soil_params": soil_abiotic_params}
 
 
 def get_water_params(pcl, parcel_type):
