@@ -290,7 +290,8 @@
                     add_dynamic_props()
                 }
 
-                if (window.sessionStorage["Params_updated_id"+loadedData.scenario_head.id] == "false" && window.sessionStorage["m_results_id"+loadedData.scenario_head.id]) {
+                // check also window.sessionStorage["Params_updated_id"+loadedData.scenario_head.id] == "false"
+                if (window.sessionStorage["m_results_id"+loadedData.scenario_head.id]) {
                     // $('#btn_execute_model').attr('disabled', "disabled")
                     setChecked("p#cb_proc_trm", "on")
                     setChecked("p#cb_proc_ode", "on")

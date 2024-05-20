@@ -395,6 +395,12 @@ def update_parcel(id, scenario_id):
                                                        unit=this_comp.parameters.get(prop)[0].default_unit)
                     else:
                         this_comp.parameters.get(prop).value = float(parcels_data[field_name])
+        if field_name in ["pH", "rho", "AverageVerticalVelocity", "FractionSand", "OrganicCarbonContent",
+                          "VolumeFraction_Liquid", "VolumeFraction_Vapor", "Porosity", "AirSoilBoundaryThickness",
+                          "Fractionofareaavailableforerosion", "FractionofAreaAvailableforRunoff",
+                          "Fractionofareaavailableforverticaldiffusion", "TotalRunoffRate"]:
+            this_par = p.get_compartment(name=parcels_data["comp_name"]).parameters.get(parcels_data["field"])
+            this_par.value = float(parcels_data[field_name])
         if field_name == "emission":
             src_comp = [c for c in p.compartments if c.name == parcels_data["compartment_name"]][0]
             src_par = [par for parn, par in src_comp.parameters.items() if parn == "surfaceDepositionRate"]

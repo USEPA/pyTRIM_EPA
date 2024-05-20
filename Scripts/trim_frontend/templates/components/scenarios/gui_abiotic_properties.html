@@ -14,8 +14,65 @@
                         <br><span style='color: firebrick;'>*</span> All editable cells are required.
                     </small>
                 </div>
-                <table data-slot="true" class="hover" id="AbioticTable">
-                </table>
+                <div class = "row">
+                    <div class="col-md m-2 text-center">
+                        <h4>Air Properties</h4>
+                    </div>
+                </div>
+                <div class ="row">
+                    <div class="col-md">
+                        <table data-slot="true" data-target="AirAbioticTable" class="hover" id="AirAbioticTable"></table>
+                    </div>
+                </div>
+                <div class = "row">
+                    <div class="col-md mt-3">
+                    </div>
+                    <div class="col-md mt-3">
+                        <button class="btn btn-warning">Get data from USDA Soil DataMart</button>
+                    </div>
+                    <div class="col-md mt-3">
+                    </div>
+                </div>
+                <div class = "row">
+                    <div class="col-md mt-4 text-center">
+                        <h4>Surface Soil Properties</h4>
+                    </div>
+                </div>
+                <div class ="row">
+                    <div class="col-md">
+                        <table data-slot="true" data-target="SurfaceSoilAbioticTable" class="hover" id="SurfaceSoilAbioticTable"></table>
+                    </div>
+                </div>
+                <div class = "row">
+                    <div class="col-md mt-4 text-center">
+                        <h4>Root Soil Properties</h4>
+                    </div>
+                </div>
+                <div class ="row">
+                    <div class="col-md">
+                        <table data-slot="true" data-target="RootSoilAbioticTable" class="hover" id="RootSoilAbioticTable"></table>
+                    </div>
+                </div>
+                <div class = "row">
+                    <div class="col-md mt-4 text-center">
+                        <h4>Vadose Zone Properties</h4>
+                    </div>
+                </div>
+                <div class ="row">
+                    <div class="col-md">
+                        <table data-slot="true" data-target="VadoseSoilAbioticTable" class="hover" id="VadoseSoilAbioticTable"></table>
+                    </div>
+                </div>
+                <div class = "row">
+                    <div class="col-md mt-4 text-center">
+                        <h4>Groundwater Zone Properties</h4>
+                    </div>
+                </div>
+                <div class ="row">
+                    <div class="col-md">
+                        <table data-slot="true" data-target="GWSoilAbioticTable" class="hover" id="GWSoilAbioticTable"></table>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -26,19 +83,60 @@
 </script>
 <script src="{{ url_for('static', filename='js/lib/dataTables/dataTables.bootstrap4.min.js') }}">
 </script>
+<!--<script src="https://cdn.datatables.net/2.0.7/js/dataTables.js">-->
+<!--</script>-->
+<!--<script src="https://cdn.datatables.net/fixedcolumns/5.0.0/js/dataTables.fixedColumns.js">-->
+<!--</script>-->
+<!--<script src="https://cdn.datatables.net/fixedcolumns/5.0.0/js/fixedColumns.dataTables.js">-->
+<!--</script>-->
 <script>
     onDomLoad(function() {
-        let apTable = null;
+        let air_apTable = null;
+        let soil_apTable = null;
+        let root_apTable = null;
+        let vadose_apTable = null;
+        let gw_apTable = null;
+        let AIR_PROPS = ['parcelid','Surface Parcel','DustParticleConcentration', 'DustParticleDensity', 'AirDensity',
+            'DustParticleOrganicMatter', 'AirHeight','hasAir'];
+        let SOIL_PROPS = ['parcelid','Surface Parcel','Tillage', 'SurfaceSoilThick', 'RootSoilThick',
+            'VadoseZoneSoilThick', 'GroundwaterZoneSoilThick', 'hasLand', 'Soil_Surface',  'Soil_Root_Zone',
+            'Soil_Vadose_Zone', 'Groundwater'
+        ]
+        //     'pH', 'rho', 'AverageVerticalVelocity',
+        //     'FractionSand', 'OrganicCarbonContent', 'VolumeFraction_Liquid', 'VolumeFraction_Vapor', 'Porosity',
+        //     'AirSoilBoundaryThickness', 'Fractionofareaavailableforerosion', 'FractionofAreaAvailableforRunoff',
+        //     'Fractionofareaavailableforverticaldiffusion', 'TotalRunoffRate'
+        // ]
         function TableRedraw(table_data) {
-            let tblId = "#AbioticTable";
-            /*
-            if (apTable) {
-                $('#AbioticTable').dataTable().fnClearTable();
-                $('#AbioticTable').dataTable().fnDraw();
-                $('#AbioticTable').dataTable().fnDestroy();
-            }*/
-            apTable =  $(tblId).removeAttr('width').dataTable({
-                data : table_data,
+            let air_tblId = "#AirAbioticTable";
+            let soil_tblId = "#SurfaceSoilAbioticTable";
+            let root_tblId = "#RootSoilAbioticTable";
+            let vadose_tblId = "#VadoseSoilAbioticTable";
+            let gw_tblId = "#GWSoilAbioticTable";
+            let air_props = table_data.map(function(e,i){
+                let dd={};
+                Object.entries(e).filter((f,ii) => AIR_PROPS.indexOf(f[0]) >-1).forEach((a,i) => dd[a[0]]=a[1]);
+                return dd
+            })
+            let soil_props = table_data.map(function(e,i){
+                let dd={};
+                Object.entries(e).filter((f,ii) => SOIL_PROPS.indexOf(f[0]) >-1).forEach((a,i) => dd[a[0]]=a[1]);
+                return dd
+            })
+
+            let render_function_air = function(param_name, err_validation_type){
+                let ret_func = function (data, type, row) {
+                            let parcel_info = create_parcel_object(param_name, row, data);
+                            let this_cell_data = row.hasAir == "Yes" ? data : "N/A"
+                            let this_cell_prop = row.hasAir == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
+                            let this_err_html = 'onblur="' + err_validation_type + '"';
+                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html=this_err_html);
+                        }
+                return ret_func
+            }
+
+            air_apTable =  $(air_tblId).removeAttr('width').dataTable({
+                data : air_props,
                 paging: false,
                 bFilter: false,
                 info: false,
@@ -50,57 +148,56 @@
                     {
                         'data': "DustParticleConcentration",
                         'bSortable': false,
-                        'render': function (data, type, row) {
-                            let parcel_info = create_parcel_object('dustLoad', row, data);
-                            let this_cell_data = row.hasAir == "Yes" ? data : "N/A"
-                            let this_cell_prop = row.hasAir == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
-                            let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html=this_err_html);
-                        }
+                        'render': render_function_air('dustLoad', "ErrorValidation.isPositiveValue(this)")
                     },
                     {
                         'data': "DustParticleDensity",
                         'bSortable': false,
-                        'render': function (data, type, row) {
-                            let parcel_info = create_parcel_object('dustDensity', row, data);
-                            let this_cell_data = row.hasAir == "Yes" ? data : "N/A"
-                            let this_cell_prop = row.hasAir == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
-                            let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html=this_err_html);
-                        }
+                        'render':  render_function_air('dustDensity',"ErrorValidation.isPositiveValue(this)")
                     },
                     {
                         'data': "AirDensity",
                         'bSortable': false,
-                        'render': function (data, type, row) {
-                            let parcel_info = create_parcel_object('airDensity', row, data);
-                            let this_cell_data = row.hasAir == "Yes" ? data : "N/A"
-                            let this_cell_prop = row.hasAir == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
-                            let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html=this_err_html);
-                        }
+                        'render':  render_function_air('airDensity', "ErrorValidation.isPositiveValue(this)")
                     },
                     {
                         'data': "DustParticleOrganicMatter",
                         'bSortable': false,
-                        'render': function (data, type, row) {
-                            let parcel_info = create_parcel_object('fractionOrganicMatterOnParticulates', row, data);
-                            let this_cell_data = row.hasAir == "Yes" ? data : "N/A"
-                            let this_cell_prop = row.hasAir == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
-                            let this_err_html = 'onblur="ErrorValidation.isValidFraction(this)"';
-                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html=this_err_html);
-                        }
+                        'render':  render_function_air('fractionOrganicMatterOnParticulates', "ErrorValidation.isValidFraction(this)")
                     },
                     {
                         'data': "AirHeight",
                         'bSortable': false,
-                        'render': function (data, type, row) {
-                            let parcel_info = create_parcel_object('airHeight', row, data);
-                            let this_cell_data = row.hasAir == "Yes" ? data : "N/A"
-                            let this_cell_prop = row.hasAir == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
-                            let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html=this_err_html);
-                        }
+                        'render':  render_function_air('airHeight', "ErrorValidation.isPositiveValue(this)")
+                    }
+                ],
+                initComplete: function (settings, json) {
+                    $(air_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    $('[data-toggle="tooltip"]').tooltip()
+                    $('[data-toggle="popover"]').popover()
+                }
+            });
+
+            let render_function_soil = function(param_name, err_validation_type, comp_name){
+                let ret_func = function (data, type, row) {
+                    let parcel_info = create_parcel_object(param_name, row, data, comp_name);
+                    let this_cell_data = row.hasLand == "Yes" ? data : "N/A"
+                    let this_cell_prop = row.hasLand == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
+                    let this_err_html = 'onblur="' + err_validation_type + '"';
+                    return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html=this_err_html);
+                }
+                return ret_func
+            }
+
+            soil_apTable =  $(soil_tblId).removeAttr('width').dataTable({
+                data : soil_props,
+                paging: false,
+                bFilter: false,
+                info: false,
+                bAutoWidth: false,
+                columns: [
+                    {
+                        'data': "Surface Parcel",
                     },
                     {
                         data: "Tillage",
@@ -118,50 +215,235 @@
                     {
                         'data': "SurfaceSoilThick",
                         'bSortable': false,
-                        'render': function (data, type, row) {
-                            let parcel_info = create_parcel_object('surfaceSoilThickness', row, data);
-                            let this_cell_data = row.hasLand == "Yes" ? data : "N/A"
-                            let this_cell_prop = row.hasLand == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
-                            let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html=this_err_html);
-                        }
+                        'render': render_function_soil('surfaceSoilThickness', "ErrorValidation.isPositiveValue(this)", "Soil_Surface")
+                    },
+                    {
+                        'data': 'Soil_Surface.VolumeFraction_Vapor',
+                        'bSortable': false,
+                        'render':  render_function_soil('VolumeFraction_Vapor',"ErrorValidation.isValidFraction(this)", "Soil_Surface")
+                    },
+                    {
+                        'data': 'Soil_Surface.AverageVerticalVelocity',
+                        'bSortable': false,
+                        'render':  render_function_soil('AverageVerticalVelocity',"ErrorValidation.isPositiveValue(this)", "Soil_Surface")
+                    },
+                    {
+                        'data': 'Soil_Surface.AirSoilBoundaryThickness',
+                        'bSortable': false,
+                        'render':  render_function_soil('AirSoilBoundaryThickness',"ErrorValidation.isPositiveValue(this)", "Soil_Surface")
+                    },
+                    {
+                        'data': 'Soil_Surface.rho',
+                        'bSortable': false,
+                        'render':  render_function_soil('rho',"ErrorValidation.isPositiveValue(this)", "Soil_Surface")
+                    },
+                    {
+                        'data': 'Soil_Surface.Fractionofareaavailableforerosion',
+                        'bSortable': false,
+                        'render':  render_function_soil('Fractionofareaavailableforerosion',"ErrorValidation.isValidFraction(this)", "Soil_Surface")
+                    },
+                    {
+                        'data': 'Soil_Surface.FractionofAreaAvailableforRunoff',
+                        'bSortable': false,
+                        'render':  render_function_soil('FractionofAreaAvailableforRunoff',"ErrorValidation.isValidFraction(this)", "Soil_Surface")
+                    },
+                    {
+                        'data': 'Soil_Surface.Fractionofareaavailableforverticaldiffusion',
+                        'bSortable': false,
+                        'render':  render_function_soil('Fractionofareaavailableforverticaldiffusion',"ErrorValidation.isValidFraction(this)", "Soil_Surface")
+                    },
+                    {
+                        'data': 'Soil_Surface.FractionSand',
+                        'bSortable': false,
+                        'render':  render_function_soil('FractionSand',"ErrorValidation.isValidFraction(this)", "Soil_Surface")
+                    },
+                    {
+                        'data': 'Soil_Surface.OrganicCarbonContent',
+                        'bSortable': false,
+                        'render':  render_function_soil('OrganicCarbonContent',"ErrorValidation.isValidFraction(this)", "Soil_Surface")
+                    },
+                    {
+                        'data': 'Soil_Surface.pH',
+                        'bSortable': false,
+                        'render':  render_function_soil('pH',"ErrorValidation.isPositiveValue(this)", "Soil_Surface")
+                    },
+                    {
+                        'data': 'Soil_Surface.TotalRunoffRate',
+                        'bSortable': false,
+                        'render':  render_function_soil('TotalRunoffRate',"ErrorValidation.isPositiveValue(this)", "Soil_Surface")
+                    },
+                    {
+                        'data': "Soil_Surface.VolumeFraction_Liquid",
+                        'bSortable': false,
+                        'render': render_function_soil('VolumeFraction_Liquid',"ErrorValidation.isValidFraction(this)", "Soil_Surface")
+                    }
+                ],
+                initComplete: function (settings, json) {
+                    $(soil_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    $('[data-toggle="tooltip"]').tooltip()
+                    $('[data-toggle="popover"]').popover()
+                }
+            });
+
+            root_apTable =  $(root_tblId).removeAttr('width').dataTable({
+                data : soil_props,
+                paging: false,
+                bFilter: false,
+                info: false,
+                bAutoWidth: false,
+                columns: [
+                    {
+                        'data': "Surface Parcel",
                     },
                     {
                         'data': "RootSoilThick",
                         'bSortable': false,
-                        'render': function (data, type, row) {
-                            let parcel_info = create_parcel_object('rootSoilThickness', row, data);
-                            let this_cell_data = row.hasLand == "Yes" ? data : "N/A"
-                            let this_cell_prop = row.hasLand == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
-                            let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html=this_err_html);
-                        }
+                        'render': render_function_soil('rootSoilThickness',"ErrorValidation.isPositiveValue(this)")
+                    },
+                    {
+                        'data': 'Soil_Root_Zone.VolumeFraction_Vapor',
+                        'bSortable': false,
+                        'render':  render_function_soil('VolumeFraction_Vapor',"ErrorValidation.isValidFraction(this)", "Soil_Root_Zone")
+                    },
+                    {
+                        'data': 'Soil_Root_Zone.AverageVerticalVelocity',
+                        'bSortable': false,
+                        'render':  render_function_soil('AverageVerticalVelocity',"ErrorValidation.isPositiveValue(this)", "Soil_Root_Zone")
+                    },
+                    {
+                        'data': 'Soil_Root_Zone.rho',
+                        'bSortable': false,
+                        'render':  render_function_soil('rho',"ErrorValidation.isPositiveValue(this)", "Soil_Root_Zone")
+                    },
+                    {
+                        'data': 'Soil_Root_Zone.FractionSand',
+                        'bSortable': false,
+                        'render':  render_function_soil('FractionSand',"ErrorValidation.isValidFraction(this)", "Soil_Root_Zone")
+                    },
+                    {
+                        'data': 'Soil_Root_Zone.OrganicCarbonContent',
+                        'bSortable': false,
+                        'render':  render_function_soil('OrganicCarbonContent',"ErrorValidation.isValidFraction(this)", "Soil_Root_Zone")
+                    },
+                    {
+                        'data': 'Soil_Root_Zone.pH',
+                        'bSortable': false,
+                        'render':  render_function_soil('pH',"ErrorValidation.isPositiveValue(this)", "Soil_Root_Zone")
+                    },
+                    {
+                        'data': "Soil_Root_Zone.VolumeFraction_Liquid",
+                        'bSortable': false,
+                        'render': render_function_soil('VolumeFraction_Liquid',"ErrorValidation.isValidFraction(this)", "Soil_Root_Zone")
+                    }
+                ],
+                initComplete: function (settings, json) {
+                    $(root_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    $('[data-toggle="tooltip"]').tooltip()
+                    $('[data-toggle="popover"]').popover()
+                }
+            });
+
+            vadose_apTable =  $(vadose_tblId).removeAttr('width').dataTable({
+                data : soil_props,
+                paging: false,
+                bFilter: false,
+                info: false,
+                bAutoWidth: false,
+                columns: [
+                    {
+                        'data': "Surface Parcel",
                     },
                     {
                         'data': "VadoseZoneSoilThick",
                         'bSortable': false,
-                        'render': function (data, type, row) {
-                            let parcel_info = create_parcel_object('vadoseZoneSoilThick', row, data);
-                            let this_cell_data = row.hasLand == "Yes" ? Number.parseFloat(data).toFixed(5) : "N/A"
-                            let this_cell_prop = row.hasLand == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
-                            let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html=this_err_html);
-                        }
+                        'render': render_function_soil('vadoseSoilThickness', "ErrorValidation.isPositiveValue(this)")
+                    },
+                    {
+                        'data': 'Soil_Vadose_Zone.VolumeFraction_Vapor',
+                        'bSortable': false,
+                        'render':  render_function_soil('VolumeFraction_Vapor',"ErrorValidation.isValidFraction(this)", "Soil_Vadose_Zone")
+                    },
+                    {
+                        'data': 'Soil_Vadose_Zone.AverageVerticalVelocity',
+                        'bSortable': false,
+                        'render':  render_function_soil('AverageVerticalVelocity',"ErrorValidation.isPositiveValue(this)", "Soil_Vadose_Zone")
+                    },
+                    {
+                        'data': 'Soil_Vadose_Zone.rho',
+                        'bSortable': false,
+                        'render':  render_function_soil('rho',"ErrorValidation.isPositiveValue(this)", "Soil_Vadose_Zone")
+                    },
+                    {
+                        'data': 'Soil_Vadose_Zone.FractionSand',
+                        'bSortable': false,
+                        'render':  render_function_soil('FractionSand',"ErrorValidation.isValidFraction(this)", "Soil_Vadose_Zone")
+                    },
+                    {
+                        'data': 'Soil_Vadose_Zone.OrganicCarbonContent',
+                        'bSortable': false,
+                        'render':  render_function_soil('OrganicCarbonContent',"ErrorValidation.isValidFraction(this)", "Soil_Vadose_Zone")
+                    },
+                    {
+                        'data': 'Soil_Vadose_Zone.pH',
+                        'bSortable': false,
+                        'render':  render_function_soil('pH',"ErrorValidation.isPositiveValue(this)", "Soil_Vadose_Zone")
+                    },
+                    {
+                        'data': "Soil_Vadose_Zone.VolumeFraction_Liquid",
+                        'bSortable': false,
+                        'render': render_function_soil('VolumeFraction_Liquid',"ErrorValidation.isValidFraction(this)", "Soil_Vadose_Zone")
+                    }
+                ],
+                initComplete: function (settings, json) {
+                    $(vadose_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    $('[data-toggle="tooltip"]').tooltip()
+                    $('[data-toggle="popover"]').popover()
+                }
+            });
+
+            gw_apTable =  $(gw_tblId).removeAttr('width').dataTable({
+                data : soil_props,
+                paging: false,
+                bFilter: false,
+                info: false,
+                bAutoWidth: false,
+                columns: [
+                    {
+                        'data': "Surface Parcel",
                     },
                     {
                         'data': "GroundwaterZoneSoilThick",
                         'bSortable': false,
-                        'render': function (data, type, row) {
-                            let parcel_info = create_parcel_object('groundwaterZoneSoilThick', row, data);
-                            let this_cell_data = row.hasLand == "Yes" ? data : "N/A"
-                            let this_cell_prop = row.hasLand == "Yes" ? 'editableCell badge badge-light' : 'text-muted'
-                            let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
-                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html=this_err_html);
-                        }
+                        'render': render_function_soil('groundwaterZoneSoilThick', "ErrorValidation.isPositiveValue(this)")
+                    },
+                    {
+                        'data': 'Groundwater.rho',
+                        'bSortable': false,
+                        'render':  render_function_soil('rho',"ErrorValidation.isPositiveValue(this)", "Groundwater")
+                    },
+                    {
+                        'data': 'Groundwater.FractionSand',
+                        'bSortable': false,
+                        'render':  render_function_soil('FractionSand',"ErrorValidation.isValidFraction(this)", "Groundwater")
+                    },
+                    {
+                        'data': 'Groundwater.OrganicCarbonContent',
+                        'bSortable': false,
+                        'render':  render_function_soil('OrganicCarbonContent',"ErrorValidation.isValidFraction(this)", "Groundwater")
+                    },
+                    {
+                        'data': 'Groundwater.pH',
+                        'bSortable': false,
+                        'render':  render_function_soil('pH',"ErrorValidation.isPositiveValue(this)", "Groundwater")
+                    },
+                    {
+                        'data': 'Groundwater.Porosity',
+                        'bSortable': false,
+                        'render':  render_function_soil('Porosity',"ErrorValidation.isValidFraction(this)", "Groundwater")
                     }
                 ],
                 initComplete: function (settings, json) {
-                    $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    $(gw_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
                 }
@@ -170,7 +452,7 @@
             let sort_order = "asc"
             $('.sortClass').click(function(e){
                 e.preventDefault();
-                let Table = $(tblId).dataTable()
+                let Table = $(air_tblId, air_tblId, root_tblId, vadose_tblId, gw_tblId).dataTable()
                 let cellIndex = $(this).closest("th").index()
                 Table.fnSort([[cellIndex,sort_order]]);//use asc/desc as you want
                 sort_order= sort_order == "desc" ? "asc" : "desc"
@@ -187,7 +469,8 @@
             // save modified cell
             $(`input.editableCell, select.editableCell`).blur(function () {
                 let focusTblId = $(this).closest(`table`).attr('id');
-                if (`#${focusTblId}` !== tblId) {
+                if (`#${focusTblId}` !== air_tblId && `#${focusTblId}` !== soil_tblId && `#${focusTblId}` !== root_tblId
+                && `#${focusTblId}` !== vadose_tblId && `#${focusTblId}` !== gw_tblId) {
                     return;
                 }
 
@@ -201,10 +484,8 @@
                     let parcel_info = $(this).data('parcelinfo')
                     if (parcel_info) {
                         parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                        console.log(parcel_info)
                         TRIM.api.updateParcel('{{ scenario.id }}', parcel_info)
-                        table_data = get_Data_from_table(tblId)
-                        //TableRedraw(table_data)
+                        table_data = get_Data_from_table(`#${focusTblId}`)
                     }
                 }
             })
@@ -214,7 +495,7 @@
         form.addEventListener('form:loaded', function() {
         });
 
-        function create_parcel_object(id, row, data){
+        function create_parcel_object(id, row, data, comp_name=undefined){
             let parcel_info = [{
                                 'type': 'data',
                                 'name': 'id',
@@ -228,6 +509,14 @@
                                 'name': id,
                                 'value': data
                             }]
+            if (comp_name) {
+                let cn_obj = {
+                    'type': 'data',
+                    'name': 'comp_name',
+                    'value': comp_name
+                }
+                parcel_info.push(cn_obj)
+            }
             return JSON.stringify(parcel_info)
         }
 
@@ -265,8 +554,9 @@
             if (loadedData.scenario.length > 0) {
                 loadedData['scenario'].forEach(function (e, i) {
                     let till_val = e.tillage == "Yes" ? "tilled" : "untilled";
-                    abiotic_data.push(
-                        {
+                    let s = e.hasLand == "Yes" ? e["soil_params"] : e;
+                    let comps = ["Soil_Surface", "Soil_Root_Zone", "Soil_Vadose_Zone", "Groundwater"]
+                    let param_dict = {
                             'parcelid': e.id,
                             'Surface Parcel': e.name,
                             'hasAir': e.hasAir,
@@ -281,9 +571,28 @@
                             'SurfaceSoilThick': (e.surfaceSoilThickness ? e.surfaceSoilThickness : TRIM.forms.fetchDefault('SurfaceSoilThick')[till_val]),
                             'RootSoilThick': (e.rootSoilThickness ? e.rootSoilThickness : TRIM.forms.fetchDefault('RootSoilThick')[till_val]),
                             'VadoseZoneSoilThick': (e.vadoseSoilThickness ? e.vadoseSoilThickness : TRIM.forms.fetchDefault('VadoseZoneSoilThick')),
-                            'GroundwaterZoneSoilThick': (e.groundwaterZoneThickness ? e.groundwaterZoneThickness : TRIM.forms.fetchDefault('GroundwaterZoneSoilThick'))
+                            'GroundwaterZoneSoilThick': (e.groundwaterZoneThickness ? e.groundwaterZoneThickness : TRIM.forms.fetchDefault('GroundwaterZoneSoilThick')),
                         }
-                    )
+                    comps.forEach(function(c,i) {
+                        if (e.hasLand == "Yes") {
+                            param_dict[c] = {
+                                'pH': s[c].pH ,
+                                'rho': s[c].rho ,
+                                'AverageVerticalVelocity': s[c].AverageVerticalVelocity,
+                                'FractionSand': s[c].FractionSand ,
+                                'OrganicCarbonContent': s[c].OrganicCarbonContent,
+                                'VolumeFraction_Liquid': s[c].VolumeFraction_Liquid,
+                                'VolumeFraction_Vapor': s[c].VolumeFraction_Vapor ,
+                                'Porosity': s[c].Porosity ,
+                                'AirSoilBoundaryThickness': s[c].AirSoilBoundaryThickness,
+                                'Fractionofareaavailableforerosion': s[c].Fractionofareaavailableforerosion,
+                                'FractionofAreaAvailableforRunoff': s[c].FractionofAreaAvailableforRunoff,
+                                'Fractionofareaavailableforverticaldiffusion': s[c].Fractionofareaavailableforverticaldiffusion,
+                                'TotalRunoffRate': s[c].TotalRunoffRate
+                            }
+                        }
+                    })
+                    abiotic_data.push(param_dict)
                 })
             }
             TableRedraw(abiotic_data)
