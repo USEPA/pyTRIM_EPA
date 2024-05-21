@@ -484,7 +484,8 @@ def run_full_model(scn):
     scn = ScenarioService.get(id=scn.id)
     try:
         (tm, df_tm, sm, df_sm, df_vmu) = make_transition_matrix(scn)
-    except Exception:
+    except Exception as e:
+        print(f"ERRORED WHILE MAKING TRANSITION MATRIX: {e}")
         [v for v in scn.proc_status][0].run_status = 'err tm 0'
 
     # get result
@@ -497,7 +498,8 @@ def run_full_model(scn):
         ScenarioService.commit()
         # make concentration output
         df_conc = compute_concentration(df_nt, df_vmu)
-    except Exception:
+    except Exception as e:
+        print(f"ERRORED WHILE MAKING CONCENTRATION OUTPUT: {e}")
         [v for v in scn.proc_status][0].run_status = 'err ode 0'
 
     # compute annual average mass and conc time series
@@ -521,14 +523,17 @@ def run_full_model(scn):
     ScenarioService.commit()
     scn = ScenarioService.get(id=scn.id)
     try:
+        print("wha the...")
         outfile_nt, outfile_conc = safe_save_output(dfn_avg, dfc_avg, scn, filetype='excel')
+        print("heck?")
         # safe_save_output(df_nt, df_conc, scn, filetype='excel')
         [v for v in scn.proc_status][0].result_file_nt = outfile_nt
         [v for v in scn.proc_status][0].result_file_conc = outfile_conc
         [v for v in scn.proc_status][0].run_status = 'run fin 100'
         [v for v in scn.proc_status][0].result_nt = json.dumps(json_n_avg, default=str)
         [v for v in scn.proc_status][0].result_conc = json.dumps(json_c_avg, default=str)
-    except Exception:
+    except Exception as e:
+        print(f"ERRORED WHILE MAKING CSV: {e}")
         [v for v in scn.proc_status][0].run_status = 'err csv 0'
     ScenarioService.commit()
 
@@ -548,11 +553,15 @@ def safe_save_output(df_nt, df_conc, scn, filetype='csv'):
             df_conc.to_csv(fname_conc)
         else:
             path_output_nt = './trim_frontend/static/.output/'
-            fname_nt = f'nt_new_{scn.name}_{scn.creator_id}_{ts}.xlsx'
+            just_name_nt = f'nt_new_{scn.name}_{scn.creator_id}_{ts}.xlsx'
+            fname_nt = os.path.join(path_output_nt, just_name_nt)
+
             path_output_conc = './trim_frontend/static/.output/'
-            fname_conc = f'conc_new_{scn.name}_{scn.creator_id}_{ts}.xlsx'
-            split_write_files(df_nt, sim_chems, path_output_nt, fname_nt)
-            split_write_files(df_conc, sim_chems, path_output_conc, fname_conc)
+            just_name_conc = f'conc_new_{scn.name}_{scn.creator_id}_{ts}.xlsx'
+            fname_conc = os.path.join(path_output_conc, just_name_conc)
+
+            split_write_files(df_nt, sim_chems, fname_nt)
+            split_write_files(df_conc, sim_chems, fname_conc)
     except Exception as e:
         print(f'{20 * ">"} Output write exception writing {filetype} file:\n{e}')
         fname_nt = "No File. There was an error while writing output..."
@@ -560,9 +569,8 @@ def safe_save_output(df_nt, df_conc, scn, filetype='csv'):
     return fname_nt, fname_conc
 
 
-def split_write_files(df, sim_chems, path_output, file_name):
+def split_write_files(df, sim_chems, of_pn):
     # Helper function to split and write time series files into excel workbook with multiple worksheets
-    of_pn = os.path.join(path_output, file_name)
     writer = pd.ExcelWriter(of_pn, engine='xlsxwriter')
     for chem in sim_chems:  # loop over sim chemicals
         # prefix = 'chem_'+chem.replace(' ', '_') + '_'  # construct prefix

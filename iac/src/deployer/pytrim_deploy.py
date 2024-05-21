@@ -84,6 +84,7 @@ class PyTrimDeployer(object):
     def do_cf_stack_work(self):
         eip_name = self.get_cfg_val("aws.eip_name")
         env_name = self.get_cfg_val("environment_name")
+        short_env_profile = self.get_cfg_val("short_env_profile")
         ssh_keypair_name = self.get_cfg_val("aws.ssh_keypair_name")
         vpc_seg = self.get_cfg_val("aws.cidr_segment_vpc")
         loggy(f"building AWS cloudformation stack named '{env_name}' / {vpc_seg}")
@@ -99,6 +100,7 @@ class PyTrimDeployer(object):
         cf_helper = CloudFormationHelper()
         cf_helper.create_or_update_stack(env_name, {
             "EnvironmentName": env_name,
+            "ShortEnvironmentProfile": short_env_profile,
             "CidrSegmentVPC": vpc_seg,
             "DatabaseName": self.get_cfg_val("aws.db.dbname"),
             "DatabaseMasterAccountUsername": self.get_cfg_val("aws.db.username"),

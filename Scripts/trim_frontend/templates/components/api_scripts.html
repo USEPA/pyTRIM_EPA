@@ -13,6 +13,7 @@ window.TRIM = (function(trim) {
         'scenario_api.get_result_scenario': '{{ url_for("scenario_api.get_result_scenario") }}',
         'scenario_api.poll_model_run_scenario': '{{ url_for("scenario_api.poll_model_run_scenario", id=0) }}',
         'scenario_api.reset_poll_model_run_scenario': '{{ url_for("scenario_api.reset_poll_model_run_scenario") }}',
+        'scenario_api.check_execution_completion': '{{ url_for("scenario_api.check_execution_completion") }}',
         'parcels_api.create':'{{ url_for("parcels_api.create_parcel", scenario_id=0) }}',
         'parcels_api.get':'{{ url_for("parcels_api.get_parcels", scenario_id=0) }}',
         'parcels_api.update': '{{ url_for("parcels_api.update_parcel", scenario_id=0, id=-1) }}',
@@ -31,7 +32,11 @@ window.TRIM = (function(trim) {
         return '{{ csrf_token() }}';
     };
 
+
     trim.api = api;
+
+	trim.trim_env_profile = '{{ config["TRIM_ENV_PROFILE"] }}';
+
     return trim;
 })(window.TRIM || {});
 </script>

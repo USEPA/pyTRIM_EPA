@@ -61,6 +61,24 @@ window.AJAX = (function(ajax) {
         var data = opts.data || null;
 
         var request = new XMLHttpRequest();
+
+		var callback = opts.callback || undefined;
+
+		request.addEventListener("readystatechange", () => {
+		  if (request.readyState === 4 && request.status === 200) {
+			  let parsedResponseData = null;
+			  try {
+				  parsedResponseData = JSON.parse(request.responseText);
+			  } catch (e) {
+				  parsedResponseData = request.responseText;
+			  }
+
+			if (callback !== undefined) { callback(true, parsedResponseData); }
+		  } else if (request.readyState === 4) {
+		    if (callback !== undefined) { callback(false, "could not fetch the data"); }
+		  }
+		});
+
         request.open(method, url);
         request.send(data);
 

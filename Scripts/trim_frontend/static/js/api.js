@@ -153,13 +153,14 @@ window.TRIM = (function(trim) {
         });
     };
 
-    api.runModel = function(scenario_info) {
+    api.runModel = function(scenario_info, callback_fxn) {
         let url = api.getUrl('scenario_api.run_result_scenario');
         let data = makeFormData(scenario_info);
         return AJAX.call({
             method: 'POST',
             url: url,
-            data: data
+            data: data,
+			callback: callback_fxn
         });
     }
 
@@ -188,6 +189,17 @@ window.TRIM = (function(trim) {
             method: 'POST',
             url: url,
             data: data
+        });
+    }
+
+    api.checkExecutionCompletion = function(execution_arn, callback_fxn) {
+        let url = api.getUrl('scenario_api.check_execution_completion');
+        let data = makeFormData([{ "name": "execution_arn", "value": execution_arn }])
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: data,
+			callback: callback_fxn
         });
     }
 

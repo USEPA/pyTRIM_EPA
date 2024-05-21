@@ -25,13 +25,16 @@ class DockerHelper(object):
     def build_image(self):
         parent_dir = figure_parent_dir()
         sep = os.path.sep
-        loggy(f"building Docker image from src '{parent_dir}docker{sep}'...")
-        self.docker_client.images.build(
-            path = f"{parent_dir}docker{sep}",
-            tag = IMAGE_TAG_NAME,
-        )
+        try:
+            loggy(f"building Docker image from src '{parent_dir}docker{sep}'...")
+            self.docker_client.images.build(
+                path = f"{parent_dir}docker{sep}",
+                tag = IMAGE_TAG_NAME,
+            )
 
-        loggy(f"build of '{IMAGE_TAG_NAME}' complete")
+            loggy(f"build of '{IMAGE_TAG_NAME}' complete")
+        except Exception as e:
+            die("fatal exception '{e}' while building Docker image...")
 
     def get_login_data(self):
         ecr_client = boto3.client("ecr")
@@ -72,7 +75,8 @@ class DockerHelper(object):
         # low-level API; had trouble doing this with the images client directly
         image = self.docker_client.images.get(IMAGE_TAG_NAME)
 
-        tag = datetime.today().strftime('%Y%m%d%H%M')
+        # tag = datetime.today().strftime('%Y%m%d%H%M')
+        tag = 'latest'
 
         # image.tag("{registry}/{ecr_registry_name}", tag="pushtest") # TODO - what tag to really use?
         # image.tag(repo_uri, tag="pushtest2") # TODO - what tag to really use?
@@ -113,7 +117,9 @@ class DockerHelper(object):
         for img in self.docker_client.images.list():
             loggy(f"\t{img.id=}, {img.tags=}")
         """
-        self.build_image()
+        # self.build_image()
+        print(f"!!!!!!! NOTE - Docker image build disabled; do it manually with 'cd <project>/docker && docker build -t {IMAGE_TAG_NAME} .'\n" * 10)
+
         registry_url, ecr_username, ecr_password = self.get_login_data()
         img_tag = self.tag_image(ecr_repo_uri)
         self.push_image_to_ecr(ecr_username, ecr_password, ecr_repo_uri, img_tag)

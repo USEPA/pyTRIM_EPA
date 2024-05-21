@@ -1,7 +1,9 @@
 import json
+import os
 import time
 from datetime import datetime
 
+import boto3
 import pandas as pd
 from flask import Blueprint, request, render_template, redirect, url_for
 from flask_security import login_required, current_user
@@ -439,20 +441,39 @@ def delete_scenario():
 @scenario_api.route('/api/scenario/run/', methods=['POST', 'GET'])
 @login_required
 def run_result_scenario():
+    trim_env_profile = os.environ.get("TRIM_ENV_PROFILE", "").lower()
+
     exec_data = request.form.to_dict()
     if not exec_data.get('scenario_id'):
         raise AssertionError("Scenario ID cannot be blank.")
     scenario_id = int(exec_data['scenario_id'])
-    s = ScenarioService.get(scenario_id)
 
     try:
-        print("Starting Model Run...")
-        json_n_avg, json_c_avg, output_file_n, output_file_c = run_full_model(s)
+        # in dev/prod, we execute an AWS StepFunction to run the model via Docker/ECS. Locally,
+        # we just run the model directly.
+        if trim_env_profile in [ "dev", "prod" ]:
+            sfn_client = boto3.client("stepfunctions")
+            state_machine_arn = os.environ.get("TRIM_DOCKERIZED_STATEMACHINE_ARN")
 
-        data_resp = {"mass": json_n_avg, "conc": json_c_avg, "outputMass": output_file_n, "outputConc": output_file_c}
+            if state_machine_arn is not None:
+                resp = sfn_client.start_execution(
+                    stateMachineArn=state_machine_arn,
+                    input=json.dumps({ "scenarioId": str(scenario_id), "generateFakeResults": "false" })
+                )
+                data_resp = { "executionArn": resp["executionArn"] }
+            else:
+                data_resp = { "error": "Missing required variable to run re-architected model" }
+        else:
+            s = ScenarioService.get(scenario_id)
+            print(f"Starting Model Run ({datetime.now()}...")
+            json_n_avg, json_c_avg, output_file_n, output_file_c = run_full_model(s)
+
+            data_resp = {"mass": json_n_avg, "conc": json_c_avg, "outputMass": output_file_n, "outputConc": output_file_c}
     except Exception as e:
         print(e)
         data_resp = {"error": e}
+
+    print(f"Model Run Finished ({datetime.now()}...")
 
     return ApiResult(data_resp)
 
@@ -514,3 +535,30 @@ def reset_poll_model_run_scenario():
         [s.proc_status][0].add(new_proc)
     ScenarioService.commit()
     return "success"
+
+@scenario_api.route('/api/scenario/check_execution_completion/', methods=['POST'])
+@login_required
+def check_execution_completion():
+    req_data = request.form.to_dict()
+    if not req_data.get('execution_arn'):
+        raise AssertionError("execution ARN cannot be blank.")
+
+    execution_arn = req_data['execution_arn']
+
+    sfn_client = boto3.client("stepfunctions")
+
+    desc_resp = sfn_client.describe_execution(executionArn=execution_arn)
+    if desc_resp["status"] == "SUCCEEDED":
+        resp = {
+            "success": True,
+            "sfn_output": json.loads(desc_resp["output"])
+        }
+    else:
+        # success should still be True b/c we didn't fail; we're just not done yet...
+        # calling client will just wait and retry.
+        resp = {
+            "success": True,
+            "sfn_output": False
+        }
+
+    return ApiResult(resp)

@@ -51,6 +51,7 @@ Metadata:
           default: General
         Parameters:
           - EnvironmentName
+          - ShortEnvironmentProfile
           - AlphaAZSuffix
           - BravoAZSuffix
       - Label:
@@ -85,6 +86,8 @@ Metadata:
     ParameterLabels:
       EnvironmentName:
         default: Environment Name
+      ShortEnvironmentProfile:
+        default: dev
       AlphaAZSuffix:
         default: Alpha Availability Zone Suffix
       BravoAZSuffix:
@@ -107,6 +110,10 @@ Parameters:
     Type: String
     Description: Environment name prefixed/appended to resource names; dashes only, no underscores!
     Default: pytrim-icfdev
+  ShortEnvironmentProfile:
+    Type: String
+    Description: simple name like "dev" or "prod" to tell the app what env it is running in
+    Default: dev
   CidrSegmentVPC:
     Type: Number
     MinValue: 0
@@ -441,7 +448,7 @@ Parameters:
       hosts, etc.)
     Type: String
     # Default: 'eipalloc-ea8c74d8'
-      
+
   #
   # Bastion Related
   #
@@ -517,6 +524,17 @@ Conditions:
 
 
 Resources:
+  #
+  #
+  # S3
+  #
+  #
+  ModelRunOutputStorageBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${EnvironmentName}-model-run-storage-bucket'
+      AccessControl: Private
+
   #
   #
   # BASIC VPC CONFIGURATION
@@ -730,37 +748,9 @@ Resources:
 
   # TODO - more restrictive role permissions...
   
-  # this is the role the step function assumes when running...
-  StepFunctionAssumedRole:
-    Type: AWS::IAM::Role
-    Properties:
-      AssumeRolePolicyDocument:
-        Version: 2012-10-17
-        Statement:
-          - Effect: Allow
-            Principal:
-              Service:
-                - 'states.amazonaws.com'
-            Action:
-              - 'sts:AssumeRole'
-      # in IAM console, search for the managed policy to find the arn for it
-      ManagedPolicyArns:
-        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AdministratorAccess"
-        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonECS_FullAccess"
-        - !Sub "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaRole"
-        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AWSXrayFullAccess"
-      Policies:
-        - PolicyName: !Sub '${EnvironmentName}CustomStepFunctionRolePolicy'
-          PolicyDocument:
-             Version: 2012-10-17
-             Statement:
-                - Sid: CloudWatchAccessStmt
-                  Effect: Allow
-                  Action: "cloudwatch:*"
-                  Resource: '*'
-                # Path: /
                 
   # this is the role the script running within the Docker container runs as...
+  # TODO CURRENLTY NOT IN USE?!?!
   DockerRuntimeAssumedRole:
     Type: AWS::IAM::Role
     Properties:
@@ -894,7 +884,240 @@ Resources:
       ClusterName: !Sub '${EnvironmentName}_container_cluster'
       CapacityProviders: 
         - 'FARGATE'
+
+  DockerTaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - 'ecs-tasks.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/CloudWatchLogsFullAccess"
+
+  DockerTaskTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - 'ecs-tasks.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AWSStepFunctionsFullAccess"
+        # - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonS3FullAccess"
+        # TODO - will need database access? network access for getting outside the dcker container?
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "secretsmanager:GetSecretValue"
+                Resource: !Sub "arn:${AWS::Partition}:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:pytrim/*"
+              - Effect: "Allow"
+                Action: "s3:*"
+                Resource:
+                  - !GetAtt ModelRunOutputStorageBucket.Arn
+                  - !Join
+                    - ''
+                    -
+                      - 'arn:'
+                      - !Sub "${AWS::Partition}"
+                      - ':s3:::'
+                      - !Ref ModelRunOutputStorageBucket
+                      - '/*'
+    
+  # this is the role the step function assumes when running...
+  # TODO CURRENTLY NOT IN USE?!?!?!
+  StepFunctionAssumedRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - 'states.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+      # in IAM console, search for the managed policy to find the arn for it
+      ManagedPolicyArns:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AdministratorAccess"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonECS_FullAccess"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaRole"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AWSXrayFullAccess"
+      Policies:
+        - PolicyName: !Sub '${EnvironmentName}CustomStepFunctionRolePolicy'
+          PolicyDocument:
+             Version: 2012-10-17
+             Statement:
+                - Sid: CloudWatchAccessStmt
+                  Effect: Allow
+                  Action: "cloudwatch:*"
+                  Resource: '*'
+                # Path: /
+
+  DockerTaskDef:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      # 1 vCPU / 4 GB RAM. hangs eventually...
+      # Cpu: "1024"
+      # Memory: "4096"
+
+      # 4 vCPU / 16 GB RAM. Works, took about 20 minutes on scenario 2
+      # Cpu: "4096"
+      # Memory: "16384"
+      
+      # 8 vCPU / 32 GB RAM. Again, about 20 minutes
+      Cpu: "8192"
+      Memory: "32768"
+      
+      # 8 vCPU / 60 GB RAM. Works, took about 19 minutes.
+      # Cpu: "8192"
+      # Memory: "61440"
+      ContainerDefinitions: 
+        - Image: !Join
+          - ':'
+          -
+            - !GetAtt ContainerRepository.RepositoryUri
+            - 'latest'
+          Cpu: 0
+          DisableNetworking: false
+
+          Environment:
+            - Name: STORAGE_BUCKET_NAME
+              Value: !Ref ModelRunOutputStorageBucket
+            - Name: RDS_HOSTNAME
+              # Value: pytrim-dev-stalk-mysql.c4kmy933ys6z.us-east-1.rds.amazonaws.com
+              Value: !GetAtt DatabaseInstance.Endpoint.Address
+            - Name: RDS_PORT
+              Value: !GetAtt DatabaseInstance.Endpoint.Port
+            - Name: RDS_DB_NAME
+              Value: !Ref DatabaseName
+            # RDS_USERNAME, RDS_PASSWORD, SQLALCHEMY_DATABASE_URI get set on-the-fly by the Docker image...
+
+          Essential: true
+          Interactive: false
+          LogConfiguration: 
+            LogDriver: "awslogs"
+            Options:
+              "awslogs-create-group": "true"
+              "awslogs-group": "/ecs/pytrim_sample_taskdef"
+              "awslogs-region": "us-east-1"
+              "awslogs-stream-prefix": "ecs"
+
+          Name: "pytrim_runmodel_container"
+          PortMappings: 
+            - Name: "pytrim_runmodel_container-80-tcp"
+              ContainerPort: 80
+              HostPort: 80
+              Protocol: "tcp"
+              AppProtocol: "http"
+          #Secrets: 
+            #- Secret
+      #EphemeralStorage: 
+        #EphemeralStorage
+      ExecutionRoleArn: !GetAtt DockerTaskExecutionRole.Arn
+      Family: "pytrim_runmodel_taskdef_family"
+      #InferenceAccelerators: 
+        #- InferenceAccelerator
+      # IpcMode: String
+      NetworkMode: "awsvpc"
+      # PidMode: String
+      # PlacementConstraints: 
+        #- TaskDefinitionPlacementConstraint
+      # ProxyConfiguration: 
+        # ProxyConfiguration
+      RequiresCompatibilities: 
+        - "FARGATE"
+      RuntimePlatform: 
+        CPUArchitecture: "X86_64"
+        OperatingSystemFamily: "LINUX"
+      Tags: 
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-runmodel-taskdef'
+      TaskRoleArn: !GetAtt DockerTaskTaskRole.Arn
+      # Volumes: 
+        # - Volume
           
+  StateMachineSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: !Sub 'controls statemachine access for ${EnvironmentName}'
+      GroupName: !Sub '${EnvironmentName}-secgrp-statemachine'
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-secgrp-statemachine'
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        -
+          CidrIp: '0.0.0.0/0'
+          Description: !Sub 'incoming access for the statemachine on ${EnvironmentName}'
+          FromPort: 0
+          ToPort: 65535
+          IpProtocol: "tcp"
+      SecurityGroupEgress:
+        -
+          CidrIp: '0.0.0.0/0'
+          Description: !Sub 'outgoing access for the statemachine on ${EnvironmentName}'
+          FromPort: 0
+          ToPort: 65535
+          IpProtocol: "tcp"
+
+  DockerStateMachineWrapper:
+    Type: 'AWS::StepFunctions::StateMachine'
+    Properties:
+      RoleArn: !GetAtt StepFunctionAssumedRole.Arn
+      Definition:
+        Comment: State Machine that launches Docker container to perform PyTrim model running
+        StartAt: ECS RunTask
+        States:
+          #ECS RunTask:
+          #Type: Pass
+          #Result: Hello
+          #End: true
+          ECS RunTask:
+            Type: Task
+            Resource: arn:aws:states:::ecs:runTask.waitForTaskToken
+            Parameters:
+              LaunchType: FARGATE
+              Cluster: !GetAtt ContainerCluster.Arn
+              TaskDefinition: !GetAtt DockerTaskDef.TaskDefinitionArn
+              NetworkConfiguration:
+                AwsvpcConfiguration:
+                  AssignPublicIp: ENABLED
+                  Subnets:
+                  - !Ref SubnetPublicAlphaAZ
+                  - !Ref SubnetPublicBravoAZ
+                  SecurityGroups:
+                  - !Ref StateMachineSecurityGroup
+              Overrides:
+                ContainerOverrides:
+                - Environment:
+                  - Name: TASK_TOKEN_ENV_VARIABLE
+                    Value.$: $$.Task.Token
+                  - Name: TRIM_SCENARIO_ID.$
+                    Value.$: $.scenarioId
+                  - Name: GENERATE_FAKE_RESULTS.$
+                    Value.$: $.generateFakeResults
+                  Name: pytrim_runmodel_container
+            End: true
+      Tags:
+        - Key: StateMachineName
+          Value: !Sub '${EnvironmentName}-dockerized-runmodel-statemachine'
+  
   #
   #
   # RDS/MYSQL
@@ -1073,6 +1296,14 @@ Resources:
           Value: !Ref DatabaseName
         -
           Namespace: 'aws:elasticbeanstalk:application:environment'
+          OptionName: TRIM_ENV_PROFILE
+          Value: !Ref ShortEnvironmentProfile
+        -
+          Namespace: 'aws:elasticbeanstalk:application:environment'
+          OptionName: TRIM_DOCKERIZED_STATEMACHINE_ARN
+          Value: !Ref DockerStateMachineWrapper
+        -
+          Namespace: 'aws:elasticbeanstalk:application:environment'
           OptionName: RDS_USERNAME
           Value: !Ref DatabaseMasterAccountUsername
         -
@@ -1202,3 +1433,6 @@ Outputs:
 
   PyTrimPrivateECRRepoUri:
     Value: !GetAtt ContainerRepository.RepositoryUri
+
+  PyTrimDockerizedStateMachineArn:
+    Value: !Ref DockerStateMachineWrapper
