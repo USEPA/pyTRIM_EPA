@@ -1,4 +1,4 @@
-import base64, os, subprocess
+import base64, os, subprocess, shutil
 import boto3
 import docker
 from datetime import datetime
@@ -57,6 +57,11 @@ class DockerHelper(object):
 
             if exit_status != 0:
                 die(f"fatal issue while building Docker image...")
+
+        temp_dir = f"{parent_dir}docker{sep}temp"
+        loggy(f"Cleaning up temp directory '{temp_dir}'...")
+        if os.path.exists(temp_dir):
+            shutil.rmtree(temp_dir)
 
     def get_login_data(self):
         ecr_client = boto3.client("ecr")
