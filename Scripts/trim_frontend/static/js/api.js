@@ -203,6 +203,17 @@ window.TRIM = (function(trim) {
         });
     }
 
+    api.fetchRunResults = function(bucket, uuid, callback_fxn) {
+        let url = api.getUrl('scenario_api.fetch_run_results');
+        let data = makeFormData([{ "name": "bucket", "value": bucket }, {"name": "uuid", "value": uuid}])
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: data,
+			callback: callback_fxn
+        });
+    }
+
     trim.api = api;
     return trim;
 })(window.TRIM || {});

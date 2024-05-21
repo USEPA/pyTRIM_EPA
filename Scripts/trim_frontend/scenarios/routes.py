@@ -562,3 +562,40 @@ def check_execution_completion():
         }
 
     return ApiResult(resp)
+
+# downloads the output from a model run and creates presigned url's for the xlsx files
+@scenario_api.route('/api/scenario/fetch_run_results/', methods=['POST'])
+@login_required
+def fetch_run_results():
+    req_data = request.form.to_dict()
+    if not req_data.get('bucket') or not req_data.get('uuid'):
+        raise AssertionError("bucket/uuid cannot be blank.")
+
+    bucket = req_data['bucket']
+    uuid = req_data['uuid']
+
+    s3_client = boto3.client("s3")
+    s3_resource = boto3.resource("s3")
+
+    content_object = s3_resource.Object(bucket, f"{uuid}/model_output.json")
+    file_content = content_object.get()["Body"].read().decode("utf-8")
+    json_content = json.loads(file_content)
+
+    resp = {
+        "success": True,
+        "model_output": json_content
+    }
+
+    for f in ["outputMass", "outputConc"]:
+        full_key = f"{uuid}/{f}.xlsx"
+        response = s3_client.generate_presigned_url("get_object",
+                                                    Params={
+                                                        "Bucket": bucket,
+                                                        "Key": full_key
+                                                    },
+                                                    ExpiresIn=600) # expires in 10 minute(s)
+
+        resp[f] = response
+
+
+    return ApiResult(resp)

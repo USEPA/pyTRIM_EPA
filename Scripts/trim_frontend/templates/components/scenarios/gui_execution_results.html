@@ -637,13 +637,30 @@
 							}
 						}
 
+						var fetchAndDisplayResults = function(bucket, uuid) {
+						  TRIM.api.fetchRunResults(bucket, uuid, function(success, data) {
+							var mass = JSON.parse("{" + data.model_output.mass + "}");
+							var conc = JSON.parse("{" + data.model_output.conc + "}");
+							  window.rawOutput = data;
+							  window.testOutputViewer = {
+								"presignedMassUrl": data.outputMass,
+								"presignedConcUrl": data.outputConc,
+								"mass": mass,
+								"conc": conc
+							  };
+						  });
+						};
+
+					  // hardcoded test
+						// fetchAndDisplayResults("pytrim-dev-stalk-model-run-storage-bucket", "98a921a2-1788-11ef-a37f-0a58a9feac02");
+
 						var resp = TRIM.api.runModel(scenario_info, function(kickoffSuccess, kickoffData) {
 							let executionArn = kickoffData.executionArn;
 							poller(executionArn, function(checkSuccess, checkData) {
 								console.log("ALL THE WAY BACK IN THE CALLBACK:");
 								console.log(checkData);
+								fetchAndDisplayResults(checkData["sfn_output"]["bucket"], checkData["sfn_output"]["uuid"]);
 							});
-
 						});
 					}
                 }
