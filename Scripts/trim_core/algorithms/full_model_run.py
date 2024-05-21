@@ -523,9 +523,7 @@ def run_full_model(scn):
     ScenarioService.commit()
     scn = ScenarioService.get(id=scn.id)
     try:
-        print("wha the...")
         outfile_nt, outfile_conc = safe_save_output(dfn_avg, dfc_avg, scn, filetype='excel')
-        print("heck?")
         # safe_save_output(df_nt, df_conc, scn, filetype='excel')
         [v for v in scn.proc_status][0].result_file_nt = outfile_nt
         [v for v in scn.proc_status][0].result_file_conc = outfile_conc
