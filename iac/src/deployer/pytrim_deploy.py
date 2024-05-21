@@ -29,19 +29,8 @@ class PyTrimDeployer(object):
         if mode == "full" or mode == "cloudformation":
             self.do_cf_stack_work()
 
-        """
-        if mode == "full" or mode == "post_cloudformation":
-            self.perform_post_cloudformation_setup()
-        """
-
         if mode == "full" or mode == "docker":
             self.build_and_push_docker_image()
-
-        """
-
-        if mode == "full" or mode == "ec2setup":
-            self.configure_ec2_instance()
-        """
 
         if mode == "_full" or mode == "push_flask_build":
             self.build_and_push_flask_app()
@@ -74,12 +63,6 @@ class PyTrimDeployer(object):
         helper = ElasticIpHelper()
         eip_allocation_id, is_currently_in_use = helper.find_or_create_eip(eip_name)
         loggy(f"'{eip_name}' --> '{eip_allocation_id}'", indent=1)
-
-    def perform_post_cloudformation_setup(self):
-        cf_helper = CloudFormationHelper()
-        env_name = self.get_cfg_val("environment_name")
-        loggy(f"performing AWS post-cloudformation activities for '{env_name}'")
-        cf_helper.perform_post_setup_tasks(env_name)
 
     def do_cf_stack_work(self):
         eip_name = self.get_cfg_val("aws.eip_name")
@@ -122,15 +105,6 @@ class PyTrimDeployer(object):
         loggy(f"performing Flask package/deploy")
         beanstalk_helper.build_etc(env_name)
 
-    """
-    def configure_ec2_instance(self):
-        env_name = self.CHECKED_CFG["env_name"]
-        bb_access_tokens = self.CHECKED_CFG["bb_access_tokens"]
-
-        helper = Ec2ConfigurationHelper()
-        helper.configure(env_name, bb_access_tokens)
-
-    """
 
 if __name__ == "__main__":
     try:

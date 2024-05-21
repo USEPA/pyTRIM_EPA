@@ -175,27 +175,3 @@ class CloudFormationHelper(object):
         (stack_id, outputs) = await_stack_completion(stack_name)
         print(f"ALL DONE: {stack_id=}, {outputs=}")
 
-    def perform_post_setup_tasks(self, stack_name):
-        (stack_id, outputs) = await_stack_completion(stack_name)
-
-        on_file_uploaded_arn = [x for x in outputs if x["OutputKey"] == "OnFileUploadedLambdaArn"][0]["OutputValue"]
-        upload_bucket_name = [x for x in outputs if x["OutputKey"] == "UploadBucketName"][0]["OutputValue"]
-
-        s3_client = boto3.client("s3")
-
-        response = s3_client.put_bucket_notification_configuration(
-            Bucket=upload_bucket_name,
-            NotificationConfiguration={
-                'LambdaFunctionConfigurations': [
-                    {
-                        'Id': f"{stack_name}_upload_trigger",
-                        'LambdaFunctionArn': on_file_uploaded_arn,
-                        'Events': [
-                            's3:ObjectCreated:*'
-                        ]
-                    },
-                ]
-            }
-        )
-
-        print(f"update status? {response}")

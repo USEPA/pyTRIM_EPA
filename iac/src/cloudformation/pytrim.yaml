@@ -790,6 +790,39 @@ Resources:
         # - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonSESFullAccess"
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/AWSElasticBeanstalkWebTier"
         # - !Sub "arn:${AWS::Partition}:iam::aws:policy/AdministratorAccess"
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "states:*"
+                Resource: !Ref DockerStateMachineWrapper
+              - Effect: "Allow"
+                Action: "states:DescribeExecution"
+                Resource: "*"
+                # Resource is like: arn:aws:states:us-east-1:426714360284:execution:DockerStateMachineWrapper-6igLbCu7FQcL:70e6b149-0e1d-4f43-b689-bdeda0d30f96 but I can't get wildcards working with that, so for now just allow on all. Just describe so low-risk.
+                #Resource:
+                #- !Join
+                #- ''
+                #-
+                #- 'arn:'
+                #- !Sub "${AWS::Partition}"
+                #- ':states:::execution:'
+                #- !GetAtt DockerStateMachineWrapper.Name
+                #- ':*'
+              - Effect: "Allow"
+                Action: "s3:*"
+                Resource:
+                  - !GetAtt ModelRunOutputStorageBucket.Arn
+                  - !Join
+                    - ''
+                    -
+                      - 'arn:'
+                      - !Sub "${AWS::Partition}"
+                      - ':s3:::'
+                      - !Ref ModelRunOutputStorageBucket
+                      - '/*'
       Path: /
 
   WebTierInstanceProfile:
@@ -1302,6 +1335,10 @@ Resources:
           Namespace: 'aws:elasticbeanstalk:application:environment'
           OptionName: TRIM_DOCKERIZED_STATEMACHINE_ARN
           Value: !Ref DockerStateMachineWrapper
+        -
+          Namespace: 'aws:elasticbeanstalk:application:environment'
+          OptionName: AWS_DEFAULT_REGION
+          Value: "us-east-1"
         -
           Namespace: 'aws:elasticbeanstalk:application:environment'
           OptionName: RDS_USERNAME
