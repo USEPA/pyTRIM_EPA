@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import os, shutil
+import argparse, os, shutil
 
 SEP = os.path.sep
 
@@ -31,8 +31,14 @@ def line_prepender(filename, lines):
         f.write(content)
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+                        prog='prepare_dockerized_pytrim.py',
+                        description='copies application code and Dockerized entrypoint to a temp directory for construction into Docker image')
+    parser.add_argument("-q", "--quiet", help="suppress extraneous output", action="store_true")
+    args = parser.parse_args()
+
     # figure out some directories
-    print(f"Setup...")
+    print(f"\tPREPARE DOCKERIZED PYTRIM: Setup...")
     proj_base_dir = get_project_base_dir()
     docker_dir = get_docker_dir()
     temp_dir = get_temp_dir()
@@ -41,17 +47,17 @@ if __name__ == "__main__":
     remove_temp_dir(temp_dir)
 
     # copy the complete webapp codebase in
-    print(f"Copying application code...")
+    print(f"\tPREPARE DOCKERIZED PYTRIM: Copying application code...")
     copy_application_code_to_temp_dir(f"{proj_base_dir}{SEP}Scripts", temp_dir)
     
     # copy the Dockerized entrypoint in
-    print(f"Copying Dockerized entrypoint...")
+    print(f"\tPREPARE DOCKERIZED PYTRIM: Copying Dockerized entrypoint...")
     destination = f"{temp_dir}{SEP}docker_entrypoint.py"
     shutil.copy(f"{docker_dir}{SEP}_entrypoint.py", destination)
 
     # add some comments to the entrypoint to alert people that it is a temp/generated file and any edits
     # will be lost...
-    print(f"Adding anti-edit warning notice...")
+    print(f"\tPREPARE DOCKERIZED PYTRIM: Adding anti-edit notice...")
     line_prepender(destination, [
         "# STOP!!!!!!",
         "# This version of the file is temporary and should NOT be edited; it is used in",
@@ -62,11 +68,14 @@ if __name__ == "__main__":
         "",
     ])
 
-    print(f"\nAll done! Next steps:\n")
-    print(f"\t* Run 'docker build -t <your_tag> .' to rebuild the Docker image.")
+    if args.quiet is not True:
+        print(f"\nAll done! Next steps:\n")
+        print(f"\t* Run 'docker build -t <your_tag> .' to rebuild the Docker image.")
 
-    print("")
-    print(f"\tIF RUNNING LOCALLY:")
-    print(f"\tdocker run --name local_pytrim_dockerized -dit <your_tag>")
+        print("")
+        print(f"\tIF RUNNING LOCALLY:")
+        print(f"\tdocker run --name local_pytrim_dockerized -dit <your_tag>")
 
-    print("")
+        print("")
+    else:
+        print(f"\tPREPARE DOCKERIZED PYTRIM: Done! docker build can proceed...")

@@ -44,7 +44,7 @@ class PyTrimDeployer(object):
         """
 
         if mode == "_full" or mode == "push_flask_build":
-            self.build_and_push_flash_app()
+            self.build_and_push_flask_app()
 
     def get_cfg_val(self, path, default_val = None):
         chunks = path.split(".")
@@ -116,7 +116,7 @@ class PyTrimDeployer(object):
         loggy(f"performing Docker build/deploy...")
         docker_helper.build_etc(env_name)
 
-    def build_and_push_flash_app(self):
+    def build_and_push_flask_app(self):
         beanstalk_helper = BeanstalkHelper()
         env_name = self.get_cfg_val("environment_name")
         loggy(f"performing Flask package/deploy")

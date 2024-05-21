@@ -1,4 +1,4 @@
-import base64, os
+import base64, os, subprocess
 import boto3
 import docker
 from datetime import datetime
@@ -25,16 +25,38 @@ class DockerHelper(object):
     def build_image(self):
         parent_dir = figure_parent_dir()
         sep = os.path.sep
-        try:
-            loggy(f"building Docker image from src '{parent_dir}docker{sep}'...")
-            self.docker_client.images.build(
-                path = f"{parent_dir}docker{sep}",
-                tag = IMAGE_TAG_NAME,
-            )
 
-            loggy(f"build of '{IMAGE_TAG_NAME}' complete")
-        except Exception as e:
-            die("fatal exception '{e}' while building Docker image...")
+        loggy("setting up Docker temp directory (application code + entrypoint for image building)...")
+
+        exit_status = subprocess.call(["python", f"{parent_dir}docker{sep}prepare_dockerized_pytrim.py", "-q"])
+        if exit_status != 0:
+            die("fatal error while preparing Docker image...")
+
+        # sometimes this works and sometimes it doesn't (like it's painfully slow to do images.build via
+        # docker_client, but cmdline tool takes just a few seconds). Not sure why.
+        use_docker_sdk_to_build = False
+
+        if use_docker_sdk_to_build:
+            try:
+                loggy(f"building Docker image from src '{parent_dir}docker{sep}' using SDK...")
+                self.docker_client.images.build(
+                    path = f"{parent_dir}docker{sep}",
+                    tag = IMAGE_TAG_NAME,
+                )
+
+                loggy(f"build of '{IMAGE_TAG_NAME}' complete")
+            except Exception as e:
+                die("fatal exception '{e}' while building Docker image...")
+        else:
+            loggy("Alternate Docker build; SDK disabled...")
+            exit_status = -1
+            try:
+                exit_status = subprocess.call(["docker", "build", "-t", IMAGE_TAG_NAME, f"{parent_dir}docker"])
+            except Exception as e:
+                die(f"fatal exception '{e}' while building Docker image...")
+
+            if exit_status != 0:
+                die(f"fatal issue while building Docker image...")
 
     def get_login_data(self):
         ecr_client = boto3.client("ecr")
@@ -117,8 +139,7 @@ class DockerHelper(object):
         for img in self.docker_client.images.list():
             loggy(f"\t{img.id=}, {img.tags=}")
         """
-        # self.build_image()
-        print(f"!!!!!!! NOTE - Docker image build disabled; do it manually with 'cd <project>/docker && docker build -t {IMAGE_TAG_NAME} .'\n" * 10)
+        self.build_image()
 
         registry_url, ecr_username, ecr_password = self.get_login_data()
         img_tag = self.tag_image(ecr_repo_uri)
