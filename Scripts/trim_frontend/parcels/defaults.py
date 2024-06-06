@@ -29,22 +29,14 @@ def serialize_parcel(pcl: Parcel):
     return s
 
 
-# def safe_get_val(comp, k, default=None):
-#     v = default if comp.parameters.get(k) is None else comp.parameters.get(k)
-#     return v if v == default else v.value
-
 def safe_get_val(comp, k, default=None):
-    if isinstance(comp.parameters.get(k), ParameterDefinition):
-        v = comp.parameters.get(k).default_value
-        if v is None:
-            v = default
-    else:
-        if comp.parameters.get(k) is None:
-            v = default
-        else:
-            v = comp.parameters.get(k).value
+    param = comp.parameters.get(k)
+    if param is None:
+        return default
+    v = param.value
+    if v is None and isinstance(param, ParameterDefinition):
+        return default
     return v
-
 
 
 def get_general_params(pcl):
@@ -258,66 +250,67 @@ def get_soil_abiotic_params(pcl):
 
 def get_water_params(pcl, parcel_type):
     precipitation_rate = pcl.scenario.Rain
+    if precipitation_rate is None:
+        precipitation_rate = 0  # 0.0041
 
-    # runoff_watershed_area = 1e3
-    # precip_runoff_frac_to_sw = 0.001
-    comp_surfaceSoil = [c for c in pcl.scenario.compartments
-                        if c.media.isa("Surface_Soil") if c.volume_element.parcel.name == pcl.name]
-    comp_surfaceWater = [c for c in pcl.scenario.compartments
-                         if c.media.isa("Surface_Water")]
-    ch = ChemicalService.get(id=32)
+    comp_surfaceSoil = pcl.get_compartment(media="Surface_Soil")
+
+    ch = ChemicalService.get(id=32)  # WRONG???
     ch.current_scenario(pcl.scenario)
+
+    runoff_watershed_area = 0  # 1e3
+    runoff_fraction = 0  # 0.001
+    precip_runoff_frac_to_sw = 0
+
     if len(comp_surfaceSoil) > 0:
         comp_surfaceSoil = comp_surfaceSoil[0]
-        runoff_watershed_area = (comp_surfaceSoil.area * comp_surfaceSoil.FractionofAreaAvailableforRunoff).magnitude
-        if comp_surfaceSoil.TotalRunoffRate:
-            runoff_fraction = (comp_surfaceSoil.TotalRunoffRate / pcl.scenario.Rain).magnitude
-        else:
-            runoff_fraction = 0
-        precip_runoff_frac_to_sw = 0
-        if len(comp_surfaceWater) > 0:
-            precip_runoff = 0
-            for comp_sw in comp_surfaceWater:
-                comp_link = comp_surfaceSoil.get_links(comp_sw)
-                if len(comp_link) > 0:
-                    tps = comp_link[0].transport_processes(chemical=ch)
-                    precip_runoff += tps[0].eval(sender=comp_surfaceSoil, receiver=comp_sw, chemical=ch)
-            precip_runoff_frac_to_sw = precip_runoff / precipitation_rate
-    else:
-        comp_surfaceSoil = None
-        runoff_watershed_area = 0
-        runoff_fraction = 0
-        precip_runoff_frac_to_sw = 0
+        runoff_watershed_area = (
+            comp_surfaceSoil.area
+            * comp_surfaceSoil.FractionofAreaAvailableforRunoff
+        ).magnitude
+        if precipitation_rate > 0 and comp_surfaceSoil.TotalRunoffRate:
+            runoff_fraction = (
+                comp_surfaceSoil.TotalRunoffRate / precipitation_rate
+            ).magnitude
+        if precipitation_rate > 0:
+            comp_surfaceWater = pcl.get_compartment(media="Surface_Water")
+            if len(comp_surfaceWater) > 0:
+                precip_runoff = 0
+                for comp_sw in comp_surfaceWater:
+                    comp_link = comp_surfaceSoil.get_links(comp_sw)
+                    if len(comp_link) > 0:
+                        tps = comp_link[0].transport_processes(chemical=ch)
+                        precip_runoff += tps[0].eval(sender=comp_surfaceSoil, receiver=comp_sw, chemical=ch)
+                precip_runoff_frac_to_sw = precip_runoff / precipitation_rate
 
     precip_seepage_frac_to_gw = 1 - runoff_fraction
 
     sed_soil_erosion_to_sw = 100
 
-    try:
-        runoff_vol_rate_to_sw = (
-            precipitation_rate
-            * precip_runoff_frac_to_sw
-            * runoff_watershed_area
-        )
-    except Exception:
-        runoff_vol_rate_to_sw = 0
-    # runoff_vol_rate_to_sw = 1
-
-    try:
-        precipitation_vol_rate_to_sw = (precipitation_rate * pcl.area).magnitude
-    except Exception:
-        precipitation_vol_rate_to_sw = 0
-    # precipitation_vol_rate_to_sw = 4.8E6
-
-    try:
-        seepage_vol_rate_to_gw = (
-            precipitation_rate
-            * precip_seepage_frac_to_gw
-            * runoff_watershed_area
-        )
-    except Exception:
-        seepage_vol_rate_to_gw = 0
-    # seepage_vol_rate_to_gw = 1
+    runoff_vol_rate_to_sw = 0  # 1
+    precipitation_vol_rate_to_sw = 0  # 4.8E6
+    seepage_vol_rate_to_gw = 0  # 1
+    if precipitation_rate > 0:
+        try:
+            runoff_vol_rate_to_sw = (
+                precipitation_rate
+                * precip_runoff_frac_to_sw
+                * runoff_watershed_area
+            )
+        except Exception:
+            pass
+        try:
+            precipitation_vol_rate_to_sw = (precipitation_rate * pcl.area).magnitude
+        except Exception:
+            pass
+        try:
+            seepage_vol_rate_to_gw = (
+                precipitation_rate
+                * precip_seepage_frac_to_gw
+                * runoff_watershed_area
+            )
+        except Exception:
+            pass
 
     water_params = {
         'precip_rate': precipitation_rate,

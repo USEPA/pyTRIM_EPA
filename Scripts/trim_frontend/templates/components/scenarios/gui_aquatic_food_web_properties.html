@@ -287,6 +287,9 @@
                         $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                         $('[data-toggle="tooltip"]').tooltip()
                         $('[data-toggle="popover"]').popover()
+                    },
+                    language: {
+                        emptyTable: 'No Parcels Have Been Defined with a Fish-Food Web'
                     }
                 });
 
@@ -392,6 +395,9 @@
                     'data': "Property",
                     'bSortable': false,
                     'render': function (data, type, row){
+                        if (!row.Property) {
+                            return '';
+                        }
                         return row.Property.parentNode.outerHTML;
                     }
                 }]
@@ -469,7 +475,9 @@
                         row_data[e.name] = e[prop][comp_name] ? e[prop][comp_name] : default_val;
                     }
                 })
-                aquatic_data.push(row_data);
+                if (!$.isEmptyObject(row_data)) {
+                    aquatic_data.push(row_data);
+                }
             })          
             return aquatic_data;
         }
@@ -481,7 +489,8 @@
             let diet_properties = Object.keys(default_diet_data)
             if (loadedData.scenario.length > 0) {
                 let aquatic_data = load_aquatic_parcels(loadedData);
-                TableRedraw(aquatic_data, "aquatic")
+                TableRedraw(aquatic_data, "aquatic");
+                divDietTables.empty();
                 ////////////////////////////////////////////////////////////////////////////////
                 loadedData['scenario'].forEach(function (e, i) {
                     if (e.hasFishFoodWeb == "Yes") {
@@ -511,6 +520,11 @@
                         divDietTables.append(this_matrix)
                     }
                 })
+                if (!$('#DietTables').children().length) {
+                    var alert = $('<div class="alert alert-light" />');
+                    alert.text('No Parcels Have Been Defined with a Fish-Food Web')
+                    divDietTables.append(alert)
+                }
                 diet_properties.forEach(function (p, i) {
                     let this_diet_property = {}
                     loadedData['scenario'].forEach(function (e, i) {
@@ -522,7 +536,9 @@
                             this_diet_property["shortProperty"] = default_diet_data[p]['short_name']
                         }
                     })
-                    diet_data.push(this_diet_property)
+                    if (!$.isEmptyObject(this_diet_property)) {
+                        diet_data.push(this_diet_property);
+                    }
                 })
                 TableRedraw(diet_data, "diet")
             }

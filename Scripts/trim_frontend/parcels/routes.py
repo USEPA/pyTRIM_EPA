@@ -72,10 +72,12 @@ def get_parcels(scenario_id):
 
         if p is not None:
             sh = s.as_serializable()
+            total_start = time.time()
             for this_p in p:
                 start_time = time.time()
                 parcels.append(this_p.as_serializable())
                 logger.info(f"Acquired parcel {this_p.name} in {time.time() - start_time} seconds")
+            logger.info(f"Acquired all parcels in {time.time() - total_start} seconds")
     except Exception as e:
         logger.error(traceback.format_exc())
 
@@ -639,7 +641,10 @@ def delete_parcel_contents(del_parcel):
         formulas = ["MethylationRate", "DemethylationRate", "ReductionRate"]
         for t in formulas:
             ins = ParameterService.definitions.get(variable_name=t).instances
-            par = [i for i in ins if i.scenario.id == scenario_id][0]
+            par = [i for i in ins if i.scenario.id == scenario_id]
+            if not par:
+                continue
+            par = par[0]
             eq = par.formula.equation
             del_id = c.id
             eq_parts = eq.split('compartment.id in {')

@@ -575,20 +575,21 @@
                         }
                     comps.forEach(function(c,i) {
                         if (e.hasLand == "Yes") {
+                            sc = s[c] || {};
                             param_dict[c] = {
-                                'pH': s[c].pH ,
-                                'rho': s[c].rho ,
-                                'AverageVerticalVelocity': s[c].AverageVerticalVelocity,
-                                'FractionSand': s[c].FractionSand ,
-                                'OrganicCarbonContent': s[c].OrganicCarbonContent,
-                                'VolumeFraction_Liquid': s[c].VolumeFraction_Liquid,
-                                'VolumeFraction_Vapor': s[c].VolumeFraction_Vapor ,
-                                'Porosity': s[c].Porosity ,
-                                'AirSoilBoundaryThickness': s[c].AirSoilBoundaryThickness,
-                                'Fractionofareaavailableforerosion': s[c].Fractionofareaavailableforerosion,
-                                'FractionofAreaAvailableforRunoff': s[c].FractionofAreaAvailableforRunoff,
-                                'Fractionofareaavailableforverticaldiffusion': s[c].Fractionofareaavailableforverticaldiffusion,
-                                'TotalRunoffRate': s[c].TotalRunoffRate
+                                'pH': sc.pH ,
+                                'rho': sc.rho ,
+                                'AverageVerticalVelocity': sc.AverageVerticalVelocity,
+                                'FractionSand': sc.FractionSand ,
+                                'OrganicCarbonContent': sc.OrganicCarbonContent,
+                                'VolumeFraction_Liquid': sc.VolumeFraction_Liquid,
+                                'VolumeFraction_Vapor': sc.VolumeFraction_Vapor ,
+                                'Porosity': sc.Porosity ,
+                                'AirSoilBoundaryThickness': sc.AirSoilBoundaryThickness,
+                                'Fractionofareaavailableforerosion': sc.Fractionofareaavailableforerosion,
+                                'FractionofAreaAvailableforRunoff': sc.FractionofAreaAvailableforRunoff,
+                                'Fractionofareaavailableforverticaldiffusion': sc.Fractionofareaavailableforverticaldiffusion,
+                                'TotalRunoffRate': sc.TotalRunoffRate
                             }
                         }
                     })
