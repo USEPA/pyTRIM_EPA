@@ -30,10 +30,7 @@
             </div>
             <div class="row mb-1">
                 <div class="col-sm">
-                    <div data-slot="true" data-target="parcel_x_coordinates_field"></div>
-                </div>
-                <div class="col-sm">
-                    <div data-slot="true" data-target="parcel_y_coordinates_field"></div>
+                    <div data-slot="true" data-target="parcel_coordinates_field"></div>
                 </div>
             </div>
             <div class="row">
@@ -43,6 +40,11 @@
                     <div data-slot="true" data-target="parcel_farm_food_field"></div>
                     <div data-slot="true" data-target="parcel_fish_food_field"></div>
                     <div data-slot="true" data-target="parcel_wetland_field"></div>
+                </div>
+            </div>
+            <div class="row mb-2">
+                <div class="col-sm">
+                    <button class="btn btn-warning" id="crate_parcels_from_csv">Create Parcels</button>
                 </div>
             </div>
         </div>
@@ -237,6 +239,7 @@
                 parcel.feature.properties.fishfoodweb = "No";
                 parcel.feature.properties.wetland = "No";
                 map.closePopup();
+                LoadingScreen.show('create_parcel');
                 // WRITE TO DATABASE
                 // TRIM.api.createParcels('{{ scenario.id }}', shapes.features.reverse()[0])
                 TRIM.api.createParcels('{{ scenario.id }}', parcel.toGeoJSON()).on('load', function() {
@@ -259,6 +262,7 @@
                     } else {
                         $('#root').data('createdParcel','');
                     }
+                    LoadingScreen.hide('create_parcel');
                 })
             };
 
@@ -273,9 +277,12 @@
 
             // REMOVE A PARCEL//
             map.on('pm:remove', ({layer})=>{
+                LoadingScreen.show('deleting_parcel');
                 parcels.removeLayer(layer._leaflet_id)
                 shapes = parcels.toGeoJSON()
-                TRIM.api.deleteParcels({{ scenario.id }}, layer.toGeoJSON())
+                TRIM.api.deleteParcels({{ scenario.id }}, layer.toGeoJSON()).on('load',function(){
+                    LoadingScreen.hide('deleting_parcel');
+                })
                 mapTableRedraw()
             });
 

@@ -94,11 +94,11 @@
                 <h5 class="text-center">Spatially-Varying Values</h5>
             </div>
         </div>
-        <div class="row">
-            <div class="col-sm">
-                <div data-slot="true" data-target="default_spatially_varying_file"></div>
-            </div>
-        </div>
+<!--        <div class="row">-->
+<!--            <div class="col-sm">-->
+<!--                <div data-slot="true" data-target="default_spatially_varying_file"></div>-->
+<!--            </div>-->
+<!--        </div>-->
 
         <table data-slot="true" data-target="spatially_varying_table" class="hover" id="spatially_varying_table">
         </table>
@@ -320,7 +320,11 @@
                                 JSON.stringify(myData)
                             );
                         }
-                        updateFields(me.closest('section'));
+                        // Make sure the file has the column with name "Date"
+                        var filedata = data.files[me.attr('name')]['file_data'];
+                        if (ErrorValidation.tsFileHasDateColumn(me.closest("div").siblings("label"),  filedata)) {
+                            updateFields(me.closest('section'));
+                        }
                     }
                     finally {
                         LoadingScreen.hide(loadingRequest);
@@ -345,6 +349,13 @@
                 data = JSON.parse(data);
                 let selected_val = $(sel).val();
                 let def_data_name = $(sel).attr("data-default")
+
+                function convertDate(inputFormat) {
+                    function pad(s) { return (s < 10) ? '0' + s : s; }
+                    let d = new Date(inputFormat)
+                    return [pad(d.getDate()), pad(d.getMonth()+1), d.getFullYear()].join('/')
+                }
+
                 // Restrict file data date range to the simulation period
                 let new_data = data.file_data.filter(e=>Date.parse(e['Date'])>=sim_start & Date.parse(e['Date'])<=sim_end)
                 // make sure we have data in the time window of simulation
@@ -352,7 +363,7 @@
                 // Get only the column for this select
                 let this_sel_data = new_data.map((e,i) => {
                     let this_row = {
-                        'Date': e['Date'],
+                        'Date': convertDate(e['Date']),
                         'xHour': e['xHour'],
                         'TimeZone': e['TimeZone']
                     }
@@ -401,7 +412,6 @@
             });
         }
 
-
         ///////////////// Spatially Varying table
         document.body.addEventListener('parcels:loaded', function() {
             let loadedData = $('#root').data('loadedParcels')
@@ -412,8 +422,8 @@
                         spatially_varying_table_data.push({
                             'parcelid': e.id,
                             'Surface Parcel': e.name,
-                            'GroundwaterSeepageFractions': e.seepage_frac ? e.seepage_frac : TRIM.forms.fetchDefault('GroundwaterSeepageFractions'),
-                            'RunoffFractions': e.runoff_fraction ? e.runoff_fraction : TRIM.forms.fetchDefault('RunoffFractions')
+                            'GroundwaterSeepageFractions': (e.seepage_frac === null) || (e.seepage_frac === "") ? TRIM.forms.fetchDefault('GroundwaterSeepageFractions') : e.seepage_frac,
+                            'RunoffFractions': (e.runoff_fraction === null) || (e.runoff_fraction === "")  ? TRIM.forms.fetchDefault('RunoffFractions') : e.runoff_fraction
                         })
                     }
                 })
