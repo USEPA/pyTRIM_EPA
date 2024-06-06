@@ -37,6 +37,7 @@ def parse():
         preview = None
         file_data = None
         truncated = False
+        record_limit = 1000000
         try:
             fname = secure_filename(f.filename)
 
@@ -47,15 +48,16 @@ def parse():
 
                 fields = list(df.columns.values)
                 entries = len(df.index)
+                print(f'NUMBER OF ENTRIES IS {entries} ')
                 preview = df.head().where(
                     pd.notnull(df), None
                 ).to_dict('records')
-                if entries < 10000:
+                if entries < record_limit:
                     file_data = df.where(
                         pd.notnull(df), None
                     ).to_dict('records')
                 else:
-                    file_data = df.head(10000).where(
+                    file_data = df.head(record_limit).where(
                         pd.notnull(df), None
                     ).to_dict('records')
 

@@ -263,7 +263,7 @@
                 })
 
                 function initialize_components() {
-                    let dt = JSON.parse(window.sessionStorage["m_results_id"+loadedData.scenario_head.id])
+                    let dt = JSON.parse(loadedData.scenario_head.latest_run_info.run_results.mass_results)
                     comp_list = Object.keys(dt).filter(e => ['year','time'].indexOf(e) == -1).map(e=> e.split("_").slice(1).join("_")).filter((v, i, a) => {
                         return a.indexOf(v) === i  // Get unique compartment names
                     })
@@ -290,8 +290,7 @@
                     add_dynamic_props()
                 }
 
-                // check also window.sessionStorage["Params_updated_id"+loadedData.scenario_head.id] == "false"
-                if (window.sessionStorage["m_results_id"+loadedData.scenario_head.id]) {
+                if (loadedData.scenario_head.latest_run_info.run_results.mass_results) {
                     // $('#btn_execute_model').attr('disabled', "disabled")
                     setChecked("p#cb_proc_trm", "on")
                     setChecked("p#cb_proc_ode", "on")
@@ -301,8 +300,8 @@
                     $('#lb_perc_ode').text("(100%)")
                     $('#lb_perc_out').text("(100%)")
                     $('#lb_perc_vis').text("(100%)")
-                    let m_file = window.sessionStorage["m_file_id" + loadedData.scenario_head.id]
-                    let c_file = window.sessionStorage["c_file_id" + loadedData.scenario_head.id]
+                    let m_file = loadedData.scenario_head.latest_run_info.run_results.mass_results_file
+                    let c_file = loadedData.scenario_head.latest_run_info.run_results.conc_results_file
                     let fpath = "{{ url_for('static', filename='.output') }}"
                     let m_filepath =  fpath + "/" + m_file
                     let c_filepath =  fpath + "/" + c_file
@@ -371,7 +370,8 @@
 
                     $('#btn_visualize').on('click', function(e) {
                         e.preventDefault()
-                        $('#res_version').text("Displaying results of last model run on " + window.sessionStorage["Last_run_id"+loadedData.scenario_head.id])
+                        let last_run_date_time = loadedData.scenario_head.latest_run_info.lastest_run_date
+                        $('#res_version').text("Displaying results of last model run on " + last_run_date_time)
                         let sel_type = $('#plt_type').find('button.dropdown-toggle').text().trim()
                         if (sel_type == "Time Series") {
                             draw_ts_chart()
@@ -475,24 +475,6 @@
                     $('p#cb_proc_trm').find("i.fas").css('display','none')
                     function exec_model_run(){
                         var resp = TRIM.api.runModel(scenario_info).on('load',function(){
-                            // let m_results = JSON.parse(JSON.stringify(this.responseJSON.mass))
-                            // m_results = "{" + m_results.trimStart().trimEnd() + "}"
-                            // let c_results = JSON.parse(JSON.stringify(this.responseJSON.conc))
-                            // c_results = "{" + c_results.trimStart().trimEnd() + "}"
-                            // let m_file = JSON.parse(JSON.stringify(this.responseJSON.outputMass))
-                            // let c_file = JSON.parse(JSON.stringify(this.responseJSON.outputConc))
-                            // let id_sting = "_id" + scenario_info[0]["value"]
-                            // window.sessionStorage["m_results" + id_sting] = m_results
-                            // window.sessionStorage["c_results" + id_sting] = c_results
-                            // window.sessionStorage["m_file" + id_sting] = m_file
-                            // window.sessionStorage["c_file" + id_sting] = c_file
-                            // window.sessionStorage["Last_run" + id_sting] = Date(Date.now)
-                            // window.sessionStorage["Params_updated" + id_sting] = "false"
-                            // let fpath = "{{ url_for('static', filename='.output') }}"
-                            // let m_filepath =  fpath + "/" + m_file
-                            // let c_filepath =  fpath + "/" + c_file
-                            // $('#btn_get_mass_results').attr("href",m_filepath)
-                            // $('#btn_get_conc_results').attr("href",c_filepath)
                             resp = this.responseJSON
                             return resp
                         })
@@ -519,13 +501,11 @@
                             result_data["c_file"] = JSON.parse(JSON.stringify(this.responseJSON.outputConc))
                             result_data["Last_run"] = JSON.parse(JSON.stringify(this.responseJSON.run_date))
                             let id_sting = "_id" + scenario_info[0]["value"]
-                            window.sessionStorage["Params_updated" + id_sting] = "false"
-                            window.sessionStorage["m_results" + id_sting] = result_data["m_results"]
-                            window.sessionStorage["c_results" + id_sting] = result_data["c_results"]
-                            window.sessionStorage["m_file" + id_sting] = result_data["m_file"]
-                            window.sessionStorage["c_file" + id_sting] = result_data["c_file"]
-                            window.sessionStorage["Last_run" + id_sting] = result_data["Last_run"]
-                            window.sessionStorage["Params_updated" + id_sting] = "false"
+                            loadedData.scenario_head.latest_run_info.run_results.mass_results = result_data["m_results"]
+                            loadedData.scenario_head.latest_run_info.run_results.conc_results = result_data["c_results"]
+                            loadedData.scenario_head.latest_run_info.run_results.mass_results_file = result_data["m_file"]
+                            loadedData.scenario_head.latest_run_info.run_results.conc_results_file = result_data["c_file"]
+                            loadedData.scenario_head.latest_run_info.lastest_run_date = result_data["Last_run"]
                             let fpath = "{{ url_for('static', filename='.output') }}"
                             let m_filepath =  fpath + "/" + result_data["m_file"]
                             let c_filepath =  fpath + "/" + result_data["c_file"]
@@ -615,7 +595,7 @@
                 }
 
                 // Plot something for the first load
-                if (window.sessionStorage["Params_updated_id"+loadedData.scenario_head.id] == "false" && window.sessionStorage["m_results_id"+loadedData.scenario_head.id]) {
+                if (loadedData.scenario_head.latest_run_info.run_has_results) {
                     $($('#plt_type').find('a.dropdown-item')[0]).trigger('click')
                     $('#btn_visualize').trigger('click')
                 }
@@ -627,13 +607,13 @@
                 let unit_type = ""
                 let unit = ""
                 if ($('#switch_res_conc').prop("checked")) {
-                    results = JSON.parse(window.sessionStorage["c_results_id"+loadedData.scenario_head.id])
+                    results = JSON.parse(loadedData.scenario_head.latest_run_info.run_results.conc_results)
                     unit_type = "Concentration"
                     unit = "(g/g)"
                     results["year"]={};
                     Object.keys(results[Object.keys(results)[0]]).forEach((e,i) => results["year"][e]=e)
                 } else {
-                    results = JSON.parse(window.sessionStorage["m_results_id"+loadedData.scenario_head.id])
+                    results = JSON.parse(loadedData.scenario_head.latest_run_info.run_results.mass_results)
                     unit_type = "Mass"
                     unit = "(g)"
                 }
@@ -704,13 +684,13 @@
                 let unit_type = ""
                 let unit = ""
                 if ($('#switch_res_conc').prop("checked")) {
-                    results = JSON.parse(window.sessionStorage["c_results_id"+loadedData.scenario_head.id])
+                    results = JSON.parse(loadedData.scenario_head.latest_run_info.run_results.conc_results)
                     unit_type = "Concentration"
                     unit = "(g/g)"
                     results["year"]={};
                     Object.keys(results[Object.keys(results)[0]]).forEach((e,i) => results["year"][e]=e)
                 } else {
-                    results = JSON.parse(window.sessionStorage["m_results_id"+loadedData.scenario_head.id])
+                    results = JSON.parse(loadedData.scenario_head.latest_run_info.run_results.mass_results)
                     unit_type = "Mass"
                     unit = "(g)"
                 }

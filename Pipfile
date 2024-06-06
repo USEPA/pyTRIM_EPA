@@ -83,8 +83,7 @@ werkzeug = "~=2.3.6"
 wtforms = "~=3.0.1"
 wtforms-sqlalchemy = "==0.3"
 xmltodict = "==0.13.0"
-pymysql = "*"
-cryptography = "*"
+xlsxwriter = "*"
 
 [dev-packages]
 

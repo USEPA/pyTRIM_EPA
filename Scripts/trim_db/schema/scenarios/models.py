@@ -1,11 +1,14 @@
 import sqlalchemy as sa
 from datetime import datetime
+import json
 
 import sqlalchemy.sql.sqltypes
 
 from ..utils.base import Model
 from ..utils.mixins import TrackUpdatesMixin
 from ..utils.serialize import register_serializer
+from ..parameters.models import CustomParameter, ParameterDefinition
+from ..entities.models import Chemical
 
 
 __all__ = [
@@ -182,43 +185,94 @@ class ScenarioLoadRunProc(Model):
 
 @register_serializer(Scenario)
 def serialize_scenario(scen: Scenario):
-    from trim_db.services import ChemicalService
 
     def get_wet_interception_params(wi_type, media_name):
         # TODO Need to figure out why agriculture_leaf does not have CalculateWIF
-        wi_data = []
+        comps_par = {comp_n: par_dict for comp_n, par_dict in leaf_pars.items() if media_name.replace("_Leaf", "") in comp_n}
+        # IMPORTANT: We are assuming all relevant scenario compartments of this type will have the same value.
+        # This requires that when this parameter is updated, it is done so for all compartments of this type for
+        # this scenario
+        pars = {}
+        if comps_par:
+            pars = comps_par[list(comps_par.keys())[0]]
+        wi_data = None
         if wi_type == 1:
-            wi_data = [c.WetDepInterceptionFraction_UserSupplied for c in scen.compartments if c.media.isa(media_name)]
+            wi_data = safe_get_param_value("WetDepInterceptionFraction_UserSupplied", pars)
         elif wi_type == 2:
-            wi_data = [c.CalculateWetDepInterceptionFraction for c in scen.compartments if c.media.isa(media_name)]
+            wi_data = safe_get_param_value("CalculateWetDepInterceptionFraction", pars)
         elif wi_type == 3:
-            wi_data = [c.WetDepInterceptionFraction_Calculated for c in scen.compartments if c.media.isa(media_name)]
-        if len(wi_data) > 0:
-            try:
-                return float(wi_data[0].magnitude)
-            except AttributeError:
-                return float(wi_data[0])
+            wi_data = safe_get_param_value("WetDepInterceptionFraction_Calculated", pars)
+        if wi_data is not None:
+            return float(wi_data)
         else:
             return -1
 
     def get_seasonal_dynamics_params(sd_type, media_name):
-        sd_data = []
+        sd_data = None
+        comps_par = {comp_n: par_dict for comp_n, par_dict in leaf_pars.items() if
+                     media_name.replace("_Leaf", "") in comp_n}
+        # IMPORTANT: We are assuming all relevant scenario compartments of this type will have the same value.
+        # This requires that when this parameter is updated, it is done so for all compartments of this type for
+        # this scenario
+        pars = {}
+        if comps_par:
+            pars = comps_par[list(comps_par.keys())[0]]
         if sd_type == 'lf':
-            sd_data = list(set([c.LitterFallRate for c in scen.compartments if c.media.isa(media_name)]))
+            sd_data = safe_get_param_value("LitterFallRate", pars)
         elif sd_type == 'ae':
             # TODO is allowExchange_forAir correct? should we use _forOther instead?
             #   or should we directly use _Dynamic (which these point to)
-            sd_data = list(set([c.AllowExchange_forAir for c in scen.compartments if c.media.isa(media_name)]))
-        if len(sd_data) > 0:
+            if pars:
+                comp = [c for c in scen.compartments if c.standard_name == list(comps_par.keys())[0]]
+                sd_data = safe_get_param_value("AllowExchange_forAir", pars, needs_quantity={'comp': comp[0]})
+        if sd_data is not None:
             try:
-                return float(sd_data[0].magnitude)
-            except AttributeError:
-                try:
-                    return float(sd_data[0])
-                except TypeError:
-                    return -1
+                return float(sd_data)
+            except TypeError:
+                print(sd_data)
         else:
             return -1
+
+    def get_latest_run_info():
+        run_info = {'has_run': scen.has_process_hist,
+                    "lastest_run_date": "",
+                    "run_has_results": False,
+                    "run_results": {}
+                    }
+        if run_info["has_run"]:
+            proc_info = [*scen.proc_status][0]
+            run_info["lastest_run_date"] = proc_info.run_datetime
+            run_info["run_has_results"] = True if proc_info.run_status == 'run fin 100' else False
+            if run_info["run_has_results"]:
+                run_info["run_results"] = {
+                    "mass_results": f'{{{json.loads(json.dumps(json.loads(proc_info.result_nt), indent=4, sort_keys=True,default=str))}}}',
+                    "mass_results_file": proc_info.result_file_nt,
+                    "conc_results": f'{{{json.loads(json.dumps(json.loads(proc_info.result_conc), indent=4, sort_keys=True, default=str))}}}',
+                    "conc_results_file": proc_info.result_file_conc
+                }
+        return run_info
+
+    def safe_get_param_value(par_name, par_dict, needs_quantity={}):
+        safe_val = None
+        if par_name in par_dict:
+            if isinstance(par_dict[par_name], CustomParameter):
+                if 'unit' in needs_quantity:
+                    safe_val = par_dict[par_name].quantity.to(needs_quantity['unit']).magnitude
+                else:
+                    safe_val = par_dict[par_name].value
+                if 'comp' in needs_quantity:
+                    safe_val = par_dict[par_name].formula.eval(self=needs_quantity['comp'], environment=scen)
+            if isinstance(par_dict[par_name], ParameterDefinition):
+                safe_val = par_dict[par_name].default_value
+                if 'comp' in needs_quantity:
+                    safe_val = par_dict[par_name].default_formula.eval(self=needs_quantity['comp'], environment=scen)
+
+        return safe_val
+
+    scen_pars = {pn: po for pn, po in scen.parameters.items()}
+
+    leaf_pars = {c.standard_name: {pn: p for pn, p in c.parameters.items()} for c in scen.compartments if
+                 c.media.isa('$_Leaf')}
 
     s = {
         'id': scen.id,
@@ -226,20 +280,22 @@ def serialize_scenario(scen: Scenario):
         'description': scen.description,
         'simulation_start_date': scen.sim_begin_end_time[0],
         'simulation_end_date': scen.sim_begin_end_time[1],
-        'erosionRateSource': scen.erosionRateCalcSource or 1,
+        'latest_run_info': get_latest_run_info(),
+        'erosionRateSource': safe_get_param_value("erosionRateCalcSource", scen_pars) or 1,
         'scenario_chem': [c.name for c in scen.chemicals],
-        'all_chem': [c.name for c in ChemicalService.get_all()],
+        'all_chem': [c.name for c in list(Chemical.query.all())],
         'meteo': {
-            'ambient_air_temp': scen.AirTemperature.to("K").magnitude,
-            'horizontal_wind_speed': scen.horizontalWindSpeed,
-            'wind_dir': scen.windDirection,
+            'ambient_air_temp': safe_get_param_value("AirTemperature", scen_pars, needs_quantity={'unit': "K"}),
+            'horizontal_wind_speed': safe_get_param_value("horizontalWindSpeed", scen_pars),
+            'wind_dir': safe_get_param_value("windDirection", scen_pars),
             # TODO scen?.mixingHeight??, # it is in Input_files/1Parameters.csv
             # wired to top of Air comp/VE in Foundries_SS (4) Properties.txt,
-            'mixing_height': scen.mixingHeight if scen.mixingHeight else
+            'mixing_height': safe_get_param_value("mixingHeight", scen_pars)
+            if safe_get_param_value("mixingHeight", scen_pars) else
             [a.height.magnitude for a in scen.compartments if a.media.isa("Air") and "Upper" not in a.standard_name][0],
-            'daytime_indicator': scen.isDay_Dynamic,
-            'precipitation': scen.Rain,
-            'cumulative_precip': scen.cumulativeRain},
+            'daytime_indicator': safe_get_param_value("isDay_Dynamic", scen_pars),
+            'precipitation': safe_get_param_value("Rain", scen_pars),
+            'cumulative_precip': safe_get_param_value("cumulativeRain", scen_pars)},
         'wet_dep_interception': {
             'wet_dep_interception_frac_coniferous_leaf': get_wet_interception_params(1, "Coniferous_Leaf"),
             'calc_wet_dep_interception_frac_coniferous_leaf': get_wet_interception_params(2, "Coniferous_Leaf"),

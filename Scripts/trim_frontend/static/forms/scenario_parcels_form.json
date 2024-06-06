@@ -75,24 +75,14 @@
             "help": "Indicate the field name showing whether a parcel will be modeled with wetland characteristics (e.g., modified water percolation and mercury methylation in soil; you will later need to provide information on these wetland characteristics) (a Yes/No field). Note: wetland designations are not allowed for land uses of water and impervious."
         },
         {
-            "id": "parcel_x_coordinates_field",
-            "label": "Field Name for X Coordinates",
+            "id": "parcel_coordinates_field",
+            "label": "Field Name for X and Y Coordinate pair list",
             "data_type": "string",
             "widget": "select",
             "choices": [],
-            "default": "Xcoordinate",
+            "default": "coordinates",
             "required": true,
-            "help": "Indicate the field name for the X coordinates of the parcels from your text or CSV file."
-        },
-        {
-            "id": "parcel_y_coordinates_field",
-            "label": "Field Name for Y Coordinates",
-            "data_type": "string",
-            "widget": "select",
-            "choices": [],
-            "default": "Ycoordinate",
-            "required": true,
-            "help": "Indicate the field name for the Y coordinates of the parcels from your text or CSV file."
+            "help": "Indicate the field name for the coordinates of the parcels (polygon vertices) from your text or CSV file. This needs to be in the pair list format such that [[[X1,Y1], [X2,Y2], [X3,Y3]]] where XN and YN are X and Y coordiantes of the Nth vertice."
         }
     ]
 }
