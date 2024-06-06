@@ -799,6 +799,8 @@ window.TRIM = (function(trim) {
         return fields
     }
 
+    var formPopulatedEvent = document.createEvent('Event');
+    formPopulatedEvent.initEvent('form:populated', true, true);
     forms.populate = function(form, data) {
         // Convert data to an array if necessary
         // (helps us handle field-list/fieldsets)
@@ -806,9 +808,11 @@ window.TRIM = (function(trim) {
             data = [data];
         }
 
+        var isFieldset = form.tagName.toLowerCase() == 'fieldset';
+
         // Check if we need to build an id-prefix for field-list/fieldsets
         var pref = '';
-        if (form.tagName.toLowerCase() == 'fieldset') {
+        if (isFieldset) {
             pref = form.id + '-';
 
             // Also check if we need to add tabs to the fieldset
@@ -866,6 +870,10 @@ window.TRIM = (function(trim) {
                     forms.populate(fieldset, subData[checkId])
                 }
             }
+        }
+
+        if (!isFieldset) {
+            form.dispatchEvent(formPopulatedEvent);
         }
     };
 
