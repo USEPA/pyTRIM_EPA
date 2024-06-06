@@ -11,6 +11,7 @@ from trim_db import ScenarioService, ParcelService, \
     CompartmentService, VolumeElementService, ParameterService, ChemicalService, FormulaService, ScenarioLoadRunProc
 from trim_frontend import api
 from trim_frontend.parcels.routes import delete_parcel_contents
+from .defaults import *
 from .forms import *
 from ..utils.logging import make_logger
 from trim_core.algorithms.full_model_run import run_full_model
@@ -19,49 +20,6 @@ from trim_core.algorithms.full_model_run import run_full_model
 import traceback
 
 scenario = Blueprint('scenario', __name__)
-
-param_map = {
-    'meteo': {
-        'meteo_ambient_air_static_value': 'AirTemperature',
-        'meteo_ambient_air_field_name_TS': 'AirTemperature',
-        'meteo_wind_speed_static_value': 'horizontalWindSpeed',
-        'meteo_wind_speed_field_name_TS': 'horizontalWindSpeed',
-        'meteo_wind_direction_static_value': 'windDirection',
-        'meteo_wind_direction_field_name_TS': 'windDirection',
-        'meteo_mixing_height_static_value': 'mixingHeight',
-        'meteo_mixing_height_field_name_TS': 'mixingHeight',
-        'meteo_daytime_indicator_static_value': 'isDay_Dynamic',
-        'meteo_daytime_indicator_field_name_TS': 'isDay_Dynamic',
-        'meteo_precipitation_static_value_rate': 'Rain',
-        'meteo_precipitation_field_name_TS': 'Rain',
-        'meteo_interception_fractions_static_deciduous': ['Deciduous_Leaf', 'WetDepInterceptionFraction_UserSupplied'],
-        'meteo_interception_fractions_static_grass': ['Grass_Leaf', 'WetDepInterceptionFraction_UserSupplied'],
-        'meteo_interception_fractions_static_coniferous': ['Coniferous_Leaf', 'WetDepInterceptionFraction_UserSupplied'],
-        'meteo_interception_fractions_static_agriculture': ['Agriculture_Leaf', 'WetDepInterceptionFraction_UserSupplied'],
-        'meteo_interception_fractions_calculated_deciduous': ['Deciduous_Leaf', 'CalculateWetDepInterceptionFraction'],
-        'meteo_interception_fractions_calculated_grass': ['Grass_Leaf', 'CalculateWetDepInterceptionFraction'],
-        'meteo_interception_fractions_calculated_coniferous': ['Coniferous_Leaf', 'CalculateWetDepInterceptionFraction'],
-        'meteo_interception_fractions_calculated_agriculture': ['Agriculture_Leaf', 'CalculateWetDepInterceptionFraction']
-    },
-    'seasonal': {
-        'seasonal_deciduous_forest_litterfall_static_value': ['Deciduous_Leaf', 'LitterFallRate'],
-        'seasonal_deciduous_forest_litterfall_field_name_TS': ['Deciduous_Leaf', 'LitterFallRate'],
-        'seasonal_deciduous_forest_allowexchange_field_name_TS': ['Deciduous_Leaf', 'AllowExchange_Dynamic'],
-        'seasonal_deciduous_forest_allowexchange_static_value': ['Deciduous_Leaf', 'AllowExchange_Dynamic'],
-        'seasonal_coniferous_forest_litterfall_static_value': ['Coniferous_Leaf', 'LitterFallRate'],
-        'seasonal_coniferous_forest_litterfall_field_name_TS': ['Coniferous_Leaf', 'LitterFallRate'],
-        'seasonal_coniferous_forest_allowexchange_static_value': ['Coniferous_Leaf', 'AllowExchange_Dynamic'],
-        'seasonal_coniferous_forest_allowexchange_field_name_TS': ['Coniferous_Leaf', 'AllowExchange_Dynamic'],
-        'seasonal_grasses_herbs_litterfall_static_value': ['Grass_Leaf', 'LitterFallRate'],
-        'seasonal_grasses_herbs_litterfall_field_name_TS': ['Grass_Leaf', 'LitterFallRate'],
-        'seasonal_grasses_herbs_allowexchange_static_value': ['Grass_Leaf', 'AllowExchange_Dynamic'],
-        'seasonal_grasses_herbs_allowexchange_field_name_TS': ['Grass_Leaf', 'AllowExchange_Dynamic'],
-        'seasonal_agriculture_litterfall_static_value': ['Agriculture_Leaf', 'LitterFallRate'],
-        'seasonal_agriculture_litterfall_field_name_TS': ['Agriculture_Leaf', 'LitterFallRate'],
-        'seasonal_agriculture_allowexchange_static_value': ['Agriculture_Leaf', 'AllowExchange_Dynamic'],
-        'seasonal_agriculture_allowexchange_field_name_TS': ['Agriculture_Leaf', 'AllowExchange_Dynamic'],
-    }
-}
 
 
 @scenario.route('/scenario', methods=['GET'])
@@ -121,8 +79,12 @@ api.use_api_errors(scenario_api)
 @scenario_api.route('/api/scenario/<int:id>', methods=['GET'])
 @login_required
 def get_scenario(id):
+    logger = make_logger('scenario_api_get')
     s = ScenarioService.get(id)
-    return ApiResult({'scenario': s.as_serializable()})
+    start_time = time.time()
+    s = s.as_serializable()
+    logger.info(f"Acquired scenario in {time.time() - start_time} seconds")
+    return ApiResult({'scenario': s})
 
 
 @scenario_api.route('/api/scenario/update', methods=['POST'])
@@ -278,8 +240,10 @@ def update_scenario():
             ts_date = time.mktime(date_obj.timetuple())
             par_name = "simulationBeginDateTime" if field_name == "startDate" else "simulationEndDateTime"
             par_list = {par_k: par for par_k, par in s.parameters.items() if par_k == par_name}
-            this_param = par_list[par_name]
-            if this_param.__tablename__ != "custom_parameter":
+            this_param = par_list.get(par_name)
+            if this_param is None:
+                s.parameters.add(par_name, value=ts_date)
+            elif this_param.__tablename__ != "custom_parameter":
                 ParameterService.create(definition_id=this_param.id, scenario_id=s.id,
                                         requirements=f"(self.id == {s.id})", value=ts_date)
             else:

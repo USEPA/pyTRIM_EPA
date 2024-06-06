@@ -5,7 +5,6 @@ import sqlalchemy.sql.sqltypes
 
 from ..utils.base import Model
 from ..utils.mixins import TrackUpdatesMixin
-from ..utils.serialize import register_serializer
 
 
 __all__ = [
@@ -63,10 +62,20 @@ class Scenario(Model, TrackUpdatesMixin):
                 comps.append(c)
         return list(sorted(comps, key=lambda x: x.name))
 
-    def get_compartment(self, name):
-        for c in self.compartments:
-            if c.name == name or c.standard_name == name:
-                return c
+    def get_compartment(self, name=None, media=None):
+        if media is None:
+            if name is None:
+                raise ValueError(
+                    'Must supply either "name" or "media" argument'
+                )
+            check = self.compartments
+        else:
+            check = [c for c in self.compartments if c.media.isa(media)]
+            if name is None:
+                return check
+        for x in check:
+            if x.name == name or x.standard_name == name:
+                return x
         return None
 
     @property
@@ -178,91 +187,3 @@ class ScenarioLoadRunProc(Model):
         if self.run_step == "err":
             return True
         return False
-
-
-@register_serializer(Scenario)
-def serialize_scenario(scen: Scenario):
-    from trim_db.services import ChemicalService
-
-    def get_wet_interception_params(wi_type, media_name):
-        # TODO Need to figure out why agriculture_leaf does not have CalculateWIF
-        wi_data = []
-        if wi_type == 1:
-            wi_data = [c.WetDepInterceptionFraction_UserSupplied for c in scen.compartments if c.media.isa(media_name)]
-        elif wi_type == 2:
-            wi_data = [c.CalculateWetDepInterceptionFraction for c in scen.compartments if c.media.isa(media_name)]
-        elif wi_type == 3:
-            wi_data = [c.WetDepInterceptionFraction_Calculated for c in scen.compartments if c.media.isa(media_name)]
-        if len(wi_data) > 0:
-            try:
-                return float(wi_data[0].magnitude)
-            except AttributeError:
-                return float(wi_data[0])
-        else:
-            return -1
-
-    def get_seasonal_dynamics_params(sd_type, media_name):
-        sd_data = []
-        if sd_type == 'lf':
-            sd_data = list(set([c.LitterFallRate for c in scen.compartments if c.media.isa(media_name)]))
-        elif sd_type == 'ae':
-            # TODO is allowExchange_forAir correct? should we use _forOther instead?
-            #   or should we directly use _Dynamic (which these point to)
-            sd_data = list(set([c.AllowExchange_forAir for c in scen.compartments if c.media.isa(media_name)]))
-        if len(sd_data) > 0:
-            try:
-                return float(sd_data[0].magnitude)
-            except AttributeError:
-                try:
-                    return float(sd_data[0])
-                except TypeError:
-                    return -1
-        else:
-            return -1
-
-    s = {
-        'id': scen.id,
-        'name': scen.name,
-        'description': scen.description,
-        'simulation_start_date': scen.sim_begin_end_time[0],
-        'simulation_end_date': scen.sim_begin_end_time[1],
-        'erosionRateSource': scen.erosionRateCalcSource or 1,
-        'scenario_chem': [c.name for c in scen.chemicals],
-        'all_chem': [c.name for c in ChemicalService.get_all()],
-        'meteo': {
-            'ambient_air_temp': scen.AirTemperature.to("K").magnitude,
-            'horizontal_wind_speed': scen.horizontalWindSpeed,
-            'wind_dir': scen.windDirection,
-            # TODO scen?.mixingHeight??, # it is in Input_files/1Parameters.csv
-            # wired to top of Air comp/VE in Foundries_SS (4) Properties.txt,
-            'mixing_height': scen.mixingHeight if scen.mixingHeight else
-            [a.height.magnitude for a in scen.compartments if a.media.isa("Air") and "Upper" not in a.standard_name][0],
-            'daytime_indicator': scen.isDay_Dynamic,
-            'precipitation': scen.Rain,
-            'cumulative_precip': scen.cumulativeRain},
-        'wet_dep_interception': {
-            'wet_dep_interception_frac_coniferous_leaf': get_wet_interception_params(1, "Coniferous_Leaf"),
-            'calc_wet_dep_interception_frac_coniferous_leaf': get_wet_interception_params(2, "Coniferous_Leaf"),
-            'wet_dep_interception_frac_coniferous_leaf_calculated': get_wet_interception_params(3, "Coniferous_Leaf"),
-            'wet_dep_interception_frac_deciduous_leaf': get_wet_interception_params(1, "Deciduous_Leaf"),
-            'calc_wet_dep_interception_frac_deciduous_leaf': get_wet_interception_params(2, "Deciduous_Leaf"),
-            'wet_dep_interception_frac_deciduous_leaf_calculated': get_wet_interception_params(3, "Deciduous_Leaf"),
-            'wet_dep_interception_frac_grass_leaf': get_wet_interception_params(1, "Grass_Leaf"),
-            'calc_wet_dep_interception_frac_grass_leaf': get_wet_interception_params(2, "Grass_Leaf"),
-            'wet_dep_interception_frac_grass_leaf_calculated': get_wet_interception_params(3, "Grass_Leaf"),
-            'wet_dep_interception_frac_agriculture_leaf': get_wet_interception_params(1, "Agriculture_Leaf"),
-            'calc_wet_dep_interception_frac_agriculture_leaf': get_wet_interception_params(2, "Agriculture_Leaf"),
-            'wet_dep_interception_frac_agriculture_leaf_calculated': get_wet_interception_params(3, "Agriculture_Leaf")
-        },
-        'seasonal_dynamics': {
-            'litterfall_coniferous': get_seasonal_dynamics_params('lf', 'Coniferous_Leaf'),
-            'allow_exchange_coniferous': get_seasonal_dynamics_params('ae', 'Coniferous_Leaf'),
-            'litterfall_deciduous': get_seasonal_dynamics_params('lf', 'Deciduous_Leaf'),
-            'allow_exchange_deciduous': get_seasonal_dynamics_params('ae', 'Deciduous_Leaf'),
-            'litterfall_grass': get_seasonal_dynamics_params('lf', 'Grass_Leaf'),
-            'allow_exchange_grass': get_seasonal_dynamics_params('ae', 'Grass_Leaf'),
-            'litterfall_agriculture': get_seasonal_dynamics_params('lf', 'Agriculture_Leaf'),
-            'allow_exchange_agriculture': get_seasonal_dynamics_params('ae', 'Agriculture_Leaf')
-        }
-    }
-    return s
