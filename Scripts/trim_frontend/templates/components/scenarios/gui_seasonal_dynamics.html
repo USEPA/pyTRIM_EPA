@@ -310,7 +310,11 @@
                                 JSON.stringify(myData)
                             );
                         }
-                        updateFields(me);
+                        // Make sure the file has the column with name "Date"
+                        var filedata = data.files[me.attr('name')]['file_data'];
+                        if (ErrorValidation.tsFileHasDateColumn(me.closest("div").siblings("label"),  filedata)) {
+                            updateFields(me);
+                        }
                     }
                     finally {
                         LoadingScreen.hide(loadingRequest);
@@ -324,6 +328,12 @@
                 var globalFileFiled = section.find('[type="file"][name^="default_"]');
                 let data = globalFileFiled.attr('data-filedata');
                 let subform = sel.closest('.subform');
+
+                function convertDate(inputFormat) {
+                    function pad(s) { return (s < 10) ? '0' + s : s; }
+                    var d = new Date(inputFormat)
+                    return [pad(d.getDate()), pad(d.getMonth()+1), d.getFullYear()].join('/')
+                }
 
                 let loadedData = $('#root').data('loadedParcels')
                 let sim_start = Date.parse(loadedData.scenario_head["simulation_start_date"])
@@ -343,7 +353,7 @@
                     // Get only the column for this select
                     let this_sel_data = new_data.map((e, i) => {
                         let this_row = {
-                            'Date': e['Date'],
+                            'Date': convertDate(e['Date']),
                             'Hour': e['Hour'],
                             'TimeZone': e['TimeZone']
                         }

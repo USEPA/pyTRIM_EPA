@@ -104,8 +104,8 @@
         ]
         //     'pH', 'rho', 'AverageVerticalVelocity',
         //     'FractionSand', 'OrganicCarbonContent', 'VolumeFraction_Liquid', 'VolumeFraction_Vapor', 'Porosity',
-        //     'AirSoilBoundaryThickness', 'Fractionofareaavailableforerosion', 'FractionofAreaAvailableforRunoff',
-        //     'Fractionofareaavailableforverticaldiffusion', 'TotalRunoffRate'
+        //     'AirSoilBoundaryThickness', 'FractionofAreaAvailableforErosion', 'FractionofAreaAvailableforRunoff',
+        //     'FractionofAreaAvailableforVerticalDiffusion', 'TotalRunoffRate'
         // ]
         function TableRedraw(table_data) {
             let air_tblId = "#AirAbioticTable";
@@ -238,9 +238,9 @@
                         'render':  render_function_soil('rho',"ErrorValidation.isPositiveValue(this)", "Soil_Surface")
                     },
                     {
-                        'data': 'Soil_Surface.Fractionofareaavailableforerosion',
+                        'data': 'Soil_Surface.FractionofAreaAvailableforErosion',
                         'bSortable': false,
-                        'render':  render_function_soil('Fractionofareaavailableforerosion',"ErrorValidation.isValidFraction(this)", "Soil_Surface")
+                        'render':  render_function_soil('FractionofAreaAvailableforErosion',"ErrorValidation.isValidFraction(this)", "Soil_Surface")
                     },
                     {
                         'data': 'Soil_Surface.FractionofAreaAvailableforRunoff',
@@ -248,9 +248,9 @@
                         'render':  render_function_soil('FractionofAreaAvailableforRunoff',"ErrorValidation.isValidFraction(this)", "Soil_Surface")
                     },
                     {
-                        'data': 'Soil_Surface.Fractionofareaavailableforverticaldiffusion',
+                        'data': 'Soil_Surface.FractionofAreaAvailableforVerticalDiffusion',
                         'bSortable': false,
-                        'render':  render_function_soil('Fractionofareaavailableforverticaldiffusion',"ErrorValidation.isValidFraction(this)", "Soil_Surface")
+                        'render':  render_function_soil('FractionofAreaAvailableforVerticalDiffusion',"ErrorValidation.isValidFraction(this)", "Soil_Surface")
                     },
                     {
                         'data': 'Soil_Surface.FractionSand',
@@ -586,9 +586,9 @@
                                 'VolumeFraction_Vapor': sc.VolumeFraction_Vapor ,
                                 'Porosity': sc.Porosity ,
                                 'AirSoilBoundaryThickness': sc.AirSoilBoundaryThickness,
-                                'Fractionofareaavailableforerosion': sc.Fractionofareaavailableforerosion,
+                                'FractionofAreaAvailableforErosion': sc.FractionofAreaAvailableforErosion,
                                 'FractionofAreaAvailableforRunoff': sc.FractionofAreaAvailableforRunoff,
-                                'Fractionofareaavailableforverticaldiffusion': sc.Fractionofareaavailableforverticaldiffusion,
+                                'FractionofAreaAvailableforVerticalDiffusion': sc.FractionofAreaAvailableforVerticalDiffusion,
                                 'TotalRunoffRate': sc.TotalRunoffRate
                             }
                         }

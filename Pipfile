@@ -85,6 +85,7 @@ wtforms-sqlalchemy = "==0.3"
 xmltodict = "==0.13.0"
 pymysql = "*"
 cryptography = "*"
+xlsxwriter = "*"
 
 [dev-packages]
 

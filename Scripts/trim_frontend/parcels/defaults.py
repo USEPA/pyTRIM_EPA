@@ -1,6 +1,6 @@
 from trim_db.schema import Parcel
 from trim_db.schema.utils.serialize import register_serializer
-from trim_db.schema.parameters.models import ParameterDefinition
+from trim_db.schema.parameters.models import ParameterDefinition, CustomParameter
 from trim_db.services import *
 import pint
 
@@ -179,8 +179,23 @@ def get_general_params(pcl):
     return general_params
 
 
-def get_soil_abiotic_params(pcl):
+def get_parcel_comp_params(pcl, comps, params):
+    cmps = [comp for comp in pcl.compartments if comp.name in [c for c in comps]]
+    pars = {c.name: {pn: p for pn, p in c.parameters.items()} for c in cmps}
+    return {cn: {pn: pars[cn][pn].value if isinstance(pars[cn][pn], CustomParameter) else pars[cn][pn].default_value
+                 for pn in params} for cn in comps}
+
+
+def get_soil_abiotic_params(pcl, run_old=True):
     comps = ["Soil_Surface", "Soil_Root_Zone", "Soil_Vadose_Zone", "Groundwater"]
+    if not run_old:
+         params = ["pH", "FractionSand", "OrganicCarbonContent", "rho", "Porosity", "VolumeFraction_Vapor",
+                   "AverageVerticalVelocity", "VolumeFraction_Liquid", "AirSoilBoundaryThickness",
+                   "FractionofAreaAvailableforErosion", "FractionofAreaAvailableforRunoff",
+                   "FractionofAreaAvailableforVerticalDiffusion", "TotalRunoffRate"]
+         new_soil_abiotic_params = get_parcel_comp_params(pcl, comps, params)
+         return {"soil_params": new_soil_abiotic_params}
+
     has_surf_soil = True if pcl.get_compartment(name="Soil_Surface") else False
     has_root_soil = True if pcl.get_compartment(name="Soil_Root_Zone") else False
     has_vadose_soil = True if pcl.get_compartment(name="Soil_Vadose_Zone") else False
@@ -190,11 +205,13 @@ def get_soil_abiotic_params(pcl):
     if has_surf_soil and has_root_soil and has_vadose_soil and has_groundwater:
         # get pH, fractionSand, organicCarbonContent, density
         for c in comps:
+            this_comp = pcl.get_compartment(name=c)
             params = {"pH": "", "FractionSand": "", "OrganicCarbonContent": "", "rho": ""}
             for k, _ in params.items():
-                mag = pcl.get_compartment(name=c).__getattr__(k).magnitude if isinstance(
-                    pcl.get_compartment(name=c).__getattr__(k), pint.Quantity) else pcl.get_compartment(
-                    name=c).__getattr__(k)
+                # par_val = safe_get_val(this_comp, k)
+                par_val = this_comp.__getattr__(k)
+                mag = par_val.magnitude if isinstance(
+                    par_val, pint.Quantity) else par_val
                 params[k] = mag
             soil_abiotic_params[c] = params
 
@@ -211,37 +228,43 @@ def get_soil_abiotic_params(pcl):
     if has_root_soil and has_vadose_soil and has_surf_soil:
         # get VolumeFraction_vapor, AverageVerticalVelocity, VolumeFraction_liquid
         for c in comps:
+            this_comp = pcl.get_compartment(name=c)
             params = {"VolumeFraction_Vapor": "", "AverageVerticalVelocity": "", "VolumeFraction_Liquid": "", "rho": ""}
             if soil_abiotic_params.get(c):
                 for k, _ in params.items():
-                    mag = pcl.get_compartment(name=c).__getattr__(k).magnitude if isinstance(
-                        pcl.get_compartment(name=c).__getattr__(k), pint.Quantity) else pcl.get_compartment(
-                        name=c).__getattr__(k)
+                    # par_val = safe_get_val(this_comp, k)
+                    par_val = this_comp.__getattr__(k)
+                    mag = par_val.magnitude if isinstance(
+                        par_val, pint.Quantity) else par_val
                     soil_abiotic_params[c].setdefault(k, mag)
             else:
                 for k, _ in params.items():
-                    mag = pcl.get_compartment(name=c).__getattr__(k).magnitude if isinstance(
-                        pcl.get_compartment(name=c).__getattr__(k), pint.Quantity) else pcl.get_compartment(
-                        name=c).__getattr__(k)
+                    # par_val = safe_get_val(this_comp, k)
+                    par_val = this_comp.__getattr__(k)
+                    mag = par_val.magnitude if isinstance(
+                        par_val, pint.Quantity) else par_val
                     params[k] = mag
                 soil_abiotic_params[c] = params
 
     if has_surf_soil:
-        params = {"AirSoilBoundaryThickness": "", "Fractionofareaavailableforerosion": "",
-                  "FractionofAreaAvailableforRunoff": "", "Fractionofareaavailableforverticaldiffusion": "",
+        params = {"AirSoilBoundaryThickness": "", "FractionofAreaAvailableforErosion": "",
+                  "FractionofAreaAvailableforRunoff": "", "FractionofAreaAvailableforVerticalDiffusion": "",
                   "TotalRunoffRate": ""}
         comp = "Soil_Surface"
+        this_comp = pcl.get_compartment(name=comp)
         if soil_abiotic_params.get(comp):
             for k, _ in params.items():
-                mag = pcl.get_compartment(name=comp).__getattr__(k).magnitude if isinstance(
-                    pcl.get_compartment(name=comp).__getattr__(k), pint.Quantity) else pcl.get_compartment(
-                    name=comp).__getattr__(k)
+                # par_val = safe_get_val(this_comp, k)
+                par_val = this_comp.__getattr__(k)
+                mag = par_val.magnitude if isinstance(
+                    par_val, pint.Quantity) else par_val
                 soil_abiotic_params[comp].setdefault(k, mag)
         else:
             for k, _ in params.items():
-                mag = pcl.get_compartment(name=comp).__getattr__(k).magnitude if isinstance(
-                    pcl.get_compartment(name=comp).__getattr__(k), pint.Quantity) else pcl.get_compartment(
-                    name=comp).__getattr__(k)
+                # par_val = safe_get_val(this_comp, k)
+                par_val = this_comp.__getattr__(k)
+                mag = par_val.magnitude if isinstance(
+                    par_val, pint.Quantity) else par_val
                 params[k] = mag
             soil_abiotic_params[comp] = params
 
@@ -255,7 +278,8 @@ def get_water_params(pcl, parcel_type):
 
     comp_surfaceSoil = pcl.get_compartment(media="Surface_Soil")
 
-    ch = ChemicalService.get(id=32)  # WRONG???
+    # TODO This is not right. We need params for all chemicals. How to show this in frontend???
+    ch = ChemicalService.get(id=32)
     ch.current_scenario(pcl.scenario)
 
     runoff_watershed_area = 0  # 1e3
@@ -326,88 +350,95 @@ def get_water_params(pcl, parcel_type):
     sw_params = None
     if 'Water' in parcel_type:
         sw = pcl.get_compartment(media='Surface_Water')[0]
+        sw_pars = {parn: par for parn, par in sw.parameters.items()}
         sed = pcl.get_compartment(media='Sediment')[0]
+        sed_pars = {parn: par for parn, par in sed.parameters.items()}
+
+        def get_correct_param(par_name, par_obj):
+            par = par_obj.get(par_name)
+            return par.value if isinstance(par, CustomParameter) else par.default_value if \
+                isinstance(par, ParameterDefinition) else None
 
         wc_external_inflow = 0
 
-        # try:
-        #     evaporation_vol_rate = sw.waterEvaporationRate * pcl.area
-        # except Exception:
-        #     evaporation_vol_rate = None
-        evaporation_vol_rate = 3.3E6
+        try:
+            evaporation_vol_rate = get_correct_param("waterEvaporationRate", sw_pars) * pcl.area.magnitude
+        except Exception:
+            evaporation_vol_rate = None
+        # evaporation_vol_rate = 3.3E6
 
-        # try:
-        #     wc_discharge_vol_rate = float('{:.5f}'.format(
-        #         runoff_vol_rate_to_sw
-        #         + seepage_vol_rate_to_gw
-        #         + wc_external_inflow
-        #         + (precipitation_vol_rate_to_sw * 2)
-        #         - evaporation_vol_rate
-        #     ))
-        # except Exception:
-        #     wc_discharge_vol_rate = None
-        wc_discharge_vol_rate = 6.2E6
+        try:
+            wc_discharge_vol_rate = float('{:.5f}'.format(
+                runoff_vol_rate_to_sw
+                + seepage_vol_rate_to_gw
+                + wc_external_inflow
+                + (precipitation_vol_rate_to_sw * 2)
+                - evaporation_vol_rate
+            ))
+        except Exception:
+            wc_discharge_vol_rate = None
+        # wc_discharge_vol_rate = 6.2E6
         
-        # try:
-        #     wc_sed_discharge_rate = (
-        #         sw.SuspendedSedimentConcentration
-        #         * wc_discharge_vol_rate
-        #     )
-        # except Exception:
-        #     wc_sed_discharge_rate = None
-        wc_sed_discharge_rate = 3.13E5
+        try:
+            wc_sed_discharge_rate = (
+                get_correct_param("SuspendedSedimentConcentration", sw_pars)
+                * wc_discharge_vol_rate
+            )
+        except Exception:
+            wc_sed_discharge_rate = None
+        # wc_sed_discharge_rate = 3.13E5
 
-        # try:
-        #     sed_burial_vol_rate = (
-        #         sw.ExternalSedimentInflow
-        #         + sed_soil_erosion_to_sw
-        #         - wc_sed_discharge_rate
-        #     ) / (sed.BedDensity * pc.area)
-        # except Exception:
-        #     sed_burial_vol_rate = None
-        sed_burial_vol_rate = 2.4992e-5
+        try:
+            sed_burial_vol_rate = (
+                get_correct_param("ExternalSedimentInflow", sw_pars)
+                + sed_soil_erosion_to_sw
+                - wc_sed_discharge_rate
+            ) / (get_correct_param("BedDensity", sed_pars) * pcl.area.magnitude)
+        except Exception:
+            sed_burial_vol_rate = None
+        # sed_burial_vol_rate = get_correct_param("SedimentBurialRateToHaveZeroNetDeposition", sed_pars)  # 2.4992e-5
 
-        # try:
-        #     sed_deposition_vol_rate = (
-        #         sw.SedimentDepositionVelocity
-        #         * sw.SuspendedSedimentConcentration
-        #     ) / sed.BedDensity
-        # except Exception:
-        #     sed_deposition_vol_rate = None
-        sed_deposition_vol_rate = 3.8462e-5
+        try:
+            sed_deposition_vol_rate = (
+                get_correct_param("SedimentDepositionVelocity", sw_pars)
+                * get_correct_param("SuspendedSedimentConcentration", sw_pars)
+            ) / get_correct_param("BedDensity", sed_pars)
+        except Exception:
+            sed_deposition_vol_rate = None
+        # sed_deposition_vol_rate = get_correct_param("SedimentDepositionRate", sw_pars)  # 3.8462e-5
 
-        # try:
-        #     sed_resuspension_vel = (
-        #         sed_deposition_vol_rate
-        #         - sed_burial_vol_rate
-        #     ) / (1 - sed.Porosity)
-        # except Exception:
-        #     sed_resuspension_vel = None
-        sed_resuspension_vel = 6.2480e-5
+        try:
+            sed_resuspension_vel = (
+                sed_deposition_vol_rate
+                - sed_burial_vol_rate
+            ) / (1 - get_correct_param("Porosity", sed_pars))
+        except Exception:
+            sed_resuspension_vel = None
+        # sed_resuspension_vel = get_correct_param("SedimentResuspensionVelocity", sed_pars)  # 6.2480e-5
 
         sw_params = {
             'wc_props':  {
-                'flush_rate': 0.48,  # sw.Flushes.magnitude,
-                'suspended_sed_conc': 0.05,  # sw.SuspendedSedimentConcentration,
-                'algae_density': 1.23E-2,  # sw.AlgaeDensityInWaterColumn.magnitude,
-                'chloride_conc': 7,  # sw.ChlorideConcentration.magnitude,
-                'chlorophyll_conc': 0.003,  # sw.ChlorophyllConcentration.magnitude,
-                'mean_depth': 3.6,  # sw.volume_element.top - sw.volume_element.bottom,
-                'evaporation_rate': 0.7,  # sw.waterEvaporationRate.magnitude,
+                'flush_rate': get_correct_param("Flushes", sw_pars),
+                'suspended_sed_conc': get_correct_param("SuspendedSedimentConcentration", sw_pars),
+                'algae_density': get_correct_param("AlgaeDensityInWaterColumn", sw_pars),
+                'chloride_conc': get_correct_param("ChlorideConcentration", sw_pars),
+                'chlorophyll_conc': get_correct_param("ChlorophyllConcentration", sw_pars),
+                'mean_depth': sw.volume_element.top - sw.volume_element.bottom,
+                'evaporation_rate': get_correct_param("waterEvaporationRate", sw_pars),
                 'evaporation_vol_rate': evaporation_vol_rate,
-                'suspended_organic_carbon': 0.05,  # sw.OrganicCarbonContent,
-                'water_ph': 8.5,  # sw.pH.magnitude,
-                'sed_deposition_vel': 2,  # sw.SedimentDepositionVelocity.magnitude,
-                'water_temp': 286.15,  # sw.WaterTemperature.magnitude,
-                'sed_inflow': 0,  # sw.ExternalSedimentInflow.magnitude,
+                'suspended_organic_carbon': get_correct_param("OrganicCarbonContent", sw_pars),
+                'water_ph': get_correct_param("pH", sw_pars),
+                'sed_deposition_vel': get_correct_param("SedimentDepositionVelocity", sw_pars),
+                'water_temp': get_correct_param("WaterTemperature", sw_pars),
+                'sed_inflow': get_correct_param("ExternalSedimentInflow", sw_pars),
                 'discharge_vol_rate': wc_discharge_vol_rate,
                 'sed_discharge_rate': wc_sed_discharge_rate
             },
             'sed_props': {
-                'bed_density': 2600,  # sed.BedDensity.magnitude,
-                'organic_carbon_frac': 0.02,  # sed.OrganicCarbonContent,
-                'bed_pH': 7.3,  # sed.pH,
-                'bed_porosity': 0.6,  # sed.Porosity,
+                'bed_density': get_correct_param("BedDensity.magnitude", sed_pars),
+                'organic_carbon_frac': get_correct_param("OrganicCarbonContent", sed_pars),
+                'bed_pH': get_correct_param("pH", sed_pars),
+                'bed_porosity': get_correct_param("Porosity", sed_pars),
                 'bed_thickness': sed.volume_element.top - sed.volume_element.bottom,
                 'sed_burial_vol_rate': sed_burial_vol_rate,
                 'sed_deposition_vol_rate': sed_deposition_vol_rate,
@@ -421,20 +452,15 @@ def get_water_params(pcl, parcel_type):
 
 def get_source_params(pcl):
     chem_objs = {c for c in pcl.scenario.chemicals}
+    source_comps = [c for c in pcl.compartments if c.media.isa("Source")]
     chems = {c.name: {} for c in pcl.scenario.chemicals}
     source_params = {"sources": chems}
-    for chem in chem_objs:
-        for comp in pcl.compartments:
-            # if comp.surfaceDepositionRate(chem) is not None:
-            #     try:
-            #         source_params["sources"][chem.name] = comp.surfaceDepositionRate(chem).magnitude
-            #     except:
-            #         source_params["sources"][chem.name] = comp.surfaceDepositionRate(chem)
-            if comp.media.isa("Source"):
-                try:
-                    source_params["sources"][chem.name][comp.volume_element.name] = {comp.name: comp.surfaceDepositionRate(chemical=chem).magnitude}
-                except AttributeError:
-                    source_params["sources"][chem.name][comp.volume_element.name] = {comp.name: comp.surfaceDepositionRate(chemical=chem)}
+    for comp in source_comps:
+        for chem in chem_objs:
+            try:
+                source_params["sources"][chem.name][comp.volume_element.name] = {comp.name: comp.surfaceDepositionRate(chemical=chem).magnitude}
+            except AttributeError:
+                source_params["sources"][chem.name][comp.volume_element.name] = {comp.name: comp.surfaceDepositionRate(chemical=chem)}
     return source_params
 
 
@@ -624,12 +650,10 @@ Air_Parcel_VolElem_defaults = {
         'Compartments': {
             'Air': {
                 'name': 'Air',
-                'media_id': 2,
                 'media_name': 'Air'
             },
-            'Degradation_Reaction_Sink': {
+            'Degradation_Reaction_Sink_Air': {
                 'name': 'Degradation_Reaction_Sink',
-                'media_id': 17,
                 'media_name': 'Degradation_Reaction'
             }
         }
@@ -639,9 +663,8 @@ Air_Parcel_VolElem_defaults = {
         'top': 1000,
         'bottom': 800,
         'Compartments': {
-            'Air': {
+            'UpperAir': {
                 'name': 'Air',
-                'media_id': 2,
                 'media_name': 'Air'
             }
         }
@@ -656,34 +679,77 @@ Land_Parcel_VolElem_defaults = {
         'Compartments': {
             'Soil_Surface': {
                 'name': 'Soil_Surface',
-                'media_id': 7,
                 'media_name': 'Surface_Soil'
             },
-            'Degradation_Reaction_Sink': {
+            'Degradation_Reaction_Sink_SurfSoil': {
                 'name': 'Degradation_Reaction_Sink',
-                'media_id': 17,
                 'media_name': 'Degradation_Reaction'
+            },
+            'Soil_Advection_Sink': {
+                'name': 'Soil_Advection_Sink',
+                'media_name': 'Advection'
             },
             'Leaf_Grasses_Herbs': {
                 'name': 'Leaf_Grasses_Herbs',
-                'media_id': 43,
                 'media_name': 'Grass_Leaf'
             },
             'Leaf_Particle_Grasses_Herbs': {
                 'name': 'Leaf_Particle_Grasses_Herbs',
-                'media_id': 47,
                 'media_name': 'Grass_Leaf_Particle'
             },
             'Stem_Grasses_Herbs': {
                 'name': 'Stem_Grasses_Herbs',
-                'media_id': 51,
                 'media_name': 'Grass_Stem'
             },
             'Root_Grasses_Herbs': {
                 'name': 'Root_Grasses_Herbs',
-                'media_id': 49,
                 'media_name': 'Grass_Root'
+            }
+        }
+    },
+    'RootSoil': {
+        'name': 'RootSoil',
+        'top': -0.01,
+        'bottom': -0.8,
+        'Compartments': {
+            'Soil_Root_Zone': {
+                'name': 'Soil_Root_Zone',
+                'media_name': 'Root_Zone'
             },
+            'Degradation_Reaction_Sink_RootSoil': {
+                'name': 'Degradation_Reaction_Sink',
+                'media_name': 'Degradation_Reaction'
+            }
+        }
+    },
+    'VadoseSoil': {
+        'name': 'VadoseSoil',
+        'top': -0.8,
+        'bottom': -2.2,
+        'Compartments': {
+            'Soil_Vadose_Zone': {
+                'name': 'Soil_Vadose_Zone',
+                'media_name': 'Vadose_Zone'
+            },
+            'Degradation_Reaction_Sink_VadoseSoil': {
+                'name': 'Degradation_Reaction_Sink',
+                'media_name': 'Degradation_Reaction'
+            }
+        }
+    },
+    'GW': {
+        'name': 'GW',
+        'top': -2.2,
+        'bottom': -5.2,
+        'Compartments': {
+            'Groundwater': {
+                'name': 'Groundwater',
+                'media_name': 'Groundwater'
+            },
+            'Degradation_Reaction_Sink_GW': {
+                'name': 'Degradation_Reaction_Sink',
+                'media_name': 'Degradation_Reaction'
+            }
         }
     }
 }
@@ -701,17 +767,14 @@ Water_Parcel_VolElem_defaults = {
         'Compartments': {
             'Surface_water': {
                 'name': 'Surface_water',
-                'media_id': 4,
                 'media_name': 'Surface_Water'
             },
             'Degradation_Reaction_Sink': {
                 'name': 'Degradation_Reaction_Sink',
-                'media_id': 17,
                 'media_name': 'Degradation_Reaction'
             },
             'Flush_Rate_Sink': {
                 'name': 'Flush_Rate_Sink',
-                'media_id': 20,
                 'media_name': 'Flush_Rate'
             }
         }
@@ -723,12 +786,10 @@ Water_Parcel_VolElem_defaults = {
         'Compartments': {
             'Sediment': {
                 'name': 'Sediment',
-                'media_id': 5,
                 'media_name': 'Sediment'
             },
             'Degradation_Reaction_Sink': {
                 'name': 'Degradation_Reaction_Sink',
-                'media_id': 17,
                 'media_name': 'Degradation_Reaction'
             },
         }

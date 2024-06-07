@@ -7,8 +7,11 @@ from flask import Blueprint, request, render_template, redirect, url_for
 from flask_security import login_required, current_user
 from flask_api import ApiResult
 from datetime import datetime
-from trim_db import ScenarioService, ParcelService, \
-    CompartmentService, VolumeElementService, ParameterService, ChemicalService, FormulaService, ScenarioLoadRunProc
+from trim_db.schema import ScenarioLoadRunProc, \
+    CustomParameter, ParameterDefinition
+from trim_db.services import ScenarioService, ChemicalService, \
+    ParcelService, CompartmentService, VolumeElementService, \
+    ParameterService, FormulaService
 from trim_frontend import api
 from trim_frontend.parcels.routes import delete_parcel_contents
 from .defaults import *
@@ -101,9 +104,10 @@ def update_scenario():
             ParameterService.update(c_p)
         ParameterService.commit()
 
-    def update_assumed_all_comp_fixed_params(scen, comp, par_name, par_val):
-        media_name = comp.media.name
-        c_par_list = [c.parameters.get(par_name) for c in scen.compartments if c.media.isa(media_name)]
+    def update_assumed_all_comp_fixed_params(scen, comps, par_name, par_val):
+        # media_name = comp.media.name
+        # c_par_list = [c.parameters.get(par_name) for c in scen.compartments if c.media.isa(media_name)]
+        c_par_list = [c.parameters.get(par_name) for c in comps]
         for c_p in c_par_list:
             c_p.value = par_val
             ParameterService.update(c_p)
@@ -226,14 +230,15 @@ def update_scenario():
             param_data = scenario_data[field_name]
             comp_list = [c for c in s.compartments if c.media.isa(param_media)]
             if "_static_" in field_name:
-                update_custom_param(s, comp_list[0], param_name, param_data)
+                # update_custom_param(s, comp_list[0], param_name, param_data)
+                update_assumed_all_comp_fixed_params(s, comp_list, param_name, param_data)
             elif field_name.endswith("_TS"):
                 ret_type = "LF" if field_name.find("_litterfall_") > 0 else "AE"
                 ret_type_name = "wt_av_litterfallrate" if field_name.find("_litterfall_") > 0 else \
                     "wt_av_allowexchange" if field_name.find("_allowexchange_") > 0 else "None"
                 ret_val = meteo_wgt_avg_value_from_timeseries(param_data, ret_type)
                 if ret_type != "None":
-                    update_assumed_all_comp_fixed_params(s, comp_list[0], param_name, ret_val[ret_type_name])
+                    update_assumed_all_comp_fixed_params(s, comp_list, param_name, ret_val[ret_type_name])
         elif field_name == "startDate" or field_name == "endDate":
             date_parts = scenario_data[field_name].split("-")
             date_obj = datetime(int(date_parts[0]), int(date_parts[1]), int(date_parts[2]))
@@ -268,7 +273,7 @@ def copy_scenario():
         raise AssertionError("User ID cannot be blank.")
     if not scenario_data.get('scenario_id'):
         raise AssertionError("Scenario ID cannot be blank.")
-    
+
     scenario_id = int(scenario_data['scenario_id'])
     user_id = int(scenario_data['user_id'])
     s = ScenarioService.get(scenario_id)
@@ -303,31 +308,75 @@ def copy_scenario():
         ns = ScenarioService.create(name=new_name, description=f'Copy of {s.name} on {datetime.now()}', creator_id=user_id)
         # ScenarioService.commit()
 
+        # Keep track of formulas with hardwired compartment ids. New formulas need to be generated for these with the
+        # new compartment ids.
+        formulas_with_comp_ids = {}
+
+        # Check formulas for specific compartment ids
+        def check_for_comp_ids(par_dict, par):
+            if isinstance(par, ParameterDefinition):
+                this_formula = par.default_formula
+            elif isinstance(par, CustomParameter):
+                this_formula = par.formula
+            else:
+                this_formula = None
+            if this_formula:
+                f = this_formula
+                if f.equation.find("compartment.id") > -1 \
+                        or f.equation.find("receiver.id") > -1 \
+                        or f.equation.find("sender.id") > -1:
+                    par_dict.setdefault(par.id, {"par": par, "frm": f})
+            return par_dict
+
         # Add scenario properties/parameters
+        cpar_map = {}
+        scen_par_start_time = time.time()
         logger.info("Adding scenario Properties")
         for s_par_name, s_par in s.parameters.items():
-            if s_par.__tablename__ == "custom_parameter" and s_par.scenario.id == s.id:
-                ParameterService.create(definition_id=s_par.definition_id, scenario_id=ns.id,
+            if isinstance(s_par, CustomParameter) and s_par.scenario.id == s.id:
+                if s_par.id not in cpar_map:
+                    ns_par = ParameterService.create(definition=s_par.definition, scenario=ns,
                                         requirements=f"(self.id == {ns.id})", value=s_par.value,
-                                        unit=s_par.unit, formula_id=s_par.formula_id)
+                                        unit=s_par.unit, formula=s_par.formula)
+                    cpar_map[s_par.id] = ns_par.id
+                formulas_with_comp_ids = check_for_comp_ids(formulas_with_comp_ids, s_par)
                 # ParameterService.commit()
+        logger.info(f'Copied scenario parameters in {time.time() - scen_par_start_time} seconds')
 
         # Add scenario chemicals
         logger.info("Adding scenario Chemicals")
+        chem_par_start_time = time.time()
         for sc in s.chemicals:
             ns.chemicals.append(sc)
             # ScenarioService.commit()
             # Add Chemical properties/parameters
             for c_par_name, c_par in sc.parameters.items():
-                if c_par.__tablename__ == "custom_parameter" and c_par.scenario.id == s.id:
-                    ParameterService.create(definition_id=c_par.definition_id, scenario_id=ns.id,
+                if isinstance(c_par, CustomParameter) and c_par.scenario.id == s.id:
+                    if c_par.id not in cpar_map:
+                        nc_par = ParameterService.create(definition=c_par.definition, scenario=ns,
                                             requirements=f"(self.id == {sc.id})", value=c_par.value,
-                                            unit=c_par.unit, formula_id=c_par.formula_id)
+                                            unit=c_par.unit, formula=c_par.formula)
+                        cpar_map[c_par.id] = nc_par.id
+                    formulas_with_comp_ids = check_for_comp_ids(formulas_with_comp_ids, c_par)
                     # ParameterService.commit()
+        logger.info(f'Copied chemical parameters in {time.time() - chem_par_start_time} seconds')
 
+        logger.info(f'Finding static compartment ids in parameter formulas')
+        chk_par_start_time = time.time()
+        # check volume element parameters for hardwired ids.
+        for ve in s.volume_elements:
+            for vpr_name, vpr in ve.parameters.items():
+                formulas_with_comp_ids = check_for_comp_ids(formulas_with_comp_ids, vpr)
+
+        # check compartment parameters for hardwired ids.
+        for cmp in s.compartments:
+            for pr_name, pr in cmp.parameters.items():
+                formulas_with_comp_ids = check_for_comp_ids(formulas_with_comp_ids, pr)
+        logger.info(f'Found static compartment ids in {len(formulas_with_comp_ids)} parameter formulas in {time.time() - chk_par_start_time} seconds')
 
         # Create new parcels
         cmp_map = {}
+        cp_all_start_time = time.time()
         for prc in s.parcels:
             np = ParcelService.create(name=prc.name, description=prc.description, scenario_id=ns.id, vertices=prc.vertices)
             start_time = time.time()
@@ -336,27 +385,99 @@ def copy_scenario():
             for ve in prc.volume_elements:
                 nve = VolumeElementService.create(name=ve.name, parcel_id=np.id, top=ve.top, bottom=ve.bottom)
                 # VolumeElementService.commit()
-                # Create new volume compartments
+                # Create new volume element parameters
+                for ve_parn, ve_par in ve.parameters.items():
+                    if isinstance(ve_par, CustomParameter) and ve_par.id not in cpar_map:
+                        nve_par = ParameterService.create(definition=ve_par.definition, scenario=ns,
+                                                requirements=f"(self.id == {nve.id})", value=ve_par.value,
+                                                unit=ve_par.unit, formula=ve_par.formula)
+                        cpar_map[ve_par.id] = nve_par.id
+                # Create new compartments
                 for cmp in ve.compartments:
-                    ncmp = CompartmentService.create(name=cmp.name, volume_element_id=nve.id, media_id=cmp.media_id)
-                    cmp_map[cmp.id] = ncmp.id
+                    ncmp = CompartmentService.create(name=cmp.name, volume_element=nve, media=cmp.media)
+                    cmp_map[str(cmp.id)] = str(ncmp.id)
                     # CompartmentService.commit()
                     # Create new custom parameters for compartments
+
+                    # custom_comp_objects = {}
+                    # for cp_obj in [cpar_obj for cpar_name, cpar_obj in cmp.parameters.items() if isinstance(cpar_obj, CustomParameter) and cpar_obj.id not in cpar_map]:
+                    #     formula_id = cp_obj.formula.id if cp_obj.formula else None
+                    #     new_cp_obj = {'ncpar': CustomParameter(definition=cp_obj.definition,
+                    #                                            definition_id=cp_obj.definition.id,
+                    #                                            scenario=ns,
+                    #                                            scenario_id=ns.id,
+                    #                                            requirements=f"(self.id == {ncmp.id})",
+                    #                                            value=cp_obj.value,
+                    #                                            unit=cp_obj.unit,
+                    #                                            formula=cp_obj.formula,
+                    #                                            formula_id=formula_id),
+                    #                   'cp_id': cp_obj.id}
+                    #     custom_comp_objects[str(new_cp_obj['ncpar'].id)] = new_cp_obj
+                    #
+                    # # Fast bulk insert new custom parameter rows
+                    # db.session.bulk_save_objects([obj['ncpar'] for _, obj in custom_comp_objects.items()])
+                    #
+                    # for nc_id, cpar in custom_comp_objects.items():
+                    #     cpar_map[cpar['cp_id']] = nc_id
+
+                    # Slow insert new custom parameter rows one-by-one
                     for parn, cpar in cmp.parameters.items():
-                        if cpar.__tablename__ == "custom_parameter" and cpar.scenario.id == s.id:
-                            ParameterService.create(definition_id=cpar.definition_id, scenario_id=ns.id,
-                                                    requirements=f"(self.id == {ncmp.id})", value=cpar.value,
-                                                    unit=cpar.unit, formula_id=cpar.formula_id)
+                        if isinstance(cpar, CustomParameter) and cpar.id not in cpar_map and cpar.scenario.id == s.id:
+                            ncpar = ParameterService.create(definition=cpar.definition, scenario=ns,
+                                                            requirements=f"(self.id == {ncmp.id})", value=cpar.value,
+                                                            unit=cpar.unit, formula=cpar.formula)
+                            cpar_map[cpar.id] = ncpar.id
                             # ParameterService.commit()
+
                 logger.info(f"Finished copying {ve.name} for {prc.name}")
             logger.info(f"{5*'<'} Finished copying {prc.name} in {time.time() - start_time} seconds {5*'>'}\n")
+        logger.info(f"Copied all components in {time.time() - cp_all_start_time} seconds\n")
+
+        # Check if we have a parameter with formula that has the hardwired ids found above.
+        logger.info("Fixing Formulas with Static Compartment ids ...")
+        fix_par_start_time = time.time()
+        for old_par_id in formulas_with_comp_ids:
+            new_par_id = cpar_map[old_par_id]
+            # replace all old compartment ids with new compartment ids
+            old_formula = formulas_with_comp_ids[old_par_id]["frm"].equation
+            # regular expression to find the id lists in the formula
+            regex = re.compile("(?:(?:receiver|compartment|sender)\.id\sin\s{([\,\s\d+]+))")
+            old_id_lists = regex.findall(old_formula)
+            r_map = []
+            for ol in old_id_lists:
+                nl = ol
+                for old_cmp_id in cmp_map:
+                    # iteratively find and replace old ids with new ids in id-list string
+                    nl = re.sub(r'(,\s' + str(old_cmp_id) + '\s,)', ", " + str(cmp_map[old_cmp_id]) + " ,", nl)
+                    nl = re.sub(r'(^' + str(old_cmp_id) + '\s,)', str(cmp_map[old_cmp_id]) + " ,", nl)
+                    nl = re.sub(r'(, ' + str(old_cmp_id) + '$)', ", " + str(cmp_map[old_cmp_id]), nl)
+                    nl = re.sub(r'(^' + str(old_cmp_id) + '$)', str(cmp_map[old_cmp_id]), nl)
+                    # if str(old_cmp_id) == ol:  # in case we encounter a case like compartment.id in {12}
+                    #     nl = nl.replace(f'{str(old_cmp_id)}', f'{str(cmp_map[old_cmp_id])}')
+                # print(f'old list is {ol}\nnew list is {nl}')
+                r_map.append((ol, nl))
+
+            # create new formula to be used next
+            new_formula = old_formula
+            for rm in r_map:
+                new_formula = new_formula.replace(rm[0], rm[1])
+            # print(f'{40*"*"}\nOLD FORMULA: {old_formula}\nNEW FORMULA: {new_formula}')
+            new_formula_obj = FormulaService.create(equation=new_formula)
+            # assign new formula to the new parameter
+            new_par = ParameterService.get(id=new_par_id)
+            # print(f'New par: {new_par}\nNew par_id: {new_par.id}\n{40 * "*"}')
+            new_par.formula_id = new_formula_obj.id
+        logger.info(f'Fixed static compartment ids in parameters in {time.time() - fix_par_start_time} seconds')
+        ParameterService.commit()
 
         # Create the compartment links using the compartment id map
         logger.info("Copying Compartment Links ...")
+        lnk_cp_start_time = time.time()
         for lnk in CompartmentService.links.get_all():
             if lnk.sender_id in cmp_map.keys():
                 CompartmentService.links.create(sender_id=cmp_map[lnk.sender_id], receiver_id=cmp_map[lnk.receiver_id])
-        # CompartmentService.commit()
+        logger.info(f'Copied compartment links in {time.time() - lnk_cp_start_time} seconds')
+        CompartmentService.commit()
     except Exception as e:
         logger.error(traceback.format_exc())
         logger.error(e)
@@ -372,36 +493,76 @@ def copy_scenario():
 @scenario_api.route('/api/scenario/delete/', methods=['POST'])
 @login_required
 def delete_scenario():
+    logger = make_logger('scenario_delete_process')
     scenario_data = request.form.to_dict()
     if not scenario_data.get('scenario_id'):
         raise AssertionError("Scenario ID cannot be blank.")
-    
+
     scenario_id = int(scenario_data['scenario_id'])
     s = ScenarioService.get(scenario_id)
 
     try:
+        # Delete compartment custom parameters
+        for cmp in s.compartments:
+            for cmp_par_name, cmp_par in cmp.parameters.items():
+                if isinstance(cmp_par, CustomParameter):
+                    ParameterService.delete(cmp_par)
+                    logger.info(f'Deleted custom par {cmp_par_name} for {cmp.name}...')
+
         # Delete chemical custom parameters
         for sc in s.chemicals:
+            sc.current_scenario(s)
+            # TODO: Currently the chemical parameters are not correctly acquired with sc.parameters (it gets the first
+            #  custom parameter from the list of custom parameters for that parameter definition. That is the parameter
+            #  for a different scenario!!! Apparently, setting current scenario for the chemical does not help to get
+            #  desired custom parameter belonging to the correct scenario...
             for c_par_name, c_par in sc.parameters.items():
-                if c_par.__tablename__ == "custom_parameter" and c_par.scenario.id == s.id:
-                    ParameterService.delete(c_par)
+                if isinstance(c_par, CustomParameter):
+                    # NOTE: below is a workaround for the chemical.current_scenario problem described above
+                    par = ParameterService.get(scenario_id=s.id, definition_id=c_par.definition.id,
+                                               requirements=f'(self.id == {sc.id})')
+                    if par:
+                        ParameterService.delete(par)
+                        logger.info(f'Deleted chemical custom par {par.definition.name} for {sc.name}...')
+
             # Remove the scenario chemical
             s.chemicals.remove(sc)
             # ScenarioService.commit()
+
         # Delete scenario custom parameters
         for s_par_name, s_par in s.parameters.items():
-            if s_par.__tablename__ == "custom_parameter" and s_par.scenario.id == s.id:
+            if isinstance(s_par, CustomParameter) and s_par.scenario.id == s.id:
                 ParameterService.delete(s_par)
+                logger.info(f'Deleted scenario custom par {s_par_name} for {s.name}...')
         # ParameterService.commit()
 
         # Delete all parcels and contents
         for parcel in s.parcels:
-            delete_parcel_contents(parcel)
+            for c in parcel.compartments:
+                # Delete Links
+                comp_id = c.id
+                lr = CompartmentService.links.get_all(receiver_id=comp_id)
+                ls = CompartmentService.links.get_all(sender_id=comp_id)
+                for lnk_r in lr:
+                    CompartmentService.links.delete(lnk_r)
+                for lnk_s in ls:
+                    CompartmentService.links.delete(lnk_s)
+
+                # Delete Compartments
+                CompartmentService.delete(c, False)
+
+            # Delete volume elements
+            for ve in parcel.volume_elements:
+                VolumeElementService.delete(ve, False)
+
+            # Delete parcel
             ParcelService.delete(parcel.id)
+            logger.info(f'Deleted parcel {parcel.name} for {s.name}...')
         # ParcelService.commit()
 
         # Delete scenario
         ScenarioService.delete(s.id)
+        logger.info(f'Deleted scenario {s.name}...')
         # ScenarioService.commit()
     except Exception as e:
         print(e)

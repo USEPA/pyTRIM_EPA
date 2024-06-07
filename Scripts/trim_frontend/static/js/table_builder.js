@@ -67,5 +67,18 @@ let ErrorValidation = {
     isInSimulationTimeSpan: function(ele, datedata){
         let has_data = datedata.length > 0;
         return ErrToolTip(ele, has_data, "Input date(s) not in simulation date range.")
+    },
+    fileHasData: function(ele, filedata){
+        let has_data = filedata.length > 0;
+        return ErrToolTip(ele, has_data, "Input file has no data.")
+    },
+    tsFileHasDateColumn: function (ele, tsData){
+        let has_data = tsData.length > 0;
+        if (has_data) {
+            let has_date_col = Object.keys(tsData[0]).indexOf("Date") > -1
+            return ErrToolTip(ele, has_date_col, "Input time-series file has no column with name 'Date'")
+        } else {
+            this.fileHasData(ele, tsData)
+        }
     }
 }
