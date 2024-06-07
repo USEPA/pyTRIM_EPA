@@ -5,19 +5,25 @@ from trim_db.services import ChemicalService
 
 @register_serializer(Scenario)
 def serialize_scenario(scen: Scenario):
+    start_time, end_time = scen.sim_begin_end_time
+    s = {
+        'id': scen.id,
+        'name': scen.name,
+        'description': scen.description,
+        'simulation_start_date': start_time,
+        'simulation_end_date': end_time,
+        'scenario_chem': [c.name for c in scen.chemicals]
+    }
+    return s
+
     ambient_air_temp = scen.AirTemperature
     mixing_height = [
         a.height.magnitude for a in scen.compartments
         if a.media.isa("Air") and "Upper" not in a.standard_name
     ]
     s = {
-        'id': scen.id,
-        'name': scen.name,
-        'description': scen.description,
-        'simulation_start_date': scen.sim_begin_end_time[0],
-        'simulation_end_date': scen.sim_begin_end_time[1],
+        **s,
         'erosionRateSource': scen.erosionRateCalcSource or 1,
-        'scenario_chem': [c.name for c in scen.chemicals],
         'all_chem': [c.name for c in ChemicalService.get_all()],
         'meteo': {
             'ambient_air_temp': (

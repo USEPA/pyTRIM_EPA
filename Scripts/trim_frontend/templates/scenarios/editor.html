@@ -133,6 +133,12 @@
     </div>
 </div>
 <script>
+    var scenarioReadyEvent = document.createEvent('Event');
+    scenarioReadyEvent.initEvent('scenario:ready', true, true);
+
+    var formVisibleEvent = document.createEvent('Event');
+    formVisibleEvent.initEvent('form:visible', true, true);
+
     onDomLoad(function() {
         // Show a loading screen while we pre-load
         // the current scenario data into editor forms
@@ -141,21 +147,29 @@
         TRIM.api.getScenario('{{ scenario.id }}').on('load', function () {
             try {
                 if (this.responseJSON) {
-                    let scenarioJSON = this.responseJSON
+                    TRIM.store.currentScenario = this.responseJSON.scenario;
+                    console.log('got scenario!')
+                    document.body.dispatchEvent(scenarioReadyEvent);
+                    // console.log(TRIM.store)
 
-                    TRIM.api.getParcels('{{ scenario.id }}').on('load', function() {
-                        $('#root').data('loadedParcels',JSON.parse(this.responseText));
-
-                        var parcelsLoadEvent = document.createEvent('Event');
-                        parcelsLoadEvent.initEvent('parcels:loaded', true, true);
-                        document.body.dispatchEvent(parcelsLoadEvent);
-
-                        populateForms(scenarioJSON.scenario);
+                    // Notify forms on tab load
+                    $('#editor-nav [data-toggle="pill"]').on('shown.bs.tab', function(e) {
+                        var tabPane = $($(e.target).attr('href'));
+                        var forms = tabPane.find('form[data-async-form]');
+                        forms.each(function() {
+                            this.dispatchEvent(formVisibleEvent);
+                        });
                     });
+                    $('.tab-pane.active form')[0].dispatchEvent(formVisibleEvent);
+                    return;
                 }
             } catch {
                 LoadingScreen.hide('scenario_loading');
             }
+        });
+        document.body.addEventListener('form:populated', function() {
+            console.log('populated edit screen!')
+            LoadingScreen.hide('scenario_loading');
         });
 
         function populateForms(scenario) {

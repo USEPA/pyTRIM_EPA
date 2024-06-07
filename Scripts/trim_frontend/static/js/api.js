@@ -205,5 +205,8 @@ window.TRIM = (function(trim) {
     }
 
     trim.api = api;
+
+    trim.store = {}
+
     return trim;
 })(window.TRIM || {});

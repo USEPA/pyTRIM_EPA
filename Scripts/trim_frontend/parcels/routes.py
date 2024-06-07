@@ -81,9 +81,13 @@ def get_parcels(scenario_id):
     except Exception as e:
         logger.error(traceback.format_exc())
 
-    sh["runoff_matrix"] = get_surface_runoff(scenario_id)
+    runoff_matrix = get_surface_runoff(scenario_id)
 
-    return ApiResult({'scenario_head': sh, 'scenario': parcels, 'media': media})
+    return ApiResult({
+        'parcels': parcels,
+        'media': media,
+        'runoff_matrix': runoff_matrix
+    })
 
 
 @parcels_api.route(
