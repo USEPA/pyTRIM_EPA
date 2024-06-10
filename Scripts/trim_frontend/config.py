@@ -14,7 +14,7 @@ if 'RDS_DB_NAME' in os.environ:
 else:
     import urllib.parse
     USERNAME = "root"
-    PASSWORD = urllib.parse.quote_plus(os.getenv('MYSQLPASSWORD'))
+    PASSWORD = urllib.parse.quote_plus(str(os.getenv('MYSQLPASSWORD')))
     HOST = "localhost"
     PORT = "3306"
     DBNAME = "pytrim"

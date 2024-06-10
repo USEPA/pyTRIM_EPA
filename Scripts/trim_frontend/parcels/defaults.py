@@ -763,6 +763,18 @@ Land_Parcel_VolElem_defaults = {
 
 Farm_Biota_SurfSoil_Compartment_defaults = {
     'Compartments': {
+        'Soil_Surface': {
+            'name': 'Soil_Surface',
+            'media_name': 'Surface_Soil'
+        },
+        'Degradation_Reaction_Sink_SurfSoil': {
+            'name': 'Degradation_Reaction_Sink',
+            'media_name': 'Degradation_Reaction'
+        },
+        'Soil_Advection_Sink': {
+            'name': 'Soil_Advection_Sink',
+            'media_name': 'Advection'
+        }
     }
 }
 
