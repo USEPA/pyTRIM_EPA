@@ -91,6 +91,15 @@
 <!--</script>-->
 <script>
     onDomLoad(function() {
+        var form = document.getElementById('abiotic-props-gui');
+
+        form.addEventListener('form:visible', function() {
+            console.log('abiotic form visible')
+            LoadingScreen.show('abiotic_info_loading');
+            TRIM.refreshParcels();
+            document.body.addEventListener('parcels:ready', updateAbioticData());
+        });
+
         let air_apTable = null;
         let soil_apTable = null;
         let root_apTable = null;
@@ -136,6 +145,7 @@
             }
 
             air_apTable =  $(air_tblId).removeAttr('width').dataTable({
+                destroy: true,
                 data : air_props,
                 paging: false,
                 bFilter: false,
@@ -190,6 +200,7 @@
             }
 
             soil_apTable =  $(soil_tblId).removeAttr('width').dataTable({
+                destroy: true,
                 data : soil_props,
                 paging: false,
                 bFilter: false,
@@ -286,6 +297,7 @@
             });
 
             root_apTable =  $(root_tblId).removeAttr('width').dataTable({
+                destroy: true,
                 data : soil_props,
                 paging: false,
                 bFilter: false,
@@ -344,6 +356,7 @@
             });
 
             vadose_apTable =  $(vadose_tblId).removeAttr('width').dataTable({
+                destroy: true,
                 data : soil_props,
                 paging: false,
                 bFilter: false,
@@ -402,6 +415,7 @@
             });
 
             gw_apTable =  $(gw_tblId).removeAttr('width').dataTable({
+                destroy: true,
                 data : soil_props,
                 paging: false,
                 bFilter: false,
@@ -491,10 +505,6 @@
             })
         }
 
-        var form = document.getElementById('abiotic-props-gui');
-        form.addEventListener('form:loaded', function() {
-        });
-
         function create_parcel_object(id, row, data, comp_name=undefined){
             let parcel_info = [{
                                 'type': 'data',
@@ -548,11 +558,22 @@
             return myRows
         }
 
-        document.body.addEventListener('parcels:loaded', function() {
-            let loadedData = $('#root').data('loadedParcels')
+        function updateAbioticData() {
+            if (!TRIM.store.currentScenario.parcels) {
+                // Parcels haven't loaded yet; wait a bit and try again
+                setTimeout(function() { updateAbioticData(); }, 1000);
+                return;
+            }
+            if ($(form).filter(':not(.form-loaded)').length) {
+                // Form hasn't loaded yet; wait a bit and try again
+                setTimeout(function() { updateAbioticData(); }, 1000);
+                return;
+            }
+
+            let parcels = TRIM.store.currentScenario.parcels;
             let abiotic_data = []
-            if (loadedData.scenario.length > 0) {
-                loadedData['scenario'].forEach(function (e, i) {
+            if (parcels.length > 0) {
+                parcels.forEach(function (e, i) {
                     let till_val = e.tillage == "Yes" ? "tilled" : "untilled";
                     let s = e.hasLand == "Yes" ? e["soil_params"] : e;
                     let comps = ["Soil_Surface", "Soil_Root_Zone", "Soil_Vadose_Zone", "Groundwater"]
@@ -597,7 +618,9 @@
                 })
             }
             TableRedraw(abiotic_data)
-        });
+            console.log('populated abiotic form!')
+            LoadingScreen.hide('abiotic_info_loading');
+        }
     })
 
 </script>

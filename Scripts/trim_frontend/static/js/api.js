@@ -40,6 +40,42 @@ window.TRIM = (function(trim) {
         })
     }
 
+    api.getMeteorology = function(scenario) {
+        var url = api.getUrl('scenario_api.get_scenario_met_data');
+        return AJAX.call({
+            url: url.replace('/0/', '/' + scenario.id + '/')
+        });
+    }
+
+    api.getSeasonalDynamics = function(scenario) {
+        var url = api.getUrl('scenario_api.get_scenario_seasonal_dynamics');
+        return AJAX.call({
+            url: url.replace('/0/', '/' + scenario.id + '/')
+        });
+    }
+
+    api.getRunoffMatrix = function(scenario) {
+        var url = api.getUrl('scenario_api.get_scenario_runoff_matrix');
+        return AJAX.call({
+            url: url.replace('/0/', '/' + scenario.id + '/')
+        });
+    }
+
+    api.getChemicals = function(scenario) {
+        if (scenario === undefined) {
+            var url = api.getUrl('chemicals_api.get_chemicals');
+            return AJAX.call({
+                url: url
+            });
+        }
+        else {
+            var url = api.getUrl('scenario_api.get_scenario_chemicals');
+            return AJAX.call({
+                url: url.replace('/0/', '/' + scenario.id + '/')
+            });
+        }
+    }
+
     api.loadForms = function(names) {
         if (!names) {
             return undefined;

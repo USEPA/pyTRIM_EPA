@@ -832,32 +832,41 @@ window.TRIM = (function(trim) {
             for (var i = 0, len = fields.inputs.length; i < len; i++) {
                 var input = fields.inputs[i];
                 var checkId = input.id.replace(fullPref, '');
-                if (subData[checkId] !== undefined) {
-                    input.value = subData[checkId];
+                if (subData[checkId] === undefined) {
+                    continue;
                 }
+                if (input.value != null && subData[checkId] === null) {
+                    continue;
+                }
+                input.value = subData[checkId];
             }
 
             // Fill in textarea fields
             for (var i = 0, len = fields.textareas.length; i < len; i++) {
                 var textarea = fields.textareas[i];
                 var checkId = textarea.id.replace(fullPref, '');
-                if (subData[checkId] !== undefined) {
-                    textarea.innerText = subData[checkId];
+                if (subData[checkId] === undefined) {
+                    continue;
                 }
+                if (textarea.innerText && subData[checkId] === null) {
+                    continue
+                }
+                textarea.innerText = subData[checkId];
             }
 
             // Fill in select fields
             for (var i = 0, len = fields.selects.length; i < len; i++) {
                 var select = fields.selects[i];
                 var checkId = select.id.replace(fullPref, '');
-                if (subData[checkId] !== undefined) {
-                    select.selectedIndex = -1;
-                    var opts = select.children;
-                    for (var j = 0; j < opts.length; j++) {
-                        if (opts[j].value == subData[checkId]) {
-                            select.selectedIndex = j;
-                            break;
-                        }
+                if (subData[checkId] === undefined) {
+                    continue;
+                }
+                select.selectedIndex = -1;
+                var opts = select.children;
+                for (var j = 0; j < opts.length; j++) {
+                    if (opts[j].value == subData[checkId]) {
+                        select.selectedIndex = j;
+                        break;
                     }
                 }
             }
@@ -866,9 +875,10 @@ window.TRIM = (function(trim) {
             for (var i = 0, len = fields.fieldsets.length; i < len; i++) {
                 var fieldset = fields.fieldsets[i];
                 var checkId = fieldset.id.replace(fullPref, '');
-                if (subData[checkId] !== undefined) {
-                    forms.populate(fieldset, subData[checkId])
+                if (subData[checkId] === undefined) {
+                    continue;
                 }
+                forms.populate(fieldset, subData[checkId])
             }
         }
 

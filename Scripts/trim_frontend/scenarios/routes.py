@@ -90,6 +90,53 @@ def get_scenario(id):
     return ApiResult({'scenario': s})
 
 
+@scenario_api.route(
+    '/api/scenario/<int:scenario_id>/chemical', methods=['GET']
+)
+@login_required
+def get_scenario_chemicals(scenario_id):
+    s = ScenarioService.get(scenario_id)
+    if not s:
+        raise ApiException("Unknown Scenario")
+    chems = [c.as_serializable() for c in s.chemicals]
+    return ApiResult({
+        'chemicals': chems
+    })
+
+
+@scenario_api.route('/api/scenario/<int:scenario_id>/meteorology/', methods=['GET'])
+@login_required
+def get_scenario_met_data(scenario_id):
+    logger = make_logger('scenario_met_api_get')
+    s = ScenarioService.get(scenario_id)
+    start_time = time.time()
+    met = get_met_data(s)
+    logger.info(f"Acquired meteorology in {time.time() - start_time} seconds")
+    return ApiResult({'meteorology': met})
+
+
+@scenario_api.route('/api/scenario/<int:scenario_id>/seasonal_dynamics/', methods=['GET'])
+@login_required
+def get_scenario_seasonal_dynamics(scenario_id):
+    logger = make_logger('scenario_seasonal_dynamics_api_get')
+    s = ScenarioService.get(scenario_id)
+    start_time = time.time()
+    met = get_seasonal_dynamics(s)
+    logger.info(f"Acquired seasonal dynamics in {time.time() - start_time} seconds")
+    return ApiResult({'seasonal_dynamics': met})
+
+
+@scenario_api.route('/api/scenario/<int:scenario_id>/runoff_matrix/', methods=['GET'])
+@login_required
+def get_scenario_runoff_matrix(scenario_id):
+    logger = make_logger('scenario_runoff_matrix_api_get')
+    s = ScenarioService.get(scenario_id)
+    start_time = time.time()
+    runoff_matrix = get_surface_runoff(s)
+    logger.info(f"Acquired runoff matrix in {time.time() - start_time} seconds")
+    return ApiResult({'runoff_matrix': runoff_matrix})
+
+
 @scenario_api.route('/api/scenario/update', methods=['POST'])
 @login_required
 def update_scenario():

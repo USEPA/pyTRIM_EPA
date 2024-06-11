@@ -36,8 +36,8 @@
                                 </div>
                                 <div class="row mb-1">
                                     <div class="col-sm">
-<!--                                        <div data-slot="true" data-target="location"></div>-->
-<!--                                    </div>-->
+                                        <!-- <div data-slot="true" data-target="location"></div>
+                                    </div> -->
                                         <button class="comp_show_all btn btn-warning">Show All</button>
                                         <button class="comp_hide_all btn btn-warning">Hide All</button>
                                         <button class="comp_show_nz btn btn-outline-success">Show Non-Zero</button>
@@ -83,330 +83,385 @@
 <script>
     onDomLoad(function(e) {
         var form = document.getElementById('emissions-settings-gui');
-        form.addEventListener('form:loaded', function() {
-            document.body.addEventListener('parcels:loaded', function() {
-                let fieldset = $('#chemicals-add-btn').closest("fieldset")
-                let loadedData = $('#root').data('loadedParcels')
-                var chem_spec = {}
-                loadedData.scenario.forEach(p =>
-                    Object.keys(p.sources).forEach(ch => {
-                        chem_spec[ch] = []
-                        Object.keys(p.sources[ch]).forEach(function (ve) {
-                            Object.keys(p.sources[ch][ve]).forEach(function (co) {
-                                chem_spec[ch].push(co)
-                            })
+
+        form.addEventListener('form:visible', function() {
+            LoadingScreen.show('emissions_loading');
+            console.log('emissions form visible')
+            populateEmissionsForm();
+        });
+
+        function populateEmissionsForm() {
+            if ($(form).filter(':not(.form-loaded)').length) {
+                // Form hasn't loaded yet; wait a bit and try again
+                setTimeout(function() { populateEmissionsForm(); }, 1000);
+                return;
+            }
+            if (TRIM.store.currentScenario.chemicals) {
+                TRIM.forms.populate(form, TRIM.store.currentScenario.chemicals);
+                renderEmissions();
+            }
+            else {
+                TRIM.api.getChemicals(TRIM.store.currentScenario).on('load', function () {
+                    var chems = this.responseJSON.chemicals;
+                    TRIM.store.currentScenario.chemicals = chems;
+                    populateEmissionsForm();
+                });
+                return;
+            }
+            console.log('populated emissions form!')
+            LoadingScreen.hide('emissions_loading');
+        }
+
+        var PARCEL_REFRESH = false;
+
+        function renderEmissions() {
+            if (!TRIM.store.currentScenario.parcels) {
+                if (!PARCEL_REFRESH) {
+                    PARCEL_REFRESH = true;
+                    LoadingScreen.show('emissions_parcels_loading');
+                    TRIM.refreshParcels();
+                }
+                // Parcels haven't loaded yet; wait a bit and try again
+                setTimeout(function() { renderEmissions(); }, 1000);
+                return;
+            }
+
+            let fieldset = $('#chemicals-add-btn').closest("fieldset")
+            var chemicals = TRIM.store.currentScenario.chemicals.map(x => x.name);
+            var parcels = TRIM.store.currentScenario.parcels;
+            var chem_spec = {}
+            parcels.forEach(p =>
+                Object.keys(p.sources).forEach(ch => {
+                    chem_spec[ch] = []
+                    Object.keys(p.sources[ch]).forEach(function (ve) {
+                        Object.keys(p.sources[ch][ve]).forEach(function (co) {
+                            chem_spec[ch].push(co)
                         })
                     })
+                })
+            )
+
+            chemicals.forEach((sc, i) => {
+                ["Vapor", "Particle"].forEach((st, ii) => {
+                    // let spec = chem_spec[sc][ii].indexOf("Vapor") > -1 ? "Gaseous" : "Particulate"
+                    let spec = st == "Vapor" ? "Gaseous" : "Particulate"
+                    window.TRIM.functions.addTabToFieldList(fieldset[0], sc + " (" +spec + ")")
+
+                    let current_index = ($("#emissions-settings-gui").find("span.chemInfo")).length-1
+
+                    $("#emissions-settings-gui").find("span.chemInfo")[current_index].innerHTML = sc
+                    $("#emissions-settings-gui").find("span.stateInfo")[current_index].innerHTML = spec
+                    $(initialize_compartment_map(spec)).insertAfter($($("#emissions-settings-gui").find("table.compMap")[current_index]).find("thead"))
+
+                    let dd_menu = $($("#emissions-settings-gui").find("table.compMap")[current_index]).prev("div.dropdown").find("div.dropdown-menu")
+                    populate_comp_dd(dd_menu);
+                    populate_values($($("#emissions-settings-gui").find("table.compMap")[current_index]))
+                    }
                 )
-
-                loadedData.scenario_head.scenario_chem.forEach((sc, i) => {
-                    ["Vapor", "Particle"].forEach((st, ii) => {
-                        // let spec = chem_spec[sc][ii].indexOf("Vapor") > -1 ? "Gaseous" : "Particulate"
-                        let spec = st == "Vapor" ? "Gaseous" : "Particulate"
-                        window.TRIM.functions.addTabToFieldList(fieldset[0], sc + " (" +spec + ")")
-
-                        let current_index = ($("#emissions-settings-gui").find("span.chemInfo")).length-1
-
-                        $("#emissions-settings-gui").find("span.chemInfo")[current_index].innerHTML = sc
-                        $("#emissions-settings-gui").find("span.stateInfo")[current_index].innerHTML = spec
-                        $(initialize_compartment_map(spec)).insertAfter($($("#emissions-settings-gui").find("table.compMap")[current_index]).find("thead"))
-
-                        let dd_menu = $($("#emissions-settings-gui").find("table.compMap")[current_index]).prev("div.dropdown").find("div.dropdown-menu")
-                        populate_comp_dd(dd_menu);
-                        populate_values($($("#emissions-settings-gui").find("table.compMap")[current_index]))
-                        }
-                    )
-                })
-
-                window.TRIM.forms.updateSelect($('#chemical')[0],$('#root').data('loadedParcels').scenario_head.all_chem, true)
-                $('#chemicals-0-pill').click()
-
-                $('#chemical').on('change',function(e){
-                    $('#add-chemicals-btn').removeAttr('disabled')
-                })
-
-                $('#add-chemicals-btn').on('click', function(e){
-                    let chem = $('#chemical').find(":selected").val()
-                    // let spec = $('#state').find(":selected").val()
-                    // window.TRIM.functions.addTabToFieldList(fieldset[0], chem)
-                    // let i = Number($("#emissions-settings-gui").find("a.nav-link.p-2.active").attr("id").split("-")[1])
-                    let specs = ["Vapor", "Particle"]
-                    specs.forEach((st, ii) => {
-                        let spec = st == "Vapor" ? "Gaseous" : "Particulate"
-                        window.TRIM.functions.addTabToFieldList(fieldset[0], chem + " (" + spec + ")")
-                        let current_index = ($("#emissions-settings-gui").find("span.chemInfo")).length - 1
-                        $("#emissions-settings-gui").find("span.chemInfo")[current_index].innerHTML = chem
-                        $("#emissions-settings-gui").find("span.stateInfo")[current_index].innerHTML = spec
-                        $(initialize_compartment_map(spec)).insertAfter($($("#emissions-settings-gui").find("table.compMap")[current_index]).find("thead"))
-                        let dd_menu = $($("#emissions-settings-gui").find("table.compMap")[current_index]).prev("div.dropdown").find("div.dropdown-menu")
-                        populate_comp_dd(dd_menu);
-                        populate_values($($("#emissions-settings-gui").find("table.compMap")[current_index]))
-                    })
-                    $("#chemicals-modal").find("button.close")[0].click()
-                })
-
-                $('tr.colps').not('tr.level2').on('click', function() {
-                    toggle_expand_icon(this, null)
-                    var findChildren = function(tr) {
-                        var depth = tr.data('depth');
-                        return tr.nextUntil($('tr').filter(function(i,e) {
-                            return $(e).data('depth') <= depth;
-                        }));
-                    };
-
-                    let this_depth = $(this).data('depth')
-                    var children = findChildren($(this));
-                    if ($(children).is(':visible')) {
-                        $(children).hide();
-                    } else {
-                        let next_level = this_depth + 1;
-                        let next_child = $(children).filter(function(i,e) {
-                            return $(e).data('depth') == next_level;
-                        });
-                        $(next_child).show()
-                    }
-                });
-
-                $('button.comp_show_all').on('click', function(e) {
-                    e.preventDefault()
-                    let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap")
-                    $(this_table).find("tr.colps").show();
-                    $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "down"))
-                    $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "down"))
-                    $(this).closest("div").find("button.btn_show_emission_comp").text("Show Compartment")
-                });
-
-                $('button.comp_hide_all').on('click', function(e) {
-                    e.preventDefault()
-                    let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap")
-                    $(this_table).find("tr.colps:not([data-depth='0'])").hide();
-                    $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "up"))
-                    $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "up"))
-                    $(this).closest("div").find("button.btn_show_emission_comp").text("Show Compartment")
-                });
-
-                $('button.comp_show_nz').on('click', function(e) {
-                    e.preventDefault()
-                    let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap");
-                    $('button.comp_hide_all').trigger('click');
-                    let non_zeros = $(this_table).find("tr.colps.level2").filter((i,e) => $(e).find("td.ems").text() > 0);
-                    $(non_zeros).show()
-                    $(non_zeros).prev("tr.level1").show()
-                    $(this).closest("div").find("button.btn_show_emission_comp").text("Show Compartment")
-                });
-
-                $(document).ready(function() {
-                    $('button.comp_hide_all').trigger('click');
-                });
-
-                function toggle_expand_icon(tr, dir){
-                    if ($(tr).find("i.fas").length <= 0) return;
-                    if (!dir) {
-                        if ($(tr).find("i.fas").attr("class").indexOf("fa-angle-right") > -1) {
-                            $(tr).find("i.fas").attr("class", "fas fa-angle-down")
-                        } else {
-                            $(tr).find("i.fas").attr("class", "fas fa-angle-right")
-                        }
-                    } else {
-                        if (dir == "down") {
-                            $(tr).find("i.fas").attr("class", "fas fa-angle-down")
-                        } else {
-                            $(tr).find("i.fas").attr("class", "fas fa-angle-right")
-                        }
-                    }
-
-                }
-
-                $('label.editableCell').click(function () {
-                    $(this).siblings("input").show()
-                    $(this).siblings("input").focus()
-                    $(this).hide();
-                });
-
-                $('input.editableCell').blur(function () {
-                    if (!$("#Emissions-tab-pill").hasClass("active")) {
-                        return;
-                    }
-                    let parcel_name = $($(this).closest("tr.level2").find("td")[0]).attr("data-pcl-name")
-                    let parcel_id = loadedData.scenario.filter(e => e.name == parcel_name)[0].id
-                    let compartment_name = $($(this).closest("tr.level2").find("td")[2]).attr("data-comp-name")
-                    let chem_name = $(this).closest("div.tab-pane").data("tab-name").split(" (")[0]
-                    let parcel_info = [{
-                        'type': 'data',
-                        'name': 'field',
-                        'value': "emission"
-                    },{
-                        'type': 'data',
-                        'name': 'id',
-                        'value': parcel_id
-                    },{
-                        'type': 'data',
-                        'name': 'chemical_name',
-                        'value': chem_name
-                    },{
-                        'type': 'data',
-                        'name': 'compartment_name',
-                        'value': compartment_name
-                    },{
-                        'type': 'input',
-                        'name': 'emission_value',
-                        'value': ''
-                    }]
-                    if (parcel_info) {
-                        submit_emission_value(this, parcel_info);
-                    }
-                })
-
-                function submit_emission_value(elem, parcel_info) {
-                    ErrorValidation.isPositiveValue(elem)
-                    if (elementIsValid($(this).parent())){
-                        let data = $(elem).val() == "" ? 0 : $(elem).val()
-                        parcel_info[4].value = data
-                        let $label = $(elem).next("label.editableCell")
-                        $label.siblings("input").hide()
-                        $label.show().text(data)
-
-                        parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                        console.log(parcel_info)
-                        TRIM.api.updateParcel({{ scenario.id }}, parcel_info)
-                    } else {
-                        return
-                    }
-                }
-
-                let gui = $('#emissions-settings-gui');
-                let fileFields = gui.find('[type="file"]');
-
-                fileFields.change(function(e) {
-                    let me = $(this);
-                    let loadingRequest = 'load_' + this.id;
-                    let this_chem_prop =  me.closest("div.tab-pane").data("tab-name").split(" (")
-                    let this_chem = this_chem_prop[0]
-                    let this_spec = this_chem_prop[1].split(")")[0] == "Gaseous" ? "Vapor" : "Particle"
-                    let this_cmap = me.closest("div.tab-pane").find("table.compMap")
-                    LoadingScreen.show(loadingRequest);
-                    let field_data = this
-                    if (!Array.isArray(field_data)) {
-                        field_data = [field_data];
-                    }
-                    let selected_spacing = me.closest("div.tab-pane").find('select').find(':selected').val()
-                    scenario_data = {
-                        'type': 'input',
-                        'name': 'scenario_id',
-                        'value': {{ scenario.id }}
-                    }
-                    spacing_data = {
-                        'type': 'input',
-                        'name': 'spacing',
-                        'value': selected_spacing
-                    }
-                    chem_data = {
-                        'type': 'input',
-                        'name': 'chemical',
-                        'value': this_chem
-                    }
-                    spec_data = {
-                        'type': 'input',
-                        'name': 'species',
-                        'value': this_spec
-                    }
-                    field_data.push(scenario_data)
-                    field_data.push(spacing_data)
-                    field_data.push(chem_data)
-                    field_data.push(spec_data)
-                    me.removeAttr('data-filedata');
-                    TRIM.api.parseAERMODFile(field_data).on('load', function() {
-                        try {
-                            let src_data = JSON.parse(this.responseText);
-                            let updated_data = loadedData
-                            loadedData.scenario.forEach(function(p,i){
-                                let dryval = src_data.aermod_result[p.name]['DrySource']
-                                let wetval = src_data.aermod_result[p.name]['WetSource']
-                                updated_data.scenario[i].sources[this_chem]["Dry"+this_spec+"Source"]["Dry"+this_spec+"Source"]=dryval
-                                updated_data.scenario[i].sources[this_chem]["Wet"+this_spec+"Source"]["Wet"+this_spec+"Source"]=wetval
-                            })
-                            $('#root').data('loadedParcels', updated_data)
-                        }
-                        finally {
-                            populate_values(this_cmap)
-                            LoadingScreen.hide(loadingRequest);
-                        }
-                    });
-                });
             })
 
-            function initialize_compartment_map(spec) {
-                let loadedData = $('#root').data('loadedParcels')
-                var map_html = "<tbody>"
-                let exclude = spec == "Particulate" ? "VaporSource" : "ParticleSource"
-                loadedData.scenario.forEach( function(e,i){
-                    map_html = map_html + "<tr data-depth='0' class='level0 colps'><td data-pcl-name='" + e.name + "'>" + e.name + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
-                    for (ve in e.compartment_map) {
-                        if (ve.indexOf(exclude) == -1) {
-                            map_html = map_html + "<tr data-depth='1' class='level1 colps'><td data-pcl-name='" + e.name + "'></td><td data-ve-name='" + ve + "'>" + ve + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td></tr>"
-                        }
-                        for (comp in e.compartment_map[ve]) {
-                            if (e.compartment_map[ve][comp].indexOf(exclude) == -1){
-                                map_html = map_html + "<tr data-depth='2' class='level2 colps'><td data-pcl-name='" + e.name + "'></td><td data-ve-name='" + ve + "'></td><td class='comp' data-comp-name='" + e.compartment_map[ve][comp] + "'>" + e.compartment_map[ve][comp] + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='editableCell badge badge-light'>0</label></td></tr>"
-                            }
-                        }
-                    }
-                })
-                map_html += "</tbody>"
-                return map_html
+            if (!TRIM.store.allChemicals) {
+                LoadingScreen.show('emissions_chemicals_loading');
+                TRIM.api.getChemicals().on('load', function () {
+                    TRIM.store.allChemicals = this.responseJSON.chemicals;
+                    TRIM.forms.updateSelect(
+                        $('#chemical')[0], TRIM.store.allChemicals.map(x => x.name), true);
+                    LoadingScreen.hide('emissions_chemicals_loading');
+                });
+            }
+            else {
+                TRIM.forms.updateSelect(
+                    $('#chemical')[0], TRIM.store.allChemicals.map(x => x.name), true);
             }
 
-            function populate_values(cmap) {
-                let this_chem = $(cmap).closest("div.tab-pane").data("tab-name").split(" (")[0]
-                let loadedData = $('#root').data('loadedParcels')
-                loadedData.scenario.forEach(function(p,i){
-                    Object.keys(p.sources).forEach(function(chem,j) {
-                        if (chem == this_chem) {
-                            let ves = Object.keys(p.sources[chem])
-                            ves.forEach(function(ve,k) {
-                                let comps = Object.keys(p.sources[chem][ve])
-                                comps.forEach(function(comp,l){
-                                    let pcl_find_str = "td[data-pcl-name='" + p.name + "']"
-                                    let ve_find_str = "td[data-ve-name='" + ve + "']"
-                                    let comp_find_str = "td[data-comp-name='" + comp + "']"
-                                    let ems_cell = $(cmap).find(pcl_find_str).next(ve_find_str).next(comp_find_str).next("td.ems")
-                                    let ems_val =  Number(p.sources[chem][ve][comp]).toExponential()
-                                    $(ems_cell).find("input").val(ems_val)
-                                    $(ems_cell).find("label.editableCell").text(ems_val)
-                                })
+            $('#chemicals-0-pill').click()
+
+            $('#chemical').on('change',function(e){
+                $('#add-chemicals-btn').removeAttr('disabled')
+            })
+
+            $('#add-chemicals-btn').on('click', function(e){
+                let chem = $('#chemical').find(":selected").val()
+                // let spec = $('#state').find(":selected").val()
+                // window.TRIM.functions.addTabToFieldList(fieldset[0], chem)
+                // let i = Number($("#emissions-settings-gui").find("a.nav-link.p-2.active").attr("id").split("-")[1])
+                let specs = ["Vapor", "Particle"]
+                specs.forEach((st, ii) => {
+                    let spec = st == "Vapor" ? "Gaseous" : "Particulate"
+                    window.TRIM.functions.addTabToFieldList(fieldset[0], chem + " (" + spec + ")")
+                    let current_index = ($("#emissions-settings-gui").find("span.chemInfo")).length - 1
+                    $("#emissions-settings-gui").find("span.chemInfo")[current_index].innerHTML = chem
+                    $("#emissions-settings-gui").find("span.stateInfo")[current_index].innerHTML = spec
+                    $(initialize_compartment_map(spec)).insertAfter($($("#emissions-settings-gui").find("table.compMap")[current_index]).find("thead"))
+                    let dd_menu = $($("#emissions-settings-gui").find("table.compMap")[current_index]).prev("div.dropdown").find("div.dropdown-menu")
+                    populate_comp_dd(dd_menu);
+                    populate_values($($("#emissions-settings-gui").find("table.compMap")[current_index]))
+                })
+                $("#chemicals-modal").find("button.close")[0].click()
+            })
+
+            $('tr.colps').not('tr.level2').on('click', function() {
+                toggle_expand_icon(this, null)
+                var findChildren = function(tr) {
+                    var depth = tr.data('depth');
+                    return tr.nextUntil($('tr').filter(function(i,e) {
+                        return $(e).data('depth') <= depth;
+                    }));
+                };
+
+                let this_depth = $(this).data('depth')
+                var children = findChildren($(this));
+                if ($(children).is(':visible')) {
+                    $(children).hide();
+                } else {
+                    let next_level = this_depth + 1;
+                    let next_child = $(children).filter(function(i,e) {
+                        return $(e).data('depth') == next_level;
+                    });
+                    $(next_child).show()
+                }
+            });
+
+            $('button.comp_show_all').on('click', function(e) {
+                e.preventDefault()
+                let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap")
+                $(this_table).find("tr.colps").show();
+                $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "down"))
+                $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "down"))
+                $(this).closest("div").find("button.btn_show_emission_comp").text("Show Compartment")
+            });
+
+            $('button.comp_hide_all').on('click', function(e) {
+                e.preventDefault()
+                let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap")
+                $(this_table).find("tr.colps:not([data-depth='0'])").hide();
+                $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "up"))
+                $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "up"))
+                $(this).closest("div").find("button.btn_show_emission_comp").text("Show Compartment")
+            });
+
+            $('button.comp_show_nz').on('click', function(e) {
+                e.preventDefault()
+                let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap");
+                $('button.comp_hide_all').trigger('click');
+                let non_zeros = $(this_table).find("tr.colps.level2").filter((i,e) => $(e).find("td.ems").text() > 0);
+                $(non_zeros).show()
+                $(non_zeros).prev("tr.level1").show()
+                $(this).closest("div").find("button.btn_show_emission_comp").text("Show Compartment")
+            });
+
+            $(document).ready(function() {
+                $('button.comp_hide_all').trigger('click');
+            });
+
+            function toggle_expand_icon(tr, dir){
+                if ($(tr).find("i.fas").length <= 0) return;
+                if (!dir) {
+                    if ($(tr).find("i.fas").attr("class").indexOf("fa-angle-right") > -1) {
+                        $(tr).find("i.fas").attr("class", "fas fa-angle-down")
+                    } else {
+                        $(tr).find("i.fas").attr("class", "fas fa-angle-right")
+                    }
+                } else {
+                    if (dir == "down") {
+                        $(tr).find("i.fas").attr("class", "fas fa-angle-down")
+                    } else {
+                        $(tr).find("i.fas").attr("class", "fas fa-angle-right")
+                    }
+                }
+
+            }
+
+            $('label.editableCell').click(function () {
+                $(this).siblings("input").show()
+                $(this).siblings("input").focus()
+                $(this).hide();
+            });
+
+            $('input.editableCell').blur(function () {
+                if (!$("#emissions-tab-pill").hasClass("active")) {
+                    return;
+                }
+                let parcel_name = $($(this).closest("tr.level2").find("td")[0]).attr("data-pcl-name")
+                let parcel_id = parcels.filter(e => e.name == parcel_name)[0].id
+                let compartment_name = $($(this).closest("tr.level2").find("td")[2]).attr("data-comp-name")
+                let chem_name = $(this).closest("div.tab-pane").data("tab-name").split(" (")[0]
+                let parcel_info = [{
+                    'type': 'data',
+                    'name': 'field',
+                    'value': "emission"
+                },{
+                    'type': 'data',
+                    'name': 'id',
+                    'value': parcel_id
+                },{
+                    'type': 'data',
+                    'name': 'chemical_name',
+                    'value': chem_name
+                },{
+                    'type': 'data',
+                    'name': 'compartment_name',
+                    'value': compartment_name
+                },{
+                    'type': 'input',
+                    'name': 'emission_value',
+                    'value': ''
+                }]
+                if (parcel_info) {
+                    submit_emission_value(this, parcel_info);
+                }
+            })
+
+            function submit_emission_value(elem, parcel_info) {
+                ErrorValidation.isPositiveValue(elem)
+                if (elementIsValid($(this).parent())){
+                    let data = $(elem).val() == "" ? 0 : $(elem).val()
+                    parcel_info[4].value = data
+                    let $label = $(elem).next("label.editableCell")
+                    $label.siblings("input").hide()
+                    $label.show().text(data)
+
+                    parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
+                    console.log(parcel_info)
+                    TRIM.api.updateParcel({{ scenario.id }}, parcel_info)
+                } else {
+                    return
+                }
+            }
+
+            let gui = $('#emissions-settings-gui');
+            let fileFields = gui.find('[type="file"]');
+
+            fileFields.change(function(e) {
+                let me = $(this);
+                let loadingRequest = 'load_' + this.id;
+                let this_chem_prop =  me.closest("div.tab-pane").data("tab-name").split(" (")
+                let this_chem = this_chem_prop[0]
+                let this_spec = this_chem_prop[1].split(")")[0] == "Gaseous" ? "Vapor" : "Particle"
+                let this_cmap = me.closest("div.tab-pane").find("table.compMap")
+                LoadingScreen.show(loadingRequest);
+                let field_data = this
+                if (!Array.isArray(field_data)) {
+                    field_data = [field_data];
+                }
+                let selected_spacing = me.closest("div.tab-pane").find('select').find(':selected').val()
+                scenario_data = {
+                    'type': 'input',
+                    'name': 'scenario_id',
+                    'value': {{ scenario.id }}
+                }
+                spacing_data = {
+                    'type': 'input',
+                    'name': 'spacing',
+                    'value': selected_spacing
+                }
+                chem_data = {
+                    'type': 'input',
+                    'name': 'chemical',
+                    'value': this_chem
+                }
+                spec_data = {
+                    'type': 'input',
+                    'name': 'species',
+                    'value': this_spec
+                }
+                field_data.push(scenario_data)
+                field_data.push(spacing_data)
+                field_data.push(chem_data)
+                field_data.push(spec_data)
+                me.removeAttr('data-filedata');
+                TRIM.api.parseAERMODFile(field_data).on('load', function() {
+                    try {
+                        let src_data = JSON.parse(this.responseText);
+                        parcels.forEach(function(p,i){
+                            let dryval = src_data.aermod_result[p.name]['DrySource']
+                            let wetval = src_data.aermod_result[p.name]['WetSource']
+                            parcels[i].sources[this_chem]["Dry"+this_spec+"Source"]["Dry"+this_spec+"Source"]=dryval
+                            parcels[i].sources[this_chem]["Wet"+this_spec+"Source"]["Wet"+this_spec+"Source"]=wetval
+                        })
+                    }
+                    finally {
+                        populate_values(this_cmap)
+                        LoadingScreen.hide(loadingRequest);
+                    }
+                });
+            });
+
+            LoadingScreen.hide('emissions_parcels_loading');
+        }
+
+        function initialize_compartment_map(spec) {
+            let parcels = TRIM.store.currentScenario.parcels;
+            var map_html = "<tbody>"
+            let exclude = spec == "Particulate" ? "VaporSource" : "ParticleSource"
+            parcels.forEach( function(e,i){
+                map_html = map_html + "<tr data-depth='0' class='level0 colps'><td data-pcl-name='" + e.name + "'>" + e.name + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
+                for (ve in e.compartment_map) {
+                    if (ve.indexOf(exclude) == -1) {
+                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td data-pcl-name='" + e.name + "'></td><td data-ve-name='" + ve + "'>" + ve + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td></tr>"
+                    }
+                    for (comp in e.compartment_map[ve]) {
+                        if (e.compartment_map[ve][comp].indexOf(exclude) == -1){
+                            map_html = map_html + "<tr data-depth='2' class='level2 colps'><td data-pcl-name='" + e.name + "'></td><td data-ve-name='" + ve + "'></td><td class='comp' data-comp-name='" + e.compartment_map[ve][comp] + "'>" + e.compartment_map[ve][comp] + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='editableCell badge badge-light'>0</label></td></tr>"
+                        }
+                    }
+                }
+            })
+            map_html += "</tbody>"
+            return map_html
+        }
+
+        function populate_values(cmap) {
+            let this_chem = $(cmap).closest("div.tab-pane").data("tab-name").split(" (")[0]
+            let parcels = TRIM.store.currentScenario.parcels;
+            parcels.forEach(function(p,i){
+                Object.keys(p.sources).forEach(function(chem,j) {
+                    if (chem == this_chem) {
+                        let ves = Object.keys(p.sources[chem])
+                        ves.forEach(function(ve,k) {
+                            let comps = Object.keys(p.sources[chem][ve])
+                            comps.forEach(function(comp,l){
+                                let pcl_find_str = "td[data-pcl-name='" + p.name + "']"
+                                let ve_find_str = "td[data-ve-name='" + ve + "']"
+                                let comp_find_str = "td[data-comp-name='" + comp + "']"
+                                let ems_cell = $(cmap).find(pcl_find_str).next(ve_find_str).next(comp_find_str).next("td.ems")
+                                let ems_val =  Number(p.sources[chem][ve][comp]).toExponential()
+                                $(ems_cell).find("input").val(ems_val)
+                                $(ems_cell).find("label.editableCell").text(ems_val)
                             })
-                        }
-                    })
-                })
-            }
-            function populate_comp_dd(dd_menu){
-                let comp_array = []
-                let loadedData = $('#root').data('loadedParcels')
-                loadedData.scenario.forEach( function(e,i){
-                    for (let ve in e.compartment_map) {
-                        for (let comp in e.compartment_map[ve]) {
-                            comp_array.push(e.compartment_map[ve][comp])
-                        }
+                        })
                     }
                 })
-                let uniq_comp = [... new Set(comp_array)]
-                uniq_comp.sort().forEach(function(e) {
-                    let menu_item = "<a class='dropdown-item comp-item'>" + e + "</a>"
-                    $(menu_item).appendTo(dd_menu)
-                })
-                $("a.dropdown-item.comp-item").on("click",function (e){
-                    e.preventDefault()
-                    let this_table = $(this).closest("div.dropdown").next("table.compMap")
-                    let this_dd_btn = $(this).closest("div.dropdown").find("button.btn_show_emission_comp")
-                    $('button.comp_hide_all').trigger('click');
-                    let only_comps = $(this_table).find("tr.colps.level2").filter((i,tr) => $(tr).find("td.comp").text() == $(this).text());
+            })
+        }
 
-                    $(only_comps).show()
-                    $(this_dd_btn).text($(this).text())
+        function populate_comp_dd(dd_menu){
+            let comp_array = []
+            let parcels = TRIM.store.currentScenario.parcels;
+            parcels.forEach( function(e,i){
+                for (let ve in e.compartment_map) {
+                    for (let comp in e.compartment_map[ve]) {
+                        comp_array.push(e.compartment_map[ve][comp])
+                    }
+                }
+            })
+            let uniq_comp = [... new Set(comp_array)]
+            uniq_comp.sort().forEach(function(e) {
+                let menu_item = "<a class='dropdown-item comp-item'>" + e + "</a>"
+                $(menu_item).appendTo(dd_menu)
+            })
+            $("a.dropdown-item.comp-item").on("click",function (e){
+                e.preventDefault()
+                let this_table = $(this).closest("div.dropdown").next("table.compMap")
+                let this_dd_btn = $(this).closest("div.dropdown").find("button.btn_show_emission_comp")
+                $('button.comp_hide_all').trigger('click');
+                let only_comps = $(this_table).find("tr.colps.level2").filter((i,tr) => $(tr).find("td.comp").text() == $(this).text());
 
-                    $(only_comps).prev("tr.level1").show()
-                })
-            }
-        });
+                $(only_comps).show()
+                $(this_dd_btn).text($(this).text())
+
+                $(only_comps).prev("tr.level1").show()
+            })
+        }
     });
 </script>

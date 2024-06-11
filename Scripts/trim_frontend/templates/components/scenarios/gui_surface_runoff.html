@@ -58,10 +58,47 @@
 </script>
 <script>
     onDomLoad(function() {
+        var form = document.getElementById('surface-runoff-gui');
+
+        form.addEventListener('form:visible', function() {
+            console.log('surface runoff form visible')
+            LoadingScreen.show('surface_runoff_loading');
+            TRIM.refreshParcels();
+            document.body.addEventListener('parcels:ready', updateRunoffData());
+        });
+
+        function updateRunoffData() {
+            if (!TRIM.store.currentScenario.parcels) {
+                // Parcels haven't loaded yet; wait a bit and try again
+                setTimeout(function() { updateRunoffData(); }, 1000);
+                return;
+            }
+            if ($(form).filter(':not(.form-loaded)').length) {
+                // Form hasn't loaded yet; wait a bit and try again
+                setTimeout(function() { updateRunoffData(); }, 1000);
+                return;
+            }
+
+            if (TRIM.store.currentScenario.runoff_matrix) {
+                TRIM.forms.populate(form, TRIM.store.currentScenario.runoff_matrix);
+                renderRunoffForm();
+            }
+            else {
+                TRIM.api.getRunoffMatrix(TRIM.store.currentScenario).on('load', function () {
+                    var sd = this.responseJSON.runoff_matrix;
+                    TRIM.store.currentScenario.runoff_matrix = sd;
+                    updateRunoffData();
+                });
+                return;
+            }
+
+        }
+
         let roTable = null;
         function TableRedraw_RO(table_data, cols) {
             let tblId = "#RunoffMatrix";
             roTable =  $(tblId).removeAttr('width').dataTable({
+                destroy: true,
                 data : table_data,
                 paging: false,
                 bFilter: false,
@@ -178,8 +215,19 @@
                     "<label "+err_html+" class='" + cell_prop + "'>" + cell_data + "</label>"
         }
 
-        document.body.addEventListener('parcels:loaded', function() {
-            let loadedData = $('#root').data('loadedParcels')
+        function renderRunoffForm() {
+            if (!TRIM.store.currentScenario.parcels) {
+                // Parcels haven't loaded yet; wait a bit and try again
+                setTimeout(function() { updateRunoffData(); }, 1000);
+                return;
+            }
+            if ($(form).filter(':not(.form-loaded)').length) {
+                // Form hasn't loaded yet; wait a bit and try again
+                setTimeout(function() { updateRunoffData(); }, 1000);
+                return;
+            }
+
+            let runoff_matrix = TRIM.store.currentScenario.runoff_matrix
             let runoff_data = []
             // Define row headers as sender parcel names
             let columns = [{
@@ -195,8 +243,8 @@
                 'bSortable': false,
                 'className': 'font-weight-bold rightBorder'
             }]
-            if (loadedData.scenario_head.runoff_matrix) {
-                Object.entries(loadedData.scenario_head['runoff_matrix']).forEach(function ([s, r], i) {
+            if (runoff_matrix) {
+                Object.entries(runoff_matrix).forEach(function ([s, r], i) {
                     runoff_data.push({
                         'sender':s
                     })
@@ -219,6 +267,8 @@
                 })
             }
             TableRedraw_RO(runoff_data, columns)
-        });
+            console.log('populated surface runoff form!')
+            LoadingScreen.hide('surface_runoff_loading');
+        }
     })
 </script>

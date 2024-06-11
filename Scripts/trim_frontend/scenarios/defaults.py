@@ -12,63 +12,65 @@ def serialize_scenario(scen: Scenario):
         'description': scen.description,
         'simulation_start_date': start_time,
         'simulation_end_date': end_time,
-        'scenario_chem': [c.name for c in scen.chemicals]
+        'has_chemicals': len(list(scen.chemicals)) > 0,
+        'has_parcels': len(list(scen.parcels)) > 0
     }
     return s
 
-    ambient_air_temp = scen.AirTemperature
-    mixing_height = [
-        a.height.magnitude for a in scen.compartments
-        if a.media.isa("Air") and "Upper" not in a.standard_name
-    ]
     s = {
         **s,
         'latest_run_info': get_latest_run_info(),
-        'erosionRateSource': scen.erosionRateCalcSource or 1,
-        'all_chem': [c.name for c in ChemicalService.get_all()],
-        'meteo': {
-            'ambient_air_temp': (
-                ambient_air_temp.to("K").magnitude
-                if ambient_air_temp is not None
-                else None
-            ),
-            'horizontal_wind_speed': scen.horizontalWindSpeed,
-            'wind_dir': scen.windDirection,
-            # TODO scen?.mixingHeight??, # it is in Input_files/1Parameters.csv
-            # wired to top of Air comp/VE in Foundries_SS (4) Properties.txt,
-            'mixing_height': (
-                scen.mixingHeight if scen.mixingHeight
-                else (mixing_height[0] if mixing_height else None)
-            ),
-            'daytime_indicator': scen.isDay_Dynamic,
-            'precipitation': scen.Rain,
-            'cumulative_precip': scen.cumulativeRain},
-        'wet_dep_interception': {
-            'wet_dep_interception_frac_coniferous_leaf': get_wet_interception_params(scen, 1, "Coniferous_Leaf"),
-            'calc_wet_dep_interception_frac_coniferous_leaf': get_wet_interception_params(scen, 2, "Coniferous_Leaf"),
-            'wet_dep_interception_frac_coniferous_leaf_calculated': get_wet_interception_params(scen, 3, "Coniferous_Leaf"),
-            'wet_dep_interception_frac_deciduous_leaf': get_wet_interception_params(scen, 1, "Deciduous_Leaf"),
-            'calc_wet_dep_interception_frac_deciduous_leaf': get_wet_interception_params(scen, 2, "Deciduous_Leaf"),
-            'wet_dep_interception_frac_deciduous_leaf_calculated': get_wet_interception_params(scen, 3, "Deciduous_Leaf"),
-            'wet_dep_interception_frac_grass_leaf': get_wet_interception_params(scen, 1, "Grass_Leaf"),
-            'calc_wet_dep_interception_frac_grass_leaf': get_wet_interception_params(scen, 2, "Grass_Leaf"),
-            'wet_dep_interception_frac_grass_leaf_calculated': get_wet_interception_params(scen, 3, "Grass_Leaf"),
-            'wet_dep_interception_frac_agriculture_leaf': get_wet_interception_params(scen, 1, "Agriculture_Leaf"),
-            'calc_wet_dep_interception_frac_agriculture_leaf': get_wet_interception_params(scen, 2, "Agriculture_Leaf"),
-            'wet_dep_interception_frac_agriculture_leaf_calculated': get_wet_interception_params(scen, 3, "Agriculture_Leaf")
-        },
-        'seasonal_dynamics': {
-            'litterfall_coniferous': get_seasonal_dynamics_params(scen, 'lf', 'Coniferous_Leaf'),
-            'allow_exchange_coniferous': get_seasonal_dynamics_params(scen, 'ae', 'Coniferous_Leaf'),
-            'litterfall_deciduous': get_seasonal_dynamics_params(scen, 'lf', 'Deciduous_Leaf'),
-            'allow_exchange_deciduous': get_seasonal_dynamics_params(scen, 'ae', 'Deciduous_Leaf'),
-            'litterfall_grass': get_seasonal_dynamics_params(scen, 'lf', 'Grass_Leaf'),
-            'allow_exchange_grass': get_seasonal_dynamics_params(scen, 'ae', 'Grass_Leaf'),
-            'litterfall_agriculture': get_seasonal_dynamics_params(scen, 'lf', 'Agriculture_Leaf'),
-            'allow_exchange_agriculture': get_seasonal_dynamics_params(scen, 'ae', 'Agriculture_Leaf')
-        }
+        'erosionRateSource': scen.erosionRateCalcSource or 1
     }
     return s
+
+
+def get_met_data(scen):
+    ambient_air_temp = scen.AirTemperature
+    if ambient_air_temp:
+        ambient_air_temp = ambient_air_temp.to("K").magnitude
+    else:
+        ambient_air_temp = None
+
+    mixing_height = scen.mixingHeight
+    if not mixing_height:
+        air_comps = [
+            c for c in scen.get_compartment(media='Air')
+            if "Upper" not in c.standard_name
+        ]
+        mixing_height = max([c.height.magnitude for c in air_comps])
+
+    met_data = {
+        'ambient_air_static_value': ambient_air_temp,
+        'wind_speed_static_value': scen.horizontalWindSpeed,
+        'wind_direction_static_value': scen.windDirection,
+        'mixing_height_static_value': mixing_height,
+        'daytime_indicator_static_value': scen.isDay_Dynamic,
+        'precipitation_static_value_rate': scen.Rain,
+        'cumulative_precip': scen.cumulativeRain,
+
+    }
+
+    wet_dep = {}
+
+    leaf_types = ['Coniferous_Leaf', 'Deciduous_Leaf', 'Grass_Leaf', 'Agriculture_Leaf']
+    for x in leaf_types:
+        k = x.lower()
+        wet_dep[f'wet_dep_interception_frac_{k}'] = get_wet_interception_params(
+            scen, 1, x
+        )
+        wet_dep[f'calc_wet_dep_interception_frac_{k}'] = get_wet_interception_params(
+            scen, 2, x, default=0
+        )
+        wet_dep[f'wet_dep_interception_frac_{k}_calculated'] = get_wet_interception_params(
+            scen, 3, x
+        )
+
+    # print(wet_dep)
+
+    met_data['wet_dep_interception'] = wet_dep
+
+    return met_data
 
 
 def get_wet_interception_params(scen, wi_type, media_name, default=-1):
@@ -89,6 +91,7 @@ def get_wet_interception_params(scen, wi_type, media_name, default=-1):
             wi_data = c.WetDepInterceptionFraction_Calculated
         else:
             raise ValueError('Unknown WI_Type!')
+        # print(wi_data)
         if wi_data is None:
             return default
         try:
@@ -102,6 +105,20 @@ def get_wet_interception_params(scen, wi_type, media_name, default=-1):
         else:
             raise
     return default
+
+
+def get_seasonal_dynamics(scen):
+    sd = {
+        'litterfall_coniferous': get_seasonal_dynamics_params(scen, 'lf', 'Coniferous_Leaf'),
+        'allow_exchange_coniferous': get_seasonal_dynamics_params(scen, 'ae', 'Coniferous_Leaf'),
+        'litterfall_deciduous': get_seasonal_dynamics_params(scen, 'lf', 'Deciduous_Leaf'),
+        'allow_exchange_deciduous': get_seasonal_dynamics_params(scen, 'ae', 'Deciduous_Leaf'),
+        'litterfall_grass': get_seasonal_dynamics_params(scen, 'lf', 'Grass_Leaf'),
+        'allow_exchange_grass': get_seasonal_dynamics_params(scen, 'ae', 'Grass_Leaf'),
+        'litterfall_agriculture': get_seasonal_dynamics_params(scen, 'lf', 'Agriculture_Leaf'),
+        'allow_exchange_agriculture': get_seasonal_dynamics_params(scen, 'ae', 'Agriculture_Leaf')
+    }
+    return sd
 
 
 def get_seasonal_dynamics_params(scen, sd_type, media_name, default=-1):
@@ -134,6 +151,25 @@ def get_seasonal_dynamics_params(scen, sd_type, media_name, default=-1):
         else:
             raise
     return default
+
+
+def get_surface_runoff(scen):
+    soil_comps = [c for c in scen.compartments if c.media.isa("Surface_Soil")]
+    water_comps = [c for c in scen.compartments if c.media.isa("Surface_Water")]
+    sink_comps = [c for c in scen.compartments if
+                  c.media.isa("Sink") & c.media.isa("Advection") & (not c.media.isa("Flush$"))]
+    runoffs = {}
+    for send in soil_comps:
+        sending_parcel = send.volume_element.parcel.name
+        runoffs[sending_parcel] = {}
+        runoffs[sending_parcel]['sink'] = 0
+        for recv in soil_comps + sink_comps + water_comps:
+            receiving_parcel = recv.volume_element.parcel.name
+            if recv in sink_comps:
+                runoffs[sending_parcel]['sink'] += send.FractionOfTotalRunoff(receiver=recv)
+            else:
+                runoffs[sending_parcel][receiving_parcel] = send.FractionOfTotalRunoff(receiver=recv)
+    return runoffs
 
 
 def get_latest_run_info(scen):

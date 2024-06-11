@@ -62,12 +62,21 @@
             LoadingScreen.hide('scenario_info_loading');
         }
 
+        var ENABLED_FORM = false;
+
         form.addEventListener('form:populated', function() {
+            if (ENABLED_FORM) {
+                return;
+            }
             var startDate = $('#simulation_start_date');
             var endDate = $('#simulation_end_date');
             startDate.on('change', calculateDateRange);
             endDate.on('change', calculateDateRange);
             startDate.change();
+            startDate.on('change', submit_scenario_value);
+            endDate.on('change', submit_scenario_value);
+
+            ENABLED_FORM = true;
         });
 
         function get_form_data(elem) {

@@ -85,12 +85,9 @@ def get_parcels(scenario_id):
     except Exception as e:
         logger.error(traceback.format_exc())
 
-    runoff_matrix = get_surface_runoff(scenario_id)
-
     return ApiResult({
         'parcels': parcels,
-        'media': media,
-        'runoff_matrix': runoff_matrix
+        'media': media
     })
 
 
@@ -649,26 +646,6 @@ def initialize_parcel_contents(new_parcel, vol_elem_defaults=None):
                                                     requirements=f'(self.id == {nc.id})',
                                                     value=occ_val)
            # elif nc.name == "Surface_water" or nc.name == "Sediment":
-
-
-def get_surface_runoff(scenario_id):
-    scenario = ScenarioService.get(id=scenario_id)
-    soil_comps = [c for c in scenario.compartments if c.media.isa("Surface_Soil")]
-    water_comps = [c for c in scenario.compartments if c.media.isa("Surface_Water")]
-    sink_comps = [c for c in scenario.compartments if
-                  c.media.isa("Sink") & c.media.isa("Advection") & (not c.media.isa("Flush$"))]
-    runoffs = {}
-    for send in soil_comps:
-        sending_parcel = send.volume_element.parcel.name
-        runoffs[sending_parcel] = {}
-        runoffs[sending_parcel]['sink'] = 0
-        for recv in soil_comps + sink_comps + water_comps:
-            receiving_parcel = recv.volume_element.parcel.name
-            if recv in sink_comps:
-                runoffs[sending_parcel]['sink'] += send.FractionOfTotalRunoff(receiver=recv)
-            else:
-                runoffs[sending_parcel][receiving_parcel] = send.FractionOfTotalRunoff(receiver=recv)
-    return runoffs
 
 
 def calc_default_erosion_rate_sdr(pcl):

@@ -27,7 +27,7 @@
         },
         {
             "id": "spacing",
-            "label": "spacing",
+            "label": "Spacing",
             "data_type": "string",
             "widget": "select",
             "choices": ["Uniform", "Non-Uniform"],

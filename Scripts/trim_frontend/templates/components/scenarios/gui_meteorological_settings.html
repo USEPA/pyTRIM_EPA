@@ -94,11 +94,11 @@
                 <h5 class="text-center">Spatially-Varying Values</h5>
             </div>
         </div>
-<!--        <div class="row">-->
-<!--            <div class="col-sm">-->
-<!--                <div data-slot="true" data-target="default_spatially_varying_file"></div>-->
-<!--            </div>-->
-<!--        </div>-->
+        <!-- <div class="row">
+            <div class="col-sm">
+                <div data-slot="true" data-target="default_spatially_varying_file"></div>
+            </div>
+        </div> -->
 
         <table data-slot="true" data-target="spatially_varying_table" class="hover" id="spatially_varying_table">
         </table>
@@ -144,71 +144,118 @@
 <script>
     onDomLoad(function(e) {
         var form = document.getElementById('met-settings-gui');
-        var scenario_id = {{ scenario.id }}
-        form.addEventListener('form:loaded', function() {
-            document.body.addEventListener('parcels:loaded', function () {
-                enableFieldUpdates();
-                let loadedData = $('#root').data('loadedParcels')
-                // Render data for Meteorology Section
-                if (loadedData.scenario_head.meteo) {
-                    $('#ambient_air_static_value').val(loadedData.scenario_head.meteo.ambient_air_temp)
-                    $('#wind_speed_static_value').val(loadedData.scenario_head.meteo.horizontal_wind_speed)
-                    $('#wind_direction_static_value').val(loadedData.scenario_head.meteo.wind_dir)
-                    $('#mixing_height_static_value').val(loadedData.scenario_head.meteo.mixing_height)
-                    $('#daytime_indicator_static_value').removeAttr('disabled').val(loadedData.scenario_head.meteo.daytime_indicator)
-                    $('#precipitation_static_value_rate').val(loadedData.scenario_head.meteo.precipitation)
-                    $('#precipitation_static_value_rate').change();
-                    $('#ambient_air_static_value').add('#wind_speed_static_value').add('#wind_direction_static_value')
-                        .add('#mixing_height_static_value').add('#daytime_indicator_static_value')
-                        .add('#precipitation_static_value_rate').blur(function(){
-                            submit_meteo_value(this)
-                    })
+        var scenario_id = {{ scenario.id }};
+
+        form.addEventListener('form:visible', function() {
+            LoadingScreen.show('met_info_loading');
+            console.log('met form visible')
+            populateMetForm();
+        });
+
+        function populateMetForm() {
+            if ($(form).filter(':not(.form-loaded)').length) {
+                // Form hasn't loaded yet; wait a bit and try again
+                setTimeout(function() { populateMetForm(); }, 1000);
+                return;
+            }
+            // console.log(form)
+            // console.log(TRIM.store.currentScenario)
+
+            if (TRIM.store.currentScenario.meteorology) {
+                TRIM.forms.populate(form, TRIM.store.currentScenario.meteorology);
+                renderWetDep();
+            }
+            else {
+                TRIM.api.getMeteorology(TRIM.store.currentScenario).on('load', function () {
+                    var met = this.responseJSON.meteorology;
+                    TRIM.store.currentScenario.meteorology = met;
+                    populateMetForm();
+                });
+                return;
+            }
+            console.log('populated met form!')
+            LoadingScreen.hide('met_info_loading');
+        }
+
+        // Render Wet Deposition Interception Fractions
+        function renderWetDep () {
+            let met = TRIM.store.currentScenario.meteorology;
+            let leaves = ["coniferous", "deciduous", "grass", "agriculture"]
+            leaves.forEach((e,i) => {
+                let search_cbx_str = `input[type="checkbox"][id$="${e}"]`
+                let search_txt_str = `input[type="number"][id$="${e}"]`
+                let this_chkbx = $('#met-settings-gui').find(search_cbx_str)
+                let this_text =  $('#met-settings-gui').find(search_txt_str)
+                let is_calculated = met.wet_dep_interception[`calc_wet_dep_interception_frac_${e}_leaf`]
+                let val_user = met.wet_dep_interception[`wet_dep_interception_frac_${e}_leaf`]
+                let val_calc = met.wet_dep_interception[`wet_dep_interception_frac_${e}_leaf_calculated`]
+                if (is_calculated == 1) {
+                    this_chkbx.attr('checked','checked')
+                    this_text.attr('disabled','disabled')
+                    this_text.val(val_calc)
+                } else {
+                    this_chkbx.removeAttr('checked')
+                    this_text.removeAttr('disabled')
+                    this_text.val(val_user)
                 }
-                // Add Listeners for Meteorology Params.
-                // Render Wet Deposition Interception Fractions
-                let wet_dep_intercept_obj = loadedData.scenario_head.wet_dep_interception
-                let leaves = ["coniferous", "deciduous", "grass", "agriculture"]
-                leaves.forEach((e,i) => {
-                    let search_cbx_str = `input[type="checkbox"][id$="${e}"]`
-                    let search_txt_str = `input[type="number"][id$="${e}"]`
-                    let this_chkbx = $('#met-settings-gui').find(search_cbx_str)
-                    let this_text =  $('#met-settings-gui').find(search_txt_str)
-                    let is_calculated = wet_dep_intercept_obj[`calc_wet_dep_interception_frac_${e}_leaf`]
-                    let val_user = wet_dep_intercept_obj[`wet_dep_interception_frac_${e}_leaf`]
-                    let val_calc = wet_dep_intercept_obj[`wet_dep_interception_frac_${e}_leaf_calculated`]
-                    if (is_calculated == 1) {
-                        this_chkbx.attr('checked','checked')
-                        this_text.attr('disabled','disabled')
+                // else if (is_calculated == -1) {
+                //     // this_chkbx.closest('div.form-group').css('display','none')
+                //     this_text.closest('div.form-group').css('display','none')
+                // }
+                // Add Listeners for Wet Dep. Interception Params.
+                this_chkbx.change(function(){
+                    if (this_chkbx.prop('checked')) {
+                        // Set Calculated_WDIF for this media-compartment to 1 in the backend
+                        // Display the calculated result and make the static value inactive
+                        this_text.prop('disabled',true)
                         this_text.val(val_calc)
-                    } else if (is_calculated == 0) {
-                        this_chkbx.removeAttr('checked')
-                        this_text.removeAttr('disabled')
+                    } else {
+                        // Set Calculated_WDIF for this media-compartment to 1 in the backend
+                        // Display the calculated result and make the static value inactive
+                        this_text.prop('disabled',false)
                         this_text.val(val_user)
-                    } else if (is_calculated == -1) {
-                        this_chkbx.closest('div.form-group').css('display','none')
-                        this_text.closest('div.form-group').css('display','none')
                     }
-                    // Add Listeners for Wet Dep. Interception Params.
-                    this_chkbx.change(function(){
-                        if (this_chkbx.prop('checked')) {
-                            // Set Calculated_WDIF for this media-compartment to 1 in the backend
-                            // Display the calculated result and make the static value inactive
-                            this_text.prop('disabled',true)
-                            this_text.val(val_calc)
-                        } else {
-                            // Set Calculated_WDIF for this media-compartment to 1 in the backend
-                            // Display the calculated result and make the static value inactive
-                            this_text.prop('disabled',false)
-                            this_text.val(val_user)
-                        }
-                        submit_meteo_value(this)
-                    })
-                    this_text.blur(function (){
-                        ErrorValidation.isPositiveValue(this);
-                        submit_meteo_value(this)
-                    })
+                    submit_meteo_value(this)
+                })
+                this_text.change(function (){
+                    ErrorValidation.isPositiveValue(this);
+                    submit_meteo_value(this)
                 })
             })
+        }
+
+        var ENABLED_FORM = false;
+
+        // Add Listeners for Meteorology Params.
+        form.addEventListener('form:populated', function() {
+            if (ENABLED_FORM) {
+                return;
+            }
+            $('#daytime_indicator_static_value').removeAttr('disabled');
+
+            enableFieldUpdates();
+            $('#precipitation_static_value_rate').change();
+
+            $('#ambient_air_static_value').on('change', function(e) {
+                submit_meteo_value(e.target);
+            });
+            $('#wind_speed_static_value').on('change', function(e) {
+                submit_meteo_value(e.target);
+            });
+            $('#wind_direction_static_value').on('change', function(e) {
+                submit_meteo_value(e.target);
+            });
+            $('#mixing_height_static_value').on('change', function(e) {
+                submit_meteo_value(e.target);
+            });
+            $('#daytime_indicator_static_value').on('change', function(e) {
+                submit_meteo_value(e.target);
+            });
+            $('#precipitation_static_value_rate').on('change', function(e) {
+                submit_meteo_value(e.target);
+            });
+
+            ENABLED_FORM = true;
         });
 
         function get_form_data(elem) {
@@ -375,7 +422,6 @@
                 submit_meteo_value(sel)
             })
 
-
             var staticPrecip = $('#precipitation_static_value_rate');
             var staticCum = $('#precipitation_static_value_cumulative');
             var precipVaries = $('#precipitation_time_varying');
@@ -412,12 +458,26 @@
             });
         }
 
+        form.addEventListener('form:visible', function() {
+            if (!TRIM.store.currentScenario.parcels) {
+                LoadingScreen.show('met_parcels_loading');
+            }
+            TRIM.refreshParcels();
+            document.body.addEventListener('parcels:ready', updateVaryingTable())
+        });
+
         ///////////////// Spatially Varying table
-        document.body.addEventListener('parcels:loaded', function() {
-            let loadedData = $('#root').data('loadedParcels')
+        function updateVaryingTable() {
+            if (!TRIM.store.currentScenario.parcels) {
+                // Parcels haven't loaded yet; wait a bit and try again
+                setTimeout(function() { updateVaryingTable(); }, 1000);
+                return;
+            }
+
+            let parcels = TRIM.store.currentScenario.parcels;
             let spatially_varying_table_data = []
-            if (loadedData.scenario.length > 0) {
-                loadedData['scenario'].forEach(function (e, i) {
+            if (parcels.length > 0) {
+                parcels.forEach(function (e, i) {
                     if (e.parcelType.indexOf("Water") == -1) {
                         spatially_varying_table_data.push({
                             'parcelid': e.id,
@@ -428,13 +488,17 @@
                     }
                 })
             }
-            TableRedraw(spatially_varying_table_data)
-        });
+            TableRedraw(spatially_varying_table_data);
+            LoadingScreen.hide('met_parcels_loading');
+        }
 
         let apTable = null;
         function TableRedraw(table_data) {
             let tblId = "#spatially_varying_table";
-            apTable =  $(tblId).removeAttr('width').dataTable({
+            apTable = $(tblId).removeAttr('width').DataTable();
+            apTable.destroy();
+            apTable = $(tblId).removeAttr('width');
+            apTable.DataTable({
                 data : table_data,
                 paging: false,
                 bFilter: false,

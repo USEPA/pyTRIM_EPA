@@ -178,8 +178,9 @@ window.LoadingScreen = (function(loader) {
     loader.hide = function(reason) {
         // Clear the loading request that was made for this reason
         var i = loadingRequests.indexOf(reason || 1);
-        if (i !== -1) {
+        while (i !== -1) {
             loadingRequests.splice(i, 1);
+            i = loadingRequests.indexOf(reason || 1);
         }
         // Ask the loader to hide if appropriate
         hideLoader();
@@ -192,6 +193,10 @@ window.LoadingScreen = (function(loader) {
         // Ask the loader to hide
         hideLoader();
     };
+
+    loader.why = function() {
+        console.log([...loadingRequests]);
+    }
 
     return loader;
 })(window.LoadingScreen || {});
