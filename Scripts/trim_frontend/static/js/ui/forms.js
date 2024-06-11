@@ -998,7 +998,10 @@ window.TRIM = (function(trim) {
         });
     }
 
-    var functions = {addTabToFieldList}
+    var functions = {
+        addTabToFieldList,
+        removeTabFromFieldList
+    }
 
     trim.forms = forms;
     trim.functions = functions

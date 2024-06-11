@@ -596,14 +596,13 @@
             parcel.feature.properties.fishfoodweb = "No";
             parcel.feature.properties.wetland = "No";
             map.closePopup();
-            // LoadingScreen.show('create_parcel');
+            LoadingScreen.show('create_parcel');
             // WRITE TO DATABASE
             // TRIM.api.createParcels('{{ scenario.id }}', shapes.features.reverse()[0])
             TRIM.api.createParcels('{{ scenario.id }}', parcel.toGeoJSON()).on('load', function() {
                 let resp = JSON.parse(this.responseText)
                 if (resp) {
-                    $('#root').data('createdParcel',resp);
-                    let new_parcel = $('#root').data('createdParcel')
+                    let new_parcel = resp
                     parcel.feature.properties.parcelid = new_parcel["scenario"]["id"]
                     parcel.feature.properties.area = new_parcel["scenario"]["area"]
                     parcel.feature.properties.air = new_parcel["scenario"]["hasAir"]
@@ -616,10 +615,8 @@
                     parcel.bindTooltip(parcel.feature.properties.name, {permanent: false}).addTo(map);
                     shapes = parcels.toGeoJSON()
                     mapTableRedraw()
-                } else {
-                    $('#root').data('createdParcel','');
                 }
-                // LoadingScreen.hide('create_parcel');
+                LoadingScreen.hide('create_parcel');
             })
         };
 

@@ -12,7 +12,7 @@ from trim_db.schema import ScenarioLoadRunProc, \
 from trim_db.services import ScenarioService, ChemicalService, \
     ParcelService, CompartmentService, VolumeElementService, \
     ParameterService, FormulaService
-from trim_frontend import api
+from trim_frontend import api, db
 from trim_frontend.parcels.routes import delete_parcel_contents
 from .defaults import *
 from .forms import *
@@ -135,6 +135,39 @@ def get_scenario_runoff_matrix(scenario_id):
     runoff_matrix = get_surface_runoff(s)
     logger.info(f"Acquired runoff matrix in {time.time() - start_time} seconds")
     return ApiResult({'runoff_matrix': runoff_matrix})
+
+
+@scenario_api.route(
+    '/api/scenario/<int:scenario_id>/parameter',
+    methods=['GET']
+)
+@login_required
+def get_parameters(scenario_id):
+    s = ScenarioService.get(scenario_id)
+    if not s:
+        raise ApiException("Unknown Scenario")
+
+    params = request.args.getlist('parameter')
+    s_params = dict(s.parameters)
+    r = {}
+    for x in params:
+        param = s_params.get(x)
+        if param is not None:
+            db.session.add(param)
+            param = param.as_serializable()
+        r[x] = param
+    return ApiResult({'parameters': r})
+
+
+@scenario_api.route('/api/scenario/<int:scenario_id>/results/', methods=['GET'])
+@login_required
+def get_last_results(scenario_id):
+    logger = make_logger('scenario_last_results_api_get')
+    s = ScenarioService.get(scenario_id)
+    start_time = time.time()
+    latest_run_info = get_latest_run_info(s)
+    logger.info(f"Acquired scenario results in {time.time() - start_time} seconds")
+    return ApiResult({'latest_run_info': latest_run_info})
 
 
 @scenario_api.route('/api/scenario/update', methods=['POST'])
@@ -635,6 +668,7 @@ def delete_scenario():
         ScenarioService.commit()
 
     return redirect(request.referrer)
+
 
 @scenario_api.route('/api/scenario/run/', methods=['POST', 'GET'])
 @login_required

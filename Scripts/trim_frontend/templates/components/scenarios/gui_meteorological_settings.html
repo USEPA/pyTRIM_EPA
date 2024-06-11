@@ -385,9 +385,9 @@
                 var globalFileFiled = section.find('[type="file"][name^="default_"]');
                 let data = globalFileFiled.attr('data-filedata');
 
-                let loadedData = $('#root').data('loadedParcels')
-                let sim_start = Date.parse(loadedData.scenario_head["simulation_start_date"])
-                let sim_end = Date.parse(loadedData.scenario_head["simulation_end_date"])
+                let scenario = TRIM.store.currentScenario;
+                let sim_start = Date.parse(scenario["simulation_start_date"])
+                let sim_end = Date.parse(scenario["simulation_end_date"])
                 let subform = sel.closest('.subform');
                 if (subform.find('[type="checkbox"][id$="use_custom_file"]').prop('checked')) {
                     data = subform.find('[type="file"]').attr('data-filedata');

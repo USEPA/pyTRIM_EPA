@@ -76,6 +76,26 @@ window.TRIM = (function(trim) {
         }
     }
 
+    api.getParameters = function(scenario, paramNames) {
+        var url = api.getUrl('scenario_api.get_parameters')
+            .replace('/0/', '/' + scenario.id + '/');
+        var query = [];
+        for (var x of paramNames) {
+            query.push('parameter=' + x)
+        }
+        url = url + '?' + query.join('&')
+        return AJAX.call({
+            url: url
+        });
+    }
+
+    api.getLastResults = function(scenario) {
+        var url = api.getUrl('scenario_api.get_last_results');
+        return AJAX.call({
+            url: url.replace('/0/', '/' + scenario.id + '/')
+        });
+    }
+
     api.loadForms = function(names) {
         if (!names) {
             return undefined;

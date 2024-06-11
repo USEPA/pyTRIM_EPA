@@ -161,15 +161,11 @@
                         });
                     });
                     $('.tab-pane.active form')[0].dispatchEvent(formVisibleEvent);
-                    return;
                 }
+                LoadingScreen.hide('scenario_loading');
             } catch {
                 LoadingScreen.hide('scenario_loading');
             }
-        });
-        document.body.addEventListener('form:populated', function() {
-            console.log('populated edit screen!')
-            LoadingScreen.hide('scenario_loading');
         });
 
         // Make tabs linkable in url

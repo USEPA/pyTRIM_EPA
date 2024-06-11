@@ -17,13 +17,6 @@ def serialize_scenario(scen: Scenario):
     }
     return s
 
-    s = {
-        **s,
-        'latest_run_info': get_latest_run_info(),
-        'erosionRateSource': scen.erosionRateCalcSource or 1
-    }
-    return s
-
 
 def get_met_data(scen):
     ambient_air_temp = scen.AirTemperature

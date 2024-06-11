@@ -5,6 +5,7 @@ import sqlalchemy.sql.sqltypes
 
 from ..utils.base import Model
 from ..utils.mixins import TrackUpdatesMixin
+from ..utils.serialize import register_serializer
 
 
 __all__ = [
@@ -143,6 +144,16 @@ class Scenario(Model, TrackUpdatesMixin):
             f'"{self.name}"'
             ')'
         )
+
+
+@register_serializer(Scenario)
+def serialize_scenario(scen: Scenario):
+    start_time, end_time = scen.sim_begin_end_time
+    s = {
+        'id': scen.id,
+        'name': scen.name,
+        'description': scen.description
+    }
 
 
 class ScenarioLoadRunProc(Model):

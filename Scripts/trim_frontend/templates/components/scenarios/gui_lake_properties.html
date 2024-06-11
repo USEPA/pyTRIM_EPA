@@ -1003,6 +1003,11 @@
         }
 
         function updateLakeProps() {
+            if (!TRIM.store.currentScenario.parcels) {
+                // Parcels haven't loaded yet; wait a bit and try again
+                setTimeout(function() { updateLakeProps(); }, 1000);
+                return;
+            }
             let parcels = TRIM.store.currentScenario.parcels;
             let water_data = []
             let sed_data = []

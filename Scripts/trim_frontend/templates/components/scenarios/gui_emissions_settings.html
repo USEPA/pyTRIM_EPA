@@ -141,6 +141,12 @@
                 })
             )
 
+            // clear existing fields
+            fieldset.find('[data-pill-id]').each(function() {
+                var i = this.getAttribute('data-pill-id')
+                TRIM.functions.removeTabFromFieldList(fieldset[0], i);
+            });
+
             chemicals.forEach((sc, i) => {
                 ["Vapor", "Particle"].forEach((st, ii) => {
                     // let spec = chem_spec[sc][ii].indexOf("Vapor") > -1 ? "Gaseous" : "Particulate"
@@ -181,6 +187,8 @@
             })
 
             $('#add-chemicals-btn').on('click', function(e){
+                $("#chemicals-modal").find("button.close")[0].click()
+                LoadingScreen.show('adding_chemical');
                 let chem = $('#chemical').find(":selected").val()
                 // let spec = $('#state').find(":selected").val()
                 // window.TRIM.functions.addTabToFieldList(fieldset[0], chem)
@@ -197,7 +205,8 @@
                     populate_comp_dd(dd_menu);
                     populate_values($($("#emissions-settings-gui").find("table.compMap")[current_index]))
                 })
-                $("#chemicals-modal").find("button.close")[0].click()
+                TRIM.refreshParcels();
+                LoadingScreen.hide('adding_chemical')
             })
 
             $('tr.colps').not('tr.level2').on('click', function() {
