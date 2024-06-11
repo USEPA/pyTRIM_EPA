@@ -17,14 +17,14 @@ else:
     elif 'MYSQL_DB_NAME' in os.environ:
         import urllib.parse
         USERNAME = os.environ['MYSQL_USERNAME']
-        PASSWORD = os.environ['MYSQL_PASSWORD']
+        PASSWORD = str(os.environ['MYSQL_PASSWORD'])
         HOST = os.environ['MYSQL_HOSTNAME']
         PORT = os.environ['MYSQL_PORT']
         DBNAME = os.environ['MYSQL_DB_NAME']
     else:
         import urllib.parse
         USERNAME = "root"
-        PASSWORD = urllib.parse.quote_plus(os.getenv('MYSQLPASSWORD'))
+        PASSWORD = urllib.parse.quote_plus(str(os.getenv('MYSQLPASSWORD')))
         HOST = "localhost"
         PORT = "3306"
         DBNAME = "pytrim"

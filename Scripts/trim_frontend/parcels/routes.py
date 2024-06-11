@@ -197,8 +197,8 @@ def update_parcel(id, scenario_id):
             if parcels_data['hasWetland'] == "Yes":
                 ve = p.get_volume_element("SurfSoil")
                 if ve:
-                    m = CompartmentService.media.get_or_create(category='Surface_Soil|Wetland')
-                    c = CompartmentService.get_or_create(name="Wetland", volume_element_id=ve.id, media_id=m.id)
+                    m = CompartmentService.media.get(name='Wetland')
+                    c = CompartmentService.get_or_create(name="Wetland", volume_element=ve, media=m)
                 else:
                     raise ValueError("Cannot create or get Wetland Compartment")
             if parcels_data['hasWetland'] == "No":
@@ -216,7 +216,7 @@ def update_parcel(id, scenario_id):
                     par.value = parcels_data['totalErosionRate']
         if field_name in [k for k, v in Air_params]:
             par_name = [v for k, v in Air_params if k == field_name][0]
-            # TODO the below part generates error due to missing par for dustLoad, dustDensity etc...
+            # the below part was generating error due to missing par for dustLoad, dustDensity etc...
             cmp = [c for c in p.compartments if "Air in Air_" in c.standard_name][0]
             par = cmp.parameters.get(par_name)
             par.value = parcels_data[field_name]
@@ -285,8 +285,8 @@ def update_parcel(id, scenario_id):
                     par_obj = [pp for pp in ParameterService.definitions.get_all() if
                                pp.full_name == "soilTillage"]
                     req_comp = f'(self.id == {c.id})'
-                    par = ParameterService.get_or_create(definition_id=par_obj[0].id, requirements=req_comp,
-                                                         scenario_id=p.scenario_id)
+                    par = ParameterService.get_or_create(definition=par_obj[0], requirements=req_comp,
+                                                         scenario=p.scenario)
                     if parcels_data['tillage'] == "Yes":
                         par.value = 1
                     elif parcels_data['tillage'] == "No":
@@ -316,8 +316,8 @@ def update_parcel(id, scenario_id):
                     par_obj = [pp for pp in ParameterService.definitions.get_all() if
                                pp.full_name == par_name[field_name]]
                     req_comp = f'(self.id == {comp.id})'
-                    par = ParameterService.get_or_create(definition_id=par_obj[0].id, requirements=req_comp,
-                                                         scenario_id=p.scenario_id, unit=par.default_unit)
+                    par = ParameterService.get_or_create(definition=par_obj[0], requirements=req_comp,
+                                                         scenario=p.scenario, unit=par.default_unit)
                     par.value = parcels_data[field_name]
             else:
                 par_obj = [pp for pp in ParameterService.definitions.get_all() if
@@ -341,8 +341,8 @@ def update_parcel(id, scenario_id):
                     par_obj = [pp for pp in ParameterService.definitions.get_all() if
                                pp.full_name == par_name[field_name]]
                     req_comp = f'(self.id == {comp.id})'
-                    par = ParameterService.get_or_create(definition_id=par_obj[0].id, requirements=req_comp,
-                                                         scenario_id=p.scenario_id, unit=par.default_unit)
+                    par = ParameterService.get_or_create(definition=par_obj[0], requirements=req_comp,
+                                                         scenario=p.scenario, unit=par.default_unit)
                     par.value = parcels_data[field_name]
             else:
                 par_obj = [pp for pp in ParameterService.definitions.get_all() if
@@ -395,8 +395,8 @@ def update_parcel(id, scenario_id):
                     print(f'{prop} ---> {parcels_data[field_name]} current val {this_comp.parameters[prop].value}')
                     if this_comp.parameters.get(prop).__tablename__ == "parameter_definition":
                         this_req_comp = f'(self.id == {this_comp.id})'
-                        ParameterService.get_or_create(definition_id=this_comp.parameters.get(prop)[0].id,
-                                                       scenario_id=p.scenario_id,
+                        ParameterService.get_or_create(definition=this_comp.parameters.get(prop)[0],
+                                                       scenario=p.scenario,
                                                        requirements=this_req_comp,
                                                        value=float(parcels_data[field_name]),
                                                        unit=this_comp.parameters.get(prop)[0].default_unit)
@@ -549,6 +549,68 @@ def get_land_use(pcl):
     return land_use
 
 
+# This is for parameters of new compartments whose default value cannot be used and will need custom parameters defined
+# at the time of creation f new compartment.
+def initialize_compartment_custom_parameters(nc):
+    # Add in custom parameters for new compartments using the self.id = <id of new compartment>
+    this_parcel = nc.volume_element.parcel
+    if nc.name == "Soil_Surface":
+        # Default Total Erosion Rate
+        ter_val = calc_default_erosion_rate_sdr(this_parcel)
+        add_compartment_custom_parameters(nc, "TotalErosionRate", ter_val, "kg/m^2/day")
+        # add Total Runoff Rate
+        trr_val = 0  # no default provided so using 0 as default (also used as placeholder in the frontend)
+        add_compartment_custom_parameters(nc, "TotalRunoffRate", trr_val, "m^3/m^2/day")
+
+    if nc.media.isa("Flora"):
+        # add AllowExchange_Dynamic, AllowExchange_SteadyState_forAir, AllowExchange_SteadyState_forOther
+        ae_pars_ss = ['AllowExchange_SteadyState_forAir', 'AllowExchange_SteadyState_forOther']
+        # Using 1 for steady state (continuously exchanging) as default
+        for ae_par in ae_pars_ss:
+            ae_ss_val = 1
+            add_compartment_custom_parameters(nc, ae_par, ae_ss_val, None)
+        # Search scenario and see if compartments with same media exists and use their Allow Exchange
+        # (should be fixed value for that media across all parcels of the scenario for compartments with
+        # that media
+        search_comps = [c for c in this_parcel.scenario.compartments if c.media.isa(nc.media)]
+        ae_val = 0.5
+        if len(search_comps) > 0:
+            ae_vals = list(set([c.parameters.get("AllowExchange_Dynamic").value for c in search_comps if
+                                c.parameters.get("AllowExchange_Dynamic") is not None and
+                                isinstance(c.parameters.get("AllowExchange_Dynamic"), CustomParameter)]))
+            if len(ae_vals) > 0:
+                ae_val = ae_vals[0]
+        add_compartment_custom_parameters(nc, 'AllowExchange_Dynamic', ae_val, None)
+
+    if nc.media.isa("Soil") or nc.media.isa("Groundwater"):
+        # get the defaults from the user defined json templates in the frontend
+        # add pH
+        ph_val = get_default_value_from_json_form(f"Abiotic_{nc.media.name}", 'pH')
+        add_compartment_custom_parameters(nc, 'pH', ph_val, None)
+        # add OrganicCarbonContent
+        occ_val = get_default_value_from_json_form(f"Abiotic_{nc.media.name}", 'OrganicCarbonContent')
+        add_compartment_custom_parameters(nc, 'OrganicCarbonContent', occ_val, None)
+        if not nc.media.isa("Groundwater"):
+            # add Air content
+            air_c_val = get_default_value_from_json_form(f"Abiotic_{nc.media.name}", 'VolumeFraction_Vapor')
+            add_compartment_custom_parameters(nc, 'VolumeFraction_Vapor', air_c_val, None)
+            # add Water content
+            water_c_val = get_default_value_from_json_form(f"Abiotic_{nc.media.name}", 'VolumeFraction_Liquid')
+            add_compartment_custom_parameters(nc, 'VolumeFraction_Liquid', water_c_val, None)
+
+    # elif nc.name == "Surface_water" or nc.name == "Sediment":
+
+
+def add_compartment_custom_parameters(nc, par_name, par_val, par_unit):
+    obj = [pp for pp in ParameterService.definitions.get_all() if pp.full_name == par_name]
+    ncp = ParameterService.get_or_create(definition=obj[0],
+                                         scenario=nc.volume_element.parcel.scenario,
+                                         requirements=f'(self.id == {nc.id})',
+                                         value=par_val,
+                                         unit=par_unit)
+    return ncp
+
+
 # Some parameters just not have any default values or any values to be referenced at the time of the
 # initialization/creation of the entity (i.e. compartment). In these cases we can get the default values from
 # the relevant flask form template (json) from the frontend.
@@ -565,6 +627,7 @@ def get_default_value_from_json_form(form_name, parameter_name):
     def_val = form_class.__getattribute__(form_class, parameter_name).kwargs["default"]
     return def_val
 
+
 def initialize_parcel_contents(new_parcel, vol_elem_defaults=None):
     if vol_elem_defaults is None:
         vol_elem_defaults = dict(Land_Parcel_VolElem_defaults)
@@ -579,74 +642,21 @@ def initialize_parcel_contents(new_parcel, vol_elem_defaults=None):
         if new_parcel.get_volume_element(ve[1]["name"]):
             nve = new_parcel.get_volume_element(ve[1]["name"])
         else:
-            nve = VolumeElementService.get_or_create(name=ve[1]["name"], parcel_id=new_parcel.id, top=ve[1]["top"],
+            nve = VolumeElementService.get_or_create(name=ve[1]["name"], parcel=new_parcel, top=ve[1]["top"],
                                                      bottom=ve[1]["bottom"])
         for c in ve[1]["Compartments"].items():
             # Create standard compartments linking them to default volume elements and media for each compartment
-            media_id = [m.id for m in CompartmentService.media.get_all() if m.name == c[1]["media_name"]][0]
+            # media_id = [m.id for m in CompartmentService.media.get_all() if m.name == c[1]["media_name"]][0]
+            this_media = [m for m in CompartmentService.media.get_all() if m.name == c[1]["media_name"]][0]
 
             if new_parcel.get_compartment(c[0]):
                 nc = new_parcel.get_compartment(c[1]["name"])
             else:
-                nc = CompartmentService.get_or_create(name=c[1]["name"], volume_element_id=nve.id,
-                                                      media_id=media_id)
-            # Add in custom parameters for new compartments using the self.id = <id of new compartment>
-            if nc.name == "Soil_Surface":
-                # Default Total Erosion Rate
-                ter_val = calc_default_erosion_rate_sdr(new_parcel)
-                ter_obj = [pp for pp in ParameterService.definitions.get_all() if pp.full_name == "TotalErosionRate"]
-                ter = ParameterService.get_or_create(definition=ter_obj[0], scenario=new_parcel.scenario,
-                                                     requirements=f'(self.id == {nc.id})',
-                                                     value=ter_val,
-                                                     unit="kg/m^2/day")
-
-                # add Total Runoff Rate
-                trr_val = 0  # no default provided so using 0 as default (also used as placeholder in the frontend)
-                trr_obj = [pp for pp in ParameterService.definitions.get_all() if pp.full_name == "TotalRunoffRate"]
-                trr = ParameterService.get_or_create(definition=trr_obj[0], scenario=new_parcel.scenario,
-                                                     requirements=f'(self.id == {nc.id})',
-                                                     value=trr_val,
-                                                     unit="m^3/m^2/day")
-
-            if nc.media.isa("Flora"):
-                # add AllowExchange_Dynamic, AllowExchange_SteadyState_forAir, AllowExchange_SteadyState_forOther
-                ae_pars_ss = ['AllowExchange_SteadyState_forAir', 'AllowExchange_SteadyState_forOther']
-                # Using 1 for steady state (continuously exchanging) as default
-                for ae_par in ae_pars_ss:
-                    ae_obj_ss = [pp for pp in ParameterService.definitions.get_all() if pp.full_name == ae_par]
-                    ae = ParameterService.get_or_create(definition=ae_obj_ss[0], scenario=new_parcel.scenario,
-                                                     requirements=f'(self.id == {nc.id})',
-                                                     value=1)
-                # Search scenario and see if compartments with same media exists and use their Allow Exchange
-                # (should be fixed value for that media across all parcels of the scenario for compartments with
-                # that media
-                search_comps = [c for c in new_parcel.scenario.compartments if c.media.isa(nc.media)]
-                ae_val = 0.5
-                if len(search_comps) > 0:
-                    ae_vals = list(set([c.parameters.get("AllowExchange_Dynamic").value for c in search_comps if
-                                        c.parameters.get("AllowExchange_Dynamic") is not None and
-                                        isinstance(c.parameters.get("AllowExchange_Dynamic"), CustomParameter)]))
-                    if len(ae_vals) > 0:
-                        ae_val = ae_vals[0]
-                ae_obj_d = [a for a in ParameterService.definitions.get_all() if a.full_name == 'AllowExchange_Dynamic']
-                ae = ParameterService.get_or_create(definition=ae_obj_d[0], scenario=new_parcel.scenario,
-                                                    requirements=f'(self.id == {nc.id})',
-                                                    value=ae_val)
-            if nc.media.isa("Soil") or nc.media.isa("Groundwater"):
-                # add OrganicCarbonContent, pH
-                # get the defaults from the user defined json templates in the frontend
-                ph_val = get_default_value_from_json_form(f"Abiotic_{nc.media.name}", 'pH')
-                ph_obj = [a for a in ParameterService.definitions.get_all() if a.full_name == 'pH']
-                ph_cp = ParameterService.get_or_create(definition=ph_obj[0], scenario=new_parcel.scenario,
-                                                       requirements=f'(self.id == {nc.id})',
-                                                       value=ph_val)
-                occ_val = get_default_value_from_json_form(f"Abiotic_{nc.media.name}", 'OrganicCarbonContent')
-                occ_obj = [a for a in ParameterService.definitions.get_all() if a.full_name == 'OrganicCarbonContent']
-                occ_cp = ParameterService.get_or_create(definition=occ_obj[0], scenario=new_parcel.scenario,
-                                                    requirements=f'(self.id == {nc.id})',
-                                                    value=occ_val)
-           # elif nc.name == "Surface_water" or nc.name == "Sediment":
-
+                nc = CompartmentService.get_or_create(name=c[1]["name"], volume_element=nve,
+                                                      media=this_media)
+                ParameterService.commit()
+            initialize_compartment_custom_parameters(nc)
+    ParameterService.commit()
 
 def calc_default_erosion_rate_sdr(pcl):
     for c in pcl.compartments:
@@ -725,8 +735,7 @@ def delete_parcel_contents(del_parcel):
 def create_base_land_compartments(parcels_data, p, land_use):
     ve_surfsoil = VolumeElementService.get(name="SurfSoil", parcel_id=p.id)
     c_surfsoil = CompartmentService.get(name="Soil_Surface", volume_element_id=ve_surfsoil.id)
-    # custom_param_erosion = ParameterService.get(requirements=f'(self.id == {c_surfsoil.id})',
-    #                                             definition_id=596)
+
     custom_param_erosion = c_surfsoil.parameters.get("TotalErosionRate")
     if not isinstance(custom_param_erosion, CustomParameter):
         if isinstance(custom_param_erosion, ParameterDefinition):
@@ -754,46 +763,53 @@ def create_base_land_compartments(parcels_data, p, land_use):
                     CompartmentService.links.delete(lnk_r)
                 for lnk_s in ls:
                     CompartmentService.links.delete(lnk_s)
-                # Remove compartments
-                CompartmentService.delete(c, False)
                 # Remove custom_parameters with the requirement self.id = c.id
-                custom_params = ParameterService.get_all(requirements=f'(self.id == {c.id})')
+                # Again this is not a good way to find the custom parameters of the compartment
+                # custom_params = ParameterService.get_all(requirements=f'(self.id == {c.id})')
+                custom_params = [cp for _, cp in c.parameters.items() if isinstance(cp, CustomParameter)]
                 for cp in custom_params:
                     ParameterService.delete(cp, False)
+                # Remove compartments
+                CompartmentService.delete(c, False)
+
     # Create the base compartments for the new land use/ land cover
+    new_comps = []
     if parcels_data['landUse'] == 'Tilled Soil':
-        c_surfsoil.media_id = 55
+        c_surfsoil.media_id = [m.id for m in CompartmentService.media.get_all() if m.name == "Tilled_Soil"][0]
     elif parcels_data['landUse'] == 'Untilled Soil':
-        c_surfsoil.media_id = 56
+        c_surfsoil.media_id = [m.id for m in CompartmentService.media.get_all() if m.name == "Untilled_Soil"][0]
     elif parcels_data['landUse'] == 'Impervious':
-        c_surfsoil.media_id = 57
+        c_surfsoil.media_id = [m.id for m in CompartmentService.media.get_all() if m.name == "Impervious"][0]
         custom_param_erosion.value = 0
     elif parcels_data['landUse'] == 'Coniferous Forest':
-        CompartmentService.create(name="Leaf_Coniferous_Forest", volume_element_id=ve_surfsoil.id,
-                                  media_id=[m for m in CompartmentService.media.get_all() if m.isa('Coniferous_Leaf')][0].id)
-        CompartmentService.create(name="Leaf_Particle_Coniferous_Forest", volume_element_id=ve_surfsoil.id,
-                                  media_id=[m for m in CompartmentService.media.get_all() if m.isa('Coniferous_Leaf_Particle')][0].id)
+        new_comps.append(CompartmentService.create(name="Leaf_Coniferous_Forest", volume_element=ve_surfsoil,
+                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Coniferous_Leaf')][0]))
+        new_comps.append(CompartmentService.create(name="Leaf_Particle_Coniferous_Forest", volume_element=ve_surfsoil,
+                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Coniferous_Leaf_Particle')][0]))
     elif parcels_data['landUse'] == 'Deciduous Forest':
-        CompartmentService.create(name="Leaf_Deciduous_Forest", volume_element_id=ve_surfsoil.id,
-                                  media_id=[m for m in CompartmentService.media.get_all() if m.isa('Deciduous_Leaf')][0].id)
-        CompartmentService.create(name="Leaf_Particle_Deciduous_Forest", volume_element_id=ve_surfsoil.id,
-                                  media_id=[m for m in CompartmentService.media.get_all() if m.isa('Deciduous_Leaf_Particle')][0].id)
+        new_comps.append(CompartmentService.create(name="Leaf_Deciduous_Forest", volume_element=ve_surfsoil,
+                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Deciduous_Leaf')][0]))
+        new_comps.append(CompartmentService.create(name="Leaf_Particle_Deciduous_Forest", volume_element=ve_surfsoil,
+                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Deciduous_Leaf_Particle')][0]))
     elif parcels_data['landUse'] == 'Grasses/Herbs':
-        CompartmentService.create(name="Leaf_Grasses_Herbs", volume_element_id=ve_surfsoil.id,
-                                  media_id=[m for m in CompartmentService.media.get_all() if m.isa('Grass_Leaf')][0].id)
-        CompartmentService.create(name="Leaf_Particle_Grasses_Herbs", volume_element_id=ve_surfsoil.id,
-                                  media_id=[m for m in CompartmentService.media.get_all() if m.isa('Grass_Leaf_Particle')][0].id)
-        CompartmentService.create(name="Stem_Grasses_Herbs", volume_element_id=ve_surfsoil.id,
-                                  media_id=[m for m in CompartmentService.media.get_all() if m.isa('Grass_Stem')][0].id)
-        CompartmentService.create(name="Root_Grasses_Herbs", volume_element_id=ve_surfsoil.id,
-                                  media_id=[m for m in CompartmentService.media.get_all() if m.isa('Grass_Root')][0].id)
+        new_comps.append(CompartmentService.create(name="Leaf_Grasses_Herbs", volume_element=ve_surfsoil,
+                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Grass_Leaf')][0]))
+        new_comps.append(CompartmentService.create(name="Leaf_Particle_Grasses_Herbs", volume_element=ve_surfsoil,
+                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Grass_Leaf_Particle')][0]))
+        new_comps.append(CompartmentService.create(name="Stem_Grasses_Herbs", volume_element=ve_surfsoil,
+                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Grass_Stem')][0]))
+        new_comps.append(CompartmentService.create(name="Root_Grasses_Herbs", volume_element=ve_surfsoil,
+                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Grass_Root')][0]))
     elif parcels_data['landUse'] == 'Agriculture - General':
-        CompartmentService.create(name="Leaf_Agriculture", volume_element_id=ve_surfsoil.id,
-                                  media_id=[m for m in CompartmentService.media.get_all() if m.isa('Agriculture_Leaf')][0].id)
-        CompartmentService.create(name="Leaf_Particle_Agriculture", volume_element_id=ve_surfsoil.id,
-                                  media_id=[m for m in CompartmentService.media.get_all() if m.isa('Agriculture_Leaf_Particle')][0].id)
-        CompartmentService.create(name="Stem_Agriculture", volume_element_id=ve_surfsoil.id,
-                                  media_id=[m for m in CompartmentService.media.get_all() if m.isa('Agriculture_Stem')][0].id)
-        CompartmentService.create(name="Root_Agriculture", volume_element_id=ve_surfsoil.id,
-                                  media_id=[m for m in CompartmentService.media.get_all() if m.isa('Agriculture_Root')][0].id)
+        new_comps.append(CompartmentService.create(name="Leaf_Agriculture", volume_element=ve_surfsoil,
+                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Agriculture_Leaf')][0]))
+        new_comps.append(CompartmentService.create(name="Leaf_Particle_Agriculture", volume_element=ve_surfsoil,
+                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Agriculture_Leaf_Particle')][0].id))
+        new_comps.append(CompartmentService.create(name="Stem_Agriculture", volume_element=ve_surfsoil.id,
+                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Agriculture_Stem')][0]))
+        new_comps.append(CompartmentService.create(name="Root_Agriculture", volume_element=ve_surfsoil,
+                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Agriculture_Root')][0]))
     CompartmentService.update(c_surfsoil)
+    for nc in new_comps:
+        initialize_compartment_custom_parameters(nc)
+    CompartmentService.commit()

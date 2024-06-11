@@ -154,10 +154,14 @@ def update_scenario():
     def update_assumed_all_comp_fixed_params(scen, comps, par_name, par_val):
         # media_name = comp.media.name
         # c_par_list = [c.parameters.get(par_name) for c in scen.compartments if c.media.isa(media_name)]
-        c_par_list = [c.parameters.get(par_name) for c in comps]
+        c_par_list = [c.parameters.get(par_name) for c in comps if c.parameters.get(par_name)]
         for c_p in c_par_list:
-            c_p.value = par_val
-            ParameterService.update(c_p)
+            try:
+                if isinstance(c_p, CustomParameter):
+                    c_p.value = par_val
+                    ParameterService.update(c_p)
+            except AttributeError as e:
+                print(e)
         ParameterService.commit()
 
     def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
@@ -602,10 +606,23 @@ def delete_scenario():
             for ve in parcel.volume_elements:
                 VolumeElementService.delete(ve, False)
 
+            # Delete some custom parameters that may be left behind for this scenario
+            # (they may be for domains other than compartment)
+            scen_custom_params = [p for p in ParameterService.get_all() if p.scenario.id == s.id]
+            for s_cp in scen_custom_params:
+                ParameterService.delete(s_cp)
+
             # Delete parcel
             ParcelService.delete(parcel.id)
             logger.info(f'Deleted parcel {parcel.name} for {s.name}...')
         # ParcelService.commit()
+
+        # Delete scenario Proc info
+        s_proc = [sp for sp in s.proc_status]
+        if len(s_proc) > 0:
+            for sp in s_proc:
+                logger.info(f'Deleted result {sp.id} for {s.name}...')
+                ScenarioService.db.session.delete(sp)
 
         # Delete scenario
         ScenarioService.delete(s.id)
