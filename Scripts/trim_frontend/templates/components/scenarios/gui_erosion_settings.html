@@ -47,455 +47,497 @@
 <script>
     onDomLoad(function (e) {
         $('[data-toggle="tooltip"]').tooltip()
+
         var form = document.getElementById('erosion-settings-gui');
-        form.addEventListener('form:loaded', function () {
-            $('.div_checkbox').hide()
-            enableFieldUpdates()
-            default_data = {
-                "Surface Parcel": "",
-                "Area": 1,
-                "Land Cover": "grass",
-                "A": 1.73E-03,
-                "a": 1.9,
-                "b": 0.125,
-                "R": 300,
-                "K": 0.36,
-                "S": 1,
-                "L": 1.5,
-                "LS": 1.5,
-                "C": 1,
-                "P": 1,
-                "Total Effective Erosion Rate": 3.30E-03
+
+        form.addEventListener('form:visible', function() {
+            console.log('erosion settings form visible')
+            LoadingScreen.show('erosion_settings_loading');
+            TRIM.refreshParcels();
+            document.body.addEventListener('parcels:ready', updateErosionSettings());
+            initializeErosionForm()
+        });
+
+        var default_data = {
+            "Surface Parcel": "",
+            "Area": 1,
+            "Land Cover": "grass",
+            "A": 1.73E-03,
+            "a": 1.9,
+            "b": 0.125,
+            "R": 300,
+            "K": 0.36,
+            "S": 1,
+            "L": 1.5,
+            "LS": 1.5,
+            "C": 1,
+            "P": 1,
+            "Total Effective Erosion Rate": 3.30E-03
+        }
+
+        function updateErosionSettings() {
+            if (!TRIM.store.currentScenario.parcels) {
+                // Parcels haven't loaded yet; wait a bit and try again
+                setTimeout(function() { updateErosionSettings(); }, 1000);
+                return;
+            }
+            let parcels = TRIM.store.currentScenario.parcels;
+
+            let data1 = []
+            let data2 = []
+            let data3 = []
+            if (parcels.length > 0) {
+                 parcels.forEach(function(e,i) {
+                     let a_param = default_data["a"]
+                     let area_in_sq_mile = (e.area/1E6).toFixed(2) / 2.58998811
+                     if (area_in_sq_mile <= 0.1) {
+                         a_param = 2.1
+                     } else if (area_in_sq_mile > 0.1 && area_in_sq_mile <= 1) {
+                         a_param = 1.9
+                     } else if (area_in_sq_mile > 1 && area_in_sq_mile <= 10) {
+                         a_param = 1.4
+                     } else if (area_in_sq_mile > 10 && area_in_sq_mile <= 100) {
+                         a_param = 1.2
+                     } else {
+                         a_param = 0.6
+                     }
+                     let C_factor = default_data["C"]
+                     if (e.landUse === "Agriculture (General)" || e.landUse === "Tilled Soil") {
+                         C_factor = 0.5
+                     } else if (e.landUse === "Soil") {
+                         C_factor = 1.0
+                     } else if (e.landUse === "Impervious") {
+                         C_factor = 0
+                     } else {
+                         C_factor = 0.1
+                     }
+                     if (e.landUse != "Impervious" && e.landUse != "N/A") {
+                         data1.push({
+                            "parcelid": e.id,
+                            "Surface Parcel": e.name,
+                            "Area": (e.area/1E6).toFixed(2),
+                            "Land Cover": e.landUse,
+                            "Total Effective Erosion Rate": new Intl.NumberFormat('en-US', {notation: "scientific"}).format(e.totalErosionRate)
+                        });
+                         data2.push({
+                             "parcelid": e.id,
+                             "Surface Parcel": e.name,
+                             "Area": (e.area/1E6).toFixed(2),
+                             "Land Cover": e.landUse,
+                             "A": new Intl.NumberFormat('en-US', {notation: "scientific"}).format(default_data["A"]),
+                             "a": a_param,
+                             "b": default_data["b"],
+                             "SD": a_param * (e.area)**(-default_data["b"]),
+                             "Total Effective Erosion Rate": (["Water","Impervious"].indexOf(e.landUse) == -1) ? new Intl.NumberFormat('en-US', {notation: "scientific"}).format(this.A * this.SD) : new Intl.NumberFormat('en-US', {notation: "scientific"}).format(0)
+                         })
+                         data3.push({
+                             "parcelid": e.id,
+                             "Surface Parcel": e.name,
+                             "Area": (e.area/1E6).toFixed(2),
+                             "Land Cover": e.landUse,
+                             "R": default_data["R"],
+                             "K": default_data["K"],
+                             "S": default_data["S"],
+                             "L": default_data["L"],
+                             "LS": default_data["L"] * default_data["S"]/100,
+                             "C": C_factor,
+                             "P": default_data["P"],
+                             "A": new Intl.NumberFormat('en-US', {notation: "scientific"}).format(default_data["A"]),
+                             "a": a_param,
+                             "b": default_data["b"],
+                             "SD": a_param * (e.area)**(-default_data["b"]),
+                             "Total Effective Erosion Rate": (["Water","Impervious"].indexOf(e.landUse) == -1) ? new Intl.NumberFormat('en-US', {notation: "scientific"}).format(this.R * this.K * this.LS * this.C * this.P) : new Intl.NumberFormat('en-US', {notation: "scientific"}).format(0)
+                         })
+                     }
+                 })
             }
 
-            document.body.addEventListener('parcels:loaded', function() {
-                let loadedData = $('#root').data('loadedParcels')
-                let data1 = []
-                let data2 = []
-                let data3 = []
-                if (loadedData.scenario.length > 0) {
-                     loadedData['scenario'].forEach(function(e,i) {
-                         let a_param = default_data["a"]
-                         let area_in_sq_mile = (e.area/1E6).toFixed(2) / 2.58998811
-                         if (area_in_sq_mile <= 0.1) {
-                             a_param = 2.1
-                         } else if (area_in_sq_mile > 0.1 && area_in_sq_mile <= 1) {
-                             a_param = 1.9
-                         } else if (area_in_sq_mile > 1 && area_in_sq_mile <= 10) {
-                             a_param = 1.4
-                         } else if (area_in_sq_mile > 10 && area_in_sq_mile <= 100) {
-                             a_param = 1.2
-                         } else {
-                             a_param = 0.6
-                         }
-                         let C_factor = default_data["C"]
-                         if (e.landUse === "Agriculture (General)" || e.landUse === "Tilled Soil") {
-                             C_factor = 0.5
-                         } else if (e.landUse === "Soil") {
-                             C_factor = 1.0
-                         } else if (e.landUse === "Impervious") {
-                             C_factor = 0
-                         } else {
-                             C_factor = 0.1
-                         }
-                         if (e.landUse != "Impervious" && e.landUse != "N/A") {
-                             data1.push({
-                                "parcelid": e.id,
-                                "Surface Parcel": e.name,
-                                "Area": (e.area/1E6).toFixed(2),
-                                "Land Cover": e.landUse,
-                                "Total Effective Erosion Rate": new Intl.NumberFormat('en-US', {notation: "scientific"}).format(e.totalErosionRate)
-                            });
-                             data2.push({
-                                 "parcelid": e.id,
-                                 "Surface Parcel": e.name,
-                                 "Area": (e.area/1E6).toFixed(2),
-                                 "Land Cover": e.landUse,
-                                 "A": new Intl.NumberFormat('en-US', {notation: "scientific"}).format(default_data["A"]),
-                                 "a": a_param,
-                                 "b": default_data["b"],
-                                 "SD": a_param * (e.area)**(-default_data["b"]),
-                                 "Total Effective Erosion Rate": (["Water","Impervious"].indexOf(e.landUse) == -1) ? new Intl.NumberFormat('en-US', {notation: "scientific"}).format(this.A * this.SD) : new Intl.NumberFormat('en-US', {notation: "scientific"}).format(0)
-                             })
-                             data3.push({
-                                 "parcelid": e.id,
-                                 "Surface Parcel": e.name,
-                                 "Area": (e.area/1E6).toFixed(2),
-                                 "Land Cover": e.landUse,
-                                 "R": default_data["R"],
-                                 "K": default_data["K"],
-                                 "S": default_data["S"],
-                                 "L": default_data["L"],
-                                 "LS": default_data["L"] * default_data["S"]/100,
-                                 "C": C_factor,
-                                 "P": default_data["P"],
-                                 "A": new Intl.NumberFormat('en-US', {notation: "scientific"}).format(default_data["A"]),
-                                 "a": a_param,
-                                 "b": default_data["b"],
-                                 "SD": a_param * (e.area)**(-default_data["b"]),
-                                 "Total Effective Erosion Rate": (["Water","Impervious"].indexOf(e.landUse) == -1) ? new Intl.NumberFormat('en-US', {notation: "scientific"}).format(this.R * this.K * this.LS * this.C * this.P) : new Intl.NumberFormat('en-US', {notation: "scientific"}).format(0)
-                             })
-                         }
-                     })
-                }
+            fieldMapping = {
+                "PN": "Surface Parcel",
+                "ER": "Total Effective Erosion Rate",
+                "USL": "A",
+                "SDR": "SD",
+                "R": "R",
+                "K": "K",
+                "S": "S",
+                "L": "L",
+                "LS": "LS",
+                "C": "C",
+                "P": "P"
+            }
 
-                fieldMapping = {
-                    "PN": "Surface Parcel",
-                    "ER": "Total Effective Erosion Rate",
-                    "USL": "A",
-                    "SDR": "SD",
-                    "R": "R",
-                    "K": "K",
-                    "S": "S",
-                    "L": "L",
-                    "LS": "LS",
-                    "C": "C",
-                    "P": "P"
-                }
+            data_source_select = $('#erosion_input_options')
 
-                data_source_select = $('#erosion_input_options')
+            have_file_cb = $("input[id*='have_user_file']")
 
+            field_name_dd = $("select[id*='field_name_']").filter((i,e)=>$(e).attr("id").startsWith("erosion_inputs"))
+
+            optionNum = 1
+            $('#option_2_form').hide()
+            $('#option_3_form').hide()
+
+            $(data_source_select).change(function (e) {
+                form_display_on_data_source_select(e,true)
+            })
+
+            function form_display_on_data_source_select(e,update_db) {
                 have_file_cb = $("input[id*='have_user_file']")
+                field_name_dd = $("select[id*='field_name_']")
+                let optionNum = $(data_source_select).children("option:selected").index() + 1
+                if (optionNum == 1) {
+                    $('#option_1_form').show()
+                    $('#option_2_form').hide()
+                    $('#option_3_form').hide()
+                } else if (optionNum == 2) {
+                    $('#option_1_form').hide()
+                    $('#option_2_form').show()
+                    $('#option_3_form').hide()
+                } else {
+                    $('#option_1_form').hide()
+                    $('#option_2_form').hide()
+                    $('#option_3_form').show()
+                }
+                if (update_db) {
+                    // ******* ADD API CALL TO UPDATE THE "erosionRateCalcSource" in the backend
+                    let scenario_info = [{
+                        'type': 'data',
+                        'name': 'id',
+                        'value': {{ scenario.id }}
+                    },{
+                        'type': 'data',
+                        'name': 'field',
+                        'value': 'erosionRateCalcSource'
+                    },{
+                        'type': 'input',
+                        'name': 'erosionRateCalcSource',
+                        'value': optionNum
+                    }]
+                    TRIM.api.updateScenario(scenario_info)
+                }
+            }
 
-                field_name_dd = $("select[id*='field_name_']").filter((i,e)=>$(e).attr("id").startsWith("erosion_inputs"))
+            $('#erosionTable_opt1').DataTable(
+                {
+                    destroy: true,
+                    data: data1,
+                    paging: false,
+                    bFilter: false,
+                    info: false,
+                    bAutoWidth: false,
+                    columns: [
+                        {
+                            "data": "Surface Parcel",
+                            "render": function (data, type, row, meta) {
+                                return '<label class="lb_parcel" data-thisrow=\''+  JSON.stringify(row).replace(/'/g, "\'") + '\'>' + data + '</label>'
+                            }
+                        },
+                        {"data": "Land Cover", className: "text-muted"},
+                        {"data": "Area", className: "text-muted"},
+                        {
+                            "data": "Total Effective Erosion Rate",
+                            "className":"td_ER",
+                            "render": function (data, type, row, meta) {
+                                let parcel_info = [{
+                                    'type': 'data',
+                                    'name': 'id',
+                                    'value': row.parcelid,
+                                },{
+                                    'type': 'data',
+                                    'name': 'field',
+                                    'value': 'totalErosionRate'
+                                }, {
+                                    'type': 'input',
+                                    'name': 'totalErosionRate',
+                                    'value': data
+                                }]
+                                parcel_info = JSON.stringify(parcel_info)
+                                return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +
+                                    data +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell badge badge-light badge badge-light'>" + data + "</label>"
+                            }
+                        }
+                    ]
+                });
 
-                optionNum = 1
-                $('#option_2_form').hide()
-                $('#option_3_form').hide()
-
-                $(data_source_select).change(function (e) {
-                    form_display_on_data_source_select(e,true)
-                })
-
-                function form_display_on_data_source_select(e,update_db) {
-                    have_file_cb = $("input[id*='have_user_file']")
-                    field_name_dd = $("select[id*='field_name_']")
-                    let optionNum = $(data_source_select).children("option:selected").index() + 1
-                    if (optionNum == 1) {
-                        $('#option_1_form').show()
-                        $('#option_2_form').hide()
-                        $('#option_3_form').hide()
-                    } else if (optionNum == 2) {
-                        $('#option_1_form').hide()
-                        $('#option_2_form').show()
-                        $('#option_3_form').hide()
-                    } else {
-                        $('#option_1_form').hide()
-                        $('#option_2_form').hide()
-                        $('#option_3_form').show()
+            $('#erosionTable_opt2').DataTable(
+                {
+                    destroy: true,
+                    data: data2,
+                    paging: false,
+                    bFilter: false,
+                    info: false,
+                    "bAutoWidth": false,
+                    columns: [
+                        {
+                            "data": "Surface Parcel",
+                            "render": function (data, type, row, meta) {
+                                return '<label class="lb_parcel" data-thisrow=\''+  JSON.stringify(row).replace(/'/g, "\'") + '\'>' + data + '</label>'
+                            }
+                        },
+                        {"data": "Land Cover", className: "text-muted"},
+                        {"data": "Area", className: "text-muted"},
+                        {
+                            "data": "A",
+                            "render": function (data, type, row, meta) {
+                                return "<input class='editableCell form-control form-control-sm erosion_inp_opt2 inp_A' type='text' value='" +
+                                    data +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell badge badge-light lb_A'>" + data + "</label>"
+                            }
+                        },
+                        {
+                            "data": "a",
+                            "className":"td_ASD",
+                            "render": function (data, type, row, meta) {
+                                return "<input class='editableCell form-control form-control-sm erosion_inp_opt2 inp_a' type='text' value='" +
+                                    data +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell badge badge-light lb_a'>" + data + "</label>"
+                            }
+                        },
+                        {
+                            "data": "b",
+                            "className":"td_ASD",
+                            "render": function (data, type, row, meta) {
+                                return "<input class='editableCell form-control form-control-sm erosion_inp_opt2 inp_b' type='text' value='" +
+                                    data +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell badge badge-light lb_b'>" + data + "</label>"
+                            }
+                        },
+                        {
+                            "data": "SD",
+                            "className":"td_ASD",
+                            "render": function (data, type, row, meta) {
+                                return "<input data-toggle='tooltip' data-placement='top' data-html='true' title='SD = a * (Area)<sup>-b</sup>' class='editableCell form-control form-control-sm erosion_inp_opt2 inp_SD' type='text' value='" +
+                                    calculate_SD(row) +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell badge badge-light lb_SD'>" + calculate_SD(row) + "</label>"
+                            }
+                        },
+                        {
+                            "data": "Total Effective Erosion Rate",
+                            "className":"td_ER",
+                            "render": function (data, type, row, meta) {
+                                let TER = calculate_ER_ASD(row,true)
+                                return "<input data-toggle='tooltip' data-placement='top' data-html='true' title='ER = A * SD' class='editableCell form-control form-control-sm erosion_inp_opt2 inp_ER' type='text' value='" +
+                                    calculate_ER_ASD(row, true) +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell badge badge-light lb_ER'>" + TER + "</label>"
+                            }
+                        }
+                    ],
+                    initComplete: function (settings, json) {
+                        $('[data-toggle="tooltip"]').tooltip()
+                        $("#erosionTable_opt2").wrap("<div style='overflow:auto; width:100%;position:relative;'></div>");
                     }
-                    if (update_db) {
-                        // ******* ADD API CALL TO UPDATE THE "erosionRateCalcSource" in the backend
-                        let scenario_info = [{
-                            'type': 'data',
-                            'name': 'id',
-                            'value': {{ scenario.id }}
-                        },{
-                            'type': 'data',
-                            'name': 'field',
-                            'value': 'erosionRateCalcSource'
-                        },{
-                            'type': 'input',
-                            'name': 'erosionRateCalcSource',
-                            'value': optionNum
-                        }]
-                        TRIM.api.updateScenario(scenario_info)
+                });
+
+            $('#erosionTable_opt3').removeAttr('width').DataTable(
+                {
+                    destroy: true,
+                    data: data3,
+                    paging: false,
+                    bFilter: false,
+                    info: false,
+                    "bAutoWidth": false,
+                    columns: [
+                         {
+                             "data": "Surface Parcel",
+                             "render": function (data, type, row, meta) {
+                                 return '<label class="lb_parcel" data-thisrow=\''+  JSON.stringify(row).replace(/'/g, "\'") + '\'>' + data + '</label>'
+                            }
+                        },
+                        {"data": "Land Cover", className: "text-muted"},
+                        {"data": "Area", className: "text-muted"},
+                        {
+                            "data": "R",
+                            "render": function (data, type, row, meta) {
+                                return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_R' type='text' value='" +
+                                    data +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell badge badge-light lb_R'>" + data + "</label>"
+                            }
+                        },
+                        {
+                            "data": "K",
+                            "render": function (data, type, row, meta) {
+                                return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_K' type='text' value='" +
+                                    new Intl.NumberFormat('en-US', {notation: "scientific"}).format(data) +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell badge badge-light lb_K'>" + new Intl.NumberFormat('en-US', {notation: "scientific"}).format(data) + "</label>"
+                            }
+                        },
+                        {
+                            "data": "S",
+                            "className":"td_LS",
+                            "render": function (data, type, row, meta) {
+                                return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_S' type='text' value='" +
+                                    data.toFixed(2) +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell badge badge-light lb_S'>" + data.toFixed(2) + "</label>"
+                            }
+                        },
+                        {
+                            "data": "L",
+                            "className":"td_LS",
+                            "render": function (data, type, row, meta) {
+                                return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_L' type='text' value='" +
+                                    data.toFixed(2) +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell badge badge-light lb_L'>" + data.toFixed(2) + "</label>"
+                            }
+                        },
+                        {
+                            "data": "LS",
+                            "className":"td_LS",
+                            "render": function (data, type, row, meta) {
+                                return "<input data-toggle='tooltip' data-placement='top' data-html='true' title='LS = L * S' class='editableCell form-control form-control-sm erosion_inp_opt3 inp_LS' type='text' value='" +
+                                    calculate_LS(row) +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell badge badge-light lb_LS'>" + calculate_LS(row) + "</label>"
+                            }
+                        },
+                        {
+                            "data": "C",
+                            "render": function (data, type, row, meta) {
+                                return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_C' type='text' value='" +
+                                    data +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell badge badge-light lb_C'>" + data + "</label>"
+                            }
+                        },
+                        {
+                            "data": "P",
+                            "render": function (data, type, row, meta) {
+                                return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_P' type='text' value='" +
+                                    data +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell badge badge-light lb_P'>" + data + "</label>"
+                            }
+                        },
+                        {
+                            "data": "A",
+                            "className":"td_ASD",
+                            "render": function (data, type, row, meta) {
+                                return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_A' type='text' value='" +
+                                    data +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell badge badge-light lb_A'>" + data + "</label>"
+                            }
+                        },
+                        {
+                            "data": "a",
+                            "className":"td_ASD",
+                            "render": function (data, type, row, meta) {
+                                return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_a' type='text' value='" +
+                                    data +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell badge badge-light lb_a'>" + data + "</label>"
+                            }
+                        },
+                        {
+                            "data": "b",
+                            "className":"td_ASD",
+                            "render": function (data, type, row, meta) {
+                                return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_b' type='text' value='" +
+                                    data +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell badge badge-light lb_b'>" + data + "</label>"
+                            }
+                        },
+                        {
+                            "data": "SD",
+                            "className":"td_ASD",
+                            "render": function (data, type, row, meta) {
+                                return "<input data-toggle='tooltip' data-placement='top' data-html='true' title=\"SD = a * (Area)<sup>-b</sup>\" class='editableCell form-control form-control-sm erosion_inp_opt3 inp_SD' type='text' value='" +
+                                    calculate_SD(row) +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell badge badge-light lb_SD'>" + calculate_SD(row) + "</label>"
+                            }
+                        },
+                        {
+                            "data": "Total Effective Erosion Rate",
+                            "className":"td_ER",
+                            "render": function (data, type, row, meta) {
+                                let TER = calculate_ER_USLE(row, true)
+                                return "<input data-toggle='tooltip' data-placement='top' data-html='true' title='ER = R*K*LS*C*P\n or\nER = A * SD' class='editableCell form-control form-control-sm erosion_inp_opt3 inp_ER' type='text' value='" +
+                                    calculate_ER_USLE(row, true) +
+                                    "' style='display:none'>" +
+                                    "<label class='editableCell badge badge-light lb_ER'>" + TER + "</label>"
+                            }
+                        }
+                    ],
+                    initComplete: function (settings, json) {
+                        $("#erosionTable_opt3").wrap("<div style='overflow:auto; width:100%;position:relative;'></div>");
+                        $('[data-toggle="tooltip"]').tooltip()
+                        let rows=$("#erosionTable_opt3").find("tr");
+                        $(rows).each((i,row)=>update_cell_format(row,["label.lb_A","label.lb_a","label.lb_b","label.lb_SD"],true))
+                    }
+                });
+            $('label.editableCell').click(function () {
+                $(this).prev("input").show()
+                $(this).prev("input").focus()
+                $(this).hide();
+            })
+            $('input.editableCell').blur(function () {
+                let focusTblId = $(this).closest(`table`).attr('id');
+                if (!focusTblId?.includes("erosionTable")) {
+                    return;
+                }
+                
+                ErrorValidation.isPositiveValue(this)
+                let is_valid = elementIsValid($(this).parent());
+
+                if (is_valid){
+                    const data = $(this).val()
+                    $(this).hide()
+                    $(this).next("label").show().text(data)
+                    let parcel_info = $(this).data('parcelinfo')
+                    if (parcel_info) {
+                        parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
+                        TRIM.api.updateParcel('{{ scenario.id }}', parcel_info)
                     }
                 }
-
-                $('#erosionTable_opt1').DataTable(
-                    {
-                        data: data1,
-                        paging: false,
-                        bFilter: false,
-                        info: false,
-                        bAutoWidth: false,
-                        columns: [
-                            {
-                                "data": "Surface Parcel",
-                                "render": function (data, type, row, meta) {
-                                    return '<label class="lb_parcel" data-thisrow=\''+  JSON.stringify(row).replace(/'/g, "\'") + '\'>' + data + '</label>'
-                                }
-                            },
-                            {"data": "Land Cover", className: "text-muted"},
-                            {"data": "Area", className: "text-muted"},
-                            {
-                                "data": "Total Effective Erosion Rate",
-                                "className":"td_ER",
-                                "render": function (data, type, row, meta) {
-                                    let parcel_info = [{
-                                        'type': 'data',
-                                        'name': 'id',
-                                        'value': row.parcelid,
-                                    },{
-                                        'type': 'data',
-                                        'name': 'field',
-                                        'value': 'totalErosionRate'
-                                    }, {
-                                        'type': 'input',
-                                        'name': 'totalErosionRate',
-                                        'value': data
-                                    }]
-                                    parcel_info = JSON.stringify(parcel_info)
-                                    return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +
-                                        data +
-                                        "' style='display:none'>" +
-                                        "<label class='editableCell badge badge-light badge badge-light'>" + data + "</label>"
-                                }
-                            }
-                        ]
-                    });
-
-                $('#erosionTable_opt2').DataTable(
-                    {
-                        data: data2,
-                        paging: false,
-                        bFilter: false,
-                        info: false,
-                        "bAutoWidth": false,
-                        columns: [
-                            {
-                                "data": "Surface Parcel",
-                                "render": function (data, type, row, meta) {
-                                    return '<label class="lb_parcel" data-thisrow=\''+  JSON.stringify(row).replace(/'/g, "\'") + '\'>' + data + '</label>'
-                                }
-                            },
-                            {"data": "Land Cover", className: "text-muted"},
-                            {"data": "Area", className: "text-muted"},
-                            {
-                                "data": "A",
-                                "render": function (data, type, row, meta) {
-                                    return "<input class='editableCell form-control form-control-sm erosion_inp_opt2 inp_A' type='text' value='" +
-                                        data +
-                                        "' style='display:none'>" +
-                                        "<label class='editableCell badge badge-light lb_A'>" + data + "</label>"
-                                }
-                            },
-                            {
-                                "data": "a",
-                                "className":"td_ASD",
-                                "render": function (data, type, row, meta) {
-                                    return "<input class='editableCell form-control form-control-sm erosion_inp_opt2 inp_a' type='text' value='" +
-                                        data +
-                                        "' style='display:none'>" +
-                                        "<label class='editableCell badge badge-light lb_a'>" + data + "</label>"
-                                }
-                            },
-                            {
-                                "data": "b",
-                                "className":"td_ASD",
-                                "render": function (data, type, row, meta) {
-                                    return "<input class='editableCell form-control form-control-sm erosion_inp_opt2 inp_b' type='text' value='" +
-                                        data +
-                                        "' style='display:none'>" +
-                                        "<label class='editableCell badge badge-light lb_b'>" + data + "</label>"
-                                }
-                            },
-                            {
-                                "data": "SD",
-                                "className":"td_ASD",
-                                "render": function (data, type, row, meta) {
-                                    return "<input data-toggle='tooltip' data-placement='top' data-html='true' title='SD = a * (Area)<sup>-b</sup>' class='editableCell form-control form-control-sm erosion_inp_opt2 inp_SD' type='text' value='" +
-                                        calculate_SD(row) +
-                                        "' style='display:none'>" +
-                                        "<label class='editableCell badge badge-light lb_SD'>" + calculate_SD(row) + "</label>"
-                                }
-                            },
-                            {
-                                "data": "Total Effective Erosion Rate",
-                                "className":"td_ER",
-                                "render": function (data, type, row, meta) {
-                                    let TER = calculate_ER_ASD(row,true)
-                                    return "<input data-toggle='tooltip' data-placement='top' data-html='true' title='ER = A * SD' class='editableCell form-control form-control-sm erosion_inp_opt2 inp_ER' type='text' value='" +
-                                        calculate_ER_ASD(row, true) +
-                                        "' style='display:none'>" +
-                                        "<label class='editableCell badge badge-light lb_ER'>" + TER + "</label>"
-                                }
-                            }
-                        ],
-                        initComplete: function (settings, json) {
-                            $('[data-toggle="tooltip"]').tooltip()
-                            $("#erosionTable_opt2").wrap("<div style='overflow:auto; width:100%;position:relative;'></div>");
-                        }
-                    });
-
-                $('#erosionTable_opt3').removeAttr('width').DataTable(
-                    {
-                        data: data3,
-                        paging: false,
-                        bFilter: false,
-                        info: false,
-                        "bAutoWidth": false,
-                        columns: [
-                             {
-                                 "data": "Surface Parcel",
-                                 "render": function (data, type, row, meta) {
-                                     return '<label class="lb_parcel" data-thisrow=\''+  JSON.stringify(row).replace(/'/g, "\'") + '\'>' + data + '</label>'
-                                }
-                            },
-                            {"data": "Land Cover", className: "text-muted"},
-                            {"data": "Area", className: "text-muted"},
-                            {
-                                "data": "R",
-                                "render": function (data, type, row, meta) {
-                                    return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_R' type='text' value='" +
-                                        data +
-                                        "' style='display:none'>" +
-                                        "<label class='editableCell badge badge-light lb_R'>" + data + "</label>"
-                                }
-                            },
-                            {
-                                "data": "K",
-                                "render": function (data, type, row, meta) {
-                                    return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_K' type='text' value='" +
-                                        new Intl.NumberFormat('en-US', {notation: "scientific"}).format(data) +
-                                        "' style='display:none'>" +
-                                        "<label class='editableCell badge badge-light lb_K'>" + new Intl.NumberFormat('en-US', {notation: "scientific"}).format(data) + "</label>"
-                                }
-                            },
-                            {
-                                "data": "S",
-                                "className":"td_LS",
-                                "render": function (data, type, row, meta) {
-                                    return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_S' type='text' value='" +
-                                        data.toFixed(2) +
-                                        "' style='display:none'>" +
-                                        "<label class='editableCell badge badge-light lb_S'>" + data.toFixed(2) + "</label>"
-                                }
-                            },
-                            {
-                                "data": "L",
-                                "className":"td_LS",
-                                "render": function (data, type, row, meta) {
-                                    return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_L' type='text' value='" +
-                                        data.toFixed(2) +
-                                        "' style='display:none'>" +
-                                        "<label class='editableCell badge badge-light lb_L'>" + data.toFixed(2) + "</label>"
-                                }
-                            },
-                            {
-                                "data": "LS",
-                                "className":"td_LS",
-                                "render": function (data, type, row, meta) {
-                                    return "<input data-toggle='tooltip' data-placement='top' data-html='true' title='LS = L * S' class='editableCell form-control form-control-sm erosion_inp_opt3 inp_LS' type='text' value='" +
-                                        calculate_LS(row) +
-                                        "' style='display:none'>" +
-                                        "<label class='editableCell badge badge-light lb_LS'>" + calculate_LS(row) + "</label>"
-                                }
-                            },
-                            {
-                                "data": "C",
-                                "render": function (data, type, row, meta) {
-                                    return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_C' type='text' value='" +
-                                        data +
-                                        "' style='display:none'>" +
-                                        "<label class='editableCell badge badge-light lb_C'>" + data + "</label>"
-                                }
-                            },
-                            {
-                                "data": "P",
-                                "render": function (data, type, row, meta) {
-                                    return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_P' type='text' value='" +
-                                        data +
-                                        "' style='display:none'>" +
-                                        "<label class='editableCell badge badge-light lb_P'>" + data + "</label>"
-                                }
-                            },
-                            {
-                                "data": "A",
-                                "className":"td_ASD",
-                                "render": function (data, type, row, meta) {
-                                    return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_A' type='text' value='" +
-                                        data +
-                                        "' style='display:none'>" +
-                                        "<label class='editableCell badge badge-light lb_A'>" + data + "</label>"
-                                }
-                            },
-                            {
-                                "data": "a",
-                                "className":"td_ASD",
-                                "render": function (data, type, row, meta) {
-                                    return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_a' type='text' value='" +
-                                        data +
-                                        "' style='display:none'>" +
-                                        "<label class='editableCell badge badge-light lb_a'>" + data + "</label>"
-                                }
-                            },
-                            {
-                                "data": "b",
-                                "className":"td_ASD",
-                                "render": function (data, type, row, meta) {
-                                    return "<input class='editableCell form-control form-control-sm erosion_inp_opt3 inp_b' type='text' value='" +
-                                        data +
-                                        "' style='display:none'>" +
-                                        "<label class='editableCell badge badge-light lb_b'>" + data + "</label>"
-                                }
-                            },
-                            {
-                                "data": "SD",
-                                "className":"td_ASD",
-                                "render": function (data, type, row, meta) {
-                                    return "<input data-toggle='tooltip' data-placement='top' data-html='true' title=\"SD = a * (Area)<sup>-b</sup>\" class='editableCell form-control form-control-sm erosion_inp_opt3 inp_SD' type='text' value='" +
-                                        calculate_SD(row) +
-                                        "' style='display:none'>" +
-                                        "<label class='editableCell badge badge-light lb_SD'>" + calculate_SD(row) + "</label>"
-                                }
-                            },
-                            {
-                                "data": "Total Effective Erosion Rate",
-                                "className":"td_ER",
-                                "render": function (data, type, row, meta) {
-                                    let TER = calculate_ER_USLE(row, true)
-                                    return "<input data-toggle='tooltip' data-placement='top' data-html='true' title='ER = R*K*LS*C*P\n or\nER = A * SD' class='editableCell form-control form-control-sm erosion_inp_opt3 inp_ER' type='text' value='" +
-                                        calculate_ER_USLE(row, true) +
-                                        "' style='display:none'>" +
-                                        "<label class='editableCell badge badge-light lb_ER'>" + TER + "</label>"
-                                }
-                            }
-                        ],
-                        initComplete: function (settings, json) {
-                            $("#erosionTable_opt3").wrap("<div style='overflow:auto; width:100%;position:relative;'></div>");
-                            $('[data-toggle="tooltip"]').tooltip()
-                            let rows=$("#erosionTable_opt3").find("tr");
-                            $(rows).each((i,row)=>update_cell_format(row,["label.lb_A","label.lb_a","label.lb_b","label.lb_SD"],true))
-                        }
-                    });
-                $('label.editableCell').click(function () {
-                    $(this).prev("input").show()
-                    $(this).prev("input").focus()
-                    $(this).hide();
-                })
-                $('input.editableCell').blur(function () {
-                    let focusTblId = $(this).closest(`table`).attr('id');
-                    if (!focusTblId?.includes("erosionTable")) {
-                        return;
-                    }
-                    
-                    ErrorValidation.isPositiveValue(this)
-                    let is_valid = elementIsValid($(this).parent());
-
-                    if (is_valid){
-                        const data = $(this).val()
-                        $(this).hide()
-                        $(this).next("label").show().text(data)
-                        let parcel_info = $(this).data('parcelinfo')
-                        if (parcel_info) {
-                            parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                            TRIM.api.updateParcel('{{ scenario.id }}', parcel_info)
-                        }
-                    }
-                })
-                $('input.erosion_inp_opt2,input.erosion_inp_opt3').change(function () {
-                    const cls = $(this).attr('class').split(' ')
-                    const row = $(this).parents('tr')
-                    // reset decorations
-                    update_cell_calc(row,cls)
-                })
-                // SELECT THE SAVED "erosionRateCalcSource" ON LOAD
-                let opt_idx = loadedData.scenario_head.erosionRateSource - 1
+            })
+            $('input.erosion_inp_opt2,input.erosion_inp_opt3').change(function () {
+                const cls = $(this).attr('class').split(' ')
+                const row = $(this).parents('tr')
+                // reset decorations
+                update_cell_calc(row,cls)
+            })
+            // SELECT THE SAVED "erosionRateCalcSource" ON LOAD
+            if (TRIM.store.currentScenario.erosionRateSource !== undefined) {
+                let opt_idx = TRIM.store.currentScenario.erosionRateSource - 1
                 $($("#erosion_input_options").find("option")[opt_idx]).attr("selected","selected")
                 form_display_on_data_source_select(e,false)
-            })
+            }
+            else {
+                TRIM.api.getParameters(TRIM.store.currentScenario, ['erosionRateCalcSource'])
+                    .on('load', function() {
+                        var ers = 1
+                        try {
+                            ers = this.responseJSON.parameters.erosionRateCalcSource.value;
+                        }
+                        catch {
+                            ers = 1
+                        }
+                        TRIM.store.currentScenario.erosionRateSource = ers;
+                        let opt_idx = ers - 1
+                        $($("#erosion_input_options").find("option")[opt_idx]).attr("selected","selected")
+                        form_display_on_data_source_select(e,false)
+                    });
+            }
+
+            console.log('populated erosion settings form!')
+            LoadingScreen.hide('erosion_settings_loading');
+        }
+
+        function initializeErosionForm() {
+            $('.div_checkbox').hide()
+            enableFieldUpdates()
+
             let field_name_dd = $("select[id*='field_name_']").filter((i,e)=>$(e).attr("id").startsWith("erosion_inputs"))
             /* const tables = ['#tableDiv_opt1', '#tableDiv_opt2', '#tableDiv_opt3'];
             $(have_file_cb).each(function (i, el) {
@@ -573,7 +615,7 @@
                 })
             })
 
-        });
+        }
 
         function get_Data_from_table(thisTableID){
             var myRows = [];

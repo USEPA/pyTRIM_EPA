@@ -52,7 +52,7 @@
                 </div>
                 <div class="modal-footer">
                     <a  class="btn btn-secondary" id="closeModalButton" data-dismiss="modal">Close</a>
-<!--                    <button type="button"  id="saveModalButton" class="btn btn-primary" data-dismiss="modal">Save</button>-->
+                    <!-- <button type="button"  id="saveModalButton" class="btn btn-primary" data-dismiss="modal">Save</button> -->
                     <button type="button"  id="saveModalButton" class="btn btn-primary">Save</button>
                 </div>
             </div>
@@ -719,8 +719,8 @@
                     return;
                 }
                 let parcel_name = $($(this).closest("table").find("thead > tr > th")[$(this).closest("td").prevAll().length]).text()
-                let loadedData = $('#root').data('loadedParcels')
-                let area = Number(loadedData.scenario.find(e => e.name == parcel_name).area)
+                let parcels = TRIM.store.currentScenario.parcels;
+                let area = Number(parcels.find(e => e.name == parcel_name).area)
                 let data = $(this).val()
                 let $label = $(this).next("label")
                 $label.siblings().hide()
@@ -826,10 +826,13 @@
             })
         }
 
-
-
         var form = document.getElementById('lake-props-gui');
-        form.addEventListener('form:loaded', function() {
+
+        form.addEventListener('form:visible', function() {
+            console.log('lake props form visible')
+            LoadingScreen.show('lake_props_loading');
+            TRIM.refreshParcels();
+            document.body.addEventListener('parcels:ready', updateLakeProps());
         });
 
         function get_pivoted_columns(table_type) {
@@ -849,8 +852,8 @@
                         "</sup>"
                     }
                 }]
-            let loadedData = $('#root').data('loadedParcels')
-            let data_subset = loadedData['scenario'].filter(e=> (e.parcelType == "Water Only" || e.parcelType == "Water & Air"))
+            let parcels = TRIM.store.currentScenario.parcels;
+            let data_subset = parcels.filter(e=> (e.parcelType == "Water Only" || e.parcelType == "Water & Air"))
             data_subset.forEach(function (e, i) {
                 if ($(table_header).find("th").length < (data_subset.length + 1)) {
                     $(table_header).append("<th>" + e.name + "</th>")
@@ -876,7 +879,7 @@
                         let calc_info = JSON.stringify({'property':row.shortProperty, 'parcel':e.name})
                         let auto_calc_button = Auto_calculable.indexOf(row.Property) >= 0 ? "<p><button data-active='False' data-calcinfo='" + calc_info +"' class='btn btn-sm btn-outline-dark auto_calc'><small>Auto-calculate</small></button></p>" : ""
                         let link_options = []
-                        loadedData['scenario'].forEach(function (el, i) {
+                        parcels.forEach(function (el, i) {
                             if (el.parcelType == "Water Only" || el.parcelType == "Water & Air") {
                                 if (el.name != e.name) {
                                     link_options.push(el.name)
@@ -943,10 +946,10 @@
         }
 
         function calculate_flush_rate(data, parcel_name){
-            let loadedData = $('#root').data('loadedParcels')
+            let parcels = TRIM.store.currentScenario.parcels;
             let wc_discharge_vol_rate = Number(data.find(e=>e.Property == "Water Column Discharge Volumetric Rate")[parcel_name])
             let wc_depth = Number(data.find(e=>e.Property == "Water Column Depth")[parcel_name])
-            let area = Number(loadedData.scenario.find(e => e.name == parcel_name).area)
+            let area = Number(parcels.find(e => e.name == parcel_name).area)
             let res = wc_discharge_vol_rate/(area * wc_depth)
             return Number.parseFloat(res).toExponential(5)
         }
@@ -999,50 +1002,54 @@
             return Number.parseFloat(res).toExponential(5)
         }
 
-        document.body.addEventListener('parcels:loaded', function() {
-             let loadedData = $('#root').data('loadedParcels')
-             let water_data = []
-             let sed_data = []
-             let water_properties = Object.keys(default_water_data)
-             let sed_properties = Object.keys(default_sed_data)
-             if (loadedData.scenario.length > 0) {
-                 water_properties.forEach(function (p, i) {
-                     let this_water_property = {}
-                     loadedData['scenario'].forEach(function (e, i) {
-                         if (e.parcelType == "Water Only" || e.parcelType == "Water & Air") {
-                             let d = p.startsWith("Precipitation ") ? e : e['surface_water']['wc_props']
-                             this_water_property['Property'] = p
-                             this_water_property[e.name] = d[default_water_data[p]['short_name']] ? d[default_water_data[p]['short_name']] : default_water_data[p]['default_value'],
-                                 this_water_property["helpText"] = default_water_data[p]['helpText'] ? default_water_data[p]['helpText'] : "Some text"
-                             this_water_property["unit"] = default_water_data[p]['unit'] ? default_water_data[p]['unit'] : "No units"
-                             this_water_property["shortProperty"] = default_water_data[p]['short_name']
-                             this_water_property["isEditable"] = default_water_data[p]['is_editable']
-                         }
-                     })
-                     water_data.push(this_water_property)
-                 })
-                 TableRedraw(water_data, "lake")
-                 sed_properties.forEach(function (p, i) {
-                     let this_sed_property = {}
-                     loadedData['scenario'].forEach(function (e, i) {
-                         if (e.parcelType == "Water Only" || e.parcelType == "Water & Air") {
-                             let d = e['surface_water']['sed_props']
-                             this_sed_property['Property'] = p
-                             this_sed_property[e.name] = d[default_sed_data[p]['short_name']] ? d[default_sed_data[p]['short_name']] : default_sed_data[p]['default_value'],
-                                 this_sed_property["helpText"] = default_sed_data[p]['helpText'] ? default_sed_data[p]['helpText'] : "Some text"
-                             this_sed_property["unit"] = default_sed_data[p]['unit'] ? default_sed_data[p]['unit'] : "No units"
-                             this_sed_property["shortProperty"] = default_sed_data[p]['short_name']
-                             this_sed_property["isEditable"] = default_sed_data[p]['is_editable']
-                         }
-                     })
-                     sed_data.push(this_sed_property)
-                 })
-                 TableRedraw(sed_data, "sed")
-             }
-         })
-            //} else {
-            //    console.log("ERROR loading data")
-            //}
- //       })
+        function updateLakeProps() {
+            if (!TRIM.store.currentScenario.parcels) {
+                // Parcels haven't loaded yet; wait a bit and try again
+                setTimeout(function() { updateLakeProps(); }, 1000);
+                return;
+            }
+            let parcels = TRIM.store.currentScenario.parcels;
+            let water_data = []
+            let sed_data = []
+            let water_properties = Object.keys(default_water_data)
+            let sed_properties = Object.keys(default_sed_data)
+            if (parcels.length > 0) {
+                water_properties.forEach(function (p, i) {
+                    let this_water_property = {}
+                    parcels.forEach(function (e, i) {
+                        if (e.parcelType == "Water Only" || e.parcelType == "Water & Air") {
+                            let d = p.startsWith("Precipitation ") ? e : e['surface_water']['wc_props']
+                            this_water_property['Property'] = p
+                            this_water_property[e.name] = d[default_water_data[p]['short_name']] ? d[default_water_data[p]['short_name']] : default_water_data[p]['default_value'],
+                                this_water_property["helpText"] = default_water_data[p]['helpText'] ? default_water_data[p]['helpText'] : "Some text"
+                            this_water_property["unit"] = default_water_data[p]['unit'] ? default_water_data[p]['unit'] : "No units"
+                            this_water_property["shortProperty"] = default_water_data[p]['short_name']
+                            this_water_property["isEditable"] = default_water_data[p]['is_editable']
+                        }
+                    })
+                    water_data.push(this_water_property)
+                })
+                TableRedraw(water_data, "lake")
+                sed_properties.forEach(function (p, i) {
+                    let this_sed_property = {}
+                    parcels.forEach(function (e, i) {
+                        if (e.parcelType == "Water Only" || e.parcelType == "Water & Air") {
+                            let d = e['surface_water']['sed_props']
+                            this_sed_property['Property'] = p
+                            this_sed_property[e.name] = d[default_sed_data[p]['short_name']] ? d[default_sed_data[p]['short_name']] : default_sed_data[p]['default_value'],
+                                this_sed_property["helpText"] = default_sed_data[p]['helpText'] ? default_sed_data[p]['helpText'] : "Some text"
+                            this_sed_property["unit"] = default_sed_data[p]['unit'] ? default_sed_data[p]['unit'] : "No units"
+                            this_sed_property["shortProperty"] = default_sed_data[p]['short_name']
+                            this_sed_property["isEditable"] = default_sed_data[p]['is_editable']
+                        }
+                    })
+                    sed_data.push(this_sed_property)
+                })
+                TableRedraw(sed_data, "sed")
+            }
+
+            console.log('populated lake props form!')
+            LoadingScreen.hide('lake_props_loading');
+        }
     });
 </script>

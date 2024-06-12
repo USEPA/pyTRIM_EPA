@@ -5,10 +5,17 @@ window.TRIM = (function(trim) {
     var api = trim.api || {};
 
     var urls = {
+        'chemicals_api.get_chemicals': '{{ url_for("chemicals_api.get_chemicals") }}',
         'scenario_api.get_scenario': '{{ url_for("scenario_api.get_scenario", id=0) }}',
         'scenario_api.update_scenario': '{{ url_for("scenario_api.update_scenario") }}',
         'scenario_api.copy_scenario': '{{ url_for("scenario_api.copy_scenario") }}',
         'scenario_api.delete_scenario': '{{ url_for("scenario_api.delete_scenario") }}',
+        'scenario_api.get_parameters': '{{ url_for("scenario_api.get_parameters", scenario_id=0) }}',
+        'scenario_api.get_scenario_met_data': '{{ url_for("scenario_api.get_scenario_met_data", scenario_id=0) }}',
+        'scenario_api.get_scenario_seasonal_dynamics': '{{ url_for("scenario_api.get_scenario_seasonal_dynamics", scenario_id=0) }}',
+        'scenario_api.get_scenario_runoff_matrix': '{{ url_for("scenario_api.get_scenario_runoff_matrix", scenario_id=0) }}',
+        'scenario_api.get_scenario_chemicals': '{{ url_for("scenario_api.get_scenario_chemicals", scenario_id=0) }}',
+        'scenario_api.get_last_results': '{{ url_for("scenario_api.get_last_results", scenario_id=0) }}',
         'scenario_api.run_result_scenario': '{{ url_for("scenario_api.run_result_scenario") }}',
         'scenario_api.get_result_scenario': '{{ url_for("scenario_api.get_result_scenario") }}',
         'scenario_api.poll_model_run_scenario': '{{ url_for("scenario_api.poll_model_run_scenario", id=0) }}',

@@ -164,36 +164,70 @@
     onDomLoad(function(e) {
         var form = document.getElementById('seasonal-gui');
         var scenario_id = {{ scenario.id }};
-        form.addEventListener('form:loaded', function() {
-            document.body.addEventListener('parcels:loaded', function () {
-                $("div.sd_subsection").each((i, subsection) => enableFieldUpdates(subsection))
-                let loadedData = $('#root').data('loadedParcels')
-                let seasonal_dyn_obj = loadedData.scenario_head.seasonal_dynamics
-                let leaves = ["coniferous", "deciduous", "grass", "agriculture"]
-                leaves.forEach((e, i) => {
-                    let search_cbx_str = `input[type="checkbox"][id^="${e}"]`
-                    let search_txt_lf_str = `input[type="number"][id^="${e}"][id*="litterfall"]`
-                    let search_txt_ae_str = `input[type="number"][id^="${e}"][id*="allowexchange"]`
-                    let this_chkbx = $('#seasonal-gui').find(search_cbx_str)
-                    let this_text_lf = $('#seasonal-gui').find(search_txt_lf_str)
-                    let this_text_ae = $('#seasonal-gui').find(search_txt_ae_str)
-                    let val_lf = seasonal_dyn_obj[`litterfall_${e}`]
-                    let val_ae = seasonal_dyn_obj[`allow_exchange_${e}`]
-                    if (val_lf == -1 && val_ae == -1) {
-                        this_chkbx.closest('div[data-slot=true]').css('display', 'none')
-                    }
-                    $(this_text_lf).val(val_lf)
-                    $(this_text_ae).val(val_ae)
-                    // Add Listeners for time varying input.
-                    // this_chkbx.change(function () {
-                    //
-                    // })
-                    $(this_text_lf).add(this_text_ae).blur(function () {
-                        submit_seasonal_dyn_value(this)
-                    })
+
+        form.addEventListener('form:visible', function() {
+            console.log('seasonal form visible')
+            LoadingScreen.show('seasonal_info_loading');
+            TRIM.refreshParcels();
+            document.body.addEventListener('parcels:ready', updateSeasonalData());
+        });
+
+        function updateSeasonalData() {
+            if (!TRIM.store.currentScenario.parcels) {
+                // Parcels haven't loaded yet; wait a bit and try again
+                setTimeout(function() { updateSeasonalData(); }, 1000);
+                return;
+            }
+            if ($(form).filter(':not(.form-loaded)').length) {
+                // Form hasn't loaded yet; wait a bit and try again
+                setTimeout(function() { updateSeasonalData(); }, 1000);
+                return;
+            }
+
+            if (TRIM.store.currentScenario.seasonal_dynamics) {
+                TRIM.forms.populate(form, TRIM.store.currentScenario.seasonal_dynamics);
+                renderSeasonalForm();
+            }
+            else {
+                TRIM.api.getSeasonalDynamics(TRIM.store.currentScenario).on('load', function () {
+                    var sd = this.responseJSON.seasonal_dynamics;
+                    TRIM.store.currentScenario.seasonal_dynamics = sd;
+                    updateSeasonalData();
+                });
+                return;
+            }
+
+        }
+
+        function renderSeasonalForm() {
+            $("div.sd_subsection").each((i, subsection) => enableFieldUpdates(subsection))
+            let seasonal_dyn_obj = TRIM.store.currentScenario.seasonal_dynamics
+            let leaves = ["coniferous", "deciduous", "grass", "agriculture"]
+            leaves.forEach((e, i) => {
+                let search_cbx_str = `input[type="checkbox"][id^="${e}"]`
+                let search_txt_lf_str = `input[type="number"][id^="${e}"][id*="litterfall"]`
+                let search_txt_ae_str = `input[type="number"][id^="${e}"][id*="allowexchange"]`
+                let this_chkbx = $('#seasonal-gui').find(search_cbx_str)
+                let this_text_lf = $('#seasonal-gui').find(search_txt_lf_str)
+                let this_text_ae = $('#seasonal-gui').find(search_txt_ae_str)
+                let val_lf = seasonal_dyn_obj[`litterfall_${e}`]
+                let val_ae = seasonal_dyn_obj[`allow_exchange_${e}`]
+                if (val_lf == -1 && val_ae == -1) {
+                    this_chkbx.closest('div[data-slot=true]').css('display', 'none')
+                }
+                $(this_text_lf).val(val_lf)
+                $(this_text_ae).val(val_ae)
+                // Add Listeners for time varying input.
+                // this_chkbx.change(function () {
+                //
+                // })
+                $(this_text_lf).add(this_text_ae).blur(function () {
+                    submit_seasonal_dyn_value(this)
                 })
             })
-        });
+            console.log('populated seasonal form!')
+            LoadingScreen.hide('seasonal_info_loading');
+        }
 
         function get_form_data(elem) {
             if ($(elem).attr('name').indexOf("_field_name") === -1) {
@@ -335,9 +369,8 @@
                     return [pad(d.getDate()), pad(d.getMonth()+1), d.getFullYear()].join('/')
                 }
 
-                let loadedData = $('#root').data('loadedParcels')
-                let sim_start = Date.parse(loadedData.scenario_head["simulation_start_date"])
-                let sim_end = Date.parse(loadedData.scenario_head["simulation_end_date"])
+                let sim_start = Date.parse(TRIM.store.currentScenario["simulation_start_date"])
+                let sim_end = Date.parse(TRIM.store.currentScenario["simulation_end_date"])
                 if (subform.find('[type="checkbox"][id$="use_custom_file"]').prop('checked')) {
                     data = subform.find('[type="file"]').attr('data-filedata');
                 }
