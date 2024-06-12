@@ -1,0 +1,146 @@
+import getopt, json, sys
+from common import die, whoami_aws, loggy
+from helpers.cloudformation_helper import CloudFormationHelper
+from helpers.beanstalk_helper import BeanstalkHelper
+from helpers.docker_helper import DockerHelper
+from helpers.elastic_ip_helper import ElasticIpHelper
+from helpers.ssh_keypair_helper import SshKeypairHelper
+
+# inspired by / based on / rips off ~/development/epa_jira_automation/src/deployer.py
+#tfeiler notes
+#
+#* uses local virtual environment "pytrim_deploy" (needs boto3)
+#* before deploying call e.g. "aws_sso_login pytrim_dev" (if you're tfeiler) or assume valid credentials some other way (if you're not)
+
+class PyTrimDeployer(object):
+    def __init__(self, config_file):
+        with open(config_file, "r") as f:
+            self.cfg = json.load(f)
+
+    def run_deployment(self, mode):
+        loggy(f"running deployment in mode '{mode}'")
+
+        if mode == "full" or mode == "ssh_key":
+            self.create_ssh_key_if_needed()
+
+        if mode == "full" or mode == "elastic_ip":
+            self.resolve_elastic_ip()
+
+        if mode == "full" or mode == "cloudformation":
+            self.do_cf_stack_work()
+
+        if mode == "full" or mode == "docker":
+            self.build_and_push_docker_image()
+
+        if mode == "_full" or mode == "push_flask_build":
+            self.build_and_push_flask_app()
+
+    def get_cfg_val(self, path, default_val = None):
+        chunks = path.split(".")
+        area_to_check = self.cfg
+        for c in chunks:
+            if c in area_to_check:
+                area_to_check = area_to_check[c]
+            else:
+                return default_val
+        return area_to_check
+
+    def create_ssh_key_if_needed(self):
+        ssh_keypair_name = self.get_cfg_val("aws.ssh_keypair_name")
+        loggy(f"checking ssh keypair '{ssh_keypair_name}'")
+
+        ssh_helper = SshKeypairHelper()
+        keypair_data = ssh_helper.generate_keypair_if_needed(ssh_keypair_name)
+        if keypair_data["status"] == "key created":
+            loggy(f"Created ssh keypair '{ssh_keypair_name}' on AWS; stored locally at '{keypair_data['pem_path']}'", indent=1)
+        elif keypair_data["status"] == "existing key found":
+            loggy(f"Using pre-existing key '{ssh_keypair_name}'", indent=1)
+
+    def resolve_elastic_ip(self):
+        eip_name = self.get_cfg_val("aws.eip_name")
+        loggy(f"checking elastic ip '{eip_name}'")
+
+        helper = ElasticIpHelper()
+        eip_allocation_id, is_currently_in_use = helper.find_or_create_eip(eip_name)
+        loggy(f"'{eip_name}' --> '{eip_allocation_id}'", indent=1)
+
+    def do_cf_stack_work(self):
+        eip_name = self.get_cfg_val("aws.eip_name")
+        env_name = self.get_cfg_val("environment_name")
+        short_env_profile = self.get_cfg_val("short_env_profile")
+        ssh_keypair_name = self.get_cfg_val("aws.ssh_keypair_name")
+        vpc_seg = self.get_cfg_val("aws.cidr_segment_vpc")
+        loggy(f"building AWS cloudformation stack named '{env_name}' / {vpc_seg}")
+
+        # get the elastic allocation id
+        eip_helper = ElasticIpHelper()
+        (elastic_ip_allocation_id, is_already_allocated) = eip_helper.find_or_create_eip(eip_name)
+        if elastic_ip_allocation_id is None:
+            die(f"unable to find eip with name '{eip_name}'...")
+
+        ingress_data = self.get_cfg_val("aws.ec2_ingress")
+
+        cf_helper = CloudFormationHelper()
+        cf_helper.create_or_update_stack(env_name, {
+            "EnvironmentName": env_name,
+            "ShortEnvironmentProfile": short_env_profile,
+            "CidrSegmentVPC": vpc_seg,
+            "DatabaseName": self.get_cfg_val("aws.db.dbname"),
+            "DatabaseMasterAccountUsername": self.get_cfg_val("aws.db.username"),
+            "DatabaseMasterAccountPassword": self.get_cfg_val("aws.db.password"),
+            "BastionPassthroughKeyPairName": ssh_keypair_name,
+            "NATGatewayElasticIPAllocationID": elastic_ip_allocation_id,
+        }, ingress_data)
+
+    def build_and_push_docker_image(self):
+        loggy(f"DOCKER SETUP!")
+        docker_helper = DockerHelper()
+        env_name = self.get_cfg_val("environment_name")
+        loggy(f"performing Docker build/deploy...")
+        docker_helper.build_etc(env_name)
+
+    def build_and_push_flask_app(self):
+        beanstalk_helper = BeanstalkHelper()
+        env_name = self.get_cfg_val("environment_name")
+        loggy(f"performing Flask package/deploy")
+        beanstalk_helper.build_etc(env_name)
+
+
+if __name__ == "__main__":
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "c:m:", [ "config=", "mode=" ])
+    except getopt.GetoptError:
+        usage()
+
+    config_file = None
+    mode = None
+    for opt, arg in opts:
+        if opt in ("-c", "--config"):
+            config_file = arg
+        elif opt in ("-m", "--mode"):
+            mode = arg
+
+    if mode is None:
+        mode = "full"
+
+    if config_file is None:
+        print(f"Usage: python pytrim_deploy.py -c <json_configuration_file> (-m <mode>)")
+    else:
+        # message the user so they are sure to be credentialed as proper user
+        whoami = whoami_aws()
+        loggy(f"Running PyTrim deployment script, mode '{mode}', as AWS userid '{whoami['user_id']}' on account '{whoami['account']}'")
+
+        active_development_skip_confirmation_screen = True
+        if active_development_skip_confirmation_screen:
+            if whoami["account"] != "426714360284" and whoami["account"] != "736887025159":
+                print(f"BAD ACCOUNT...")
+                sys.exit(1)
+            else:
+                print(f"\n>>>>>>> DUMMY HARDCODE ALLOW THIS ACCOUNT ONLY DURING ACTIVE DEVELOPMENT CYCLE <<<<<<<<\n")
+                proceed_or_not = "y"
+        else:
+            proceed_or_not = input("Proceed [y/n]? ")
+
+        if proceed_or_not[0].lower() == "y":
+            d = PyTrimDeployer(config_file)
+            d.run_deployment(mode)

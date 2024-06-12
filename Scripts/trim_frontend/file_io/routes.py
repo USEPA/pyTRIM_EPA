@@ -23,6 +23,7 @@ api.use_api_errors(file_api)
 @file_api.route('/api/file', methods=['POST'])
 @login_required
 def parse():
+
     logger = make_logger('file_uploader')
 
     files = request.files

@@ -14,7 +14,7 @@ if 'RDS_DB_NAME' in os.environ:
 else:
     import urllib.parse
     USERNAME = "root"
-    PASSWORD = urllib.parse.quote_plus(os.getenv('MYSQLPASSWORD'))
+    PASSWORD = urllib.parse.quote_plus(str(os.getenv('MYSQLPASSWORD')))
     HOST = "localhost"
     PORT = "3306"
     DBNAME = "pytrim"
@@ -64,6 +64,9 @@ class AppConfig:
     BOTO_AWS_SECRET = ''
     BOTO_S3_BUCKET = ''
     BOTO_AWS_REGION = 'us-east-1'
+
+    TRIM_ENV_PROFILE = os.getenv('TRIM_ENV_PROFILE', 'local')
+    print(f"LOADED TRIM_ENV_PROFILE: {TRIM_ENV_PROFILE}")
 
 
 class ProdConfig(AppConfig):

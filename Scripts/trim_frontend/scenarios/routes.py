@@ -1,9 +1,11 @@
 import json
+import os
 import time
 import sqlalchemy
 from datetime import datetime
 import re
 
+import boto3
 import pandas as pd
 import pymysql.err
 from flask import Blueprint, request, render_template, redirect, url_for
@@ -149,10 +151,14 @@ def update_scenario():
     def update_assumed_all_comp_fixed_params(scen, comps, par_name, par_val):
         # media_name = comp.media.name
         # c_par_list = [c.parameters.get(par_name) for c in scen.compartments if c.media.isa(media_name)]
-        c_par_list = [c.parameters.get(par_name) for c in comps]
+        c_par_list = [c.parameters.get(par_name) for c in comps if c.parameters.get(par_name)]
         for c_p in c_par_list:
-            c_p.value = par_val
-            ParameterService.update(c_p)
+            try:
+                if isinstance(c_p, CustomParameter):
+                    c_p.value = par_val
+                    ParameterService.update(c_p)
+            except AttributeError as e:
+                print(e)
         ParameterService.commit()
 
     def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
@@ -595,10 +601,23 @@ def delete_scenario():
             for ve in parcel.volume_elements:
                 VolumeElementService.delete(ve, False)
 
+            # Delete some custom parameters that may be left behind for this scenario
+            # (they may be for domains other than compartment)
+            scen_custom_params = [p for p in ParameterService.get_all() if p.scenario.id == s.id]
+            for s_cp in scen_custom_params:
+                ParameterService.delete(s_cp)
+
             # Delete parcel
             ParcelService.delete(parcel.id)
             logger.info(f'Deleted parcel {parcel.name} for {s.name}...')
         # ParcelService.commit()
+
+        # Delete scenario Proc info
+        s_proc = [sp for sp in s.proc_status]
+        if len(s_proc) > 0:
+            for sp in s_proc:
+                logger.info(f'Deleted result {sp.id} for {s.name}...')
+                ScenarioService.db.session.delete(sp)
 
         # Delete scenario
         ScenarioService.delete(s.id)
@@ -615,20 +634,39 @@ def delete_scenario():
 @scenario_api.route('/api/scenario/run/', methods=['POST', 'GET'])
 @login_required
 def run_result_scenario():
+    trim_env_profile = os.environ.get("TRIM_ENV_PROFILE", "").lower()
+
     exec_data = request.form.to_dict()
     if not exec_data.get('scenario_id'):
         raise AssertionError("Scenario ID cannot be blank.")
     scenario_id = int(exec_data['scenario_id'])
-    s = ScenarioService.get(scenario_id)
 
     try:
-        print("Starting Model Run...")
-        json_n_avg, json_c_avg, output_file_n, output_file_c = run_full_model(s)
+        # in dev/prod, we execute an AWS StepFunction to run the model via Docker/ECS. Locally,
+        # we just run the model directly.
+        if trim_env_profile in [ "dev", "prod" ]:
+            sfn_client = boto3.client("stepfunctions")
+            state_machine_arn = os.environ.get("TRIM_DOCKERIZED_STATEMACHINE_ARN")
 
-        data_resp = {"mass": json_n_avg, "conc": json_c_avg, "outputMass": output_file_n, "outputConc": output_file_c}
+            if state_machine_arn is not None:
+                resp = sfn_client.start_execution(
+                    stateMachineArn=state_machine_arn,
+                    input=json.dumps({ "scenarioId": str(scenario_id), "generateFakeResults": "false" })
+                )
+                data_resp = { "executionArn": resp["executionArn"] }
+            else:
+                data_resp = { "error": "Missing required variable to run re-architected model" }
+        else:
+            s = ScenarioService.get(scenario_id)
+            print(f"Starting Model Run ({datetime.now()}...")
+            json_n_avg, json_c_avg, output_file_n, output_file_c = run_full_model(s)
+
+            data_resp = {"mass": json_n_avg, "conc": json_c_avg, "outputMass": output_file_n, "outputConc": output_file_c}
     except Exception as e:
         print(e)
         data_resp = {"error": e}
+
+    print(f"Model Run Finished ({datetime.now()}...")
 
     return ApiResult(data_resp)
 
@@ -690,3 +728,67 @@ def reset_poll_model_run_scenario():
         [s.proc_status][0].add(new_proc)
     ScenarioService.commit()
     return "success"
+
+@scenario_api.route('/api/scenario/check_execution_completion/', methods=['POST'])
+@login_required
+def check_execution_completion():
+    req_data = request.form.to_dict()
+    if not req_data.get('execution_arn'):
+        raise AssertionError("execution ARN cannot be blank.")
+
+    execution_arn = req_data['execution_arn']
+
+    sfn_client = boto3.client("stepfunctions")
+
+    desc_resp = sfn_client.describe_execution(executionArn=execution_arn)
+    if desc_resp["status"] == "SUCCEEDED":
+        resp = {
+            "success": True,
+            "sfn_output": json.loads(desc_resp["output"])
+        }
+    else:
+        # success should still be True b/c we didn't fail; we're just not done yet...
+        # calling client will just wait and retry.
+        resp = {
+            "success": True,
+            "sfn_output": False
+        }
+
+    return ApiResult(resp)
+
+# downloads the output from a model run and creates presigned url's for the xlsx files
+@scenario_api.route('/api/scenario/fetch_run_results/', methods=['POST'])
+@login_required
+def fetch_run_results():
+    req_data = request.form.to_dict()
+    if not req_data.get('bucket') or not req_data.get('uuid'):
+        raise AssertionError("bucket/uuid cannot be blank.")
+
+    bucket = req_data['bucket']
+    uuid = req_data['uuid']
+
+    s3_client = boto3.client("s3")
+    s3_resource = boto3.resource("s3")
+
+    content_object = s3_resource.Object(bucket, f"{uuid}/model_output.json")
+    file_content = content_object.get()["Body"].read().decode("utf-8")
+    json_content = json.loads(file_content)
+
+    resp = {
+        "success": True,
+        "model_output": json_content
+    }
+
+    for f in ["outputMass", "outputConc"]:
+        full_key = f"{uuid}/{f}.xlsx"
+        response = s3_client.generate_presigned_url("get_object",
+                                                    Params={
+                                                        "Bucket": bucket,
+                                                        "Key": full_key
+                                                    },
+                                                    ExpiresIn=600) # expires in 10 minute(s)
+
+        resp[f] = response
+
+
+    return ApiResult(resp)
