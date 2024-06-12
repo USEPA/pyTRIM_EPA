@@ -183,7 +183,8 @@
                 var feature = parcel.feature = parcel.feature || {};
                 feature.type = "Feature";
                 feature.properties = feature.properties || {};
-                var content = '<span><b>Parcel Name</b></span><br/><input id="shapeName" type="text"/><br/><br/><span><b>Parcel Description<b/></span><br/><textarea id="shapeDesc" cols="25" rows="5"></textarea><br/><br/><input type="button" id="okBtn" value="Save"/>';
+                let parcelDrawHelpText = "Enter an arbitrary but unique name for the parcel. Names should not begin with Air, SW, Sed, SurfSoil, RootSoil, VadoseSoil, or GW. Names should not contain spaces. We recommend short names (e.g., less than about 15 characters) because they will be displayed on other pages of this user interface.";
+                var content = '<span>'+parcelDrawHelpText+'<br/><br/><b>Parcel Name</b></span><br/><input id="shapeName" type="text"/><br/><br/><span><b>Parcel Description<b/></span><br/><textarea id="shapeDesc" cols="25" rows="5"></textarea><br/><br/><input type="button" id="okBtn" value="Save"/>';
                 idIW.setContent(content);
                 idIW.setLatLng(l.getBounds().getCenter());
                 idIW.openOn(map);
