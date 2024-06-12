@@ -15,6 +15,17 @@ if os.getenv('TEST_DB_SERVERLESS'):
         HOST = os.environ['RDS_HOSTNAME']
         PORT = os.environ['RDS_PORT']
         DBNAME = os.environ['RDS_DB_NAME']
+        db_uri = f'mysql+pymysql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}'
+        db = DataBase(db_uri, model_base=Model)
+    elif 'SQLITE_DB_NAME' in os.environ:
+        db_filename = 'database.db'
+        db_path = (
+            'sqlite:///'
+            + f'{os.path.dirname(os.path.abspath(__file__))}/../../'
+            + os.environ['SQLITE_DB_NAME']
+        )
+        print(f'-- Connecting to local SQLite file\n({db_path})')
+        db = DataBase(db_path, model_base=Model)
     else:
         import urllib.parse
         USERNAME = "root"
@@ -22,16 +33,9 @@ if os.getenv('TEST_DB_SERVERLESS'):
         HOST = "localhost"
         PORT = "3306"
         DBNAME = "pytrim"
-    # db_filename = 'database.db'
-    # db_path = (
-    #     'sqlite:///'
-    #     + f'{os.path.dirname(os.path.abspath(__file__))}/../../'
-    #     + db_filename
-    # )
-    # print(f'-- Connecting to local SQLite file\n({db_path})')
-    # db = DataBase(db_path, model_base=Model)
-    db_uri = f'mysql+pymysql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}'
-    db = DataBase(db_uri, model_base=Model)
+        print(f'-- Connecting to local MYSQL db')
+        db_uri = f'mysql+pymysql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}'
+        db = DataBase(db_uri, model_base=Model)
 else:
     print('-- Connecting to flask_sqlalchemy db')
     from flask_sqlalchemy import SQLAlchemy

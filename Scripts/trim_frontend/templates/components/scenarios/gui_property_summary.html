@@ -74,224 +74,246 @@
     </section>
 </form>
 <script>
-        onDomLoad(function(e) {
+    onDomLoad(function(e) {
         var form = document.getElementById('property-summary-gui');
-        form.addEventListener('form:loaded', function() {
-            document.body.addEventListener('parcels:loaded', function() {
-                let loadedData = $('#root').data('loadedParcels')
-                $(initialize_compartment_map()).insertAfter($($("#property-summary-gui").find("table.compMap")[0]).find("thead"))
-                $(initialize_scenario_map()).insertAfter($($("#property-summary-gui").find("table.scenarioMap")[0]).find("thead"))
 
-                let dd_menu = $($("#property-summary-gui").find("table.compMap")[0]).prev("div.dropdown").find("div.dropdown-menu")
-                populate_comp_dd(dd_menu);
+        form.addEventListener('form:visible', function() {
+            console.log('property summary form visible')
+            LoadingScreen.show('property_summary_loading');
+            TRIM.refreshParcels();
+            document.body.addEventListener('parcels:ready', updateSummaryFields());
+        });
+
+        function updateSummaryFields() {
+            if (!TRIM.store.currentScenario.parcels) {
+                // Parcels haven't loaded yet; wait a bit and try again
+                setTimeout(function() { updateSummaryFields(); }, 1000);
+                return;
+            }
+
+            $(initialize_compartment_map()).insertAfter($($("#property-summary-gui").find("table.compMap")[0]).find("thead"))
+            $(initialize_scenario_map()).insertAfter($($("#property-summary-gui").find("table.scenarioMap")[0]).find("thead"))
+
+            let dd_menu = $($("#property-summary-gui").find("table.compMap")[0]).prev("div.dropdown").find("div.dropdown-menu")
+            populate_comp_dd(dd_menu);
 
 
 
-                $('tr.colps').on('click', function() {
-                    toggle_expand_icon(this, null)
-                    var findChildren = function(tr) {
-                        var depth = tr.data('depth');
-                        return tr.nextUntil($('tr').filter(function(i,e) {
-                            return $(e).data('depth') <= depth;
-                        }));
-                    };
+            $('tr.colps').on('click', function() {
+                toggle_expand_icon(this, null)
+                var findChildren = function(tr) {
+                    var depth = tr.data('depth');
+                    return tr.nextUntil($('tr').filter(function(i,e) {
+                        return $(e).data('depth') <= depth;
+                    }));
+                };
 
-                    let this_depth = $(this).data('depth')
-                    var children = findChildren($(this));
-                    if ($(children).is(':visible')) {
-                        $(children).hide();
-                    } else {
-                        let next_level = this_depth + 1;
-                        let next_child = $(children).filter(function(i,e) {
-                            return $(e).data('depth') == next_level;
-                        });
-                        $(next_child).show()
-                    }
-                });
-
-                $('button.scenario_show_all').on('click', function(e) {
-                    let this_table =$(this).closest("div[role=tabpanel]").find("table.scenarioMap")
-                    $(this_table).find("tr.colps").show();
-                    $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "down"))
-                    $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "down"))
-                });
-                $('button.comp_show_all').on('click', function(e) {
-                    e.preventDefault()
-                    let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap")
-                    $(this_table).find("tr.colps").show();
-                    $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "down"))
-                    $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "down"))
-                    $(this).closest("div").find("button.btn_show_comp").text("Show Compartment")
-                });
-
-                $('button.scenario_hide_all').on('click', function(e) {
-                    let this_table =$(this).closest("div[role=tabpanel]").find("table.scenarioMap")
-                    $(this_table).find("tr.colps:not([data-depth='0'])").hide();
-                    $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "up"))
-                    $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "up"))
-                });
-                $('button.comp_hide_all').on('click', function(e) {
-                    e.preventDefault()
-                    let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap")
-                    $(this_table).find("tr.colps:not([data-depth='0'])").hide();
-                    $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "up"))
-                    $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "up"))
-                    $(this).closest("div").find("button.btn_show_comp").text("Show Compartment")
-                });
-
-                $('button.comp_show_nz').on('click', function(e) {
-                    e.preventDefault()
-                    let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap");
-                    $('button.comp_hide_all').trigger('click');
-                    let non_zeros = $(this_table).find("tr.colps.level2").filter((i,e) => $(e).find("td.ems").text() > 0);
-                    $(non_zeros).show()
-                    $(non_zeros).prev("tr.level1").show()
-                    $(this).closest("div").find("button.btn_show_comp").text("Show Compartment")
-                });
-
-                $(document).ready(function() {
-                    $('button.comp_hide_all').trigger('click');
-                });
-
-                function toggle_expand_icon(tr, dir){
-                    if ($(tr).find("i.fas").length <= 0) return;
-                    if (!dir) {
-                        if ($(tr).find("i.fas").attr("class").indexOf("fa-angle-right") > -1) {
-                            $(tr).find("i.fas").attr("class", "fas fa-angle-down")
-                        } else {
-                            $(tr).find("i.fas").attr("class", "fas fa-angle-right")
-                        }
-                    } else {
-                        if (dir == "down") {
-                            $(tr).find("i.fas").attr("class", "fas fa-angle-down")
-                        } else {
-                            $(tr).find("i.fas").attr("class", "fas fa-angle-right")
-                        }
-                    }
-
+                let this_depth = $(this).data('depth')
+                var children = findChildren($(this));
+                if ($(children).is(':visible')) {
+                    $(children).hide();
+                } else {
+                    let next_level = this_depth + 1;
+                    let next_child = $(children).filter(function(i,e) {
+                        return $(e).data('depth') == next_level;
+                    });
+                    $(next_child).show()
                 }
+            });
 
-                $('label.editableCell').click(function () {
-                    $(this).siblings("input").show()
-                    $(this).siblings("input").focus()
-                    $(this).hide();
-                });
+            $('button.scenario_show_all').on('click', function(e) {
+                let this_table =$(this).closest("div[role=tabpanel]").find("table.scenarioMap")
+                $(this_table).find("tr.colps").show();
+                $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "down"))
+                $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "down"))
+            });
+            $('button.comp_show_all').on('click', function(e) {
+                e.preventDefault()
+                let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap")
+                $(this_table).find("tr.colps").show();
+                $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "down"))
+                $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "down"))
+                $(this).closest("div").find("button.btn_show_comp").text("Show Compartment")
+            });
 
-                $('input.editableCell').blur(function () {
-                    if (!$("#summary-tab-pill").hasClass("active")) {
-                        return;
-                    }
+            $('button.scenario_hide_all').on('click', function(e) {
+                let this_table =$(this).closest("div[role=tabpanel]").find("table.scenarioMap")
+                $(this_table).find("tr.colps:not([data-depth='0'])").hide();
+                $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "up"))
+                $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "up"))
+            });
+            $('button.comp_hide_all').on('click', function(e) {
+                e.preventDefault()
+                let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap")
+                $(this_table).find("tr.colps:not([data-depth='0'])").hide();
+                $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "up"))
+                $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "up"))
+                $(this).closest("div").find("button.btn_show_comp").text("Show Compartment")
+            });
 
-                    ErrorValidation.isPositiveValue(this);
-                    let parcel_name = $(this).closest("tr.level2")
-                    let parcel_info = [{
-                        'type': 'data',
-                        'name': 'id',
-                        'value': "parcel_name"
-                    },{
-                        'type': 'data',
-                        'name': 'chemical',
-                        'value': "chemical_name"
-                    },{
-                        'type': 'input',
-                        'name': 'compartment_name',
-                        'value': $(this).val()
-                    }]
-                    if (parcel_info) {
-                        submit_new_value(this, parcel_info);
-                    }
-                })
+            $('button.comp_show_nz').on('click', function(e) {
+                e.preventDefault()
+                let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap");
+                $('button.comp_hide_all').trigger('click');
+                let non_zeros = $(this_table).find("tr.colps.level2").filter((i,e) => $(e).find("td.ems").text() > 0);
+                $(non_zeros).show()
+                $(non_zeros).prev("tr.level1").show()
+                $(this).closest("div").find("button.btn_show_comp").text("Show Compartment")
+            });
 
-                function submit_new_value(elem, parcel_info) {
-                    if (elementIsValid($(this).parent())){
-                        let data = $(elem).val() == "" ? 0 : $(elem).val()
-                        let $label = $(elem).next("label.editableCell")
-                        $label.siblings("input").hide()
-                        $label.show().text(data)
+            $(document).ready(function() {
+                $('button.comp_hide_all').trigger('click');
+            });
 
-                        parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                        // TRIM.api.updateParcel(parcel_info)
+            function toggle_expand_icon(tr, dir){
+                if ($(tr).find("i.fas").length <= 0) return;
+                if (!dir) {
+                    if ($(tr).find("i.fas").attr("class").indexOf("fa-angle-right") > -1) {
+                        $(tr).find("i.fas").attr("class", "fas fa-angle-down")
                     } else {
-                        return
+                        $(tr).find("i.fas").attr("class", "fas fa-angle-right")
+                    }
+                } else {
+                    if (dir == "down") {
+                        $(tr).find("i.fas").attr("class", "fas fa-angle-down")
+                    } else {
+                        $(tr).find("i.fas").attr("class", "fas fa-angle-right")
                     }
                 }
 
+            }
+
+            $('label.editableCell').click(function () {
+                $(this).siblings("input").show()
+                $(this).siblings("input").focus()
+                $(this).hide();
+            });
+
+            $('input.editableCell').blur(function () {
+                if (!$("#summary-tab-pill").hasClass("active")) {
+                    return;
+                }
+
+                ErrorValidation.isPositiveValue(this);
+                let parcel_name = $(this).closest("tr.level2")
+                let parcel_info = [{
+                    'type': 'data',
+                    'name': 'id',
+                    'value': "parcel_name"
+                },{
+                    'type': 'data',
+                    'name': 'chemical',
+                    'value': "chemical_name"
+                },{
+                    'type': 'input',
+                    'name': 'compartment_name',
+                    'value': $(this).val()
+                }]
+                if (parcel_info) {
+                    submit_new_value(this, parcel_info);
+                }
             })
 
-            var entities = {'Parcel':'Parcel', 'Compartment':'Compartment', 'Volume Element':'Volume Element'}
-            function initialize_compartment_map(spec) {
-                let loadedData = $('#root').data('loadedParcels')
-                var map_html = "<tbody>"
-                loadedData.scenario.forEach( function(e,i){
-                    map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>" + e.name + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
-                    for (ve in entities) {
-                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td>" + ve + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td></tr>"
-                        for (comp in e.compartment_map[ve]) {
-                            map_html = map_html + "<tr data-depth='2' class='level2 colps'><td></td><td></td><td class='comp'>" + e.compartment_map[ve][comp] + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='editableCell badge badge-light'>0</label></td></tr>"
-                        }
-                    }
-                })
-                map_html += "</tbody>"
-                return map_html
+            function submit_new_value(elem, parcel_info) {
+                if (elementIsValid($(this).parent())){
+                    let data = $(elem).val() == "" ? 0 : $(elem).val()
+                    let $label = $(elem).next("label.editableCell")
+                    $label.siblings("input").hide()
+                    $label.show().text(data)
+
+                    parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
+                    // TRIM.api.updateParcel(parcel_info)
+                } else {
+                    return
+                }
             }
 
-            // FIXME no daytime_indicator
-            function initialize_scenario_map(spec) {
-                let loadedData = $('#root').data('loadedParcels')['scenario_head']
-                var map_html = "<tbody>"
-                let scenario_map = {
-                    "Simulation": {
-                        "simulation_start_date": loadedData['simulation_start_date'],
-                        "simulation_end_date": loadedData['simulation_end_date'],
-                        "erosionRateSource": loadedData['erosionRateSource']
-                    },
-                    "Scenario": {
-                        "name": loadedData['name'],
-                        "description": loadedData['description'],
+            console.log('populated property summary form!')
+            LoadingScreen.hide('property_summary_loading');
+        }
+
+        var entities = {'Parcel':'Parcel', 'Compartment':'Compartment', 'Volume Element':'Volume Element'}
+        function initialize_compartment_map(spec) {
+            let parcels = TRIM.store.currentScenario.parcels;
+            var map_html = "<tbody>"
+            parcels.forEach( function(e,i){
+                map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>" + e.name + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
+                for (ve in entities) {
+                    map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td>" + ve + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td></tr>"
+                    for (comp in e.compartment_map[ve]) {
+                        map_html = map_html + "<tr data-depth='2' class='level2 colps'><td></td><td></td><td class='comp'>" + e.compartment_map[ve][comp] + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='editableCell badge badge-light'>0</label></td></tr>"
                     }
                 }
-                scenario_map["Scenario"] = Object.assign({}, scenario_map["Scenario"], loadedData['meteo'])
-                scenario_map["Scenario"] = Object.assign({}, scenario_map["Scenario"], loadedData['wet_dep_interception'])
-                scenario_map["Scenario"] = Object.assign({}, scenario_map["Scenario"], loadedData['seasonal_dynamics'])
-                
-                for (const [entity_key, entity_value] of Object.entries(scenario_map)) {
-                    map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>" + entity_key + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
-                    for (const [property_key, property_value] of Object.entries(entity_value)) {
-                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td></td><td class='comp'>" + property_key + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted'>"+ property_value +"</label></td></tr>"
+            })
+            map_html += "</tbody>"
+            return map_html
+        }
+
+        // FIXME no daytime_indicator
+        function initialize_scenario_map(spec) {
+            let scenario = TRIM.store.currentScenario
+            var map_html = "<tbody>"
+            let scenario_map = {
+                "Simulation": {
+                    "simulation_start_date": scenario['simulation_start_date'],
+                    "simulation_end_date": scenario['simulation_end_date'],
+                    "erosionRateSource": scenario['erosionRateSource'] || 1
+                },
+                "Scenario": {
+                    "name": scenario['name'],
+                    "description": scenario['description'],
+                }
+            }
+            try {
+                scenario_map["Scenario"] = Object.assign({}, scenario_map["Scenario"], scenario['meteorology'])
+            }
+            catch {}
+            try {
+                scenario_map["Scenario"] = Object.assign({}, scenario_map["Scenario"], scenario['meteorology']['wet_dep_interception'])
+            }
+            catch {}
+            try {
+                scenario_map["Scenario"] = Object.assign({}, scenario_map["Scenario"], scenario['seasonal_dynamics'])
+            }
+            catch {}
+            
+            for (const [entity_key, entity_value] of Object.entries(scenario_map)) {
+                map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>" + entity_key + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
+                for (const [property_key, property_value] of Object.entries(entity_value)) {
+                    map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td></td><td class='comp'>" + property_key + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted'>"+ property_value +"</label></td></tr>"
+                }
+            }
+            map_html += "</tbody>"
+            return map_html        
+        }
+
+        function populate_comp_dd(dd_menu){
+            let comp_array = []
+            let parcels = TRIM.store.currentScenario.parcels;
+            parcels.forEach( function(e,i){
+                for (let ve in e.compartment_map) {
+                    for (let comp in e.compartment_map[ve]) {
+                        comp_array.push(e.compartment_map[ve][comp])
                     }
                 }
-                map_html += "</tbody>"
-                return map_html        
-            }
+            })
+            let uniq_comp = [... new Set(comp_array)]
+            uniq_comp.sort().forEach(function(e) {
+                let menu_item = "<a class='dropdown-item comp-item'>" + e + "</a>"
+                $(menu_item).appendTo(dd_menu)
+            })
+            $("a.dropdown-item.comp-item").on("click",function (e){
+                e.preventDefault()
+                let this_table = $(this).closest("div.dropdown").next("table.compMap")
+                let this_dd_btn = $(this).closest("div.dropdown").find("button.btn_show_comp")
+                $('button.comp_hide_all').trigger('click');
+                let only_comps = $(this_table).find("tr.colps.level2").filter((i,tr) => $(tr).find("td.comp").text() == $(this).text());
 
-            function populate_comp_dd(dd_menu){
-                let comp_array = []
-                let loadedData = $('#root').data('loadedParcels')
-                loadedData.scenario.forEach( function(e,i){
-                    for (let ve in e.compartment_map) {
-                        for (let comp in e.compartment_map[ve]) {
-                            comp_array.push(e.compartment_map[ve][comp])
-                        }
-                    }
-                })
-                let uniq_comp = [... new Set(comp_array)]
-                uniq_comp.sort().forEach(function(e) {
-                    let menu_item = "<a class='dropdown-item comp-item'>" + e + "</a>"
-                    $(menu_item).appendTo(dd_menu)
-                })
-                $("a.dropdown-item.comp-item").on("click",function (e){
-                    e.preventDefault()
-                    let this_table = $(this).closest("div.dropdown").next("table.compMap")
-                    let this_dd_btn = $(this).closest("div.dropdown").find("button.btn_show_comp")
-                    $('button.comp_hide_all').trigger('click');
-                    let only_comps = $(this_table).find("tr.colps.level2").filter((i,tr) => $(tr).find("td.comp").text() == $(this).text());
+                $(only_comps).show()
+                $(this_dd_btn).text($(this).text())
 
-                    $(only_comps).show()
-                    $(this_dd_btn).text($(this).text())
-
-                    $(only_comps).prev("tr.level1").show()
-                })
-            }
-        });
+                $(only_comps).prev("tr.level1").show()
+            })
+        }
     });
 </script>

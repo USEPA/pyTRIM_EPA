@@ -190,5 +190,19 @@ CREATE TABLE compartment_link (
     UNIQUE (sender_id, receiver_id)
 );
 
+CREATE TABLE scenario_load_run_proc (
+    id INTEGER NOT NULL, 
+    load_status VARCHAR(140), 
+    run_status VARCHAR(140), 
+    run_datetime DATETIME, 
+    result_file_nt VARCHAR(255), 
+    result_file_conc VARCHAR(255), 
+    result_nt VARCHAR, 
+    result_conc VARCHAR, 
+    scenario_id INTEGER NOT NULL, 
+    PRIMARY KEY (id), 
+    FOREIGN KEY(scenario_id) REFERENCES scenario (id)
+);
+
 INSERT INTO alembic_version (version_num) VALUES ('12f3b3bc93f9');
 

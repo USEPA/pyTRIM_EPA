@@ -76,16 +76,19 @@ def get_parcels(scenario_id):
             start_time_s = time.time()
             sh = s.as_serializable()
             logger.info(f"Acquired scenario {s.name} in {time.time() - start_time_s} seconds")
+            total_start = time.time()
             for this_p in p:
                 start_time = time.time()
                 parcels.append(this_p.as_serializable())
                 logger.info(f"Acquired parcel {this_p.name} in {time.time() - start_time} seconds")
+            logger.info(f"Acquired all parcels in {time.time() - total_start} seconds")
     except Exception as e:
         logger.error(traceback.format_exc())
 
-    sh["runoff_matrix"] = get_surface_runoff(scenario_id)
-
-    return ApiResult({'scenario_head': sh, 'scenario': parcels, 'media': media})
+    return ApiResult({
+        'parcels': parcels,
+        'media': media
+    })
 
 
 @parcels_api.route(
@@ -655,26 +658,6 @@ def initialize_parcel_contents(new_parcel, vol_elem_defaults=None):
             initialize_compartment_custom_parameters(nc)
     ParameterService.commit()
 
-def get_surface_runoff(scenario_id):
-    scenario = ScenarioService.get(id=scenario_id)
-    soil_comps = [c for c in scenario.compartments if c.media.isa("Surface_Soil")]
-    water_comps = [c for c in scenario.compartments if c.media.isa("Surface_Water")]
-    sink_comps = [c for c in scenario.compartments if
-                  c.media.isa("Sink") & c.media.isa("Advection") & (not c.media.isa("Flush$"))]
-    runoffs = {}
-    for send in soil_comps:
-        sending_parcel = send.volume_element.parcel.name
-        runoffs[sending_parcel] = {}
-        runoffs[sending_parcel]['sink'] = 0
-        for recv in soil_comps + sink_comps + water_comps:
-            receiving_parcel = recv.volume_element.parcel.name
-            if recv in sink_comps:
-                runoffs[sending_parcel]['sink'] += send.FractionOfTotalRunoff(receiver=recv)
-            else:
-                runoffs[sending_parcel][receiving_parcel] = send.FractionOfTotalRunoff(receiver=recv)
-    return runoffs
-
-
 def calc_default_erosion_rate_sdr(pcl):
     for c in pcl.compartments:
         if not c.media.isa("Surface_Soil"):
@@ -726,7 +709,10 @@ def delete_parcel_contents(del_parcel):
         formulas = ["MethylationRate", "DemethylationRate", "ReductionRate"]
         for t in formulas:
             ins = ParameterService.definitions.get(variable_name=t).instances
-            par = [i for i in ins if i.scenario.id == scenario_id][0]
+            par = [i for i in ins if i.scenario.id == scenario_id]
+            if not par:
+                continue
+            par = par[0]
             eq = par.formula.equation
             del_id = c.id
             eq_parts = eq.split('compartment.id in {')

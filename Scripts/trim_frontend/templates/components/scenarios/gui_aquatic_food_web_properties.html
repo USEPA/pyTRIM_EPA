@@ -274,6 +274,7 @@
                     tblHandle.destroy();
                 }
                 tblHandle = $(tblId).removeAttr('width').DataTable({
+                    destroy: true,
                     data : table_data,
                     paging: false,
                     bFilter: false,
@@ -287,6 +288,9 @@
                         $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                         $('[data-toggle="tooltip"]').tooltip()
                         $('[data-toggle="popover"]').popover()
+                    },
+                    language: {
+                        emptyTable: 'No Parcels Have Been Defined with a Fish-Food Web'
                     }
                 });
 
@@ -381,8 +385,14 @@
                 })
             }
         }
+
         var form = document.getElementById('aquatic-food-web-props-gui');
-        form.addEventListener('form:loaded', function() {
+
+        form.addEventListener('form:visible', function() {
+            console.log('aquatic food web form visible')
+            LoadingScreen.show('aquatic_food_web_loading');
+            TRIM.refreshParcels();
+            document.body.addEventListener('parcels:ready', updateAquaticFoodWeb());
         });
 
         function get_pivoted_columns(table_data, table_type) {
@@ -392,11 +402,14 @@
                     'data': "Property",
                     'bSortable': false,
                     'render': function (data, type, row){
+                        if (!row.Property) {
+                            return '';
+                        }
                         return row.Property.parentNode.outerHTML;
                     }
                 }]
-            let loadedData = $('#root').data('loadedParcels')
-            let data_subset = loadedData['scenario'].filter(e=> (e.hasFishFoodWeb == "Yes"))
+            let parcels = TRIM.store.currentScenario.parcels;
+            let data_subset = parcels.filter(e=> (e.hasFishFoodWeb == "Yes"))
             data_subset.forEach(function (e, i) {
                 if ($(table_header).find("th").length < (data_subset.length + 1)) {
                     $(table_header).append("<th>" + e.name + "</th>")
@@ -453,13 +466,13 @@
             return myRows
         }
 
-        function load_aquatic_parcels(loadedData){
+        function load_aquatic_parcels(parcels){
             let aquatic_data = [];
             $("#AquaticTable").find("[data-id]").each(function (i, p) {
                 let row_data = {};
                 let ids = JSON.parse(p.getAttribute("data-id"));
 
-                loadedData['scenario'].forEach(function (e, i) {
+                parcels.forEach(function (e, i) {
                     if (e.hasFishFoodWeb == "Yes") {
                         let prop = ids["type"];
                         let comp_name = ids["comp_name"];
@@ -469,21 +482,29 @@
                         row_data[e.name] = e[prop][comp_name] ? e[prop][comp_name] : default_val;
                     }
                 })
-                aquatic_data.push(row_data);
+                if (!$.isEmptyObject(row_data)) {
+                    aquatic_data.push(row_data);
+                }
             })          
             return aquatic_data;
         }
 
-        document.body.addEventListener('parcels:loaded', function() {
-            let loadedData = $('#root').data('loadedParcels')
+        function updateAquaticFoodWeb() {
+            if (!TRIM.store.currentScenario.parcels) {
+                // Parcels haven't loaded yet; wait a bit and try again
+                setTimeout(function() { updateAquaticFoodWeb(); }, 1000);
+                return;
+            }
+            let parcels = TRIM.store.currentScenario.parcels;
 
             let diet_data = []
             let diet_properties = Object.keys(default_diet_data)
-            if (loadedData.scenario.length > 0) {
-                let aquatic_data = load_aquatic_parcels(loadedData);
-                TableRedraw(aquatic_data, "aquatic")
+            if (parcels.length > 0) {
+                let aquatic_data = load_aquatic_parcels(parcels);
+                TableRedraw(aquatic_data, "aquatic");
+                divDietTables.empty();
                 ////////////////////////////////////////////////////////////////////////////////
-                loadedData['scenario'].forEach(function (e, i) {
+                parcels.forEach(function (e, i) {
                     if (e.hasFishFoodWeb == "Yes") {
                         let this_matrix = $(diet_table_template)
                         let matrix_data = e.aquatic_diet_fractions
@@ -511,9 +532,14 @@
                         divDietTables.append(this_matrix)
                     }
                 })
+                if (!$('#DietTables').children().length) {
+                    var alert = $('<div class="alert alert-light" />');
+                    alert.text('No Parcels Have Been Defined with a Fish-Food Web')
+                    divDietTables.append(alert)
+                }
                 diet_properties.forEach(function (p, i) {
                     let this_diet_property = {}
-                    loadedData['scenario'].forEach(function (e, i) {
+                    parcels.forEach(function (e, i) {
                         if (e.hasFishFoodWeb == "Yes") {
                             this_diet_property['Property'] = p
                             this_diet_property[e.name] = e[default_diet_data[p]['short_name']] ? e[default_diet_data[p]['short_name']] : default_diet_data[p]['default_value'],
@@ -522,10 +548,14 @@
                             this_diet_property["shortProperty"] = default_diet_data[p]['short_name']
                         }
                     })
-                    diet_data.push(this_diet_property)
+                    if (!$.isEmptyObject(this_diet_property)) {
+                        diet_data.push(this_diet_property);
+                    }
                 })
                 TableRedraw(diet_data, "diet")
             }
-        })
+            console.log('populated aquatic food web form!')
+            LoadingScreen.hide('aquatic_food_web_loading');
+        }
     });
 </script>
