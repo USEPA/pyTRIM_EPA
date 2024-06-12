@@ -76,6 +76,9 @@ class AppConfig:
     BOTO_S3_BUCKET = ''
     BOTO_AWS_REGION = 'us-east-1'
 
+    TRIM_ENV_PROFILE = os.getenv('TRIM_ENV_PROFILE', 'local')
+    print(f"LOADED TRIM_ENV_PROFILE: {TRIM_ENV_PROFILE}")
+
 
 class ProdConfig(AppConfig):
     SECRET_KEY = os.getenv('SECRET_KEY', '')

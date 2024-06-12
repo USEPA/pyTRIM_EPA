@@ -617,9 +617,61 @@
                     });
                 };
 
-                let fetchResults = () => exec_model_run();
-                let validate = status => status !== 'fin';
-                poll(fetchResults, validate, 5000);
+                console.log("TRIM_ENV_PROFILE == '" + TRIM.trim_env_profile + "'");
+
+                if (TRIM.trim_env_profile == "local") {
+                    // run the model locally
+                    let fetchResults = () => exec_model_run();
+                    let validate = status => status !== 'fin';
+                    poll(fetchResults, validate, 5000);
+                } else {
+                    // run the model via AWS StepFunction / Docker on ECS
+                    var poller = function(executionArn, callback, numAttempts) {
+                        if (numAttempts === undefined) { numAttempts = 1; }
+                        console.log("POLLER ATTEMPT #" + numAttempts + "...");
+
+                        if (true || numAttempts < 30) {
+                            TRIM.api.checkExecutionCompletion(executionArn, function(success, data) {
+                                // pass it along to the actual callback...
+                                if ("sfn_output" in data && data.sfn_output !== false) {
+                                    callback(success, data);
+                                } else {
+                                  setTimeout(function() {
+                                    poller(executionArn, callback, numAttempts + 1);
+                                  }, 30000); // sleep for 30 seconds
+                                }
+                            });
+                        } else {
+                          console.log("no more tries...");
+                        }
+                    }
+
+                    var fetchAndDisplayResults = function(bucket, uuid) {
+                      TRIM.api.fetchRunResults(bucket, uuid, function(success, data) {
+                        var mass = JSON.parse("{" + data.model_output.mass + "}");
+                        var conc = JSON.parse("{" + data.model_output.conc + "}");
+                          window.rawOutput = data;
+                          window.testOutputViewer = {
+                            "presignedMassUrl": data.outputMass,
+                            "presignedConcUrl": data.outputConc,
+                            "mass": mass,
+                            "conc": conc
+                          };
+                      });
+                    };
+
+                    // hardcoded test
+                    // fetchAndDisplayResults("pytrim-dev-stalk-model-run-storage-bucket", "98a921a2-1788-11ef-a37f-0a58a9feac02");
+
+                    var resp = TRIM.api.runModel(scenario_info, function(kickoffSuccess, kickoffData) {
+                        let executionArn = kickoffData.executionArn;
+                        poller(executionArn, function(checkSuccess, checkData) {
+                            console.log("ALL THE WAY BACK IN THE CALLBACK:");
+                            console.log(checkData);
+                            fetchAndDisplayResults(checkData["sfn_output"]["bucket"], checkData["sfn_output"]["uuid"]);
+                        });
+                    });
+                }
             }
 
             // Plot something for the first load

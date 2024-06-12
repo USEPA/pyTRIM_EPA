@@ -412,8 +412,7 @@ def gen_avg(df_nt, df_conc, inputs):
     dct = {k: v for i in
            [{col: agg for col in df_conc.select_dtypes(tp).columns.difference(groupby_cols)} for tp, agg in dct.items()] for
            k, v in i.items()}
-    dfc_avg = df_conc.groupby(groupby_cols, as_index=True).agg(**{k: (k, v) for k, v in dct.items()}).reset_index()
-
+    dfc_avg = df_conc.groupby(groupby_cols).agg(**{k: (k, v) for k, v in dct.items()})
     # drop last line (just one day)
     dfc_avg = dfc_avg.head(len(dfc_avg)-1)
     return dfn_avg, dfc_avg
@@ -485,7 +484,8 @@ def run_full_model(scn):
     scn = ScenarioService.get(id=scn.id)
     try:
         (tm, df_tm, sm, df_sm, df_vmu) = make_transition_matrix(scn)
-    except Exception:
+    except Exception as e:
+        print(f"ERRORED WHILE MAKING TRANSITION MATRIX: {e}")
         [v for v in scn.proc_status][0].run_status = 'err tm 0'
 
     # get result
@@ -498,7 +498,8 @@ def run_full_model(scn):
         ScenarioService.commit()
         # make concentration output
         df_conc = compute_concentration(df_nt, df_vmu)
-    except Exception:
+    except Exception as e:
+        print(f"ERRORED WHILE MAKING CONCENTRATION OUTPUT: {e}")
         [v for v in scn.proc_status][0].run_status = 'err ode 0'
 
     # compute annual average mass and conc time series
@@ -529,7 +530,8 @@ def run_full_model(scn):
         [v for v in scn.proc_status][0].run_status = 'run fin 100'
         [v for v in scn.proc_status][0].result_nt = json.dumps(json_n_avg, default=str)
         [v for v in scn.proc_status][0].result_conc = json.dumps(json_c_avg, default=str)
-    except Exception:
+    except Exception as e:
+        print(f"ERRORED WHILE MAKING CSV: {e}")
         [v for v in scn.proc_status][0].run_status = 'err csv 0'
     ScenarioService.commit()
 
@@ -540,21 +542,24 @@ def safe_save_output(df_nt, df_conc, scn, filetype='csv'):
     try:
         ts = datetime.now().strftime('%Y-%m-%d--%H_%M_%S')
         sim_chems = [c.name for c in scn.chemicals]
-        safe_name = scn.name.replace("#", "")
         if not os.path.isdir('./trim_frontend/static/.output'):
             os.makedirs('./trim_frontend/static/.output')
         if filetype == 'csv':
-            fname_nt = f'./trim_frontend/static/.output/nt_new_{safe_name}_{scn.creator_id}_{ts}.csv'
-            fname_conc = f'./trim_frontend/static/.output/conc_new_{safe_name}_{scn.creator_id}_{ts}.csv'
+            fname_nt = f'./trim_frontend/static/.output/nt_new_{scn.name}_{scn.creator_id}_{ts}.csv'
+            fname_conc = f'./trim_frontend/static/.output/conc_new_{scn.name}_{scn.creator_id}_{ts}.csv'
             df_nt.to_csv(fname_nt)
             df_conc.to_csv(fname_conc)
         else:
             path_output_nt = './trim_frontend/static/.output/'
-            fname_nt = f'nt_new_{safe_name}_{scn.creator_id}_{ts}.xlsx'
+            just_name_nt = f'nt_new_{scn.name}_{scn.creator_id}_{ts}.xlsx'
+            fname_nt = os.path.join(path_output_nt, just_name_nt)
+
             path_output_conc = './trim_frontend/static/.output/'
-            fname_conc = f'conc_new_{safe_name}_{scn.creator_id}_{ts}.xlsx'
-            split_write_files(df_nt, sim_chems, path_output_nt, fname_nt)
-            split_write_files(df_conc, sim_chems, path_output_conc, fname_conc)
+            just_name_conc = f'conc_new_{scn.name}_{scn.creator_id}_{ts}.xlsx'
+            fname_conc = os.path.join(path_output_conc, just_name_conc)
+
+            split_write_files(df_nt, sim_chems, fname_nt)
+            split_write_files(df_conc, sim_chems, fname_conc)
     except Exception as e:
         print(f'{20 * ">"} Output write exception writing {filetype} file:\n{e}')
         fname_nt = "No File. There was an error while writing output..."
@@ -562,9 +567,8 @@ def safe_save_output(df_nt, df_conc, scn, filetype='csv'):
     return fname_nt, fname_conc
 
 
-def split_write_files(df, sim_chems, path_output, file_name):
+def split_write_files(df, sim_chems, of_pn):
     # Helper function to split and write time series files into excel workbook with multiple worksheets
-    of_pn = os.path.join(path_output, file_name)
     writer = pd.ExcelWriter(of_pn, engine='xlsxwriter')
     for chem in sim_chems:  # loop over sim chemicals
         # prefix = 'chem_'+chem.replace(' ', '_') + '_'  # construct prefix
