@@ -12,17 +12,17 @@
         },
         {
             "id": "have_AERMOD_file",
-            "label": "Use Emission values from input file",
+            "label": "Use values from input file",
             "data_type": "boolean",
             "default": false,
-            "help": "Check this box to use Emission values from input file."
+            "help": "Check this box to use values from an input file."
         },
         {
             "id": "emissions_source_file",
             "label": "AERMOD Deposition File",
             "data_type": "file",
             "required": true,
-            "help": "Indicate the AERMOD output file of emissions data.",
+            "help": "Indicate the AERMOD plotfile (.PLT) output file. It must use the same geographic extent and meteorological scenario being modeled in pyTRIM. It must contain wet and dry deposition estimates.",
             "if_true": ["have_AERMOD_file"]
         },
         {
@@ -32,7 +32,7 @@
             "widget": "select",
             "choices": ["Uniform", "Non-Uniform"],
             "required": true,
-            "help": "Enter the spacing of your emission sources.",
+            "help": "Enter the Spacing of your emission sources. For the receptors in the AERMOD deposition file, indicate whether they are uniformly spaced or non-uniformly spaced.",
             "if_true": ["have_AERMOD_file"]
         }
     ]

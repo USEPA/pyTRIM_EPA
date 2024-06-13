@@ -124,7 +124,7 @@
                 'is_editable': true,
                 'default_value': 298,
                 'unit': 'K',
-                'helpText': 'Enter the average water temperature. Valid values are >= 0. The default value of 298 is from Table B-4-12 of Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities (including the Hazardous Waste Companion Database of chemical-specific parameter values). U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response, Washington, DC. EPA-530-R-05-006. September 2005. Available online at: https://archive.epa.gov/epawaste/hazard/tsd/td/web/html/risk.html. Typical sources of site-specific values include state departments of fish and wildlife or natural resources, and state or local lake stewardship programs.'
+                'helpText': 'Enter the average water temperature. Valid values are >= 0. The default value of 298 is from Table B-4-12 of U.S. EPA 2005 (Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities). Typical sources of site-specific values include state departments of fish and wildlife or natural resources, and state or local lake stewardship programs. See the TRIM User Guide Appendix for full reference information.'
             },
             'Water Column Depth':{
                 'short_name':'mean_depth',
@@ -138,35 +138,35 @@
                 'is_editable': true,
                 'default_value': 0.0025,
                 'unit': 'g [algae wet weight]/L [water]',
-                'helpText': 'Enter the algae density (wet weight) in the water column. Valid values are >= 0. The default value of 0.0025 is from XX of Millard, E.S., D.D. Myles, O.E. Johannsson, and K.M. Ralph. 1996. Phytoplankton photosynthesis at two index stations in Lake Ontario 1987â€“1992: assessment of the long-term response to phosphorus control. Canadian Journal of Fisheries and Aquatic Sciences 53: 1092â€“1111. Available online at: https://doi.org/10.1016/S0380-1330(91)71370-1. A typical way of calculating a site-specific value uses lake depth and total phosphorus level: (0.4*TPhos+0.2*TPhos^1.4)/WaterColumnDepth, where Tphos = average total phosphorus level (Âµg/L = mg/m3; not a model input parameter) and WaterColumnDepth = Water Column Depth (m; a model input parameter), as adapted from Table 2 of Peters, R.H. 1986. The role of prediction in limnology. Limnol. Oceanogr. 31(5): 1143â€“1159. Available online at: XX.'
+                'helpText': 'Enter the algae density (wet weight) in the water column. Valid values are >= 0. The default value of 0.0025 is from Millard et al. 1996 (Phytoplankton photosynthesis at two index stations in Lake Ontario 1987–1992: assessment of the long-term response to phosphorus control). A typical way of calculating a site-specific value uses lake depth and total phosphorus level: (0.4*TPhos+0.2*TPhos^1.4)/WaterColumnDepth, where Tphos = average total phosphorus level (µg/L = mg/m3; not a model input parameter) and WaterColumnDepth = Water Column Depth (m; a model input parameter), as adapted from Table 2 of Peters 1996 (The role of prediction in limnology).Then, divide by Water Column Depth (m) and divide by 1,000 to obtain the correct units. See the TRIM User Guide Appendix for full reference information.'
             },
             'Water Column Chloride Concentration':{
                 'short_name':'chloride_conc',
                 'is_editable': true,
                 'default_value': 8,
                 'unit': 'mg [chloride]/L [water]',
-                'helpText': 'Enter the chloride ion concentration in the water column. Valid values are >= 0. The default value of 8 is from Table 1 (maximum value from streams without nearby roadways) of Kaushal, S.S., P.M. Groffman, G.E. Likens, K.T. Belt, W.P. Stack, V.R. Kelly, L.E. Band, and G.T. Fisher. 2005. Increased salinization of fresh water in the northeastern United States. Proceedings of the National Academy of Sciences 102: 13517â€“13520. Available online at: https://www.pnas.org/doi/full/10.1073/pnas.0506414102. Typical sources of site-specific values include the Water Quality Portal of the National Water Quality Monitoring Council (available online at: http://www.waterqualitydata.us/; includes data from U.S. Geological Survey National Water Information System and U.S. Environmental Protection Agency STORET data warehouses) and local watershed watch programs.'
+                'helpText': 'Enter the chloride ion concentration in the water column. Valid values are >= 0. The default value of 8 is from Table 1 (maximum value from streams without nearby roadways) of Kaushal et al. 2005 (Increased salinization of fresh water in the northeastern United States). Typical sources of site-specific values include the Water Quality Portal of the National Water Quality Monitoring Council (available online at: http://www.waterqualitydata.us/; includes data from U.S. Geological Survey National Water Information System and U.S. Environmental Protection Agency STORET data warehouses) and local watershed watch programs. See the TRIM User Guide Appendix for full reference information.'
             },
             'Water Column Chlorophyll Concentration':{
                 'short_name':'chlorophyll_conc',
                 'is_editable': true,
                 'default_value': 0.0029,
                 'unit': 'mg [chlorophyll]/L [water]',
-                'helpText': 'Enter the chlorophyll concentration in the water column. Valid values are >= 0. The default value of 0.0029 is from Table 1 (2.9 Âµg/L; median of average epilimnetic summer chlorophyll values from 43 North American lakes) of NÃ¼rnberg, G.K. 1996. Trophic state of clear and colored, soft- and hardwater lakes with special consideration of nutrients, anoxia, phytoplankton and fish. Journal of Lake and Reservoir Management 12(4): 432â€“447. Available online at: https://doi.org/10.1080/07438149609354283. A typical source of site-specific values is the respective state department of environment or natural resources.'
+                'helpText': 'Enter the chlorophyll concentration in the water column. Valid values are >= 0. The default value of 0.0029 is from Table 1 (2.9 µg/L; median of average epilimnetic summer chlorophyll values from 43 North American lakes) of Nürnberg 1996 (Trophic state of clear and colored, soft- and hardwater lakes with special consideration of nutrients, anoxia, phytoplankton and fish). A typical source of site-specific values is the respective state department of environment or natural resources. See the TRIM User Guide Appendix for full reference information.'
             },
             'Water Column Organic Carbon Fraction in Suspended Sediments':{
                 'short_name':'suspended_organic_carbon',
                 'is_editable': true,
                 'default_value': 0.02,
                 'unit': 'unitless',
-                'helpText': 'Enter the organic carbon fraction in sediments suspended in the water column. Valid values are 0 to 1. The default value of 0.02 is from Table 3 (assumed equivalent to the organic carbon fraction in sediments) of McKone, T.E., A.B. Bodnar, and E.G. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. Lawrence Berkeley National Laboratory. LBNL-43722. Available online at: https://escholarship.org/uc/item/9f1164rk. For site-specific values, it is typical to assume the same value as Water Body Organic Carbon Fraction in Sediment Bed (also a model input).'
+                'helpText': 'Enter the organic carbon fraction in sediments suspended in the water column. Valid values are 0 to 1. The default value of 0.02 is from Table 3 (assumed equivalent to the organic carbon fraction in sediments) of McKone et al. 2001 (Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models). For site-specific values, it is typical to assume the same value as Water Body Organic Carbon Fraction in Sediment Bed (also a model input). See the TRIM User Guide Appendix for full reference information.'
             },
             'Water Column Suspended Sediment Concentration':{
                 'short_name':'suspended_sed_conc',
                 'is_editable': true,
                 'default_value': 0.05,
                 'unit': 'kg [sediment particles]/m<sup>3</sup> [water]',
-                'helpText': 'Enter the concentration of suspended sediments in the water column. Valid values are >= 0. The default value of 0.05 is based on the value of 0.088 used in the CalTOX model (see Table 1 of: CalEPA (California Environmental Protection Agency), Department of Toxic Substances Control. 1996. The Distribution of California Landscape Variables for CalTOX. Draft (February). Available online at: https://dtsc.ca.gov/wp-content/uploads/sites/31/2018/01/landscap-2.pdf). The data from which the 0.088 average was calculated (from 14 California water quality sites) had a large standard deviation (also 0.088). Screening scenarios have shown TRIM to be sensitive to this parameter, with higher values generally leading to lower concentrations in fish. As such, we utilize a more conservative default value of 0.05 (professional judgment), but we recommend utilizing site-specific values where available. Sources of site-specific data might include the Water Quality Portal of the National Water Quality Monitoring Council (available online at: http://www.waterqualitydata.us/; includes data from U.S. Geological Survey National Water Information System and U.S. Environmental Protection Agency STORET data warehouses), state department of environment or natural resources, and state or local watershed watch or lake stewardship programs.'
+                'helpText': 'Enter the concentration of suspended sediments in the water column. Valid values are >= 0. The default value of 0.05 is based on the value of 0.088 used in the CalTOX model (see Table 1 of CalEPA 1996 [The Distribution of California Landscape Variables for CalTOX]). The data from which the 0.088 average was calculated (from 14 California water quality sites) had a large standard deviation (also 0.088). Screening scenarios have shown TRIM to be sensitive to this parameter, with higher values generally leading to lower concentrations in fish. As such, we utilize a more conservative default value of 0.05 (professional judgment), but we recommend utilizing site-specific values where available. Sources of site-specific data might include the Water Quality Portal of the National Water Quality Monitoring Council (available online at: http://www.waterqualitydata.us/; includes data from U.S. Geological Survey National Water Information System and U.S. Environmental Protection Agency STORET data warehouses), state department of environment or natural resources, and state or local watershed watch or lake stewardship programs. See the TRIM User Guide for full reference information.'
             },
             'Water Column External Sediment Inflow from Other Water Bodies':{
                 'short_name':'sed_inflow',
@@ -180,7 +180,7 @@
                 'is_editable': true,
                 'default_value': 2,
                 'unit': 'm [water]/d',
-                'helpText': 'N/A'
+                'helpText': 'Enter the sediment deposition velocity in the water column. The default of 2 is for fine silt with a diameter of 0.005 mm and is from Section B.2.22 of U.S. EPA 1997 (Mercury study report to Congress, volume III: fate and transport of mercury in the environment). There is no typical source of site-specific values. See the TRIM User Guide Appendix for full reference information.'
             },
             'Water Column Sediment Discharge Rate':{
                 'short_name':'sed_discharge_rate',
@@ -210,7 +210,7 @@
                 'is_editable': true,
                 'default_value': 0.7,
                 'unit': 'm [water]/y',
-                'helpText': 'Enter the evaporation rate of the water body. Valid values are >= 0. The default value is 0.7, from Table 11 (approximately the value of 0.002 m/d [0.73 m/y] estimated for Wisconsin and Illinois, and similar to the value of 0.0021 m/d [0.77 m/y] estimated for many northeastern states) of McKone, T.E., A.B. Bodnar, and E.G. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. Lawrence Berkeley National Laboratory. LBNL-43722. Available online at: https://escholarship.org/uc/item/9f1164rk. This reference provides values for other states that range from 0.0011 m/d [0.40 m/y] in Maine and New Hampshire to 0.007 m/d [2.6 m/y] in Arizona, which might be more appropriate for site-specific simulations.'
+                'helpText': 'Enter the evaporation rate of the water body. Valid values are >= 0. The default value is 0.7, from Table 11 (approximately the value of 0.002 m/d [0.73 m/y] estimated for Wisconsin and Illinois, and similar to the value of 0.0021 m/d [0.77 m/y] estimated for many northeastern states) of McKone et al. 2001 (Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models). This reference provides values for other states that range from 0.0011 m/d [0.40 m/y] in Maine and New Hampshire to 0.007 m/d [2.6 m/y] in Arizona, which might be more appropriate for site-specific simulations. See the TRIM User Guide Appendix for full reference information.'
             },
             'Water Column Evaporation Volumetric Rate':{
                 'short_name':'evaporation_vol_rate',
@@ -225,7 +225,7 @@
                 'is_editable': true,
                 'default_value': 0,
                 'unit': 'm<sup>3</sup> [water]/y',
-                'helpText': 'Enter the volumetric inflow rate of water received from other water bodies. Valid values are >= 0. The default value is 0 (i.e., assumption of no inflow from other water bodies). If that assumption is not valid, this inflow can be equal to (or some fraction of) the other water bodyâ€™s discharge, which is based on that other water bodyâ€™s Water Column Flush Rate.'
+                'helpText': 'The volumetric inflow rate of water received from other water bodies. The default value assumes no inflow from other water bodies. If the assumption of no inflow from other water bodies is not valid, this inflow can be equal to (or some fraction of) the other water body’s discharge, which is based on that other water body’s Water Column Flush Rate. To accomplish this, use the dropdown to identify the connecting water body (or bodies). Then click the green/blue icon, where you then will enter the fraction of the selected water body’s discharge that flows into this water body.'
             },
             'Precipitation Runoff Watershed Area':{
                 'short_name':'precip_runoff_watershed_area',
@@ -273,7 +273,7 @@
                 'is_editable': true,
                 'default_value': 2600,
                 'unit': 'kg [sediment particles]/m<sup>3</sup> [sediment particles]',
-                'helpText': 'Enter the density of dry sediment in the water bodyâ€™s sediment bed (i.e., the unburied sediment). Valid values are > 0. The default value of 2600 is from Table 3 of McKone, T.E., A.B. Bodnar, and E.G. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. Lawrence Berkeley National Laboratory. LBNL-43722. Available online at: https://escholarship.org/uc/item/9f1164rk. There is no typical source of site-specific values.'
+                'helpText': 'Enter the density of dry sediment in the water body\'s sediment bed (i.e., the unburied sediment). Valid values are > 0. The default value of 2600 is from Table 3 of McKone et al. 2001 (Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models). There is no typical source of site-specific values. See the TRIM User Guide Appendix for full reference information.'
             },
             'Sediment Bed pH':{
                 'short_name':'bed_pH',
@@ -287,14 +287,14 @@
                 'is_editable': true,
                 'default_value': 0.02,
                 'unit': 'unitless',
-                'helpText': 'Enter the organic carbon fraction in sediments in the sediment bed (i.e., the unburied sediment). Valid values are 0 to 1. The default value of 0.02 is from Table 3 of McKone, T.E., A.B. Bodnar, and E.G. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. Lawrence Berkeley National Laboratory. LBNL-43722. Available online at: https://escholarship.org/uc/item/9f1164rk. Also, approximately the lowest value obtained from surface sediments in 46 Minnesota lakes (range: 0.029 to 28.6), from appendix to Dean, W.E., E. Gorham, and D.J. Swaine. 1993, Geochemistry of surface sediments of Minnesota lakes, in Bradbury, J.P., and W.E. Dean, eds., Elk Lake, Minnesotaâ€”Evidence for rapid climate change in the north-central United States: Geological Society of America, Special Paper 276, p. 115â€“134. Many contaminants will sorb to organic carbon, so it is health-protective to assume a lower value. Sources of site-specific data might include state departments of natural resources or environmental protectionâ€”organic carbon content is measured when sediment samples are analyzed for organic contaminants.'
+                'helpText': 'Enter the organic carbon fraction in sediments in the sediment bed (i.e., the unburied sediment). Valid values are 0 to 1. The default value of 0.02 is from Table 3 of McKone et al. 2001 (Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models). Also, approximately the lowest value obtained from surface sediments in 46 Minnesota lakes (range: 0.029 to 28.6), from Dean et al. 2006 (Characterization of organic matter in lake sediments from Minnesota and Yellowstone National Park). Many contaminants will sorb to organic carbon, so it is health-protective to assume a lower value. Sources of site-specific data might include state departments of natural resources or environmental protection: organic carbon content is measured when sediment samples are analyzed for organic contaminants. See the TRIM User Guide Appendix for full reference information.'
             },
             'Sediment Bed Porosity':{
                 'short_name':'bed_porosity',
                 'is_editable': true,
                 'default_value': 0.6,
                 'unit': 'unitless',
-                'helpText': 'Enter the porosity of the sediment bed (i.e., the ratio of the volume of the pore space in the sediment bed to the overall volume of the sediment bed). Valid values are 0 to 1. The default value of 0.6 is from â€¦. There are no typical sources of site-specific values.'
+                'helpText': 'Enter the porosity of the sediment bed (i.e., the ratio of the volume of the pore space in the sediment bed to the overall volume of the sediment bed). Valid values are 0 to 1. The default value of 0.6 is based on the value of 0.2 used in Table 3 of McKone et al. 2001 (Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models). Screening scenarios with TRIM have shown that higher values generally lead to higher concentrations in fish. As such, we utilize a more conservative default value of 0.6 (midpoint between 0.2 and 1.0; professional judgment). See the TRIM User Guide Appendix for full reference information. There are no typical sources of site-specific values.'
             },
             'Sediment Resuspension Velocity':{
                 'short_name':'sed_resuspension_vel',

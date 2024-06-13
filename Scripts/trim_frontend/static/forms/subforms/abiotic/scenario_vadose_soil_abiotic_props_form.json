@@ -16,7 +16,7 @@
       "data_type": "float",
       "default": 1.4,
       "tooltip": "(m)",
-      "help": "Enter the thickness of the vadose zone. Valid values are > 0. The default value of 1.4 is from Table 17 - U.S. Average from McKone, T.E., A. Bodnar, and E. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. University of California at Berkeley. Supported by U.S. Environmental Protection Agency (Sustainable Technology Division, National Risk Management Research Laboratory) and Environmental Defense Fund. July. LBNL-43722. Available online at: <a href='https://escholarship.org/uc/item/9f1164rk' target='_blank'>https://escholarship.org/uc/item/9f1164rk</a>."
+      "help": "Enter the thickness of the vadose zone. Valid values are > 0. The default value of 1.4 is from Table 17 - U.S. Average from McKone et al. 2001 (Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models). See the TRIM User Guide Appendix for full reference information."
     },
     {
       "id": "VolumeFraction_Vapor",
@@ -24,7 +24,7 @@
       "data_type": "float",
       "default": 0.28,
       "tooltip": "volume [air]/volume [compartment]",
-      "help": "Enter the volume fraction of air in the soil layer (volumetric pore space occupied by air). Valid values are 0 to 1. The default value of 0.28 is the U.S. average in Table 15 of McKone, T.E., A. Bodnar, and E. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. University of California at Berkeley. Supported by U.S. Environmental Protection Agency (Sustainable Technology Division, National Risk Management Research Laboratory) and Environmental Defense Fund. July. LBNL-43722. Available online at: <a href='https://escholarship.org/uc/item/9f1164rk' target='_blank'>https://escholarship.org/uc/item/9f1164rk</a>. For wetland parcels, a value of 0.1 might be appropriate (professional judgment)."
+      "help": "Enter the volume fraction of air in the soil layer (volumetric pore space occupied by air). Valid values are 0 to 1. The default value of 0.28 is the U.S. average in Table 15 of McKone, T.E., A. Bodnar, and E. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. University of California at Berkeley. Supported by U.S. Environmental Protection Agency (Sustainable Technology Division, National Risk Management Research Laboratory) and Environmental Defense Fund. July. LBNL-43722. Available online at https://escholarship.org/uc/item/9f1164rk. For wetland parcels, a value of 0.1 might be appropriate (professional judgment)."
     },
     {
       "id": "Average vertical velocity of water (percolation)",

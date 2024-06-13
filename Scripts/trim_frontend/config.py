@@ -5,6 +5,10 @@ app_folder = os.path.abspath(os.path.dirname(__file__))
 root = os.path.dirname(app_folder)
 has_mail = os.getenv('MAIL_USERNAME') is not None
 
+os.environ["MYSQLPASSWORD"] = "FZ!ndah1191240!"
+os.environ["FLASK_DEBUG"] = ""
+os.environ["SECRET_KEY"] = "dcf917c34aec178987494a853bffa479"
+
 if 'SQLITE_DB_NAME' in os.environ:
     db_uri = f'sqlite:///{root}/database.db'
 else:
@@ -29,6 +33,9 @@ else:
         PORT = "3306"
         DBNAME = "pytrim"
     db_uri = f'mysql+pymysql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}'
+
+os.environ["SQLALCHEMY_DATABASE_URI"] = f'mysql+pymysql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}'
+SQLALCHEMY_DATABASE_URI = f'mysql+pymysql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}'
 
 class AppConfig:
     # Template config

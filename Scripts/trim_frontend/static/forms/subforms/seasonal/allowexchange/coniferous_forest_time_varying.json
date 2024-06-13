@@ -15,7 +15,7 @@
         {
             "id": "static_value",
             "label": "Static Value of Allow Exchange for Coniferous Forest",
-            "help": "Select a single value of 'allow exchange' to use for coniferous forest throughout your model run. The default value is to allow exchange (1)."
+            "help": "Enter a single value of 'allow exchange' to use for coniferous forest throughout your model run. The default value is to allow exchange (1)."
         }
     ]
 }
