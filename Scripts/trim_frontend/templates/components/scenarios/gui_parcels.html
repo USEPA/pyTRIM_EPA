@@ -65,14 +65,7 @@
                 <table class="hover" id="mapTable">
                     <thead>
                         <tr>
-                            <th data-toggle="tooltip" data-placement="top" data-html="true" title="">Parcel Name
-                                <sup>
-                                <a href="javascript:void(0);" title="" data-toggle="popover" data-html="true" data-placement="left" 
-                                data-content="(not editable here) A short, unique name you provided the parcel when creating it in the map utility." data-original-title="Parcel Name">
-                                    <i class="fa fa-question"></i>
-                                </a>
-                                </sup>
-                            </th>
+                            <th data-toggle="tooltip" data-placement="top" data-html="true" title="">Parcel Name</th>
                             <th data-toggle="tooltip" data-placement="top" data-html="true" title="">Description</th>
                             <th data-toggle="tooltip" data-placement="top" data-html="true" title="(km<sup>2</sup>)">Area</th>
                             <th data-toggle="tooltip" data-placement="top" data-html="true" title="">Parcel Type</th>
@@ -208,9 +201,10 @@
             shapes = parcels.toGeoJSON()
         }
 
-        let mapTable = $('#mapTable').removeAttr('width').DataTable()
+        let mapTable = null;
         function mapTableRedraw() {
             let tblId = "#mapTable"
+            mapTable = $(tblId).removeAttr('width').DataTable();
             // console.log(shapes.features)
 
             mapTable.clear().draw();

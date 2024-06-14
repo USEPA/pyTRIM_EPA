@@ -368,6 +368,9 @@ class CustomParameter(Model):
         if not self.definition.domain.validate(entity):
             return False
 
+        if not (self.requirements or '').strip():
+            return True
+
         if not hasattr(self, '_validator'):
             setattr(self, '_validator', as_function(self.requirements))
         return self._validator(self=entity) or False
