@@ -26,7 +26,7 @@
           "untilled": 0.01
       },
       "tooltip": "(m)",
-      "help": "Enter the thickness of an tilled/untilled layer of surface soil. Valid values are > 0. The default value of 0.01 is from p. 30 of McKone, T.E., A. Bodnar, and E. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. University of California at Berkeley. Supported by U.S. Environmental Protection Agency (Sustainable Technology Division, National Risk Management Research Laboratory) and Environmental Defense Fund. July. LBNL-43722. Available online at: https://escholarship.org/uc/item/9f1164rk."
+      "help": "Enter the thickness of the surface soil. Valid values are > 0. The default value of 0.01 for untilled soils is from p. 30 of McKone et al. 2001 (Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models). The default value of 0.20 for tilled soils is from U.S. EPA 2005 (Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities, including the Hazardous Waste Companion Database of chemical-specific parameter values). See the TRIM User Guide Appendix for full reference information."
     },
     {
       "id": "VolumeFraction_Vapor",

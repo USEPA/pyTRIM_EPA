@@ -574,7 +574,10 @@
             let abiotic_data = []
             if (parcels.length > 0) {
                 parcels.forEach(function (e, i) {
-                    let till_val = e.tillage == "Yes" ? "tilled" : "untilled";
+                    let till_val = "untilled";
+                    if (e.soilTillage == "Yes" || e.soilTillage == true) {
+                        till_val = "tilled";
+                    }
                     let s = e.hasLand == "Yes" ? e["soil_params"] : e;
                     let comps = ["Soil_Surface", "Soil_Root_Zone", "Soil_Vadose_Zone", "Groundwater"]
                     let param_dict = {
