@@ -1,3 +1,5 @@
+import csv
+import io
 import os
 import pandas as pd
 import traceback
@@ -8,12 +10,15 @@ from flask_security import login_required
 from werkzeug.utils import secure_filename
 from flask_api import ApiException, ApiResult
 from trim_db.schema import *
+from trim_db.schema.entities.environment import Parcel
 from trim_db.services import *
+from trim_db.services.entities import ParcelService
 from trim_frontend import api
+from ..utils.data_structures import calculate_list_depth
 from ..utils.file_io import csv_to_df
 from ..utils.forms import assemble_json_form
 from ..utils.logging import make_logger
-from ..utils.spatial import *
+from ..utils.spatial import determine_location, determine_nearest_neighbor_distance, is_utm_zone_valid, translate_coordinates
 
 
 file_api = Blueprint('file_api', __name__)
@@ -23,7 +28,6 @@ api.use_api_errors(file_api)
 @file_api.route('/api/file', methods=['POST'])
 @login_required
 def parse():
-
     logger = make_logger('file_uploader')
 
     files = request.files
@@ -224,6 +228,127 @@ def parse_aermod():
 
     return ApiResult({'aermod_result': res_json})
 
+
+@file_api.route('/api/parcel_file', methods=['POST'])
+@login_required
+def parse_parcel_upload():
+    scenario_id = [v for k, v in request.form.items() if k == 'scenario_id'][0]
+    coord_system = [v for k, v in request.form.items() if k == 'coord_system'][0]
+    raw_utm_zone = [v for k, v in request.form.items() if k == 'utm_zone'][0]
+
+    errors = []
+
+    default_utm_zone = None
+
+    if coord_system == "UTM":
+        valid_zone, default_utm_zone = is_utm_zone_valid(raw_utm_zone)
+        if not valid_zone:
+            errors.append("Invalid default utm zone '{raw_utm_zone}' supplied.")
+
+    files = request.files
+
+    if not files:
+        errors.append("No files were uploaded")
+
+    if len(errors) == 0:
+
+        fpn = [f.stream for n, f in files.items()][0]
+        try:
+            fpn.seek(0)
+            lines = fpn.read().decode("utf-8")
+            csv_reader = csv.DictReader(io.StringIO(lines))
+
+            line_num = 2
+            parcels_to_save = []
+            for row in csv_reader:
+                parcel_name = row.get("ParcelName")
+                parcel_type = row.get("ParcelType")
+                is_air = row.get("Air", "").upper() == "YES"
+                is_land_use = row.get("LandUse", "").upper() == "YES"
+                is_farm_food_chain = row.get("FarmFoodChain", "").upper() == "YES"
+                is_fish_food_web = row.get("FishFoodWeb", "").upper() == "YES"
+                is_wetland = row.get("Wetland", "").upper() == "YES"
+                raw_coords = row.get("coordinates")
+
+                # print(f"PARCEL NAME: {parcel_name}, TYPE: {parcel_type}, AIR: {is_air}, LAND USE: {is_land_use}, FARM FOOD CHAIN: {is_farm_food_chain}, FISH FOOD WEB: {is_fish_food_web}, WETLAND: {is_wetland}, COORDS: {raw_coords}")
+
+                # we'll accept either a 3 level list...
+                # OUTERMOST LIST 1 == multiple polygons
+                # MIDDLE LIST 2 == group of coords; i.e. the full vertices of the polygon
+                # INNERMOST LIST 3 == x/y coord; a single point of a parcel's polygon
+                #
+                # ...or we'll allow the user to optionally omit the outermost list; we'll add it for them after we check depth
+                try:
+                    parsed_coords = json.loads(raw_coords)
+                    if calculate_list_depth(parsed_coords) == 2:
+                        parsed_coords = [parsed_coords]
+
+                    # now parsed coords is definitely nested3 lists
+                    fixed_coords = []
+                    for polygon_definition in parsed_coords:
+                        # print(f"CHECKING POLYGON: {polygon_definition}")
+
+                        if coord_system == "WGS84 Longitude/Latitude":
+                            fixed_coords.append(polygon_definition)
+                        else:
+                            longlat_poly = translate_coordinates(polygon_definition, coord_system, "WGS84_LONGLAT", default_utm_zone=default_utm_zone)
+                            fixed_coords.append(longlat_poly)
+                    print(f"COORDS: {fixed_coords}")
+
+                    # now fixed_coords is definitely nested3 lists of long/lat pairs
+                    # ch = ChemicalService.get(id=32)
+
+                    print(f"hit service {ParcelService} / {Parcel}...")
+
+                    # note - we currently only support a single polygon, so we are just taking
+                    # the first one.
+                    p = Parcel(name=parcel_name, scenario_id=scenario_id, vertices=fixed_coords[0])
+                    parcels_to_save.append(p)
+                    # save one at a time? Nah, bulk it
+                    # ParcelService.db.session.add(p)
+                    """
+                    # why didn't this work...
+                    p = ParcelService.create(no_commit=True)
+                    print(f"soft created '{p}'")
+                    p.name = parcel_name
+                    p.scenario_id = scenario_id
+                    p.vertices = json.dumps(fixed_coords)
+
+                    foo = ParcelService.commit()
+                    print(f"really created '{p}' / {foo}")
+                    """
+                    """
+                    # we're not yet doing anything with any of the following data in the upload...
+                    parcel_type
+                    is_air
+                    is_land_use
+                    is_farm_food_chain
+                    is_fish_food_web
+                    is_wetland
+                    """
+
+                    print("A OK ALL DONE!!!")
+                    # update_parcel(-1, -1)
+                except Exception as e:
+                    errors.append(f"Error parsing coordinates at line {line_num}: {e}")
+
+                line_num += 1
+
+            lines = lines.split("\r\n")
+        except Exception:
+            errors.append("Unable to open file")
+
+    if len(errors) == 0 and len(parcels_to_save) > 0:
+        # ParcelService.db.session.bulk_save_objects(parcels_to_save)
+        # ParcelService.commit()
+        pass
+
+    if len(errors) > 0:
+        raise ApiException("; ".join(errors))
+    else:
+        return ApiResult({
+            "fakeData": "from tom"
+        })
 
 root = os.path.dirname(os.path.abspath(__file__))
 static = os.path.abspath(os.path.join(root, '../static'))

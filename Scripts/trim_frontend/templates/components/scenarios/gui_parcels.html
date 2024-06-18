@@ -4,19 +4,45 @@
     data-form-src="scenario_parcels_form"
 >
     <section class="container px-0">
-        <div class="row mb-1">
-            <div class="col-sm">
-                <div data-slot="true" data-target="parcels_file"></div>
-                <div class="form-text mb-2">
-                    <small class="text-muted">
-                        <a href="{{ url_for(
-                            'static', filename='templates/parcels.csv'
-                        ) }}">Click here</a> to download the template for creating a CSV parcels file.
-                    </small>
-                </div>
-                <div data-slot="true" data-target="parcel_coordinates_description"></div>
-            </div>
-        </div>
+		<fieldset>
+<!-- TODO - move this styling into css file! -->
+<style>
+	fieldset {
+		border: 1px solid;
+		margin: 5px;
+		padding: 5px;
+	}
+	legend {
+		width: inherit;
+		padding: 2px;
+	}
+</style>
+			<legend>Parcel Upload</legend>
+			<div class="row mb-1">
+				<div class="col-sm">
+					<div data-slot="true" data-target="parcels_file"></div>
+					<div class="form-text mb-2">
+						<small class="text-muted">
+							<a href="{{ url_for(
+								'static', filename='templates/parcels.csv'
+							) }}">Click here</a> to download the template for creating a CSV parcels file.
+						</small>
+					</div>
+
+					<div class="row mb-1 subform">
+						<div class="col-md">
+							<div data-slot="true" data-target="upload_coordinates_system"></div>
+						</div>
+						<div class="col-md" style="opacity:0">
+							<div data-slot="true" data-target="upload_utm_zone"></div>
+						</div>
+					</div>
+
+					<!-- <div data-slot="true" data-target="parcel_coordinates_description"></div> -->
+					<a id="upload-btn" href="#" class="btn btn-secondary"><i class="fas fa-upload mr-1"></i>Upload</a>
+				</div>
+			</div>
+		</fieldset>
         <div id="parcel_file_fields_div">
             <div class="row">
                 <div class="col-sm">
@@ -144,7 +170,76 @@
             // console.log(form)
             // console.log(TRIM.store.currentScenario.parcels)
             TRIM.refreshParcels();
+
+			enableParcelFileUploadUi();
         }
+
+		function onUploadCoordinateSystemChanged() {
+			let parcelGui = $("#parcels-gui");
+			let coordsSystem = parcelGui.find("#upload_coordinates_system");
+			let utmZone = parcelGui.find("#upload_utm_zone");
+
+			// show/hide the div containing the UTM zone widget
+			utmZone.parents("div[class='col-md']").css("opacity", (coordsSystem.val() == "UTM" ? 1 : 0));
+		}
+
+		// zones are 1A-60Z with no I/O. case/whitespace insensitive.
+		function isValidUtmZone(z) {
+			let cleanedZone = z.trim().replaceAll(" ", "").toUpperCase();
+			const regex = /^([1-9]|[1-5][0-9]|60)([A-HJ-NP-Z])$/gm;
+
+			return (regex.exec(cleanedZone) != null);
+		}
+
+		function enableParcelFileUploadUi() {
+			let parcelGui = $("#parcels-gui");
+
+			let parcelFile = parcelGui.find("#parcels_file");
+			let coordsSystem = parcelGui.find("#upload_coordinates_system");
+			let utmZone = parcelGui.find("#upload_utm_zone");
+			let parcelUploader = parcelGui.find("#upload-btn");
+
+			coordsSystem.on('change', onUploadCoordinateSystemChanged);
+			onUploadCoordinateSystemChanged();
+
+			parcelUploader.on('click', function() {
+				let parcelFileData = parcelFile.prop('files')[0];
+
+				if (parcelFileData == undefined) {
+					alert('Please select a file to upload.');
+					return false;
+				} else if (coordsSystem.val() == "UTM") {
+					if (!isValidUtmZone(utmZone.val())) {
+						alert('Please enter a valid UTM zone (e.g. 16T, 32A, etc.).');
+						return false;
+					}
+				}
+
+				// if we made it here, we're good to submit to server
+				let fieldData = [parcelFile.get(0)];
+
+				fieldData.push({
+					"type": "input",
+					"name": "scenario_id",
+					"value": {{ scenario.id }}
+				});
+
+				fieldData.push({
+					"type": "input",
+					"name": "coord_system",
+					"value": coordsSystem.val()
+				});
+
+				fieldData.push({
+					"type": "input",
+					"name": "utm_zone",
+					"value": coordsSystem.val() == "UTM" ? utmZone.val() : "n/a"
+				});
+
+				TRIM.api.uploadParcelFile(fieldData);
+				return false;
+			});
+		}
 
         function drawAllParcels() {
             TRIM.forms.populate(form, TRIM.store.currentScenario);
