@@ -341,6 +341,12 @@ def update_scenario():
                 this_param.value = ts_date
                 ParameterService.update(this_param)
             ParameterService.commit()
+        elif field_name == "chemical": # emission settings, add/remove chemicals from a scenario
+            new_chem = ChemicalService.get(name=scenario_data["chemical"])
+            if new_chem in s.chemicals:
+                s.chemicals.remove(new_chem)
+            else:
+                s.chemicals.append(new_chem)
 
     except Exception as e:
         logger.error(traceback.format_exc())

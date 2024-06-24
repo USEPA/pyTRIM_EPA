@@ -414,6 +414,14 @@ def update_parcel(id, scenario_id):
             chem = ChemicalService.get(name=parcels_data["chemical_name"])
             if len(src_par) > 0:
                 src_par = src_par[0]
+
+                # Create new custom parameter with a new formula if one doesn't exist
+                if isinstance(src_par, ParameterDefinition):
+                    comp_req = f'(self.id == {src_comp.id})'
+                    new_formula_obj = FormulaService.create(equation=src_par.default_formula.equation)
+                    src_par = ParameterService.get_or_create(definition=src_par, requirements=comp_req,
+                                                            scenario=p.scenario, unit=src_par.default_unit, formula_id=new_formula_obj.id)
+
                 eq = src_par.formula.equation
                 # We have the chemical in the formula
                 if f'chemical.id == {str(chem.id)}' in eq:

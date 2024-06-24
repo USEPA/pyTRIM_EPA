@@ -296,6 +296,7 @@
         function submit_meteo_value(elem) {
             let param_info = get_form_data(elem)
             if (elementIsValid($(elem).parent())){
+                console.log(param_info);
                 let resp = TRIM.api.updateScenario(param_info).on('load',function(){
                     let val_resp = this.responseJSON
                     if (val_resp) {
