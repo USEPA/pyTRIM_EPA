@@ -421,6 +421,7 @@ def update_parcel(id, scenario_id):
                     new_formula_obj = FormulaService.create(equation=src_par.default_formula.equation)
                     src_par = ParameterService.get_or_create(definition=src_par, requirements=comp_req,
                                                             scenario=p.scenario, unit=src_par.default_unit, formula_id=new_formula_obj.id)
+                    ParameterService.commit()
 
                 eq = src_par.formula.equation
                 # We have the chemical in the formula

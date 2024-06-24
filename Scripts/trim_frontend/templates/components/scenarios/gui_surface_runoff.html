@@ -116,6 +116,23 @@
                 }
             });
 
+            let sort_order = "asc"
+            $('.sortClass').click(function(e){
+                e.preventDefault();
+                let Table = $(air_tblId, air_tblId, root_tblId, vadose_tblId, gw_tblId).dataTable()
+                let cellIndex = $(this).closest("th").index()
+                Table.fnSort([[cellIndex,sort_order]]);//use asc/desc as you want
+                sort_order= sort_order == "desc" ? "asc" : "desc"
+            });
+
+            $('label.editableCell').click(function () {
+                $(this).siblings("input").show()
+                $(this).siblings("select").show()
+                $(this).prev("input").focus()
+                $(this).prev("select").focus()
+                $(this).hide();
+            });
+
             // save modified cell
             $(`input.editableCell, select.editableCell`).blur(function () {
                 let this_input = this
