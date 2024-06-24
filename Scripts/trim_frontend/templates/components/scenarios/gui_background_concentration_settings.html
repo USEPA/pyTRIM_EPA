@@ -110,6 +110,13 @@
 
             let fieldset = $('#background_chemicals-add-btn').closest("fieldset")
             $('#background_chemicals-add-btn').hide()
+
+            // clear existing fields
+            fieldset.find('[data-pill-id]').each(function() {
+                var i = this.getAttribute('data-pill-id')
+                TRIM.functions.removeTabFromFieldList(fieldset[0], i);
+            });
+
             TRIM.store.currentScenario.chemicals.map(x => x.name).forEach((sc, i) => {
                 window.TRIM.functions.addTabToFieldList(fieldset[0], sc)
 

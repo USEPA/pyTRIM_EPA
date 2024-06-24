@@ -207,6 +207,7 @@
                 let parcel_info = get_form_data(elem_list)
                 let elem = elem_list[0]
                 if (elementIsValid($(elem).closest('tr'))){
+                    console.log(parcel_info)
                     TRIM.api.updateParcel('{{ scenario.id }}',parcel_info).on('load',function(){
                         let msg =  this.responseJSON["message"]
                         if (msg != "success") {
