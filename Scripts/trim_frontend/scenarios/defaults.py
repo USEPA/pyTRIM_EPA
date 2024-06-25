@@ -17,9 +17,9 @@ def serialize_scenario(scen: Scenario):
     }
     return s
 
-def set_param_default(param_name, val, unit=None):
+def set_param_default(kwargs, val, unit=None):
     try:
-        default_param = ParameterService.definitions.get(variable_name=param_name)
+        default_param = ParameterService.definitions.get(**kwargs)
         if default_param.default_value:
             return
         
@@ -34,7 +34,8 @@ def set_param_default(param_name, val, unit=None):
 
 def get_met_data(scen):
     # set defaults first
-    set_param_default("Rain", 0.0041) # Precipitation
+    set_param_default({"variable_name":"AirTemperature", "default_unit":"K"}, 278) # Air Temperature
+    set_param_default({"variable_name":"Rain"}, 0.0041) # Precipitation
 
     ambient_air_temp = scen.AirTemperature
     if ambient_air_temp:

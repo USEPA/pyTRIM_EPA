@@ -179,7 +179,6 @@ def update_scenario():
     ret_val = ''
 
     def create_new_custom_param_meteo(scen, comp, par_name):
-        print(par_name)
         default_param = ParameterService.definitions.get_all(variable_name=par_name)
         
         if par_name == "AirTemperature":
