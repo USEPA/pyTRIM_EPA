@@ -178,9 +178,33 @@ def update_scenario():
     logger = make_logger('scenario_api_update')
     ret_val = ''
 
-    def update_custom_param(scen, comp, par_name, par_val):
+    def create_new_custom_param_meteo(scen, comp, par_name):
+        print(par_name)
+        default_param = ParameterService.definitions.get_all(variable_name=par_name)
+        
+        if par_name == "AirTemperature":
+                default_param = ParameterService.definitions.get(variable_name=par_name, default_unit="K")
+        elif par_name == "WetDepInterceptionFraction_UserSupplied":
+            pass
+        elif len(default_param) > 1: 
+            print(f"\tTried to create new custom parameter but multiple defaults found!\n{default_param}")
+            default_param = default_param[0]
+        else:
+            default_param = default_param[0]
+
+        return ParameterService.get_or_create(definition=default_param, scenario=scen, 
+                                                            requirements=f'self.id == {comp.id}',
+                                                            unit=default_param.default_unit, 
+                                                            formula_id=default_param.default_formula_id)
+
+    def update_custom_param(scen, comp, par_name, par_val, create_if_dne = False):
         par_list = [p for p in scen.custom_params if
                     p.definition.variable_name == par_name and f'self.id == {comp.id}' in p.requirements]
+        print(f"\t{par_list}")
+        
+        if not par_list and create_if_dne:
+            par_list.append(create_new_custom_param_meteo(scen, comp, par_name))
+
         for c_p in par_list:
             c_p.value = par_val
             ParameterService.update(c_p)
@@ -301,15 +325,15 @@ def update_scenario():
                     # TODO Why is this not working???
                     # c.parameters.get(param_name).value = scenario_data[field_name]
                     # CompartmentService.update(c)
-                    update_custom_param(s, c, param_name, scenario_data[field_name])
+                    update_custom_param(s, c, param_name, scenario_data[field_name], create_if_dne=False)
             else:
                 param_name = param_map["meteo"].get(field_name)
                 param_data = scenario_data[field_name]
                 if "_static_" in field_name:
-                    update_custom_param(s, s, param_name, param_data)
+                    update_custom_param(s, s, param_name, param_data, create_if_dne=True)
                 elif field_name.endswith("_TS"):
                     ret_val = meteo_wgt_avg_value_from_timeseries(param_data, "MET")
-                    update_custom_param(s, s, param_name, list(ret_val.values())[0])
+                    update_custom_param(s, s, param_name, list(ret_val.values())[0], create_if_dne=True)
         elif field_name.startswith("seasonal_"):  # Data from the seasonal dynamics tab
             param_media = param_map["seasonal"].get(field_name)[0]
             param_name = param_map["seasonal"].get(field_name)[1]

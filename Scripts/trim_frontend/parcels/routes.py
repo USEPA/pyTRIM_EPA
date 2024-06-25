@@ -419,6 +419,7 @@ def update_parcel(id, scenario_id):
                 if isinstance(src_par, ParameterDefinition):
                     comp_req = f'(self.id == {src_comp.id})'
                     new_formula_obj = FormulaService.create(equation=src_par.default_formula.equation)
+                    FormulaService.commit()
                     src_par = ParameterService.get_or_create(definition=src_par, requirements=comp_req,
                                                             scenario=p.scenario, unit=src_par.default_unit, formula_id=new_formula_obj.id)
                     ParameterService.commit()
@@ -454,6 +455,16 @@ def update_parcel(id, scenario_id):
             sender_par = [sender_comp.parameters.get("FractionOfTotalRunoff")]
             if len(sender_par) > 0:
                 sender_par = sender_par[0]
+
+                # Create new custom parameter with a new formula if one doesn't exist
+                if isinstance(sender_par, ParameterDefinition):
+                    comp_req = f'(self.id == {sender_comp.id})'
+                    new_formula_obj = FormulaService.create(equation=sender_par.default_formula.equation)
+                    FormulaService.commit()
+                    sender_par = ParameterService.get_or_create(definition=sender_par, requirements=comp_req,
+                                                            scenario=p.scenario, unit=sender_par.default_unit, formula_id=new_formula_obj.id)
+                    ParameterService.commit()
+
                 eq = sender_par.formula.equation
                 for ri, rec in enumerate(receivers):
                     receiver_name = rec.replace("ro_", "")
