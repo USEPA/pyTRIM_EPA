@@ -107,7 +107,7 @@ def update_parcel(id, scenario_id):
         Air_params = [('dustLoad', "DustLoad"),
                       ("dustDensity", "DustDensity"),
                       ("airDensity", "AirDensity"),
-                      ("fractionOrganicMatterOnParticulates", "FractionOrganicMatterOnParticulates")]
+                      ("fractionOrganicMatterOnParticulates", "FractionOrganicMatteronParticulates")]
 
         # Update the specified property
         field_name = parcels_data["field"]
@@ -219,7 +219,18 @@ def update_parcel(id, scenario_id):
             # the below part was generating error due to missing par for dustLoad, dustDensity etc...
             cmp = [c for c in p.compartments if "Air in Air_" in c.standard_name][0]
             par = cmp.parameters.get(par_name)
+
+            # if custom parameter doesn't exist
+            if isinstance(par, ParameterDefinition):
+                par = ParameterService.get_or_create(definition=par, scenario_id=p.scenario_id, 
+                                                    requirements=f'self.id == {cmp.id}',
+                                                    unit=par.default_unit, 
+                                                    formula_id=par.default_formula_id)
+                ParameterService.commit()
+
             par.value = parcels_data[field_name]
+            ParameterService.update(par)
+            ParameterService.commit()
         # Note that 0 is the fixed datum for volume element boundary locations
         if field_name == "airHeight":
             for co in p.compartments:
