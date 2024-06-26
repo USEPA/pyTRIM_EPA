@@ -196,7 +196,7 @@
                     'ro_' + receiver
                     )
                 param_info[4]['value'].push(
-                    Number((elem).val()) // standardize value e.g. '.5' -> '0.5'
+                    Number($(elem).val()) // standardize value e.g. '.5' -> '0.5'
                     )
             })
             return param_info

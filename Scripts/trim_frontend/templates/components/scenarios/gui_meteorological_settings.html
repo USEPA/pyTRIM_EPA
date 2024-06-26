@@ -144,7 +144,6 @@
 <script>
     onDomLoad(function(e) {
         var form = document.getElementById('met-settings-gui');
-        var scenario_id = {{ scenario.id }};
 
         form.addEventListener('form:visible', function() {
             LoadingScreen.show('met_info_loading');
@@ -267,7 +266,7 @@
                 {
                     'type': 'data',
                     'name': 'id',
-                    'value': scenario_id
+                    'value': TRIM.store.currentScenario.id
                 }, {
                     'type': 'data',
                     'name': 'field',
