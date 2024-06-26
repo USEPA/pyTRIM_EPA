@@ -391,7 +391,7 @@
                 scenario_data = {
                     'type': 'input',
                     'name': 'scenario_id',
-                    'value': {{ scenario.id }}
+                    'value': TRIM.store.currentScenario.id
                 }
                 spacing_data = {
                     'type': 'input',
@@ -433,7 +433,7 @@
 
         function submit_emission_value(elem, parcel_info) {
             ErrorValidation.isPositiveValue(elem)
-            if (elementIsValid($(this).parent())){
+            if (elementIsValid($(elem).parent())){
                 let data = $(elem).val() == "" ? 0 : $(elem).val()
                 parcel_info[4].value = data
                 let $label = $(elem).next("label.editableCell")
@@ -441,8 +441,8 @@
                 $label.show().text(data)
 
                 parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                console.log(parcel_info)
-                TRIM.api.updateParcel({{ scenario.id }}, parcel_info)
+                console.log(parcel_info)              
+                TRIM.api.updateParcel(TRIM.store.currentScenario.id, parcel_info)
             } else {
                 return
             }

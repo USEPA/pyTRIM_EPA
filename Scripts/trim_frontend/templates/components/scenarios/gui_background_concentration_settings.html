@@ -236,7 +236,7 @@
             })
 
             function submit_emission_value(elem, parcel_info) {
-                if (elementIsValid($(this).parent())){
+                if (elementIsValid($(elem).parent())){
                     let data = $(elem).val() == "" ? 0 : $(elem).val()
                     let $label = $(elem).next("label.editableCell")
                     $label.siblings("input").hide()

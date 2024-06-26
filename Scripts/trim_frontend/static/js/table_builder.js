@@ -1,4 +1,7 @@
 function isNumber(str) {
+    if (str.includes("+")) { // The '+' generated in something like e+0 crashes things in the backend
+        return false;
+    }
     const numberRegex = /^\s*[+-]?(\d+|\d*\.\d+|\d+\.\d*)([Ee][+-]?\d+)?\s*$/
     return numberRegex.test(str)
 }
