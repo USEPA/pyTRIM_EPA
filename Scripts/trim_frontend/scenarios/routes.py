@@ -112,7 +112,11 @@ def get_scenario_met_data(scenario_id):
     logger = make_logger('scenario_met_api_get')
     s = ScenarioService.get(scenario_id)
     start_time = time.time()
-    met = get_met_data(s)
+    try:
+        met = get_met_data(s)
+    except Exception as e:
+        print(e)
+        met = {}
     logger.info(f"Acquired meteorology in {time.time() - start_time} seconds")
     return ApiResult({'meteorology': met})
 

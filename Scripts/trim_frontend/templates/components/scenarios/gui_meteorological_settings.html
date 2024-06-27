@@ -179,6 +179,9 @@
         // Render Wet Deposition Interception Fractions
         function renderWetDep () {
             let met = TRIM.store.currentScenario.meteorology;
+            if (Object.keys(met).length === 0) {
+                return;
+            }
             let leaves = ["coniferous", "deciduous", "grass", "agriculture"]
             leaves.forEach((e,i) => {
                 let search_cbx_str = `input[type="checkbox"][id$="${e}"]`
