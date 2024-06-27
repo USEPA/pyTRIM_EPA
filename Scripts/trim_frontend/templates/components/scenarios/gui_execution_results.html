@@ -234,7 +234,7 @@
         google.charts.load('current', {'packages':['corechart']});
         var form = document.getElementById('model-run-result-gui');
 
-        var default_no_latest_run = { // FIXME this.responseJSON.latest_run_info should always exist but it's missing if run crashes at some point
+        var default_no_latest_run = {
             "has_run": false,
             "lastest_run_date": "",
             "run_has_results": false,

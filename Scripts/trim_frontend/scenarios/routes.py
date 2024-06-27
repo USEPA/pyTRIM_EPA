@@ -182,9 +182,11 @@ def update_scenario():
         default_param = ParameterService.definitions.get_all(variable_name=par_name)
         
         if par_name == "AirTemperature":
-                default_param = ParameterService.definitions.get(variable_name=par_name, default_unit="K")
+            default_param = ParameterService.definitions.get(variable_name=par_name, default_unit="K")
         elif par_name == "WetDepInterceptionFraction_UserSupplied":
-            pass
+            default_param = ParameterService.definitions.get_all(variable_name=par_name, 
+                                                                 domain=ParameterService.domains.get(name="Compartment"))
+            default_param = default_param[0]
         elif len(default_param) > 1: 
             print(f"\tTried to create new custom parameter but multiple defaults found!\n{default_param}")
             default_param = default_param[0]
@@ -324,7 +326,7 @@ def update_scenario():
                     # TODO Why is this not working???
                     # c.parameters.get(param_name).value = scenario_data[field_name]
                     # CompartmentService.update(c)
-                    update_custom_param(s, c, param_name, scenario_data[field_name], create_if_dne=False)
+                    update_custom_param(s, c, param_name, scenario_data[field_name], create_if_dne=True)
             else:
                 param_name = param_map["meteo"].get(field_name)
                 param_data = scenario_data[field_name]
