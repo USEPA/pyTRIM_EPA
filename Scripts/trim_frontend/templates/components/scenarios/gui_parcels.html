@@ -295,13 +295,7 @@
                     },
                     {
                         data: "properties.landuse",
-                        render: function (data, type, row) {
-                            // removing Impervous as a UI option only
-                            const impervious_idx = data.list.indexOf("Impervious");
-                            if (impervious_idx >= 0) {
-                                data.list.splice(impervious_idx, 1);
-                            }
-                            
+                        render: function (data, type, row) {                            
                             let parcel_info = [{
                                 'type': 'data',
                                 'name': 'id',
@@ -325,6 +319,9 @@
                                     });
                                 if (row.properties.landuse.lu == v) {
                                     $option.attr("selected","selected")
+                                }
+                                if (v == "Impervious") { // removing Impervous as a UI option only
+                                    $option.attr("hidden","");
                                 }
                                 $select.append($option)
                             })
@@ -483,8 +480,17 @@
                 update_data(this_table_id)
                 let parcel_info = $(this).data('parcelinfo')
                 if (parcel_info) {
-                    parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                    TRIM.api.updateParcel('{{ scenario.id }}', parcel_info)
+                    previous_data = parcel_info[parcel_info.findIndex(e => e.type == 'input')];
+                    if (previous_data.value === data) {
+                        return;
+                    }
+                    console.log(parcel_info);
+                    previous_data.value = data;
+                    LoadingScreen.show('loading_results');
+                    TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load',function(){
+                        TRIM.refreshParcels();
+                        LoadingScreen.hide('loading_results');
+                    });
                     mapTableRedraw()
                 }
             })
