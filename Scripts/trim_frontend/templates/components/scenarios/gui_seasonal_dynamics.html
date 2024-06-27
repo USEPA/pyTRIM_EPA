@@ -270,6 +270,8 @@
         function submit_seasonal_dyn_value(elem) {
             let param_info = get_form_data(elem)
             if (elementIsValid($(elem).parent())){
+                console.log(param_info)
+                LoadingScreen.show('loading_results');
                 let resp = TRIM.api.updateScenario(param_info).on('load',function(){
                     let val_resp = this.responseJSON
                     if (val_resp) {
@@ -282,6 +284,7 @@
                             $(elem).closest('div.form-group').append(lb_static_val)
                         }
                     }
+                    LoadingScreen.hide('loading_results');
                 })
             } else {
                 return

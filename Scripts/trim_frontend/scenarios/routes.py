@@ -198,6 +198,31 @@ def update_scenario():
                                                             unit=default_param.default_unit, 
                                                             formula_id=default_param.default_formula_id)
 
+    def create_litterfallrate_custom_param(scen, comps, par_name):
+        # FIXME shouldn't use this eventually, maybe just create for all media?
+        # step 1 grab the right compartments by media name, using a hardcoded map
+        comp_media = [
+            "Leaf_Grasses_Herbs", # Grass
+            "Leaf_Deciduous_Forest" # Deciduous forest
+        ]
+        comps = [c for c in comps if c.name in comp_media]
+
+        # step 2 grab the correct default param
+        default_param = ParameterService.definitions.get(variable_name=par_name, 
+                                                            domain=ParameterService.domains.get(name="Compartment"))
+        
+        # step 3 create new custom param for each of the identified compartments (per parcel)
+        custom_params = []
+        for comp in comps:
+            custom_params.append(
+                ParameterService.get_or_create(definition=default_param, scenario=scen, 
+                                                requirements=f'self.id == {comp.id}',
+                                                unit=default_param.default_unit, 
+                                                formula_id=default_param.default_formula_id)
+            )
+        ParameterService.commit()
+        return custom_params
+
     def update_custom_param(scen, comp, par_name, par_val, create_if_dne = False):
         par_list = [p for p in scen.custom_params if
                     p.definition.variable_name == par_name and f'self.id == {comp.id}' in p.requirements]
@@ -214,12 +239,17 @@ def update_scenario():
     def update_assumed_all_comp_fixed_params(scen, comps, par_name, par_val):
         # media_name = comp.media.name
         # c_par_list = [c.parameters.get(par_name) for c in scen.compartments if c.media.isa(media_name)]
-        c_par_list = [c.parameters.get(par_name) for c in comps if c.parameters.get(par_name)]
+        ParameterService.commit() # for some reason gets open instance errors otherwise
+        c_par_list = set(c.parameters.get(par_name) for c in comps if c.parameters.get(par_name))
+        c_par_list = [par for par in c_par_list if isinstance(par, CustomParameter)]
+
+        if not c_par_list:
+            c_par_list = create_litterfallrate_custom_param(scen, comps, par_name)
+
         for c_p in c_par_list:
-            try:
-                if isinstance(c_p, CustomParameter):
-                    c_p.value = par_val
-                    ParameterService.update(c_p)
+            try:                
+                c_p.value = par_val
+                ParameterService.update(c_p)
             except AttributeError as e:
                 print(e)
         ParameterService.commit()
