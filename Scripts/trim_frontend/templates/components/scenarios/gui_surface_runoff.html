@@ -194,10 +194,17 @@
                 let receiver = $(elem).attr("data-receiver")
                 param_info[3]['value'].push(
                     'ro_' + receiver
-                    )
+                )
+
+                // standardize value e.g. '.5' -> '0.5'
+                let standardized_val = Number($(elem).val()).toString();
+                if (!standardized_val.includes('.')) {
+                    standardized_val += '.0';
+                }
+
                 param_info[4]['value'].push(
-                    Number($(elem).val()) // standardize value e.g. '.5' -> '0.5'
-                    )
+                    standardized_val
+                )
             })
             return param_info
         }

@@ -209,7 +209,9 @@ def update_scenario():
             "Leaf_Grasses_Herbs", # Grass
             "Leaf_Deciduous_Forest" # Deciduous forest
         ]
-        comps = [c for c in comps if c.name in comp_media]
+        filtered_comps = [c for c in comps if c.name in comp_media]
+        if not filtered_comps:
+            filtered_comps = comps
 
         # step 2 grab the correct default param
         default_param = ParameterService.definitions.get(variable_name=par_name, 
@@ -217,7 +219,7 @@ def update_scenario():
         
         # step 3 create new custom param for each of the identified compartments (per parcel)
         custom_params = []
-        for comp in comps:
+        for comp in filtered_comps:
             custom_params.append(
                 ParameterService.get_or_create(definition=default_param, scenario=scen, 
                                                 requirements=f'self.id == {comp.id}',
