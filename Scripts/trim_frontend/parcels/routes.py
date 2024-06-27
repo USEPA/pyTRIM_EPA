@@ -417,8 +417,20 @@ def update_parcel(id, scenario_id):
                           "VolumeFraction_Liquid", "VolumeFraction_Vapor", "Porosity", "AirSoilBoundaryThickness",
                           "Fractionofareaavailableforerosion", "FractionofAreaAvailableforRunoff",
                           "Fractionofareaavailableforverticaldiffusion", "TotalRunoffRate"]:
-            this_par = p.get_compartment(name=parcels_data["comp_name"]).parameters.get(parcels_data["field"])
-            this_par.value = float(parcels_data[field_name])
+            this_comp = p.get_compartment(name=parcels_data["comp_name"])
+            this_par = this_comp.parameters.get(parcels_data["field"])
+
+            # create if doesn't exist
+            if isinstance(this_par, ParameterDefinition):
+                this_par = ParameterService.get_or_create(definition=this_par, scenario_id=p.scenario_id, 
+                                                        requirements=f'self.id == {this_comp.id}',
+                                                        unit=this_par.default_unit, 
+                                                        formula_id=this_par.default_formula_id,
+                                                        value=float(parcels_data[field_name]))
+            else:
+                this_par.value = float(parcels_data[field_name])
+                ParameterService.update(this_par)
+            ParameterService.commit()
         if field_name == "emission":
             src_comp = [c for c in p.compartments if c.name == parcels_data["compartment_name"]][0]
             src_par = [par for parn, par in src_comp.parameters.items() if parn == "surfaceDepositionRate"]

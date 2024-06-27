@@ -196,7 +196,7 @@ def get_latest_run_info(scen):
                 }
     if run_info["has_run"]:
         proc_info = [*scen.proc_status][0]
-        run_info["lastest_run_date"] = proc_info.run_datetime.strftime('%Y-%m-%d')
+        run_info["lastest_run_date"] = proc_info.run_datetime.strftime('%Y-%m-%d "%H:%M:%S"')
         run_info["run_has_results"] = True if proc_info.run_status == 'run fin 100' else False
         if run_info["run_has_results"]:
             run_info["run_results"] = {
