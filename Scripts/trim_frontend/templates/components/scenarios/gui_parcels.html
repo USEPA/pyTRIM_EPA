@@ -298,8 +298,10 @@
                         render: function (data, type, row) {
                             // removing Impervous as a UI option only
                             const impervious_idx = data.list.indexOf("Impervious");
-                            data.list.splice(impervious_idx, 1);
-
+                            if (impervious_idx >= 0) {
+                                data.list.splice(impervious_idx, 1);
+                            }
+                            
                             let parcel_info = [{
                                 'type': 'data',
                                 'name': 'id',
