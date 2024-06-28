@@ -485,8 +485,7 @@ def run_full_model(scn):
     try:
         (tm, df_tm, sm, df_sm, df_vmu) = make_transition_matrix(scn)
     except Exception as e:
-        print(f"ERRORED WHILE MAKING TRANSITION MATRIX: {e}")
-        [v for v in scn.proc_status][0].run_status = 'err tm 0'
+        return model_err(scn, f"ERRORED WHILE MAKING TRANSITION MATRIX: {e}", 'err tm 0')
 
     # get result
     [v for v in scn.proc_status][0].run_status = 'run ode 0'
@@ -499,17 +498,19 @@ def run_full_model(scn):
         # make concentration output
         df_conc = compute_concentration(df_nt, df_vmu)
     except Exception as e:
-        print(f"ERRORED WHILE MAKING CONCENTRATION OUTPUT: {e}")
-        [v for v in scn.proc_status][0].run_status = 'err ode 0'
+        return model_err(scn, f"ERRORED WHILE MAKING CONCENTRATION OUTPUT: {e}", 'err ode 0')
 
     # compute annual average mass and conc time series
     inputs = {
         'simulation_start_date': scn.sim_begin_end_time[0],  # scn.simulationBeginDate,
         'simulation_end_date': scn.sim_begin_end_time[1]  # scn.simulationEndDate
     }
-    dfn_avg, dfc_avg = gen_avg(df_nt, df_conc, inputs)
-    json_n_avg = dfn_avg.to_json(orient='columns')[1:-1].replace('},{', '} {')
-    json_c_avg = dfc_avg.to_json(orient='columns')[1:-1].replace('},{', '} {')
+    try:
+        dfn_avg, dfc_avg = gen_avg(df_nt, df_conc, inputs)
+        json_n_avg = dfn_avg.to_json(orient='columns')[1:-1].replace('},{', '} {')
+        json_c_avg = dfc_avg.to_json(orient='columns')[1:-1].replace('},{', '} {')
+    except Exception as e:
+        return model_err(scn, f"ERRORED WHILE COMPUTING AVERAGES: {e}", 'err ode 0')
 
     outfile_nt, outfile_conc = "", ""
 
@@ -531,11 +532,17 @@ def run_full_model(scn):
         [v for v in scn.proc_status][0].result_nt = json.dumps(json_n_avg, default=str)
         [v for v in scn.proc_status][0].result_conc = json.dumps(json_c_avg, default=str)
     except Exception as e:
-        print(f"ERRORED WHILE MAKING CSV: {e}")
-        [v for v in scn.proc_status][0].run_status = 'err csv 0'
+        return model_err(scn, f"ERRORED WHILE MAKING CSV: {e}", 'err csv 0')
     ScenarioService.commit()
 
     return json_n_avg, json_c_avg, outfile_nt, outfile_conc
+
+
+def model_err(scn, err_msg, status):
+    print(err_msg)
+    [v for v in scn.proc_status][0].run_status = status
+    ScenarioService.commit()
+    return {}, {}, "", ""
 
 
 def safe_save_output(df_nt, df_conc, scn, filetype='csv'):

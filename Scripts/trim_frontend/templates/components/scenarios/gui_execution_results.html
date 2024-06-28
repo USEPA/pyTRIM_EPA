@@ -455,10 +455,10 @@
             function setChecked(id, check) {
                 if (check == "off") {
                     $(id).find("span").hide()
-                    $(id).find("i.fas").show().attr("class", "fas fa-play")
+                    $(id).find("i.fas").show().attr("class", "fas fa-play").css('color','black')
                 } else if (check == "on") {
                     $(id).find("span").hide()
-                    $(id).find("i.fas").show().attr("class","fas fa-check")
+                    $(id).find("i.fas").show().attr("class","fas fa-check").css('color','black')
                 } else if (check == "err") {
                     $(id).find("span").hide()
                     $(id).find("i.fas").show().css('color','red')
@@ -492,6 +492,7 @@
                 $('#plot_div').empty()
                 $('#div_visuals').css("display","none")
                 $('#div_visuals').find('h6').empty()
+                $('#model_err_msg').remove()
             }
 
             $('#btn_execute_model').on('click', function (e) {
@@ -598,6 +599,11 @@
                                 setChecked('p#cb_proc_vis', "err")
                                 // $('p#cb_proc_vis').find("span").hide()
                                 // $('p#cb_proc_vis').find("i.fas").show().css('color','red')
+                                $("#model_err_msg").remove()
+                                $("#btn_execute_model").parent().append(
+                                    "<p style='color:red;' id='model_err_msg'>Model ran into an error and stopped running.</p>"
+                                )
+                                
                             }
                         })
 
@@ -615,11 +621,13 @@
                             setChecked("p#cb_proc_vis", "err")
                         }
                     }
-                    setTimeout(function(){
-                        initialize_components()
-                        $($('#plt_type').find('a.dropdown-item')[0]).trigger('click')
-                        $('#btn_visualize').prop('disabled', false).trigger('click')
-                    }, ms)
+                    if (result != "err") {
+                        setTimeout(function(){
+                            initialize_components()
+                            $($('#plt_type').find('a.dropdown-item')[0]).trigger('click')
+                            $('#btn_visualize').prop('disabled', false).trigger('click')
+                        }, ms)
+                    }
                     return result;
                 };
 
@@ -634,7 +642,7 @@
                 if (TRIM.trim_env_profile == "local") {
                     // run the model locally
                     let fetchResults = () => exec_model_run();
-                    let validate = status => status !== 'fin';
+                    let validate = status => (status !== 'fin' && status !== 'err');
                     poll(fetchResults, validate, 5000);
                 } else {
                     // run the model via AWS StepFunction / Docker on ECS
