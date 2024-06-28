@@ -371,8 +371,7 @@ def parameterize(cls, default_scenario=None):
             # if no specific version applies
             p = {}
             got_custom = {}
-            # s_id = get_scenario(entity).id
-            # is_scenario = isinstance(entity, Scenario)
+            s_id = _get_current_scenario(entity).id
             for d in sorted(
                 # Sort to make sure sub-domains override parents
                 entity.domains,
@@ -387,8 +386,8 @@ def parameterize(cls, default_scenario=None):
                         # custom parameters
                         p[pd.name] = pd
                     for cp in pd.instances:
-                        # if (not is_scenario) and (cp.scenario_id != s_id):
-                        #     continue
+                        if cp.scenario_id != s_id:
+                            continue
                         if cp.validate(entity):
                             got_custom[pd.name] = True
                             p[pd.name] = cp
