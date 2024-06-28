@@ -418,6 +418,6 @@ def serialize_custom_parameter(cp: CustomParameter):
         'name': cp.definition.variable_name,
         'value': cp.value,
         'unit': cp.unit,
-        'formula': cp.formula.equation if pd.formula else None
+        'formula': cp.formula.equation if cp.formula else None
     }
     return s

@@ -198,9 +198,9 @@ def update_scenario():
             default_param = default_param[0]
 
         return ParameterService.get_or_create(definition=default_param, scenario=scen, 
-                                                            requirements=f'self.id == {comp.id}',
-                                                            unit=default_param.default_unit, 
-                                                            formula_id=default_param.default_formula_id)
+                                                requirements=f'self.id == {comp.id}',
+                                                unit=default_param.default_unit, 
+                                                formula_id=default_param.default_formula_id)
 
     def create_litterfallrate_custom_param(scen, comps, par_name):
         # FIXME shouldn't use this eventually, maybe just create for all media?
@@ -346,8 +346,8 @@ def update_scenario():
         field_name = scenario_data["field"]
         if field_name == "erosionRateCalcSource":  # Data from erosion tab
             ercs = scenario_data["erosionRateCalcSource"]
-            ercs_obj = [pp for pp in ParameterService.definitions.get_all() if pp.full_name == "erosionRateCalcSource"]
-            ercs_cp = ParameterService.get_or_create(definition_id=ercs_obj[0].id, scenario_id=scenario_data['id'])
+            default_ercs = ParameterService.definitions.get(full_name="erosionRateCalcSource")
+            ercs_cp = ParameterService.get_or_create(definition=default_ercs, scenario_id=s.id)
             ercs_cp.value = ercs
             # for cp in s.custom_params:
             #     if cp.definition.variable_name == "erosionRateCalcSource":

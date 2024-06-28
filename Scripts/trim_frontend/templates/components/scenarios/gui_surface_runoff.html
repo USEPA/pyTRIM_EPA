@@ -195,15 +195,8 @@
                 param_info[3]['value'].push(
                     'ro_' + receiver
                 )
-
-                // standardize value e.g. '.5' -> '0.5'
-                let standardized_val = Number($(elem).val()).toString();
-                if (!standardized_val.includes('.')) {
-                    standardized_val += '.0';
-                }
-
                 param_info[4]['value'].push(
-                    standardized_val
+                    standardize_val($(elem).val())
                 )
             })
             return param_info

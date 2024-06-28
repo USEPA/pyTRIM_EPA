@@ -6,6 +6,15 @@ function isNumber(str) {
     return numberRegex.test(str)
 }
 
+function standardize_val(val) {
+    // standardize value e.g. '.5' -> '0.5'
+    let standardized_val = Number(val).toString();
+    if (!standardized_val.includes('.')) {
+        standardized_val += '.0';
+    }
+    return standardized_val // string
+}
+
 function ErrToolTip(ele, is_valid, message, parent_ele="td") {
     let parent = $(ele).parent();
     $(parent).find("label.warningTT").tooltip('dispose');
