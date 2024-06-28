@@ -482,7 +482,7 @@
                         let default_val = JSON.parse(p.getAttribute("data-default"));
 
                         row_data['Property'] = p; // HTML Element
-                        row_data[e.name] = e[prop][comp_name] ? e[prop][comp_name] : default_val;
+                        row_data[e.name] = (e[prop][comp_name] !== null) ? e[prop][comp_name] : default_val;
                     }
                 })
                 if (!$.isEmptyObject(row_data)) {
