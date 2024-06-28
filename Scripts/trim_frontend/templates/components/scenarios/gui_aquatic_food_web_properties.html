@@ -380,7 +380,10 @@
                     // Push change to DB
                     let is_valid_row = elementIsValid(this);
                     if (is_valid_row){
-                        TRIM.api.updateParcel('{{ scenario.id }}', parcel_info)   
+                        LoadingScreen.show('submit_diet'); // since this can take a moment
+                        TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', ()=>{
+                            LoadingScreen.hide('submit_diet'); 
+                        });
                     }
                 })
             }

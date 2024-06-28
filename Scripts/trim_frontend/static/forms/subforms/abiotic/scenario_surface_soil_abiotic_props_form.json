@@ -78,7 +78,7 @@
     },
     {
       "id": "Fractionofareaavailableforverticaldiffusion",
-      "label": "Fraction of area availabe for vertical diffusion",
+      "label": "Fraction of area available for vertical diffusion",
       "data_type": "float",
       "default": 1,
       "tooltip": "m<sup>2</sup> [area available]/m<sup>2</sup> [total]",
