@@ -368,6 +368,9 @@ class CustomParameter(Model):
         if not self.definition.domain.validate(entity):
             return False
 
+        if not (self.requirements or '').strip():
+            return True
+
         if not hasattr(self, '_validator'):
             setattr(self, '_validator', as_function(self.requirements))
         return self._validator(self=entity) or False
@@ -415,6 +418,6 @@ def serialize_custom_parameter(cp: CustomParameter):
         'name': cp.definition.variable_name,
         'value': cp.value,
         'unit': cp.unit,
-        'formula': cp.formula.equation if pd.formula else None
+        'formula': cp.formula.equation if cp.formula else None
     }
     return s

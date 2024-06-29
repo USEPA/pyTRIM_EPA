@@ -75,7 +75,7 @@ def get_general_params(pcl):
                 dust_load = safe_get_val(comp, 'DustLoad', None)
                 dust_density = safe_get_val(comp, 'DustDensity', None)
                 fraction_organic_matter_on_particulates = safe_get_val(
-                    comp, 'FractionOrganicMatterOnParticulates', None
+                    comp, 'FractionOrganicMatteronParticulates', None
                 )
         elif comp.media.isa('Surface_Soil', or_child=False):
             land = True

@@ -163,7 +163,6 @@
 <script>
     onDomLoad(function(e) {
         var form = document.getElementById('seasonal-gui');
-        var scenario_id = {{ scenario.id }};
 
         form.addEventListener('form:visible', function() {
             console.log('seasonal form visible')
@@ -231,14 +230,19 @@
 
         function get_form_data(elem) {
             if ($(elem).attr('name').indexOf("_field_name") === -1) {
-                ErrorValidation.isPositiveValue(elem);
+                ErrorValidation.isPositiveValue(elem, "div");
             }
+            // all litterfall rates must be <= 1
+            if (elem.id.includes("litterfall") && elementIsValid($(elem).parent())) {
+                ErrToolTip(elem, parseFloat($(elem).val()) <= 1.0, "Litterfall rates must be <= 1.", "div");
+            }
+
             let param_name = $(elem).attr("name")
             let param_info = [
                 {
                     'type': 'data',
                     'name': 'id',
-                    'value': scenario_id
+                    'value': TRIM.store.currentScenario.id
                 }, {
                     'type': 'data',
                     'name': 'field',
@@ -266,6 +270,8 @@
         function submit_seasonal_dyn_value(elem) {
             let param_info = get_form_data(elem)
             if (elementIsValid($(elem).parent())){
+                console.log(param_info)
+                LoadingScreen.show('loading_results');
                 let resp = TRIM.api.updateScenario(param_info).on('load',function(){
                     let val_resp = this.responseJSON
                     if (val_resp) {
@@ -278,6 +284,7 @@
                             $(elem).closest('div.form-group').append(lb_static_val)
                         }
                     }
+                    LoadingScreen.hide('loading_results');
                 })
             } else {
                 return

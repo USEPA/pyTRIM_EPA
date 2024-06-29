@@ -91,7 +91,7 @@
     <section id="spatially-varying-values" class="container px-0">
         <div class="row">
             <div class="col-sm">
-                <h5 class="text-center">Spatially-Varying Values</h5>
+                <h5 class="text-center">Spatially Varying Values</h5>
             </div>
         </div>
         <!-- <div class="row">
@@ -144,7 +144,6 @@
 <script>
     onDomLoad(function(e) {
         var form = document.getElementById('met-settings-gui');
-        var scenario_id = {{ scenario.id }};
 
         form.addEventListener('form:visible', function() {
             LoadingScreen.show('met_info_loading');
@@ -180,6 +179,9 @@
         // Render Wet Deposition Interception Fractions
         function renderWetDep () {
             let met = TRIM.store.currentScenario.meteorology;
+            if (Object.keys(met).length === 0) {
+                return;
+            }
             let leaves = ["coniferous", "deciduous", "grass", "agriculture"]
             leaves.forEach((e,i) => {
                 let search_cbx_str = `input[type="checkbox"][id$="${e}"]`
@@ -249,6 +251,9 @@
                 submit_meteo_value(e.target);
             });
             $('#daytime_indicator_static_value').on('change', function(e) {
+                let daytime_val = parseFloat($(e.target).val());
+                let valid_daytime = (daytime_val == 0 || daytime_val == 1);
+                ErrToolTip(e.target, valid_daytime, "Daytime Indicator must be either 0 or 1.", "div");
                 submit_meteo_value(e.target);
             });
             $('#precipitation_static_value_rate').on('change', function(e) {
@@ -264,7 +269,7 @@
                 {
                     'type': 'data',
                     'name': 'id',
-                    'value': scenario_id
+                    'value': TRIM.store.currentScenario.id
                 }, {
                     'type': 'data',
                     'name': 'field',
@@ -293,6 +298,7 @@
         function submit_meteo_value(elem) {
             let param_info = get_form_data(elem)
             if (elementIsValid($(elem).parent())){
+                console.log(param_info);
                 let resp = TRIM.api.updateScenario(param_info).on('load',function(){
                     let val_resp = this.responseJSON
                     if (val_resp) {

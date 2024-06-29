@@ -498,6 +498,7 @@
                     let parcel_info = $(this).data('parcelinfo')
                     if (parcel_info) {
                         parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
+                        console.log(parcel_info);
                         TRIM.api.updateParcel('{{ scenario.id }}', parcel_info)
                         table_data = get_Data_from_table(`#${focusTblId}`)
                     }
@@ -574,7 +575,16 @@
             let abiotic_data = []
             if (parcels.length > 0) {
                 parcels.forEach(function (e, i) {
-                    let till_val = e.tillage == "Yes" ? "tilled" : "untilled";
+                    // default surface soil thickness depends on tilled/untilled
+                    let till_val = "untilled";
+                    if (e.soilTillage == "Yes" || e.soilTillage == true) {
+                        till_val = "tilled";
+                    }
+                    let surface_soil_thickness = (e.surfaceSoilThickness ? e.surfaceSoilThickness : TRIM.forms.fetchDefault('SurfaceSoilThick')[till_val]);
+                    
+                    // default root soil thickness depends on (0.8 - surface soil thickness)
+                    let root_soil_default = Math.abs(0.8 - surface_soil_thickness);
+
                     let s = e.hasLand == "Yes" ? e["soil_params"] : e;
                     let comps = ["Soil_Surface", "Soil_Root_Zone", "Soil_Vadose_Zone", "Groundwater"]
                     let param_dict = {
@@ -583,16 +593,16 @@
                             'hasAir': e.hasAir,
                             'hasLand': e.hasLand,
                             'parcelType': e.parcelType,
-                            'DustParticleConcentration': (e.dustLoad ? e.dustLoad : TRIM.forms.fetchDefault('DustParticleConcentration')),
-                            'DustParticleDensity': (e.dustDensity ? e.dustDensity : TRIM.forms.fetchDefault('DustParticleDensity')),
-                            'AirDensity': (e.airDensity ? e.airDensity : TRIM.forms.fetchDefault('AirDensity')),
-                            'DustParticleOrganicMatter': (e.fractionOrganicMatterOnParticulates ? e.fractionOrganicMatterOnParticulates : TRIM.forms.fetchDefault('DustParticleOrganicMatter')),
-                            'AirHeight': (e.airHeight ? e.airHeight : TRIM.forms.fetchDefault('AirHeight')),
-                            'Tillage': (e.soilTillage ? e.soilTillage : TRIM.forms.fetchDefault('Tillage')),
-                            'SurfaceSoilThick': (e.surfaceSoilThickness ? e.surfaceSoilThickness : TRIM.forms.fetchDefault('SurfaceSoilThick')[till_val]),
-                            'RootSoilThick': (e.rootSoilThickness ? e.rootSoilThickness : TRIM.forms.fetchDefault('RootSoilThick')[till_val]),
-                            'VadoseZoneSoilThick': (e.vadoseSoilThickness ? e.vadoseSoilThickness : TRIM.forms.fetchDefault('VadoseZoneSoilThick')),
-                            'GroundwaterZoneSoilThick': (e.groundwaterZoneThickness ? e.groundwaterZoneThickness : TRIM.forms.fetchDefault('GroundwaterZoneSoilThick')),
+                            'DustParticleConcentration': (e.dustLoad !== null ? e.dustLoad : TRIM.forms.fetchDefault('DustParticleConcentration')),
+                            'DustParticleDensity': (e.dustDensity !== null ? e.dustDensity : TRIM.forms.fetchDefault('DustParticleDensity')),
+                            'AirDensity': (e.airDensity !== null ? e.airDensity : TRIM.forms.fetchDefault('AirDensity')),
+                            'DustParticleOrganicMatter': (e.fractionOrganicMatterOnParticulates !== null ? e.fractionOrganicMatterOnParticulates : TRIM.forms.fetchDefault('DustParticleOrganicMatter')),
+                            'AirHeight': (e.airHeight !== null ? e.airHeight : TRIM.forms.fetchDefault('AirHeight')),
+                            'Tillage': (e.soilTillage !== null ? e.soilTillage : TRIM.forms.fetchDefault('Tillage')),
+                            'SurfaceSoilThick': surface_soil_thickness,
+                            'RootSoilThick': (e.rootSoilThickness !== null ? e.rootSoilThickness : root_soil_default),
+                            'VadoseZoneSoilThick': (e.vadoseSoilThickness !== null ? e.vadoseSoilThickness : TRIM.forms.fetchDefault('VadoseZoneSoilThick')),
+                            'GroundwaterZoneSoilThick': (e.groundwaterZoneThickness !== null ? e.groundwaterZoneThickness : TRIM.forms.fetchDefault('GroundwaterZoneSoilThick')),
                         }
                     comps.forEach(function(c,i) {
                         if (e.hasLand == "Yes") {

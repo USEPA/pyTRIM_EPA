@@ -1,0 +1,57 @@
+{
+  "title": "",
+  "table_id": "mapTable",
+  "pivot": false,
+  "header": "",
+  "fields": [
+    {
+      "id": "parcels-parcel_name",
+      "label": "Parcel Name",
+      "data_type": "str",
+      "default": ""
+    },
+    {
+      "id": "parcels-parcel_description",
+      "label": "Description",
+      "data_type": "str",
+      "default": ""
+    },
+    {
+      "id": "parcels-parcel_area",
+      "label": "Area",
+      "data_type": "str",
+      "default": "",
+      "tooltip": "(km<sup>2</sup>)"
+    },
+    {
+      "id": "parcels-parcel_type",
+      "label": "Parcel Type",
+      "data_type": "str",
+      "default": ""
+    },
+    {
+      "id": "parcels-parcel_land_use",
+      "label": "Land Use",
+      "data_type": "str",
+      "default": ""
+    },
+    {
+      "id": "parcels-parcel_farm_food_chain",
+      "label": "Farm Food Chain",
+      "data_type": "str",
+      "default": ""
+    },
+    {
+      "id": "parcels-parcel_fish_food_web",
+      "label": "Fish Food Web",
+      "data_type": "str",
+      "default": ""
+    },
+    {
+      "id": "parcels-parcel_wetland",
+      "label": "Wetland",
+      "data_type": "str",
+      "default": ""
+    }
+  ]
+}

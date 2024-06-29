@@ -1,6 +1,6 @@
 from trim_db.schema import Scenario
 from trim_db.schema.utils.serialize import register_serializer
-from trim_db.services import ChemicalService
+from trim_db.services import ParameterService
 
 
 @register_serializer(Scenario)
@@ -17,8 +17,30 @@ def serialize_scenario(scen: Scenario):
     }
     return s
 
+def set_param_default(kwargs, val, unit=None):
+    try:
+        default_param = ParameterService.definitions.get(**kwargs)
+        if default_param.default_value:
+            return
+        
+        default_param.default_value = val
+        if unit:
+            default_param.default_unit = unit
+        ParameterService.definitions.update(default_param)
+        ParameterService.commit()
+    except Exception as e:
+        print(e)
+    
 
 def get_met_data(scen):
+    # set defaults first
+    set_param_default({"variable_name":"AirTemperature", "default_unit":"K"}, 298)
+    set_param_default({"variable_name":"horizontalWindSpeed"}, 1.6)
+    set_param_default({"variable_name":"windDirection"}, 270)
+    # FIXME add mixing height
+    set_param_default({"variable_name":"isDay_Dynamic"}, 1)
+    set_param_default({"variable_name":"Rain"}, 0.0041) # Precipitation
+
     ambient_air_temp = scen.AirTemperature
     if ambient_air_temp:
         ambient_air_temp = ambient_air_temp.to("K").magnitude
@@ -174,7 +196,7 @@ def get_latest_run_info(scen):
                 }
     if run_info["has_run"]:
         proc_info = [*scen.proc_status][0]
-        run_info["lastest_run_date"] = proc_info.run_datetime
+        run_info["lastest_run_date"] = proc_info.run_datetime.strftime('%Y-%m-%d "%H:%M:%S"')
         run_info["run_has_results"] = True if proc_info.run_status == 'run fin 100' else False
         if run_info["run_has_results"]:
             run_info["run_results"] = {

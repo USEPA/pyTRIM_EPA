@@ -112,7 +112,11 @@ def get_scenario_met_data(scenario_id):
     logger = make_logger('scenario_met_api_get')
     s = ScenarioService.get(scenario_id)
     start_time = time.time()
-    met = get_met_data(s)
+    try:
+        met = get_met_data(s)
+    except Exception as e:
+        print(e)
+        met = {}
     logger.info(f"Acquired meteorology in {time.time() - start_time} seconds")
     return ApiResult({'meteorology': met})
 
@@ -178,9 +182,61 @@ def update_scenario():
     logger = make_logger('scenario_api_update')
     ret_val = ''
 
-    def update_custom_param(scen, comp, par_name, par_val):
+    def create_new_custom_param_meteo(scen, comp, par_name):
+        default_param = ParameterService.definitions.get_all(variable_name=par_name)
+        
+        if par_name == "AirTemperature":
+            default_param = ParameterService.definitions.get(variable_name=par_name, default_unit="K")
+        elif par_name == "WetDepInterceptionFraction_UserSupplied":
+            default_param = ParameterService.definitions.get_all(variable_name=par_name, 
+                                                                 domain=ParameterService.domains.get(name="Compartment"))
+            default_param = default_param[0]
+        elif len(default_param) > 1: 
+            print(f"\tTried to create new custom parameter but multiple defaults found!\n{default_param}")
+            default_param = default_param[0]
+        else:
+            default_param = default_param[0]
+
+        return ParameterService.get_or_create(definition=default_param, scenario=scen, 
+                                                requirements=f'self.id == {comp.id}',
+                                                unit=default_param.default_unit, 
+                                                formula_id=default_param.default_formula_id)
+
+    def create_litterfallrate_custom_param(scen, comps, par_name):
+        # FIXME shouldn't use this eventually, maybe just create for all media?
+        # step 1 grab the right compartments by media name, using a hardcoded map
+        comp_media = [
+            "Leaf_Grasses_Herbs", # Grass
+            "Leaf_Deciduous_Forest" # Deciduous forest
+        ]
+        filtered_comps = [c for c in comps if c.name in comp_media]
+        if not filtered_comps:
+            filtered_comps = comps
+
+        # step 2 grab the correct default param
+        default_param = ParameterService.definitions.get(variable_name=par_name, 
+                                                            domain=ParameterService.domains.get(name="Compartment"))
+        
+        # step 3 create new custom param for each of the identified compartments (per parcel)
+        custom_params = []
+        for comp in filtered_comps:
+            custom_params.append(
+                ParameterService.get_or_create(definition=default_param, scenario=scen, 
+                                                requirements=f'self.id == {comp.id}',
+                                                unit=default_param.default_unit, 
+                                                formula_id=default_param.default_formula_id)
+            )
+        ParameterService.commit()
+        return custom_params
+
+    def update_custom_param(scen, comp, par_name, par_val, create_if_dne = False):
         par_list = [p for p in scen.custom_params if
                     p.definition.variable_name == par_name and f'self.id == {comp.id}' in p.requirements]
+        print(f"\t{par_list}")
+        
+        if not par_list and create_if_dne:
+            par_list.append(create_new_custom_param_meteo(scen, comp, par_name))
+
         for c_p in par_list:
             c_p.value = par_val
             ParameterService.update(c_p)
@@ -189,12 +245,17 @@ def update_scenario():
     def update_assumed_all_comp_fixed_params(scen, comps, par_name, par_val):
         # media_name = comp.media.name
         # c_par_list = [c.parameters.get(par_name) for c in scen.compartments if c.media.isa(media_name)]
-        c_par_list = [c.parameters.get(par_name) for c in comps if c.parameters.get(par_name)]
+        ParameterService.commit() # for some reason gets open instance errors otherwise
+        c_par_list = set(c.parameters.get(par_name) for c in comps if c.parameters.get(par_name))
+        c_par_list = [par for par in c_par_list if isinstance(par, CustomParameter)]
+
+        if not c_par_list:
+            c_par_list = create_litterfallrate_custom_param(scen, comps, par_name)
+
         for c_p in c_par_list:
-            try:
-                if isinstance(c_p, CustomParameter):
-                    c_p.value = par_val
-                    ParameterService.update(c_p)
+            try:                
+                c_p.value = par_val
+                ParameterService.update(c_p)
             except AttributeError as e:
                 print(e)
         ParameterService.commit()
@@ -285,8 +346,8 @@ def update_scenario():
         field_name = scenario_data["field"]
         if field_name == "erosionRateCalcSource":  # Data from erosion tab
             ercs = scenario_data["erosionRateCalcSource"]
-            ercs_obj = [pp for pp in ParameterService.definitions.get_all() if pp.full_name == "erosionRateCalcSource"]
-            ercs_cp = ParameterService.get_or_create(definition_id=ercs_obj[0].id, scenario_id=scenario_data['id'])
+            default_ercs = ParameterService.definitions.get(full_name="erosionRateCalcSource")
+            ercs_cp = ParameterService.get_or_create(definition=default_ercs, scenario_id=s.id)
             ercs_cp.value = ercs
             # for cp in s.custom_params:
             #     if cp.definition.variable_name == "erosionRateCalcSource":
@@ -301,15 +362,15 @@ def update_scenario():
                     # TODO Why is this not working???
                     # c.parameters.get(param_name).value = scenario_data[field_name]
                     # CompartmentService.update(c)
-                    update_custom_param(s, c, param_name, scenario_data[field_name])
+                    update_custom_param(s, c, param_name, scenario_data[field_name], create_if_dne=True)
             else:
                 param_name = param_map["meteo"].get(field_name)
                 param_data = scenario_data[field_name]
                 if "_static_" in field_name:
-                    update_custom_param(s, s, param_name, param_data)
+                    update_custom_param(s, s, param_name, param_data, create_if_dne=True)
                 elif field_name.endswith("_TS"):
                     ret_val = meteo_wgt_avg_value_from_timeseries(param_data, "MET")
-                    update_custom_param(s, s, param_name, list(ret_val.values())[0])
+                    update_custom_param(s, s, param_name, list(ret_val.values())[0], create_if_dne=True)
         elif field_name.startswith("seasonal_"):  # Data from the seasonal dynamics tab
             param_media = param_map["seasonal"].get(field_name)[0]
             param_name = param_map["seasonal"].get(field_name)[1]
@@ -341,6 +402,12 @@ def update_scenario():
                 this_param.value = ts_date
                 ParameterService.update(this_param)
             ParameterService.commit()
+        elif field_name == "chemical": # emission settings, add/remove chemicals from a scenario
+            new_chem = ChemicalService.get(name=scenario_data["chemical"])
+            if new_chem in s.chemicals:
+                s.chemicals.remove(new_chem)
+            else:
+                s.chemicals.append(new_chem)
 
     except Exception as e:
         logger.error(traceback.format_exc())

@@ -16,7 +16,7 @@
       "data_type": "float",
       "default": 3,
       "tooltip": "(m)",
-      "help": "Enter the thickness of the groundwater layer. Valid values are > 0. The default value of 3 is from Table 3 - Thickness of the aquifer layer from McKone, T.E., A. Bodnar, and E. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. University of California at Berkeley. Supported by U.S. Environmental Protection Agency (Sustainable Technology Division, National Risk Management Research Laboratory) and Environmental Defense Fund. July. LBNL-43722. Available online at: <a href='https://escholarship.org/uc/item/9f1164rk' target='_blank'>https://escholarship.org/uc/item/9f1164rk</a>."
+      "help": "Enter the thickness of the groundwater layer. Valid values are > 0. The default value of 3 is from Table 3 - Thickness of the aquifer layer from McKone et al. 2001 (Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models). See the TRIM User Guide Appendix for full reference information."
     },
     {
       "id": "rho",

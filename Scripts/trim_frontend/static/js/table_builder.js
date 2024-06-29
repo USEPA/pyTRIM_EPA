@@ -1,16 +1,28 @@
 function isNumber(str) {
+    if (str.includes("+")) { // The '+' generated in something like e+0 crashes things in the backend
+        return false;
+    }
     const numberRegex = /^\s*[+-]?(\d+|\d*\.\d+|\d+\.\d*)([Ee][+-]?\d+)?\s*$/
     return numberRegex.test(str)
 }
 
-function ErrToolTip(ele, is_valid, message) {
+function standardize_val(val) {
+    // standardize value e.g. '.5' -> '0.5'
+    let standardized_val = Number(val).toString();
+    if (!standardized_val.includes('.')) {
+        standardized_val += '.0';
+    }
+    return standardized_val // string
+}
+
+function ErrToolTip(ele, is_valid, message, parent_ele="td") {
     let parent = $(ele).parent();
     $(parent).find("label.warningTT").tooltip('dispose');
     $(parent).find("label.warningTT").remove();
 
     if (!is_valid) {
         let tt = '<label class="warningTT" data-toggle="tooltip" data-placement="top" data-html="true" title="'+message+'"><i class="ml-1 fas fa-exclamation-triangle"></i></label>';
-        let this_cell = $(ele).closest("td");
+        let this_cell = $(ele).closest(parent_ele);
         if (this_cell.length > 0) {
             $("label.warningTT").tooltip('hide');
             $(this_cell).append(tt);
@@ -32,18 +44,18 @@ function elementIsValid(ele){
 
 // Table error validation
 let ErrorValidation = {
-    isPositiveValue : function (ele) {
+    isPositiveValue : function (ele, parent_ele="td") {
         if (!this.isValidNumber(ele)) {
             return false;
         }
         let data = $(ele).val();
         let is_valid = parseFloat(data) >= 0;
-        return ErrToolTip(ele, is_valid, "Value must be positive.");
+        return ErrToolTip(ele, is_valid, "Value must be positive.", parent_ele);
     },
-    isValidNumber : function (ele) {
+    isValidNumber : function (ele, parent_ele="td") {
         let data = $(ele).val();
         let is_valid = isNumber(data);
-        return ErrToolTip(ele, is_valid, "Invalid values found within number.");
+        return ErrToolTip(ele, is_valid, "Invalid values found within number.", parent_ele);
     },
     rowTotalIsValid : function (ele) {
         let row = ele.closest("tr");

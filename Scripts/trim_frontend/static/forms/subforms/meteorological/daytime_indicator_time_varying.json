@@ -9,7 +9,8 @@
         {
             "id": "static_value",
             "data_type": "float",
-            "min": 0 ,
+            "min": 0,
+            "step": 1,
             "max": 1,
             "default": 1,
             "required": true,

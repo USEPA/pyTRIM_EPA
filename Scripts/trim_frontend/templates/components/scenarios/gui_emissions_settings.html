@@ -113,6 +113,14 @@
         }
 
         var PARCEL_REFRESH = false;
+        try {
+            var chemicals = TRIM.store.currentScenario.chemicals.map(x => x.name);
+            var parcels = TRIM.store.currentScenario.parcels;
+        } catch(e) {
+            var chemicals = null;
+            var parcels = null;
+        }
+        var chem_spec = {}
 
         function renderEmissions() {
             if (!TRIM.store.currentScenario.parcels) {
@@ -127,9 +135,9 @@
             }
 
             let fieldset = $('#chemicals-add-btn').closest("fieldset")
-            var chemicals = TRIM.store.currentScenario.chemicals.map(x => x.name);
-            var parcels = TRIM.store.currentScenario.parcels;
-            var chem_spec = {}
+            chemicals = TRIM.store.currentScenario.chemicals.map(x => x.name);
+            parcels = TRIM.store.currentScenario.parcels;
+            chem_spec = {}
             parcels.forEach(p =>
                 Object.keys(p.sources).forEach(ch => {
                     chem_spec[ch] = []
@@ -180,12 +188,6 @@
                     $('#chemical')[0], TRIM.store.allChemicals.map(x => x.name), true);
             }
 
-            $('#chemicals-0-pill').click()
-
-            $('#chemical').on('change',function(e){
-                $('#add-chemicals-btn').removeAttr('disabled')
-            })
-
             $('#add-chemicals-btn').on('click', function(e){
                 $("#chemicals-modal").find("button.close")[0].click()
                 LoadingScreen.show('adding_chemical');
@@ -205,8 +207,53 @@
                     populate_comp_dd(dd_menu);
                     populate_values($($("#emissions-settings-gui").find("table.compMap")[current_index]))
                 })
-                TRIM.refreshParcels();
+                attach_event_handlers()
+                //TRIM.refreshParcels();
+                let scenario_info = [{
+                        'type': 'data',
+                        'name': 'id',
+                        'value': TRIM.store.currentScenario.id
+                    },{
+                        'type': 'data',
+                        'name': 'field',
+                        'value': 'chemical'
+                    },{
+                        'type': 'input',
+                        'name': 'chemical',
+                        'value': chem
+                    }]
+                TRIM.api.updateScenario(scenario_info)
                 LoadingScreen.hide('adding_chemical')
+                $('#save-btn').click(); // FIXME awkward fix for broken event handlers, shouldn't rely on page reload
+            })
+
+            attach_event_handlers()
+            LoadingScreen.hide('emissions_parcels_loading');
+        }
+
+        function toggle_expand_icon(tr, dir){
+            if ($(tr).find("i.fas").length <= 0) return;
+            if (!dir) {
+                if ($(tr).find("i.fas").attr("class").indexOf("fa-angle-right") > -1) {
+                    $(tr).find("i.fas").attr("class", "fas fa-angle-down")
+                } else {
+                    $(tr).find("i.fas").attr("class", "fas fa-angle-right")
+                }
+            } else {
+                if (dir == "down") {
+                    $(tr).find("i.fas").attr("class", "fas fa-angle-down")
+                } else {
+                    $(tr).find("i.fas").attr("class", "fas fa-angle-right")
+                }
+            }
+
+        }
+
+        function attach_event_handlers() {
+            $('#chemicals-0-pill').click()
+            
+            $('#chemical').on('change',function(e){
+                $('#add-chemicals-btn').removeAttr('disabled')
             })
 
             $('tr.colps').not('tr.level2').on('click', function() {
@@ -257,29 +304,32 @@
                 $(non_zeros).show()
                 $(non_zeros).prev("tr.level1").show()
                 $(this).closest("div").find("button.btn_show_emission_comp").text("Show Compartment")
-            });
+            });          
 
             $(document).ready(function() {
                 $('button.comp_hide_all').trigger('click');
             });
 
-            function toggle_expand_icon(tr, dir){
-                if ($(tr).find("i.fas").length <= 0) return;
-                if (!dir) {
-                    if ($(tr).find("i.fas").attr("class").indexOf("fa-angle-right") > -1) {
-                        $(tr).find("i.fas").attr("class", "fas fa-angle-down")
-                    } else {
-                        $(tr).find("i.fas").attr("class", "fas fa-angle-right")
-                    }
-                } else {
-                    if (dir == "down") {
-                        $(tr).find("i.fas").attr("class", "fas fa-angle-down")
-                    } else {
-                        $(tr).find("i.fas").attr("class", "fas fa-angle-right")
-                    }
+            $('a[href*="remove-chemicals"]').each((i, e) => {
+                let chem = $(e).parent().siblings().find(".chemInfo").text();
+                e.onclick = function() {
+                    let scenario_info = [{
+                        'type': 'data',
+                        'name': 'id',
+                        'value': TRIM.store.currentScenario.id
+                    },{
+                        'type': 'data',
+                        'name': 'field',
+                        'value': 'chemical'
+                    },{
+                        'type': 'input',
+                        'name': 'chemical',
+                        'value': chem
+                    }]
+                    TRIM.api.updateScenario(scenario_info)
+                    $('#save-btn').click();
                 }
-
-            }
+            });
 
             $('label.editableCell').click(function () {
                 $(this).siblings("input").show()
@@ -321,22 +371,6 @@
                 }
             })
 
-            function submit_emission_value(elem, parcel_info) {
-                ErrorValidation.isPositiveValue(elem)
-                if (elementIsValid($(this).parent())){
-                    let data = $(elem).val() == "" ? 0 : $(elem).val()
-                    parcel_info[4].value = data
-                    let $label = $(elem).next("label.editableCell")
-                    $label.siblings("input").hide()
-                    $label.show().text(data)
-
-                    parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                    console.log(parcel_info)
-                    TRIM.api.updateParcel({{ scenario.id }}, parcel_info)
-                } else {
-                    return
-                }
-            }
 
             let gui = $('#emissions-settings-gui');
             let fileFields = gui.find('[type="file"]');
@@ -357,7 +391,7 @@
                 scenario_data = {
                     'type': 'input',
                     'name': 'scenario_id',
-                    'value': {{ scenario.id }}
+                    'value': TRIM.store.currentScenario.id
                 }
                 spacing_data = {
                     'type': 'input',
@@ -395,8 +429,23 @@
                     }
                 });
             });
+        }
 
-            LoadingScreen.hide('emissions_parcels_loading');
+        function submit_emission_value(elem, parcel_info) {
+            ErrorValidation.isPositiveValue(elem)
+            if (elementIsValid($(elem).parent())){
+                let data = $(elem).val() == "" ? 0 : $(elem).val()
+                parcel_info[4].value = data
+                let $label = $(elem).next("label.editableCell")
+                $label.siblings("input").hide()
+                $label.show().text(data)
+
+                parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
+                console.log(parcel_info)              
+                TRIM.api.updateParcel(TRIM.store.currentScenario.id, parcel_info)
+            } else {
+                return
+            }
         }
 
         function initialize_compartment_map(spec) {

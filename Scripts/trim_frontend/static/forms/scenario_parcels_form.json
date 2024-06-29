@@ -59,7 +59,7 @@
             "choices": [],
             "default": "LandUse",
             "required": true,
-            "help": "Indicate the field name showing a parcel's land use (valid values: impervious, tilled soil, untilled soil, agriculture - general, grasses/herbs, deciduous forest, coniferous forest, and water). Note: air parcel boundaries can exactly match parcel boundaries for land and water, such that a parcel with deciduous forest land use can also be selected as an air parcel, for example. Also note: The land-use designation will dictate which areas will be modeled with vegetation (agriculture - general, grasses/herbs, deciduous forest, and coniferous forest) as well as which will be modeled with soil depths reflective of untilled soil (grasses/herbs, deciduous forest, coniferous forest, and untilled soil), and you will later need to provide additional properties about these features."
+            "help": "Indicate the field name showing a parcel's land use (valid values: tilled soil, untilled soil, agriculture - general, grasses/herbs, deciduous forest, coniferous forest, and water). Note: air parcel boundaries can exactly match parcel boundaries for land and water, such that a parcel with deciduous forest land use can also be selected as an air parcel, for example. Also note: The land-use designation will dictate which areas will be modeled with vegetation (agriculture - general, grasses/herbs, deciduous forest, and coniferous forest) as well as which will be modeled with soil depths reflective of untilled soil (grasses/herbs, deciduous forest, coniferous forest, and untilled soil), and you will later need to provide additional properties about these features."
         },
         {
             "id": "parcel_farm_food_field",
@@ -89,7 +89,7 @@
             "choices": [],
             "default": "Wetland",
             "required": true,
-            "help": "Indicate the field name showing whether a parcel will be modeled with wetland characteristics (e.g., modified water percolation and mercury methylation in soil; you will later need to provide information on these wetland characteristics) (a Yes/No field). Note: wetland designations are not allowed for land uses of water and impervious."
+            "help": "Indicate the field name showing whether a parcel will be modeled with wetland characteristics (e.g., modified water percolation and mercury methylation in soil; you will later need to provide information on these wetland characteristics) (a Yes/No field). Note: wetland designations are not allowed for land uses of water."
         },
         {
             "id": "parcel_coordinates_field",

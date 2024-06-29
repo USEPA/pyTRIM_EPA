@@ -234,6 +234,13 @@
         google.charts.load('current', {'packages':['corechart']});
         var form = document.getElementById('model-run-result-gui');
 
+        var default_no_latest_run = {
+            "has_run": false,
+            "lastest_run_date": "",
+            "run_has_results": false,
+            "run_results": {}
+        }
+
         var resultsReadyEvent = document.createEvent('Event');
         resultsReadyEvent.initEvent('results:ready', true, true);
         TRIM.refreshResults = function(force) {
@@ -244,7 +251,12 @@
             }
             LoadingScreen.show('loading_results');
             TRIM.api.getLastResults(TRIM.store.currentScenario).on('load', function() {
-                TRIM.store.latestRunInfo = this.responseJSON.latest_run_info;
+                try{
+                    TRIM.store.latestRunInfo = this.responseJSON.latest_run_info;
+                } catch(err) {
+                    console.log("Error pulling latest run info\n", err);
+                    TRIM.store.latestRunInfo = default_no_latest_run;
+                }
                 document.body.dispatchEvent(resultsReadyEvent);
                 LoadingScreen.hide('loading_results');
             });

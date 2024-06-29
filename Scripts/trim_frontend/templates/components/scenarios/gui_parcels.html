@@ -296,9 +296,10 @@
             shapes = parcels.toGeoJSON()
         }
 
-        let mapTable = $('#mapTable').removeAttr('width').DataTable()
+        let mapTable = null;
         function mapTableRedraw() {
             let tblId = "#mapTable"
+            mapTable = $(tblId).removeAttr('width').DataTable();
             // console.log(shapes.features)
 
             mapTable.clear().draw();
@@ -389,7 +390,7 @@
                     },
                     {
                         data: "properties.landuse",
-                        render: function (data, type, row) {
+                        render: function (data, type, row) {                            
                             let parcel_info = [{
                                 'type': 'data',
                                 'name': 'id',
@@ -413,6 +414,9 @@
                                     });
                                 if (row.properties.landuse.lu == v) {
                                     $option.attr("selected","selected")
+                                }
+                                if (v == "Impervious") { // removing Impervous as a UI option only
+                                    $option.attr("hidden","");
                                 }
                                 $select.append($option)
                             })
@@ -571,8 +575,17 @@
                 update_data(this_table_id)
                 let parcel_info = $(this).data('parcelinfo')
                 if (parcel_info) {
-                    parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                    TRIM.api.updateParcel('{{ scenario.id }}', parcel_info)
+                    previous_data = parcel_info[parcel_info.findIndex(e => e.type == 'input')];
+                    if (previous_data.value === data) {
+                        return;
+                    }
+                    console.log(parcel_info);
+                    previous_data.value = data;
+                    LoadingScreen.show('loading_results');
+                    TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load',function(){
+                        TRIM.refreshParcels();
+                        LoadingScreen.hide('loading_results');
+                    });
                     mapTableRedraw()
                 }
             })
@@ -668,7 +681,8 @@
             var feature = parcel.feature = parcel.feature || {};
             feature.type = "Feature";
             feature.properties = feature.properties || {};
-            var content = '<span><b>Parcel Name</b></span><br/><input id="shapeName" type="text"/><br/><br/><span><b>Parcel Description<b/></span><br/><textarea id="shapeDesc" cols="25" rows="5"></textarea><br/><br/><input type="button" id="okBtn" value="Save"/>';
+            let parcelDrawHelpText = "Enter an arbitrary but unique name for the parcel. Names should not begin with Air, SW, Sed, SurfSoil, RootSoil, VadoseSoil, or GW. Names should not contain spaces. We recommend short names (e.g., less than about 15 characters) because they will be displayed on other pages of this user interface.";
+            var content = '<span>'+parcelDrawHelpText+'<br/><br/><b>Parcel Name</b></span><br/><input id="shapeName" type="text"/><br/><br/><span><b>Parcel Description<b/></span><br/><textarea id="shapeDesc" cols="25" rows="5"></textarea><br/><br/><input type="button" id="okBtn" value="Save"/>';
             idIW.setContent(content);
             idIW.setLatLng(l.getBounds().getCenter());
             idIW.openOn(map);
@@ -729,7 +743,7 @@
             // LoadingScreen.show('deleting_parcel');
             parcels.removeLayer(layer._leaflet_id)
             shapes = parcels.toGeoJSON()
-            TRIM.api.deleteParcels({{ scenario.id }}, layer.toGeoJSON())
+            TRIM.api.deleteParcels(TRIM.store.currentScenario.id, layer.toGeoJSON())
                 // .on('load', function(){
                 //     LoadingScreen.hide('deleting_parcel');
                 // })

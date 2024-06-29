@@ -116,6 +116,23 @@
                 }
             });
 
+            let sort_order = "asc"
+            $('.sortClass').click(function(e){
+                e.preventDefault();
+                let Table = $(air_tblId, air_tblId, root_tblId, vadose_tblId, gw_tblId).dataTable()
+                let cellIndex = $(this).closest("th").index()
+                Table.fnSort([[cellIndex,sort_order]]);//use asc/desc as you want
+                sort_order= sort_order == "desc" ? "asc" : "desc"
+            });
+
+            $('label.editableCell').click(function () {
+                $(this).siblings("input").show()
+                $(this).siblings("select").show()
+                $(this).prev("input").focus()
+                $(this).prev("select").focus()
+                $(this).hide();
+            });
+
             // save modified cell
             $(`input.editableCell, select.editableCell`).blur(function () {
                 let this_input = this
@@ -177,10 +194,10 @@
                 let receiver = $(elem).attr("data-receiver")
                 param_info[3]['value'].push(
                     'ro_' + receiver
-                    )
+                )
                 param_info[4]['value'].push(
-                    $(elem).val()
-                    )
+                    standardize_val($(elem).val())
+                )
             })
             return param_info
         }
@@ -190,6 +207,7 @@
                 let parcel_info = get_form_data(elem_list)
                 let elem = elem_list[0]
                 if (elementIsValid($(elem).closest('tr'))){
+                    console.log(parcel_info)
                     TRIM.api.updateParcel('{{ scenario.id }}',parcel_info).on('load',function(){
                         let msg =  this.responseJSON["message"]
                         if (msg != "success") {

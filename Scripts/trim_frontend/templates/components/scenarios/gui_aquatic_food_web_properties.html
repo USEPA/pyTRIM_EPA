@@ -380,7 +380,10 @@
                     // Push change to DB
                     let is_valid_row = elementIsValid(this);
                     if (is_valid_row){
-                        TRIM.api.updateParcel('{{ scenario.id }}', parcel_info)   
+                        LoadingScreen.show('submit_diet'); // since this can take a moment
+                        TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', ()=>{
+                            LoadingScreen.hide('submit_diet'); 
+                        });
                     }
                 })
             }
@@ -479,7 +482,7 @@
                         let default_val = JSON.parse(p.getAttribute("data-default"));
 
                         row_data['Property'] = p; // HTML Element
-                        row_data[e.name] = e[prop][comp_name] ? e[prop][comp_name] : default_val;
+                        row_data[e.name] = (e[prop][comp_name] !== null) ? e[prop][comp_name] : default_val;
                     }
                 })
                 if (!$.isEmptyObject(row_data)) {

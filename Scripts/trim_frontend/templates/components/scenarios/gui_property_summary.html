@@ -91,7 +91,9 @@
                 return;
             }
 
+            $($("#property-summary-gui").find("table.compMap")[0]).find("tbody").text("");
             $(initialize_compartment_map()).insertAfter($($("#property-summary-gui").find("table.compMap")[0]).find("thead"))
+            $($("#property-summary-gui").find("table.scenarioMap")[0]).find("tbody").text("");
             $(initialize_scenario_map()).insertAfter($($("#property-summary-gui").find("table.scenarioMap")[0]).find("thead"))
 
             let dd_menu = $($("#property-summary-gui").find("table.compMap")[0]).prev("div.dropdown").find("div.dropdown-menu")
@@ -215,7 +217,7 @@
             })
 
             function submit_new_value(elem, parcel_info) {
-                if (elementIsValid($(this).parent())){
+                if (elementIsValid($(elem).parent())){
                     let data = $(elem).val() == "" ? 0 : $(elem).val()
                     let $label = $(elem).next("label.editableCell")
                     $label.siblings("input").hide()
