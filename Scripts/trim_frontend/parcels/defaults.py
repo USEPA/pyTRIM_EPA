@@ -56,15 +56,24 @@ def get_general_params(pcl):
     is_tilled = False
 
     surface_soil_height = None
-    root_soil_height = None
-    vadose_soil_height = None
-    groundwater_height = None
+    root_soil_height = pcl.get_compartment("Soil_Root_Zone")
+    vadose_soil_height = pcl.get_compartment("Soil_Vadose_Zone")
+    groundwater_height = pcl.get_compartment("Groundwater")
 
     diet_by_media = {}
     biomass_by_media = {}
     bw_by_media = {}
 
     land_use = 'Impervious'
+
+    # FIXME verify this is okay
+    if root_soil_height:
+        root_soil_height = root_soil_height.volume_element.height.m_as('m')
+    if vadose_soil_height:
+        vadose_soil_height = vadose_soil_height.volume_element.height.m_as('m')
+    if groundwater_height:
+        groundwater_height = groundwater_height.volume_element.height.m_as('m')
+
     for comp in pcl.compartments:
         # Check parcel type
         if comp.media.isa('Air', or_child=False):
@@ -88,15 +97,6 @@ def get_general_params(pcl):
                         is_tilled = True
                 except ValueError:
                     is_tilled = False
-        elif comp.media.isa('Soil_Root_Zone'):
-            if root_soil_height is None:
-                root_soil_height = comp.volume_element.height.m_as('m')
-        elif comp.media.isa('Soil_Vadose_Zone'):
-            if vadose_soil_height is None:
-                vadose_soil_height = comp.volume_element.height.m_as('m')
-        elif comp.media.isa('Groundwater'):
-            if groundwater_height is None:
-                groundwater_height = comp.volume_element.height.m_as('m')
         elif comp.media.isa('Surface_Water'):
             water = True
         elif comp.media.isa('Wetland'):
