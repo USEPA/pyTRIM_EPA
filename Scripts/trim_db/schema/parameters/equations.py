@@ -167,7 +167,7 @@ def evaluated_args(eq, evaluator=evaluator):
             for x in eq.split(el)[1:]:
                 t = x.split(')')[0]
                 p_i = 0
-                while t.count("(") > t.count(")"):
+                while t.count("(") > t.count(")") and p_i <= len(t):
                     p_i += 1
                     t = "".join(x.split(")")[:p_i]) + ")"
                 x = t

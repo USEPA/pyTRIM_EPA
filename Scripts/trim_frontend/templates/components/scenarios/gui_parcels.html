@@ -763,10 +763,10 @@
             // LoadingScreen.show('deleting_parcel');
             parcels.removeLayer(layer._leaflet_id)
             shapes = parcels.toGeoJSON()
-            TRIM.api.deleteParcels(TRIM.store.currentScenario.id, layer.toGeoJSON())
-                // .on('load', function(){
-                //     LoadingScreen.hide('deleting_parcel');
-                // })
+            LoadingScreen.show('delete_parcel');
+            TRIM.api.deleteParcels(TRIM.store.currentScenario.id, layer.toGeoJSON()).on('load', function(){
+                LoadingScreen.hide('delete_parcel');
+            })
             mapTableRedraw()
         });
 

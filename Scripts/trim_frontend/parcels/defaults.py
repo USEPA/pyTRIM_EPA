@@ -7,6 +7,8 @@ import pint
 
 @register_serializer(Parcel)
 def serialize_parcel(pcl: Parcel):
+    init_first_time_default_param_values()
+
     general_params = get_general_params(pcl)
     water_params = get_water_params(pcl, general_params['parcelType'])
     source_params = get_source_params(pcl)
@@ -56,15 +58,24 @@ def get_general_params(pcl):
     is_tilled = False
 
     surface_soil_height = None
-    root_soil_height = None
-    vadose_soil_height = None
-    groundwater_height = None
+    root_soil_height = pcl.get_compartment("Soil_Root_Zone")
+    vadose_soil_height = pcl.get_compartment("Soil_Vadose_Zone")
+    groundwater_height = pcl.get_compartment("Groundwater")
 
     diet_by_media = {}
     biomass_by_media = {}
     bw_by_media = {}
 
     land_use = 'Impervious'
+
+    # FIXME verify this is okay
+    if root_soil_height:
+        root_soil_height = root_soil_height.volume_element.height.m_as('m')
+    if vadose_soil_height:
+        vadose_soil_height = vadose_soil_height.volume_element.height.m_as('m')
+    if groundwater_height:
+        groundwater_height = groundwater_height.volume_element.height.m_as('m')
+
     for comp in pcl.compartments:
         # Check parcel type
         if comp.media.isa('Air', or_child=False):
@@ -88,15 +99,6 @@ def get_general_params(pcl):
                         is_tilled = True
                 except ValueError:
                     is_tilled = False
-        elif comp.media.isa('Soil_Root_Zone'):
-            if root_soil_height is None:
-                root_soil_height = comp.volume_element.height.m_as('m')
-        elif comp.media.isa('Soil_Vadose_Zone'):
-            if vadose_soil_height is None:
-                vadose_soil_height = comp.volume_element.height.m_as('m')
-        elif comp.media.isa('Groundwater'):
-            if groundwater_height is None:
-                groundwater_height = comp.volume_element.height.m_as('m')
         elif comp.media.isa('Surface_Water'):
             water = True
         elif comp.media.isa('Wetland'):
@@ -479,6 +481,42 @@ def get_fish_params(comp):
     }
 
     return fish_params
+
+
+# FIXME this probably shouldn't be here, ideally already lives in the database
+# probably shouldn't exist here in the first place... should be created as custom params when a new water parcel is made
+def init_first_time_default_param_values():
+    default_params = [
+        # Water Body Properties
+        {"kwargs": {"variable_name": "WaterTemperature", "default_unit":"K"}, "value": 298},
+        {"kwargs": {"variable_name": "pH"}, "value": 7.3},
+        {"kwargs": {"variable_name": "AlgaeDensityInWaterColumn"}, "value": 0.0025},
+        {"kwargs": {"variable_name": "ChlorideConcentration"}, "value": 8},
+        {"kwargs": {"variable_name": "ChlorophyllConcentration"}, "value": 0.0029},
+        {"kwargs": {"variable_name": "OrganicCarbonContent"}, "value": 0.02},
+        {"kwargs": {"variable_name": "SuspendedSedimentConcentration"}, "value": 0.05},
+        {"kwargs": {"variable_name": "ExternalSedimentInflow"}, "value": 0},
+        {"kwargs": {"variable_name": "SedimentDepositionVelocity"}, "value": 2},
+        {"kwargs": {"variable_name": "waterEvaporationRate"}, "value": 0.7},
+
+        # Aquatic Food Web
+        {"kwargs": {"variable_name": "FractionDietAlgae"}, "value": 0},
+        {"kwargs": {"variable_name": "FractionDietMacrophyte"}, "value": 0},
+        {"kwargs": {"variable_name": "FractionDietZooplankton"}, "value": 0},
+        {"kwargs": {"variable_name": "FractionDietBenthicInvertebrate"}, "value": 0},
+        {"kwargs": {"variable_name": "FractionDietFishHerbivore"}, "value": 0},
+        {"kwargs": {"variable_name": "FractionDietFishBenthicOmnivore"}, "value": 0},
+        {"kwargs": {"variable_name": "FractionDietFishOmnivore"}, "value": 0},
+        {"kwargs": {"variable_name": "FractionDietFishBenthicCarnivore"}, "value": 0},
+        {"kwargs": {"variable_name": "FractionDietFishCarnivore"}, "value": 0},
+        {"kwargs": {"variable_name": "FoodIngestionRate"}, "value": 0},
+    ]
+    for obj in default_params:
+        default_params = ParameterService.definitions.get_all(**obj["kwargs"])
+        for param in default_params:
+            if not param.default_value:
+                param.default_value = obj["value"]
+                ParameterService.definitions.update(param)
 
 
 LAND_USE_TYPES = [

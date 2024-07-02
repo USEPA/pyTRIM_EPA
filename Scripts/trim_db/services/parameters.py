@@ -386,7 +386,10 @@ def parameterize(cls, default_scenario=None):
                         # custom parameters
                         p[pd.name] = pd
                     for cp in pd.instances:
-                        if cp.scenario_id != s_id:
+                        # FIXME need to either correct the chem param definitions 
+                        # or init custom params for each new scenario.
+                        # at the moment chemicals take custom params from the Foundries/Default scenario
+                        if cp.scenario_id != s_id and entity.__tablename__ != 'chemical':
                             continue
                         if cp.validate(entity):
                             got_custom[pd.name] = True
