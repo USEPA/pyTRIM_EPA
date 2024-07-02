@@ -7,6 +7,8 @@ import pint
 
 @register_serializer(Parcel)
 def serialize_parcel(pcl: Parcel):
+    init_first_time_default_param_values()
+
     general_params = get_general_params(pcl)
     water_params = get_water_params(pcl, general_params['parcelType'])
     source_params = get_source_params(pcl)
@@ -479,6 +481,42 @@ def get_fish_params(comp):
     }
 
     return fish_params
+
+
+# FIXME this probably shouldn't be here, ideally already lives in the database
+# probably shouldn't exist here in the first place... should be created as custom params when a new water parcel is made
+def init_first_time_default_param_values():
+    default_params = [
+        # Water Body Properties
+        {"kwargs": {"variable_name": "WaterTemperature", "default_unit":"K"}, "value": 298},
+        {"kwargs": {"variable_name": "pH"}, "value": 7.3},
+        {"kwargs": {"variable_name": "AlgaeDensityInWaterColumn"}, "value": 0.0025},
+        {"kwargs": {"variable_name": "ChlorideConcentration"}, "value": 8},
+        {"kwargs": {"variable_name": "ChlorophyllConcentration"}, "value": 0.0029},
+        {"kwargs": {"variable_name": "OrganicCarbonContent"}, "value": 0.02},
+        {"kwargs": {"variable_name": "SuspendedSedimentConcentration"}, "value": 0.05},
+        {"kwargs": {"variable_name": "ExternalSedimentInflow"}, "value": 0},
+        {"kwargs": {"variable_name": "SedimentDepositionVelocity"}, "value": 2},
+        {"kwargs": {"variable_name": "waterEvaporationRate"}, "value": 0.7},
+
+        # Aquatic Food Web
+        {"kwargs": {"variable_name": "FractionDietAlgae"}, "value": 0},
+        {"kwargs": {"variable_name": "FractionDietMacrophyte"}, "value": 0},
+        {"kwargs": {"variable_name": "FractionDietZooplankton"}, "value": 0},
+        {"kwargs": {"variable_name": "FractionDietBenthicInvertebrate"}, "value": 0},
+        {"kwargs": {"variable_name": "FractionDietFishHerbivore"}, "value": 0},
+        {"kwargs": {"variable_name": "FractionDietFishBenthicOmnivore"}, "value": 0},
+        {"kwargs": {"variable_name": "FractionDietFishOmnivore"}, "value": 0},
+        {"kwargs": {"variable_name": "FractionDietFishBenthicCarnivore"}, "value": 0},
+        {"kwargs": {"variable_name": "FractionDietFishCarnivore"}, "value": 0},
+        {"kwargs": {"variable_name": "FoodIngestionRate"}, "value": 0},
+    ]
+    for obj in default_params:
+        default_params = ParameterService.definitions.get_all(**obj["kwargs"])
+        for param in default_params:
+            if not param.default_value:
+                param.default_value = obj["value"]
+                ParameterService.definitions.update(param)
 
 
 LAND_USE_TYPES = [

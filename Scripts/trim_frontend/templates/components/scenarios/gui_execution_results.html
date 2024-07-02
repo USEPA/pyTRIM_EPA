@@ -581,11 +581,10 @@
                                 setChecked("p#cb_proc_trm", "on")
                                 setChecked("p#cb_proc_ode", "on")
                                 setChecked("p#cb_proc_out", "on")
-                                setChecked("p#cb_proc_vis", "on")
+                                setChecked("p#cb_proc_vis", "run")
                                 $('#btn_get_mass_results').show()
                                 $('#btn_get_conc_results').show()
                                 $('#btn_visualize').prop('disabled', false)
-                                $('#lb_perc_vis').text("(100%)")
                                 $('#lb_perc_ode').text("(100%)")
                                 $('#lb_perc_out').text("(100%)")
                                 $('#lb_perc_trm').text("(100%)")
@@ -607,28 +606,22 @@
                                 
                             }
                         })
-
-                        if (result == "fin") {
-                            setChecked("p#cb_proc_trm", "on")
-                            setChecked("p#cb_proc_ode", "on")
-                            setChecked("p#cb_proc_out", "on")
-                            setChecked("p#cb_proc_vis", "on")
-                        }
-
-                        if (result == "err") {
-                            setChecked("p#cb_proc_trm", "err")
-                            setChecked("p#cb_proc_ode", "err")
-                            setChecked("p#cb_proc_out", "err")
-                            setChecked("p#cb_proc_vis", "err")
-                        }
                     }
-                    if (result != "err") {
-                        setTimeout(function(){
-                            initialize_components()
-                            $($('#plt_type').find('a.dropdown-item')[0]).trigger('click')
-                            $('#btn_visualize').prop('disabled', false).trigger('click')
-                        }, ms)
+
+                    if (result == "err") {
+                        setChecked("p#cb_proc_trm", "err")
+                        setChecked("p#cb_proc_ode", "err")
+                        setChecked("p#cb_proc_out", "err")
+                        setChecked("p#cb_proc_vis", "err")
+                        return result;
                     }
+                    setTimeout(function(){
+                        initialize_components()
+                        $($('#plt_type').find('a.dropdown-item')[0]).trigger('click')
+                        $('#btn_visualize').prop('disabled', false).trigger('click')
+                        setChecked("p#cb_proc_vis", "on")
+                        $('#lb_perc_vis').text("(100%)")
+                    }, ms)
                     return result;
                 };
 
