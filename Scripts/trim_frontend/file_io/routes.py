@@ -14,11 +14,12 @@ from trim_db.schema.entities.environment import Parcel
 from trim_db.services import *
 from trim_db.services.entities import ParcelService
 from trim_frontend import api
+from ..parcels.utils import delete_parcel_contents, get_canonical_land_use_type, get_canonical_parcel_type, get_ve_defaults_for_parcel_type, handle_parcel_update, initialize_parcel_contents
 from ..utils.data_structures import calculate_list_depth
 from ..utils.file_io import csv_to_df
 from ..utils.forms import assemble_json_form
 from ..utils.logging import make_logger
-from ..utils.spatial import determine_location, determine_nearest_neighbor_distance, is_utm_zone_valid, translate_coordinates
+from ..utils.spatial import determine_location, determine_nearest_neighbor_distance, ensure_closed_polygon, is_utm_zone_valid, translate_coordinates
 
 
 file_api = Blueprint('file_api', __name__)
@@ -251,7 +252,21 @@ def parse_parcel_upload():
         errors.append("No files were uploaded")
 
     if len(errors) == 0:
+        # delete existing parcels...
+        scenario = ScenarioService.get(id=scenario_id)
+        for del_parcel in scenario.parcels:
+            del_parcel_description = f"'{del_parcel.name}' ({del_parcel.id})"
+            print(f"deleting parcel {del_parcel}...")
+            try:
+                delete_parcel_contents(del_parcel)
+                ParcelService.delete(del_parcel.id)
+            except Exception as e:
+                errors.append(f"Exception deleting parcel {del_parcel_description}: {e}")
 
+    return_data = {
+        "parcels": []
+    }
+    if len(errors) == 0:
         fpn = [f.stream for n, f in files.items()][0]
         try:
             fpn.seek(0)
@@ -259,18 +274,13 @@ def parse_parcel_upload():
             csv_reader = csv.DictReader(io.StringIO(lines))
 
             line_num = 2
-            parcels_to_save = []
+            # parcels_to_save = []
             for row in csv_reader:
                 parcel_name = row.get("ParcelName")
-                parcel_type = row.get("ParcelType")
-                is_air = row.get("Air", "").upper() == "YES"
-                is_land_use = row.get("LandUse", "").upper() == "YES"
-                is_farm_food_chain = row.get("FarmFoodChain", "").upper() == "YES"
-                is_fish_food_web = row.get("FishFoodWeb", "").upper() == "YES"
-                is_wetland = row.get("Wetland", "").upper() == "YES"
+                parcel_type = get_canonical_parcel_type(row.get("ParcelType"))
+                parcel_description = row.get("Description", "")
+                land_use = get_canonical_land_use_type(row.get("LandUse", ""))
                 raw_coords = row.get("coordinates")
-
-                # print(f"PARCEL NAME: {parcel_name}, TYPE: {parcel_type}, AIR: {is_air}, LAND USE: {is_land_use}, FARM FOOD CHAIN: {is_farm_food_chain}, FISH FOOD WEB: {is_fish_food_web}, WETLAND: {is_wetland}, COORDS: {raw_coords}")
 
                 # we'll accept either a 3 level list...
                 # OUTERMOST LIST 1 == multiple polygons
@@ -287,25 +297,81 @@ def parse_parcel_upload():
                     fixed_coords = []
                     for polygon_definition in parsed_coords:
                         # print(f"CHECKING POLYGON: {polygon_definition}")
+                        polygon_definition = ensure_closed_polygon(polygon_definition)
 
                         if coord_system == "WGS84 Longitude/Latitude":
                             fixed_coords.append(polygon_definition)
                         else:
                             longlat_poly = translate_coordinates(polygon_definition, coord_system, "WGS84_LONGLAT", default_utm_zone=default_utm_zone)
                             fixed_coords.append(longlat_poly)
-                    print(f"COORDS: {fixed_coords}")
 
                     # now fixed_coords is definitely nested3 lists of long/lat pairs
                     # ch = ChemicalService.get(id=32)
 
-                    print(f"hit service {ParcelService} / {Parcel}...")
-
+                    """
                     # note - we currently only support a single polygon, so we are just taking
                     # the first one.
-                    p = Parcel(name=parcel_name, scenario_id=scenario_id, vertices=fixed_coords[0])
+                    p = Parcel(name=parcel_name, description=parcel_description, scenario_id=scenario_id, vertices=fixed_coords[0])
+
                     parcels_to_save.append(p)
                     # save one at a time? Nah, bulk it
                     # ParcelService.db.session.add(p)
+                    """
+                    # TODO - reload page after upload (done; but we could do better...)
+                    p = ParcelService.create(name=parcel_name, description=parcel_description, scenario_id=scenario_id, vertices=fixed_coords[0])
+                    ve_defaults = get_ve_defaults_for_parcel_type(parcel_type)
+                    initialize_parcel_contents(p, ve_defaults)
+
+                    # TODO - verify this logic is sound -- or is it being enforced elsewhere?
+                    # basically does the upload handler need to worry about e.g. someone saying
+                    # "Yes" to farm food chain while also saying "air only"?
+                    if "Land" in parcel_type:
+                        if land_use is not None:
+                            handle_parcel_update(p, {
+                                "field": "landUse",
+                                "landUse": land_use
+                            })
+
+                        if land_use == "Tilled Soil" or "Agriculture" in land_use:
+                            has_farm_food_chain = row.get("FarmFoodChain", "").upper() == "YES"
+                            handle_parcel_update(p, {
+                                "field": "hasFarmFoodChain",
+                                "hasFarmFoodChain": "Yes" if has_farm_food_chain else "No"
+                            })
+
+                        # always allow wetland for land editing?
+                        has_wetland = row.get("Wetland", "").upper() == "YES"
+                        handle_parcel_update(p, {
+                            "field": "hasWetland",
+                            "hasWetland": "Yes" if has_wetland else "No"
+                        })
+
+                    if "Water" in parcel_type:
+                        has_fish_food_web = row.get("FishFoodWeb", "").upper() == "YES"
+                        handle_parcel_update(p, {
+                            "field": "hasFishFoodWeb",
+                            "hasFishFoodWeb": "Yes" if has_fish_food_web else "No"
+                        })
+
+                    return_data["parcels"].append(p.as_serializable())
+
+                    # TODO - verify that "Air" in the csv sample is meaningless?
+
+                    # TODO - "Agriculture (General)" doesn't work either in UI or via CSV upload
+                    # TODO - "Tilled Soil, Untilled Soil, Impervious" are all bused in create_base_land_compartments
+
+                    """
+                    # WHAT'S EDITABLE?
+                    LAND USE        FARMFOODCHAIN   FISHFOODWEB     WETLAND
+                    --------------------------------------------------------
+                    Tilled Soil         yes             -           yes
+                    Untilled Soil       ??????????????????
+                    Agri Gen
+                    Grasses/Herb        -               -           yes
+                    Decid For           -               -           yes
+                    Conif For           -               -           yes
+                    """
+
                     """
                     # why didn't this work...
                     p = ParcelService.create(no_commit=True)
@@ -317,20 +383,9 @@ def parse_parcel_upload():
                     foo = ParcelService.commit()
                     print(f"really created '{p}' / {foo}")
                     """
-                    """
-                    # we're not yet doing anything with any of the following data in the upload...
-                    parcel_type
-                    is_air
-                    is_land_use
-                    is_farm_food_chain
-                    is_fish_food_web
-                    is_wetland
-                    """
-
-                    print("A OK ALL DONE!!!")
-                    # update_parcel(-1, -1)
+                    print(f"\tDONE FOR LINE {line_num}")
                 except Exception as e:
-                    errors.append(f"Error parsing coordinates at line {line_num}: {e}")
+                    errors.append(f"Error processing CSV line {line_num}: {e}")
 
                 line_num += 1
 
@@ -338,17 +393,50 @@ def parse_parcel_upload():
         except Exception:
             errors.append("Unable to open file")
 
+    """
     if len(errors) == 0 and len(parcels_to_save) > 0:
-        # ParcelService.db.session.bulk_save_objects(parcels_to_save)
-        # ParcelService.commit()
-        pass
+        try:
+            print("++++++++++++++++++\n" * 5)
+            # delete all existing parcels for this scenario...
+
+            scenario = ScenarioService.get(id=scenario_id)
+            for del_parcel in scenario.parcels:
+                print(f"deleting parcel {del_parcel}...")
+                try:
+                    delete_parcel_contents(del_parcel)
+                    ParcelService.delete(del_parcel.id, no_commit=True)
+                except Exception as e:
+                    print(f"error during delete: {e}")
+            ParcelService.commit()
+
+            print(f"NOW BULK SAVE {parcels_to_save}...")
+            ParcelService.db.session.bulk_save_objects(parcels_to_save)
+            ParcelService.commit()
+            print(f"past commit!")
+
+            # get the ones we just saved; ugly
+            saved_parcels = ParcelService.get_all(scenario_id=scenario_id)
+            for p in saved_parcels:
+                print(f"NORMALLY WE'D NOW UPDATE {p} / {p.compartments}...")
+                initialize_parcel_contents(p)
+                # handle_parcel_update(p, { "hello": "world", "foo": True, "bar": 99})
+            pass
+
+            print(f"at way bottom!")
+        except Exception as e:
+            print(f"Exception during del/save: {e}")
+            errors.append("Error saving")
+    """
 
     if len(errors) > 0:
         raise ApiException("; ".join(errors))
     else:
+        """
         return ApiResult({
             "fakeData": "from tom"
         })
+        """
+        return ApiResult(return_data)
 
 root = os.path.dirname(os.path.abspath(__file__))
 static = os.path.abspath(os.path.join(root, '../static'))

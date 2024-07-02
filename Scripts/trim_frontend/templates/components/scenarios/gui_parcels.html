@@ -236,7 +236,26 @@
 					"value": coordsSystem.val() == "UTM" ? utmZone.val() : "n/a"
 				});
 
-				TRIM.api.uploadParcelFile(fieldData);
+				LoadingScreen.show('upload_parcel_csv');
+				TRIM.api.uploadParcelFile(fieldData, function(success,responseData,c) {
+					LoadingScreen.hide('upload_parcel_csv');
+
+					if (!success) {
+						alert('An error occurred during upload.');
+					} else {
+						/*
+						// TODO - can we use this data to just redraw the map/table w/o a full page reload? probably!
+						console.log("WORKED:");
+						console.log(responseData);
+						for (let i = 0 ; i < responseData.parcels.length ; i++) {
+							let new_parcel = responseData.parcels[i];
+							console.log("NEW PARCEL: " + JSON.stringify(new_parcel));
+						}
+						*/
+						console.log("reload...");
+						window.location.reload();
+					}
+				});
 				return false;
 			});
 		}
@@ -720,6 +739,7 @@
                     parcel.feature.properties.farmfoodchain = new_parcel["scenario"]["hasFarmFoodChain"]
                     parcel.feature.properties.fishfoodweb = new_parcel["scenario"]["hasFishFoodWeb"]
                     parcel.feature.properties.wetland = new_parcel["scenario"]["hasWetland"]
+
                     parcels.addLayer(parcel);
                     parcel.bindTooltip(parcel.feature.properties.name, {permanent: false}).addTo(map);
                     shapes = parcels.toGeoJSON()

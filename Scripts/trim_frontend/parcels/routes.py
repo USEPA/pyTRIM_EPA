@@ -104,7 +104,11 @@ def update_parcel(id, scenario_id):
         p = ParcelService.get(id)
         parcels_data = request.form.to_dict()
         print(f"updating with {parcels_data}")
-        rv = handle_parcel_update(p, parcels_data)
+        rv = None
+        try:
+            rv = handle_parcel_update(p, parcels_data)
+        except Exception as e:
+            print(f"exception while updating parcel {p} with {parcels_data}: {e}")
 
         if rv is not None:
             return rv

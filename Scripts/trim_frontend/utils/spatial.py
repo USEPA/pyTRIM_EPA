@@ -1,3 +1,4 @@
+import json
 import re
 
 from shapely.geometry import Polygon, Point, MultiPoint
@@ -110,3 +111,22 @@ def translate_coordinates(polygon_definition, from_system, to_system, **kwargs):
         translated.append(translated_xy)
 
     return translated
+
+
+# given list of x/y (+utm maybe?) points, ensure that the polygon closes
+def ensure_closed_polygon(polygon_definition):
+    if len(polygon_definition) >= 3:
+        first_point = json.dumps(polygon_definition[0])
+        last_point = json.dumps(polygon_definition[-1])
+
+        if first_point != last_point:
+            copied_point = [polygon_definition[0][0], polygon_definition[0][1]]
+            if len(polygon_definition[0]) == 3:
+                copied_point.append(polygon_definition[0][2])
+            polygon_definition.append(copied_point)
+
+            return polygon_definition
+        else:
+            return polygon_definition
+    else:
+        return polygon_definition

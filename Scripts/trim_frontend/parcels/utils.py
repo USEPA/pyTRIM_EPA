@@ -4,7 +4,7 @@ from flask_api import ApiResult
 
 from trim_db.schema import CustomParameter, ParameterDefinition, Parcel
 from trim_db.services import ChemicalService, CompartmentService, FormulaService, ParameterService, ParcelService, ScenarioService, VolumeElementService
-from .defaults import Air_Parcel_VolElem_defaults, Aquatic_Biota_SW_Compartment_defaults, Aquatic_Biota_Sed_Compartment_defaults, Farm_Biota_SurfSoil_Compartment_defaults, Land_Parcel_VolElem_defaults, Water_Parcel_VolElem_defaults, Wet_Dry_Source_VolElem_defaults
+from .defaults import Air_Parcel_VolElem_defaults, Aquatic_Biota_SW_Compartment_defaults, Aquatic_Biota_Sed_Compartment_defaults, Farm_Biota_SurfSoil_Compartment_defaults, LAND_USE_TYPES, Land_Parcel_VolElem_defaults, Water_Parcel_VolElem_defaults, Wet_Dry_Source_VolElem_defaults
 from ..scenarios.forms import ScenarioAbioticPropertiesForm
 from ..utils.logging import make_logger
 
@@ -21,6 +21,8 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
     logger = make_logger('handle_parcel_update')
 
     land_use = get_land_use(p)
+
+    print(f"\t\tREFACTORED HANDLE_PARCEL_UPDATE FOR {p} / {parcels_data}; land_use == '{land_use}'")
 
     Air_params = [('dustLoad', "DustLoad"),
                   ("dustDensity", "DustDensity"),
@@ -469,6 +471,50 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
     # Update record
     ParcelService.update(p)
 
+# TODO - define "Air Only", etc. as constants somewhere?!?!?
+# forgiving translation of user-supplied value
+def get_canonical_parcel_type(p_type):
+    normalized = p_type.upper().replace(" ", "")
+
+    if normalized == "AIRONLY":
+        return "Air Only"
+    elif normalized == "WATERONLY":
+        return "Water Only"
+    elif normalized == "LANDONLY":
+        return "Land Only"
+    elif normalized == "LAND&AIR":
+        return "Land & Air"
+    elif normalized == "WATER&AIR":
+        return "Water & Air"
+
+
+# forgiving translation of user-supplied value
+def get_canonical_land_use_type(lu_type):
+    normalized = lu_type.upper().replace(" ", "")
+
+    for x in LAND_USE_TYPES:
+        if x.upper().replace(" ", "") == normalized:
+            return x
+
+
+def get_ve_defaults_for_parcel_type(parcel_type):
+    normalized = parcel_type.upper().replace(" ", "")
+
+    if normalized == "AIRONLY":
+        return Air_Parcel_VolElem_defaults
+    elif normalized == "WATERONLY":
+        return Water_Parcel_VolElem_defaults
+    elif normalized == "LANDONLY":
+        return Land_Parcel_VolElem_defaults
+    elif normalized == "LAND&AIR":
+        combo = dict(Land_Parcel_VolElem_defaults)
+        combo.update(Air_Parcel_VolElem_defaults)
+        return combo
+    elif normalized == "WATER&AIR":
+        combo = dict(Water_Parcel_VolElem_defaults)
+        combo.update(Air_Parcel_VolElem_defaults)
+        return combo
+
 
 def initialize_parcel_contents(new_parcel, vol_elem_defaults=None):
     if vol_elem_defaults is None:
@@ -652,7 +698,13 @@ def delete_parcel_contents(del_parcel):
                     continue
                 sub_parts = p.split('}')
                 complist = sub_parts[0].split(",")
-                new_complist = [str(int(i.strip())) for i in complist if int(i.strip()) != del_id]
+
+                # tfeiler bandaid - not fully following logic here; just avoiding a crash
+                if len(complist) == 1 and complist[0].strip() == '':
+                    new_complist = ''
+                else:
+                    new_complist = [str(int(i.strip())) for i in complist if int(i.strip()) != del_id]
+
                 sub_parts[0] = " , ".join(new_complist)
                 eq_parts[i] = "}".join(sub_parts)
             new_eq = 'compartment.id in {'.join(eq_parts)
