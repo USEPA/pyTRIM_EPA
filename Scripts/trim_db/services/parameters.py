@@ -282,6 +282,36 @@ def get_parameter_characteristics(param):
     }
 
 
+def get_or_create_custom_param(param_obj=None, kwargs={}, new_formula=False):
+    if isinstance(param_obj, CustomParameter):
+        return param_obj
+    
+    elif isinstance(param_obj, ParameterDefinition):
+        default_kwargs = {
+            "definition": param_obj,
+            "value": param_obj.default_value,
+            "unit": param_obj.default_unit,
+            "formula_id": param_obj.default_formula_id,
+        }
+        keys = set(list(kwargs.keys()) + list(default_kwargs.keys()))
+        for key in keys:
+            if key not in kwargs:
+                kwargs[key] = default_kwargs[key]
+
+    elif param_obj:
+        raise Exception(f"Param type {type(param_obj)} not supported")
+
+    if new_formula:
+        default_param = ParameterService.definitions.get(kwargs["definition"].id)
+        new_formula_obj = FormulaService.create(equation=default_param.default_formula.equation)
+        FormulaService.commit()
+        kwargs["formula_id"] = new_formula_obj.id
+
+    custom_param = ParameterService.get_or_create(**kwargs)
+    ParameterService.commit()
+    return custom_param
+
+
 def parameterize(cls, default_scenario=None):
     cls_name = cls.__name__
 

@@ -101,14 +101,15 @@ def update_parcel(id, scenario_id):
 
     try:
         # Get the specified parcel
-        p = ParcelService.get(id)
+        p = ParcelService.get(id=id, scenario_id=scenario_id)
         parcels_data = request.form.to_dict()
         print(f"updating with {parcels_data}")
         rv = None
         try:
             rv = handle_parcel_update(p, parcels_data)
         except Exception as e:
-            print(f"exception while updating parcel {p} with {parcels_data}: {e}")
+            print(f"exception while updating parcel {p} with {parcels_data}:\n")
+            print(traceback.format_exc())
 
         if rv is not None:
             return rv
@@ -135,7 +136,3 @@ def delete_parcel(id, scenario_id):
         logger.error(traceback.format_exc())
 
     return "success"
-
-
-
-

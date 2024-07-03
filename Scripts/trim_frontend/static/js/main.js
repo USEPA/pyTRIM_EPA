@@ -49,6 +49,11 @@ function calculateDateDistance(start, end, funcs) {
     return diff;
 }
 
+// does not refresh parcels
+function getParcelByKey(key, val) {
+    return TRIM.store.currentScenario.parcels.filter(e=>e[key]==val)[0]
+}
+
 // Add global objects
 
 // An ajax handler

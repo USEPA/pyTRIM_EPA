@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import time
 from datetime import datetime
 
@@ -14,6 +15,7 @@ from trim_db.schema import ScenarioLoadRunProc, \
 from trim_db.services import ScenarioService, ChemicalService, \
     ParcelService, CompartmentService, VolumeElementService, \
     ParameterService, FormulaService
+from trim_db.services.parameters import get_or_create_custom_param
 from trim_frontend import api, db
 from trim_frontend.parcels.routes import delete_parcel_contents
 from .defaults import *
@@ -197,10 +199,10 @@ def update_scenario():
         else:
             default_param = default_param[0]
 
-        return ParameterService.get_or_create(definition=default_param, scenario=scen, 
-                                                requirements=f'self.id == {comp.id}',
-                                                unit=default_param.default_unit, 
-                                                formula_id=default_param.default_formula_id)
+        return get_or_create_custom_param(
+            default_param,
+            {"requirements": f"self.id == {comp.id}", "scenario_id": scen.id},
+        )
 
     def create_litterfallrate_custom_param(scen, comps, par_name):
         # FIXME shouldn't use this eventually, maybe just create for all media?

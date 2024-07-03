@@ -1,9 +1,11 @@
 import re
+from pprint import pprint
 
 from flask_api import ApiResult
 
 from trim_db.schema import CustomParameter, ParameterDefinition, Parcel
 from trim_db.services import ChemicalService, CompartmentService, FormulaService, ParameterService, ParcelService, ScenarioService, VolumeElementService
+from trim_db.services.parameters import get_or_create_custom_param
 from .defaults import Air_Parcel_VolElem_defaults, Aquatic_Biota_SW_Compartment_defaults, Aquatic_Biota_Sed_Compartment_defaults, Farm_Biota_SurfSoil_Compartment_defaults, LAND_USE_TYPES, Land_Parcel_VolElem_defaults, Water_Parcel_VolElem_defaults, Wet_Dry_Source_VolElem_defaults
 from ..scenarios.forms import ScenarioAbioticPropertiesForm
 from ..utils.logging import make_logger
@@ -22,7 +24,9 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
 
     land_use = get_land_use(p)
 
-    print(f"\t\tREFACTORED HANDLE_PARCEL_UPDATE FOR {p} / {parcels_data}; land_use == '{land_use}'")
+    print(f"\t\tREFACTORED HANDLE_PARCEL_UPDATE FOR {p}")
+    pprint(parcels_data)
+    print(f"land_use == '{land_use}'\n")
 
     Air_params = [('dustLoad', "DustLoad"),
                   ("dustDensity", "DustDensity"),
@@ -138,16 +142,10 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         par_name = [v for k, v in Air_params if k == field_name][0]
         # the below part was generating error due to missing par for dustLoad, dustDensity etc...
         cmp = [c for c in p.compartments if "Air in Air_" in c.standard_name][0]
-        par = cmp.parameters.get(par_name)
-
-        # if custom parameter doesn't exist
-        if isinstance(par, ParameterDefinition):
-            par = ParameterService.get_or_create(definition=par, scenario_id=p.scenario_id,
-                                                requirements=f'self.id == {cmp.id}',
-                                                unit=par.default_unit,
-                                                formula_id=par.default_formula_id)
-            ParameterService.commit()
-
+        par = get_or_create_custom_param(
+            cmp.parameters.get(par_name),
+            {"requirements": f"self.id == {cmp.id}", "scenario_id": p.scenario_id},
+        )
         par.value = parcels_data[field_name]
         ParameterService.update(par)
         ParameterService.commit()
@@ -183,11 +181,11 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                 (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.top
             p.get_compartment(soil_comp).volume_element.bottom = \
                 (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.bottom
-    if field_name == "vadoseZoneSoilThick":
+    if field_name == "vadoseSoilThickness":
         thickness_before = p.get_compartment("Soil_Vadose_Zone").volume_element.height
         p.get_compartment("Soil_Vadose_Zone").volume_element.bottom = \
             p.get_compartment("Soil_Vadose_Zone").volume_element.top + \
-            (-1 * float(parcels_data['vadoseZoneSoilThick']))
+            (-1 * float(parcels_data['vadoseSoilThickness']))
         thickness_now = p.get_compartment("Soil_Vadose_Zone").volume_element.height
         delta_thickness = thickness_now.magnitude - thickness_before.magnitude
         for soil_comp in ["Groundwater", "DryVaporSource", "WetVaporSource",
@@ -212,12 +210,13 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
     if field_name == "tillage":
         for c in p.compartments:
             if c.name == 'Soil_Surface':
-                # par = c.parameters.get('soilTillage')
-                par_obj = [pp for pp in ParameterService.definitions.get_all() if
-                           pp.full_name == "soilTillage"]
-                req_comp = f'(self.id == {c.id})'
-                par = ParameterService.get_or_create(definition=par_obj[0], requirements=req_comp,
-                                                     scenario=p.scenario)
+                par = get_or_create_custom_param(
+                    ParameterService.definitions.get(full_name="soilTillage"),
+                    {
+                        "requirements": f"(self.id == {c.id})",
+                        "scenario_id": p.scenario.id,
+                    },
+                )
                 if parcels_data['tillage'] == "Yes":
                     par.value = 1
                 elif parcels_data['tillage'] == "No":
@@ -231,7 +230,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                     'algae_density': "AlgaeDensityInWaterColumn",
                     'chloride_conc': "ChlorideConcentration",
                     'chlorophyll_conc': "ChlorophyllConcentration",
-                    'mean_depth': "MeanWaterDepth",
+                    'mean_depth': "MeanDepth",
                     'evaporation_rate': "waterEvaporationRate",
                     'suspended_organic_carbon': "OrganicCarbonContent",
                     'water_ph': "pH",
@@ -241,15 +240,14 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         comp = p.get_compartment("Surface_water")
         par = comp.parameters.get(par_name[field_name])
         if par:
-            if par.__tablename__ == "custom_parameter":
-                par.value = parcels_data[field_name]
-            else:
-                par_obj = [pp for pp in ParameterService.definitions.get_all() if
-                           pp.full_name == par_name[field_name]]
-                req_comp = f'(self.id == {comp.id})'
-                par = ParameterService.get_or_create(definition=par_obj[0], requirements=req_comp,
-                                                     scenario=p.scenario, unit=par.default_unit)
-                par.value = parcels_data[field_name]
+            par = get_or_create_custom_param(
+                par,
+                {
+                    "requirements": f"(self.id == {comp.id})",
+                    "scenario_id": p.scenario.id,
+                },
+            )
+            par.value = parcels_data[field_name]
         else:
             par_obj = [pp for pp in ParameterService.definitions.get_all() if
                        pp.full_name == par_name[field_name]]
@@ -266,15 +264,14 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         comp = p.get_compartment("Sediment")
         par = comp.parameters.get(par_name[field_name])
         if par:
-            if par.__tablename__ == "custom_parameter":
-                par.value = parcels_data[field_name]
-            else:
-                par_obj = [pp for pp in ParameterService.definitions.get_all() if
-                           pp.full_name == par_name[field_name]]
-                req_comp = f'(self.id == {comp.id})'
-                par = ParameterService.get_or_create(definition=par_obj[0], requirements=req_comp,
-                                                     scenario=p.scenario, unit=par.default_unit)
-                par.value = parcels_data[field_name]
+            par = get_or_create_custom_param(
+                par,
+                {
+                    "requirements": f"(self.id == {comp.id})",
+                    "scenario_id": p.scenario.id,
+                },
+            )
+            par.value = parcels_data[field_name]
         else:
             par_obj = [pp for pp in ParameterService.definitions.get_all() if
                        pp.full_name == par_name[field_name]]
@@ -296,13 +293,10 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         this_comp = [c for c in p.compartments if c.name == comp_name[field_name]][0]
         ParameterService.commit()
         for param in params:
-            this_par = this_comp.parameters[param]
-            if isinstance(this_par, ParameterDefinition):
-                this_par = ParameterService.get_or_create(definition=this_par, scenario_id=p.scenario_id,
-                                                        requirements=f'self.id == {this_comp.id}',
-                                                        unit=this_par.default_unit,
-                                                        formula_id=this_par.default_formula_id
-                )
+            this_par = get_or_create_custom_param(
+                this_comp.parameters[param],
+                {"requirements": f"self.id == {this_comp.id}", "scenario_id": p.scenario_id},
+            )
             this_par.value = parcels_data[param]
         ParameterService.commit()
 
@@ -331,14 +325,10 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
 
         for this_comp in p.compartments:
             if this_comp.name == comp_name[base_name]:
-                this_param = this_comp.parameters.get(prop)
-                if isinstance(this_param, ParameterDefinition):
-                    comp_req = f'(self.id == {this_comp.id})'
-                    this_param = ParameterService.get_or_create(definition=this_param,
-                                                                scenario=p.scenario,
-                                                                requirements=f'(self.id == {this_comp.id})',
-                                                                unit=this_param.default_unit
-                    )
+                this_param = get_or_create_custom_param(
+                    this_comp.parameters.get(prop),
+                    {"requirements": f"self.id == {this_comp.id}", "scenario_id": p.scenario_id},
+                )
                 this_param.value = float(parcels_data[field_name])
                 ParameterService.commit()
 
@@ -347,15 +337,10 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                       "FractionofAreaAvailableforErosion", "FractionofAreaAvailableforRunoff",
                       "FractionofAreaAvailableforVerticalDiffusion", "TotalRunoffRate"]:
         this_comp = p.get_compartment(name=parcels_data["comp_name"])
-        this_par = this_comp.parameters.get(parcels_data["field"])
-
-        # create if doesn't exist
-        if isinstance(this_par, ParameterDefinition):
-            this_par = ParameterService.get_or_create(definition=this_par, scenario_id=p.scenario_id,
-                                                    requirements=f'self.id == {this_comp.id}',
-                                                    unit=this_par.default_unit,
-                                                    formula_id=this_par.default_formula_id
-            )
+        this_par = get_or_create_custom_param(
+            this_comp.parameters.get(parcels_data["field"]),
+            {"requirements": f"self.id == {this_comp.id}", "scenario_id": p.scenario_id},
+        )
         this_par.value = float(parcels_data[field_name])
         ParameterService.commit()
     if field_name == "emission":
@@ -363,16 +348,11 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         src_par = [par for parn, par in src_comp.parameters.items() if parn == "surfaceDepositionRate"]
         chem = ChemicalService.get(name=parcels_data["chemical_name"])
         if len(src_par) > 0:
-            src_par = src_par[0]
-
-            # Create new custom parameter with a new formula if one doesn't exist
-            if isinstance(src_par, ParameterDefinition):
-                comp_req = f'(self.id == {src_comp.id})'
-                new_formula_obj = FormulaService.create(equation=src_par.default_formula.equation)
-                FormulaService.commit()
-                src_par = ParameterService.get_or_create(definition=src_par, requirements=comp_req,
-                                                        scenario=p.scenario, unit=src_par.default_unit, formula_id=new_formula_obj.id)
-                ParameterService.commit()
+            src_par = get_or_create_custom_param(
+                src_par[0],
+                {"requirements": f"self.id == {src_comp.id}", "scenario_id": p.scenario.id},
+                new_formula=True
+            )
 
             eq = src_par.formula.equation
             # We have the chemical in the formula
@@ -396,7 +376,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             FormulaService.get(src_par.formula.id).equation = new_formula
             FormulaService.commit()
     if field_name == "runoff_matrix_value":
-        scn = ScenarioService.get(id=parcels_data["id"])
+        scn = ScenarioService.get(id=p.scenario.id)
         sender_parcel_name = parcels_data["sender"].replace("ro_", "")
         receivers = parcels_data["receiver"].split(",")
         values = parcels_data["ro_value"].split(",")
@@ -404,16 +384,11 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         sender_comp = sp.get_compartment("Soil_Surface")
         sender_par = [sender_comp.parameters.get("FractionOfTotalRunoff")]
         if len(sender_par) > 0:
-            sender_par = sender_par[0]
-
-            # Create new custom parameter with a new formula if one doesn't exist
-            if isinstance(sender_par, ParameterDefinition):
-                comp_req = f'(self.id == {sender_comp.id})'
-                new_formula_obj = FormulaService.create(equation=sender_par.default_formula.equation)
-                FormulaService.commit()
-                sender_par = ParameterService.get_or_create(definition=sender_par, requirements=comp_req,
-                                                        scenario=p.scenario, unit=sender_par.default_unit, formula_id=new_formula_obj.id)
-                ParameterService.commit()
+            sender_par = get_or_create_custom_param(
+                sender_par[0],
+                {"requirements": f"self.id == {sender_comp.id}", "scenario_id": scn.id},
+                new_formula=True
+            )
 
             eq = sender_par.formula.equation
             for ri, rec in enumerate(receivers):
@@ -603,13 +578,15 @@ def initialize_compartment_custom_parameters(nc):
 
 
 def add_compartment_custom_parameters(nc, par_name, par_val, par_unit):
-    obj = [pp for pp in ParameterService.definitions.get_all() if pp.full_name == par_name]
-    ncp = ParameterService.get_or_create(definition=obj[0],
-                                         scenario=nc.volume_element.parcel.scenario,
-                                         requirements=f'(self.id == {nc.id})',
-                                         value=par_val,
-                                         unit=par_unit)
-    return ncp
+    return get_or_create_custom_param(
+        ParameterService.definitions.get(full_name=par_name),
+        {
+            "requirements": f"self.id == {nc.id}",
+            "scenario_id": nc.volume_element.parcel.scenario.id,
+            "value": par_val,
+            "unit": par_unit,
+        },
+    )
 
 
 def calc_default_erosion_rate_sdr(pcl):
@@ -635,7 +612,7 @@ def calc_default_erosion_rate_sdr(pcl):
 
 def get_land_use(pcl):
     land = False
-    land_use = 'Impervious'
+    land_use = ''
     for comp in pcl.compartments:
         if comp.media.isa('Surface_Soil'):
             land = True

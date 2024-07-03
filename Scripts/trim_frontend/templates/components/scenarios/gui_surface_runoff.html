@@ -171,7 +171,7 @@
                 {
                     'type': 'data',
                     'name': 'id',
-                    'value': '{{ scenario.id }}'
+                    'value': getParcelByKey("name", sender).id
                 }, {
                     'type': 'data',
                     'name': 'field',
@@ -267,6 +267,10 @@
                         'sender':s
                     })
                     Object.entries(r).forEach(([rc, v]) => {
+                        let current_parcel = getParcelByKey("name", rc)
+                        if (current_parcel?.parcelType.includes("Water")) {
+                            return
+                        }
                         runoff_data[i][rc]=(v).toLocaleString(undefined, { minimumFractionDigits: 4 })
                         if (i == 0) {
                             columns.push({
