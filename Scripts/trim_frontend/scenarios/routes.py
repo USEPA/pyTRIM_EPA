@@ -223,10 +223,11 @@ def update_scenario():
         custom_params = []
         for comp in filtered_comps:
             custom_params.append(
-                ParameterService.get_or_create(definition=default_param, scenario=scen, 
-                                                requirements=f'self.id == {comp.id}',
-                                                unit=default_param.default_unit, 
-                                                formula_id=default_param.default_formula_id)
+                get_or_create_custom_param(
+                    default_param,
+                    {"requirements": f"self.id == {comp.id}", "scenario_id": scen.id},
+                    no_commit=True
+                )
             )
         ParameterService.commit()
         return custom_params
@@ -234,7 +235,6 @@ def update_scenario():
     def update_custom_param(scen, comp, par_name, par_val, create_if_dne = False):
         par_list = [p for p in scen.custom_params if
                     p.definition.variable_name == par_name and f'self.id == {comp.id}' in p.requirements]
-        print(f"\t{par_list}")
         
         if not par_list and create_if_dne:
             par_list.append(create_new_custom_param_meteo(scen, comp, par_name))

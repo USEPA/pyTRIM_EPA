@@ -282,7 +282,7 @@ def get_parameter_characteristics(param):
     }
 
 
-def get_or_create_custom_param(param_obj=None, kwargs={}, new_formula=False):
+def get_or_create_custom_param(param_obj=None, kwargs={}, new_formula=False, no_commit=False):
     if isinstance(param_obj, CustomParameter):
         return param_obj
     
@@ -307,8 +307,7 @@ def get_or_create_custom_param(param_obj=None, kwargs={}, new_formula=False):
         FormulaService.commit()
         kwargs["formula_id"] = new_formula_obj.id
 
-    custom_param = ParameterService.get_or_create(**kwargs)
-    ParameterService.commit()
+    custom_param = ParameterService.get_or_create(**kwargs, no_commit=no_commit)
     return custom_param
 
 

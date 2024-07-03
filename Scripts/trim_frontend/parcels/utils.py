@@ -216,11 +216,13 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                         "requirements": f"(self.id == {c.id})",
                         "scenario_id": p.scenario.id,
                     },
+                    no_commit=True
                 )
                 if parcels_data['tillage'] == "Yes":
                     par.value = 1
                 elif parcels_data['tillage'] == "No":
                     par.value = 0
+        ParameterService.commit()
 
     if field_name in ['flush_rate', 'suspended_sed_conc', 'algae_density', 'chloride_conc', 'chlorophyll_conc',
                       'mean_depth', 'evaporation_rate', 'suspended_organic_carbon', 'water_ph',
@@ -296,6 +298,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             this_par = get_or_create_custom_param(
                 this_comp.parameters[param],
                 {"requirements": f"self.id == {this_comp.id}", "scenario_id": p.scenario_id},
+                no_commit=True
             )
             this_par.value = parcels_data[param]
         ParameterService.commit()
@@ -328,9 +331,10 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                 this_param = get_or_create_custom_param(
                     this_comp.parameters.get(prop),
                     {"requirements": f"self.id == {this_comp.id}", "scenario_id": p.scenario_id},
+                    no_commit=True
                 )
                 this_param.value = float(parcels_data[field_name])
-                ParameterService.commit()
+        ParameterService.commit()
 
     if field_name in ["pH", "rho", "AverageVerticalVelocity", "FractionSand", "OrganicCarbonContent",
                       "VolumeFraction_Liquid", "VolumeFraction_Vapor", "Porosity", "AirSoilBoundaryThickness",
