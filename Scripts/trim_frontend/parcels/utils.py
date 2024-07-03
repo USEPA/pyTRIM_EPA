@@ -612,7 +612,7 @@ def calc_default_erosion_rate_sdr(pcl):
 
 def get_land_use(pcl):
     land = False
-    land_use = ''
+    land_use = 'Grasses/Herbs'
     for comp in pcl.compartments:
         if comp.media.isa('Surface_Soil'):
             land = True

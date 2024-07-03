@@ -288,7 +288,7 @@ def get_or_create_custom_param(param_obj=None, kwargs={}, new_formula=False):
     
     elif isinstance(param_obj, ParameterDefinition):
         default_kwargs = {
-            "definition": param_obj,
+            "definition_id": param_obj.id,
             "value": param_obj.default_value,
             "unit": param_obj.default_unit,
             "formula_id": param_obj.default_formula_id,
@@ -302,7 +302,7 @@ def get_or_create_custom_param(param_obj=None, kwargs={}, new_formula=False):
         raise Exception(f"Param type {type(param_obj)} not supported")
 
     if new_formula:
-        default_param = ParameterService.definitions.get(kwargs["definition"].id)
+        default_param = ParameterService.definitions.get(kwargs["definition_id"])
         new_formula_obj = FormulaService.create(equation=default_param.default_formula.equation)
         FormulaService.commit()
         kwargs["formula_id"] = new_formula_obj.id
