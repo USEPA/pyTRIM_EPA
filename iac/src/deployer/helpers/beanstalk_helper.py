@@ -1,10 +1,14 @@
-import boto3, getopt, os, shutil, sys, zipfile, time
+import boto3, getopt, os, shutil, subprocess, sys, zipfile, time
 from datetime import datetime
 from common import await_beanstalk_app_deployment, await_stack_completion, figure_home_dir, whoami_aws, die, loggy
 
 class BeanstalkHelper(object):
     def __init__(self):
         pass
+
+    def capture_shell_command_output(self, cmd):
+        result = subprocess.run(cmd, stdout=subprocess.PIPE)
+        return result.stdout.decode("utf-8")[:-1]
 
     def build_flask_zip(self):
         home_dir = figure_home_dir()
@@ -20,6 +24,12 @@ class BeanstalkHelper(object):
         shutil.copyfile("../../requirements.txt", "./requirements.txt")
         # Berk said he does this; but I don't see any files matching this pattern?
         # cp ../../Pipfile* .
+
+        # write a Git metadata file
+        curr_branch = self.capture_shell_command_output(["git", "symbolic-ref", "--short", "HEAD"])
+        curr_commit = self.capture_shell_command_output(["git", "rev-parse", "HEAD"])
+        with open("trim_frontend/static/gitinfo.txt", "w") as git_file:
+            git_file.write(f"DEPLOYED BRANCH = '{curr_branch}'; commit = '{curr_commit}'")
 
         os.mkdir(".ebextensions")
         with open(".ebextensions/00-packages.config", "w") as f:
@@ -146,7 +156,6 @@ class BeanstalkHelper(object):
         )
         await_beanstalk_app_deployment(stack_name)
 
-        
 
     def build_etc(self, stack_name):
         (stack_id, outputs) = await_stack_completion(stack_name)
