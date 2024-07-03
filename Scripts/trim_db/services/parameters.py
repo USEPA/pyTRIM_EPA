@@ -304,11 +304,9 @@ def get_or_create_custom_param(param_obj=None, kwargs={}, new_formula=False, no_
     if new_formula:
         default_param = ParameterService.definitions.get(kwargs["definition_id"])
         new_formula_obj = FormulaService.create(equation=default_param.default_formula.equation)
-        FormulaService.commit()
         kwargs["formula_id"] = new_formula_obj.id
 
-    custom_param = ParameterService.get_or_create(**kwargs, no_commit=no_commit)
-    return custom_param
+    return ParameterService.get_or_create(**kwargs, no_commit=no_commit)
 
 
 def parameterize(cls, default_scenario=None):

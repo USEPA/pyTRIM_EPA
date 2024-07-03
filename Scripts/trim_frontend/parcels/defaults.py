@@ -484,7 +484,7 @@ def get_fish_params(comp):
 
 
 # FIXME this probably shouldn't be here, ideally already lives in the database
-# probably shouldn't exist here in the first place... should be created as custom params when a new water parcel is made
+# or set when parcel first created
 def init_first_time_default_param_values():
     default_params = [
         # Water Body Properties
@@ -500,15 +500,6 @@ def init_first_time_default_param_values():
         {"kwargs": {"variable_name": "waterEvaporationRate"}, "value": 0.7},
 
         # Aquatic Food Web
-        {"kwargs": {"variable_name": "FractionDietAlgae"}, "value": 0},
-        {"kwargs": {"variable_name": "FractionDietMacrophyte"}, "value": 0},
-        {"kwargs": {"variable_name": "FractionDietZooplankton"}, "value": 0},
-        {"kwargs": {"variable_name": "FractionDietBenthicInvertebrate"}, "value": 0},
-        {"kwargs": {"variable_name": "FractionDietFishHerbivore"}, "value": 0},
-        {"kwargs": {"variable_name": "FractionDietFishBenthicOmnivore"}, "value": 0},
-        {"kwargs": {"variable_name": "FractionDietFishOmnivore"}, "value": 0},
-        {"kwargs": {"variable_name": "FractionDietFishBenthicCarnivore"}, "value": 0},
-        {"kwargs": {"variable_name": "FractionDietFishCarnivore"}, "value": 0},
         {"kwargs": {"variable_name": "FoodIngestionRate"}, "value": 0},
     ]
     for obj in default_params:

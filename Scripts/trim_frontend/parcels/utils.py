@@ -6,7 +6,7 @@ from flask_api import ApiResult
 from trim_db.schema import CustomParameter, ParameterDefinition, Parcel
 from trim_db.services import ChemicalService, CompartmentService, FormulaService, ParameterService, ParcelService, ScenarioService, VolumeElementService
 from trim_db.services.parameters import get_or_create_custom_param
-from .defaults import Air_Parcel_VolElem_defaults, Aquatic_Biota_SW_Compartment_defaults, Aquatic_Biota_Sed_Compartment_defaults, Farm_Biota_SurfSoil_Compartment_defaults, LAND_USE_TYPES, Land_Parcel_VolElem_defaults, Water_Parcel_VolElem_defaults, Wet_Dry_Source_VolElem_defaults
+from .defaults import Air_Parcel_VolElem_defaults, Aquatic_Biota_SW_Compartment_defaults, Aquatic_Biota_Sed_Compartment_defaults, Farm_Biota_SurfSoil_Compartment_defaults, LAND_USE_TYPES, AQUATIC_DIET, Land_Parcel_VolElem_defaults, Water_Parcel_VolElem_defaults, Wet_Dry_Source_VolElem_defaults
 from ..scenarios.forms import ScenarioAbioticPropertiesForm
 from ..utils.logging import make_logger
 
@@ -106,6 +106,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             sw = p.get_volume_element("SW")
             if sw:
                 initialize_parcel_contents(p, biotic_ve)
+                add_diet_table_custom_parameters(p)
             else:
                 raise ValueError("Cannot create or get Fish Compartment")
         if parcels_data['hasFishFoodWeb'] == "No":
@@ -293,7 +294,6 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         params = [pd for pd in parcels_data.keys() if pd not in ["id", "field", "csrf_token"]]
         # print(f"{field_name} {[c for c in p.compartments if c.name == comp_name[field_name]]}")
         this_comp = [c for c in p.compartments if c.name == comp_name[field_name]][0]
-        ParameterService.commit()
         for param in params:
             this_par = get_or_create_custom_param(
                 this_comp.parameters[param],
@@ -524,7 +524,6 @@ def initialize_parcel_contents(new_parcel, vol_elem_defaults=None):
                 nc = CompartmentService.get_or_create(name=c[1]["name"],
                                                       volume_element=nve,
                                                       media=this_media)
-                ParameterService.commit()
             initialize_compartment_custom_parameters(nc)
     ParameterService.commit()
 
@@ -590,7 +589,21 @@ def add_compartment_custom_parameters(nc, par_name, par_val, par_unit):
             "value": par_val,
             "unit": par_unit,
         },
+        no_commit=True
     )
+
+def add_diet_table_custom_parameters(pcl):
+    comp_names = AQUATIC_DIET.keys()
+    for comp_name in comp_names:
+        comp = pcl.get_compartment(comp_name)
+        for param_name in AQUATIC_DIET[comp_name]:
+            param = get_or_create_custom_param(
+                comp.parameters[param_name],
+                {"requirements": f"self.id == {comp.id}", "scenario_id": pcl.scenario_id},
+                no_commit=True
+            )
+            param.value = AQUATIC_DIET[comp_name][param_name]
+    ParameterService.commit()
 
 
 def calc_default_erosion_rate_sdr(pcl):
