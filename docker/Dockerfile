@@ -2,10 +2,37 @@
 # https://docs.docker.com/get-started/02_our_app/
 # https://simonwillison.net/2018/Nov/19/smaller-python-docker-images/
 
-FROM python:3.11-alpine as builder
+# START June 2024 - tfeiler switched to a newer MacBook with
+# an Apple M2 chip -- and then the Docker container when running
+# on AWS started throwing errors about "exec format error" when
+# launching python3. Googled around and found:
+# https://stackoverflow.com/questions/73398714/docker-fails-when-building-on-m1-macs-exec-usr-local-bin-docker-entrypoint-sh
+# https://stackoverflow.com/questions/65612411/forcing-docker-to-use-linux-amd64-platform-by-default-on-macos/69636473#69636473
+# https://docs.docker.com/build/building/multi-platform/
+#
+# fix appears to be adding --platform=linux/amd64 to the FROM
+# commands to ensure we use the right architecture.
+#
+# before figuring this out -- or if you want to build an image
+# that can run locally at some point -- I also was running into
+# this error during docker build:
+# ../../meson.build:82:0: ERROR: Unknown compiler(s): [['gfortran'], ['flang'], ['nvfortran'], ['pgfortran'], ['ifort'], ['ifx'], ['g95']]
+# and then a bunch more. Fix was to manually install more libs
+# for compilation purposes; I did this right after installing gcc/python3-dev/etc:
+# RUN apk add gfortran openblas openblas-dev linux-headers libffi-dev
+# following the --platform realization, we no longer need
+# gfortran/openblas/etc. so I commented that out. But keeping it
+# in here commented out in case we ever need to revisit.
+# END June 2024
+
+# FROM python:3.11-alpine as builder
+FROM --platform=linux/amd64 python:3.11-alpine as builder
 
 # Install all the python libraries we need to run...Alpine lacks a compiler toolchain for building some things we need, like pandas.
 RUN apk add --no-cache gcc python3-dev musl-dev alpine-sdk
+
+# DON'T NEED THIS -- see above "June 2024" comment...
+# RUN apk add gfortran openblas openblas-dev linux-headers libffi-dev
 
 # START - some Python packages can't install/build via pip without some extra work.
 # (pyproj)
@@ -46,6 +73,7 @@ RUN python3 -m pip install cython
 RUN python3 -m pip install -r /tmp/requirements.txt
 
 FROM python:3.11-alpine
+FROM --platform=linux/amd64 python:3.11-alpine
 COPY --from=builder /usr/local/lib/python3.11 /usr/local/lib/python3.11
 
 # was getting errors around libstc++ when doing "import pandas";
