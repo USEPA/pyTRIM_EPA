@@ -128,6 +128,16 @@
         attributes: true
     });
     onDomLoad(function() {
+
+        // FIXME hacky way to refresh all parcels when leaving the parcels tab
+        // otherwise for some reason surface runoff will break
+        $('a[href$="-tab"]').on('click', (e)=>{
+            if ($("#parcels-tab-pill").hasClass("active")) {
+                e.target.click();
+                $('#save-btn').click();
+            }
+        });
+
         var parcels = L.layerGroup();
 
         var DREW_MAP = false;
@@ -221,7 +231,7 @@
 				fieldData.push({
 					"type": "input",
 					"name": "scenario_id",
-					"value": {{ scenario.id }}
+					"value": TRIM.store.currentScenario.id
 				});
 
 				fieldData.push({
@@ -765,6 +775,7 @@
             shapes = parcels.toGeoJSON()
             LoadingScreen.show('delete_parcel');
             TRIM.api.deleteParcels(TRIM.store.currentScenario.id, layer.toGeoJSON()).on('load', function(){
+                TRIM.refreshParcels(true);
                 LoadingScreen.hide('delete_parcel');
             })
             mapTableRedraw()
