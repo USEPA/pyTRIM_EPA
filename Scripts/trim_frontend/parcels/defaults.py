@@ -4,11 +4,12 @@ from trim_db.schema.parameters.models import ParameterDefinition, CustomParamete
 from trim_db.services import *
 import pint
 
-param_local_cache = {}
 comp_local_cache = {}
 
 @register_serializer(Parcel)
 def serialize_parcel(pcl: Parcel):
+    init_comp_cache(pcl)
+    
     general_params = get_general_params(pcl)
     water_params = get_water_params(pcl, general_params['parcelType'])
     source_params = get_source_params(pcl)
@@ -27,18 +28,12 @@ def serialize_parcel(pcl: Parcel):
         **soil_abiotic_params
     }
 
-    param_local_cache.clear()
     comp_local_cache.clear()
     return s
 
 
 def safe_get_val(comp, k, default=None):
-    uuid = f"{comp.id}_{k}"
-    param = param_local_cache.get(uuid)
-    if not param:
-        param = comp.parameters.get(k)
-        param_local_cache[uuid] = param
-
+    param = comp.parameters.get(k)
     if param is None:
         return default
     v = param.value
@@ -47,12 +42,35 @@ def safe_get_val(comp, k, default=None):
     return v
 
 
+def get_soil_magnitude(comp, attr):
+    par_val = comp.__getattr__(attr)
+    if isinstance(par_val, pint.Quantity):
+        return par_val.magnitude
+    return par_val
+
+
+def init_comp_cache(pcl):
+    # calling .compartments and .get_compartment a lot is slow
+    comp_local_cache["all"] = pcl.compartments
+    for c in comp_local_cache["all"]:
+        kwargs = {"name": c.name}
+        uuid = f"{pcl.id}_{str(kwargs.keys())}_{str(kwargs.values())}"
+        if uuid in comp_local_cache:
+            comp_local_cache[uuid].append(c)
+        else:
+            comp_local_cache.setdefault(uuid, [c])
+
+
 def get_comp(pcl, kwargs):
     uuid = f"{pcl.id}_{str(kwargs.keys())}_{str(kwargs.values())}"
     comp = comp_local_cache.get(uuid)
     if not comp:
         comp = pcl.get_compartment(**kwargs)
         comp_local_cache[uuid] = comp
+    
+    if kwargs.get("name") and isinstance(comp, list):
+        comp = comp[0]
+
     return comp
 
 
@@ -91,7 +109,7 @@ def get_general_params(pcl):
     if groundwater_height:
         groundwater_height = groundwater_height.volume_element.height.m_as('m')
 
-    for comp in pcl.compartments:
+    for comp in comp_local_cache["all"]:
         # Check parcel type
         if comp.media.isa('Air', or_child=False):
             air = True
@@ -225,11 +243,7 @@ def get_soil_abiotic_params(pcl, run_old=True):
             this_comp = get_comp(pcl, {"name":c})
             params = {"pH": "", "FractionSand": "", "OrganicCarbonContent": "", "rho": ""}
             for k, _ in params.items():
-                # par_val = safe_get_val(this_comp, k)
-                par_val = this_comp.__getattr__(k)
-                mag = par_val.magnitude if isinstance(
-                    par_val, pint.Quantity) else par_val
-                params[k] = mag
+                params[k] = get_soil_magnitude(this_comp, k)
             soil_abiotic_params[c] = params
 
     if has_groundwater:
@@ -249,18 +263,10 @@ def get_soil_abiotic_params(pcl, run_old=True):
             params = {"VolumeFraction_Vapor": "", "AverageVerticalVelocity": "", "VolumeFraction_Liquid": "", "rho": ""}
             if soil_abiotic_params.get(c):
                 for k, _ in params.items():
-                    # par_val = safe_get_val(this_comp, k)
-                    par_val = this_comp.__getattr__(k)
-                    mag = par_val.magnitude if isinstance(
-                        par_val, pint.Quantity) else par_val
-                    soil_abiotic_params[c].setdefault(k, mag)
+                    soil_abiotic_params[c].setdefault(k, get_soil_magnitude(this_comp, k))
             else:
                 for k, _ in params.items():
-                    # par_val = safe_get_val(this_comp, k)
-                    par_val = this_comp.__getattr__(k)
-                    mag = par_val.magnitude if isinstance(
-                        par_val, pint.Quantity) else par_val
-                    params[k] = mag
+                    params[k] = get_soil_magnitude(this_comp, k)
                 soil_abiotic_params[c] = params
 
     if has_surf_soil:
@@ -271,18 +277,10 @@ def get_soil_abiotic_params(pcl, run_old=True):
         this_comp = get_comp(pcl, {"name":comp})
         if soil_abiotic_params.get(comp):
             for k, _ in params.items():
-                # par_val = safe_get_val(this_comp, k)
-                par_val = this_comp.__getattr__(k)
-                mag = par_val.magnitude if isinstance(
-                    par_val, pint.Quantity) else par_val
-                soil_abiotic_params[comp].setdefault(k, mag)
+                soil_abiotic_params[comp].setdefault(k, get_soil_magnitude(this_comp, k))
         else:
             for k, _ in params.items():
-                # par_val = safe_get_val(this_comp, k)
-                par_val = this_comp.__getattr__(k)
-                mag = par_val.magnitude if isinstance(
-                    par_val, pint.Quantity) else par_val
-                params[k] = mag
+                params[k] = get_soil_magnitude(this_comp, k)
             soil_abiotic_params[comp] = params
 
     return {"soil_params": soil_abiotic_params}
@@ -469,7 +467,7 @@ def get_water_params(pcl, parcel_type):
 
 def get_source_params(pcl):
     chem_objs = {c for c in pcl.scenario.chemicals}
-    source_comps = [c for c in pcl.compartments if c.media.isa("Source")]
+    source_comps = [c for c in comp_local_cache["all"] if c.media.isa("Source")]
     chems = {c.name: {} for c in pcl.scenario.chemicals}
     source_params = {"sources": chems}
     for comp in source_comps:
