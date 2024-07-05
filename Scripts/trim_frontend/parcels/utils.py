@@ -106,7 +106,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             sw = p.get_volume_element("SW")
             if sw:
                 initialize_parcel_contents(p, biotic_ve)
-                add_diet_table_custom_parameters(p)
+                init_diet_table_custom_parameters(p)
             else:
                 raise ValueError("Cannot create or get Fish Compartment")
         if parcels_data['hasFishFoodWeb'] == "No":
@@ -592,7 +592,7 @@ def add_compartment_custom_parameters(nc, par_name, par_val, par_unit):
         no_commit=True
     )
 
-def add_diet_table_custom_parameters(pcl):
+def init_diet_table_custom_parameters(pcl):
     comp_names = AQUATIC_DIET.keys()
     for comp_name in comp_names:
         comp = pcl.get_compartment(comp_name)

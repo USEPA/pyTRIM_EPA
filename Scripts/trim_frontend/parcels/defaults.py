@@ -4,11 +4,11 @@ from trim_db.schema.parameters.models import ParameterDefinition, CustomParamete
 from trim_db.services import *
 import pint
 
+param_local_cache = {}
+comp_local_cache = {}
 
 @register_serializer(Parcel)
 def serialize_parcel(pcl: Parcel):
-    init_first_time_default_param_values()
-
     general_params = get_general_params(pcl)
     water_params = get_water_params(pcl, general_params['parcelType'])
     source_params = get_source_params(pcl)
@@ -17,7 +17,7 @@ def serialize_parcel(pcl: Parcel):
     s = {
         'id': pcl.id,
         'name': pcl.name,
-        'description': pcl.description,
+        'description': pcl.description if pcl.description else "None",
         'vertices': pcl.vertices,
         'area': pcl.area.m_as('m^2'),
         'compartment_map': {ve.name: [c.name for c in ve.compartments] for ve in pcl.volume_elements},
@@ -25,20 +25,35 @@ def serialize_parcel(pcl: Parcel):
         **water_params,
         **source_params,
         **soil_abiotic_params
-
     }
 
+    param_local_cache.clear()
+    comp_local_cache.clear()
     return s
 
 
 def safe_get_val(comp, k, default=None):
-    param = comp.parameters.get(k)
+    uuid = f"{comp.id}_{k}"
+    param = param_local_cache.get(uuid)
+    if not param:
+        param = comp.parameters.get(k)
+        param_local_cache[uuid] = param
+
     if param is None:
         return default
     v = param.value
     if v is None and isinstance(param, ParameterDefinition):
         return default
     return v
+
+
+def get_comp(pcl, kwargs):
+    uuid = f"{pcl.id}_{str(kwargs.keys())}_{str(kwargs.values())}"
+    comp = comp_local_cache.get(uuid)
+    if not comp:
+        comp = pcl.get_compartment(**kwargs)
+        comp_local_cache[uuid] = comp
+    return comp
 
 
 def get_general_params(pcl):
@@ -58,9 +73,9 @@ def get_general_params(pcl):
     is_tilled = False
 
     surface_soil_height = None
-    root_soil_height = pcl.get_compartment("Soil_Root_Zone")
-    vadose_soil_height = pcl.get_compartment("Soil_Vadose_Zone")
-    groundwater_height = pcl.get_compartment("Groundwater")
+    root_soil_height = get_comp(pcl, {"name":"Soil_Root_Zone"})
+    vadose_soil_height = get_comp(pcl, {"name":"Soil_Vadose_Zone"})
+    groundwater_height = get_comp(pcl, {"name":"Groundwater"})
 
     diet_by_media = {}
     biomass_by_media = {}
@@ -172,7 +187,7 @@ def get_general_params(pcl):
         'vadoseSoilThickness': vadose_soil_height,
         "groundwaterZoneThickness": groundwater_height,
         'fractionOrganicMatterOnParticulates': fraction_organic_matter_on_particulates,
-        'soilTillage': is_tilled,
+        'soilTillage': 'Yes' if is_tilled else 'No',
 
         'aquatic_diet_fractions': diet_by_media,
         'aquatic_biomass': biomass_by_media,
@@ -198,16 +213,16 @@ def get_soil_abiotic_params(pcl, run_old=True):
          new_soil_abiotic_params = get_parcel_comp_params(pcl, comps, params)
          return {"soil_params": new_soil_abiotic_params}
 
-    has_surf_soil = True if pcl.get_compartment(name="Soil_Surface") else False
-    has_root_soil = True if pcl.get_compartment(name="Soil_Root_Zone") else False
-    has_vadose_soil = True if pcl.get_compartment(name="Soil_Vadose_Zone") else False
-    has_groundwater = True if pcl.get_compartment(name="Groundwater") else False
+    has_surf_soil = True if get_comp(pcl, {"name":"Soil_Surface"}) else False
+    has_root_soil = True if get_comp(pcl, {"name":"Soil_Root_Zone"}) else False
+    has_vadose_soil = True if get_comp(pcl, {"name":"Soil_Vadose_Zone"}) else False
+    has_groundwater = True if get_comp(pcl, {"name":"Groundwater"}) else False
     soil_abiotic_params = {}
 
     if has_surf_soil and has_root_soil and has_vadose_soil and has_groundwater:
         # get pH, fractionSand, organicCarbonContent, density
         for c in comps:
-            this_comp = pcl.get_compartment(name=c)
+            this_comp = get_comp(pcl, {"name":c})
             params = {"pH": "", "FractionSand": "", "OrganicCarbonContent": "", "rho": ""}
             for k, _ in params.items():
                 # par_val = safe_get_val(this_comp, k)
@@ -221,16 +236,16 @@ def get_soil_abiotic_params(pcl, run_old=True):
         # get porosity
         param = soil_abiotic_params.get("Groundwater")
         if param:
-            param["Porosity"] = pcl.get_compartment("Groundwater").Porosity
+            param["Porosity"] = get_comp(pcl, {"name":"Groundwater"}).Porosity
         else:
-            param.setdefault("Groundwater", {"Porosity": pcl.get_compartment("Groundwater").Porosity})
+            param.setdefault("Groundwater", {"Porosity": get_comp(pcl, {"name":"Groundwater"}).Porosity})
         soil_abiotic_params["Groundwater"] = param
 
     comps.pop(comps.index("Groundwater"))
     if has_root_soil and has_vadose_soil and has_surf_soil:
         # get VolumeFraction_vapor, AverageVerticalVelocity, VolumeFraction_liquid
         for c in comps:
-            this_comp = pcl.get_compartment(name=c)
+            this_comp = get_comp(pcl, {"name":c})
             params = {"VolumeFraction_Vapor": "", "AverageVerticalVelocity": "", "VolumeFraction_Liquid": "", "rho": ""}
             if soil_abiotic_params.get(c):
                 for k, _ in params.items():
@@ -253,7 +268,7 @@ def get_soil_abiotic_params(pcl, run_old=True):
                   "FractionofAreaAvailableforRunoff": "", "FractionofAreaAvailableforVerticalDiffusion": "",
                   "TotalRunoffRate": ""}
         comp = "Soil_Surface"
-        this_comp = pcl.get_compartment(name=comp)
+        this_comp = get_comp(pcl, {"name":comp})
         if soil_abiotic_params.get(comp):
             for k, _ in params.items():
                 # par_val = safe_get_val(this_comp, k)
@@ -278,7 +293,7 @@ def get_water_params(pcl, parcel_type):
     if precipitation_rate is None:
         precipitation_rate = 0  # 0.0041
 
-    comp_surfaceSoil = pcl.get_compartment(media="Surface_Soil")
+    comp_surfaceSoil = get_comp(pcl, {"media":"Surface_Soil"})
 
     # TODO This is not right. We need params for all chemicals. How to show this in frontend???
     ch = ChemicalService.get(id=32)
@@ -299,7 +314,7 @@ def get_water_params(pcl, parcel_type):
                 comp_surfaceSoil.TotalRunoffRate / precipitation_rate
             ).magnitude
         if precipitation_rate > 0:
-            comp_surfaceWater = pcl.get_compartment(media="Surface_Water")
+            comp_surfaceWater = get_comp(pcl, {"media":"Surface_Water"})
             if len(comp_surfaceWater) > 0:
                 precip_runoff = 0
                 for comp_sw in comp_surfaceWater:
@@ -351,9 +366,9 @@ def get_water_params(pcl, parcel_type):
 
     sw_params = None
     if 'Water' in parcel_type:
-        sw = pcl.get_compartment(media='Surface_Water')[0]
+        sw = get_comp(pcl, {"media":"Surface_Water"})[0]
         sw_pars = {parn: par for parn, par in sw.parameters.items()}
-        sed = pcl.get_compartment(media='Sediment')[0]
+        sed = get_comp(pcl, {"media":"Sediment"})[0]
         sed_pars = {parn: par for parn, par in sed.parameters.items()}
 
         def get_correct_param(par_name, par_obj):
@@ -481,33 +496,6 @@ def get_fish_params(comp):
     }
 
     return fish_params
-
-
-# FIXME this probably shouldn't be here, ideally already lives in the database
-# or set when parcel first created
-def init_first_time_default_param_values():
-    default_params = [
-        # Water Body Properties
-        {"kwargs": {"variable_name": "WaterTemperature", "default_unit":"K"}, "value": 298},
-        {"kwargs": {"variable_name": "pH"}, "value": 7.3},
-        {"kwargs": {"variable_name": "AlgaeDensityInWaterColumn"}, "value": 0.0025},
-        {"kwargs": {"variable_name": "ChlorideConcentration"}, "value": 8},
-        {"kwargs": {"variable_name": "ChlorophyllConcentration"}, "value": 0.0029},
-        {"kwargs": {"variable_name": "OrganicCarbonContent"}, "value": 0.02},
-        {"kwargs": {"variable_name": "SuspendedSedimentConcentration"}, "value": 0.05},
-        {"kwargs": {"variable_name": "ExternalSedimentInflow"}, "value": 0},
-        {"kwargs": {"variable_name": "SedimentDepositionVelocity"}, "value": 2},
-        {"kwargs": {"variable_name": "waterEvaporationRate"}, "value": 0.7},
-
-        # Aquatic Food Web
-        {"kwargs": {"variable_name": "FoodIngestionRate"}, "value": 0},
-    ]
-    for obj in default_params:
-        default_params = ParameterService.definitions.get_all(**obj["kwargs"])
-        for param in default_params:
-            if not param.default_value:
-                param.default_value = obj["value"]
-                ParameterService.definitions.update(param)
 
 
 LAND_USE_TYPES = [

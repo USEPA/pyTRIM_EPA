@@ -65,17 +65,18 @@ def create_parcel(scenario_id):
 def get_parcels(scenario_id):
     logger = make_logger('parcels_api_get')
     try:
-        s = ScenarioService.get(scenario_id)
-        if not s:
-            raise ApiException("Unknown Scenario")
+        #s = ScenarioService.get(scenario_id)
+        #if not s:
+        #    raise ApiException("Unknown Scenario")
         p = ParcelService.get_all(scenario_id=scenario_id)
         m = LAND_USE_TYPES
         parcels = []
         media = m
 
-        if p is not None:
+        if p:
+            s = p[0].scenario
             start_time_s = time.time()
-            sh = s.as_serializable()
+            #sh = s.as_serializable()
             logger.info(f"Acquired scenario {s.name} in {time.time() - start_time_s} seconds")
             total_start = time.time()
             for this_p in p:
