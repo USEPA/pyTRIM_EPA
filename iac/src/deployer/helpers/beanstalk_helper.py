@@ -28,8 +28,10 @@ class BeanstalkHelper(object):
         # write a Git metadata file
         curr_branch = self.capture_shell_command_output(["git", "symbolic-ref", "--short", "HEAD"])
         curr_commit = self.capture_shell_command_output(["git", "rev-parse", "HEAD"])
-        with open("trim_frontend/static/gitinfo.txt", "w") as git_file:
-            git_file.write(f"DEPLOYED BRANCH = '{curr_branch}'; commit = '{curr_commit}'")
+        with open("trim_frontend/static/js/trim_deployment_info.js", "w") as git_file:
+            build_time = self.make_key()
+            pushing_user = os.getlogin()
+            git_file.write("let SITE_DEPLOYMENT_INFO = { \"deployed_branch\": \"" + str(curr_branch) + "\", \"deployed_commit\": \"" + str(curr_commit) + "\", \"build_time\": \"" + str(build_time) + "\", \"deployed_by\": \"" + str(pushing_user) + "\" };")
 
         os.mkdir(".ebextensions")
         with open(".ebextensions/00-packages.config", "w") as f:
