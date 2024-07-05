@@ -1,4 +1,4 @@
-import boto3, getopt, os, shutil, subprocess, sys, zipfile, time
+import boto3, getopt, json, os, shutil, subprocess, sys, zipfile, time
 from datetime import datetime
 from common import await_beanstalk_app_deployment, await_stack_completion, figure_home_dir, whoami_aws, die, loggy
 
@@ -27,9 +27,28 @@ class BeanstalkHelper(object):
 
         # write a Git metadata file
         curr_branch = self.capture_shell_command_output(["git", "symbolic-ref", "--short", "HEAD"])
-        curr_commit = self.capture_shell_command_output(["git", "rev-parse", "HEAD"])
-        with open("trim_frontend/static/gitinfo.txt", "w") as git_file:
-            git_file.write(f"DEPLOYED BRANCH = '{curr_branch}'; commit = '{curr_commit}'")
+        curr_sha = self.capture_shell_command_output(["git", "rev-parse", "HEAD"])
+        curr_subj = self.capture_shell_command_output(["git", "log", "-n", "1", "--pretty=\"format:%s\""])
+        with open("trim_frontend/static/js/trim_deployment_info.js", "w") as git_file:
+            build_time = self.make_key()
+            try:
+                pushing_user = boto3.client("sts").get_caller_identity().get("UserId").split(":")[-1]
+            except Exception:
+                pushing_user = os.getlogin()
+
+            deployment_data = {
+                "version": {
+                    "branch": curr_branch,
+                    "sha": curr_sha,
+                    "subject": curr_subj
+                },
+                "push_details": {
+                    "user": pushing_user,
+                    "timestamp": build_time
+                }
+            }
+            git_file.write("let SITE_DEPLOYMENT_INFO = " + json.dumps(deployment_data) + ";")
+            # git_file.write("let SITE_DEPLOYMENT_INFO = { \"deployed_branch\": \"" + str(curr_branch) + "\", \"deployed_commit\": \"" + str(curr_sha) + "\", \"build_time\": \"" + str(build_time) + "\", \"deployed_by\": \"" + str(pushing_user) + "\" };")
 
         os.mkdir(".ebextensions")
         with open(".ebextensions/00-packages.config", "w") as f:
