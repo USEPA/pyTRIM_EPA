@@ -130,11 +130,13 @@
     onDomLoad(function() {
 
         // FIXME hacky way to refresh all parcels when leaving the parcels tab
-        // otherwise for some reason surface runoff will break
+        let requires_reload = false;
         $('a[href$="-tab"]').on('click', (e)=>{
-            if ($("#parcels-tab-pill").hasClass("active")) {
-                e.target.click();
-                $('#save-btn').click();
+            if ($("#parcels-tab-pill").hasClass("active")){
+                if (requires_reload) {
+                    e.target.click();
+                    $('#save-btn').click();
+                }
             }
         });
 
@@ -613,6 +615,7 @@
                     LoadingScreen.show('loading_results');
                     TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load',function(){
                         TRIM.refreshParcels();
+                        requires_reload = true;
                         LoadingScreen.hide('loading_results');
                     });
                     mapTableRedraw()
@@ -755,6 +758,8 @@
                     shapes = parcels.toGeoJSON()
                     mapTableRedraw()
                 }
+                TRIM.refreshParcels();
+                requires_reload = true;
                 LoadingScreen.hide('create_parcel');
             })
         };
@@ -775,7 +780,8 @@
             shapes = parcels.toGeoJSON()
             LoadingScreen.show('delete_parcel');
             TRIM.api.deleteParcels(TRIM.store.currentScenario.id, layer.toGeoJSON()).on('load', function(){
-                TRIM.refreshParcels(true);
+                TRIM.refreshParcels();
+                requires_reload = true;
                 LoadingScreen.hide('delete_parcel');
             })
             mapTableRedraw()
@@ -939,6 +945,8 @@
                         updateFields();
                     }
                     finally {
+                        TRIM.refreshParcels();
+                        requires_reload = true;
                         LoadingScreen.hide(loadingRequest);
                     }
                 });
