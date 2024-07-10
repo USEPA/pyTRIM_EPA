@@ -84,8 +84,19 @@ let ErrorValidation = {
         let has_data = filedata.length > 0;
         return ErrToolTip(ele, has_data, "Input file has no data.")
     },
+    fileIsParsed: function(ele, has_data) {
+        let fileIsParsed = has_data
+        return ErrToolTip(ele, fileIsParsed, "CSV file parse problem")
+    },
     tsFileHasDateColumn: function (ele, tsData){
-        let has_data = tsData.length > 0;
+        let has_data = false
+        if (tsData) {
+            let has_data = tsData.length > 0;
+        } else {
+            this.fileIsParsed(ele, has_data)
+            return
+        }
+
         if (has_data) {
             let has_date_col = Object.keys(tsData[0]).indexOf("Date") > -1
             return ErrToolTip(ele, has_date_col, "Input time-series file has no column with name 'Date'")
@@ -93,4 +104,5 @@ let ErrorValidation = {
             this.fileHasData(ele, tsData)
         }
     }
+
 }

@@ -47,7 +47,7 @@ def parse():
         try:
             fname = secure_filename(f.filename)
 
-            if fname.endswith('.csv'):
+            if fname.lower().endswith('.csv'):
                 df = csv_to_df(f, dtype=str)
                 # Get rid of carriage returns b/c they mess up output
                 df = df.replace('\r', '', regex=True)
