@@ -5,7 +5,7 @@ from flask_api import ApiResult
 
 from trim_db.schema import CustomParameter, ParameterDefinition, Parcel
 from trim_db.services import ChemicalService, CompartmentService, FormulaService, ParameterService, ParcelService, ScenarioService, VolumeElementService
-from trim_db.services.parameters import get_or_create_custom_param
+from trim_db.services.parameters import get_or_create_custom_param, update_custom_param_value
 from .defaults import Air_Parcel_VolElem_defaults, Aquatic_Biota_SW_Compartment_defaults, Aquatic_Biota_Sed_Compartment_defaults, Farm_Biota_SurfSoil_Compartment_defaults, LAND_USE_TYPES, AQUATIC_DIET, Land_Parcel_VolElem_defaults, Water_Parcel_VolElem_defaults, Wet_Dry_Source_VolElem_defaults
 from ..scenarios.forms import ScenarioAbioticPropertiesForm
 from ..utils.logging import make_logger
@@ -147,8 +147,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             cmp.parameters.get(par_name),
             {"requirements": f"self.id == {cmp.id}", "scenario_id": p.scenario_id},
         )
-        par.value = parcels_data[field_name]
-        ParameterService.update(par)
+        update_custom_param_value(par, parcels_data[field_name])
         ParameterService.commit()
     # Note that 0 is the fixed datum for volume element boundary locations
     if field_name == "airHeight":
@@ -220,9 +219,9 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                     no_commit=True
                 )
                 if parcels_data['tillage'] == "Yes":
-                    par.value = 1
+                    update_custom_param_value(par, 1)
                 elif parcels_data['tillage'] == "No":
-                    par.value = 0
+                    update_custom_param_value(par, 0)
         ParameterService.commit()
 
     if field_name in ['flush_rate', 'suspended_sed_conc', 'algae_density', 'chloride_conc', 'chlorophyll_conc',
@@ -250,7 +249,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                     "scenario_id": p.scenario.id,
                 },
             )
-            par.value = parcels_data[field_name]
+            update_custom_param_value(par, parcels_data[field_name])
         else:
             par_obj = [pp for pp in ParameterService.definitions.get_all() if
                        pp.full_name == par_name[field_name]]
@@ -274,7 +273,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                     "scenario_id": p.scenario.id,
                 },
             )
-            par.value = parcels_data[field_name]
+            update_custom_param_value(par, parcels_data[field_name])
         else:
             par_obj = [pp for pp in ParameterService.definitions.get_all() if
                        pp.full_name == par_name[field_name]]
@@ -300,7 +299,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                 {"requirements": f"self.id == {this_comp.id}", "scenario_id": p.scenario_id},
                 no_commit=True
             )
-            this_par.value = parcels_data[param]
+            update_custom_param_value(this_par, parcels_data[param])
         ParameterService.commit()
 
     if field_name in ["BenthicCarnivoreBiomass", "BenthicInvertebrateBiomass", "BenthicOmnivoreBiomass",
@@ -333,7 +332,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                     {"requirements": f"self.id == {this_comp.id}", "scenario_id": p.scenario_id},
                     no_commit=True
                 )
-                this_param.value = float(parcels_data[field_name])
+                update_custom_param_value(this_param, float(parcels_data[field_name]))
         ParameterService.commit()
 
     if field_name in ["pH", "rho", "AverageVerticalVelocity", "FractionSand", "OrganicCarbonContent",
@@ -345,8 +344,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             this_comp.parameters.get(parcels_data["field"]),
             {"requirements": f"self.id == {this_comp.id}", "scenario_id": p.scenario_id},
         )
-        this_par.value = float(parcels_data[field_name])
-        ParameterService.commit()
+        update_custom_param_value(this_par, float(parcels_data[field_name]))
     if field_name == "emission":
         src_comp = [c for c in p.compartments if c.name == parcels_data["compartment_name"]][0]
         src_par = [par for parn, par in src_comp.parameters.items() if parn == "surfaceDepositionRate"]

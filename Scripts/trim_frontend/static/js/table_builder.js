@@ -62,7 +62,7 @@ let ErrorValidation = {
         let cells = $(row).find("input.editableCell");
         let expected_total = parseFloat($(row).data("rsval"));
         let message_entity = $(row).data("entity") || "fractions for given consuming organism"
-        let total = cells.toArray().reduce((ps,e) => ps + parseFloat($(e).val()),0).toFixed(2);  // exact comparison may not be possible due to precision so compare using less precise total
+        let total = cells.toArray().reduce((ps,e) => ps + parseFloat($(e).val()),0).toFixed(4);  // exact comparison may not be possible due to precision so compare using less precise total
 
         let is_valid = total == expected_total;
         ele = $(ele).closest("td")

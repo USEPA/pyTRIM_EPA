@@ -104,7 +104,7 @@ def update_parcel(id, scenario_id):
         # Get the specified parcel
         p = ParcelService.get(id=id, scenario_id=scenario_id)
         parcels_data = request.form.to_dict()
-        print(f"updating with {parcels_data}")
+        # print(f"updating with {parcels_data}")
         rv = None
         try:
             rv = handle_parcel_update(p, parcels_data)

@@ -450,7 +450,7 @@ def get_water_params(pcl, parcel_type):
                 'sed_discharge_rate': wc_sed_discharge_rate
             },
             'sed_props': {
-                'bed_density': get_correct_param("BedDensity.magnitude", sed_pars),
+                'bed_density': get_correct_param("BedDensity", sed_pars), 
                 'organic_carbon_frac': get_correct_param("OrganicCarbonContent", sed_pars),
                 'bed_pH': get_correct_param("pH", sed_pars),
                 'bed_porosity': get_correct_param("Porosity", sed_pars),
