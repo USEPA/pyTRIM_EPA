@@ -167,6 +167,7 @@ def get_surface_runoff(scen):
 
 def get_latest_run_info(scen):
     import json
+    from pathlib import Path
     run_info = {'has_run': scen.has_process_hist,
                 "lastest_run_date": "",
                 "run_has_results": False,
@@ -179,9 +180,9 @@ def get_latest_run_info(scen):
         if run_info["run_has_results"]:
             run_info["run_results"] = {
                 "mass_results": f'{{{json.loads(json.dumps(json.loads(proc_info.result_nt), indent=4, sort_keys=True,default=str))}}}',
-                "mass_results_file": proc_info.result_file_nt,
+                "mass_results_file": Path(proc_info.result_file_nt).name,
                 "conc_results": f'{{{json.loads(json.dumps(json.loads(proc_info.result_conc), indent=4, sort_keys=True, default=str))}}}',
-                "conc_results_file": proc_info.result_file_conc
+                "conc_results_file": Path(proc_info.result_file_conc).name
             }
     return run_info
 

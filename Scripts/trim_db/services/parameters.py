@@ -314,7 +314,7 @@ def update_custom_param_value(param_obj, val):
         raise Exception(f"Param type {type(param_obj)} not supported")
     
     try:
-        if float(param_obj.value) != float(val):
+        if param_obj.value != float(val):
             param_obj.value = val
             ParameterService.update(param_obj)
     except Exception as e:
