@@ -403,20 +403,16 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                 else:
                     rp = scn.parcels.where(Parcel.name == receiver_name).first()
                     receiver_comp = rp.get_compartment("Soil_Surface")
+                    if not receiver_comp: # try for water parcels
+                        receiver_comp = rp.get_compartment("Surface_water")
                 entity_name = "receiver"
                 formula_entity = receiver_comp
                 # this pattern captures integers, decimals and/or numbers with scientific notations that may or may
                 # not be in parentheses
                 val_pattern = re.compile(r"\(?(\d+(?:\.\d+(?:[eE][+\-]?\d+)?))\)?")
                 # We have the receiver compartment in the formula
-                # TODO #1 Update formula only if the sender_comp.connects_to(receiver_comp) == True. if there is no
-                #   connection (this means no custom link and
-                #   sender_comp.volume_element.interface_with(sender_comp.volume_element) == False), either create
-                #   a custom link or send error back to be shown as a validation error using async await in api call
                 if not sender_comp.connects_to(receiver_comp):
-                    return ApiResult({
-                        'message': f'{sender_comp.standard_name} does not connect to {receiver_comp.standard_name}'
-                        })
+                    CompartmentService.links.create(sender_id=sender_comp.id, receiver_id=receiver_comp.id)
                 # TODO #2 if a value is given as zero and it exists in formula remove it from formula paying
                 #  attention to parenthesis.
                 if f'{entity_name}.id in {{{str(formula_entity.id)}}}' in eq:
