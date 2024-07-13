@@ -309,6 +309,23 @@ def get_or_create_custom_param(param_obj=None, kwargs={}, new_formula=False, no_
     return ParameterService.get_or_create(**kwargs, no_commit=no_commit)
 
 
+def update_custom_param_value(param_obj, val):
+    if not isinstance(param_obj, CustomParameter):
+        raise Exception(f"Param type {type(param_obj)} not supported")
+    
+    try:
+        if param_obj.value != float(val):
+            param_obj.value = val
+            ParameterService.update(param_obj)
+    except Exception as e:
+        print(f"Could not convert value {val} to float: {e}")
+        if param_obj.value != val:
+            param_obj.value = val
+            ParameterService.update(param_obj)
+
+    return param_obj
+
+
 def parameterize(cls, default_scenario=None):
     cls_name = cls.__name__
 

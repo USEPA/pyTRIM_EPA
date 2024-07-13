@@ -17,6 +17,7 @@ from trim_db.services import ScenarioService, ChemicalService, \
     ParameterService, FormulaService
 from trim_db.services.parameters import get_or_create_custom_param
 from trim_frontend import api, db
+from trim_frontend.scenarios.utils import init_first_time_default_param_values
 from trim_frontend.parcels.routes import delete_parcel_contents
 from .defaults import *
 from .forms import *
@@ -64,6 +65,8 @@ def create_scenario():
 
     # Set the current_user as the form creator
     s.creator = current_user
+
+    init_first_time_default_param_values()
 
     # Save the scenario
     ScenarioService.commit()

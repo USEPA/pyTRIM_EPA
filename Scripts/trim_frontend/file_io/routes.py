@@ -12,6 +12,7 @@ from flask_api import ApiException, ApiResult
 from trim_db.schema import *
 from trim_db.schema.entities.environment import Parcel
 from trim_db.services import *
+from trim_db.services.parameters import get_or_create_custom_param
 from trim_db.services.entities import ParcelService
 from trim_frontend import api
 from ..parcels.utils import delete_parcel_contents, get_canonical_land_use_type, get_canonical_parcel_type, get_ve_defaults_for_parcel_type, handle_parcel_update, initialize_parcel_contents
@@ -19,7 +20,8 @@ from ..utils.data_structures import calculate_list_depth
 from ..utils.file_io import csv_to_df
 from ..utils.forms import assemble_json_form
 from ..utils.logging import make_logger
-from ..utils.spatial import determine_location, determine_nearest_neighbor_distance, ensure_closed_polygon, is_utm_zone_valid, translate_coordinates
+from ..utils.spatial import determine_location, determine_nearest_neighbor_distance, ensure_closed_polygon, is_utm_zone_valid, translate_coordinates, translate_position
+from shapely.geometry import Polygon
 
 
 file_api = Blueprint('file_api', __name__)
@@ -47,7 +49,7 @@ def parse():
         try:
             fname = secure_filename(f.filename)
 
-            if fname.endswith('.csv'):
+            if fname.lower().endswith('.csv'):
                 df = csv_to_df(f, dtype=str)
                 # Get rid of carriage returns b/c they mess up output
                 df = df.replace('\r', '', regex=True)
@@ -97,6 +99,11 @@ def parse_aermod():
     this_chem = [v for k, v in request.form.items() if k == 'chemical'][0]
     this_spec = [v for k, v in request.form.items() if k == 'species'][0]
     spacing = [v for k, v in request.form.items() if k == 'spacing'][0]
+    coord_sys = [v for k, v in request.form.items() if k == 'proj'][0]
+    utm_zone = [v for k, v in request.form.items() if k == 'utm_zone'][0]
+
+    logger.info(f'Parsed AERMOD file: {list(files.items())[0][1].filename} for scenario id {scenario_id}, chemical {this_chem} with'
+                f' coordinate system {coord_sys} {"and utm zone of " + utm_zone if utm_zone else ""}.')
 
     scenario = ScenarioService.get(id=scenario_id)
     chem = ChemicalService.get(name=this_chem)
@@ -135,23 +142,40 @@ def parse_aermod():
     df = df.sort_values(['X', 'Y', 'ZELEV']).drop_duplicates(['X', 'Y'], keep='first')
     # remove if NET ID = POLGRID. This does not always work. We will also need a user restriction to limit
     # receptors intended for TRIM modeling – i.e., Cartesian grid with no overlapping receptors
+
+    # Convert the aermod X and Y to the default utm coordinates that pyTRIM uses. We need users input for the
+    # coordinate system and UTM zone (if UTM coordiantes) for the given file.
+
+
     df_aermod = pd.DataFrame(df[df['NET ID'] != 'POLGRID1'])
     df_aermod['NUM HRS'] = pd.to_numeric(df_aermod['NUM HRS'])
     df_aermod['DRY DEPO'] = pd.to_numeric(df_aermod['DRY DEPO'])
     df_aermod['WET DEPO'] = pd.to_numeric(df_aermod['WET DEPO'])
 
     # make a dictionary of shapely polygon objects based on TRIM layout
-    dict_poly = {p.name: p.polygon() for p in scenario.parcels}
+    # dict_poly = {p.name: p.polygon() for p in scenario.parcels}
+    dict_poly = {p.name: Polygon(p.vertices) for p in scenario.parcels}
     dict_area = {p.name: p.area.magnitude for p in scenario.parcels}
+
+    try:
+        df_aermod['newX'] = df_aermod.apply(
+            lambda z: translate_position(float(z.X), float(z.Y), 'UTM', 'WGS84_LONGLAT', utm_zone=utm_zone)[0], axis=1)
+        df_aermod['newY'] = df_aermod.apply(
+            lambda z: translate_position(float(z.X), float(z.Y), 'UTM', 'WGS84_LONGLAT', utm_zone=utm_zone)[1], axis=1)
+    except Exception as e:
+        print(e)
+
     try:
         # add parcel location to each receptor in aermod file
-        df_aermod['Parcel'] = df_aermod.apply(lambda z: determine_location(dict_poly=dict_poly, x=z.X, y=z.Y), axis=1)
+        # df_aermod['Parcel'] = df_aermod.apply(lambda z: determine_location(dict_poly=dict_poly, x=z.X, y=z.Y), axis=1)
+        df_aermod['Parcel'] = df_aermod.apply(lambda z: determine_location(dict_poly=dict_poly, x=z.newX, y=z.newY), axis=1)
         df_aermod = df_aermod[df_aermod['Parcel'] != ""]  # drop any receptors that are not mapped to layout
         df_aermod['ParcelArea'] = df_aermod.apply(lambda z: dict_area.get(z.Parcel), axis=1)
         df_aermod = df_aermod.reset_index(drop=True)
         ndays = df_aermod['NUM HRS'].loc[1] / 24  # compute number of days of cumulative deposition
     except Exception as e:
         print(f"Error finding parcels corresponding to sources: {e}")
+    df_aermod['ParcelArea'] = pd.to_numeric(df_aermod['ParcelArea'])
 
     try:
         if spacing == r'Uniform':  # compute flat averages of all receptors in the parcel
@@ -163,7 +187,7 @@ def parse_aermod():
 
         elif spacing == r'Non-Uniform':  # computes weighted average of receptors in the parcel using distance of influence of each receptor as weight
             df_aermod['Spacing'] = df_aermod.apply(
-                lambda z: determine_nearest_neighbor_distance(df_aermod=df_aermod, point_x=z.X, point_y=z.Y),
+                lambda z: determine_nearest_neighbor_distance(df_aermod=df_aermod, point_x=z.newX, point_y=z.newY),
                 axis=1)  # compute distance to nearest receptor
             # Calculate receptor area (m2)
             dft = df_aermod  # temp file
@@ -201,6 +225,11 @@ def parse_aermod():
                     src_par = [par for parn, par in comp.parameters.items() if parn == "surfaceDepositionRate"]
                     if len(src_par) > 0:
                         src_par = src_par[0]
+                        src_par = get_or_create_custom_param(
+                            src_par,
+                            {"requirements": f"self.id == {comp.id}", "scenario_id": scenario.id},
+                            new_formula=True
+                        )
                         prefix = "DRY" if comp.name.startswith("Dry") else "WET"
                         stype = f'{prefix} DEPO'
                         eq = src_par.formula.equation

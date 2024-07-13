@@ -62,7 +62,7 @@ let ErrorValidation = {
         let cells = $(row).find("input.editableCell");
         let expected_total = parseFloat($(row).data("rsval"));
         let message_entity = $(row).data("entity") || "fractions for given consuming organism"
-        let total = cells.toArray().reduce((ps,e) => ps + parseFloat($(e).val()),0).toFixed(2);  // exact comparison may not be possible due to precision so compare using less precise total
+        let total = cells.toArray().reduce((ps,e) => ps + parseFloat($(e).val()),0).toFixed(4);  // exact comparison may not be possible due to precision so compare using less precise total
 
         let is_valid = total == expected_total;
         ele = $(ele).closest("td")
@@ -84,8 +84,19 @@ let ErrorValidation = {
         let has_data = filedata.length > 0;
         return ErrToolTip(ele, has_data, "Input file has no data.")
     },
+    fileIsParsed: function(ele, has_data) {
+        let fileIsParsed = has_data
+        return ErrToolTip(ele, fileIsParsed, "CSV file parse problem")
+    },
     tsFileHasDateColumn: function (ele, tsData){
-        let has_data = tsData.length > 0;
+        let has_data = false
+        if (tsData) {
+            let has_data = tsData.length > 0;
+        } else {
+            this.fileIsParsed(ele, has_data)
+            return
+        }
+
         if (has_data) {
             let has_date_col = Object.keys(tsData[0]).indexOf("Date") > -1
             return ErrToolTip(ele, has_date_col, "Input time-series file has no column with name 'Date'")
@@ -93,4 +104,5 @@ let ErrorValidation = {
             this.fileHasData(ele, tsData)
         }
     }
+
 }

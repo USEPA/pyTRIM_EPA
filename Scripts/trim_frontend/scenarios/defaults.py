@@ -16,31 +16,9 @@ def serialize_scenario(scen: Scenario):
         'has_parcels': len(list(scen.parcels)) > 0
     }
     return s
-
-def set_param_default(kwargs, val, unit=None):
-    try:
-        default_param = ParameterService.definitions.get(**kwargs)
-        if default_param.default_value:
-            return
-        
-        default_param.default_value = val
-        if unit:
-            default_param.default_unit = unit
-        ParameterService.definitions.update(default_param)
-        ParameterService.commit()
-    except Exception as e:
-        print(e)
-    
+   
 
 def get_met_data(scen):
-    # set defaults first
-    set_param_default({"variable_name":"AirTemperature", "default_unit":"K"}, 298)
-    set_param_default({"variable_name":"horizontalWindSpeed"}, 1.6)
-    set_param_default({"variable_name":"windDirection"}, 270)
-    # FIXME add mixing height
-    set_param_default({"variable_name":"isDay_Dynamic"}, 1)
-    set_param_default({"variable_name":"Rain"}, 0.0041) # Precipitation
-
     ambient_air_temp = scen.AirTemperature
     if ambient_air_temp:
         ambient_air_temp = ambient_air_temp.to("K").magnitude
@@ -189,6 +167,7 @@ def get_surface_runoff(scen):
 
 def get_latest_run_info(scen):
     import json
+    from pathlib import Path
     run_info = {'has_run': scen.has_process_hist,
                 "lastest_run_date": "",
                 "run_has_results": False,
@@ -201,9 +180,9 @@ def get_latest_run_info(scen):
         if run_info["run_has_results"]:
             run_info["run_results"] = {
                 "mass_results": f'{{{json.loads(json.dumps(json.loads(proc_info.result_nt), indent=4, sort_keys=True,default=str))}}}',
-                "mass_results_file": proc_info.result_file_nt,
+                "mass_results_file": Path(proc_info.result_file_nt).name,
                 "conc_results": f'{{{json.loads(json.dumps(json.loads(proc_info.result_conc), indent=4, sort_keys=True, default=str))}}}',
-                "conc_results_file": proc_info.result_file_conc
+                "conc_results_file": Path(proc_info.result_file_conc).name
             }
     return run_info
 
