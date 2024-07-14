@@ -800,34 +800,54 @@
             // getting a hold of the file reference
             var file = e.target.files[0];
             if (file.name.split('.').pop() == "geojson"){
+                // setting up the reader
+                var reader = new FileReader();
+                reader.readAsText(file,'UTF-8');
 
-            // setting up the reader
-            var reader = new FileReader();
-            reader.readAsText(file,'UTF-8');
+                // here we tell the reader what to do when it's done reading...
+                reader.onload = readerEvent => {
+                    var fileContent = readerEvent.target.result; // this is the content!
+                    shapesJson = JSON.parse(fileContent);
 
-            // here we tell the reader what to do when it's done reading...
-            reader.onload = readerEvent => {
-                var fileContent = readerEvent.target.result; // this is the content!
-                shapesJson = JSON.parse(fileContent);
-                parcels.clearLayers()
-                parcels = L.geoJSON(shapesJson).addTo(map);
-                shapes = parcels.toGeoJSON()
-                mapTableRedraw()}}
+                    let fieldData = [{
+                        "type": "input",
+                        "name": "geojson",
+                        "value": JSON.stringify(shapesJson["features"])
+                    }];
+
+                    fieldData.push({
+                        "type": "input",
+                        "name": "scenario_id",
+                        "value": TRIM.store.currentScenario.id
+                    });
+
+                    LoadingScreen.show('upload_parcel_geojson');
+                    TRIM.api.uploadParcelFile(fieldData, function(success,responseData,c) {
+                        LoadingScreen.hide('upload_parcel_geojson');
+                        
+                        if (!success) {
+                            alert('An error occurred during upload.');
+                        } else {
+                            console.log("reload...");
+                            window.location.reload();
+                        }
+                    });
+                }
+            }
             else if (file.name.split('.').pop() == "shp"){
                 console.log("This is a ShapeFile")
                 var shpfile = new L.Shapefile('shpFile/Durham.zip', {
-                onEachFeature: function(feature, layer) {
-                    if (feature.properties) {
-                        layer.bindPopup(Object.keys(feature.properties).map(function(k) {
-                            return k + ": " + feature.properties[k];
-                        }).join("<br />"), {
-                            maxHeight: 200
-                        });
+                    onEachFeature: function(feature, layer) {
+                        if (feature.properties) {
+                            layer.bindPopup(Object.keys(feature.properties).map(function(k) {
+                                return k + ": " + feature.properties[k];
+                            }).join("<br />"), {
+                                maxHeight: 200
+                            });
+                        }
                     }
-                }
-            });
-            shpfile.addTo(map);
-
+                });
+                shpfile.addTo(map);
             }
             // else if (file.name.split('.').pop() == "kml"){
             //     console.log("This is a KML")
