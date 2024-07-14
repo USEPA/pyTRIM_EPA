@@ -130,7 +130,7 @@ if __name__ == "__main__":
         whoami = whoami_aws()
         loggy(f"Running PyTrim deployment script, mode '{mode}', as AWS userid '{whoami['user_id']}' on account '{whoami['account']}'")
 
-        active_development_skip_confirmation_screen = True
+        active_development_skip_confirmation_screen = False
         if active_development_skip_confirmation_screen:
             if whoami["account"] != "426714360284" and whoami["account"] != "736887025159":
                 print(f"BAD ACCOUNT...")

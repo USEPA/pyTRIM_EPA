@@ -190,6 +190,10 @@ window.TRIM = (function(trim) {
                 field.innerText = defaultVal;
             }
         }
+        else if (widget == 'button') {
+           field = document.createElement('a');
+           field.innerHTML = fieldDef.buttonHtml;
+        }
         else {
             var type = dataType;
             if (type == 'int' || type == 'float') {
@@ -217,8 +221,12 @@ window.TRIM = (function(trim) {
         }
         field.id = id;
         field.name = id;
-        field.className = 'form-control form-control-sm';
-        field.style.maxWidth = '100%';
+        if (widget == 'button') {
+            field.className = "btn btn-secondary";
+        }  else {
+            field.className = 'form-control form-control-sm';
+            field.style.maxWidth = '100%';
+        }
 
         if (fieldDef.readonly) {
             field.setAttribute('readonly', 'readonly');
