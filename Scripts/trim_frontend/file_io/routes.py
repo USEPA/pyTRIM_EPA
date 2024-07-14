@@ -319,8 +319,12 @@ def parse_parcel_upload():
                     """
                     # TODO - reload page after upload (done; but we could do better...)
                     p = ParcelService.create(name=parcel_name, description=parcel_description, scenario_id=scenario_id, vertices=fixed_coords[0])
-                    ve_defaults = get_ve_defaults_for_parcel_type(parcel_type)
-                    initialize_parcel_contents(p, ve_defaults)
+                    handle_parcel_update(p, {
+                        "field": "parcelType",
+                        "parcelType": parcel_type
+                    })
+                    #ve_defaults = get_ve_defaults_for_parcel_type(parcel_type)
+                    #initialize_parcel_contents(p, ve_defaults)
 
                     # TODO - verify this logic is sound -- or is it being enforced elsewhere?
                     # basically does the upload handler need to worry about e.g. someone saying

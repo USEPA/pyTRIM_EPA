@@ -1,4 +1,5 @@
 import re
+from copy import deepcopy
 from pprint import pprint
 
 from flask_api import ApiResult
@@ -50,13 +51,13 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             initialize_parcel_contents(p, Land_Parcel_VolElem_defaults)
         if parcels_data['parcelType'] == "Land & Air":
             # concat Land and Air defaults
-            land_and_air_parcel_vol_elem_defaults = dict(Land_Parcel_VolElem_defaults)
+            land_and_air_parcel_vol_elem_defaults = deepcopy(Land_Parcel_VolElem_defaults)
             land_and_air_parcel_vol_elem_defaults.update(Air_Parcel_VolElem_defaults)
             # add standard Land & Air Volume element and compartments
             initialize_parcel_contents(p, land_and_air_parcel_vol_elem_defaults)
         if parcels_data['parcelType'] == "Water & Air":
             # concat Water and Air defaults
-            water_and_air_parcel_vol_elem_defaults = dict(Water_Parcel_VolElem_defaults)
+            water_and_air_parcel_vol_elem_defaults = deepcopy(Water_Parcel_VolElem_defaults)
             water_and_air_parcel_vol_elem_defaults.update(Air_Parcel_VolElem_defaults)
             # add standard Water & Air Volume element and compartments
             initialize_parcel_contents(p, water_and_air_parcel_vol_elem_defaults)
@@ -81,8 +82,8 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                     CompartmentService.delete(cmp, False)
 
     if field_name == "hasFarmFoodChain":
-        biotic_ve = dict(Land_Parcel_VolElem_defaults)
-        biotic_ve["SurfSoil"]["Compartments"] = dict(Farm_Biota_SurfSoil_Compartment_defaults["Compartments"])
+        biotic_ve = deepcopy(Land_Parcel_VolElem_defaults)
+        biotic_ve["SurfSoil"]["Compartments"] = deepcopy(Farm_Biota_SurfSoil_Compartment_defaults["Compartments"])
         if parcels_data['hasFarmFoodChain'] == "Yes":
             surfsoil = p.get_volume_element("SurfSoil")
             if surfsoil:
@@ -99,9 +100,9 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                             logger.info(f"Deleted {cmp.name}")
                             CompartmentService.delete(cmp, False)
     if field_name == "hasFishFoodWeb":
-        biotic_ve = dict(Water_Parcel_VolElem_defaults)
-        biotic_ve["Sed"]["Compartments"] = dict(Aquatic_Biota_Sed_Compartment_defaults["Compartments"])
-        biotic_ve["SW"]["Compartments"] = dict(Aquatic_Biota_SW_Compartment_defaults["Compartments"])
+        biotic_ve = deepcopy(Water_Parcel_VolElem_defaults)
+        biotic_ve["Sed"]["Compartments"] = deepcopy(Aquatic_Biota_Sed_Compartment_defaults["Compartments"])
+        biotic_ve["SW"]["Compartments"] = deepcopy(Aquatic_Biota_SW_Compartment_defaults["Compartments"])
         if parcels_data['hasFishFoodWeb'] == "Yes":
             sw = p.get_volume_element("SW")
             if sw:
@@ -480,21 +481,21 @@ def get_ve_defaults_for_parcel_type(parcel_type):
     elif normalized == "LANDONLY":
         return Land_Parcel_VolElem_defaults
     elif normalized == "LAND&AIR":
-        combo = dict(Land_Parcel_VolElem_defaults)
+        combo = deepcopy(Land_Parcel_VolElem_defaults)
         combo.update(Air_Parcel_VolElem_defaults)
         return combo
     elif normalized == "WATER&AIR":
-        combo = dict(Water_Parcel_VolElem_defaults)
+        combo = deepcopy(Water_Parcel_VolElem_defaults)
         combo.update(Air_Parcel_VolElem_defaults)
         return combo
 
 
 def initialize_parcel_contents(new_parcel, vol_elem_defaults=None):
     if vol_elem_defaults is None:
-        vol_elem_defaults = dict(Land_Parcel_VolElem_defaults)
+        vol_elem_defaults = deepcopy(Land_Parcel_VolElem_defaults)
         vol_elem_defaults.update(Air_Parcel_VolElem_defaults)
     else:
-        vol_elem_defaults = dict(vol_elem_defaults)
+        vol_elem_defaults = deepcopy(vol_elem_defaults)
     # Add the Sources
     vol_elem_defaults.update(Wet_Dry_Source_VolElem_defaults)
 
