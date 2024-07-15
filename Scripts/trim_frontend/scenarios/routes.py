@@ -3,6 +3,7 @@ import os
 import re
 import time
 from datetime import datetime
+from pathlib import Path
 
 import boto3
 import pandas as pd
@@ -798,8 +799,8 @@ def get_result_scenario():
         logger.info(f'Getting Model Run Results for scenario {s.name}...')
         fin_stat = [v for v in s.proc_status][0].run_status
         run_date = [v for v in s.proc_status][0].run_datetime
-        output_file_n = [v for v in s.proc_status][0].result_file_nt
-        output_file_c = [v for v in s.proc_status][0].result_file_conc
+        output_file_n = Path([v for v in s.proc_status][0].result_file_nt).name
+        output_file_c = Path([v for v in s.proc_status][0].result_file_conc).name
         json_n_avg = [v for v in s.proc_status][0].result_nt
         json_c_avg = [v for v in s.proc_status][0].result_conc
 
