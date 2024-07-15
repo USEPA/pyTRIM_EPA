@@ -499,24 +499,20 @@ def initialize_parcel_contents(new_parcel, vol_elem_defaults=None):
     # Add the Sources
     vol_elem_defaults.update(Wet_Dry_Source_VolElem_defaults)
 
-    for ve in vol_elem_defaults.items():
+    for ve_name, ve in vol_elem_defaults.items():
         # Create standard volume elements
-        if new_parcel.get_volume_element(ve[1]["name"]):
-            nve = new_parcel.get_volume_element(ve[1]["name"])
-        else:
-            nve = VolumeElementService.get_or_create(name=ve[1]["name"],
+        nve = new_parcel.get_volume_element(ve_name)
+        if not nve:
+            nve = VolumeElementService.get_or_create(name=ve_name,
                                                      parcel=new_parcel,
-                                                     top=ve[1]["top"],
-                                                     bottom=ve[1]["bottom"])
-        for c in ve[1]["Compartments"].items():
+                                                     top=ve["top"],
+                                                     bottom=ve["bottom"])
+        for c_name, c in ve["Compartments"].items():
             # Create standard compartments linking them to default volume elements and media for each compartment
-            # media_id = [m.id for m in CompartmentService.media.get_all() if m.name == c[1]["media_name"]][0]
-            this_media = [m for m in CompartmentService.media.get_all() if m.name == c[1]["media_name"]][0]
-
-            if new_parcel.get_compartment(c[0]):
-                nc = new_parcel.get_compartment(c[1]["name"])
-            else:
-                nc = CompartmentService.get_or_create(name=c[1]["name"],
+            nc = new_parcel.get_compartment(c_name)
+            if not nc:
+                this_media = CompartmentService.media.get(name = c["media_name"])
+                nc = CompartmentService.get_or_create(name=c_name,
                                                       volume_element=nve,
                                                       media=this_media)
             initialize_compartment_custom_parameters(nc)
