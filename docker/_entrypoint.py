@@ -260,6 +260,16 @@ class DockerEntryPoint:
                         Bucket=storage_bucket_name,
                         Key=full_key
                     )
+                    # The URL for output needs to be updated in the database for the frondend hrefs to work.
+                    # For local run they are not changed but for prod run, the created files in the model_run are
+                    # purged along with the docker container, so we need to have the s3 url instead.
+                    if key_name == 'outputMass':
+                        [v for v in s.proc_status][0].result_file_nt =\
+                            f'https://{storage_bucket_name}.s3.amazonaws.com/{full_key}'
+                    else:
+                        [v for v in s.proc_status][0].result_file_conc =\
+                            f'https://{storage_bucket_name}.s3.amazonaws.com/{full_key}'
+                    ScenarioService.commit()
                 except Exception as e:
                     loggy(f"ERROR WRITING DATA TO S3: {e}")
             else:

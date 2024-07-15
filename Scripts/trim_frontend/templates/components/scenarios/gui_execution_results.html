@@ -557,8 +557,8 @@
                     return results_data
                 }
 
-                let result = ''
-                const poll = async function (fn, fnCondition, ms) {
+                // let result = ''
+                const poll = async function (fn, fnCondition, result, ms, deployment_type) {
                     await fn();
                     while (fnCondition(result)) {
                         await wait(ms);
@@ -603,9 +603,11 @@
                                 $("#btn_execute_model").parent().append(
                                     "<p style='color:red;' id='model_err_msg'>Model ran into an error and stopped running.</p>"
                                 )
-                                
                             }
                         })
+                        if (deployment_type == 'prod') {
+                            break
+                        }
                     }
 
                     if (result == "err") {
@@ -615,13 +617,15 @@
                         setChecked("p#cb_proc_vis", "err")
                         return result;
                     }
-                    setTimeout(function(){
-                        initialize_components()
-                        $($('#plt_type').find('a.dropdown-item')[0]).trigger('click')
-                        $('#btn_visualize').prop('disabled', false).trigger('click')
-                        setChecked("p#cb_proc_vis", "on")
-                        $('#lb_perc_vis').text("(100%)")
-                    }, ms)
+                    if (deployment_type == 'local') {
+                        setTimeout(function(){
+                            initialize_components()
+                            $($('#plt_type').find('a.dropdown-item')[0]).trigger('click')
+                            $('#btn_visualize').prop('disabled', false).trigger('click')
+                            setChecked("p#cb_proc_vis", "on")
+                            $('#lb_perc_vis').text("(100%)")
+                        }, ms)
+                    }
                     return result;
                 };
 
@@ -637,7 +641,7 @@
                     // run the model locally
                     let fetchResults = () => exec_model_run();
                     let validate = status => (status !== 'fin' && status !== 'err');
-                    poll(fetchResults, validate, 5000);
+                    poll(fetchResults, validate, '', 5000, 'local');
                 } else {
                     // run the model via AWS StepFunction / Docker on ECS
                     var poller = function(executionArn, callback, numAttempts) {
@@ -650,9 +654,13 @@
                                 if ("sfn_output" in data && data.sfn_output !== false) {
                                     callback(success, data);
                                 } else {
-                                  setTimeout(function() {
-                                    poller(executionArn, callback, numAttempts + 1);
-                                  }, 30000); // sleep for 30 seconds
+                                    let dev_poll = function() {
+                                        setTimeout(function () {
+                                            poller(executionArn, callback, numAttempts + 1);
+                                        }, 30000); // sleep for 30 seconds
+                                    }
+                                    let validate = status => (status !== 'fin' && status !== 'err');
+                                    poll(dev_poll, validate, '', 10, 'prod');
                                 }
                             });
                         } else {
@@ -661,17 +669,38 @@
                     }
 
                     var fetchAndDisplayResults = function(bucket, uuid) {
-                      TRIM.api.fetchRunResults(bucket, uuid, function(success, data) {
-                        var mass = JSON.parse("{" + data.model_output.mass + "}");
-                        var conc = JSON.parse("{" + data.model_output.conc + "}");
-                          window.rawOutput = data;
-                          window.testOutputViewer = {
-                            "presignedMassUrl": data.outputMass,
-                            "presignedConcUrl": data.outputConc,
-                            "mass": mass,
-                            "conc": conc
-                          };
-                      });
+                        TRIM.api.fetchRunResults(bucket, uuid, function(success, data) {
+                            var mass = JSON.parse("{" + data.model_output.mass + "}");
+                            var conc = JSON.parse("{" + data.model_output.conc + "}");
+                            // window.rawOutput = data;
+                            // window.testOutputViewer = {
+                            //     "presignedMassUrl": data.outputMass,
+                            //     "presignedConcUrl": data.outputConc,
+                            //     "mass": mass,
+                            //     "conc": conc
+                            // };
+                            TRIM.store.latestRunInfo.run_results.mass_results = mass
+                            TRIM.store.latestRunInfo.run_results.conc_results = conc
+                            TRIM.store.latestRunInfo.run_results.mass_results_file = data.outputMass
+                            TRIM.store.latestRunInfo.run_results.conc_results_file = data.outputConc
+                            TRIM.store.latestRunInfo.lastest_run_date = data.run_date
+                            $('#btn_get_mass_results').attr("href",data.outputMass)
+                            $('#btn_get_conc_results').attr("href",data.outputConc)
+                            setChecked("p#cb_proc_trm", "on")
+                            setChecked("p#cb_proc_ode", "on")
+                            setChecked("p#cb_proc_out", "on")
+                            setChecked("p#cb_proc_vis", "on")
+                            $('#lb_perc_trm').text("(100%)")
+                            $('#lb_perc_ode').text("(100%)")
+                            $('#lb_perc_out').text("(100%)")
+                            $('#lb_perc_vis').text("(100%)")
+                            setTimeout(function(){
+                                initialize_components()
+                                $('#btn_visualize').prop('disabled', false)
+                                $($('#plt_type').find('a.dropdown-item')[0]).trigger('click')
+                                $('#btn_visualize').prop('disabled', false).trigger('click');
+                            }, 3000)
+                        });
                     };
 
                     // hardcoded test
