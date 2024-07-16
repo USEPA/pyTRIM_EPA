@@ -61,7 +61,7 @@
         var default_data = {
             "Surface Parcel": "",
             "Area": 1,
-            "Land Cover": "grass",
+            "Land Use": "grass",
             "A": 1.73E-03,
             "a": 1.9,
             "b": 0.125,
@@ -116,14 +116,14 @@
                             "parcelid": e.id,
                             "Surface Parcel": e.name,
                             "Area": (e.area/1E6).toFixed(2),
-                            "Land Cover": e.landUse,
+                            "Land Use": e.landUse,
                             "Total Effective Erosion Rate": new Intl.NumberFormat('en-US', {notation: "scientific"}).format(e.totalErosionRate)
                         });
                          data2.push({
                              "parcelid": e.id,
                              "Surface Parcel": e.name,
                              "Area": (e.area/1E6).toFixed(2),
-                             "Land Cover": e.landUse,
+                             "Land Use": e.landUse,
                              "A": new Intl.NumberFormat('en-US', {notation: "scientific"}).format(default_data["A"]),
                              "a": a_param,
                              "b": default_data["b"],
@@ -134,7 +134,7 @@
                              "parcelid": e.id,
                              "Surface Parcel": e.name,
                              "Area": (e.area/1E6).toFixed(2),
-                             "Land Cover": e.landUse,
+                             "Land Use": e.landUse,
                              "R": default_data["R"],
                              "K": default_data["K"],
                              "S": default_data["S"],
@@ -231,7 +231,7 @@
                                 return '<label class="lb_parcel" data-thisrow=\''+  JSON.stringify(row).replace(/'/g, "\'") + '\'>' + data + '</label>'
                             }
                         },
-                        {"data": "Land Cover", className: "text-muted"},
+                        {"data": "Land Use", className: "text-muted"},
                         {"data": "Area", className: "text-muted"},
                         {
                             "data": "Total Effective Erosion Rate",
@@ -279,7 +279,7 @@
                                 return '<label class="lb_parcel" data-thisrow=\''+  JSON.stringify(row).replace(/'/g, "\'") + '\'>' + data + '</label>'
                             }
                         },
-                        {"data": "Land Cover", className: "text-muted"},
+                        {"data": "Land Use", className: "text-muted"},
                         {"data": "Area", className: "text-muted"},
                         {
                             "data": "A",
@@ -354,7 +354,7 @@
                                  return '<label class="lb_parcel" data-thisrow=\''+  JSON.stringify(row).replace(/'/g, "\'") + '\'>' + data + '</label>'
                             }
                         },
-                        {"data": "Land Cover", className: "text-muted"},
+                        {"data": "Land Use", className: "text-muted"},
                         {"data": "Area", className: "text-muted"},
                         {
                             "data": "R",
@@ -767,7 +767,7 @@
         }
 
         function calculate_ER_ASD(row,firstLoad = false) {
-            if ( ["Water", "Impervious"].indexOf(row["Land Cover"]) == -1 ) {
+            if ( ["Water", "Impervious"].indexOf(row["Land Use"]) == -1 ) {
                 let ER = row.ER
                 if (firstLoad) {
                     ER = new Intl.NumberFormat('en-US', {notation: "scientific"}).format(row.A * calculate_SD(row))
@@ -797,7 +797,7 @@
         }
 
         function calculate_ER_USLE(row, firstLoad = false) {
-            if ( ["Water", "Impervious"].indexOf(row["Land Cover"]) == -1 ) {
+            if ( ["Water", "Impervious"].indexOf(row["Land Use"]) == -1 ) {
                 let ER = row.ER
                 if (firstLoad) {
                     ER = new Intl.NumberFormat('en-US', {notation: "scientific"}).format(row.R * row.K * calculate_LS(row) * row.C * row.P)

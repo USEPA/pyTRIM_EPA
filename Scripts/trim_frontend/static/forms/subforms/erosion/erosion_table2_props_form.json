@@ -11,8 +11,8 @@
       "default": ""
     },
     {
-      "id": "erosion2-land_cover",
-      "label": "Land Cover",
+      "id": "erosion2-land_use",
+      "label": "Land Use",
       "data_type": "str",
       "default": ""
     },
