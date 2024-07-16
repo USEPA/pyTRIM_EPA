@@ -100,6 +100,12 @@
             "default": "coordinates",
             "required": true,
             "help": "Indicate the field name for the coordinates of the parcels (polygon vertices) from your text or CSV file. This needs to be in the pair list format such that [[[X1,Y1], [X2,Y2], [X3,Y3]]] where XN and YN are X and Y coordiantes of the Nth vertice."
+        },
+        {
+            "id": "mapTable",
+            "label": "",
+            "data_type": "form",
+            "form_definition": "subforms/parcels/parcels_props_form.json"
         }
     ]
 }

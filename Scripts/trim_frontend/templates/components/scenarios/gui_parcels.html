@@ -16,6 +16,9 @@
 		width: inherit;
 		padding: 2px;
 	}
+    table { 
+        white-space: nowrap;
+    }
 </style>
 			<legend>Parcel Upload</legend>
 			<div class="row mb-1">
@@ -88,20 +91,7 @@
                         </strong>
                     </small>
                 </div>
-                <table class="hover" id="mapTable">
-                    <thead>
-                        <tr>
-                            <th data-toggle="tooltip" data-placement="top" data-html="true" title="">Parcel Name</th>
-                            <th data-toggle="tooltip" data-placement="top" data-html="true" title="">Description</th>
-                            <th data-toggle="tooltip" data-placement="top" data-html="true" title="(km<sup>2</sup>)">Area</th>
-                            <th data-toggle="tooltip" data-placement="top" data-html="true" title="">Parcel Type</th>
-                            <th data-toggle="tooltip" data-placement="top" data-html="true" title="">Land Use</th>
-                            <th data-toggle="tooltip" data-placement="top" data-html="true" title="">Farm Food Chain</th>
-                            <th data-toggle="tooltip" data-placement="top" data-html="true" title="">Fish Food Web</th>
-                            <th data-toggle="tooltip" data-placement="top" data-html="true" title="">Wetland</th>
-                        </tr>
-                    </thead>
-                </table>
+                <table data-slot="true" data-target="mapTable" class="hover" id="mapTable"></table>
             </div>
         </div>
     </section>
@@ -535,7 +525,8 @@
                 ],
                 initComplete: function (settings, json) {
                     $("#mapTable").wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
-                    $('[data-toggle="tooltip"]').tooltip()
+                    $("[data-toggle=popover]").popover();
+                    $('[data-toggle="tooltip"]').tooltip();
                     $('#mapTable tbody').on('change', 'select.landuse_ddl', function () {
                         //get selected value
                         var changed = $(this).find(":selected").val();

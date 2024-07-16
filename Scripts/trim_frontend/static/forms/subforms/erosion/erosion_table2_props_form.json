@@ -1,0 +1,62 @@
+{
+  "title": "",
+  "table_id": "erosionTable_opt2",
+  "pivot": false,
+  "header": "",
+  "fields": [
+    {
+      "id": "erosion2-surface_parcel",
+      "label": "Surface Parcel",
+      "data_type": "str",
+      "default": ""
+    },
+    {
+      "id": "erosion2-land_cover",
+      "label": "Land Cover",
+      "data_type": "str",
+      "default": ""
+    },
+    {
+      "id": "erosion2-area",
+      "label": "Area",
+      "data_type": "float",
+      "default": 0,
+      "tooltip": "(km<sup>2</sup>)"
+    },
+    {
+      "id": "erosion2-unit_soil_loss",
+      "label": "A",
+      "data_type": "float",
+      "default": 0,
+      "tooltip": "unit soil loss (kg/m<sup>2</sup>-d)"
+    },
+    {
+      "id": "erosion2-empirical_intercept_coefficient",
+      "label": "a",
+      "data_type": "float",
+      "default": 0,
+      "tooltip": "sediment delivery ratio: empirical intercept coefficient (unitless)"
+    },
+    {
+      "id": "erosion2-empirical_slope_coefficient",
+      "label": "b",
+      "data_type": "float",
+      "default": 0,
+      "tooltip": "sediment delivery ratio: empirical slope coefficient (unitless)"
+    },
+    {
+      "id": "erosion2-sediment_delivery_ratio",
+      "label": "SD",
+      "data_type": "float",
+      "default": 0,
+      "tooltip": "sediment delivery ratio (unitless)"
+    },
+    {
+      "id": "erosion2-total_effective_erosion_rate",
+      "label": "Total Effective Erosion Rate",
+      "data_type": "float",
+      "default": 0,
+      "tooltip": "(kg/m<sup>2</sup>-d)"
+    }
+  ]
+}

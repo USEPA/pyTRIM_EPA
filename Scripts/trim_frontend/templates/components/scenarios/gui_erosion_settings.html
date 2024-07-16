@@ -257,7 +257,11 @@
                                     "<label class='editableCell badge badge-light badge badge-light'>" + data + "</label>"
                             }
                         }
-                    ]
+                    ],
+                    initComplete: function (settings, json) {
+                        $("[data-toggle=popover]").popover();
+                        $('[data-toggle="tooltip"]').tooltip();
+                    }
                 });
 
             $('#erosionTable_opt2').DataTable(
@@ -267,7 +271,7 @@
                     paging: false,
                     bFilter: false,
                     info: false,
-                    "bAutoWidth": false,
+                    bAutoWidth: false,
                     columns: [
                         {
                             "data": "Surface Parcel",
@@ -329,7 +333,8 @@
                         }
                     ],
                     initComplete: function (settings, json) {
-                        $('[data-toggle="tooltip"]').tooltip()
+                        $("[data-toggle=popover]").popover();
+                        $('[data-toggle="tooltip"]').tooltip();
                         $("#erosionTable_opt2").wrap("<div style='overflow:auto; width:100%;position:relative;'></div>");
                     }
                 });
@@ -341,7 +346,7 @@
                     paging: false,
                     bFilter: false,
                     info: false,
-                    "bAutoWidth": false,
+                    bAutoWidth: false,
                     columns: [
                          {
                              "data": "Surface Parcel",
@@ -471,7 +476,8 @@
                     ],
                     initComplete: function (settings, json) {
                         $("#erosionTable_opt3").wrap("<div style='overflow:auto; width:100%;position:relative;'></div>");
-                        $('[data-toggle="tooltip"]').tooltip()
+                        $("[data-toggle=popover]").popover();
+                        $('[data-toggle="tooltip"]').tooltip();
                         let rows=$("#erosionTable_opt3").find("tr");
                         $(rows).each((i,row)=>update_cell_format(row,["label.lb_A","label.lb_a","label.lb_b","label.lb_SD"],true))
                     }
@@ -940,6 +946,9 @@
 
 </script>
 <style>
+    table { 
+        white-space: nowrap;
+    }
     .td_ER {
         background-color: #f8caca80;
     }

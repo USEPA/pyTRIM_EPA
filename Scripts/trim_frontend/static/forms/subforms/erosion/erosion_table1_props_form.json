@@ -1,0 +1,34 @@
+{
+  "title": "",
+  "table_id": "erosionTable_opt1",
+  "pivot": false,
+  "header": "",
+  "fields": [
+    {
+      "id": "erosion1-surface_parcel",
+      "label": "Surface Parcel",
+      "data_type": "str",
+      "default": ""
+    },
+    {
+      "id": "erosion1-land_cover",
+      "label": "Land Cover",
+      "data_type": "str",
+      "default": ""
+    },
+    {
+      "id": "erosion1-area",
+      "label": "Area",
+      "data_type": "float",
+      "default": 0,
+      "tooltip": "(km<sup>2</sup>)"
+    },
+    {
+      "id": "erosion1-total_effective_erosion_rate",
+      "label": "Total Effective Erosion Rate",
+      "data_type": "float",
+      "default": 0,
+      "tooltip": "(kg/m<sup>2</sup>-d)"
+    }
+  ]
+}

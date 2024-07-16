@@ -9,7 +9,7 @@ import boto3
 import pandas as pd
 from flask import Blueprint, request, render_template, redirect, url_for
 from flask_security import login_required, current_user
-from flask_api import ApiResult
+from flask_api import ApiException, ApiResult
 from datetime import datetime
 from trim_db.schema import ScenarioLoadRunProc, \
     CustomParameter, ParameterDefinition
@@ -168,6 +168,8 @@ def get_parameters(scenario_id):
             db.session.add(param)
             param = param.as_serializable()
         r[x] = param
+
+    ScenarioService.commit() # required because of session update
     return ApiResult({'parameters': r})
 
 
