@@ -715,6 +715,30 @@
         function saveIdIW(event) {
             let parcel = event.data.parcel
             var sName = $('#shapeName').val();
+
+            // validation
+            let parcelList = TRIM.store.currentScenario.parcels;
+            let invalid_starts = [
+                "air",
+                "sw",
+                "sed",
+                "surfsoil",
+                "rootsoil",
+                "vadosesoil",
+                "gw"
+            ];
+            for (let substr of invalid_starts) {
+                if (sName.toLowerCase().startsWith(substr)) {
+                    return;
+                }
+            }
+            if (sName.indexOf(' ') >= 0) {
+                return; // contain spaces
+            }
+            else if (parcelList.filter(p=>p.name.toLowerCase() == sName.toLowerCase()).length > 0) {
+                return; // dupe parcel name
+            }
+
             var sDesc = $('#shapeDesc').val();
             var Area = L.GeometryUtil.geodesicArea(parcel.getLatLngs()[0]);
             var sArea = Area.toString() //L.GeometryUtil.readableArea(Area, isMetric = 'km')

@@ -8,55 +8,63 @@
       "id": "erosion2-surface_parcel",
       "label": "Surface Parcel",
       "data_type": "str",
-      "default": ""
+      "default": "",
+      "help": "(not editable here) A short, unique name you provided the parcel when creating it in the map utility on the Parcels Page."
     },
     {
       "id": "erosion2-land_use",
       "label": "Land Use",
       "data_type": "str",
-      "default": ""
+      "default": "",
+      "help": "(not editable here) The parcel's dominant land use that you provided when creating it in the map utility on the Parcels Page."
     },
     {
       "id": "erosion2-area",
       "label": "Area",
       "data_type": "float",
       "default": 0,
-      "tooltip": "(km<sup>2</sup>)"
+      "tooltip": "(km<sup>2</sup>)",
+      "help": "(auto-calculated) Surface area of the parcel (square kilometers)"
     },
     {
       "id": "erosion2-unit_soil_loss",
       "label": "A",
       "data_type": "float",
       "default": 0,
-      "tooltip": "unit soil loss (kg/m<sup>2</sup>-d)"
+      "tooltip": "unit soil loss (kg/m<sup>2</sup>-d)",
+      "help": "Enter the unit soil loss of the parcel (kilograms per square meter per day)"
     },
     {
       "id": "erosion2-empirical_intercept_coefficient",
       "label": "a",
       "data_type": "float",
       "default": 0,
-      "tooltip": "sediment delivery ratio: empirical intercept coefficient (unitless)"
+      "tooltip": "sediment delivery ratio: empirical intercept coefficient (unitless)",
+      "help": "Enter the empirical intercept coefficient of the sediment delivery ratio (unitless). The ratio is the fraction of gross erosion from a specific area that is delivered to another area, and it is defined as a*Area<sup>-b</sup> (area in square meters). In this editable table, you may directly enter the ratio value (in this case, you will not enter the values of coefficients a or b), or you may enter the values of a and b and then the ratio value will be calculated for you. The default intercept values depend on the parcel area and are from Vanoni 1975 (Sedimentation Engineering) as cited by Section 7.2.7 of U.S. EPA 1998 (Methodology for assessing health risks associated with multiple pathways of exposure to combustor emissions) and Table B-4-14 of U.S. EPA 2005 (Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities): 2.1 for parcel areas ≤ 0.1 square miles, 1.9 for parcel areas > 0.1 to ≤ 1.0 square miles, 1.4 for parcel areas > 1.0 to ≤ 10 square miles, 1.2 for parcel areas > 10 to ≤ 100 square miles, and 0.6 for parcel areas > 100 square miles. See the TRIM User Guide Appendix for full reference information."
     },
     {
       "id": "erosion2-empirical_slope_coefficient",
       "label": "b",
       "data_type": "float",
       "default": 0,
-      "tooltip": "sediment delivery ratio: empirical slope coefficient (unitless)"
+      "tooltip": "sediment delivery ratio: empirical slope coefficient (unitless)",
+      "help": "Enter the empirical slope coefficient of the sediment delivery ratio (unitless). The ratio is the fraction of gross erosion from a specific area that is delivered to another area, and is defined as a*Area<sup>-b</sup> (area in square meters). In this editable table, you may directly enter the ratio value (in this case, you will not enter the values of coefficients a or b), or you may enter the values of a and b and then the ratio value will be calculated for you. The default slope value is 0.125 from Vanoni 1975 (Sedimentation Engineering) as cited by Section 7.2.7 of U.S. EPA 1998 (Methodology for assessing health risks associated with multiple pathways of exposure to combustor emissions) and Table B-4-14 of U.S. EPA 2005 (Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities). See the TRIM User Guide Appendix for full reference information."
     },
     {
       "id": "erosion2-sediment_delivery_ratio",
       "label": "SD",
       "data_type": "float",
       "default": 0,
-      "tooltip": "sediment delivery ratio (unitless)"
+      "tooltip": "sediment delivery ratio (unitless)",
+      "help": "Enter the sediment delivery ratio (unitless). The ratio is the fraction of gross erosion from a specific area that is delivered to another area, and is defined as a*Area<sup>-b</sup> (area in square meters; these parameters also are in this editable table, with Area being auto-calculated). In this editable table, you may directly enter the ratio value (in this case, you will not enter the values of coefficients a or b), or you may enter the values of a and b and then the ratio value will be calculated for you."
     },
     {
       "id": "erosion2-total_effective_erosion_rate",
       "label": "Total Effective Erosion Rate",
       "data_type": "float",
       "default": 0,
-      "tooltip": "(kg/m<sup>2</sup>-d)"
+      "tooltip": "(kg/m<sup>2</sup>-d)",
+      "help": "Enter the total effective erosion rate of the parcel (kilograms per square meter per day). Under Options 2 and 3 on this page, it is calculated as: unit soil loss (A) * sediment delivery ratio (SD) (and * organic enrichment ratio for organic contaminants). A can be calculated using the Universal Soil Loss Equation as: rainfall erosivity index (R) * soil erodibility index (K) * topographical length-slope factor (LS) * cover/management factor (C) * supporting practices factor (P), with additional unit conversions to go from tons per acre per year to kilograms per square meter per day. SD can be calculated as: empirical intercept factor (a) * area<sup>-empirical slope factor (b)</sup> (area in square meters)."
     }
   ]
 }

@@ -8,50 +8,58 @@
       "id": "parcels-parcel_name",
       "label": "Parcel Name",
       "data_type": "str",
-      "default": ""
+      "default": "",
+      "help": "(not editable here) A short, unique name you provided the parcel when creating it in the map utility."
     },
     {
       "id": "parcels-parcel_description",
       "label": "Description",
       "data_type": "str",
-      "default": ""
+      "default": "",
+      "help": "Enter an arbitrary description of the parcel. It will not be used within the modeling."
     },
     {
       "id": "parcels-parcel_area",
       "label": "Area",
       "data_type": "str",
       "default": "",
-      "tooltip": "(km<sup>2</sup>)"
+      "tooltip": "(km<sup>2</sup>)",
+      "help": "(auto-calculated) Surface area of the parcel (square kilometers)"
     },
     {
       "id": "parcels-parcel_type",
       "label": "Parcel Type",
       "data_type": "str",
-      "default": ""
+      "default": "",
+      "help": "Indicate whether the parcel is a land parcel, a water parcel, or an air parcel. If you want a parcel's boundaries to define both a land (or water) parcel and a co-located air parcel above it, then indicate 'Land & Air' (or 'Water & Air'). The default selection is 'Land & Air'."
     },
     {
       "id": "parcels-parcel_land_use",
       "label": "Land Use",
       "data_type": "str",
-      "default": ""
+      "default": "",
+      "help": "(only for land parcels) Indicate the parcel's dominant land use. The land-use designation will dictate which areas will be modeled with vegetation (Agriculture (General), Grasses/Herbs, Deciduous Forest, and Coniferous Forest) as well as which will be modeled with soil depths reflective of untilled soil (Grasses/Herbs, Deciduous Forest, Coniferous Forest, and Untilled Soil) or tilled soil (Tilled Soil). You later will provide additional properties about these land uses. The default setting is 'Grasses/Herbs'. A typical source of site-specific data is the National Land Cover Database (available online at: <a target='_blank' href='https://www.usgs.gov/centers/eros/science/national-land-cover-database'>https://www.usgs.gov/centers/eros/science/national-land-cover-database</a>)."
     },
     {
       "id": "parcels-parcel_farm_food_chain",
       "label": "Farm Food Chain",
       "data_type": "str",
-      "default": ""
+      "default": "",
+      "help": "(only for parcels with land use of Untilled Soil or Tilled Soil) Indicate whether the parcel will eventually be evaluated with exposure from a farm food chain. This is only compatible with Untilled Soil or Tilled Soil land uses because it is anticipated that, after TRIM modeling, you will use soil-to-plant uptake factors to estimate chemical concentrations in farm foods based on TRIM-modeled chemical concentrations in soil. Otherwise, this selection has no impact on TRIM modeling. The default selection is 'No' because the default land use is 'Grasses/Herbs'."
     },
     {
       "id": "parcels-parcel_fish_food_web",
       "label": "Fish Food Web",
       "data_type": "str",
-      "default": ""
+      "default": "",
+      "help": "(only for water parcels) Indicate whether a parcel will be modeled with a fish food web (i.e., for exposure from fish consumption). Water parcels do not necessarily need fish food webs, but if they do not, they will not be evaluated for exposure through fish consumption. You later will provide additional properties about the fish food web. The default selection is 'No' because the default parcel type is 'Land & Air'."
     },
     {
       "id": "parcels-parcel_wetland",
       "label": "Wetland",
       "data_type": "str",
-      "default": ""
+      "default": "",
+      "help": "(only for land parcels with land uses other than Impervious) Indicate whether the parcel will be modeled with wetland characteristics (e.g., modified water percolation and mercury methylation in soil; you later will provide information on these wetland characteristics). The default selection is 'No'."
     }
   ]
 }

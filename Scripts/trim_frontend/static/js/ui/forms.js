@@ -952,6 +952,8 @@ window.TRIM = (function(trim) {
         let toggle = create_element("a", marker);
         toggle.href = 'javascript:void(0);';
         toggle.setAttribute('data-toggle', 'popover');
+        toggle.setAttribute('data-html', 'true');
+        toggle.setAttribute('data-trigger', 'focus');
         toggle.setAttribute('data-original-title', title);
         toggle.setAttribute('data-content', note);
 
