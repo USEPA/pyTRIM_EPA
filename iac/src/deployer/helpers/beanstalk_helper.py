@@ -50,7 +50,10 @@ class BeanstalkHelper(object):
             git_file.write("let SITE_DEPLOYMENT_INFO = " + json.dumps(deployment_data) + ";")
             # git_file.write("let SITE_DEPLOYMENT_INFO = { \"deployed_branch\": \"" + str(curr_branch) + "\", \"deployed_commit\": \"" + str(curr_sha) + "\", \"build_time\": \"" + str(build_time) + "\", \"deployed_by\": \"" + str(pushing_user) + "\" };")
 
-        os.mkdir(".ebextensions")
+        try:
+            os.mkdir(".ebextensions")
+        except FileExistsError:
+            loggy(".ebextensions already exists! Using existing folder.")
         with open(".ebextensions/00-packages.config", "w") as f:
             f.write("packages:\n")
             f.write("  yum:\n")
@@ -62,7 +65,7 @@ class BeanstalkHelper(object):
                 for file in files:
                     if not file.endswith(zip_name):
                         combined = os.path.join(root, file)
-                        # print(f"ADDING '{combined}' to zip...")
+                        print(f"ADDING '{combined}' to zip...")
                         archive.write(combined)
 
         return os.path.abspath(zip_name), temp_dir

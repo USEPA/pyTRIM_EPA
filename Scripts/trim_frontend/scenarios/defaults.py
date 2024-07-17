@@ -180,9 +180,9 @@ def get_latest_run_info(scen):
         if run_info["run_has_results"]:
             run_info["run_results"] = {
                 "mass_results": f'{{{json.loads(json.dumps(json.loads(proc_info.result_nt), indent=4, sort_keys=True,default=str))}}}',
-                "mass_results_file": Path(proc_info.result_file_nt).name,
+                "mass_results_file": proc_info.result_file_nt if ".s3.amazonaws.com" in proc_info.result_file_nt else Path(proc_info.result_file_nt).name,
                 "conc_results": f'{{{json.loads(json.dumps(json.loads(proc_info.result_conc), indent=4, sort_keys=True, default=str))}}}',
-                "conc_results_file": Path(proc_info.result_file_conc).name
+                "conc_results_file": proc_info.result_file_conc if ".s3.amazonaws.com" in proc_info.result_file_conc else Path(proc_info.result_file_conc).name
             }
     return run_info
 
