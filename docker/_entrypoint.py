@@ -253,6 +253,7 @@ class DockerEntryPoint:
             if output_file is not None and os.path.isfile(output_file) and os.path.exists(output_file):
                 full_key = f"{uuid}/{key_name}.xlsx"
                 print(f"upload it to '{full_key}'...")
+                print(f"file S3 URL is https://{storage_bucket_name}.s3.amazonaws.com/{full_key}")
 
                 try:
                     s3_client.put_object(
@@ -260,18 +261,26 @@ class DockerEntryPoint:
                         Bucket=storage_bucket_name,
                         Key=full_key
                     )
-                    # The URL for output needs to be updated in the database for the frondend hrefs to work.
-                    # For local run they are not changed but for prod run, the created files in the model_run are
-                    # purged along with the docker container, so we need to have the s3 url instead.
-                    if key_name == 'outputMass':
-                        [v for v in s.proc_status][0].result_file_nt =\
-                            f'https://{storage_bucket_name}.s3.amazonaws.com/{full_key}'
-                    else:
-                        [v for v in s.proc_status][0].result_file_conc =\
-                            f'https://{storage_bucket_name}.s3.amazonaws.com/{full_key}'
-                    ScenarioService.commit()
                 except Exception as e:
                     loggy(f"ERROR WRITING DATA TO S3: {e}")
+
+                # The URL for output needs to be updated in the database for the frontend hrefs to work.
+                # For local run they are not changed but for prod run, the created files in the model_run are
+                # purged along with the docker container, so we need to have the s3 url instead.
+                try:
+                    with self.app.app_context():
+                        loggy(f"App context established!")
+                        if not FAKE_THE_RESULTS:
+                            scen = ScenarioService.get(self.scenario_id)
+                            if key_name == 'outputMass':
+                                [v for v in scen.proc_status][0].result_file_nt = \
+                                    f'https://{storage_bucket_name}.s3.amazonaws.com/{full_key}'
+                            else:
+                                [v for v in scen.proc_status][0].result_file_conc = \
+                                    f'https://{storage_bucket_name}.s3.amazonaws.com/{full_key}'
+                            ScenarioService.commit()
+                except Exception as e:
+                    loggy(f"ERROR STORING S3 URL in the DB: {e}")
             else:
                 print(f"skip '{output_file}'; doesn't exist in this payload (maybe testing data...)")
 

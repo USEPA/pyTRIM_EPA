@@ -343,10 +343,12 @@
                 let m_file = TRIM.store.latestRunInfo.run_results.mass_results_file
                 let c_file = TRIM.store.latestRunInfo.run_results.conc_results_file
                 let fpath = "{{ url_for('static', filename='.output') }}"
-                let m_filepath =  fpath + "/" + m_file
-                let c_filepath =  fpath + "/" + c_file
+                let m_filepath =  m_file.includes(".s3.amazonaws.com") ? m_file : fpath + "/" + m_file
+                let c_filepath =  c_file.includes(".s3.amazonaws.com") ? c_file : fpath + "/" + c_file
                 $('#btn_get_mass_results').attr("href",m_filepath)
+                $('#btn_get_mass_results').attr("download","mass_results.xlsx")
                 $('#btn_get_conc_results').attr("href",c_filepath)
+                $('#btn_get_conc_results').attr("download","concentration_results.xlsx")
                 initialize_components()
                 $('#btn_visualize').prop('disabled', false)
             }
@@ -548,10 +550,12 @@
                         TRIM.store.latestRunInfo.run_results.conc_results_file = result_data["c_file"]
                         TRIM.store.latestRunInfo.lastest_run_date = result_data["Last_run"]
                         let fpath = "{{ url_for('static', filename='.output') }}"
-                        let m_filepath =  fpath + "/" + result_data["m_file"]
-                        let c_filepath =  fpath + "/" + result_data["c_file"]
+                        let m_filepath = result_data["m_file"].includes(".s3.amazonaws.com") ? result_data["m_file"] : fpath + "/" + result_data["m_file"]
+                        let c_filepath = result_data["c_file"].includes(".s3.amazonaws.com") ? result_data["c_file"] : fpath + "/" + result_data["c_file"]
                         $('#btn_get_mass_results').attr("href",m_filepath)
+                        $('#btn_get_mass_results').attr("download","mass_results.xlsx")
                         $('#btn_get_conc_results').attr("href",c_filepath)
+                        $('#btn_get_conc_results').attr("download","concentration_results.xlsx")
                         return result_data
                     })
                     return results_data
@@ -563,7 +567,8 @@
                     while (fnCondition(result)) {
                         await wait(ms);
                         TRIM.api.poll(scenario_head.id).on('load', function() {
-                            let status = this.responseJSON.status
+                            // ignore the responses if a scenario is already run and we are running it again but the container takes long time to initiate
+                            let status = (result == 'new' && this.responseJSON.status == 'fin') ? 'new' : this.responseJSON.status
                             result = status;
                             let percent = this.responseJSON.percent
                             if (status == "ode") {
@@ -660,7 +665,8 @@
                                         }, 30000); // sleep for 30 seconds
                                     }
                                     let validate = status => (status !== 'fin' && status !== 'err');
-                                    poll(dev_poll, validate, '', 10, 'prod');
+                                    let this_result = (numAttempts < 3) ? 'new' : ''
+                                    poll(dev_poll, validate, this_result, 1000, 'prod');
                                 }
                             });
                         } else {
@@ -679,13 +685,17 @@
                             //     "mass": mass,
                             //     "conc": conc
                             // };
+                            console.log("DATA IS ....")
+                            console.log(data)
                             TRIM.store.latestRunInfo.run_results.mass_results = mass
                             TRIM.store.latestRunInfo.run_results.conc_results = conc
                             TRIM.store.latestRunInfo.run_results.mass_results_file = data.outputMass
                             TRIM.store.latestRunInfo.run_results.conc_results_file = data.outputConc
                             TRIM.store.latestRunInfo.lastest_run_date = data.run_date
                             $('#btn_get_mass_results').attr("href",data.outputMass)
+                            $('#btn_get_mass_results').attr("download","mass_results.xlsx")
                             $('#btn_get_conc_results').attr("href",data.outputConc)
+                            $('#btn_get_conc_results').attr("download","concentration_results.xlsx")
                             setChecked("p#cb_proc_trm", "on")
                             setChecked("p#cb_proc_ode", "on")
                             setChecked("p#cb_proc_out", "on")
