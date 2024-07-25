@@ -227,7 +227,7 @@ def parse_aermod():
                         src_par = src_par[0]
                         src_par = get_or_create_custom_param(
                             src_par,
-                            {"requirements": f"self.id == {comp.id}", "scenario_id": scenario.id},
+                            {"requirements": f"(self.id == {comp.id})", "scenario_id": scenario.id},
                             new_formula=True
                         )
                         prefix = "DRY" if comp.name.startswith("Dry") else "WET"

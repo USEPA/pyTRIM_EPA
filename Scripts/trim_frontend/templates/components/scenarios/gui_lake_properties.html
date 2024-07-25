@@ -228,14 +228,14 @@
                 'helpText': 'The volumetric inflow rate of water received from other water bodies. The default value assumes no inflow from other water bodies. If the assumption of no inflow from other water bodies is not valid, this inflow can be equal to (or some fraction of) the other water body’s discharge, which is based on that other water body’s Water Column Flush Rate. To accomplish this, use the dropdown to identify the connecting water body (or bodies). Then click the green/blue icon, where you then will enter the fraction of the selected water body’s discharge that flows into this water body.'
             },
             'Precipitation Runoff Watershed Area':{
-                'short_name':'precip_runoff_watershed_area',
+                'short_name':'connected_watershed_area',
                 'is_editable': false,
                 'default_value': 0,
                 'unit': 'm<sup>2</sup>',
                 'helpText': "Portion of the modeling domain whose runoff terminates in this water body. Matrix multiplication on the matrix of parcel-to-parcel runoff fractions and the parcel surface areas. For the parcels directly sending runoff to the water body, it follows the flow lines upstream through the parcels contributing to those sending parcels, multiplying parcel areas by aggregate runoff fractions. For example: If a parcel sends 100% of its runoff directly to the water body, then that sending parcel&apos;s whole surface area is included in this Precipitation Runoff Watershed Area calculation. If Parcel A sends 10% of its runoff to Parcel B which sends 50% of its runoff to the water body, then the Precipitation Runoff Watershed Area calculation incorporates 10% * 50% = 5% of Parcel A&apos;s surface area and 50% of Parcel B&apos;s surface area."
             },
             'Precipitation Runoff Volumetric Rate from Land to Water Body':{
-                'short_name':'precip_runoff_vol_rate_to_SW',
+                'short_name':'connected_runoff_to_this_sw',
                 'is_editable': false,
                 'default_value': 0,
                 'unit': 'm<sup>3</sup> [water]/y',
@@ -252,7 +252,7 @@
                     '<p><strong>= (precipitation rate * water body surface area)</strong></p>'
             },
             'Precipitation Seepage Volumetric Rate to Groundwater':{
-                'short_name':'precip_seepage_vol_rate_to_GW',
+                'short_name':'connected_seepage_to_gw',
                 'is_editable': false,
                 'default_value': 0,
                 'unit': 'm<sup>3</sup> [water]/y',
@@ -1018,7 +1018,12 @@
                     let this_water_property = {}
                     parcels.forEach(function (e, i) {
                         if (e.parcelType == "Water Only" || e.parcelType == "Water & Air") {
-                            let d = p.startsWith("Precipitation ") ? e : e['surface_water']['wc_props']
+                            let exceptions = ['Precipitation Runoff Watershed Area',
+                                'Precipitation Runoff Volumetric Rate from Land to Water Body',
+                                'Precipitation Volumetric Rate to Water Body',
+                                'Precipitation Seepage Volumetric Rate to Groundwater'
+                            ]
+                            let d = (p.startsWith("Precipitation ") && exceptions.indexOf(p) == -1 )? e : e['surface_water']['wc_props']
                             this_water_property['Property'] = p
                             this_water_property[e.name] = d[default_water_data[p]['short_name']] ? d[default_water_data[p]['short_name']] : default_water_data[p]['default_value'],
                                 this_water_property["helpText"] = default_water_data[p]['helpText'] ? default_water_data[p]['helpText'] : "Some text"

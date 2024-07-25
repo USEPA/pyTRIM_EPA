@@ -146,7 +146,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         cmp = [c for c in p.compartments if "Air in Air_" in c.standard_name][0]
         par = get_or_create_custom_param(
             cmp.parameters.get(par_name),
-            {"requirements": f"self.id == {cmp.id}", "scenario_id": p.scenario_id},
+            {"requirements": f"(self.id == {cmp.id})", "scenario_id": p.scenario_id},
         )
         update_custom_param_value(par, parcels_data[field_name])
         ParameterService.commit()
@@ -225,6 +225,27 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                     update_custom_param_value(par, 0)
         ParameterService.commit()
 
+    if field_name in ["GroundwaterSeepageFractions", "RunoffFractions"]:
+        soil_comp = p.get_compartment("Soil_Surface")
+        data_name = field_name if field_name == "GroundwaterSeepageFractions" else "RunoffFractions"
+        seepage_frac_val = float(parcels_data[data_name]) if data_name == "GroundwaterSeepageFractions" else 1-float(parcels_data[data_name])
+        runoff_frac_val = 1 - seepage_frac_val
+        watershed_area = (
+                soil_comp.area
+                * soil_comp.FractionofAreaAvailableforRunoff
+        ).magnitude
+        total_runoff_val = runoff_frac_val * p.scenario.Rain * watershed_area
+        for par_name, par_val in {"TotalRunoffRate": total_runoff_val, "GroundwaterSeepageFraction": seepage_frac_val}.items():
+            par = get_or_create_custom_param(
+                soil_comp.parameters.get(par_name),
+                {
+                    "requirements": f"(self.id == {soil_comp.id})",
+                    "scenario_id": p.scenario.id,
+                },
+                no_commit=True
+            )
+            update_custom_param_value(par, par_val)
+
     if field_name in ['flush_rate', 'suspended_sed_conc', 'algae_density', 'chloride_conc', 'chlorophyll_conc',
                       'mean_depth', 'evaporation_rate', 'suspended_organic_carbon', 'water_ph',
                       'sed_deposition_vel', 'water_temp', 'sed_inflow']:
@@ -297,7 +318,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         for param in params:
             this_par = get_or_create_custom_param(
                 this_comp.parameters[param],
-                {"requirements": f"self.id == {this_comp.id}", "scenario_id": p.scenario_id},
+                {"requirements": f"(self.id == {this_comp.id})", "scenario_id": p.scenario_id},
                 no_commit=True
             )
             update_custom_param_value(this_par, parcels_data[param])
@@ -330,7 +351,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             if this_comp.name == comp_name[base_name]:
                 this_param = get_or_create_custom_param(
                     this_comp.parameters.get(prop),
-                    {"requirements": f"self.id == {this_comp.id}", "scenario_id": p.scenario_id},
+                    {"requirements": f"(self.id == {this_comp.id})", "scenario_id": p.scenario_id},
                     no_commit=True
                 )
                 update_custom_param_value(this_param, float(parcels_data[field_name]))
@@ -343,7 +364,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         this_comp = p.get_compartment(name=parcels_data["comp_name"])
         this_par = get_or_create_custom_param(
             this_comp.parameters.get(parcels_data["field"]),
-            {"requirements": f"self.id == {this_comp.id}", "scenario_id": p.scenario_id},
+            {"requirements": f"(self.id == {this_comp.id})", "scenario_id": p.scenario_id},
         )
         update_custom_param_value(this_par, float(parcels_data[field_name]))
     if field_name == "emission":
@@ -353,7 +374,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         if len(src_par) > 0:
             src_par = get_or_create_custom_param(
                 src_par[0],
-                {"requirements": f"self.id == {src_comp.id}", "scenario_id": p.scenario.id},
+                {"requirements": f"(self.id == {src_comp.id})", "scenario_id": p.scenario.id},
                 new_formula=True
             )
 
@@ -389,7 +410,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         if len(sender_par) > 0:
             sender_par = get_or_create_custom_param(
                 sender_par[0],
-                {"requirements": f"self.id == {sender_comp.id}", "scenario_id": scn.id},
+                {"requirements": f"(self.id == {sender_comp.id})", "scenario_id": scn.id},
                 new_formula=True
             )
 
@@ -520,7 +541,7 @@ def initialize_parcel_contents(new_parcel, vol_elem_defaults=None):
 
 
 # This is for parameters of new compartments whose default value cannot be used and will need custom parameters defined
-# at the time of creation f new compartment.
+# at the time of creation of new compartment.
 def initialize_compartment_custom_parameters(nc):
     # Add in custom parameters for new compartments using the self.id = <id of new compartment>
     this_parcel = nc.volume_element.parcel
@@ -529,7 +550,8 @@ def initialize_compartment_custom_parameters(nc):
         ter_val = calc_default_erosion_rate_sdr(this_parcel)
         add_compartment_custom_parameters(nc, "TotalErosionRate", ter_val, "kg/m^2/day")
         # add Total Runoff Rate
-        trr_val = 0  # no default provided so using 0 as default (also used as placeholder in the frontend)
+        # using Groundwater seepage fraction and precipitation to calculate runoff
+        trr_val = (1 - nc.GroundwaterSeepageFraction) * (nc.volume_element.parcel.scenario.Rain).magnitude
         add_compartment_custom_parameters(nc, "TotalRunoffRate", trr_val, "m^3/m^2/day")
 
     if nc.media.isa("Flora"):
@@ -575,7 +597,7 @@ def add_compartment_custom_parameters(nc, par_name, par_val, par_unit):
     return get_or_create_custom_param(
         ParameterService.definitions.get(full_name=par_name),
         {
-            "requirements": f"self.id == {nc.id}",
+            "requirements": f"(self.id == {nc.id})",
             "scenario_id": nc.volume_element.parcel.scenario.id,
             "value": par_val,
             "unit": par_unit,
@@ -590,7 +612,7 @@ def init_diet_table_custom_parameters(pcl):
         for param_name in AQUATIC_DIET[comp_name]:
             param = get_or_create_custom_param(
                 comp.parameters[param_name],
-                {"requirements": f"self.id == {comp.id}", "scenario_id": pcl.scenario_id},
+                {"requirements": f"(self.id == {comp.id})", "scenario_id": pcl.scenario_id},
                 no_commit=True
             )
             param.value = AQUATIC_DIET[comp_name][param_name]

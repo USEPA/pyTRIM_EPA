@@ -207,7 +207,7 @@ def update_scenario():
 
         return get_or_create_custom_param(
             default_param,
-            {"requirements": f"self.id == {comp.id}", "scenario_id": scen.id},
+            {"requirements": f"(self.id == {comp.id})", "scenario_id": scen.id},
         )
 
     def create_litterfallrate_custom_param(scen, comps, par_name):
@@ -231,7 +231,7 @@ def update_scenario():
             custom_params.append(
                 get_or_create_custom_param(
                     default_param,
-                    {"requirements": f"self.id == {comp.id}", "scenario_id": scen.id},
+                    {"requirements": f"(self.id == {comp.id})", "scenario_id": scen.id},
                     no_commit=True
                 )
             )
