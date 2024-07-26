@@ -232,13 +232,17 @@
             if ($(elem).attr('name').indexOf("_field_name") === -1) {
                 ErrorValidation.isPositiveValue(elem, "div");
             }
+            let subsection_header = $(elem).closest("div.sd_subsection").find('h3').text()
+            let sd_type = subsection_header == "Litterfall" ? "litterfall" : "allowexchange"
+            let type_text = subsection_header == "Litterfall" ? subsection_header : "Allow exchange"
+
             // all litterfall rates must be <= 1
-            if (elem.attr("id").includes("litterfall") && elementIsValid($(elem).parent())) {
+            if ($(elem).attr("id").includes(sd_type) && elementIsValid($(elem).parent())) {
                 if (!$(elem).is("select")) {
-                    ErrToolTip(elem, parseFloat($(elem).val()) <= 1.0, "Litterfall rates must be <= 1.", "div");
+                    ErrToolTip(elem, parseFloat($(elem).val()) <= 1.0, `${type_text} rates must be <= 1.`, "div");
                 } else {
                     let bad_data = $(elem).data("seasonal").filter((e,i)=>parseFloat(e.LitterfallRate) > 1)
-                    ErrToolTip(elem, bad_data.length == 0, "Litterfall rates must be <= 1.", "div");
+                    ErrToolTip(elem, bad_data.length == 0, `${type_text} rates must be <= 1.`, "div");
                 }
             }
 
