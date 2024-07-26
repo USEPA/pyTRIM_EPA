@@ -237,20 +237,7 @@
                             "data": "Total Effective Erosion Rate",
                             "className":"td_ER",
                             "render": function (data, type, row, meta) {
-                                let parcel_info = [{
-                                    'type': 'data',
-                                    'name': 'id',
-                                    'value': row.parcelid,
-                                },{
-                                    'type': 'data',
-                                    'name': 'field',
-                                    'value': 'totalErosionRate'
-                                }, {
-                                    'type': 'input',
-                                    'name': 'totalErosionRate',
-                                    'value': data
-                                }]
-                                parcel_info = JSON.stringify(parcel_info)
+                                let parcel_info = create_parcel_object("totalErosionRate", row, data);
                                 return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +
                                     data +
                                     "' style='display:none'>" +
@@ -482,6 +469,24 @@
                         $(rows).each((i,row)=>update_cell_format(row,["label.lb_A","label.lb_a","label.lb_b","label.lb_SD"],true))
                     }
                 });
+
+            function create_parcel_object(param_name, row, data){
+                let parcel_info = [{
+                                    'type': 'data',
+                                    'name': 'id',
+                                    'value': row.parcelid,
+                                },{
+                                    'type': 'data',
+                                    'name': 'field',
+                                    'value': param_name
+                                },{
+                                    'type': 'input',
+                                    'name': param_name,
+                                    'value': data
+                                }]
+                return JSON.stringify(parcel_info)
+            };
+
             $('label.editableCell').click(function () {
                 $(this).prev("input").show()
                 $(this).prev("input").focus()

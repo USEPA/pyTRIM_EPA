@@ -18,7 +18,7 @@ from trim_db.services import ScenarioService, ChemicalService, \
     ParameterService, FormulaService
 from trim_db.services.parameters import get_or_create_custom_param
 from trim_frontend import api, db
-from trim_frontend.scenarios.utils import init_first_time_default_param_values
+from trim_frontend.scenarios.utils import init_first_time_default_param_values, init_erosion_default_params
 from trim_frontend.parcels.routes import delete_parcel_contents
 from .defaults import *
 from .forms import *
@@ -94,6 +94,7 @@ def get_scenario(id):
     s = ScenarioService.get(id)
     start_time = time.time()
     s = s.as_serializable()
+    init_erosion_default_params()
     logger.info(f"Acquired scenario in {time.time() - start_time} seconds")
     return ApiResult({'scenario': s})
 
