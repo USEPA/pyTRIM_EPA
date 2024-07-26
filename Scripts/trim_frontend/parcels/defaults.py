@@ -291,7 +291,7 @@ def get_water_params(pcl, parcel_type):
     if precipitation_rate is None:
         precipitation_rate = 0  # 0.0041
 
-    comp_surfaceSoil = get_comp(pcl, {"media":"Surface_Soil"})
+    comp_surfaceSoil = get_comp(pcl, {"media": "Surface_Soil"})
 
     # TODO This is not right. We need params for all chemicals. How to show this in frontend???
     ch = ChemicalService.get(id=32)
@@ -299,64 +299,39 @@ def get_water_params(pcl, parcel_type):
 
     runoff_watershed_area = 0  # 1e3
     runoff_fraction = 0  # 0.001
-    precip_runoff_frac_to_sw = 0
+    precip_seepage_frac_to_gw = None
+    seepage_vol_rate_to_gw = 0  # 1
+    sed_soil_erosion_to_sw = 100
+
+    # Even though this function's name is "get_water_parameters" many of the parameters directly below are related to
+    # water on land parcels and not water parcels as they are related to watersheds that only exists on land.
 
     if len(comp_surfaceSoil) > 0:
         comp_surfaceSoil = comp_surfaceSoil[0]
+
         runoff_watershed_area = (
             comp_surfaceSoil.area
             * comp_surfaceSoil.FractionofAreaAvailableforRunoff
         ).magnitude
-        if precipitation_rate > 0 and comp_surfaceSoil.TotalRunoffRate:
-            runoff_fraction = (
-                comp_surfaceSoil.TotalRunoffRate / precipitation_rate
-            ).magnitude
-        if precipitation_rate > 0:
-            comp_surfaceWater = get_comp(pcl, {"media":"Surface_Water"})
-            if len(comp_surfaceWater) > 0:
-                precip_runoff = 0
-                for comp_sw in comp_surfaceWater:
-                    comp_link = comp_surfaceSoil.get_links(comp_sw)
-                    if len(comp_link) > 0:
-                        tps = comp_link[0].transport_processes(chemical=ch)
-                        precip_runoff += tps[0].eval(sender=comp_surfaceSoil, receiver=comp_sw, chemical=ch)
-                precip_runoff_frac_to_sw = precip_runoff / precipitation_rate
 
-    precip_seepage_frac_to_gw = 1 - runoff_fraction
+        precip_seepage_frac_to_gw = comp_surfaceSoil.GroundwaterSeepageFraction  # 1 - runoff_fraction
 
-    sed_soil_erosion_to_sw = 100
+        runoff_fraction = 1 - precip_seepage_frac_to_gw
 
-    runoff_vol_rate_to_sw = 0  # 1
-    precipitation_vol_rate_to_sw = 0  # 4.8E6
-    seepage_vol_rate_to_gw = 0  # 1
-    if precipitation_rate > 0:
-        try:
-            runoff_vol_rate_to_sw = (
-                precipitation_rate
-                * precip_runoff_frac_to_sw
-                * runoff_watershed_area
-            )
-        except Exception:
-            pass
-        try:
-            precipitation_vol_rate_to_sw = (precipitation_rate * pcl.area).magnitude
-        except Exception:
-            pass
         try:
             seepage_vol_rate_to_gw = (
                 precipitation_rate
                 * precip_seepage_frac_to_gw
                 * runoff_watershed_area
             )
-        except Exception:
-            pass
+        except Exception as e:
+            print(e)
+
 
     water_params = {
         'precip_rate': precipitation_rate,
         'precip_runoff_watershed_area': runoff_watershed_area,
         'precip_seepage_vol_rate_to_GW': seepage_vol_rate_to_gw,
-        'precip_runoff_vol_rate_to_SW': runoff_vol_rate_to_sw,
-        'precip_vol_rate_to_SW': precipitation_vol_rate_to_sw,
         'sed_soil_erosion_to_SW': sed_soil_erosion_to_sw,
         'runoff_fraction': runoff_fraction,
         'seepage_frac': precip_seepage_frac_to_gw
@@ -364,17 +339,62 @@ def get_water_params(pcl, parcel_type):
 
     sw_params = None
     if 'Water' in parcel_type:
-        sw = get_comp(pcl, {"media":"Surface_Water"})[0]
+        sw = get_comp(pcl, {"media": "Surface_Water"})[0]
         sw_pars = {parn: par for parn, par in sw.parameters.items()}
-        sed = get_comp(pcl, {"media":"Sediment"})[0]
+        sed = get_comp(pcl, {"media": "Sediment"})[0]
         sed_pars = {parn: par for parn, par in sed.parameters.items()}
 
+        # we need a new watershed area here as the watershed of a water parcel is located on surrounding land parcels.
+        sw_total_watershed_area = 0
+        total_runoff_vol_rate_to_this_sw = 0
+        total_seepage_vol_rate_to_gw = 0
+
+        connected_soil_comps = []
+        for this_parcel in pcl.scenario.parcels:
+            soil_comp = this_parcel.get_compartment("Soil_Surface")
+            if soil_comp and soil_comp.connects_to(sw):
+                connected_soil_comps.append(soil_comp)
+        # sum up watershed area of connected Soil parcels.
+        for this_soil_comp in connected_soil_comps:
+            this_watershed_area = (
+                    this_soil_comp.area
+                    * this_soil_comp.FractionofAreaAvailableforRunoff
+            ).magnitude
+            sw_total_watershed_area += this_watershed_area
+            # we need to calculate runoff to this surface_water body using the watershed area above
+            comp_link = this_soil_comp.get_links(sw)
+            if len(comp_link) > 0:
+                tps = comp_link[0].transport_processes(chemical=ch)
+                runoff_tps = [t for t in tps if t.name.startswith("Runoff from Surface Soil to Surface Water")]
+                if len(runoff_tps) > 0:
+                    runoff_tps = runoff_tps[0]
+                precip_runoff = runoff_tps.eval(sender=this_soil_comp, receiver=sw, chemical=ch)
+            this_precip_runoff_frac_to_sw = (precip_runoff / precipitation_rate).magnitude
+            total_runoff_vol_rate_to_this_sw += (
+                    precipitation_rate
+                    * this_precip_runoff_frac_to_sw
+                    * this_watershed_area
+            )
+            this_seepage_frac_to_gw = this_soil_comp.GroundwaterSeepageFraction
+            total_seepage_vol_rate_to_gw += (
+                    precipitation_rate
+                    * this_seepage_frac_to_gw
+                    * this_watershed_area
+            )
         def get_correct_param(par_name, par_obj):
             par = par_obj.get(par_name)
             return par.value if isinstance(par, CustomParameter) else par.default_value if \
                 isinstance(par, ParameterDefinition) else None
 
         wc_external_inflow = 0
+        precipitation_vol_rate_to_sw = 0  # 4.8E6
+
+        try:
+            precipitation_vol_rate_to_sw = (
+                    precipitation_rate
+                    * pcl.area).magnitude
+        except Exception as e:
+            print(e)
 
         try:
             evaporation_vol_rate = get_correct_param("waterEvaporationRate", sw_pars) * pcl.area.magnitude
@@ -384,10 +404,10 @@ def get_water_params(pcl, parcel_type):
 
         try:
             wc_discharge_vol_rate = float('{:.5f}'.format(
-                runoff_vol_rate_to_sw
-                + seepage_vol_rate_to_gw
+                total_runoff_vol_rate_to_this_sw
+                + total_seepage_vol_rate_to_gw
                 + wc_external_inflow
-                + (precipitation_vol_rate_to_sw * 2)
+                + precipitation_vol_rate_to_sw
                 - evaporation_vol_rate
             ))
         except Exception:
@@ -447,7 +467,11 @@ def get_water_params(pcl, parcel_type):
                 'water_temp': get_correct_param("WaterTemperature", sw_pars),
                 'sed_inflow': get_correct_param("ExternalSedimentInflow", sw_pars),
                 'discharge_vol_rate': wc_discharge_vol_rate,
-                'sed_discharge_rate': wc_sed_discharge_rate
+                'sed_discharge_rate': wc_sed_discharge_rate,
+                'connected_watershed_area': sw_total_watershed_area,
+                'connected_runoff_to_this_sw': total_runoff_vol_rate_to_this_sw,
+                'connected_seepage_to_gw': total_seepage_vol_rate_to_gw,
+                'precip_vol_rate_to_SW': precipitation_vol_rate_to_sw,
             },
             'sed_props': {
                 'bed_density': get_correct_param("BedDensity", sed_pars), 

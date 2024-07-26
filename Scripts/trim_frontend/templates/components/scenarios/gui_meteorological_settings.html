@@ -537,6 +537,11 @@
                     $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
+                    $(tblId).find("tr").each((i,e)=>$(e).attr({
+                        "data-rsval": 1,
+                        "data-entity": "fractions for given precipitation"
+                    })
+                    )
                 }
             });
 
@@ -586,17 +591,48 @@
                     return;
                 }
 
-                let is_valid = ErrorValidation.isValidFraction(this);
-                if (!is_valid) {
-                    return;
-                }
-
-                // FIXME does nothing for now!
                 let data = $(this).val()
                 let $label = $(this).next("label")
                 $label.siblings().hide()
                 $label.show().text(data)
+
+                ErrorValidation.isValidFraction(this);
+                ErrorValidation.rowTotalIsValid(this);
+
+                let is_valid = elementIsValid($(this).parent());
+                if (is_valid) {
+                    let parcel_info = $(this).data('parcelinfo')
+                    if (parcel_info) {
+                        parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
+                        console.log(parcel_info);
+                        TRIM.api.updateParcel('{{ scenario.id }}', parcel_info)
+                        table_data = get_Data_from_table(`#${focusTblId}`)
+                    }
+                }
             });
+
+            function get_Data_from_table(thisTableID){
+                var myRows = [];
+                var headersText = [];
+                var head_section = thisTableID + ' thead th'
+                var $headers = $(head_section);
+
+                // Loop through grabbing everything
+                thisRows = thisTableID + ' tbody tr'
+                var $rows = $(thisRows).each(function(index) {
+                    $cells = $(this).find("td");
+                    myRows[index] = {};
+                    $cells.each(function(cellIndex) {
+                        // Set the header text
+                        if(headersText[cellIndex] === undefined) {
+                            headersText[cellIndex] = $($headers[cellIndex]).text();
+                        }
+                        // Update the row object with the header/cell combo
+                        myRows[index][headersText[cellIndex]] = $(this).text();
+                    });
+                });
+                return myRows
+            }
         };
     });
 </script>

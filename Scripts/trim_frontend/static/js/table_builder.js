@@ -91,7 +91,7 @@ let ErrorValidation = {
     tsFileHasDateColumn: function (ele, tsData){
         let has_data = false
         if (tsData) {
-            let has_data = tsData.length > 0;
+            has_data = tsData.length > 0;
         } else {
             this.fileIsParsed(ele, has_data)
             return
