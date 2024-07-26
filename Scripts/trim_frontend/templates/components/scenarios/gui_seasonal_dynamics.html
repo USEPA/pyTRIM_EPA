@@ -233,8 +233,13 @@
                 ErrorValidation.isPositiveValue(elem, "div");
             }
             // all litterfall rates must be <= 1
-            if (elem.id.includes("litterfall") && elementIsValid($(elem).parent())) {
-                ErrToolTip(elem, parseFloat($(elem).val()) <= 1.0, "Litterfall rates must be <= 1.", "div");
+            if (elem.attr("id").includes("litterfall") && elementIsValid($(elem).parent())) {
+                if (!$(elem).is("select")) {
+                    ErrToolTip(elem, parseFloat($(elem).val()) <= 1.0, "Litterfall rates must be <= 1.", "div");
+                } else {
+                    let bad_data = $(elem).data("seasonal").filter((e,i)=>parseFloat(e.LitterfallRate) > 1)
+                    ErrToolTip(elem, bad_data.length == 0, "Litterfall rates must be <= 1.", "div");
+                }
             }
 
             let param_name = $(elem).attr("name")
@@ -264,6 +269,7 @@
             }
 
             param_info[param_info.findIndex(e => e.type == 'input')].value =param_data
+            console.log(param_info)
             return param_info
         }
 
@@ -373,7 +379,7 @@
                 function convertDate(inputFormat) {
                     function pad(s) { return (s < 10) ? '0' + s : s; }
                     var d = new Date(inputFormat)
-                    return [pad(d.getDate()), pad(d.getMonth()+1), d.getFullYear()].join('/')
+                    return [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/')
                 }
 
                 let sim_start = Date.parse(TRIM.store.currentScenario["simulation_start_date"])
