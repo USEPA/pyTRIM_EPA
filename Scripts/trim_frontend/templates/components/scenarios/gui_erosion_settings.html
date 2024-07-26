@@ -213,6 +213,10 @@
                         'value': optionNum
                     }]
                     TRIM.api.updateScenario(scenario_info)
+
+                    // submit erosion rates
+                    let table_id = "#erosionTable_opt"+optionNum;
+                    submit_all_ER_for_table(table_id);
                 }
             }
 
@@ -238,7 +242,7 @@
                             "className":"td_ER",
                             "render": function (data, type, row, meta) {
                                 let parcel_info = create_parcel_object("totalErosionRate", row, data);
-                                return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +
+                                return "<input class='editableCell form-control form-control-sm erosion_inp_opt1 inp_ER' data-parcelinfo='" + parcel_info +"' type='text' value='" +
                                     data +
                                     "' style='display:none'>" +
                                     "<label class='editableCell badge badge-light badge badge-light'>" + data + "</label>"
@@ -312,7 +316,8 @@
                             "className":"td_ER",
                             "render": function (data, type, row, meta) {
                                 let TER = calculate_ER_ASD(row,true)
-                                return "<input data-toggle='tooltip' data-placement='top' data-html='true' title='ER = A * SD' class='editableCell form-control form-control-sm erosion_inp_opt2 inp_ER' type='text' value='" +
+                                let parcel_info = create_parcel_object("totalErosionRate", row, TER);
+                                return "<input data-toggle='tooltip' data-placement='top' data-html='true' title='ER = A * SD' class='editableCell form-control form-control-sm erosion_inp_opt2 inp_ER' data-parcelinfo='" + parcel_info +"' type='text' value='" +
                                     calculate_ER_ASD(row, true) +
                                     "' style='display:none'>" +
                                     "<label class='editableCell badge badge-light lb_ER'>" + TER + "</label>"
@@ -454,7 +459,8 @@
                             "className":"td_ER",
                             "render": function (data, type, row, meta) {
                                 let TER = calculate_ER_USLE(row, true)
-                                return "<input data-toggle='tooltip' data-placement='top' data-html='true' title='ER = R*K*LS*C*P\n or\nER = A * SD' class='editableCell form-control form-control-sm erosion_inp_opt3 inp_ER' type='text' value='" +
+                                let parcel_info = create_parcel_object("totalErosionRate", row, TER);
+                                return "<input data-toggle='tooltip' data-placement='top' data-html='true' title='ER = R*K*LS*C*P\n or\nER = A * SD' class='editableCell form-control form-control-sm erosion_inp_opt3 inp_ER' data-parcelinfo='" + parcel_info +"' type='text' value='" +
                                     calculate_ER_USLE(row, true) +
                                     "' style='display:none'>" +
                                     "<label class='editableCell badge badge-light lb_ER'>" + TER + "</label>"
@@ -502,13 +508,20 @@
                 let is_valid = elementIsValid($(this).parent());
 
                 if (is_valid){
-                    const data = $(this).val()
+                    let data = $(this).val()
                     $(this).hide()
                     $(this).next("label").show().text(data)
                     let parcel_info = $(this).data('parcelinfo')
                     if (parcel_info) {
                         parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
                         TRIM.api.updateParcel('{{ scenario.id }}', parcel_info)
+                    }
+                    else { // anything edited other than erosion rate, submit the erosion rate
+                        let ER_ele = $(this).closest("tr").find(".inp_ER");
+                        data = $(ER_ele).val();
+                        parcel_info = $(ER_ele).data('parcelinfo');
+                        parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
+                        TRIM.api.updateParcel('{{ scenario.id }}', parcel_info);
                     }
                 }
             })
@@ -792,9 +805,6 @@
                     'name': 'totalErosionRate',
                     'value': ER
                 }]
-                if (!firstLoad) {
-                    TRIM.api.updateParcel('{{ scenario.id }}', parcel_info)
-                }
                 return ER
             } else {
                 return new Intl.NumberFormat('en-US', {notation: "scientific"}).format(0)
@@ -822,13 +832,24 @@
                     'name': 'totalErosionRate',
                     'value': ER
                 }]
-                if (!firstLoad) {
-                    TRIM.api.updateParcel('{{ scenario.id }}', parcel_info)
-                }
                 return ER
             } else {
                 return new Intl.NumberFormat('en-US', {notation: "scientific"}).format(0)
             }
+        }
+
+        function submit_all_ER_for_table(table_id) {
+            LoadingScreen.show('saving_erosion_rates');
+            $(table_id).find("tr").each((idx) => {
+                let ER_ele =  $($(table_id).find("tr")[idx]).find(".inp_ER");
+                data = $(ER_ele).val();
+                if (data && ErrorValidation.isValidNumber(ER_ele)) {                        
+                    parcel_info = $(ER_ele).data('parcelinfo');
+                    parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
+                    TRIM.api.updateParcel('{{ scenario.id }}', parcel_info);
+                }
+            });
+            LoadingScreen.hide('saving_erosion_rates');
         }
 
         function enableFieldUpdates() {
@@ -942,6 +963,7 @@
                             }
                         }
                     }
+                    submit_all_ER_for_table(this_opt_table_id);
                     $('label.lds-dual-ring').remove()
                     $('#SoilData_btn_opt3').attr('disabled', false)
                 })
