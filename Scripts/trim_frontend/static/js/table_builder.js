@@ -15,6 +15,10 @@ function standardize_val(val) {
     return standardized_val // string
 }
 
+function scientific(val) { // to scientific notation
+    return new Intl.NumberFormat('en-US', {notation: "scientific"}).format(parseFloat(val));
+}
+
 function ErrToolTip(ele, is_valid, message, parent_ele="td") {
     let parent = $(ele).parent();
     $(parent).find("label.warningTT").tooltip('dispose');

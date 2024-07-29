@@ -282,17 +282,19 @@ def get_parameter_characteristics(param):
     }
 
 
-def get_or_create_custom_param(param_obj=None, kwargs={}, new_formula=False, no_commit=False):
+def get_or_create_custom_param(param_obj=None, kwargs={}, include_default_value = False, new_formula=False, no_commit=False):
     if isinstance(param_obj, CustomParameter):
         return param_obj
     
     elif isinstance(param_obj, ParameterDefinition):
         default_kwargs = {
             "definition_id": param_obj.id,
-            "value": param_obj.default_value,
             "unit": param_obj.default_unit,
             "formula_id": param_obj.default_formula_id,
         }
+        if include_default_value:
+            default_kwargs["value"] = param_obj.default_value
+
         keys = set(list(kwargs.keys()) + list(default_kwargs.keys()))
         for key in keys:
             if key not in kwargs:

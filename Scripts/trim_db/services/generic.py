@@ -43,6 +43,7 @@ else:
 
 
 def make_key(**opts):
+    opts = dict(sorted(dict(opts).items()))
     key = '-'.join([
         f'{k}={v}'
         for k, v in dict(opts).items()
@@ -118,7 +119,7 @@ class GenericService(metaclass=ServiceMetaClass):
         with cls.db.session.no_autoflush:
             model = cls.__model__(**opts)
             cls.db.session.add(model)
-            cls.cache(make_key(**opts), model)
+            # cls.cache(make_key(**opts), model) # old cache reference
 
         if not no_commit and cls.auto_commit:
             cls.commit()
