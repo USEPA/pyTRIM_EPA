@@ -39,7 +39,7 @@ def get_met_data(scen):
         'wind_direction_static_value': scen.windDirection,
         'mixing_height_static_value': mixing_height,
         'daytime_indicator_static_value': scen.isDay_Dynamic,
-        'precipitation_static_value_rate': scen.Rain,
+        'precipitation_static_value_rate': scen.Rain.magnitude,
         'cumulative_precip': scen.cumulativeRain,
 
     }

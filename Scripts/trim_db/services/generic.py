@@ -118,7 +118,7 @@ class GenericService(metaclass=ServiceMetaClass):
         with cls.db.session.no_autoflush:
             model = cls.__model__(**opts)
             cls.db.session.add(model)
-            cls.cache(make_key(**opts), model)
+            # cls.cache(make_key(**opts), model)
 
         if not no_commit and cls.auto_commit:
             cls.commit()
