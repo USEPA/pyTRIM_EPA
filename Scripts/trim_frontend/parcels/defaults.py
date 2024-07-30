@@ -298,7 +298,7 @@ def get_soil_abiotic_params(pcl, run_old=True):
 
 
 def get_water_params(pcl, parcel_type):
-    precipitation_rate = pcl.scenario.Rain
+    precipitation_rate = pcl.scenario.Rain.magnitude
     if precipitation_rate is None:
         precipitation_rate = 0  # 0.0041
 

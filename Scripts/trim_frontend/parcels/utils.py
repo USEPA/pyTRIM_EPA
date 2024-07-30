@@ -242,7 +242,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                 soil_comp.area
                 * soil_comp.FractionofAreaAvailableforRunoff
         ).magnitude
-        total_runoff_val = runoff_frac_val * p.scenario.Rain * watershed_area
+        total_runoff_val = runoff_frac_val * p.scenario.Rain.magnitude * watershed_area
         for par_name, par_val in {"TotalRunoffRate": total_runoff_val, "GroundwaterSeepageFraction": seepage_frac_val}.items():
             par = get_or_create_custom_param(
                 soil_comp.parameters.get(par_name),
