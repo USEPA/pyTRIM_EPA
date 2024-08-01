@@ -49,6 +49,12 @@
     td.rightBorder {
         text-align: right; border-right: 1px solid black; padding: 10px
     }
+    td.freeze-column, th.freeze-column {
+        position: sticky;
+        left: 0;
+        background-color: white; /* to cover other cells when scrolling */
+        z-index: 1; /* to ensure the column stays on top */
+    }
 </style>
 <script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}">
 </script>
@@ -108,6 +114,7 @@
                 fnCreatedRow: function (row, data, index) {
                     $(row).attr("data-rsval","1")
                     $(row).attr("data-entity","run off fractions")
+                    $(row).find("td.rightBorder").addClass("freeze-column")
                 },
                 initComplete: function (settings, json) {
                     $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
@@ -259,7 +266,7 @@
                     '<td style="border-bottom: 0px; padding: 0px"><i class="fa fa-arrow-down"></i></td>' +
                     '</tr>',
                 'bSortable': false,
-                'className': 'font-weight-bold rightBorder'
+                'className': 'font-weight-bold rightBorder freeze-column'
             }]
             if (runoff_matrix) {
                 Object.entries(runoff_matrix).forEach(function ([s, r], i) {
