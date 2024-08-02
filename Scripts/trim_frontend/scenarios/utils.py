@@ -46,6 +46,13 @@ def init_first_time_default_param_values():
 
 def init_erosion_default_params():
     default_variable_kwargs = [
+        # table 1
+        {
+            "variable_name": "erosion_table",
+            "full_name": "erosion1-total_effective_erosion_rate",
+            "domain_id": 1,
+        },
+
         # table 2
         {
             "variable_name": "erosion_table",

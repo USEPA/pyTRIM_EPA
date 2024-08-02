@@ -1,4 +1,4 @@
-import re
+import re, json
 from copy import deepcopy
 from pprint import pprint
 
@@ -140,13 +140,16 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             if c.media.isa('Surface_Soil'):
                 par = c.parameters.get('TotalErosionRate')
                 par.value = parcels_data['totalErosionRate']
-    if "erosion2" in field_name or "erosion3" in field_name:
+    if "erosion1" in field_name or "erosion2" in field_name or "erosion3" in field_name: # unique structure
         param = ParameterService.definitions.get(full_name=field_name)
-        param = get_or_create_custom_param(param, {
-            "scenario_id": p.scenario_id,
-            "requirements": f"(self.id == {p.id})" # parcel id
-        })
-        update_custom_param_value(param, float(parcels_data[field_name]))
+        param = ParameterService.get_or_create(
+            definition_id=param.id,
+            scenario_id=p.scenario_id,
+            requirements=f"(self.id == {p.id})", # parcel id
+        )
+        # storing in unit since value is decimal only
+        param.unit = parcels_data[field_name]
+        ParameterService.update(param)
         ParameterService.commit()
     if field_name in [k for k, v in Air_params]:
         par_name = [v for k, v in Air_params if k == field_name][0]

@@ -3,6 +3,7 @@ from trim_db.schema.utils.serialize import register_serializer
 from trim_db.schema.parameters.models import ParameterDefinition, CustomParameter
 from trim_db.services import *
 import pint
+import json
 
 comp_local_cache = {}
 
@@ -98,8 +99,8 @@ def get_general_params(pcl):
             requirements=f"(self.id == {pcl.id})",
             definition_id=default_param.id,
         )
-        if custom_param:
-            erosion_table_params[default_param.full_name] = custom_param.value
+        if custom_param and custom_param.unit:
+            erosion_table_params[default_param.full_name] =  custom_param.unit
 
     surface_soil_height = None
     root_soil_height = get_comp(pcl, {"name":"Soil_Root_Zone"})
