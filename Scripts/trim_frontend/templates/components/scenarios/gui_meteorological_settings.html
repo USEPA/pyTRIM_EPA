@@ -189,6 +189,7 @@
                 let this_chkbx = $('#met-settings-gui').find(search_cbx_str)
                 let this_text =  $('#met-settings-gui').find(search_txt_str)
                 let is_calculated = met.wet_dep_interception[`calc_wet_dep_interception_frac_${e}_leaf`]
+                let is_comp_exists = met.wet_dep_interception[`wet_dep_interception_frac_${e}_leaf`]
                 let val_user = met.wet_dep_interception[`wet_dep_interception_frac_${e}_leaf`]
                 let val_calc = met.wet_dep_interception[`wet_dep_interception_frac_${e}_leaf_calculated`]
                 if (is_calculated == 1) {
@@ -200,10 +201,18 @@
                     this_text.removeAttr('disabled')
                     this_text.val(val_user)
                 }
-                // else if (is_calculated == -1) {
-                //     // this_chkbx.closest('div.form-group').css('display','none')
-                //     this_text.closest('div.form-group').css('display','none')
-                // }
+                if (is_comp_exists == -1) {
+                    this_chkbx.closest('div.form-group').css('display','none')
+                    this_text.closest('div.form-group').css('display','none')
+                }
+                // Check if the first column has all hidden form_groups and move current to its place
+                if (i == 3) {
+                    let this_col = $(this_chkbx).closest("div.col-sm")
+                    let first_col = $(this_col).parent("div").find("div.col-sm")[0]
+                    if ($(first_col).find("div.form-group").filter((i,e)=>$(e).css('display')!='none').length == 0) {
+                        $(this_col).detach().insertBefore(first_col)
+                    }
+                }
                 // Add Listeners for Wet Dep. Interception Params.
                 this_chkbx.change(function(){
                     if (this_chkbx.prop('checked')) {
