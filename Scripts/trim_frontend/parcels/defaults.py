@@ -301,7 +301,7 @@ def get_water_params(pcl, parcel_type):
     runoff_fraction = 0  # 0.001
     precip_seepage_frac_to_gw = None
     seepage_vol_rate_to_gw = 0  # 1
-    sed_soil_erosion_to_sw = 100
+    sed_soil_erosion_to_sw = 0
 
     # Even though this function's name is "get_water_parameters" many of the parameters directly below are related to
     # water on land parcels and not water parcels as they are related to watersheds that only exists on land.
@@ -380,6 +380,12 @@ def get_water_params(pcl, parcel_type):
                     precipitation_rate
                     * this_seepage_frac_to_gw
                     * this_watershed_area
+            )
+            this_total_erosion_rate = this_soil_comp.TotalErosionRate.magnitude
+            sed_soil_erosion_to_sw += (
+                this_precip_runoff_frac_to_sw
+                * this_total_erosion_rate
+                * this_watershed_area
             )
         def get_correct_param(par_name, par_obj):
             par = par_obj.get(par_name)
