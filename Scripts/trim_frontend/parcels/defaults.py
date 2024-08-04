@@ -368,8 +368,13 @@ def get_water_params(pcl, parcel_type):
                 runoff_tps = [t for t in tps if t.name.startswith("Runoff from Surface Soil to Surface Water")]
                 if len(runoff_tps) > 0:
                     runoff_tps = runoff_tps[0]
-                precip_runoff = runoff_tps.eval(sender=this_soil_comp, receiver=sw, chemical=ch)
-            this_precip_runoff_frac_to_sw = (precip_runoff / precipitation_rate).magnitude
+                    precip_runoff = runoff_tps.eval(sender=this_soil_comp, receiver=sw, chemical=ch)
+                    this_precip_runoff_frac_to_sw = (precip_runoff / precipitation_rate).magnitude
+                else:
+                    # This handles exception for Run-off when there is no link between compartments.
+                    print(f"No runoff transport from {this_soil_comp.standard_name} to {sw.standard_name}. "
+                          f"They are not next to each other. Check Runoff Matrix!")
+                    this_precip_runoff_frac_to_sw = 0
             total_runoff_vol_rate_to_this_sw += (
                     precipitation_rate
                     * this_precip_runoff_frac_to_sw
