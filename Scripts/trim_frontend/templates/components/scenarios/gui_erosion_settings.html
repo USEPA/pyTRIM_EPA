@@ -220,6 +220,7 @@
                 have_file_cb = $("input[id*='have_user_file']")
                 field_name_dd = $("select[id*='field_name_']")
                 let optionNum = $(data_source_select).children("option:selected").index() + 1
+                TRIM.store.currentScenario.erosionRateSource = optionNum; 
                 if (optionNum == 1) {
                     $('#option_1_form').show()
                     $('#option_2_form').hide()
@@ -579,7 +580,7 @@
                         //$(rows).each((i,row)=>update_cell_format(row,["label.lb_A","label.lb_a","label.lb_b","label.lb_SD"],true))
 
                         // iterate through all cells, update strike-through
-                        let cells = $("#erosionTable_opt2").find("*[data-parcelinfo]");
+                        let cells = $("#erosionTable_opt3").find("*[data-parcelinfo]");
                         cells.each((i) => {
                             let cell = cells[i];
                             let cell_lbl = $(cell).siblings("label");
@@ -592,9 +593,19 @@
                             }
                         });
 
-                        //for (let row of rows) {
-                        //    update_cell_format(row, ["label.lb_A","label.lb_a","label.lb_b","label.lb_SD"], true);
-                        //}
+                        // should not be possible for nothing to be striked, so must be first load
+                        for (let row of rows) {
+                            if ($(row).parent().is("thead")) continue;
+
+                            let all_cells = $(row).find("*[data-parcelinfo]");
+                            let striked_cells = all_cells.filter((i) => {
+                                let cell = all_cells[i];
+                                return get_parcelinfo_data(cell).active == false;
+                            })
+                            if (striked_cells.length == 0) {
+                                update_cell_format(row, ["label.lb_A","label.lb_a","label.lb_b","label.lb_SD"], true);
+                            }
+                        }
                     }
                 });
 
@@ -637,6 +648,11 @@
 
                 let row = $(this).parents('tr').find(".erosion_inp_opt"+TRIM.store.currentScenario.erosionRateSource);
                 try {
+                    const cls = $(this).attr('class').split(' ')
+                    const complete_row = $(this).parents('tr')
+                    // reset decorations
+                    update_cell_calc(complete_row,cls)
+
                     row.each((i) => {
                         let ele = row[i];
                         let is_used = !$(ele).siblings("label").css("text-decoration").includes("line-through");
@@ -905,13 +921,13 @@
             if (is_grayed) {
                 labels.forEach((e,i)=>{
                     $(row).find(e).css({'color': 'gray', 'text-decoration': 'line-through'});
-                    let input_cell = $(e).siblings("input");
+                    let input_cell = $(row).find(e).siblings("input");
                     set_parcelinfo_data(input_cell, undefined, false);
                 });
             } else {
                 labels.forEach((e,i)=>{
                     $(row).find(e).css({'color': 'black', 'text-decoration': 'none'});
-                    let input_cell = $(e).siblings("input");
+                    let input_cell = $(row).find(e).siblings("input");
                     set_parcelinfo_data(input_cell, undefined, true);
                 })
             }
@@ -1009,6 +1025,9 @@
         }
 
         function set_parcelinfo_data(input_cell=undefined, value=undefined, active=undefined) {
+            if (input_cell.length == 0) {
+                return undefined;
+            }
             let data = get_parcelinfo_data(input_cell);
             if (data) {
                 if (value != undefined) data.value = value;
