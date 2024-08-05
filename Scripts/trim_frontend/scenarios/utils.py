@@ -32,10 +32,10 @@ def init_first_time_default_param_values():
         {"kwargs": {"variable_name": "SuspendedSedimentConcentration"}, "value": 0.05},
         {"kwargs": {"variable_name": "ExternalSedimentInflow"}, "value": 0},
         {"kwargs": {"variable_name": "SedimentDepositionVelocity"}, "value": 2},
-        {"kwargs": {"variable_name": "waterEvaporationRate"}, "value": 0.7},
+        {"kwargs": {"variable_name": "waterEvaporationRate"}, "value": 0.7}
 
         # Aquatic Food Web
-        {"kwargs": {"variable_name": "FoodIngestionRate"}, "value": 0},
+        # {"kwargs": {"variable_name": "FoodIngestionRate"}, "value": 0},
     ]
     # fmt: on
 

@@ -37,6 +37,21 @@ def is_compartment_of_interest(comp):
     return False
 
 
+def full_stack():
+    import traceback, sys
+    exc = sys.exc_info()[0]
+    if exc is not None:
+        f = sys.exc_info()[-1].tb_frame.f_back
+        stack = traceback.extract_stack(f)
+    else:
+        stack = traceback.extract_stack()[:-1]  # last one would be full_stack()
+    trc = 'Traceback (most recent call last):\n'
+    stackstr = trc + ''.join(traceback.format_list(stack))
+    if exc is not None:
+        stackstr += '  ' + traceback.format_exc().lstrip(trc)
+    return stackstr
+
+
 def make_transition_matrix(scenario):
     def full_stack():
         import traceback, sys
@@ -274,7 +289,6 @@ def make_transition_matrix(scenario):
                     if len(print_vals) > 1:
                         for ln in print_vals:
                             print(ln)
-
     except KeyboardInterrupt:
         pass
 
@@ -485,6 +499,7 @@ def run_full_model(scn):
     try:
         (tm, df_tm, sm, df_sm, df_vmu) = make_transition_matrix(scn)
     except Exception as e:
+        print(full_stack())
         return model_err(scn, f"ERRORED WHILE MAKING TRANSITION MATRIX: {e}", 'err tm 0')
 
     # get result

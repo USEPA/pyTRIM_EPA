@@ -303,7 +303,12 @@
             })
 
             function initialize_components() {
-                let dt = JSON.parse(TRIM.store.latestRunInfo.run_results.mass_results)
+                let dt = {}
+                if (TRIM.trim_env_profile == 'local') {
+                    dt = JSON.parse(TRIM.store.latestRunInfo.run_results.mass_results)
+                } else {
+                    dt = TRIM.store.latestRunInfo.run_results.mass_results
+                }
                 comp_list = Object.keys(dt).filter(e => ['year','time'].indexOf(e) == -1).map(e=> e.split("_").slice(1).join("_")).filter((v, i, a) => {
                     return a.indexOf(v) === i  // Get unique compartment names
                 })

@@ -313,7 +313,7 @@ def get_water_params(pcl, parcel_type):
     runoff_fraction = 0  # 0.001
     precip_seepage_frac_to_gw = None
     seepage_vol_rate_to_gw = 0  # 1
-    sed_soil_erosion_to_sw = 100
+    sed_soil_erosion_to_sw = 0
 
     # Even though this function's name is "get_water_parameters" many of the parameters directly below are related to
     # water on land parcels and not water parcels as they are related to watersheds that only exists on land.
@@ -380,8 +380,13 @@ def get_water_params(pcl, parcel_type):
                 runoff_tps = [t for t in tps if t.name.startswith("Runoff from Surface Soil to Surface Water")]
                 if len(runoff_tps) > 0:
                     runoff_tps = runoff_tps[0]
-                precip_runoff = runoff_tps.eval(sender=this_soil_comp, receiver=sw, chemical=ch)
-            this_precip_runoff_frac_to_sw = (precip_runoff / precipitation_rate).magnitude
+                    precip_runoff = runoff_tps.eval(sender=this_soil_comp, receiver=sw, chemical=ch)
+                    this_precip_runoff_frac_to_sw = (precip_runoff / precipitation_rate).magnitude
+                else:
+                    # This handles exception for Run-off when there is no link between compartments.
+                    print(f"No runoff transport from {this_soil_comp.standard_name} to {sw.standard_name}. "
+                          f"They are not next to each other. Check Runoff Matrix!")
+                    this_precip_runoff_frac_to_sw = 0
             total_runoff_vol_rate_to_this_sw += (
                     precipitation_rate
                     * this_precip_runoff_frac_to_sw
@@ -392,6 +397,12 @@ def get_water_params(pcl, parcel_type):
                     precipitation_rate
                     * this_seepage_frac_to_gw
                     * this_watershed_area
+            )
+            this_total_erosion_rate = this_soil_comp.TotalErosionRate.magnitude
+            sed_soil_erosion_to_sw += (
+                this_precip_runoff_frac_to_sw
+                * this_total_erosion_rate
+                * this_watershed_area
             )
         def get_correct_param(par_name, par_obj):
             par = par_obj.get(par_name)
