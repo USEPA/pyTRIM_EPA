@@ -303,12 +303,7 @@
             })
 
             function initialize_components() {
-                let dt = {}
-                if (TRIM.trim_env_profile == 'local') {
-                    dt = JSON.parse(TRIM.store.latestRunInfo.run_results.mass_results)
-                } else {
-                    dt = TRIM.store.latestRunInfo.run_results.mass_results
-                }
+                let dt = JSON.parse(TRIM.store.latestRunInfo.run_results.mass_results)
                 comp_list = Object.keys(dt).filter(e => ['year','time'].indexOf(e) == -1).map(e=> e.split("_").slice(1).join("_")).filter((v, i, a) => {
                     return a.indexOf(v) === i  // Get unique compartment names
                 })
@@ -681,15 +676,8 @@
 
                     var fetchAndDisplayResults = function(bucket, uuid) {
                         TRIM.api.fetchRunResults(bucket, uuid, function(success, data) {
-                            var mass = JSON.parse("{" + data.model_output.mass + "}");
-                            var conc = JSON.parse("{" + data.model_output.conc + "}");
-                            // window.rawOutput = data;
-                            // window.testOutputViewer = {
-                            //     "presignedMassUrl": data.outputMass,
-                            //     "presignedConcUrl": data.outputConc,
-                            //     "mass": mass,
-                            //     "conc": conc
-                            // };
+                            var mass = "{" + data.model_output.mass + "}";
+                            var conc = "{" + data.model_output.conc + "}";
                             console.log("DATA IS ....")
                             console.log(data)
                             TRIM.store.latestRunInfo.run_results.mass_results = mass
