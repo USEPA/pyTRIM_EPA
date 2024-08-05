@@ -1042,7 +1042,9 @@
             return data;
         }
 
-        function submit_all_ER_for_table(table_id) { // FIXME
+        function submit_all_ER_for_table(table_id) {
+            LoadingScreen.show('saving_erosion_rates');
+
             for (let row of $(table_id).find("tr")) {
                 let ER_ele =  $(row).find(".inp_ER");
                 if (ER_ele.length == 0) continue;
@@ -1053,7 +1055,6 @@
                 }
             }
 
-            LoadingScreen.show('saving_erosion_rates');
             $(table_id).find("tr").each((idx) => {
                 let ER_ele =  $($(table_id).find("tr")[idx]).find(".inp_ER");
                 if (ER_ele.length !== 0) {
@@ -1073,10 +1074,11 @@
                                     'name': "totalErosionRate",
                                     'value': data
                                 }]
-                    TRIM.api.updateParcel(TRIM.store.currentScenario.id, parcel_info);
+                    TRIM.api.updateParcel(TRIM.store.currentScenario.id, parcel_info).on('load', ()=>{
+                        LoadingScreen.hide('saving_erosion_rates'); 
+                    });;
                 }
             });
-            LoadingScreen.hide('saving_erosion_rates');
         }
 
         function enableFieldUpdates() {
