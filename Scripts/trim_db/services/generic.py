@@ -43,6 +43,7 @@ else:
 
 
 def make_key(**opts):
+    opts = dict(sorted(dict(opts).items()))
     key = '-'.join([
         f'{k}={v}'
         for k, v in dict(opts).items()

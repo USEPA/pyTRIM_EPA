@@ -3,6 +3,7 @@ from trim_db.schema.utils.serialize import register_serializer
 from trim_db.schema.parameters.models import ParameterDefinition, CustomParameter
 from trim_db.services import *
 import pint
+import json
 
 comp_local_cache = {}
 
@@ -90,6 +91,17 @@ def get_general_params(pcl):
     total_erosion_rate = None
     is_tilled = False
 
+    erosion_table_params = {}
+    default_erosion = ParameterService.definitions.get_all(variable_name="erosion_table")
+    for default_param in default_erosion:
+        custom_param = ParameterService.get(
+            scenario_id=pcl.scenario_id,
+            requirements=f"(self.id == {pcl.id})",
+            definition_id=default_param.id,
+        )
+        if custom_param and custom_param.unit:
+            erosion_table_params[default_param.full_name] =  custom_param.unit
+
     surface_soil_height = None
     root_soil_height = get_comp(pcl, {"name":"Soil_Root_Zone"})
     vadose_soil_height = get_comp(pcl, {"name":"Soil_Vadose_Zone"})
@@ -139,7 +151,6 @@ def get_general_params(pcl):
         elif comp.media.isa('Farm'):
             farm_food_chain = True
 
-
         elif comp.media.isa('Aquatic'):  # Check for fish
             fish_food_web = True
             nm = comp.name
@@ -148,7 +159,6 @@ def get_general_params(pcl):
             biomass_by_media[nm] = fish_params['aquatic_biomass']
             bw_by_media[nm] = fish_params['aquatic_bw']
 
-        
         elif comp.media.isa('Coniferous_Forest'):  # Check land use
             land_use = 'Coniferous Forest'
         elif comp.media.isa('Deciduous_Forest'):
@@ -209,7 +219,9 @@ def get_general_params(pcl):
 
         'aquatic_diet_fractions': diet_by_media,
         'aquatic_biomass': biomass_by_media,
-        'aquatic_bw': bw_by_media
+        'aquatic_bw': bw_by_media,
+
+        **erosion_table_params
     }
     return general_params
 
