@@ -457,8 +457,9 @@
                     if (calcInfo.property == "discharge_vol_rate") {
                         res = calculate_discharge_vol_rate(tbl_data, parcel_name)
                     }
-                    $(this).parent().siblings("label").text(res)
-                    $(this).parent().siblings("input").attr("value",res)
+                    $(this).parent().siblings("label").text(Number(res))
+                    $(this).parent().siblings("input").attr("value",Number(res))
+                    $(this).parent().siblings("input").trigger("blur")
                 }
             });
 
