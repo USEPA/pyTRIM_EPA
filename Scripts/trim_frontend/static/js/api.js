@@ -245,6 +245,17 @@ window.TRIM = (function(trim) {
         });
     }
 
+    api.clearOldResults = function(scenario_info, callback_fxn) {
+        let url = api.getUrl('scenario_api.clear_old_result');
+        let data = makeFormData(scenario_info);
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: data,
+            callback: callback_fxn
+        })
+    }
+
     api.getResults = function(scenario_info) {
         let url = api.getUrl('scenario_api.get_result_scenario');
         let data = makeFormData(scenario_info);

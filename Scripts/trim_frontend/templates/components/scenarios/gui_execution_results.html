@@ -500,7 +500,18 @@
             $('#btn_execute_model').on('click', function (e) {
                 e.preventDefault()
                 reset_for_run()
-                let m_results, c_results = run_model(TRIM.store.currentScenario)
+                let scenario_info = [{
+                    'type': 'data',
+                    'name': 'scenario_id',
+                    'value': TRIM.store.currentScenario.id
+                },{
+                    'type': 'data',
+                    'name': 'scenario_name',
+                    'value': TRIM.store.currentScenario.name
+                }]
+                let resp = TRIM.api.clearOldResults(scenario_info).on('load',function() {
+                    let m_results, c_results = run_model(TRIM.store.currentScenario)
+                })
             })
 
             function run_model(scenario_head) {

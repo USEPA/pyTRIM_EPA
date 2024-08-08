@@ -747,6 +747,25 @@ def delete_scenario():
 
     return redirect(request.referrer)
 
+@scenario_api.route('/api/scenario/clearresult/', methods=['POST'])
+@login_required
+def clear_old_result():
+    exec_data = request.form.to_dict()
+    if not exec_data.get('scenario_id'):
+        raise AssertionError("Scenario ID cannot be blank.")
+    scenario_id = int(exec_data['scenario_id'])
+    scn = ScenarioService.get(scenario_id)
+    print(f"Clearing Last Model Run for {scn.name} {[v for v in scn.proc_status][0].run_datetime}...")
+    data_resp = {"success": "success"}
+    try:
+        if len(scn.proc_status.all()) > 0:
+            scn.proc_status.delete()
+    except Exception as e:
+        print([v for v in scn.proc_status][0])
+        print(f'problem deleting {e}')
+    print(f"Model Result deleted for {scn.name}")
+    ScenarioService.commit()
+    return ApiResult(data_resp)
 
 @scenario_api.route('/api/scenario/run/', methods=['POST', 'GET'])
 @login_required
