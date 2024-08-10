@@ -167,9 +167,11 @@ def get_general_params(pcl):
             land_use = 'Agriculture - General'
         elif comp.media.isa('Grass'):
             land_use = 'Grasses/Herbs'
-        elif comp.media.isa('Tilled_Soil'):
+        elif comp.media.isa('Tilled Soil'):
+            land = True
             land_use = 'Tilled Soil'
-        elif comp.media.isa('Untilled_Soil'):
+        elif comp.media.isa('Untilled Soil'):
+            land = True
             land_use = 'Untilled Soil'
 
     if not land:

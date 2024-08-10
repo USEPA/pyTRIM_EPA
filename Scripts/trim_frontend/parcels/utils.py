@@ -67,6 +67,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                                        'Grasses/Herbs', 'Tilled Soil', 'Untilled Soil', 'Impervious']:
             # COMPARTMENT CHANGE
             if not parcels_data['landUse'] == land_use:
+                print(f'NEW LAND USE DETECTED {land_use} >> {parcels_data["landUse"]}')
                 create_base_land_compartments(parcels_data, p, land_use)
         if parcels_data['landUse'] not in ['Tilled Soil', 'Untilled Soil']:
             ve = p.get_volume_element("SurfSoil")
@@ -658,16 +659,22 @@ def get_land_use(pcl):
         if comp.media.isa('Surface_Soil'):
             land = True
         elif comp.media.isa('Coniferous_Forest'):  # Check land use
+            land = True
             land_use = 'Coniferous Forest'
         elif comp.media.isa('Deciduous_Forest'):
+            land = True
             land_use = 'Deciduous Forest'
         elif comp.media.isa('Agriculture'):
+            land = True
             land_use = 'Agriculture - General'
         elif comp.media.isa('Grass'):
+            land = True
             land_use = 'Grasses/Herbs'
-        elif comp.media.isa('Tilled_Soil'):
+        elif comp.media.isa('Tilled Soil'):
+            land = True
             land_use = 'Tilled Soil'
-        elif comp.media.isa('Untilled_Soil'):
+        elif comp.media.isa('Untilled Soil'):
+            land = True
             land_use = 'Untilled Soil'
     if not land:
         land_use = 'N/A'  # No land use for air-only and water-only parcels
@@ -793,9 +800,9 @@ def create_base_land_compartments(parcels_data, p, land_use):
     # Create the base compartments for the new land use/ land cover
     new_comps = []
     if parcels_data['landUse'] == 'Tilled Soil':
-        c_surfsoil.media_id = [m.id for m in CompartmentService.media.get_all() if m.name == "Tilled_Soil"][0]
+        c_surfsoil.media_id = [m.id for m in CompartmentService.media.get_all() if m.name == "Tilled Soil"][0]
     elif parcels_data['landUse'] == 'Untilled Soil':
-        c_surfsoil.media_id = [m.id for m in CompartmentService.media.get_all() if m.name == "Untilled_Soil"][0]
+        c_surfsoil.media_id = [m.id for m in CompartmentService.media.get_all() if m.name == "Untilled Soil"][0]
     elif parcels_data['landUse'] == 'Impervious':
         c_surfsoil.media_id = [m.id for m in CompartmentService.media.get_all() if m.name == "Impervious"][0]
         custom_param_erosion.value = 0
