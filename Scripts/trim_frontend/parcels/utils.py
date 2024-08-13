@@ -803,10 +803,10 @@ def create_base_land_compartments(parcels_data, p, land_use):
     new_comps = []
     if parcels_data['landUse'] == 'Tilled Soil':
         c_surfsoil.media_id = [m.id for m in CompartmentService.media.get_all() if m.name == "Tilled_Soil"][0]
-        init_tillage_default_params('Tilled_Soil')
+        init_tillage_default_params('Tilled_Soil', check_subtypes=True)
     elif parcels_data['landUse'] == 'Untilled Soil':
         c_surfsoil.media_id = [m.id for m in CompartmentService.media.get_all() if m.name == "Untilled_Soil"][0]
-        init_tillage_default_params('Untilled_Soil')
+        init_tillage_default_params('Untilled_Soil', check_subtypes=True)
     elif parcels_data['landUse'] == 'Impervious':
         c_surfsoil.media_id = [m.id for m in CompartmentService.media.get_all() if m.name == "Impervious"][0]
         custom_param_erosion.value = 0
