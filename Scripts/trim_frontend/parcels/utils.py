@@ -1,6 +1,8 @@
 import re, json
 from copy import deepcopy
 from pprint import pprint
+from ..scenarios.utils import init_parameter_definitions
+from .defaults import SURFACE_SOIL_SPECIFIC_MEDIA_PARAMS
 
 from flask_api import ApiResult
 
@@ -242,11 +244,11 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         data_name = field_name if field_name == "GroundwaterSeepageFractions" else "RunoffFractions"
         seepage_frac_val = float(parcels_data[data_name]) if data_name == "GroundwaterSeepageFractions" else 1-float(parcels_data[data_name])
         runoff_frac_val = 1 - seepage_frac_val
-        watershed_area = (
-                soil_comp.area
-                * soil_comp.FractionofAreaAvailableforRunoff
-        ).magnitude
-        total_runoff_val = runoff_frac_val * p.scenario.Rain.magnitude * watershed_area
+        # watershed_area = (
+        #         soil_comp.area
+        #         * soil_comp.FractionofAreaAvailableforRunoff
+        # ).magnitude
+        total_runoff_val = runoff_frac_val * p.scenario.Rain.magnitude  # was multiplied by watershed area but removed per Arun on 08/12/2024
         for par_name, par_val in {"TotalRunoffRate": total_runoff_val, "GroundwaterSeepageFraction": seepage_frac_val}.items():
             par = get_or_create_custom_param(
                 soil_comp.parameters.get(par_name),
@@ -670,10 +672,10 @@ def get_land_use(pcl):
         elif comp.media.isa('Grass'):
             land = True
             land_use = 'Grasses/Herbs'
-        elif comp.media.isa('Tilled Soil'):
+        elif comp.media.isa('Tilled_Soil'):
             land = True
             land_use = 'Tilled Soil'
-        elif comp.media.isa('Untilled Soil'):
+        elif comp.media.isa('Untilled_Soil'):
             land = True
             land_use = 'Untilled Soil'
     if not land:
@@ -800,9 +802,11 @@ def create_base_land_compartments(parcels_data, p, land_use):
     # Create the base compartments for the new land use/ land cover
     new_comps = []
     if parcels_data['landUse'] == 'Tilled Soil':
-        c_surfsoil.media_id = [m.id for m in CompartmentService.media.get_all() if m.name == "Tilled Soil"][0]
+        c_surfsoil.media_id = [m.id for m in CompartmentService.media.get_all() if m.name == "Tilled_Soil"][0]
+        init_tillage_default_params('Tilled_Soil')
     elif parcels_data['landUse'] == 'Untilled Soil':
-        c_surfsoil.media_id = [m.id for m in CompartmentService.media.get_all() if m.name == "Untilled Soil"][0]
+        c_surfsoil.media_id = [m.id for m in CompartmentService.media.get_all() if m.name == "Untilled_Soil"][0]
+        init_tillage_default_params('Untilled_Soil')
     elif parcels_data['landUse'] == 'Impervious':
         c_surfsoil.media_id = [m.id for m in CompartmentService.media.get_all() if m.name == "Impervious"][0]
         custom_param_erosion.value = 0
@@ -838,3 +842,23 @@ def create_base_land_compartments(parcels_data, p, land_use):
     for nc in new_comps:
         initialize_compartment_custom_parameters(nc)
     CompartmentService.commit()
+
+
+def init_tillage_default_params(till_media_name):
+    media_id = [m.id for m in CompartmentService.media.get_all() if m.name == till_media_name][0]
+    domain_id = [d.id for d in ParameterService.domains.get_all()
+                 if d.requirements == f'self.media_id == {media_id}'][0]
+    new_pd_kwargs = SURFACE_SOIL_SPECIFIC_MEDIA_PARAMS
+    for i, pd in enumerate(new_pd_kwargs):
+        for k, v in pd.items():
+            if k == 'domain_id':
+                new_pd_kwargs[i]['domain_id'] = domain_id
+
+    init_parameter_definitions(new_pd_kwargs)
+
+
+def create_new_parameter_defs_for_domain(comp_name):
+    domain_id = [d.id for d in CompartmentService.get(name=comp_name).domains if d.requirements][0]
+    med_par_defs = [pd for pd in ParameterService.definitions.get_all() if pd.domain_id == domain_id]
+    # TODO Complete this for affinity
+

@@ -167,10 +167,10 @@ def get_general_params(pcl):
             land_use = 'Agriculture - General'
         elif comp.media.isa('Grass'):
             land_use = 'Grasses/Herbs'
-        elif comp.media.isa('Tilled Soil'):
+        elif comp.media.isa('Tilled_Soil'):
             land = True
             land_use = 'Tilled Soil'
-        elif comp.media.isa('Untilled Soil'):
+        elif comp.media.isa('Untilled_Soil'):
             land = True
             land_use = 'Untilled Soil'
 
@@ -394,6 +394,7 @@ def get_water_params(pcl, parcel_type):
                     * this_precip_runoff_frac_to_sw
                     * this_watershed_area
             )
+            total_runoff_vol_rate_to_this_sw = 0 if total_runoff_vol_rate_to_this_sw else total_runoff_vol_rate_to_this_sw
             this_seepage_frac_to_gw = this_soil_comp.GroundwaterSeepageFraction
             total_seepage_vol_rate_to_gw += (
                     precipitation_rate
@@ -435,6 +436,7 @@ def get_water_params(pcl, parcel_type):
                 + precipitation_vol_rate_to_sw
                 - evaporation_vol_rate
             ))
+            wc_discharge_vol_rate = 0 if wc_discharge_vol_rate else wc_discharge_vol_rate
         except Exception:
             wc_discharge_vol_rate = None
         # wc_discharge_vol_rate = 6.2E6
@@ -913,3 +915,120 @@ Aquatic_Biota_SW_Compartment_defaults = {
         }
     }
 }
+
+# These are parameters specific to surface soil needed for new media that are child of surface soil. Replace domain_id
+# with the id of the new domain specific to that new media.
+SURFACE_SOIL_SPECIFIC_MEDIA_PARAMS = [
+    {
+        'variable_name': 'conc_Colloid',
+        'full_name': 'conc_Colloid',
+        'domain_id': None,
+        'default_value': 0.01,
+        'default_unit': 'kg/m^3',
+        'default_formula_id': None
+    },
+    {
+        'variable_name': 'Depth',
+        'full_name': 'Depth',
+        'domain_id': None,
+        'default_value': None,
+        'default_unit': 'm',
+        'default_formula_id': 165
+    },
+    {
+        'variable_name': 'Height',
+          'full_name': 'Height',
+          'domain_id': None,
+          'default_value': None,
+          'default_unit': 'm',
+          'default_formula_id': 166
+    },
+    {
+        'variable_name': 'isBiotic',
+        'full_name': 'isBiotic',
+        'domain_id': None,
+        'default_value': 0.0,
+        'default_unit': None,
+        'default_formula_id': None
+    },
+    {
+        'variable_name': 'rho_Colloid',
+        'full_name': 'rho_Colloid',
+        'domain_id': None,
+        'default_value': 2650.0,
+        'default_unit': 'kg/m^3',
+        'default_formula_id': None
+    },
+    {
+        'variable_name': 'TotalMass',
+        'full_name': 'TotalMass',
+        'domain_id': None,
+        'default_value': None,
+        'default_unit': 'kg',
+        'default_formula_id': 167
+    },
+    {
+        'variable_name': 'Volume',
+        'full_name': 'Volume',
+        'domain_id': None,
+        'default_value': None,
+        'default_unit': 'm^3',
+        'default_formula_id': 168
+    },
+    {
+        'variable_name': 'VolumeFraction_Colloid',
+        'full_name': 'VolumeFraction_Colloid',
+        'domain_id': None,
+        'default_value': None,
+        'default_unit': 'm^3[colloid]/m^3[compartment]',
+        'default_formula_id': 169
+    },
+    {
+        'variable_name': 'VolumeFraction_LiquidColloid',
+        'full_name': 'VolumeFraction_LiquidColloid',
+        'domain_id': None,
+        'default_value': 0.22,
+        'default_unit': '',
+        'default_formula_id': None
+    },
+    {
+        'variable_name': 'wetConcOutputUnits',
+        'full_name': 'wetConcOutputUnits',
+        'domain_id': None,
+        'default_value': None,
+        'default_unit': None,
+        'default_formula_id': 170
+    },
+    {
+        'variable_name': 'FractionOfTotalErosion',
+        'full_name': 'FractionOfTotalErosion',
+        'domain_id': None,
+        'default_value': None,
+        'default_unit': None,
+        'default_formula_id': 2484
+    },
+    {
+        'variable_name': 'FractionOfTotalRunoff',
+        'full_name': 'FractionOfTotalRunoff',
+        'domain_id': None,
+        'default_value': None,
+        'default_unit': None,
+        'default_formula_id': 2485
+    },
+    {
+        'variable_name': 'unitSoilLoss',
+        'full_name': 'unitSoilLoss',
+        'domain_id': None,
+        'default_value': 0.00036,
+        'default_unit': 'kg/m^2/day',
+        'default_formula_id': None
+    },
+    {
+        'variable_name': 'sedimentDeliveryRatioSlopeCoef',
+        'full_name': 'sedimentDeliveryRatioSlopeCoef',
+        'domain_id': None,
+        'default_value': 0.125,
+        'default_unit': None,
+        'default_formula_id': None
+    }
+]

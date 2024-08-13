@@ -1,4 +1,5 @@
 from trim_db.services import *
+from .defaults import EROSION_TABLE_KWARGS
 
 
 def set_param_default_val(kwargs, val):
@@ -45,113 +46,15 @@ def init_first_time_default_param_values():
 
 
 def init_erosion_default_params():
-    default_variable_kwargs = [
-        # table 1
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion1-total_effective_erosion_rate",
-            "domain_id": 1,
-        },
+    init_parameter_definitions(EROSION_TABLE_KWARGS)
 
-        # table 2
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion2-unit_soil_loss",
-            "domain_id": 1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion2-empirical_intercept_coefficient",
-            "domain_id": 1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion2-empirical_slope_coefficient",
-            "domain_id": 1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion2-sediment_delivery_ratio",
-            "domain_id": 1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion2-total_effective_erosion_rate",
-            "domain_id": 1,
-        },
 
-        # table 3
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-rainfall_erosivity_index",
-            "domain_id": 1,
-            "default_value": 300,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-erodibility_index",
-            "domain_id": 1,
-            "default_value": 3.6e-1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-slope_gradient",
-            "domain_id": 1,
-            "default_value": 1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-slope_length",
-            "domain_id": 1,
-            "default_value": 1.5,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-topographical_length-slope_factor",
-            "domain_id": 1,
-            "default_value": 1.5e-2,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-cover_management_factor",
-            "domain_id": 1,
-            "default_value": 0.1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-supporting_practices_factor",
-            "domain_id": 1,
-            "default_value": 1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-unit_soil_loss",
-            "domain_id": 1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-empirical_intercept_coefficient",
-            "domain_id": 1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-empirical_slope_coefficient",
-            "domain_id": 1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-sediment_delivery_ratio",
-            "domain_id": 1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-total_effective_erosion_rate",
-            "domain_id": 1,
-        },
-    ]
-
-    for kwargs in default_variable_kwargs:
-        default_param = ParameterService.definitions.get(full_name=kwargs["full_name"])
+def init_parameter_definitions(kwarg_list, check_subtypes=False):
+    for kwargs in kwarg_list:
+        if check_subtypes:
+            default_param = ParameterService.definitions.get(**kwargs)
+        else:
+            default_param = ParameterService.definitions.get(full_name=kwargs["full_name"])
         if not default_param:
             ParameterService.definitions.create(**kwargs, no_commit=True)
     ParameterService.commit()
