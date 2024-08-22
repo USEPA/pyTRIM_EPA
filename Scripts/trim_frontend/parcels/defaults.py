@@ -169,9 +169,17 @@ def get_general_params(pcl):
             land_use = 'Grasses/Herbs'
         elif comp.media.isa('Tilled_Soil'):
             land = True
+            if surface_soil_height is None:
+                surface_soil_height = comp.volume_element.height.m_as('m')
+                total_erosion_rate = safe_get_val(comp, 'TotalErosionRate', None)
+                is_tilled = True
             land_use = 'Tilled Soil'
         elif comp.media.isa('Untilled_Soil'):
             land = True
+            if surface_soil_height is None:
+                surface_soil_height = comp.volume_element.height.m_as('m')
+                total_erosion_rate = safe_get_val(comp, 'TotalErosionRate', None)
+                is_tilled = False
             land_use = 'Untilled Soil'
 
     if not land:

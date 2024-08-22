@@ -1,5 +1,6 @@
 import json
 import pandas as pd
+import re
 import sqlalchemy as sa
 from shapely.geometry import Polygon
 from pyproj import CRS, Transformer
@@ -190,6 +191,21 @@ class VolumeElement(Model):
         comps = self.get_compartment(name=compartment_name, media=compartment_media)
         if not isinstance(comps, list):
             comps = [comps]
+
+        if len(comps) == 0:
+            # In this case this method returns 0 but misses the units. Berk added unit for this case on August 19 2024
+            from trim_db.services import ParameterService
+            par_def = ParameterService.definitions.get(variable_name=prop)
+            if par_def.default_unit:
+                prop_unit = re.sub(r'\[(.*?)\]', '', par_def.default_unit)
+            else:
+                prop_unit = ''
+            try:
+                unit_obj = ureg(prop_unit)
+            except Exception as e:
+                print(e)
+                return 0 * ureg('')
+            return 0 * unit_obj
 
         def get_prop(c):
             if args or kwargs:
