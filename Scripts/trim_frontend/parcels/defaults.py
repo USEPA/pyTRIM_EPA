@@ -493,7 +493,7 @@ def get_water_params(pcl, parcel_type):
                 'algae_density': get_correct_param("AlgaeDensityInWaterColumn", sw_pars),
                 'chloride_conc': get_correct_param("ChlorideConcentration", sw_pars),
                 'chlorophyll_conc': get_correct_param("ChlorophyllConcentration", sw_pars),
-                'mean_depth': sw.volume_element.top - sw.volume_element.bottom,
+                'mean_depth': abs(sw.MeanDepth.magnitude),
                 'evaporation_rate': get_correct_param("waterEvaporationRate", sw_pars),
                 'evaporation_vol_rate': evaporation_vol_rate,
                 'suspended_organic_carbon': get_correct_param("OrganicCarbonContent", sw_pars),
