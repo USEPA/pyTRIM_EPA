@@ -5,18 +5,33 @@
 >
     <section class="container px-0">
         <div class="row">
-            <div class="col-md">
-                <div class="pill pill-alert col-sm">
-                    <small>
-                        <strong>
-                            <u>Click on the table cells to edit properties.</u>Please note that the values displayed in the table at the time of the "Save" operation are the values that will be incorporated into the calculations
-                        </strong>
+            <div class="col-sm">
+                <div data-slot="true" data-target="default_runoff_matrix_file"></div>
+                <div class="form-text mb-2">
+                    <small class="text-muted">
+                        <span>All rows and columns must match the existing scenario matrix.</span>
                     </small>
                 </div>
             </div>
         </div>
         <div class="row">
             <div class="col-md">
+                <div class="row">
+                    <div class="col-md align-content-center justify-content-center">
+                        <div class="text-center">
+                            <a id="surface-runoff-upload-btn" class="btn btn-warning"><i class="fas fa-upload mr-1"></i>Upload Matrix</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md">
+                <div class="row">
+                    <div class="col-md align-content-center justify-content-center">
+                        <div class="text-center">
+                            <a id="export_runoff_matrix" class="btn btn-warning">Export Matrix</a>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="col-md">
                 <div class="row">
@@ -29,12 +44,21 @@
                 <div class="row">
                     <div class="col-md">
                         <div class="text-center">
-                            <small>Click button to auto-calculate runoff values and automatically populate the runoff matrix below</small>
+                            <small>Auto-calculate runoff values and populate the matrix below</small>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+        <div class="row">
             <div class="col-md">
+                <div class="pill pill-alert col-sm">
+                    <small>
+                        <strong>
+                            <u>Click on the table cells to edit properties</u>. Please note that the values displayed in the table at the time of the "Save" operation are the values that will be incorporated into the calculations
+                        </strong>
+                    </small>
+                </div>
             </div>
         </div>
         <div class="row">
@@ -240,6 +264,45 @@
                     "<label "+err_html+" class='" + cell_prop + "'>" + cell_data + "</label>"
         }
 
+        $("#export_runoff_matrix").on('click', (e) => {
+            let filename = TRIM.store.currentScenario.name + "_Runoff Matrix_";
+            filename += moment(new Date()).format('YYYY_MM_DD-HH_MM') + ".csv";
+            
+            let cleanedTable = $('#RunoffMatrix').clone();
+            cleanedTable.find(".runoff-matrix-corner-header").children().remove();
+            cleanedTable.find(".runoff-matrix-corner-header")[0].append("parcels")
+            exportTableToCSV.apply(e.target, [cleanedTable, filename]);
+        });
+
+        $("#surface-runoff-upload-btn").on('click', function(e) {
+            let matrixImport = $(form).find('[type="file"]');
+            let matrixImportFileData = matrixImport.prop('files')[0];
+            if (matrixImportFileData == undefined) {
+                alert('Please select a file to upload.');
+                return false;
+            }
+
+            let matrixFile = $(form).find("#default_runoff_matrix_file");
+            let fieldData = [matrixFile.get(0)];
+            fieldData.push({
+                "type": "input",
+                "name": "scenario_id",
+                "value": TRIM.store.currentScenario.id
+            });
+            
+            LoadingScreen.show('upload_matrix_csv');
+            TRIM.api.uploadSurfaceRunoffMatrixFile(fieldData, function(success,responseData,c) {
+                LoadingScreen.hide('upload_matrix_csv');
+                if (!success) {
+                    alert('An error occurred during upload:\n' + responseData.message);
+                    matrixImport.value = "";
+                } else {
+                    console.log("reload...");
+                    window.location.reload();
+                }
+            });
+        });
+
         function renderRunoffForm() {
             if (!TRIM.store.currentScenario.parcels) {
                 // Parcels haven't loaded yet; wait a bit and try again
@@ -266,7 +329,7 @@
                     '<td style="border-bottom: 0px; padding: 0px"><i class="fa fa-arrow-down"></i></td>' +
                     '</tr>',
                 'bSortable': false,
-                'className': 'font-weight-bold rightBorder freeze-column'
+                'className': 'font-weight-bold rightBorder freeze-column runoff-matrix-corner-header'
             }]
             if (runoff_matrix) {
                 Object.entries(runoff_matrix).forEach(function ([s, r], i) {

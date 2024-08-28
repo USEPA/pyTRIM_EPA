@@ -315,9 +315,9 @@ def parse_parcel_upload():
     for row in reader:
         try:
             if geojson:
-                row_data = get_row_geojson(row)
+                row_data = get_parcel_row_geojson(row)
             else:
-                row_data = get_row_csv(row, coord_system, default_utm_zone)
+                row_data = get_parcel_row_csv(row, coord_system, default_utm_zone)
 
             parcel_name = row_data["parcel_name"]
             parcel_type = row_data["parcel_type"]
@@ -395,7 +395,7 @@ def parse_parcel_upload():
         return ApiResult(return_data)
 
 
-def get_row_csv(row, coord_system, utm_zone):
+def get_parcel_row_csv(row, coord_system, utm_zone):
     has_farm_food_chain = row.get("FarmFoodChain", "").upper() == "YES"
     has_wetland = row.get("Wetland", "").upper() == "YES"
     has_fish_food_web = row.get("FishFoodWeb", "").upper() == "YES"
@@ -437,7 +437,7 @@ def get_row_csv(row, coord_system, utm_zone):
     }
 
 
-def get_row_geojson(row):
+def get_parcel_row_geojson(row):
     props = row["properties"]
     return {
         "parcel_name": props.get("name").strip(),
@@ -450,6 +450,66 @@ def get_row_geojson(row):
         "coordinates": row["geometry"].get("coordinates")[0],
     }
 
+@file_api.route('/api/runoff_matrix_file', methods=['POST'])
+@login_required
+def parse_runoff_matrix_upload():
+    scenario_id = request.form["scenario_id"]
+    parcels = ParcelService.get_all(scenario_id=int(scenario_id))
+    parcel_names = {p.name : p for p in parcels}
+
+    files = request.files
+    if not files:
+        return ApiException("No files were uploaded")
+    
+    try:
+        fpn = [f.stream for n, f in files.items()][0]
+        fpn.seek(0)
+        lines = fpn.read().decode("utf-8")
+        reader = csv.DictReader(io.StringIO(lines))
+
+        # TODO make sure all parcels are accounted for
+        # verify headers are valid parcels + sink exists
+        for header in reader.fieldnames:
+            if header == 'sink' or header == 'parcels':
+                continue
+            elif header not in parcel_names.keys():
+                return ApiException(f"Parcel '{header}' does not exist in the scenario")
+        for row in reader:
+            if row.get("parcels") not in parcel_names.keys():
+                return ApiException(f"Parcel '{row.get('parcels')}' does not exist in the scenario")    
+        if "sink" not in reader.fieldnames:
+            return ApiException("Required header 'sink' is missing")
+
+        # verify values are valid
+        reader = csv.DictReader(io.StringIO(lines))
+        for row in reader:
+            row_total = 0
+            for k, v in row.items():
+                if k == "parcels": continue
+                if float(v) < 0: return ApiException("All values must be positive")
+                row_total += float(v)
+            if row_total != 1 and row_total != 0: return ApiException("Sum of runoff fractions should be 1")
+            
+        # submit
+        reader = csv.DictReader(io.StringIO(lines))
+        for row in reader:
+            for k, v in row.items():
+                if k == "parcels": continue
+                sender_pcl = parcel_names[row.get("parcels")]
+                v = float(v)
+
+                payload = {
+                    "id": sender_pcl.id,
+                    "field": "runoff_matrix_value",
+                    "sender": f"ro_{row.get('parcels')}",
+                    "receiver": f"ro_{k}",
+                    "ro_value": f"{v}"
+                }
+                handle_parcel_update(sender_pcl, payload)
+                
+    except Exception as e:
+        return ApiException(e)
+    return ApiResult({'matrix_result': "success"})
 
 root = os.path.dirname(os.path.abspath(__file__))
 static = os.path.abspath(os.path.join(root, '../static'))

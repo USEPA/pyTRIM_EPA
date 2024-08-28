@@ -70,16 +70,22 @@ window.AJAX = (function(ajax) {
 		var callback = opts.callback || undefined;
 
 		request.addEventListener("readystatechange", () => {
-		  if (request.readyState === 4 && request.status === 200) {
-			  let parsedResponseData = null;
-			  try {
-				  parsedResponseData = JSON.parse(request.responseText);
-			  } catch (e) {
-				  parsedResponseData = request.responseText;
-			  }
+          let parsedResponseData = null;
+          if (request.responseText) {
+            try {
+                parsedResponseData = JSON.parse(request.responseText);
+            } catch (e) {
+                parsedResponseData = request.responseText;
+            }
+          }
 
+		  if (request.readyState === 4 && request.status === 200) {
 			if (callback !== undefined) { callback(true, parsedResponseData); }
-		  } else if (request.readyState === 4) {
+		  } 
+          else if (request.readyState === 4 && request.status >= 400) {
+            if (callback !== undefined) { callback(false, parsedResponseData); }
+          }
+          else if (request.readyState === 4) {
 		    if (callback !== undefined) { callback(false, "could not fetch the data"); }
 		  }
 		});
