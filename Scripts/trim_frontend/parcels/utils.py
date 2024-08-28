@@ -804,9 +804,37 @@ def create_base_land_compartments(parcels_data, p, land_use):
     if parcels_data['landUse'] == 'Tilled Soil':
         c_surfsoil.media_id = [m.id for m in CompartmentService.media.get_all() if m.name == "Tilled_Soil"][0]
         init_tillage_default_params('Tilled_Soil')
+        update_tillage_formula_media('Tilled_Soil')
+        c_surfsoil.soilTillage = 1
+        thickness_before = c_surfsoil.volume_element.height.magnitude
+        c_surfsoil.volume_element.bottom = c_surfsoil.volume_element.top - 0.20
+        thickness_now = abs(c_surfsoil.volume_element.bottom - c_surfsoil.volume_element.top)
+        delta_thickness = thickness_now - thickness_before
+        for soil_comp in ["Soil_Root_Zone", "Soil_Vadose_Zone", "Groundwater", "DryVaporSource", "WetVaporSource",
+                          "DryParticleSource", "WetParticleSource"]:
+            p.get_compartment(soil_comp).volume_element.top = \
+                (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.top
+            p.get_compartment(soil_comp).volume_element.bottom = \
+                (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.bottom
+            print(f"New top/bottom for {soil_comp}:\ntop: {p.get_compartment(soil_comp).volume_element.top}"
+                  f" bottom: {p.get_compartment(soil_comp).volume_element.bottom}")
     elif parcels_data['landUse'] == 'Untilled Soil':
         c_surfsoil.media_id = [m.id for m in CompartmentService.media.get_all() if m.name == "Untilled_Soil"][0]
         init_tillage_default_params('Untilled_Soil')
+        update_tillage_formula_media('Untilled_Soil')
+        c_surfsoil.soilTillage = 0
+        thickness_before = c_surfsoil.volume_element.height.magnitude
+        c_surfsoil.volume_element.bottom = c_surfsoil.volume_element.top - 0.01
+        thickness_now = abs(c_surfsoil.volume_element.bottom - c_surfsoil.volume_element.top)
+        delta_thickness = thickness_now - thickness_before
+        for soil_comp in ["Soil_Root_Zone", "Soil_Vadose_Zone", "Groundwater", "DryVaporSource", "WetVaporSource",
+                          "DryParticleSource", "WetParticleSource"]:
+            p.get_compartment(soil_comp).volume_element.top = \
+                (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.top
+            p.get_compartment(soil_comp).volume_element.bottom = \
+                (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.bottom
+            print(f"New top/bottom for {soil_comp}:\ntop: {p.get_compartment(soil_comp).volume_element.top}"
+                  f" bottom: {p.get_compartment(soil_comp).volume_element.bottom}")
     elif parcels_data['landUse'] == 'Impervious':
         c_surfsoil.media_id = [m.id for m in CompartmentService.media.get_all() if m.name == "Impervious"][0]
         custom_param_erosion.value = 0
@@ -855,6 +883,36 @@ def init_tillage_default_params(till_media_name):
                 new_pd_kwargs[i]['domain_id'] = domain_id
 
     init_parameter_definitions(new_pd_kwargs, check_subtypes=True)
+
+
+def update_tillage_formula_media(till_media_name):
+    # REPLACING/APPENDING MEDIA.ID FOR MISSING MEDIA WITH KNOWN/EXISTING PARENT COMPARTMENT IN A FORMULA
+    new_media_id = [m.id for m in CompartmentService.media.get_all() if m.name == till_media_name][0]
+    old_media_id = [m.id for m in CompartmentService.media.get_all() if m.name == "Surface_Soil"][0]
+    fl = {}
+    old_id = str(old_media_id)
+    new_id = str(new_media_id)
+    search_id_regex = r'(media.id\sin\s\{.*\b(' + old_id + r')\b.*\})'
+    regex_id_list = re.compile("(?:media\.id\sin\s{([\,\s\d+]+)\})")
+    old_id_regex = r'.*\b(' + old_id + r')\b.*'
+    new_id_regex = r'.*\b(' + new_id + r')\b.*'
+    old_id_replace_regex = r'\b(' + old_id + r')\b'
+    for f in FormulaService.get_all():
+        if re.search(search_id_regex, f.equation):
+            fl[f.id] = []
+            old_id_lists = regex_id_list.findall(f.equation)
+            for idl in old_id_lists:
+                if re.search(old_id_regex, idl) and not re.search(new_id_regex, idl):
+                    fl[f.id].append((idl, re.sub(old_id_replace_regex, f'{old_id} , {new_id}', idl)))
+
+    for fid, fv in fl.items():
+        f = FormulaService.get(id=fid)
+        nf = f.equation
+        for ids in fv:
+            nf = nf.replace(f'media.id in {{{ids[0]}}}', f'media.id in {{{ids[1]}}}')
+        print(f'old formula: {f.equation}\nnew formula: {nf}\n')
+        f.equation = nf
+    FormulaService.commit()
 
 
 def create_new_parameter_defs_for_domain(comp_name):

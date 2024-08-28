@@ -85,74 +85,7 @@
             </div>
         </div>
  </div>
-<style>
-    .parcelMultiselect {
-      width: 100%;
-    }
-
-    .selectBox {
-      position: relative;
-    }
-
-    .selectBox select {
-      width: 100%;
-    }
-
-    .overSelect {
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 0;
-      bottom: 0;
-    }
-
-    .parcelSelectOptions {
-      display: none;
-      border: 0.5px #7c7c7c solid;
-      background-color: #ffffff;
-      max-height: 150px;
-      overflow-y: scroll;
-    }
-
-    .parcelSelectOptions label {
-      display: block;
-      font-weight: normal;
-      display: block;
-      white-space: nowrap;
-      min-height: 1.2em;
-      background-color: #ffffff00;
-      padding: 0 2.25rem 0 .75rem;
-    }
-
-    .parcelSelectOptions label:hover {
-      background-color: #1e90ff;
-    }
-
-    table.diet{
-        border:solid 1px;
-        margin: 20px auto;
-    }
-
-    th.rotated {
-        height: 220px;
-        white-space: nowrap;
-    }
-
-    th.rotated > div {
-        transform: translate(0px, 75px)
-        rotate(270deg);
-        width: 50px;
-    }
-
-    th.rotated > div > span {
-      padding: 10px 0px;
-    }
-
-    .fa-exclamation-triangle {
-        color:orange;
-    }
-
-</style>
+<link rel="stylesheet" href="{{url_for('static', filename='css/form_styles.css')}}"/>
 <script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}">
 </script>
 <script src="{{ url_for('static', filename='js/lib/dataTables/jquery.dataTables.min.js') }}">
@@ -280,6 +213,9 @@
                     bFilter: false,
                     info: false,
                     bAutoWidth: false,
+                    fnCreatedRow: function (row, data, index) {
+                        $(row).find("td.rightBorder-pivoted").addClass("freeze-column")
+                    },
                     columnDefs: [
                        { width: '100%', targets: 0 }
                     ],
@@ -404,6 +340,7 @@
                 {
                     'data': "Property",
                     'bSortable': false,
+                    'className': 'font-weight-bold rightBorder-pivoted freeze-column',
                     'render': function (data, type, row){
                         if (!row.Property) {
                             return '';

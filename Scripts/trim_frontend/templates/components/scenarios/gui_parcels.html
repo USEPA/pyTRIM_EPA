@@ -5,21 +5,6 @@
 >
     <section class="container px-0">
 		<fieldset>
-<!-- TODO - move this styling into css file! -->
-<style>
-	fieldset {
-		border: 1px solid;
-		margin: 5px;
-		padding: 5px;
-	}
-	legend {
-		width: inherit;
-		padding: 2px;
-	}
-    table { 
-        white-space: nowrap;
-    }
-</style>
 			<legend>Parcel Upload</legend>
 			<div class="row mb-1">
 				<div class="col-sm">
@@ -96,6 +81,7 @@
         </div>
     </section>
 </form>
+<link rel="stylesheet" href="{{url_for('static', filename='css/form_styles.css')}}"/>
 <script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}">
 </script>
 <script src="{{ url_for('static', filename='js/lib/dataTables/jquery.dataTables.min.js') }}">
@@ -331,13 +317,17 @@
                 bFilter: false,
                 info: false,
                 bAutoWidth: false,
+                fnCreatedRow: function (row, data, index) {
+                    $(row).find("td.rightBorder").addClass("freeze-column")
+                },
                 columns: [
                     {
                         data: "properties.name",
                         render: function (data, type, row) {
                             return "<input class='editableCell form-control form-control-sm' type='text' value='" +  data + "' style='display:none'>" +
                                 "<label>" + data + "</label>"
-                        }
+                        },
+                        className: 'font-weight-bold rightBorder freeze-column'
                     },
                     {
                         data: "properties.desc",

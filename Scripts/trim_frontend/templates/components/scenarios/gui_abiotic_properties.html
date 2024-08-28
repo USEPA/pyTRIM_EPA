@@ -77,18 +77,13 @@
         </div>
     </section>
 </form>
+<link rel="stylesheet" href="{{url_for('static', filename='css/form_styles.css')}}"/>
 <script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}">
 </script>
 <script src="{{ url_for('static', filename='js/lib/dataTables/jquery.dataTables.min.js') }}">
 </script>
 <script src="{{ url_for('static', filename='js/lib/dataTables/dataTables.bootstrap4.min.js') }}">
 </script>
-<!--<script src="https://cdn.datatables.net/2.0.7/js/dataTables.js">-->
-<!--</script>-->
-<!--<script src="https://cdn.datatables.net/fixedcolumns/5.0.0/js/dataTables.fixedColumns.js">-->
-<!--</script>-->
-<!--<script src="https://cdn.datatables.net/fixedcolumns/5.0.0/js/fixedColumns.dataTables.js">-->
-<!--</script>-->
 <script>
     onDomLoad(function() {
         var form = document.getElementById('abiotic-props-gui');
@@ -151,9 +146,13 @@
                 bFilter: false,
                 info: false,
                 bAutoWidth: false,
+                fnCreatedRow: function (row, data, index) {
+                    $(row).find("td.rightBorder").addClass("freeze-column")
+                },
                 columns: [
                     {
                         'data': "Surface Parcel",
+                        'className': 'font-weight-bold rightBorder freeze-column'
                     },
                     {
                         'data': "DustParticleConcentration",
@@ -206,9 +205,13 @@
                 bFilter: false,
                 info: false,
                 bAutoWidth: false,
+                fnCreatedRow: function (row, data, index) {
+                    $(row).find("td.rightBorder").addClass("freeze-column")
+                },
                 columns: [
                     {
                         'data': "Surface Parcel",
+                        'className': 'font-weight-bold rightBorder freeze-column'
                     },
                     {
                         data: "Tillage",
@@ -303,9 +306,13 @@
                 bFilter: false,
                 info: false,
                 bAutoWidth: false,
+                fnCreatedRow: function (row, data, index) {
+                    $(row).find("td.rightBorder").addClass("freeze-column")
+                },
                 columns: [
                     {
                         'data': "Surface Parcel",
+                        'className': 'font-weight-bold rightBorder freeze-column'
                     },
                     {
                         'data': "RootSoilThick",
@@ -362,9 +369,13 @@
                 bFilter: false,
                 info: false,
                 bAutoWidth: false,
+                fnCreatedRow: function (row, data, index) {
+                    $(row).find("td.rightBorder").addClass("freeze-column")
+                },
                 columns: [
                     {
                         'data': "Surface Parcel",
+                        'className': 'font-weight-bold rightBorder freeze-column'
                     },
                     {
                         'data': "VadoseZoneSoilThick",
@@ -421,9 +432,13 @@
                 bFilter: false,
                 info: false,
                 bAutoWidth: false,
+                fnCreatedRow: function (row, data, index) {
+                    $(row).find("td.rightBorder").addClass("freeze-column")
+                },
                 columns: [
                     {
                         'data': "Surface Parcel",
+                        'className': 'font-weight-bold rightBorder freeze-column'
                     },
                     {
                         'data': "GroundwaterZoneSoilThick",

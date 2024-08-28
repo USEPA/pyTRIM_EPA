@@ -69,23 +69,13 @@
         </div>
     </section>
 </form>
-<style>
-    td.rightBorder {
-        text-align: right; border-right: 1px solid black; padding: 10px
-    }
-    td.freeze-column, th.freeze-column {
-        position: sticky;
-        left: 0;
-        background-color: white; /* to cover other cells when scrolling */
-        z-index: 1; /* to ensure the column stays on top */
-    }
-</style>
 <script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}">
 </script>
 <script src="{{ url_for('static', filename='js/lib/dataTables/jquery.dataTables.min.js') }}">
 </script>
 <script src="{{ url_for('static', filename='js/lib/dataTables/dataTables.bootstrap4.min.js') }}">
 </script>
+<link rel="stylesheet" href="{{url_for('static', filename='css/form_styles.css')}}"/>
 <script>
     onDomLoad(function() {
         var form = document.getElementById('surface-runoff-gui');

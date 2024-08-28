@@ -141,6 +141,7 @@
         </div>
     </section>
 </form>
+<link rel="stylesheet" href="{{url_for('static', filename='css/form_styles.css')}}"/>
 <script>
     onDomLoad(function(e) {
         var form = document.getElementById('met-settings-gui');
@@ -519,9 +520,13 @@
                 bFilter: false,
                 info: false,
                 bAutoWidth: false,
+                fnCreatedRow: function (row, data, index) {
+                    $(row).find("td.rightBorder").addClass("freeze-column")
+                },
                 columns: [
                     {
                         'data': "Surface Parcel",
+                        'className': 'font-weight-bold rightBorder freeze-column'
                     },
                     {
                         'data': "GroundwaterSeepageFractions",
