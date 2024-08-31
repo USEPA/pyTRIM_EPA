@@ -3,7 +3,6 @@ from trim_db.schema.utils.serialize import register_serializer
 from trim_db.schema.parameters.models import ParameterDefinition, CustomParameter
 from trim_db.services import *
 import pint
-import json
 
 comp_local_cache = {}
 
@@ -309,6 +308,7 @@ def get_soil_abiotic_params(pcl, run_old=True):
 
 
 def get_water_params(pcl, parcel_type):
+    from .utils import get_watershed_area
     precipitation_rate = pcl.scenario.Rain.magnitude
     if precipitation_rate is None:
         precipitation_rate = 0  # 0.0041
@@ -371,6 +371,9 @@ def get_water_params(pcl, parcel_type):
         total_runoff_vol_rate_to_this_sw = 0
         total_seepage_vol_rate_to_gw = 0
 
+        # get watershed are for water parcel
+        sw_total_watershed_area = get_watershed_area(pcl)
+
         connected_soil_comps = []
         for this_parcel in pcl.scenario.parcels:
             soil_comp = this_parcel.get_compartment("Soil_Surface")
@@ -378,11 +381,12 @@ def get_water_params(pcl, parcel_type):
                 connected_soil_comps.append(soil_comp)
         # sum up watershed area of connected Soil parcels.
         for this_soil_comp in connected_soil_comps:
-            this_watershed_area = (
-                    this_soil_comp.area
-                    * this_soil_comp.FractionofAreaAvailableforRunoff
-            ).magnitude
-            sw_total_watershed_area += this_watershed_area
+            # this_watershed_area = (
+            #         this_soil_comp.area
+            #         * this_soil_comp.FractionofAreaAvailableforRunoff
+            # ).magnitude
+            # sw_total_watershed_area += this_watershed_area
+            this_watershed_area = get_watershed_area(this_soil_comp.volume_element.parcel)
             # we need to calculate runoff to this surface_water body using the watershed area above
             comp_link = this_soil_comp.get_links(sw)
             if len(comp_link) > 0:
@@ -402,7 +406,7 @@ def get_water_params(pcl, parcel_type):
                     * this_precip_runoff_frac_to_sw
                     * this_watershed_area
             )
-            total_runoff_vol_rate_to_this_sw = 0 if total_runoff_vol_rate_to_this_sw else total_runoff_vol_rate_to_this_sw
+            # total_runoff_vol_rate_to_this_sw = 0 if not total_runoff_vol_rate_to_this_sw else total_runoff_vol_rate_to_this_sw
             this_seepage_frac_to_gw = this_soil_comp.GroundwaterSeepageFraction
             total_seepage_vol_rate_to_gw += (
                     precipitation_rate
@@ -411,10 +415,11 @@ def get_water_params(pcl, parcel_type):
             )
             this_total_erosion_rate = this_soil_comp.TotalErosionRate.magnitude
             sed_soil_erosion_to_sw += (
-                this_precip_runoff_frac_to_sw
-                * this_total_erosion_rate
+                this_total_erosion_rate
+                * this_precip_runoff_frac_to_sw
                 * this_watershed_area
             )
+
         def get_correct_param(par_name, par_obj):
             par = par_obj.get(par_name)
             return par.value if isinstance(par, CustomParameter) else par.default_value if \

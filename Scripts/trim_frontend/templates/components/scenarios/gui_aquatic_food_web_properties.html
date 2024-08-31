@@ -279,8 +279,11 @@
 
             function submit_aquatic_table(elem, parcel_info) {
                 let data = $(elem).val() == "" ? 0 : $(elem).val()
-                parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data                
-                TRIM.api.updateParcel('{{ scenario.id }}', parcel_info)
+                parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
+                LoadingScreen.show('submit_mass'); // since this can take a moment
+                TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', ()=>{
+                    LoadingScreen.hide('submit_mass');
+                });
             }
 
             function submit_diet_tables(elem) {

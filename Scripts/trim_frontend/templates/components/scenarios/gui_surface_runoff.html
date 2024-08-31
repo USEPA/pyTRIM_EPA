@@ -322,12 +322,16 @@
                 'className': 'font-weight-bold rightBorder freeze-column runoff-matrix-corner-header'
             }]
             if (runoff_matrix) {
-                Object.entries(runoff_matrix).forEach(function ([s, r], i) {
+                let parcel_list = TRIM.store.currentScenario.parcels.map(e=>e.name)
+                parcel_list.forEach(function (s, i) {
                     runoff_data.push({
                         'sender':s
                     })
-                    Object.entries(r).forEach(([rc, v]) => {
-                        runoff_data[i][rc]=(v).toLocaleString(undefined, { minimumFractionDigits: 4 })
+                    let r = runoff_matrix[s]
+                    let full_p_list = ['sink'].concat(parcel_list)
+                    full_p_list.forEach((rc) => {
+                        let v = r[rc]
+                        runoff_data[i][rc] = (v).toLocaleString(undefined, { minimumFractionDigits: 4 })
                         if (i == 0) {
                             columns.push({
                                 'data': rc,

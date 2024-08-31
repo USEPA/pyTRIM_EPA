@@ -152,12 +152,18 @@ def get_surface_runoff(scen):
     sink_comps = [c for c in scen.compartments if
                   c.media.isa("Sink") & c.media.isa("Advection") & (not c.media.isa("Flush$"))]
     runoffs = {}
-    for send in soil_comps:
+    for send in soil_comps + water_comps:
         sending_parcel = send.volume_element.parcel.name
         runoffs[sending_parcel] = {}
         runoffs[sending_parcel]['sink'] = 0
         for recv in soil_comps + sink_comps + water_comps:
             receiving_parcel = recv.volume_element.parcel.name
+            if send in water_comps:
+                if send == recv:
+                    runoffs[sending_parcel][receiving_parcel] = 1
+                else:
+                    runoffs[sending_parcel][receiving_parcel] = 0
+                continue
             if recv in sink_comps:
                 runoffs[sending_parcel]['sink'] += send.FractionOfTotalRunoff(receiver=recv)
             else:
