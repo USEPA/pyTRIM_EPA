@@ -241,17 +241,40 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                     update_custom_param_value(par, 0)
         ParameterService.commit()
 
-    if field_name in ["GroundwaterSeepageFractions", "RunoffFractions"]:
+    if field_name in ["EvapotranspirationFractions", "GroundwaterSeepageFractions", "RunoffFractions"]:
         soil_comp = p.get_compartment("Soil_Surface")
-        data_name = field_name if field_name == "GroundwaterSeepageFractions" else "RunoffFractions"
-        seepage_frac_val = float(parcels_data[data_name]) if data_name == "GroundwaterSeepageFractions" else 1-float(parcels_data[data_name])
-        runoff_frac_val = 1 - seepage_frac_val
+        # data_name = field_name if field_name == "GroundwaterSeepageFractions" else "RunoffFractions"
+        # seepage_frac_val = float(parcels_data[data_name]) if data_name == "GroundwaterSeepageFractions" else 1-float(parcels_data[data_name])
+        # runoff_frac_val = 1 - seepage_frac_val
         # watershed_area = (
         #         soil_comp.area
         #         * soil_comp.FractionofAreaAvailableforRunoff
         # ).magnitude
-        total_runoff_val = runoff_frac_val * p.scenario.Rain.magnitude  # was multiplied by watershed area but removed per Arun on 08/12/2024
-        for par_name, par_val in {"TotalRunoffRate": total_runoff_val, "GroundwaterSeepageFraction": seepage_frac_val}.items():
+        # evapotranspiration_frac_val = parcels_data["EvapotranspirationFractions"]
+        # seepage_frac_val = parcels_data["GroundwaterSeepageFractions"]
+        # runoff_frac_val = parcels_data["RunoffFractions"]
+        frac_val = float(parcels_data[field_name])
+        par_name_map = {"RunoffFractions": "PrecipitationRunoffFraction",
+                       "GroundwaterSeepageFractions": "GroundwaterSeepageFraction",
+                       "EvapotranspirationFractions": "EvapotranspirationFraction"}
+        # for par_name, par_val in {"TotalRunoffRate": total_runoff_val, "GroundwaterSeepageFraction": seepage_frac_val,
+        #                           "EvapotranspirationFraction": evapotranspiration_frac_val}.items():
+        par_name = par_name_map[field_name]
+        par_val = frac_val
+        par = get_or_create_custom_param(
+            soil_comp.parameters.get(par_name),
+            {
+                "requirements": f"(self.id == {soil_comp.id})",
+                "scenario_id": p.scenario.id,
+            },
+            no_commit=True
+        )
+        update_custom_param_value(par, par_val)
+
+        if field_name == "RunoffFractions":
+            total_runoff_val = frac_val * p.scenario.Rain.magnitude  # was multiplied by watershed area but removed per Arun on 08/12/2024
+            par_name = "TotalRunoffRate"
+            par_val = total_runoff_val
             par = get_or_create_custom_param(
                 soil_comp.parameters.get(par_name),
                 {

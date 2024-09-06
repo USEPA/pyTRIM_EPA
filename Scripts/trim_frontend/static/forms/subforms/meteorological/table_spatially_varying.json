@@ -9,6 +9,12 @@
             "default": ""
         },
         {
+            "id": "EvapotranspirationFractions",
+            "label": "Evapotranspiration Fractions",
+            "data_type": "float",
+            "default": ""
+        },
+        {
             "id": "GroundwaterSeepageFractions",
             "label": "Groundwater Seepage Fractions",
             "data_type": "float",

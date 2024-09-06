@@ -91,7 +91,7 @@
     <section id="spatially-varying-values" class="container px-0">
         <div class="row">
             <div class="col-sm">
-                <h5 class="text-center">Spatially Varying Values</h5>
+                <h5 class="text-center">What Happens to Precipitation on the Surface</h5>
             </div>
         </div>
         <!-- <div class="row">
@@ -498,6 +498,7 @@
                         spatially_varying_table_data.push({
                             'parcelid': e.id,
                             'Surface Parcel': e.name,
+                            'EvapotranspirationFractions': (e.evapotrans_frac === null) || (e.evapotrans_frac === "") ? TRIM.forms.fetchDefault('EvapotranspirationFractions') : e.evapotrans_frac,
                             'GroundwaterSeepageFractions': (e.seepage_frac === null) || (e.seepage_frac === "") ? TRIM.forms.fetchDefault('GroundwaterSeepageFractions') : e.seepage_frac,
                             'RunoffFractions': (e.runoff_fraction === null) || (e.runoff_fraction === "")  ? TRIM.forms.fetchDefault('RunoffFractions') : e.runoff_fraction
                         })
@@ -527,6 +528,15 @@
                     {
                         'data': "Surface Parcel",
                         'className': 'font-weight-bold rightBorder freeze-column'
+                    },
+                    {
+                        'data': "EvapotranspirationFractions",
+                        'bSortable': false,
+                        'render': function (data, type, row) {
+                            let this_cell_prop = 'editableCell badge badge-light';
+                            let parcel_info = create_parcel_object('EvapotranspirationFractions', row, data);
+                            return create_cell_html(parcel_info, data, this_cell_prop, data);
+                        }
                     },
                     {
                         'data': "GroundwaterSeepageFractions",
@@ -614,14 +624,22 @@
                 ErrorValidation.rowTotalIsValid(this);
 
                 let is_valid = elementIsValid($(this).parent());
+
                 if (is_valid) {
-                    let parcel_info = $(this).data('parcelinfo')
-                    if (parcel_info) {
-                        parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                        console.log(parcel_info);
-                        TRIM.api.updateParcel('{{ scenario.id }}', parcel_info)
-                        table_data = get_Data_from_table(`#${focusTblId}`)
-                    }
+                    let this_par = this
+                    $(this).parents("tr").find("input.editableCell").each((i,f)=>{
+                        LoadingScreen.show('submit_sv_val');
+                        let parcel_info = $(f).data('parcelinfo')
+                        if (parcel_info) {
+                            if (f == this_par) {
+                                parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
+                            }
+                            TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', ()=>{
+                                LoadingScreen.hide('submit_sv_val')
+                            })
+                            table_data = get_Data_from_table(`#${focusTblId}`)
+                        }
+                    })
                 }
             });
 
