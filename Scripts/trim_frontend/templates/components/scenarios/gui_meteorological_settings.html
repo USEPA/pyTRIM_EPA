@@ -625,9 +625,9 @@
 
                 let is_valid = elementIsValid($(this).parent());
 
+                let this_par = this
                 if (is_valid) {
-                    let this_par = this
-                    $(this).parents("tr").find("input.editableCell").each((i,f)=>{
+                    $(this_par).parents("tr").find("input.editableCell").each((i,f)=>{
                         LoadingScreen.show('submit_sv_val');
                         let parcel_info = $(f).data('parcelinfo')
                         if (parcel_info) {
@@ -640,6 +640,9 @@
                             table_data = get_Data_from_table(`#${focusTblId}`)
                         }
                     })
+                } else {
+                    let parcel_info = $(this_par).data('parcelinfo')
+                    parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
                 }
             });
 
