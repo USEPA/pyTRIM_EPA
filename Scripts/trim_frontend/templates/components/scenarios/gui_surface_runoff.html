@@ -164,7 +164,23 @@
                 }
                 $(this_input).parent().find('label').addClass('modified')
 
+                // sum the row except sink and then set sink to 1-sum
+                let row_sink = $(focusTblrow).find('[data-receiver="sink"]')[0];
+                if (this_input != row_sink) {
+                    let matrix_row_sum = 0;
+                    $(focusTblrow).find("label").each(function(i,e)
+                        {
+                            this_input = $(e).parent().find("input.editableCell")
+                            if ($(this_input).data("receiver") != "sink")
+                                matrix_row_sum += parseFloat($(this_input).val());
+                        }
+                    )
+                    $(row_sink).val(Math.max(1-matrix_row_sum, 0));
+                    $(row_sink).parent().find('label').addClass('modified');
+                }
+
                 // make sure the element and the row is valid before posting the modified elements (all modified elements need to be posted)
+                ErrorValidation.rowTotalIsValid(this);
                 let is_valid = elementIsValid($(this).closest("tr")); //elementIsValid($(this).parent()) &&
 
                 if (is_valid) {
@@ -249,6 +265,11 @@
         }
 
         function create_cell_html(data, cell_prop, cell_data, err_html="", sender="", receiver=""){
+            // disable water parcel inputs
+            let pcl = getParcelByKey("name", sender);
+            if (pcl.parcelType.includes("Water")) {
+                cell_prop = cell_prop.replace("editableCell", "text-muted");
+            }
             return "<input "+err_html+" class='editableCell form-control form-control-sm type='text' value='" + data +
                 "' data-sender='"+ sender + "' data-receiver='"+ receiver + "' style='display:none'>" +
                     "<label "+err_html+" class='" + cell_prop + "'>" + cell_data + "</label>"
@@ -278,6 +299,17 @@
                 "type": "input",
                 "name": "scenario_id",
                 "value": TRIM.store.currentScenario.id
+            });
+
+            // list of water parcels to skip
+            let waterPcls = [];
+            TRIM.store.currentScenario.parcels.forEach((p, i) => {
+                if (p?.parcelType?.includes("Water")) waterPcls.push(p.name)
+            });
+            fieldData.push({
+                "type": "input",
+                "name": "water_parcels",
+                "value": waterPcls
             });
             
             LoadingScreen.show('upload_matrix_csv');
@@ -340,7 +372,7 @@
                                 'render': function (data, type, row) {
                                     let this_cell_data = data
                                     let this_cell_prop = 'editableCell badge badge-light'
-                                    let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this);ErrorValidation.rowTotalIsValid(this)"';
+                                    let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
                                     return create_cell_html(data, this_cell_prop, this_cell_data, err_html = this_err_html, sender=row.sender, receiver=rc);
                                 }
                             })

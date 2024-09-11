@@ -5,6 +5,7 @@ import pandas as pd
 import traceback
 import re
 import json
+from decimal import Decimal
 from flask import Blueprint, request
 from flask_security import login_required
 from werkzeug.utils import secure_filename
@@ -483,31 +484,36 @@ def parse_runoff_matrix_upload():
         # verify values are valid
         reader = csv.DictReader(io.StringIO(lines))
         for row in reader:
-            row_total = 0
+            row_total = []
             for k, v in row.items():
                 if k == "parcels": continue
-                if float(v) < 0: return ApiException("All values must be positive")
-                row_total += float(v)
-            if row_total != 1 and row_total != 0: return ApiException("Sum of runoff fractions should be 1")
-            
+                if Decimal(v) < 0: return ApiException("All values must be positive")
+                row_total.append(Decimal(v))
+            row_total = float(sum(row_total))
+            if row_total != 1 and row_total != 0: 
+                return ApiException("Sum of runoff fractions should be 1")
+
         # submit
         reader = csv.DictReader(io.StringIO(lines))
         for row in reader:
-            for k, v in row.items():
-                if k == "parcels": continue
-                sender_pcl = parcel_names[row.get("parcels")]
-                v = float(v)
-
-                payload = {
-                    "id": sender_pcl.id,
-                    "field": "runoff_matrix_value",
-                    "sender": f"ro_{row.get('parcels')}",
-                    "receiver": f"ro_{k}",
-                    "ro_value": f"{v}"
-                }
-                handle_parcel_update(sender_pcl, payload)
+            sender_pcl = parcel_names[row.get("parcels")]
+            if sender_pcl.name in request.form["water_parcels"]:
+                continue
+            del row["parcels"]
+            
+            row_receivers = [f"ro_{k}" for k in row.keys()]
+            row_vals = [f"{float(Decimal(v))}" for v in row.values()]
+            payload = {
+                "id": sender_pcl.id,
+                "field": "runoff_matrix_value",
+                "sender": f"ro_{sender_pcl.name}",
+                "receiver": ",".join(row_receivers),
+                "ro_value": ",".join(row_vals)
+            }
+            handle_parcel_update(sender_pcl, payload)
                 
     except Exception as e:
+        print(traceback.format_exc())
         return ApiException(e)
     return ApiResult({'matrix_result': "success"})
 
