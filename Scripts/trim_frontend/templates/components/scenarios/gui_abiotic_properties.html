@@ -152,6 +152,8 @@
                 paging: false,
                 bFilter: false,
                 info: false,
+                scrollX: true,
+                scrollY: 500,
                 bAutoWidth: false,
                 fnCreatedRow: function (row, data, index) {
                     $(row).find("td.rightBorder").addClass("freeze-column")
@@ -188,7 +190,7 @@
                     }
                 ],
                 initComplete: function (settings, json) {
-                    $(air_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    // $(air_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                     appendHeaderOptions(this, skip_columns=["Parcel Name"]);
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
@@ -213,6 +215,8 @@
                 bFilter: false,
                 info: false,
                 bAutoWidth: false,
+                scrollX: true,
+                scrollY: 500,
                 fnCreatedRow: function (row, data, index) {
                     $(row).find("td.rightBorder").addClass("freeze-column")
                 },
@@ -301,7 +305,7 @@
                     }
                 ],
                 initComplete: function (settings, json) {
-                    $(soil_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    // $(soil_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                     appendHeaderOptions(this, skip_columns=["Parcel Name", "Tillage"]);
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
@@ -315,6 +319,8 @@
                 bFilter: false,
                 info: false,
                 bAutoWidth: false,
+                scrollX: true,
+                scrollY: 500,
                 fnCreatedRow: function (row, data, index) {
                     $(row).find("td.rightBorder").addClass("freeze-column")
                 },
@@ -365,7 +371,7 @@
                     }
                 ],
                 initComplete: function (settings, json) {
-                    $(root_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    // $(root_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                     appendHeaderOptions(this, skip_columns=["Parcel Name"]);
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
@@ -378,6 +384,8 @@
                 paging: false,
                 bFilter: false,
                 info: false,
+                scrollX: true,
+                scrollY: 500,
                 bAutoWidth: false,
                 fnCreatedRow: function (row, data, index) {
                     $(row).find("td.rightBorder").addClass("freeze-column")
@@ -429,7 +437,7 @@
                     }
                 ],
                 initComplete: function (settings, json) {
-                    $(vadose_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    // $(vadose_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                     appendHeaderOptions(this, skip_columns=["Parcel Name"]);
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
@@ -442,6 +450,8 @@
                 paging: false,
                 bFilter: false,
                 info: false,
+                scrollX: true,
+                scrollY: 500,
                 bAutoWidth: false,
                 fnCreatedRow: function (row, data, index) {
                     $(row).find("td.rightBorder").addClass("freeze-column")
@@ -483,7 +493,7 @@
                     }
                 ],
                 initComplete: function (settings, json) {
-                    $(gw_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    // $(gw_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                     appendHeaderOptions(this, skip_columns=["Parcel Name"]);
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()

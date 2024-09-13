@@ -316,6 +316,8 @@
                 paging: false,
                 bFilter: false,
                 info: false,
+                scrollX: true,
+                scrollY: 500,
                 bAutoWidth: false,
                 fnCreatedRow: function (row, data, index) {
                     $(row).find("td.rightBorder").addClass("freeze-column")
@@ -514,7 +516,7 @@
                     }
                 ],
                 initComplete: function (settings, json) {
-                    $("#mapTable").wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    // $("#mapTable").wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                     $("[data-toggle=popover]").popover();
                     $('[data-toggle="tooltip"]').tooltip();
                     $('#mapTable tbody').on('change', 'select.landuse_ddl', function () {

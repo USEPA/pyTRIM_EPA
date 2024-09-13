@@ -316,6 +316,8 @@
                 bFilter: false,
                 info: false,
                 bAutoWidth: false,
+                scrollX: true,
+                scrollY: 500,
                 columnDefs: [
                    { width: '100%', targets: 0 }
                 ],
@@ -324,7 +326,7 @@
                 },
                 columns: get_pivoted_columns(table_type),
                 initComplete: function (settings, json) {
-                    $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    // $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
                 }

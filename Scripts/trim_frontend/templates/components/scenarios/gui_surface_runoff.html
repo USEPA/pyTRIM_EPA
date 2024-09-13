@@ -123,6 +123,8 @@
                 paging: false,
                 bFilter: false,
                 info: false,
+                scrollX: true,
+                scrollY: 500,
                 bAutoWidth: false,
                 columns: cols,
                 fnCreatedRow: function (row, data, index) {
@@ -131,7 +133,7 @@
                     $(row).find("td.rightBorder").addClass("freeze-column")
                 },
                 initComplete: function (settings, json) {
-                    $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    // $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
                 }

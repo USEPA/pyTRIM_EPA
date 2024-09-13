@@ -521,6 +521,8 @@
                 bFilter: false,
                 info: false,
                 bAutoWidth: false,
+                scrollX: true,
+                scrollY: 500,
                 fnCreatedRow: function (row, data, index) {
                     $(row).find("td.rightBorder").addClass("freeze-column")
                 },
@@ -558,7 +560,7 @@
                     }
                 ],
                 initComplete: function (settings, json) {
-                    $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    // $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
                     $(tblId).find("tr").each((i,e)=>$(e).attr({

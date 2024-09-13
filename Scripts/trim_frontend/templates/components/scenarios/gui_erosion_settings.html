@@ -266,6 +266,8 @@
                     bFilter: false,
                     info: false,
                     bAutoWidth: false,
+                    scrollX: true,
+                    scrollY: 500,
                     fnCreatedRow: function (row, data, index) {
                         $(row).find("td.rightBorder").addClass("freeze-column")
                     },
@@ -307,6 +309,8 @@
                     bFilter: false,
                     info: false,
                     bAutoWidth: false,
+                    scrollX: true,
+                    scrollY: 500,
                     fnCreatedRow: function (row, data, index) {
                         $(row).find("td.rightBorder").addClass("freeze-column")
                     },
@@ -390,7 +394,7 @@
                     initComplete: function (settings, json) {
                         $("[data-toggle=popover]").popover();
                         $('[data-toggle="tooltip"]').tooltip();
-                        $("#erosionTable_opt2").wrap("<div style='overflow:auto; width:100%;position:relative;'></div>");
+                        // $("#erosionTable_opt2").wrap("<div style='overflow:auto; width:100%;position:relative;'></div>");
 
                         // iterate through all cells, update strike-through
                         let cells = $("#erosionTable_opt2").find("*[data-parcelinfo]");
@@ -417,6 +421,8 @@
                     bFilter: false,
                     info: false,
                     bAutoWidth: false,
+                    scrollX: true,
+                    scrollY: 500,
                     fnCreatedRow: function (row, data, index) {
                         $(row).find("td.rightBorder").addClass("freeze-column")
                     },
@@ -587,7 +593,7 @@
                         }
                     ],
                     initComplete: function (settings, json) {
-                        $("#erosionTable_opt3").wrap("<div style='overflow:auto; width:100%;position:relative;'></div>");
+                        // $("#erosionTable_opt3").wrap("<div style='overflow:auto; width:100%;position:relative;'></div>");
                         $("[data-toggle=popover]").popover();
                         $('[data-toggle="tooltip"]').tooltip();
                         let rows=$("#erosionTable_opt3").find("tr");
