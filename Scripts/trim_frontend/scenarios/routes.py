@@ -346,6 +346,7 @@ def update_scenario():
 
     try:
         scenario_data = request.form.to_dict()
+        print(scenario_data)
         if not scenario_data['id']:
             raise AssertionError("Scenario ID cannot be blank.")
         # Get the specified parcel
@@ -395,11 +396,11 @@ def update_scenario():
                 ret_val = meteo_wgt_avg_value_from_timeseries(param_data, ret_type)
                 if ret_type != "None":
                     update_assumed_all_comp_fixed_params(s, comp_list, param_name, ret_val[ret_type_name])
-        elif field_name == "startDate" or field_name == "endDate":
+        elif field_name == "simulation_start_date" or field_name == "simulation_end_date":
             date_parts = scenario_data[field_name].split("-")
             date_obj = datetime(int(date_parts[0]), int(date_parts[1]), int(date_parts[2]))
             ts_date = time.mktime(date_obj.timetuple())
-            par_name = "simulationBeginDateTime" if field_name == "startDate" else "simulationEndDateTime"
+            par_name = "simulationBeginDateTime" if field_name == "simulation_start_date" else "simulationEndDateTime"
             par_list = {par_k: par for par_k, par in s.parameters.items() if par_k == par_name}
             this_param = par_list.get(par_name)
             if this_param is None:

@@ -73,8 +73,8 @@
             startDate.on('change', calculateDateRange);
             endDate.on('change', calculateDateRange);
             startDate.change();
-            startDate.on('change', submit_scenario_value);
-            endDate.on('change', submit_scenario_value);
+            startDate.on('blur', submit_scenario_value);
+            endDate.on('blur', submit_scenario_value);
 
             ENABLED_FORM = true;
         });
@@ -105,7 +105,8 @@
         }
 
         function submit_scenario_value(elem) {
-            let param_info = get_form_data(elem)
+            let form_field = elem.target
+            let param_info = get_form_data(form_field)
             let resp = TRIM.api.updateScenario(param_info).on('load',function(){
                 let val_resp = this.responseJSON
                 if (val_resp) {
