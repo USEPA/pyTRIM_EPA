@@ -19,6 +19,15 @@ function scientific(val) { // to scientific notation
     return new Intl.NumberFormat('en-US', {notation: "scientific"}).format(parseFloat(val));
 }
 
+// static value dropdown menu of column names
+function appendHeaderOptions(datatable, skip_columns=[]) {
+    datatable.api().columns().every(function(column_idx) {
+        let header = this.header().textContent;
+        if (!skip_columns.includes(header))
+            $("#"+datatable.attr('id')+"_columns").append(`<option value='${column_idx}'>${header}</option>`);
+    })
+}
+
 function ErrToolTip(ele, is_valid, message, parent_ele="td") {
     let parent = $(ele).parent();
     $(parent).find("label.warningTT").tooltip('dispose');
@@ -30,12 +39,12 @@ function ErrToolTip(ele, is_valid, message, parent_ele="td") {
         if (this_cell.length > 0) {
             $("label.warningTT").tooltip('hide');
             $(this_cell).append(tt);
-            $(this_cell).find("label.warningTT").tooltip('show').tooltip('hide');;
+            $(this_cell).find("label.warningTT").tooltip('show').tooltip('hide');
         } else {
             let this_txt = $(ele).closest("div");
             $("label.warningTT").tooltip('hide');
             $(this_txt).prepend(tt);
-            $(this_txt).find("label.warningTT").tooltip('show').tooltip('hide');;
+            $(this_txt).find("label.warningTT").tooltip('show').tooltip('hide');
         }
 
     }

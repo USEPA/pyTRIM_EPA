@@ -1,0 +1,30 @@
+{% macro table_static_value(table_id, columns) %}
+<div class="pill pill-alert col-sm" style="font-size:.9em;">
+    <label for="{{table_id}}_columns">Set static value for column</label>
+    <select id="{{table_id}}_columns" name="{{table_id}}_columns">
+        {% for column in columns %}
+            <option value='{{column | replace(" ", "")}}'>{{column}}</option>
+        {% endfor %}
+    </select> 
+    <br>
+    Value: <input id="{{table_id}}_sv_val" type="text"> <button id="{{table_id}}_sv_btn" class="btn btn-warning" style="height:1.8em;padding:2px;">Update</button>
+</div>
+
+<script>
+    // trigger input cell blur
+    $("#{{table_id}}_sv_btn").on("click", (e) => {
+        e.preventDefault();
+        let selected_header = parseInt($("#{{table_id}}_columns").val());
+        let input_val = parseFloat($("#{{table_id}}_sv_val").val());
+
+        $("#{{table_id}} > tbody > tr").each((i, e) => {
+            let cell = $(e).find("td").eq(selected_header).find("input.editableCell");
+            let cell_lbl = cell.siblings("label.editableCell");
+            if (cell.length && cell_lbl.length && input_val) {
+                cell_lbl.click();
+                cell.val(input_val).blur();
+            }
+        });
+    });
+</script>
+{% endmacro %}

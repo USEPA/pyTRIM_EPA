@@ -1,4 +1,6 @@
+{% from 'macros/scenarios/static_value_macro.html' import table_static_value %}
 
+{% block content %}
 <form id="abiotic-props-gui"
     data-async-form="true"
     data-form-src="scenario_abiotic_props_form"
@@ -19,6 +21,7 @@
                         <h4>Air Properties</h4>
                     </div>
                 </div>
+                {{ table_static_value(table_id='AirAbioticTable', columns=[]) }}
                 <div class ="row">
                     <div class="col-md">
                         <table data-slot="true" data-target="AirAbioticTable" class="hover" id="AirAbioticTable"></table>
@@ -38,6 +41,7 @@
                         <h4>Surface Soil Properties</h4>
                     </div>
                 </div>
+                {{ table_static_value(table_id='SurfaceSoilAbioticTable', columns=[]) }}
                 <div class ="row">
                     <div class="col-md">
                         <table data-slot="true" data-target="SurfaceSoilAbioticTable" class="hover" id="SurfaceSoilAbioticTable"></table>
@@ -48,6 +52,7 @@
                         <h4>Root Soil Properties</h4>
                     </div>
                 </div>
+                {{ table_static_value(table_id='RootSoilAbioticTable', columns=[]) }}
                 <div class ="row">
                     <div class="col-md">
                         <table data-slot="true" data-target="RootSoilAbioticTable" class="hover" id="RootSoilAbioticTable"></table>
@@ -58,6 +63,7 @@
                         <h4>Vadose Zone Properties</h4>
                     </div>
                 </div>
+                {{ table_static_value(table_id='VadoseSoilAbioticTable', columns=[]) }}
                 <div class ="row">
                     <div class="col-md">
                         <table data-slot="true" data-target="VadoseSoilAbioticTable" class="hover" id="VadoseSoilAbioticTable"></table>
@@ -68,6 +74,7 @@
                         <h4>Groundwater Zone Properties</h4>
                     </div>
                 </div>
+                {{ table_static_value(table_id='GWSoilAbioticTable', columns=[]) }}
                 <div class ="row">
                     <div class="col-md">
                         <table data-slot="true" data-target="GWSoilAbioticTable" class="hover" id="GWSoilAbioticTable"></table>
@@ -182,6 +189,7 @@
                 ],
                 initComplete: function (settings, json) {
                     $(air_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    appendHeaderOptions(this, skip_columns=["Parcel Name"]);
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
                 }
@@ -294,6 +302,7 @@
                 ],
                 initComplete: function (settings, json) {
                     $(soil_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    appendHeaderOptions(this, skip_columns=["Parcel Name", "Tillage"]);
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
                 }
@@ -357,6 +366,7 @@
                 ],
                 initComplete: function (settings, json) {
                     $(root_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    appendHeaderOptions(this, skip_columns=["Parcel Name"]);
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
                 }
@@ -420,6 +430,7 @@
                 ],
                 initComplete: function (settings, json) {
                     $(vadose_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    appendHeaderOptions(this, skip_columns=["Parcel Name"]);
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
                 }
@@ -473,6 +484,7 @@
                 ],
                 initComplete: function (settings, json) {
                     $(gw_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    appendHeaderOptions(this, skip_columns=["Parcel Name"]);
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
                 }
@@ -670,3 +682,4 @@
     })
 
 </script>
+{% endblock content %}
