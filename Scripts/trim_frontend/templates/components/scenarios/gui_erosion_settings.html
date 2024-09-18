@@ -296,6 +296,7 @@
                         }
                     ],
                     initComplete: function (settings, json) {
+                        $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
                         $("[data-toggle=popover]").popover();
                         $('[data-toggle="tooltip"]').tooltip();
                     }
@@ -394,6 +395,7 @@
                     initComplete: function (settings, json) {
                         $("[data-toggle=popover]").popover();
                         $('[data-toggle="tooltip"]').tooltip();
+                        $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
                         // $("#erosionTable_opt2").wrap("<div style='overflow:auto; width:100%;position:relative;'></div>");
 
                         // iterate through all cells, update strike-through
@@ -594,6 +596,7 @@
                     ],
                     initComplete: function (settings, json) {
                         // $("#erosionTable_opt3").wrap("<div style='overflow:auto; width:100%;position:relative;'></div>");
+                        $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
                         $("[data-toggle=popover]").popover();
                         $('[data-toggle="tooltip"]').tooltip();
                         let rows=$("#erosionTable_opt3").find("tr");

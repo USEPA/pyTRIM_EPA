@@ -191,6 +191,7 @@
                 ],
                 initComplete: function (settings, json) {
                     // $(air_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
                     appendHeaderOptions(this, skip_columns=["Parcel Name"]);
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
@@ -306,6 +307,7 @@
                 ],
                 initComplete: function (settings, json) {
                     // $(soil_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
                     appendHeaderOptions(this, skip_columns=["Parcel Name", "Tillage"]);
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
@@ -372,6 +374,7 @@
                 ],
                 initComplete: function (settings, json) {
                     // $(root_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
                     appendHeaderOptions(this, skip_columns=["Parcel Name"]);
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
@@ -438,6 +441,7 @@
                 ],
                 initComplete: function (settings, json) {
                     // $(vadose_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
                     appendHeaderOptions(this, skip_columns=["Parcel Name"]);
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
@@ -494,6 +498,7 @@
                 ],
                 initComplete: function (settings, json) {
                     // $(gw_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
                     appendHeaderOptions(this, skip_columns=["Parcel Name"]);
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()

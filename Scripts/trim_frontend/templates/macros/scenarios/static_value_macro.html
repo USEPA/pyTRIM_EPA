@@ -1,6 +1,6 @@
 {% macro table_static_value(table_id, columns) %}
 <div class="pill pill-alert col-sm" style="font-size:.9em;">
-    <label for="{{table_id}}_columns">Set static value for column</label>
+    <label for="{{table_id}}_columns">Set uniform value for column</label>
     <select id="{{table_id}}_columns" name="{{table_id}}_columns">
         {% for column in columns %}
             <option value='{{column | replace(" ", "")}}'>{{column}}</option>

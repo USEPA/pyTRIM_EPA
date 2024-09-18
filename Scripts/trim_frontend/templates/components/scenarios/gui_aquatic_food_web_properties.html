@@ -224,6 +224,7 @@
                     columns: get_pivoted_columns(table_data, table_type),
                     initComplete: function (settings, json) {
                         // $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                        $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
                         $('[data-toggle="tooltip"]').tooltip()
                         $('[data-toggle="popover"]').popover()
                     },
