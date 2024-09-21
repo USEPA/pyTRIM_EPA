@@ -674,6 +674,8 @@
 
             $('input.editableCell,select.editableCell').blur(function() {
                 let focusTblId = $(this).closest(`table`).attr('id');
+                let elm = this;
+                let this_table = $(elm).closest("table").attr("id")
                 if (`#${focusTblId}` !== tblId) {
                     return;
                 }
@@ -690,8 +692,17 @@
                 $label.show().text(this_cell_data)
                 let parcel_info = $(this).data('parcelinfo')
                 if (parcel_info) {
+                    let old_data = parcel_info[parcel_info.findIndex(e => e.type == 'input')].value
                     parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                    TRIM.api.updateParcel('{{ scenario.id }}', parcel_info)
+                    let param_store_key = "surface_water"
+                    let ls_info = "Water_body_prop_update"
+                    let sub_cat = this_table == "LakeTable" ? "wc_props" : "sed_props"
+                    param_store_key = param_store_key + "." + sub_cat
+                    LoadingScreen.show(ls_info)
+                    TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', (rsp)=>{
+                        update_data_store_callback(rsp, elm, parcel_info, param_store_key, data, old_data)
+                        LoadingScreen.hide(ls_info)
+                    })
                     // table_data = get_Data_from_table(tblId)
                     let wc_table_data = get_Data_from_table("#LakeTable")
                     let sed_table_data = get_Data_from_table("#SedTable")
