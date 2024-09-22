@@ -625,8 +625,9 @@
 
                 let is_valid = elementIsValid($(this).parent());
                 if (is_valid) {
-                    let data = $(this).val()
-                    let $label = $(this).next("label")
+                    let elm = this
+                    let data = $(elm).val()
+                    let $label = $(elm).next("label")
                     $label.siblings().hide()
                     $label.show().text(data)
 
@@ -634,26 +635,11 @@
                     if (parcel_info) {
                         let ls_info = "Abiotic_Prop_update"
                         LoadingScreen.show(ls_info)
+                        let old_data = parcel_info[parcel_info.findIndex(e => e.type == 'input')].value
                         parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                        // console.log(parcel_info);
                         let param_store_key = "soil_params"
                         TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', (rsp)=>{
-                            if (rsp.target.responseJSON.message == 'success') {
-                                let has_specific_comp = false
-                                let comp_name = null
-                                if (parcel_info.findIndex(e => e.type == 'data' & e.name == 'comp_name') > -1){
-                                    comp_name = parcel_info[parcel_info.findIndex(e => e.type == 'data' & e.name == 'comp_name')].value
-                                    has_specific_comp = true
-                                }
-                                let param_name = parcel_info[parcel_info.findIndex(e => e.type == 'data' & e.name == 'field')].value
-                                let parcel_id = parcel_info[parcel_info.findIndex(e => e.type == 'data' & e.name == 'id')].value
-                                let parcel_index = TRIM.store.currentScenario.parcels.findIndex(e => e.id == parcel_id)
-                                if (has_specific_comp) {
-                                    TRIM.store.currentScenario.parcels[parcel_index][param_store_key][comp_name][param_name] = data
-                                } else {
-                                    TRIM.store.currentScenario.parcels[parcel_index][param_name] = data
-                                }
-                            }
+                            update_data_store_callback(rsp, elm, parcel_info, param_store_key, data, old_data)
                             LoadingScreen.hide(ls_info)
                         })
                         table_data = get_Data_from_table(`#${focusTblId}`)
