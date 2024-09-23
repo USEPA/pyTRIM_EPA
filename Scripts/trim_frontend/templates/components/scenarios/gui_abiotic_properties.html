@@ -149,9 +149,6 @@
                 return dd
             })
 
-
-
-
             spatially_varying_apTable = $(spatially_varying_tblId).removeAttr('width').dataTable({
                 data : table_data,
                 paging: false,
@@ -221,12 +218,10 @@
                             })
                         }
                     })
+                    $(spatially_varying_tblId).DataTable().columns.adjust();
                     appendHeaderOptions(this, skip_columns=["Parcel Name"]);
                 }
             });
-
-
-
 
             let render_function_air = function(param_name, err_validation_type){
                 let ret_func = function (data, type, row) {
@@ -644,6 +639,12 @@
                         })
                         table_data = get_Data_from_table(`#${focusTblId}`)
                     }
+                } else {
+                    let elm = this
+                    let data = $(elm).val()
+                    let $label = $(elm).next("label")
+                    $label.siblings("input").hide()
+                    $label.show().text(data)
                 }
             })
         }
