@@ -1,0 +1,19 @@
+name: Sync pyTRIM EPA GitHub Mirror
+on: push
+concurrency:
+  group: pytrim_mirror_repo
+jobs:
+  pytrim_mirror_repo:
+    runs-on: ubuntu-latest
+    if: ${{ github.repository == 'ICF-Corp/trim-builder' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+            ssh-private-key: |
+              ${{ secrets.TRT_SOURCE_SSH_PRIVATE_KEY }}
+              ${{ secrets.TRT_MIRROR_SSH_PRIVATE_KEY }}
+      - name: Clone Source
+        run: cd ~ && git clone --bare git@github.com:ICF-Corp/trim-builder.git
+      - name: Push Mirror
+        run: cd ~/trim-builder.git && git push --mirror git@github.com:USEPA/pyTRIM_EPA.git
