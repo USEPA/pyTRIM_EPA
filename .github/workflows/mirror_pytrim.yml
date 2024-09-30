@@ -13,6 +13,7 @@ jobs:
             ssh-private-key: |
               ${{ secrets.RTR_SOURCE_SSH_PRIVATE_KEY }}
               ${{ secrets.RTR_MIRROR_SSH_PRIVATE_KEY }}
+              ${{ secrets.SSH_PRIVATE_KEY }}\ 
       - name: Clone Source
         run: cd ~ && git clone --bare git@github.com:ICF-Corp/trim-builder.git
       - name: Push Mirror
