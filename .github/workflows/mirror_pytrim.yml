@@ -11,13 +11,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-            token: ${{ secrets.MIRRORING_ACTION_ACCESS_TOKEN }}
+            token: ${{ secrets.MIRRORING_ACTION_ACCESS_TOKEN }}\
       - uses: webfactory/ssh-agent@v0.9.0
         with:
             ssh-private-key: |
               ${{ secrets.RTR_SOURCE_SSH_PRIVATE_KEY }}
               ${{ secrets.RTR_MIRROR_SSH_PRIVATE_KEY }}\
       - name: Clone Source
-        run: cd ~ && git clone --bare git@github.com:ICF-Corp/trim-builder.git
+        env: 
+          MIRROR_AT: ${{ secrets.MIRRORING_ACTION_ACCESS_TOKEN }}
+        run: cd ~ && git clone --bare https://oauth2:"$MIRROR_AT"@github.com/ICF-Corp/trim-builder.git
       - name: Push Mirror
         run: cd ~/trim-builder.git && git push --mirror git@github.com:USEPA/pyTRIM_EPA.git
