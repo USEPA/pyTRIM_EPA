@@ -10,8 +10,6 @@ jobs:
     if: ${{ github.repository == 'ICF-Corp/trim-builder' }}
     steps:
       - uses: actions/checkout@v4
-        with:
-            token: ${{ secrets.MIRRORING_ACTION_ACCESS_TOKEN }}\
       - uses: webfactory/ssh-agent@v0.9.0
         with:
             ssh-private-key: |
@@ -20,6 +18,8 @@ jobs:
       - name: Clone Source
         env: 
           MIRROR_AT: ${{ secrets.MIRRORING_ACTION_ACCESS_TOKEN }}
-        run: cd ~ && git clone --bare https://oauth2:"$MIRROR_AT"@github.com/ICF-Corp/trim-builder.git
+        run: |
+          echo "$MIRROR_AT" | cut -c1-5
+          cd ~ && git clone --bare https://oauth2:"$MIRROR_AT"@github.com/ICF-Corp/trim-builder.git
       - name: Push Mirror
         run: cd ~/trim-builder.git && git push --mirror git@github.com:USEPA/pyTRIM_EPA.git
