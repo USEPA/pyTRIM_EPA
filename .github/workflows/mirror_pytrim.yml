@@ -19,7 +19,6 @@ jobs:
         env: 
           MIRROR_AT: ${{ secrets.MIRRORING_ACTION_ACCESS_TOKEN }}
         run: |
-          echo "$MIRROR_AT" | cut -c1-5
-          cd ~ && git clone --bare https://oauth2:"$MIRROR_AT"@github.com/ICF-Corp/trim-builder.git
+          cd ~ && git clone --bare https://"$MIRROR_AT"@github.com/ICF-Corp/trim-builder.git
       - name: Push Mirror
         run: cd ~/trim-builder.git && git push --mirror git@github.com:USEPA/pyTRIM_EPA.git
