@@ -1,5 +1,7 @@
 name: Sync pyTRIM EPA GitHub Mirror
 on: push
+permissions:
+  contents: read
 concurrency:
   group: pytrim_mirror_repo
 jobs:
