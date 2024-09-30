@@ -618,33 +618,23 @@
                     return;
                 }
 
-                let is_valid = elementIsValid($(this).parent());
-                if (is_valid) {
-                    let elm = this
-                    let data = $(elm).val()
-                    let $label = $(elm).next("label")
-                    $label.siblings().hide()
-                    $label.show().text(data)
+                let data = $(this).val();
+                let $label = $(this).next("label");
+                $label.siblings("input").hide();
+                $label.show().text(data);
 
-                    let parcel_info = $(this).data('parcelinfo')
-                    if (parcel_info) {
-                        let ls_info = "Abiotic_Prop_update"
-                        LoadingScreen.show(ls_info)
-                        let old_data = parcel_info[parcel_info.findIndex(e => e.type == 'input')].value
-                        parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                        let param_store_key = "soil_params"
-                        TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', (rsp)=>{
-                            update_data_store_callback(rsp, elm, parcel_info, param_store_key, data, old_data)
-                            LoadingScreen.hide(ls_info)
-                        })
-                        table_data = get_Data_from_table(`#${focusTblId}`)
+                let is_valid = elementIsValid($(this).parent());
+
+                if (`#${focusTblId}` === spatially_varying_tblId) {
+                    if (is_valid) {
+                        submit_spatially_varying_row(focusTblId, this, data);
                     }
-                } else {
-                    let elm = this
-                    let data = $(elm).val()
-                    let $label = $(elm).next("label")
-                    $label.siblings("input").hide()
-                    $label.show().text(data)
+                    else {
+                        let parcel_info = $(this).data('parcelinfo')
+                        parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
+                    }
+                } else if (is_valid) {
+                    submit_abiotic_cell(focusTblId, this, data);
                 }
             })
         }
@@ -677,6 +667,38 @@
         function create_cell_html(parcel_info, data, cell_prop, cell_data, err_html=""){
             return "<input "+err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
                     "<label "+err_html+" class='" + cell_prop + "'>" + cell_data + "</label>"
+        }
+
+        function submit_abiotic_cell(focusTblId, cell, data) {
+            let parcel_info = $(cell).data('parcelinfo')
+            if (parcel_info) {
+                let ls_info = "Abiotic_Prop_update"
+                LoadingScreen.show(ls_info)
+                let old_data = parcel_info[parcel_info.findIndex(e => e.type == 'input')].value
+                parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
+                let param_store_key = "soil_params"
+                TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', (rsp)=>{
+                    update_data_store_callback(rsp, elm, parcel_info, param_store_key, data, old_data)
+                    LoadingScreen.hide(ls_info)
+                })
+                table_data = get_Data_from_table(`#${focusTblId}`)
+            }
+        }
+
+        function submit_spatially_varying_row(focusTblId, cell, data) {
+            $(cell).parents("tr").find("input.editableCell").each((i,f)=>{
+                LoadingScreen.show('submit_sv_val');
+                let parcel_info = $(f).data('parcelinfo');
+                if (parcel_info) {
+                    if (f == cell) {
+                        parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data;
+                    }
+                    TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', ()=>{
+                        LoadingScreen.hide('submit_sv_val');
+                    })
+                    table_data = get_Data_from_table(`#${focusTblId}`);
+                }
+            })
         }
 
         function get_Data_from_table(thisTableID){
