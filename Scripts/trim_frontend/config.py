@@ -5,19 +5,30 @@ app_folder = os.path.abspath(os.path.dirname(__file__))
 root = os.path.dirname(app_folder)
 has_mail = os.getenv('MAIL_USERNAME') is not None
 
-if 'RDS_DB_NAME' in os.environ:
-    USERNAME = os.environ['RDS_USERNAME']
-    PASSWORD = os.environ['RDS_PASSWORD']
-    HOST = os.environ['RDS_HOSTNAME']
-    PORT = os.environ['RDS_PORT']
-    DBNAME = os.environ['RDS_DB_NAME']
+if 'SQLITE_DB_NAME' in os.environ:
+    db_uri = f'sqlite:///{root}/database.db'
 else:
-    import urllib.parse
-    USERNAME = "root"
-    PASSWORD = urllib.parse.quote_plus(os.getenv('MYSQLPASSWORD'))
-    HOST = "localhost"
-    PORT = "3306"
-    DBNAME = "pytrim"
+    if 'RDS_DB_NAME' in os.environ:
+        USERNAME = os.environ['RDS_USERNAME']
+        PASSWORD = os.environ['RDS_PASSWORD']
+        HOST = os.environ['RDS_HOSTNAME']
+        PORT = os.environ['RDS_PORT']
+        DBNAME = os.environ['RDS_DB_NAME']
+    elif 'MYSQL_DB_NAME' in os.environ:
+        import urllib.parse
+        USERNAME = os.environ['MYSQL_USERNAME']
+        PASSWORD = str(os.environ['MYSQL_PASSWORD'])
+        HOST = os.environ['MYSQL_HOSTNAME']
+        PORT = os.environ['MYSQL_PORT']
+        DBNAME = os.environ['MYSQL_DB_NAME']
+    else:
+        import urllib.parse
+        USERNAME = "root"
+        PASSWORD = urllib.parse.quote_plus(str(os.getenv('MYSQLPASSWORD')))
+        HOST = "localhost"
+        PORT = "3306"
+        DBNAME = "pytrim"
+    db_uri = f'mysql+pymysql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}'
 
 class AppConfig:
     # Template config
@@ -65,6 +76,9 @@ class AppConfig:
     BOTO_S3_BUCKET = ''
     BOTO_AWS_REGION = 'us-east-1'
 
+    TRIM_ENV_PROFILE = os.getenv('TRIM_ENV_PROFILE', 'local')
+    print(f"LOADED TRIM_ENV_PROFILE: {TRIM_ENV_PROFILE}")
+
 
 class ProdConfig(AppConfig):
     SECRET_KEY = os.getenv('SECRET_KEY', '')
@@ -74,8 +88,7 @@ class ProdConfig(AppConfig):
 class DevConfig(AppConfig):
     SECRET_KEY = 'dcf917c34aec178987494a853bffa479'
     SECURITY_PASSWORD_SALT = ''
-    # SQLALCHEMY_DATABASE_URI = f'sqlite:///{root}/database.db'
-    SQLALCHEMY_DATABASE_URI = f'mysql+pymysql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}'
+    SQLALCHEMY_DATABASE_URI = db_uri
     SQLALCHEMY_ECHO = False
 
 
@@ -86,7 +99,6 @@ class TestConfig(DevConfig):
     BCRYPT_LOG_ROUNDS = 4
     MAIL_SUPPRESS_SEND = True
     # SQLALCHEMY_DATABASE_URI = f'sqlite:///{app_folder}/test.db'
-    SQLALCHEMY_DATABASE_URI = f'mysql+pymysql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}'
 
     # Security config
     SECURITY_CONFIRMABLE = False

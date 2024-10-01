@@ -1,21 +1,26 @@
 import json
-import time
-import sqlalchemy
-from datetime import datetime
+import os
 import re
+import time
+from datetime import datetime
+from pathlib import Path
 
+import boto3
 import pandas as pd
-import pymysql.err
 from flask import Blueprint, request, render_template, redirect, url_for
 from flask_security import login_required, current_user
-from flask_api import ApiResult
+from flask_api import ApiException, ApiResult
 from datetime import datetime
-# from trim_db import ScenarioService, ParcelService, \
-#     CompartmentService, VolumeElementService, ParameterService, ChemicalService, FormulaService, ScenarioLoadRunProc
-from trim_db.services import *
-from trim_db.schema import *
-from trim_frontend import api
+from trim_db.schema import ScenarioLoadRunProc, \
+    CustomParameter, ParameterDefinition
+from trim_db.services import ScenarioService, ChemicalService, \
+    ParcelService, CompartmentService, VolumeElementService, \
+    ParameterService, FormulaService
+from trim_db.services.parameters import get_or_create_custom_param
+from trim_frontend import api, db
+from trim_frontend.scenarios.utils import init_first_time_default_param_values, init_erosion_default_params
 from trim_frontend.parcels.routes import delete_parcel_contents
+from .defaults import *
 from .forms import *
 from ..utils.logging import make_logger
 from trim_core.algorithms.full_model_run import run_full_model
@@ -24,49 +29,6 @@ from trim_core.algorithms.full_model_run import run_full_model
 import traceback
 
 scenario = Blueprint('scenario', __name__)
-
-param_map = {
-    'meteo': {
-        'meteo_ambient_air_static_value': 'AirTemperature',
-        'meteo_ambient_air_field_name_TS': 'AirTemperature',
-        'meteo_wind_speed_static_value': 'horizontalWindSpeed',
-        'meteo_wind_speed_field_name_TS': 'horizontalWindSpeed',
-        'meteo_wind_direction_static_value': 'windDirection',
-        'meteo_wind_direction_field_name_TS': 'windDirection',
-        'meteo_mixing_height_static_value': 'mixingHeight',
-        'meteo_mixing_height_field_name_TS': 'mixingHeight',
-        'meteo_daytime_indicator_static_value': 'isDay_Dynamic',
-        'meteo_daytime_indicator_field_name_TS': 'isDay_Dynamic',
-        'meteo_precipitation_static_value_rate': 'Rain',
-        'meteo_precipitation_field_name_TS': 'Rain',
-        'meteo_interception_fractions_static_deciduous': ['Deciduous_Leaf', 'WetDepInterceptionFraction_UserSupplied'],
-        'meteo_interception_fractions_static_grass': ['Grass_Leaf', 'WetDepInterceptionFraction_UserSupplied'],
-        'meteo_interception_fractions_static_coniferous': ['Coniferous_Leaf', 'WetDepInterceptionFraction_UserSupplied'],
-        'meteo_interception_fractions_static_agriculture': ['Agriculture_Leaf', 'WetDepInterceptionFraction_UserSupplied'],
-        'meteo_interception_fractions_calculated_deciduous': ['Deciduous_Leaf', 'CalculateWetDepInterceptionFraction'],
-        'meteo_interception_fractions_calculated_grass': ['Grass_Leaf', 'CalculateWetDepInterceptionFraction'],
-        'meteo_interception_fractions_calculated_coniferous': ['Coniferous_Leaf', 'CalculateWetDepInterceptionFraction'],
-        'meteo_interception_fractions_calculated_agriculture': ['Agriculture_Leaf', 'CalculateWetDepInterceptionFraction']
-    },
-    'seasonal': {
-        'seasonal_deciduous_forest_litterfall_static_value': ['Deciduous_Leaf', 'LitterFallRate'],
-        'seasonal_deciduous_forest_litterfall_field_name_TS': ['Deciduous_Leaf', 'LitterFallRate'],
-        'seasonal_deciduous_forest_allowexchange_field_name_TS': ['Deciduous_Leaf', 'AllowExchange_Dynamic'],
-        'seasonal_deciduous_forest_allowexchange_static_value': ['Deciduous_Leaf', 'AllowExchange_Dynamic'],
-        'seasonal_coniferous_forest_litterfall_static_value': ['Coniferous_Leaf', 'LitterFallRate'],
-        'seasonal_coniferous_forest_litterfall_field_name_TS': ['Coniferous_Leaf', 'LitterFallRate'],
-        'seasonal_coniferous_forest_allowexchange_static_value': ['Coniferous_Leaf', 'AllowExchange_Dynamic'],
-        'seasonal_coniferous_forest_allowexchange_field_name_TS': ['Coniferous_Leaf', 'AllowExchange_Dynamic'],
-        'seasonal_grasses_herbs_litterfall_static_value': ['Grass_Leaf', 'LitterFallRate'],
-        'seasonal_grasses_herbs_litterfall_field_name_TS': ['Grass_Leaf', 'LitterFallRate'],
-        'seasonal_grasses_herbs_allowexchange_static_value': ['Grass', 'AllowExchange_Dynamic'],
-        'seasonal_grasses_herbs_allowexchange_field_name_TS': ['Grass', 'AllowExchange_Dynamic'],
-        'seasonal_agriculture_litterfall_static_value': ['Agriculture_Leaf', 'LitterFallRate'],
-        'seasonal_agriculture_litterfall_field_name_TS': ['Agriculture_Leaf', 'LitterFallRate'],
-        'seasonal_agriculture_allowexchange_static_value': ['Agriculture', 'AllowExchange_Dynamic'],
-        'seasonal_agriculture_allowexchange_field_name_TS': ['Agriculture', 'AllowExchange_Dynamic'],
-    }
-}
 
 
 @scenario.route('/scenario', methods=['GET'])
@@ -105,6 +67,8 @@ def create_scenario():
     # Set the current_user as the form creator
     s.creator = current_user
 
+    init_first_time_default_param_values()
+
     # Save the scenario
     ScenarioService.commit()
 
@@ -126,10 +90,99 @@ api.use_api_errors(scenario_api)
 @scenario_api.route('/api/scenario/<int:id>', methods=['GET'])
 @login_required
 def get_scenario(id):
-    # Do we need this. The scenario parameters are already obtained in parcels/routes.py using s.serialazible().
-    # s = ScenarioService.get(id)
-    # return ApiResult({'scenario': s.as_serializable()})
-    return ApiResult({'scenario': 'success'})
+    logger = make_logger('scenario_api_get')
+    s = ScenarioService.get(id)
+    start_time = time.time()
+    s = s.as_serializable()
+    init_erosion_default_params()
+    logger.info(f"Acquired scenario in {time.time() - start_time} seconds")
+    return ApiResult({'scenario': s})
+
+
+@scenario_api.route(
+    '/api/scenario/<int:scenario_id>/chemical', methods=['GET']
+)
+@login_required
+def get_scenario_chemicals(scenario_id):
+    s = ScenarioService.get(scenario_id)
+    if not s:
+        raise ApiException("Unknown Scenario")
+    chems = [c.as_serializable() for c in s.chemicals]
+    return ApiResult({
+        'chemicals': chems
+    })
+
+
+@scenario_api.route('/api/scenario/<int:scenario_id>/meteorology/', methods=['GET'])
+@login_required
+def get_scenario_met_data(scenario_id):
+    logger = make_logger('scenario_met_api_get')
+    s = ScenarioService.get(scenario_id)
+    start_time = time.time()
+    try:
+        met = get_met_data(s)
+    except Exception as e:
+        print(e)
+        met = {}
+    logger.info(f"Acquired meteorology in {time.time() - start_time} seconds")
+    return ApiResult({'meteorology': met})
+
+
+@scenario_api.route('/api/scenario/<int:scenario_id>/seasonal_dynamics/', methods=['GET'])
+@login_required
+def get_scenario_seasonal_dynamics(scenario_id):
+    logger = make_logger('scenario_seasonal_dynamics_api_get')
+    s = ScenarioService.get(scenario_id)
+    start_time = time.time()
+    met = get_seasonal_dynamics(s)
+    logger.info(f"Acquired seasonal dynamics in {time.time() - start_time} seconds")
+    return ApiResult({'seasonal_dynamics': met})
+
+
+@scenario_api.route('/api/scenario/<int:scenario_id>/runoff_matrix/', methods=['GET'])
+@login_required
+def get_scenario_runoff_matrix(scenario_id):
+    logger = make_logger('scenario_runoff_matrix_api_get')
+    s = ScenarioService.get(scenario_id)
+    start_time = time.time()
+    runoff_matrix = get_surface_runoff(s)
+    logger.info(f"Acquired runoff matrix in {time.time() - start_time} seconds")
+    return ApiResult({'runoff_matrix': runoff_matrix})
+
+
+@scenario_api.route(
+    '/api/scenario/<int:scenario_id>/parameter',
+    methods=['GET']
+)
+@login_required
+def get_parameters(scenario_id):
+    s = ScenarioService.get(scenario_id)
+    if not s:
+        raise ApiException("Unknown Scenario")
+
+    params = request.args.getlist('parameter')
+    s_params = dict(s.parameters)
+    r = {}
+    for x in params:
+        param = s_params.get(x)
+        if param is not None:
+            db.session.add(param)
+            param = param.as_serializable()
+        r[x] = param
+
+    ScenarioService.commit() # required because of session update
+    return ApiResult({'parameters': r})
+
+
+@scenario_api.route('/api/scenario/<int:scenario_id>/results/', methods=['GET'])
+@login_required
+def get_last_results(scenario_id):
+    logger = make_logger('scenario_last_results_api_get')
+    s = ScenarioService.get(scenario_id)
+    start_time = time.time()
+    latest_run_info = get_latest_run_info(s)
+    logger.info(f"Acquired scenario results in {time.time() - start_time} seconds")
+    return ApiResult({'latest_run_info': latest_run_info})
 
 
 @scenario_api.route('/api/scenario/update', methods=['POST'])
@@ -138,9 +191,61 @@ def update_scenario():
     logger = make_logger('scenario_api_update')
     ret_val = ''
 
-    def update_custom_param(scen, comp, par_name, par_val):
+    def create_new_custom_param_meteo(scen, comp, par_name):
+        default_param = ParameterService.definitions.get_all(variable_name=par_name)
+        
+        if par_name == "AirTemperature":
+            default_param = ParameterService.definitions.get(variable_name=par_name, default_unit="K")
+        elif par_name == "WetDepInterceptionFraction_UserSupplied":
+            default_param = ParameterService.definitions.get_all(variable_name=par_name, 
+                                                                 domain=ParameterService.domains.get(name="Compartment"))
+            default_param = default_param[0]
+        elif len(default_param) > 1: 
+            print(f"\tTried to create new custom parameter but multiple defaults found!\n{default_param}")
+            default_param = default_param[0]
+        else:
+            default_param = default_param[0]
+
+        return get_or_create_custom_param(
+            default_param,
+            {"requirements": f"(self.id == {comp.id})", "scenario_id": scen.id},
+        )
+
+    def create_litterfallrate_custom_param(scen, comps, par_name):
+        # FIXME shouldn't use this eventually, maybe just create for all media?
+        # step 1 grab the right compartments by media name, using a hardcoded map
+        comp_media = [
+            "Leaf_Grasses_Herbs", # Grass
+            "Leaf_Deciduous_Forest" # Deciduous forest
+        ]
+        filtered_comps = [c for c in comps if c.name in comp_media]
+        if not filtered_comps:
+            filtered_comps = comps
+
+        # step 2 grab the correct default param
+        default_param = ParameterService.definitions.get(variable_name=par_name, 
+                                                            domain=ParameterService.domains.get(name="Compartment"))
+        
+        # step 3 create new custom param for each of the identified compartments (per parcel)
+        custom_params = []
+        for comp in filtered_comps:
+            custom_params.append(
+                get_or_create_custom_param(
+                    default_param,
+                    {"requirements": f"(self.id == {comp.id})", "scenario_id": scen.id},
+                    no_commit=True
+                )
+            )
+        ParameterService.commit()
+        return custom_params
+
+    def update_custom_param(scen, comp, par_name, par_val, create_if_dne = False):
         par_list = [p for p in scen.custom_params if
                     p.definition.variable_name == par_name and f'self.id == {comp.id}' in p.requirements]
+        
+        if not par_list and create_if_dne:
+            par_list.append(create_new_custom_param_meteo(scen, comp, par_name))
+
         for c_p in par_list:
             c_p.value = par_val
             ParameterService.update(c_p)
@@ -149,10 +254,19 @@ def update_scenario():
     def update_assumed_all_comp_fixed_params(scen, comps, par_name, par_val):
         # media_name = comp.media.name
         # c_par_list = [c.parameters.get(par_name) for c in scen.compartments if c.media.isa(media_name)]
-        c_par_list = [c.parameters.get(par_name) for c in comps]
+        ParameterService.commit() # for some reason gets open instance errors otherwise
+        c_par_list = set(c.parameters.get(par_name) for c in comps if c.parameters.get(par_name))
+        c_par_list = [par for par in c_par_list if isinstance(par, CustomParameter)]
+
+        if not c_par_list:
+            c_par_list = create_litterfallrate_custom_param(scen, comps, par_name)
+
         for c_p in c_par_list:
-            c_p.value = par_val
-            ParameterService.update(c_p)
+            try:                
+                c_p.value = par_val
+                ParameterService.update(c_p)
+            except AttributeError as e:
+                print(e)
         ParameterService.commit()
 
     def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
@@ -232,6 +346,7 @@ def update_scenario():
 
     try:
         scenario_data = request.form.to_dict()
+        print(scenario_data)
         if not scenario_data['id']:
             raise AssertionError("Scenario ID cannot be blank.")
         # Get the specified parcel
@@ -241,8 +356,8 @@ def update_scenario():
         field_name = scenario_data["field"]
         if field_name == "erosionRateCalcSource":  # Data from erosion tab
             ercs = scenario_data["erosionRateCalcSource"]
-            ercs_obj = [pp for pp in ParameterService.definitions.get_all() if pp.full_name == "erosionRateCalcSource"]
-            ercs_cp = ParameterService.get_or_create(definition_id=ercs_obj[0].id, scenario_id=scenario_data['id'])
+            default_ercs = ParameterService.definitions.get(full_name="erosionRateCalcSource")
+            ercs_cp = ParameterService.get_or_create(definition=default_ercs, scenario_id=s.id)
             ercs_cp.value = ercs
             # for cp in s.custom_params:
             #     if cp.definition.variable_name == "erosionRateCalcSource":
@@ -257,15 +372,15 @@ def update_scenario():
                     # TODO Why is this not working???
                     # c.parameters.get(param_name).value = scenario_data[field_name]
                     # CompartmentService.update(c)
-                    update_custom_param(s, c, param_name, scenario_data[field_name])
+                    update_custom_param(s, c, param_name, scenario_data[field_name], create_if_dne=True)
             else:
                 param_name = param_map["meteo"].get(field_name)
                 param_data = scenario_data[field_name]
                 if "_static_" in field_name:
-                    update_custom_param(s, s, param_name, param_data)
+                    update_custom_param(s, s, param_name, param_data, create_if_dne=True)
                 elif field_name.endswith("_TS"):
                     ret_val = meteo_wgt_avg_value_from_timeseries(param_data, "MET")
-                    update_custom_param(s, s, param_name, list(ret_val.values())[0])
+                    update_custom_param(s, s, param_name, list(ret_val.values())[0], create_if_dne=True)
         elif field_name.startswith("seasonal_"):  # Data from the seasonal dynamics tab
             param_media = param_map["seasonal"].get(field_name)[0]
             param_name = param_map["seasonal"].get(field_name)[1]
@@ -281,20 +396,28 @@ def update_scenario():
                 ret_val = meteo_wgt_avg_value_from_timeseries(param_data, ret_type)
                 if ret_type != "None":
                     update_assumed_all_comp_fixed_params(s, comp_list, param_name, ret_val[ret_type_name])
-        elif field_name == "startDate" or field_name == "endDate":
+        elif field_name == "simulation_start_date" or field_name == "simulation_end_date":
             date_parts = scenario_data[field_name].split("-")
             date_obj = datetime(int(date_parts[0]), int(date_parts[1]), int(date_parts[2]))
             ts_date = time.mktime(date_obj.timetuple())
-            par_name = "simulationBeginDateTime" if field_name == "startDate" else "simulationEndDateTime"
+            par_name = "simulationBeginDateTime" if field_name == "simulation_start_date" else "simulationEndDateTime"
             par_list = {par_k: par for par_k, par in s.parameters.items() if par_k == par_name}
-            this_param = par_list[par_name]
-            if this_param.__tablename__ != "custom_parameter":
+            this_param = par_list.get(par_name)
+            if this_param is None:
+                s.parameters.add(par_name, value=ts_date)
+            elif this_param.__tablename__ != "custom_parameter":
                 ParameterService.create(definition_id=this_param.id, scenario_id=s.id,
                                         requirements=f"(self.id == {s.id})", value=ts_date)
             else:
                 this_param.value = ts_date
                 ParameterService.update(this_param)
             ParameterService.commit()
+        elif field_name == "chemical": # emission settings, add/remove chemicals from a scenario
+            new_chem = ChemicalService.get(name=scenario_data["chemical"])
+            if new_chem in s.chemicals:
+                s.chemicals.remove(new_chem)
+            else:
+                s.chemicals.append(new_chem)
 
     except Exception as e:
         logger.error(traceback.format_exc())
@@ -384,8 +507,8 @@ def copy_scenario():
         logger.info(f'Copied scenario parameters in {time.time() - scen_par_start_time} seconds')
 
         # Add scenario chemicals
-        chem_par_start_time = time.time()
         logger.info("Adding scenario Chemicals")
+        chem_par_start_time = time.time()
         for sc in s.chemicals:
             ns.chemicals.append(sc)
             # ScenarioService.commit()
@@ -595,10 +718,23 @@ def delete_scenario():
             for ve in parcel.volume_elements:
                 VolumeElementService.delete(ve, False)
 
+            # Delete some custom parameters that may be left behind for this scenario
+            # (they may be for domains other than compartment)
+            scen_custom_params = [p for p in ParameterService.get_all() if p.scenario.id == s.id]
+            for s_cp in scen_custom_params:
+                ParameterService.delete(s_cp)
+
             # Delete parcel
             ParcelService.delete(parcel.id)
             logger.info(f'Deleted parcel {parcel.name} for {s.name}...')
         # ParcelService.commit()
+
+        # Delete scenario Proc info
+        s_proc = [sp for sp in s.proc_status]
+        if len(s_proc) > 0:
+            for sp in s_proc:
+                logger.info(f'Deleted result {sp.id} for {s.name}...')
+                ScenarioService.db.session.delete(sp)
 
         # Delete scenario
         ScenarioService.delete(s.id)
@@ -612,23 +748,62 @@ def delete_scenario():
 
     return redirect(request.referrer)
 
-@scenario_api.route('/api/scenario/run/', methods=['POST', 'GET'])
+@scenario_api.route('/api/scenario/clearresult/', methods=['POST'])
 @login_required
-def run_result_scenario():
+def clear_old_result():
     exec_data = request.form.to_dict()
     if not exec_data.get('scenario_id'):
         raise AssertionError("Scenario ID cannot be blank.")
     scenario_id = int(exec_data['scenario_id'])
-    s = ScenarioService.get(scenario_id)
+    scn = ScenarioService.get(scenario_id)
+    print(f"Clearing Last Model Run for {scn.name} {[v for v in scn.proc_status][0].run_datetime}...")
+    data_resp = {"success": "success"}
+    try:
+        if len(scn.proc_status.all()) > 0:
+            scn.proc_status.delete()
+    except Exception as e:
+        print([v for v in scn.proc_status][0])
+        print(f'problem deleting {e}')
+    print(f"Model Result deleted for {scn.name}")
+    ScenarioService.commit()
+    return ApiResult(data_resp)
+
+@scenario_api.route('/api/scenario/run/', methods=['POST', 'GET'])
+@login_required
+def run_result_scenario():
+    trim_env_profile = os.environ.get("TRIM_ENV_PROFILE", "").lower()
+
+    exec_data = request.form.to_dict()
+    if not exec_data.get('scenario_id'):
+        raise AssertionError("Scenario ID cannot be blank.")
+    scenario_id = int(exec_data['scenario_id'])
 
     try:
-        print("Starting Model Run...")
-        json_n_avg, json_c_avg, output_file_n, output_file_c = run_full_model(s)
+        # in dev/prod, we execute an AWS StepFunction to run the model via Docker/ECS. Locally,
+        # we just run the model directly.
+        if trim_env_profile in [ "dev", "prod" ]:
+            sfn_client = boto3.client("stepfunctions")
+            state_machine_arn = os.environ.get("TRIM_DOCKERIZED_STATEMACHINE_ARN")
 
-        data_resp = {"mass": json_n_avg, "conc": json_c_avg, "outputMass": output_file_n, "outputConc": output_file_c}
+            if state_machine_arn is not None:
+                resp = sfn_client.start_execution(
+                    stateMachineArn=state_machine_arn,
+                    input=json.dumps({ "scenarioId": str(scenario_id), "generateFakeResults": "false" })
+                )
+                data_resp = { "executionArn": resp["executionArn"] }
+            else:
+                data_resp = { "error": "Missing required variable to run re-architected model" }
+        else:
+            s = ScenarioService.get(scenario_id)
+            print(f"Starting Model Run ({datetime.now()}...")
+            json_n_avg, json_c_avg, output_file_n, output_file_c = run_full_model(s)
+
+            data_resp = {"mass": json_n_avg, "conc": json_c_avg, "outputMass": output_file_n, "outputConc": output_file_c}
     except Exception as e:
         print(e)
         data_resp = {"error": e}
+
+    print(f"Model Run Finished ({datetime.now()}...")
 
     return ApiResult(data_resp)
 
@@ -647,8 +822,8 @@ def get_result_scenario():
         logger.info(f'Getting Model Run Results for scenario {s.name}...')
         fin_stat = [v for v in s.proc_status][0].run_status
         run_date = [v for v in s.proc_status][0].run_datetime
-        output_file_n = [v for v in s.proc_status][0].result_file_nt
-        output_file_c = [v for v in s.proc_status][0].result_file_conc
+        output_file_n = Path([v for v in s.proc_status][0].result_file_nt).name
+        output_file_c = Path([v for v in s.proc_status][0].result_file_conc).name
         json_n_avg = [v for v in s.proc_status][0].result_nt
         json_c_avg = [v for v in s.proc_status][0].result_conc
 
@@ -690,3 +865,67 @@ def reset_poll_model_run_scenario():
         [s.proc_status][0].add(new_proc)
     ScenarioService.commit()
     return "success"
+
+@scenario_api.route('/api/scenario/check_execution_completion/', methods=['POST'])
+@login_required
+def check_execution_completion():
+    req_data = request.form.to_dict()
+    if not req_data.get('execution_arn'):
+        raise AssertionError("execution ARN cannot be blank.")
+
+    execution_arn = req_data['execution_arn']
+
+    sfn_client = boto3.client("stepfunctions")
+
+    desc_resp = sfn_client.describe_execution(executionArn=execution_arn)
+    if desc_resp["status"] == "SUCCEEDED":
+        resp = {
+            "success": True,
+            "sfn_output": json.loads(desc_resp["output"])
+        }
+    else:
+        # success should still be True b/c we didn't fail; we're just not done yet...
+        # calling client will just wait and retry.
+        resp = {
+            "success": True,
+            "sfn_output": False
+        }
+
+    return ApiResult(resp)
+
+# downloads the output from a model run and creates presigned url's for the xlsx files
+@scenario_api.route('/api/scenario/fetch_run_results/', methods=['POST'])
+@login_required
+def fetch_run_results():
+    req_data = request.form.to_dict()
+    if not req_data.get('bucket') or not req_data.get('uuid'):
+        raise AssertionError("bucket/uuid cannot be blank.")
+
+    bucket = req_data['bucket']
+    uuid = req_data['uuid']
+
+    s3_client = boto3.client("s3")
+    s3_resource = boto3.resource("s3")
+
+    content_object = s3_resource.Object(bucket, f"{uuid}/model_output.json")
+    file_content = content_object.get()["Body"].read().decode("utf-8")
+    json_content = json.loads(file_content)
+
+    resp = {
+        "success": True,
+        "model_output": json_content
+    }
+
+    for f in ["outputMass", "outputConc"]:
+        full_key = f"{uuid}/{f}.xlsx"
+        response = s3_client.generate_presigned_url("get_object",
+                                                    Params={
+                                                        "Bucket": bucket,
+                                                        "Key": full_key
+                                                    },
+                                                    ExpiresIn=600) # expires in 10 minute(s)
+
+        resp[f] = response
+
+
+    return ApiResult(resp)

@@ -40,6 +40,62 @@ window.TRIM = (function(trim) {
         })
     }
 
+    api.getMeteorology = function(scenario) {
+        var url = api.getUrl('scenario_api.get_scenario_met_data');
+        return AJAX.call({
+            url: url.replace('/0/', '/' + scenario.id + '/')
+        });
+    }
+
+    api.getSeasonalDynamics = function(scenario) {
+        var url = api.getUrl('scenario_api.get_scenario_seasonal_dynamics');
+        return AJAX.call({
+            url: url.replace('/0/', '/' + scenario.id + '/')
+        });
+    }
+
+    api.getRunoffMatrix = function(scenario) {
+        var url = api.getUrl('scenario_api.get_scenario_runoff_matrix');
+        return AJAX.call({
+            url: url.replace('/0/', '/' + scenario.id + '/')
+        });
+    }
+
+    api.getChemicals = function(scenario) {
+        if (scenario === undefined) {
+            var url = api.getUrl('chemicals_api.get_chemicals');
+            return AJAX.call({
+                url: url
+            });
+        }
+        else {
+            var url = api.getUrl('scenario_api.get_scenario_chemicals');
+            return AJAX.call({
+                url: url.replace('/0/', '/' + scenario.id + '/')
+            });
+        }
+    }
+
+    api.getParameters = function(scenario, paramNames) {
+        var url = api.getUrl('scenario_api.get_parameters')
+            .replace('/0/', '/' + scenario.id + '/');
+        var query = [];
+        for (var x of paramNames) {
+            query.push('parameter=' + x)
+        }
+        url = url + '?' + query.join('&')
+        return AJAX.call({
+            url: url
+        });
+    }
+
+    api.getLastResults = function(scenario) {
+        var url = api.getUrl('scenario_api.get_last_results');
+        return AJAX.call({
+            url: url.replace('/0/', '/' + scenario.id + '/')
+        });
+    }
+
     api.loadForms = function(names) {
         if (!names) {
             return undefined;
@@ -120,6 +176,30 @@ window.TRIM = (function(trim) {
         });
     };
 
+    api.uploadParcelFile = function(fields, callbackFxn) {
+        var url = api.getUrl('file_api.parse_parcel');
+        var data = makeFormData(fields);
+
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: data,
+            callback: callbackFxn
+        });
+    };
+
+    api.uploadSurfaceRunoffMatrixFile = function(fields, callbackFxn) {
+        var url = api.getUrl('file_api.parse_runoff_matrix');
+        var data = makeFormData(fields);
+
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: data,
+            callback: callbackFxn
+        });
+    };
+
     api.getSoilData = function(tillage) {
         var url = api.getUrl('external_api.get_soil_data').replace('/both', '/' + tillage);
 
@@ -166,14 +246,26 @@ window.TRIM = (function(trim) {
         });
     };
 
-    api.runModel = function(scenario_info) {
+    api.runModel = function(scenario_info, callback_fxn) {
         let url = api.getUrl('scenario_api.run_result_scenario');
         let data = makeFormData(scenario_info);
         return AJAX.call({
             method: 'POST',
             url: url,
-            data: data
+            data: data,
+			callback: callback_fxn
         });
+    }
+
+    api.clearOldResults = function(scenario_info, callback_fxn) {
+        let url = api.getUrl('scenario_api.clear_old_result');
+        let data = makeFormData(scenario_info);
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: data,
+            callback: callback_fxn
+        })
     }
 
     api.getResults = function(scenario_info) {
@@ -204,6 +296,31 @@ window.TRIM = (function(trim) {
         });
     }
 
+    api.checkExecutionCompletion = function(execution_arn, callback_fxn) {
+        let url = api.getUrl('scenario_api.check_execution_completion');
+        let data = makeFormData([{ "name": "execution_arn", "value": execution_arn }])
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: data,
+			callback: callback_fxn
+        });
+    }
+
+    api.fetchRunResults = function(bucket, uuid, callback_fxn) {
+        let url = api.getUrl('scenario_api.fetch_run_results');
+        let data = makeFormData([{ "name": "bucket", "value": bucket }, {"name": "uuid", "value": uuid}])
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: data,
+			callback: callback_fxn
+        });
+    }
+
     trim.api = api;
+
+    trim.store = {}
+
     return trim;
 })(window.TRIM || {});

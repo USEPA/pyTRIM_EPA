@@ -1,6 +1,7 @@
 import sqlalchemy as sa
 from ..utils.base import Model
 from ..utils.caching import CacheManager
+from ..utils.serialize import register_serializer
 from .equations import *
 from .utils import *
 
@@ -324,6 +325,17 @@ class ParameterDefinition(Model):
         )
 
 
+@register_serializer(ParameterDefinition)
+def serialize_parameter_definition(pd: ParameterDefinition):
+    s = {
+        'name': pd.variable_name,
+        'value': pd.default_value,
+        'unit': pd.default_unit,
+        'formula': pd.default_formula.equation if pd.default_formula else None
+    }
+    return s
+
+
 class CustomParameter(Model):
     definition_id = sa.Column(
         sa.Integer(), sa.ForeignKey('parameter_definition.id'), nullable=False
@@ -355,6 +367,9 @@ class CustomParameter(Model):
     def validate(self, entity):
         if not self.definition.domain.validate(entity):
             return False
+
+        if not (self.requirements or '').strip():
+            return True
 
         if not hasattr(self, '_validator'):
             setattr(self, '_validator', as_function(self.requirements))
@@ -395,3 +410,14 @@ class CustomParameter(Model):
             + f' "{self.definition.name}", {self.quantity}'
             + ')'
         )
+
+
+@register_serializer(CustomParameter)
+def serialize_custom_parameter(cp: CustomParameter):
+    s = {
+        'name': cp.definition.variable_name,
+        'value': cp.value,
+        'unit': cp.unit,
+        'formula': cp.formula.equation if cp.formula else None
+    }
+    return s

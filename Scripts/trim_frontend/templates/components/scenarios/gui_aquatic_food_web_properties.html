@@ -20,7 +20,7 @@
                 <div class="pill pill-alert col-sm">
                     <small>
                         <strong>
-                            <u>Click on the table cells to edit properties.</u>Please note that the values displayed in the table at the time of the "Save" operation are the values that will be incorporated into the calculations
+                            <u>Click on the table cells to edit properties</u>. Please note that the values displayed in the table at the time of the "Save" operation are the values that will be incorporated into the calculations
                         </strong>
                         <br><span style='color: firebrick;'>*</span> All editable cells are required.
                     </small>
@@ -85,74 +85,7 @@
             </div>
         </div>
  </div>
-<style>
-    .parcelMultiselect {
-      width: 100%;
-    }
-
-    .selectBox {
-      position: relative;
-    }
-
-    .selectBox select {
-      width: 100%;
-    }
-
-    .overSelect {
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 0;
-      bottom: 0;
-    }
-
-    .parcelSelectOptions {
-      display: none;
-      border: 0.5px #7c7c7c solid;
-      background-color: #ffffff;
-      max-height: 150px;
-      overflow-y: scroll;
-    }
-
-    .parcelSelectOptions label {
-      display: block;
-      font-weight: normal;
-      display: block;
-      white-space: nowrap;
-      min-height: 1.2em;
-      background-color: #ffffff00;
-      padding: 0 2.25rem 0 .75rem;
-    }
-
-    .parcelSelectOptions label:hover {
-      background-color: #1e90ff;
-    }
-
-    table.diet{
-        border:solid 1px;
-        margin: 20px auto;
-    }
-
-    th.rotated {
-        height: 220px;
-        white-space: nowrap;
-    }
-
-    th.rotated > div {
-        transform: translate(0px, 75px)
-        rotate(270deg);
-        width: 50px;
-    }
-
-    th.rotated > div > span {
-      padding: 10px 0px;
-    }
-
-    .fa-exclamation-triangle {
-        color:orange;
-    }
-
-</style>
+<link rel="stylesheet" href="{{url_for('static', filename='css/form_styles.css')}}"/>
 <script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}">
 </script>
 <script src="{{ url_for('static', filename='js/lib/dataTables/jquery.dataTables.min.js') }}">
@@ -274,19 +207,29 @@
                     tblHandle.destroy();
                 }
                 tblHandle = $(tblId).removeAttr('width').DataTable({
+                    destroy: true,
                     data : table_data,
                     paging: false,
                     bFilter: false,
                     info: false,
                     bAutoWidth: false,
+                    scrollX: true,
+                    scrollY: 500,
+                    fnCreatedRow: function (row, data, index) {
+                        $(row).find("td.rightBorder-pivoted").addClass("freeze-column")
+                    },
                     columnDefs: [
                        { width: '100%', targets: 0 }
                     ],
                     columns: get_pivoted_columns(table_data, table_type),
                     initComplete: function (settings, json) {
-                        $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                        // $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                        $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
                         $('[data-toggle="tooltip"]').tooltip()
                         $('[data-toggle="popover"]').popover()
+                    },
+                    language: {
+                        emptyTable: 'No Parcels Have Been Defined with a Fish-Food Web'
                     }
                 });
 
@@ -339,8 +282,11 @@
 
             function submit_aquatic_table(elem, parcel_info) {
                 let data = $(elem).val() == "" ? 0 : $(elem).val()
-                parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data                
-                TRIM.api.updateParcel('{{ scenario.id }}', parcel_info)
+                parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
+                LoadingScreen.show('submit_mass'); // since this can take a moment
+                TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', ()=>{
+                    LoadingScreen.hide('submit_mass');
+                });
             }
 
             function submit_diet_tables(elem) {
@@ -376,13 +322,22 @@
                     // Push change to DB
                     let is_valid_row = elementIsValid(this);
                     if (is_valid_row){
-                        TRIM.api.updateParcel('{{ scenario.id }}', parcel_info)   
+                        LoadingScreen.show('submit_diet'); // since this can take a moment
+                        TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', ()=>{
+                            LoadingScreen.hide('submit_diet'); 
+                        });
                     }
                 })
             }
         }
+
         var form = document.getElementById('aquatic-food-web-props-gui');
-        form.addEventListener('form:loaded', function() {
+
+        form.addEventListener('form:visible', function() {
+            console.log('aquatic food web form visible')
+            LoadingScreen.show('aquatic_food_web_loading');
+            TRIM.refreshParcels();
+            document.body.addEventListener('parcels:ready', updateAquaticFoodWeb());
         });
 
         function get_pivoted_columns(table_data, table_type) {
@@ -391,12 +346,16 @@
                 {
                     'data': "Property",
                     'bSortable': false,
+                    'className': 'font-weight-bold rightBorder-pivoted freeze-column',
                     'render': function (data, type, row){
+                        if (!row.Property) {
+                            return '';
+                        }
                         return row.Property.parentNode.outerHTML;
                     }
                 }]
-            let loadedData = $('#root').data('loadedParcels')
-            let data_subset = loadedData['scenario'].filter(e=> (e.hasFishFoodWeb == "Yes"))
+            let parcels = TRIM.store.currentScenario.parcels;
+            let data_subset = parcels.filter(e=> (e.hasFishFoodWeb == "Yes"))
             data_subset.forEach(function (e, i) {
                 if ($(table_header).find("th").length < (data_subset.length + 1)) {
                     $(table_header).append("<th>" + e.name + "</th>")
@@ -453,37 +412,45 @@
             return myRows
         }
 
-        function load_aquatic_parcels(loadedData){
+        function load_aquatic_parcels(parcels){
             let aquatic_data = [];
             $("#AquaticTable").find("[data-id]").each(function (i, p) {
                 let row_data = {};
                 let ids = JSON.parse(p.getAttribute("data-id"));
 
-                loadedData['scenario'].forEach(function (e, i) {
+                parcels.forEach(function (e, i) {
                     if (e.hasFishFoodWeb == "Yes") {
                         let prop = ids["type"];
                         let comp_name = ids["comp_name"];
                         let default_val = JSON.parse(p.getAttribute("data-default"));
 
                         row_data['Property'] = p; // HTML Element
-                        row_data[e.name] = e[prop][comp_name] ? e[prop][comp_name] : default_val;
+                        row_data[e.name] = (e[prop][comp_name] !== null) ? e[prop][comp_name] : default_val;
                     }
                 })
-                aquatic_data.push(row_data);
+                if (!$.isEmptyObject(row_data)) {
+                    aquatic_data.push(row_data);
+                }
             })          
             return aquatic_data;
         }
 
-        document.body.addEventListener('parcels:loaded', function() {
-            let loadedData = $('#root').data('loadedParcels')
+        function updateAquaticFoodWeb() {
+            if (!TRIM.store.currentScenario.parcels) {
+                // Parcels haven't loaded yet; wait a bit and try again
+                setTimeout(function() { updateAquaticFoodWeb(); }, 1000);
+                return;
+            }
+            let parcels = TRIM.store.currentScenario.parcels;
 
             let diet_data = []
             let diet_properties = Object.keys(default_diet_data)
-            if (loadedData.scenario.length > 0) {
-                let aquatic_data = load_aquatic_parcels(loadedData);
-                TableRedraw(aquatic_data, "aquatic")
+            if (parcels.length > 0) {
+                let aquatic_data = load_aquatic_parcels(parcels);
+                TableRedraw(aquatic_data, "aquatic");
+                divDietTables.empty();
                 ////////////////////////////////////////////////////////////////////////////////
-                loadedData['scenario'].forEach(function (e, i) {
+                parcels.forEach(function (e, i) {
                     if (e.hasFishFoodWeb == "Yes") {
                         let this_matrix = $(diet_table_template)
                         let matrix_data = e.aquatic_diet_fractions
@@ -511,9 +478,14 @@
                         divDietTables.append(this_matrix)
                     }
                 })
+                if (!$('#DietTables').children().length) {
+                    var alert = $('<div class="alert alert-light" />');
+                    alert.text('No Parcels Have Been Defined with a Fish-Food Web')
+                    divDietTables.append(alert)
+                }
                 diet_properties.forEach(function (p, i) {
                     let this_diet_property = {}
-                    loadedData['scenario'].forEach(function (e, i) {
+                    parcels.forEach(function (e, i) {
                         if (e.hasFishFoodWeb == "Yes") {
                             this_diet_property['Property'] = p
                             this_diet_property[e.name] = e[default_diet_data[p]['short_name']] ? e[default_diet_data[p]['short_name']] : default_diet_data[p]['default_value'],
@@ -522,10 +494,14 @@
                             this_diet_property["shortProperty"] = default_diet_data[p]['short_name']
                         }
                     })
-                    diet_data.push(this_diet_property)
+                    if (!$.isEmptyObject(this_diet_property)) {
+                        diet_data.push(this_diet_property);
+                    }
                 })
                 TableRedraw(diet_data, "diet")
             }
-        })
+            console.log('populated aquatic food web form!')
+            LoadingScreen.hide('aquatic_food_web_loading');
+        }
     });
 </script>

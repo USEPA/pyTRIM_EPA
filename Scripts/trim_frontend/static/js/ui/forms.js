@@ -190,6 +190,10 @@ window.TRIM = (function(trim) {
                 field.innerText = defaultVal;
             }
         }
+        else if (widget == 'button') {
+           field = document.createElement('a');
+           field.innerHTML = fieldDef.buttonHtml;
+        }
         else {
             var type = dataType;
             if (type == 'int' || type == 'float') {
@@ -217,8 +221,12 @@ window.TRIM = (function(trim) {
         }
         field.id = id;
         field.name = id;
-        field.className = 'form-control form-control-sm';
-        field.style.maxWidth = '100%';
+        if (widget == 'button') {
+            field.className = "btn btn-secondary";
+        }  else {
+            field.className = 'form-control form-control-sm';
+            field.style.maxWidth = '100%';
+        }
 
         if (fieldDef.readonly) {
             field.setAttribute('readonly', 'readonly');
@@ -799,6 +807,8 @@ window.TRIM = (function(trim) {
         return fields
     }
 
+    var formPopulatedEvent = document.createEvent('Event');
+    formPopulatedEvent.initEvent('form:populated', true, true);
     forms.populate = function(form, data) {
         // Convert data to an array if necessary
         // (helps us handle field-list/fieldsets)
@@ -806,9 +816,11 @@ window.TRIM = (function(trim) {
             data = [data];
         }
 
+        var isFieldset = form.tagName.toLowerCase() == 'fieldset';
+
         // Check if we need to build an id-prefix for field-list/fieldsets
         var pref = '';
-        if (form.tagName.toLowerCase() == 'fieldset') {
+        if (isFieldset) {
             pref = form.id + '-';
 
             // Also check if we need to add tabs to the fieldset
@@ -828,32 +840,41 @@ window.TRIM = (function(trim) {
             for (var i = 0, len = fields.inputs.length; i < len; i++) {
                 var input = fields.inputs[i];
                 var checkId = input.id.replace(fullPref, '');
-                if (subData[checkId] !== undefined) {
-                    input.value = subData[checkId];
+                if (subData[checkId] === undefined) {
+                    continue;
                 }
+                if (input.value != null && subData[checkId] === null) {
+                    continue;
+                }
+                input.value = subData[checkId];
             }
 
             // Fill in textarea fields
             for (var i = 0, len = fields.textareas.length; i < len; i++) {
                 var textarea = fields.textareas[i];
                 var checkId = textarea.id.replace(fullPref, '');
-                if (subData[checkId] !== undefined) {
-                    textarea.innerText = subData[checkId];
+                if (subData[checkId] === undefined) {
+                    continue;
                 }
+                if (textarea.innerText && subData[checkId] === null) {
+                    continue
+                }
+                textarea.innerText = subData[checkId];
             }
 
             // Fill in select fields
             for (var i = 0, len = fields.selects.length; i < len; i++) {
                 var select = fields.selects[i];
                 var checkId = select.id.replace(fullPref, '');
-                if (subData[checkId] !== undefined) {
-                    select.selectedIndex = -1;
-                    var opts = select.children;
-                    for (var j = 0; j < opts.length; j++) {
-                        if (opts[j].value == subData[checkId]) {
-                            select.selectedIndex = j;
-                            break;
-                        }
+                if (subData[checkId] === undefined) {
+                    continue;
+                }
+                select.selectedIndex = -1;
+                var opts = select.children;
+                for (var j = 0; j < opts.length; j++) {
+                    if (opts[j].value == subData[checkId]) {
+                        select.selectedIndex = j;
+                        break;
                     }
                 }
             }
@@ -862,10 +883,15 @@ window.TRIM = (function(trim) {
             for (var i = 0, len = fields.fieldsets.length; i < len; i++) {
                 var fieldset = fields.fieldsets[i];
                 var checkId = fieldset.id.replace(fullPref, '');
-                if (subData[checkId] !== undefined) {
-                    forms.populate(fieldset, subData[checkId])
+                if (subData[checkId] === undefined) {
+                    continue;
                 }
+                forms.populate(fieldset, subData[checkId])
             }
+        }
+
+        if (!isFieldset) {
+            form.dispatchEvent(formPopulatedEvent);
         }
     };
 
@@ -926,6 +952,8 @@ window.TRIM = (function(trim) {
         let toggle = create_element("a", marker);
         toggle.href = 'javascript:void(0);';
         toggle.setAttribute('data-toggle', 'popover');
+        toggle.setAttribute('data-html', 'true');
+        toggle.setAttribute('data-trigger', 'focus');
         toggle.setAttribute('data-original-title', title);
         toggle.setAttribute('data-content', note);
 
@@ -980,7 +1008,10 @@ window.TRIM = (function(trim) {
         });
     }
 
-    var functions = {addTabToFieldList}
+    var functions = {
+        addTabToFieldList,
+        removeTabFromFieldList
+    }
 
     trim.forms = forms;
     trim.functions = functions

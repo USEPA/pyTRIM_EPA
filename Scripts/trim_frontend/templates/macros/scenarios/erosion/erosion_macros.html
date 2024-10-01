@@ -64,60 +64,18 @@
         {% if optionNum == 1 %}
         <div id="tableDiv_opt1" class="col-md">
             <div><small><strong><u>Click on the table cells to edit properties.</u> Please note that the values displayed in the table at the time of the "Save" operation are the values that will be incorporated into the calculations</strong></small></div>
-            <table class="hover" id="erosionTable_opt1">
-                <thead>
-                    <tr>
-                        <th>Surface Parcel</th>
-                        <th>Land Cover</th>
-                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="(km<sup>2</sup>)" >Area</th>
-                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="(kg/m<sup>2</sup>-d)">Total Effective Erosion Rate</th>
-                    </tr>
-                </thead>
-            </table>
+            <table data-slot="true" data-target="erosionTable_opt1" class="hover" id="erosionTable_opt1"></table>
         </div>
         {% elif optionNum == 2 %}
         <div id="tableDiv_opt2" class="col-md">
             <div class="pill pill-alert"><small><strong><u>Click on the table cells to edit properties.</u> Please note that the values displayed in the table at the time of the "Save" operation are the values that will be incorporated into the calculations</strong></small></div>
-            <table class="hover" id="erosionTable_opt2">
-                <thead>
-                    <tr>
-                        <th>Surface Parcel</th>
-                        <th>Land Cover</th>
-                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="(km<sup>2</sup>)">Area</th>
-                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="unit soil loss (kg/m<sup>2</sup>-d)">A</th>
-                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="sediment delivery ratio: empirical intercept coefficient (unitless)">a</th>
-                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="sediment delivery ratio: empirical slope coefficient (unitless)">b</th>
-                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="sediment delivery ratio (unitless)">SD</th>
-                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="(kg/m<sup>2</sup>-d)">Total Effective Erosion Rate</th>
-                    </tr>
-                </thead>
-            </table>
+            <table data-slot="true" data-target="erosionTable_opt2" class="hover" id="erosionTable_opt2"></table>
         </div>
         {% else %}
         <div id="tableDiv_opt3" class="col-md">
             <div class="pill pill-alert"><small><strong><u>Click on the table cells to edit properties.</u> Please note that the values displayed in the table at the time of the "Save" operation are the values that will be incorporated into the calculations</strong></small></div>
             <button id="SoilData_btn_opt3" class="btn btn-secondary mt-2">Get USDA Soil Data</button>
-            <table class="hover" id="erosionTable_opt3">
-                <thead>
-                    <tr>
-                        <th>Surface Parcel</th>
-                        <th>Land Cover</th>
-                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="(km<sup>2</sup>)">Area</th>
-                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="rainfall erosivity index (100 ft-ton/acre)">R</th>
-                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="erodibility index (tons/area/(100 ft-ton/acre))">K</th>
-                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="slope gradient (%)">S</th>
-                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="slope length (ft)">L</th>
-                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="topographical length-slope factor (unitless)">LS</th>
-                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="cover/management factor (unitless)">C</th>
-                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="supporting practices factor (unitless)">P</th>
-                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="unit soil loss (kg/m<sup>2</sup>-d)">A</th>
-                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="sediment delivery ratio: empirical intercept coefficient (unitless)">a</th>
-                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="sediment delivery ratio: empirical slope coefficient (unitless)">b</th>
-                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="sediment delivery ratio (unitless)">SD</th>
-                        <th data-toggle="tooltip" data-placement="top" data-html="true" title="(kg/m<sup>2</sup>-d)">Total Effective Erosion Rate</th>
-                    </tr>
-                </thead>
-            </table>
+            <table data-slot="true" data-target="erosionTable_opt3" class="hover" id="erosionTable_opt3"></table>
         </div>
         {% endif %}
     </div>

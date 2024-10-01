@@ -89,20 +89,6 @@
     </section>
 
     <section id="spatially-varying-values" class="container px-0">
-        <div class="row">
-            <div class="col-sm">
-                <h5 class="text-center">Spatially-Varying Values</h5>
-            </div>
-        </div>
-<!--        <div class="row">-->
-<!--            <div class="col-sm">-->
-<!--                <div data-slot="true" data-target="default_spatially_varying_file"></div>-->
-<!--            </div>-->
-<!--        </div>-->
-
-        <table data-slot="true" data-target="spatially_varying_table" class="hover" id="spatially_varying_table">
-        </table>
-
         <div data-slot="true" data-target="runoff">
             {{ dimensionally_varying_subform(
                 is_varying_field='spatially_varying',
@@ -141,74 +127,136 @@
         </div>
     </section>
 </form>
+<link rel="stylesheet" href="{{url_for('static', filename='css/form_styles.css')}}"/>
 <script>
     onDomLoad(function(e) {
         var form = document.getElementById('met-settings-gui');
-        var scenario_id = {{ scenario.id }}
-        form.addEventListener('form:loaded', function() {
-            document.body.addEventListener('parcels:loaded', function () {
-                enableFieldUpdates();
-                let loadedData = $('#root').data('loadedParcels')
-                // Render data for Meteorology Section
-                if (loadedData.scenario_head.meteo) {
-                    $('#ambient_air_static_value').val(loadedData.scenario_head.meteo.ambient_air_temp)
-                    $('#wind_speed_static_value').val(loadedData.scenario_head.meteo.horizontal_wind_speed)
-                    $('#wind_direction_static_value').val(loadedData.scenario_head.meteo.wind_dir)
-                    $('#mixing_height_static_value').val(loadedData.scenario_head.meteo.mixing_height)
-                    $('#daytime_indicator_static_value').removeAttr('disabled').val(loadedData.scenario_head.meteo.daytime_indicator)
-                    $('#precipitation_static_value_rate').val(loadedData.scenario_head.meteo.precipitation)
-                    $('#precipitation_static_value_rate').change();
-                    $('#ambient_air_static_value').add('#wind_speed_static_value').add('#wind_direction_static_value')
-                        .add('#mixing_height_static_value').add('#daytime_indicator_static_value')
-                        .add('#precipitation_static_value_rate').blur(function(){
-                            submit_meteo_value(this)
-                    })
+
+        form.addEventListener('form:visible', function() {
+            LoadingScreen.show('met_info_loading');
+            console.log('met form visible')
+            populateMetForm();
+        });
+
+        function populateMetForm() {
+            if ($(form).filter(':not(.form-loaded)').length) {
+                // Form hasn't loaded yet; wait a bit and try again
+                setTimeout(function() { populateMetForm(); }, 1000);
+                return;
+            }
+            // console.log(form)
+            // console.log(TRIM.store.currentScenario)
+
+            if (TRIM.store.currentScenario.meteorology) {
+                TRIM.forms.populate(form, TRIM.store.currentScenario.meteorology);
+                renderWetDep();
+            }
+            else {
+                TRIM.api.getMeteorology(TRIM.store.currentScenario).on('load', function () {
+                    var met = this.responseJSON.meteorology;
+                    TRIM.store.currentScenario.meteorology = met;
+                    populateMetForm();
+                });
+                return;
+            }
+            console.log('populated met form!')
+            LoadingScreen.hide('met_info_loading');
+        }
+
+        // Render Wet Deposition Interception Fractions
+        function renderWetDep () {
+            let met = TRIM.store.currentScenario.meteorology;
+            if (Object.keys(met).length === 0) {
+                return;
+            }
+            let leaves = ["coniferous", "deciduous", "grass", "agriculture"]
+            leaves.forEach((e,i) => {
+                let search_cbx_str = `input[type="checkbox"][id$="${e}"]`
+                let search_txt_str = `input[type="number"][id$="${e}"]`
+                let this_chkbx = $('#met-settings-gui').find(search_cbx_str)
+                let this_text =  $('#met-settings-gui').find(search_txt_str)
+                let is_calculated = met.wet_dep_interception[`calc_wet_dep_interception_frac_${e}_leaf`]
+                let is_comp_exists = met.wet_dep_interception[`wet_dep_interception_frac_${e}_leaf`]
+                let val_user = met.wet_dep_interception[`wet_dep_interception_frac_${e}_leaf`]
+                let val_calc = met.wet_dep_interception[`wet_dep_interception_frac_${e}_leaf_calculated`]
+                if (is_calculated == 1) {
+                    this_chkbx.attr('checked','checked')
+                    this_text.attr('disabled','disabled')
+                    this_text.val(val_calc)
+                } else {
+                    this_chkbx.removeAttr('checked')
+                    this_text.removeAttr('disabled')
+                    this_text.val(val_user)
                 }
-                // Add Listeners for Meteorology Params.
-                // Render Wet Deposition Interception Fractions
-                let wet_dep_intercept_obj = loadedData.scenario_head.wet_dep_interception
-                let leaves = ["coniferous", "deciduous", "grass", "agriculture"]
-                leaves.forEach((e,i) => {
-                    let search_cbx_str = `input[type="checkbox"][id$="${e}"]`
-                    let search_txt_str = `input[type="number"][id$="${e}"]`
-                    let this_chkbx = $('#met-settings-gui').find(search_cbx_str)
-                    let this_text =  $('#met-settings-gui').find(search_txt_str)
-                    let is_calculated = wet_dep_intercept_obj[`calc_wet_dep_interception_frac_${e}_leaf`]
-                    let val_user = wet_dep_intercept_obj[`wet_dep_interception_frac_${e}_leaf`]
-                    let val_calc = wet_dep_intercept_obj[`wet_dep_interception_frac_${e}_leaf_calculated`]
-                    if (is_calculated == 1) {
-                        this_chkbx.attr('checked','checked')
-                        this_text.attr('disabled','disabled')
-                        this_text.val(val_calc)
-                    } else if (is_calculated == 0) {
-                        this_chkbx.removeAttr('checked')
-                        this_text.removeAttr('disabled')
-                        this_text.val(val_user)
-                    } else if (is_calculated == -1) {
-                        this_chkbx.closest('div.form-group').css('display','none')
-                        this_text.closest('div.form-group').css('display','none')
+                if (is_comp_exists == -1) {
+                    this_chkbx.closest('div.form-group').css('display','none')
+                    this_text.closest('div.form-group').css('display','none')
+                }
+                // Check if the first column has all hidden form_groups and move current to its place
+                if (i == 3) {
+                    let this_col = $(this_chkbx).closest("div.col-sm")
+                    let first_col = $(this_col).parent("div").find("div.col-sm")[0]
+                    if ($(first_col).find("div.form-group").filter((i,e)=>$(e).css('display')!='none').length == 0) {
+                        $(this_col).detach().insertBefore(first_col)
                     }
-                    // Add Listeners for Wet Dep. Interception Params.
-                    this_chkbx.change(function(){
-                        if (this_chkbx.prop('checked')) {
-                            // Set Calculated_WDIF for this media-compartment to 1 in the backend
-                            // Display the calculated result and make the static value inactive
-                            this_text.prop('disabled',true)
-                            this_text.val(val_calc)
-                        } else {
-                            // Set Calculated_WDIF for this media-compartment to 1 in the backend
-                            // Display the calculated result and make the static value inactive
-                            this_text.prop('disabled',false)
-                            this_text.val(val_user)
-                        }
-                        submit_meteo_value(this)
-                    })
-                    this_text.blur(function (){
-                        ErrorValidation.isPositiveValue(this);
-                        submit_meteo_value(this)
-                    })
+                }
+                // Add Listeners for Wet Dep. Interception Params.
+                this_chkbx.change(function(){
+                    if (this_chkbx.prop('checked')) {
+                        // Set Calculated_WDIF for this media-compartment to 1 in the backend
+                        // Display the calculated result and make the static value inactive
+                        this_text.prop('disabled',true)
+                        this_text.val(val_calc)
+                    } else {
+                        // Set Calculated_WDIF for this media-compartment to 1 in the backend
+                        // Display the calculated result and make the static value inactive
+                        this_text.prop('disabled',false)
+                        this_text.val(val_user)
+                    }
+                    submit_meteo_value(this)
+                })
+                this_text.change(function (){
+                    ErrorValidation.isPositiveValue(this);
+                    submit_meteo_value(this)
                 })
             })
+        }
+
+        var ENABLED_FORM = false;
+
+        // Add Listeners for Meteorology Params.
+        form.addEventListener('form:populated', function() {
+            if (ENABLED_FORM) {
+                return;
+            }
+            $('#daytime_indicator_static_value').removeAttr('disabled');
+
+            enableFieldUpdates();
+            $('#precipitation_static_value_rate').change();
+
+            $('#ambient_air_static_value').on('change', function(e) {
+                submit_meteo_value(e.target);
+            });
+            $('#wind_speed_static_value').on('change', function(e) {
+                submit_meteo_value(e.target);
+            });
+            $('#wind_direction_static_value').on('change', function(e) {
+                submit_meteo_value(e.target);
+            });
+            $('#mixing_height_static_value').on('change', function(e) {
+                submit_meteo_value(e.target);
+            });
+            $('#daytime_indicator_static_value').on('change', function(e) {
+                let daytime_val = parseFloat($(e.target).val());
+                let valid_daytime = (daytime_val == 0 || daytime_val == 1);
+                ErrToolTip(e.target, valid_daytime, "Daytime Indicator must be either 0 or 1.", "div");
+                submit_meteo_value(e.target);
+            });
+            $('#precipitation_static_value_rate').on('change', function(e) {
+                submit_meteo_value(e.target);
+            });
+
+            ENABLED_FORM = true;
         });
 
         function get_form_data(elem) {
@@ -217,7 +265,7 @@
                 {
                     'type': 'data',
                     'name': 'id',
-                    'value': scenario_id
+                    'value': TRIM.store.currentScenario.id
                 }, {
                     'type': 'data',
                     'name': 'field',
@@ -246,6 +294,7 @@
         function submit_meteo_value(elem) {
             let param_info = get_form_data(elem)
             if (elementIsValid($(elem).parent())){
+                console.log(param_info);
                 let resp = TRIM.api.updateScenario(param_info).on('load',function(){
                     let val_resp = this.responseJSON
                     if (val_resp) {
@@ -338,9 +387,9 @@
                 var globalFileFiled = section.find('[type="file"][name^="default_"]');
                 let data = globalFileFiled.attr('data-filedata');
 
-                let loadedData = $('#root').data('loadedParcels')
-                let sim_start = Date.parse(loadedData.scenario_head["simulation_start_date"])
-                let sim_end = Date.parse(loadedData.scenario_head["simulation_end_date"])
+                let scenario = TRIM.store.currentScenario;
+                let sim_start = Date.parse(scenario["simulation_start_date"])
+                let sim_end = Date.parse(scenario["simulation_end_date"])
                 let subform = sel.closest('.subform');
                 if (subform.find('[type="checkbox"][id$="use_custom_file"]').prop('checked')) {
                     data = subform.find('[type="file"]').attr('data-filedata');
@@ -374,7 +423,6 @@
 
                 submit_meteo_value(sel)
             })
-
 
             var staticPrecip = $('#precipitation_static_value_rate');
             var staticCum = $('#precipitation_static_value_cumulative');
@@ -412,121 +460,12 @@
             });
         }
 
-        ///////////////// Spatially Varying table
-        document.body.addEventListener('parcels:loaded', function() {
-            let loadedData = $('#root').data('loadedParcels')
-            let spatially_varying_table_data = []
-            if (loadedData.scenario.length > 0) {
-                loadedData['scenario'].forEach(function (e, i) {
-                    if (e.parcelType.indexOf("Water") == -1) {
-                        spatially_varying_table_data.push({
-                            'parcelid': e.id,
-                            'Surface Parcel': e.name,
-                            'GroundwaterSeepageFractions': (e.seepage_frac === null) || (e.seepage_frac === "") ? TRIM.forms.fetchDefault('GroundwaterSeepageFractions') : e.seepage_frac,
-                            'RunoffFractions': (e.runoff_fraction === null) || (e.runoff_fraction === "")  ? TRIM.forms.fetchDefault('RunoffFractions') : e.runoff_fraction
-                        })
-                    }
-                })
+        form.addEventListener('form:visible', function() {
+            if (!TRIM.store.currentScenario.parcels) {
+                LoadingScreen.show('met_parcels_loading');
             }
-            TableRedraw(spatially_varying_table_data)
+            TRIM.refreshParcels();
+            LoadingScreen.hide('met_parcels_loading');
         });
-
-        let apTable = null;
-        function TableRedraw(table_data) {
-            let tblId = "#spatially_varying_table";
-            apTable =  $(tblId).removeAttr('width').dataTable({
-                data : table_data,
-                paging: false,
-                bFilter: false,
-                info: false,
-                bAutoWidth: false,
-                columns: [
-                    {
-                        'data': "Surface Parcel",
-                    },
-                    {
-                        'data': "GroundwaterSeepageFractions",
-                        'bSortable': false,
-                        'render': function (data, type, row) {
-                            let this_cell_prop = 'editableCell badge badge-light';
-                            let parcel_info = create_parcel_object('GroundwaterSeepageFractions', row, data);
-                            return create_cell_html(parcel_info, data, this_cell_prop, data);
-                        }
-                    },
-                    {
-                        'data': "RunoffFractions",
-                        'bSortable': false,
-                        'render': function (data, type, row) {
-                            let this_cell_prop = 'editableCell badge badge-light';
-                            let parcel_info = create_parcel_object('RunoffFractions', row, data);
-                            return create_cell_html(parcel_info, data, this_cell_prop, data);
-                        }
-                    }
-                ],
-                initComplete: function (settings, json) {
-                    $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
-                    $('[data-toggle="tooltip"]').tooltip()
-                    $('[data-toggle="popover"]').popover()
-                }
-            });
-
-            let sort_order = "asc"
-            $('.sortClass').click(function(e){
-                e.preventDefault();
-                let Table = $(tblId).dataTable()
-                let cellIndex = $(this).closest("th").index()
-                Table.fnSort([[cellIndex,sort_order]]);//use asc/desc as you want
-                sort_order= sort_order == "desc" ? "asc" : "desc"
-            });
-
-            $('label.editableCell').click(function () {
-                $(this).siblings("input").show()
-                $(this).siblings("select").show()
-                $(this).prev("input").focus()
-                $(this).prev("select").focus()
-                $(this).hide();
-            });
-
-            function create_cell_html(parcel_info, data, cell_prop, cell_data, err_html=""){
-                return "<input "+err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                        "<label "+err_html+" class='" + cell_prop + "'>" + cell_data + "</label>";
-            };
-
-            function create_parcel_object(id, row, data){
-                let parcel_info = [{
-                                    'type': 'data',
-                                    'name': 'id',
-                                    'value': row.parcelid,
-                                },{
-                                    'type': 'data',
-                                    'name': 'field',
-                                    'value': id
-                                },{
-                                    'type': 'input',
-                                    'name': id,
-                                    'value': data
-                                }]
-                return JSON.stringify(parcel_info)
-            };
-
-            // save modified cell
-            $(`input.editableCell, select.editableCell`).blur(function () {
-                let focusTblId = $(this).closest(`table`).attr('id');
-                if (`#${focusTblId}` !== tblId) {
-                    return;
-                }
-
-                let is_valid = ErrorValidation.isValidFraction(this);
-                if (!is_valid) {
-                    return;
-                }
-
-                // FIXME does nothing for now!
-                let data = $(this).val()
-                let $label = $(this).next("label")
-                $label.siblings().hide()
-                $label.show().text(data)
-            });
-        };
     });
 </script>

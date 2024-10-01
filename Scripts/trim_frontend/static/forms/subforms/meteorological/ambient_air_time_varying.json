@@ -12,7 +12,7 @@
             "min": 150,
             "max": 350,
             "default": 298,
-            "help": "Enter a single value to use throughout your model run. The default value of 298 is from: Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities (including the Hazardous Waste Companion Database of chemical-specific parameter values). U.S. Environmental Protection Agency, Office of Solid Waste and Emergency Response, Washington, DC. EPA-530-R-05-006. September. Available online at: <a href='https://archive.epa.gov/epawaste/hazard/tsd/td/web/html/risk.html' target='_blank'>https://archive.epa.gov/epawaste/hazard/tsd/td/web/html/risk.html</a>."
+            "help": "Enter a single value to use throughout your model run. The default value of 298 is from U.S. EPA 2005 (Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities [including the Hazardous Waste Companion Database of chemical-specific parameter values]). See the TRIM User Guide Appendix for full reference information."
         }
     ]
 }

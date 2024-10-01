@@ -282,6 +282,52 @@ def get_parameter_characteristics(param):
     }
 
 
+def get_or_create_custom_param(param_obj=None, kwargs={}, include_default_value = False, new_formula=False, no_commit=False):
+    if isinstance(param_obj, CustomParameter):
+        return param_obj
+    
+    elif isinstance(param_obj, ParameterDefinition):
+        default_kwargs = {
+            "definition_id": param_obj.id,
+            "unit": param_obj.default_unit,
+            "formula_id": param_obj.default_formula_id,
+        }
+        if include_default_value:
+            default_kwargs["value"] = param_obj.default_value
+
+        keys = set(list(kwargs.keys()) + list(default_kwargs.keys()))
+        for key in keys:
+            if key not in kwargs:
+                kwargs[key] = default_kwargs[key]
+
+    elif param_obj:
+        raise Exception(f"Param type {type(param_obj)} not supported")
+
+    if new_formula:
+        default_param = ParameterService.definitions.get(kwargs["definition_id"])
+        new_formula_obj = FormulaService.create(equation=default_param.default_formula.equation)
+        kwargs["formula_id"] = new_formula_obj.id
+
+    return ParameterService.get_or_create(**kwargs, no_commit=no_commit)
+
+
+def update_custom_param_value(param_obj, val):
+    if not isinstance(param_obj, CustomParameter):
+        raise Exception(f"Param type {type(param_obj)} not supported")
+    
+    try:
+        if param_obj.value != float(val):
+            param_obj.value = val
+            ParameterService.update(param_obj)
+    except Exception as e:
+        print(f"Could not convert value {val} to float: {e}")
+        if param_obj.value != val:
+            param_obj.value = val
+            ParameterService.update(param_obj)
+
+    return param_obj
+
+
 def parameterize(cls, default_scenario=None):
     cls_name = cls.__name__
 
@@ -371,8 +417,7 @@ def parameterize(cls, default_scenario=None):
             # if no specific version applies
             p = {}
             got_custom = {}
-            # s_id = get_scenario(entity).id
-            # is_scenario = isinstance(entity, Scenario)
+            s_id = _get_current_scenario(entity).id
             for d in sorted(
                 # Sort to make sure sub-domains override parents
                 entity.domains,
@@ -387,8 +432,11 @@ def parameterize(cls, default_scenario=None):
                         # custom parameters
                         p[pd.name] = pd
                     for cp in pd.instances:
-                        # if (not is_scenario) and (cp.scenario_id != s_id):
-                        #     continue
+                        # FIXME need to either correct the chem param definitions 
+                        # or init custom params for each new scenario.
+                        # at the moment chemicals take custom params from the Foundries/Default scenario
+                        if cp.scenario_id != s_id and entity.__tablename__ != 'chemical':
+                            continue
                         if cp.validate(entity):
                             got_custom[pd.name] = True
                             p[pd.name] = cp

@@ -1,19 +1,28 @@
+import csv
+import io
 import os
 import pandas as pd
 import traceback
 import re
 import json
+from decimal import Decimal
 from flask import Blueprint, request
 from flask_security import login_required
 from werkzeug.utils import secure_filename
 from flask_api import ApiException, ApiResult
 from trim_db.schema import *
+from trim_db.schema.entities.environment import Parcel
 from trim_db.services import *
+from trim_db.services.parameters import get_or_create_custom_param
+from trim_db.services.entities import ParcelService
 from trim_frontend import api
+from ..parcels.utils import delete_parcel_contents, get_canonical_land_use_type, get_canonical_parcel_type, get_ve_defaults_for_parcel_type, handle_parcel_update, initialize_parcel_contents
+from ..utils.data_structures import calculate_list_depth
 from ..utils.file_io import csv_to_df
 from ..utils.forms import assemble_json_form
 from ..utils.logging import make_logger
-from ..utils.spatial import *
+from ..utils.spatial import determine_location, determine_nearest_neighbor_distance, ensure_closed_polygon, is_utm_zone_valid, translate_coordinates, translate_position
+from shapely.geometry import Polygon
 
 
 file_api = Blueprint('file_api', __name__)
@@ -41,7 +50,7 @@ def parse():
         try:
             fname = secure_filename(f.filename)
 
-            if fname.endswith('.csv'):
+            if fname.lower().endswith('.csv'):
                 df = csv_to_df(f, dtype=str)
                 # Get rid of carriage returns b/c they mess up output
                 df = df.replace('\r', '', regex=True)
@@ -91,6 +100,11 @@ def parse_aermod():
     this_chem = [v for k, v in request.form.items() if k == 'chemical'][0]
     this_spec = [v for k, v in request.form.items() if k == 'species'][0]
     spacing = [v for k, v in request.form.items() if k == 'spacing'][0]
+    coord_sys = [v for k, v in request.form.items() if k == 'proj'][0]
+    utm_zone = [v for k, v in request.form.items() if k == 'utm_zone'][0]
+
+    logger.info(f'Parsed AERMOD file: {list(files.items())[0][1].filename} for scenario id {scenario_id}, chemical {this_chem} with'
+                f' coordinate system {coord_sys} {"and utm zone of " + utm_zone if utm_zone else ""}.')
 
     scenario = ScenarioService.get(id=scenario_id)
     chem = ChemicalService.get(name=this_chem)
@@ -129,23 +143,40 @@ def parse_aermod():
     df = df.sort_values(['X', 'Y', 'ZELEV']).drop_duplicates(['X', 'Y'], keep='first')
     # remove if NET ID = POLGRID. This does not always work. We will also need a user restriction to limit
     # receptors intended for TRIM modeling – i.e., Cartesian grid with no overlapping receptors
+
+    # Convert the aermod X and Y to the default utm coordinates that pyTRIM uses. We need users input for the
+    # coordinate system and UTM zone (if UTM coordiantes) for the given file.
+
+
     df_aermod = pd.DataFrame(df[df['NET ID'] != 'POLGRID1'])
     df_aermod['NUM HRS'] = pd.to_numeric(df_aermod['NUM HRS'])
     df_aermod['DRY DEPO'] = pd.to_numeric(df_aermod['DRY DEPO'])
     df_aermod['WET DEPO'] = pd.to_numeric(df_aermod['WET DEPO'])
 
     # make a dictionary of shapely polygon objects based on TRIM layout
-    dict_poly = {p.name: p.polygon() for p in scenario.parcels}
+    # dict_poly = {p.name: p.polygon() for p in scenario.parcels}
+    dict_poly = {p.name: Polygon(p.vertices) for p in scenario.parcels}
     dict_area = {p.name: p.area.magnitude for p in scenario.parcels}
+
+    try:
+        df_aermod['newX'] = df_aermod.apply(
+            lambda z: translate_position(float(z.X), float(z.Y), 'UTM', 'WGS84_LONGLAT', utm_zone=utm_zone)[0], axis=1)
+        df_aermod['newY'] = df_aermod.apply(
+            lambda z: translate_position(float(z.X), float(z.Y), 'UTM', 'WGS84_LONGLAT', utm_zone=utm_zone)[1], axis=1)
+    except Exception as e:
+        print(e)
+
     try:
         # add parcel location to each receptor in aermod file
-        df_aermod['Parcel'] = df_aermod.apply(lambda z: determine_location(dict_poly=dict_poly, x=z.X, y=z.Y), axis=1)
+        # df_aermod['Parcel'] = df_aermod.apply(lambda z: determine_location(dict_poly=dict_poly, x=z.X, y=z.Y), axis=1)
+        df_aermod['Parcel'] = df_aermod.apply(lambda z: determine_location(dict_poly=dict_poly, x=z.newX, y=z.newY), axis=1)
         df_aermod = df_aermod[df_aermod['Parcel'] != ""]  # drop any receptors that are not mapped to layout
         df_aermod['ParcelArea'] = df_aermod.apply(lambda z: dict_area.get(z.Parcel), axis=1)
         df_aermod = df_aermod.reset_index(drop=True)
         ndays = df_aermod['NUM HRS'].loc[1] / 24  # compute number of days of cumulative deposition
     except Exception as e:
         print(f"Error finding parcels corresponding to sources: {e}")
+    df_aermod['ParcelArea'] = pd.to_numeric(df_aermod['ParcelArea'])
 
     try:
         if spacing == r'Uniform':  # compute flat averages of all receptors in the parcel
@@ -157,7 +188,7 @@ def parse_aermod():
 
         elif spacing == r'Non-Uniform':  # computes weighted average of receptors in the parcel using distance of influence of each receptor as weight
             df_aermod['Spacing'] = df_aermod.apply(
-                lambda z: determine_nearest_neighbor_distance(df_aermod=df_aermod, point_x=z.X, point_y=z.Y),
+                lambda z: determine_nearest_neighbor_distance(df_aermod=df_aermod, point_x=z.newX, point_y=z.newY),
                 axis=1)  # compute distance to nearest receptor
             # Calculate receptor area (m2)
             dft = df_aermod  # temp file
@@ -195,6 +226,11 @@ def parse_aermod():
                     src_par = [par for parn, par in comp.parameters.items() if parn == "surfaceDepositionRate"]
                     if len(src_par) > 0:
                         src_par = src_par[0]
+                        src_par = get_or_create_custom_param(
+                            src_par,
+                            {"requirements": f"(self.id == {comp.id})", "scenario_id": scenario.id},
+                            new_formula=True
+                        )
                         prefix = "DRY" if comp.name.startswith("Dry") else "WET"
                         stype = f'{prefix} DEPO'
                         eq = src_par.formula.equation
@@ -223,6 +259,263 @@ def parse_aermod():
 
     return ApiResult({'aermod_result': res_json})
 
+
+@file_api.route('/api/parcel_file', methods=['POST'])
+@login_required
+def parse_parcel_upload():
+    errors = []
+    default_utm_zone = None
+    return_data = {
+        "parcels": []
+    }
+
+    scenario_id = request.form["scenario_id"]
+    coord_system = request.form.get("coord_system")
+    raw_utm_zone = request.form.get("utm_zone")
+
+    geojson = request.form.get("geojson")
+    files = request.files
+
+    if coord_system == "UTM":
+        valid_zone, default_utm_zone = is_utm_zone_valid(raw_utm_zone)
+        if not valid_zone:
+            errors.append("Invalid default utm zone '{raw_utm_zone}' supplied.")
+
+    if not files and not geojson:
+        errors.append("No files were uploaded")
+
+    if len(errors) == 0:
+        # delete existing parcels...
+        scenario = ScenarioService.get(id=scenario_id)
+        for del_parcel in scenario.parcels:
+            del_parcel_description = f"'{del_parcel.name}' ({del_parcel.id})"
+            print(f"deleting parcel {del_parcel}...")
+            try:
+                delete_parcel_contents(del_parcel)
+                ParcelService.delete(del_parcel.id)
+            except Exception as e:
+                errors.append(f"Exception deleting parcel {del_parcel_description}: {e}")
+
+    if len(errors) > 0:
+        raise ApiException("; ".join(errors))
+    
+    try:
+        if geojson:
+            lines = ""
+            line_num = 0
+            reader = json.loads(geojson)
+        else: # assume csv
+            fpn = [f.stream for n, f in files.items()][0]
+            fpn.seek(0)
+            lines = fpn.read().decode("utf-8")
+            line_num = 2
+            reader = csv.DictReader(io.StringIO(lines))
+    except Exception:
+        errors.append("Unable to open file")
+
+    for row in reader:
+        try:
+            if geojson:
+                row_data = get_parcel_row_geojson(row)
+            else:
+                row_data = get_parcel_row_csv(row, coord_system, default_utm_zone)
+
+            parcel_name = row_data["parcel_name"]
+            parcel_type = row_data["parcel_type"]
+            parcel_description = row_data["parcel_description"]
+            land_use = row_data["land_use"]
+            farm_food_chain = row_data["hasFarmFoodChain"]
+            wetland = row_data["hasWetland"]
+            fish_food_web = row_data["hasFishFoodWeb"]
+            coordinates = row_data["coordinates"]
+        
+            # TODO - reload page after upload (done; but we could do better...)
+            p = ParcelService.create(name=parcel_name, description=parcel_description, scenario_id=scenario_id, vertices=coordinates)
+            handle_parcel_update(p, {
+                "field": "parcelType",
+                "parcelType": parcel_type
+            })
+
+            # TODO - verify this logic is sound -- or is it being enforced elsewhere?
+            # basically does the upload handler need to worry about e.g. someone saying
+            # "Yes" to farm food chain while also saying "air only"?
+            if "Land" in parcel_type:
+                if land_use is not None:
+                    handle_parcel_update(p, {
+                        "field": "landUse",
+                        "landUse": land_use
+                    })
+
+                if land_use == "Tilled Soil" or "Agriculture" in land_use:
+                    handle_parcel_update(p, {
+                        "field": "hasFarmFoodChain",
+                        "hasFarmFoodChain": farm_food_chain
+                    })
+
+                # always allow wetland for land editing?
+                handle_parcel_update(p, {
+                    "field": "hasWetland",
+                    "hasWetland": wetland
+                })
+
+            if "Water" in parcel_type:
+                handle_parcel_update(p, {
+                    "field": "hasFishFoodWeb",
+                    "hasFishFoodWeb": fish_food_web
+                })
+
+            return_data["parcels"].append(p.as_serializable())
+
+            # TODO - verify that "Air" in the csv sample is meaningless?
+            # TODO - "Agriculture (General)" doesn't work either in UI or via CSV upload
+            # TODO - "Tilled Soil, Untilled Soil, Impervious" are all bused in create_base_land_compartments
+
+            """
+            # WHAT'S EDITABLE?
+            LAND USE        FARMFOODCHAIN   FISHFOODWEB     WETLAND
+            --------------------------------------------------------
+            Tilled Soil         yes             -           yes
+            Untilled Soil       ??????????????????
+            Agri Gen
+            Grasses/Herb        -               -           yes
+            Decid For           -               -           yes
+            Conif For           -               -           yes
+            """
+
+            print(f"\tDONE FOR LINE {line_num}")
+        except Exception as e:
+            errors.append(f"Error processing CSV line {line_num}: {e}")
+
+        line_num += 1
+
+    lines = lines.split("\r\n")
+
+    if len(errors) > 0:
+        raise ApiException("; ".join(errors))
+    else:
+        return ApiResult(return_data)
+
+
+def get_parcel_row_csv(row, coord_system, utm_zone):
+    has_farm_food_chain = row.get("FarmFoodChain", "").upper() == "YES"
+    has_wetland = row.get("Wetland", "").upper() == "YES"
+    has_fish_food_web = row.get("FishFoodWeb", "").upper() == "YES"
+
+    # we'll accept either a 3 level list...
+    # OUTERMOST LIST 1 == multiple polygons
+    # MIDDLE LIST 2 == group of coords; i.e. the full vertices of the polygon
+    # INNERMOST LIST 3 == x/y coord; a single point of a parcel's polygon
+    #
+    # ...or we'll allow the user to optionally omit the outermost list; we'll add it for them after we check depth
+    raw_coords = row.get("coordinates")
+    parsed_coords = json.loads(raw_coords)
+    if calculate_list_depth(parsed_coords) == 2:
+        parsed_coords = [parsed_coords]
+
+    # now parsed coords is definitely nested3 lists
+    fixed_coords = []
+    for polygon_definition in parsed_coords:
+        # print(f"CHECKING POLYGON: {polygon_definition}")
+        polygon_definition = ensure_closed_polygon(polygon_definition)
+
+        if coord_system == "WGS84 Longitude/Latitude":
+            fixed_coords.append(polygon_definition)
+        else:
+            longlat_poly = translate_coordinates(polygon_definition, coord_system, "WGS84_LONGLAT", default_utm_zone=utm_zone)
+            fixed_coords.append(longlat_poly)
+
+    # now fixed_coords is definitely nested3 lists of long/lat pairs
+
+    return {
+        "parcel_name": row.get("ParcelName"),
+        "parcel_type": get_canonical_parcel_type(row.get("ParcelType")),
+        "parcel_description": row.get("Description", ""),
+        "land_use": get_canonical_land_use_type(row.get("LandUse", "")),
+        "hasFarmFoodChain": "Yes" if has_farm_food_chain else "No",
+        "hasWetland": "Yes" if has_wetland else "No",
+        "hasFishFoodWeb": "Yes" if has_fish_food_web else "No",
+        "coordinates": fixed_coords[0],
+    }
+
+
+def get_parcel_row_geojson(row):
+    props = row["properties"]
+    return {
+        "parcel_name": props.get("name").strip(),
+        "parcel_type": props.get("parceltype").strip(),
+        "parcel_description": props.get("desc", " "),
+        "land_use": props["landuse"].get("lu").strip(),
+        "hasFarmFoodChain": props.get("farmfoodchain").strip(),
+        "hasWetland": props.get("wetland").strip(),
+        "hasFishFoodWeb": props.get("fishfoodweb").strip(),
+        "coordinates": row["geometry"].get("coordinates")[0],
+    }
+
+@file_api.route('/api/runoff_matrix_file', methods=['POST'])
+@login_required
+def parse_runoff_matrix_upload():
+    scenario_id = request.form["scenario_id"]
+    parcels = ParcelService.get_all(scenario_id=int(scenario_id))
+    parcel_names = {p.name : p for p in parcels}
+
+    files = request.files
+    if not files:
+        return ApiException("No files were uploaded")
+    
+    try:
+        fpn = [f.stream for n, f in files.items()][0]
+        fpn.seek(0)
+        lines = fpn.read().decode("utf-8")
+        reader = csv.DictReader(io.StringIO(lines))
+
+        # TODO make sure all parcels are accounted for
+        # verify headers are valid parcels + sink exists
+        for header in reader.fieldnames:
+            if header == 'sink' or header == 'parcels':
+                continue
+            elif header not in parcel_names.keys():
+                return ApiException(f"Parcel '{header}' does not exist in the scenario")
+        for row in reader:
+            if row.get("parcels") not in parcel_names.keys():
+                return ApiException(f"Parcel '{row.get('parcels')}' does not exist in the scenario")    
+        if "sink" not in reader.fieldnames:
+            return ApiException("Required header 'sink' is missing")
+
+        # verify values are valid
+        reader = csv.DictReader(io.StringIO(lines))
+        for row in reader:
+            row_total = []
+            for k, v in row.items():
+                if k == "parcels": continue
+                if Decimal(v) < 0: return ApiException("All values must be positive")
+                row_total.append(Decimal(v))
+            row_total = float(sum(row_total))
+            if row_total != 1 and row_total != 0: 
+                return ApiException("Sum of runoff fractions should be 1")
+
+        # submit
+        reader = csv.DictReader(io.StringIO(lines))
+        for row in reader:
+            sender_pcl = parcel_names[row.get("parcels")]
+            if sender_pcl.name in request.form["water_parcels"]:
+                continue
+            del row["parcels"]
+            
+            row_receivers = [f"ro_{k}" for k in row.keys()]
+            row_vals = [f"{float(Decimal(v))}" for v in row.values()]
+            payload = {
+                "id": sender_pcl.id,
+                "field": "runoff_matrix_value",
+                "sender": f"ro_{sender_pcl.name}",
+                "receiver": ",".join(row_receivers),
+                "ro_value": ",".join(row_vals)
+            }
+            handle_parcel_update(sender_pcl, payload)
+                
+    except Exception as e:
+        print(traceback.format_exc())
+        return ApiException(e)
+    return ApiResult({'matrix_result': "success"})
 
 root = os.path.dirname(os.path.abspath(__file__))
 static = os.path.abspath(os.path.join(root, '../static'))

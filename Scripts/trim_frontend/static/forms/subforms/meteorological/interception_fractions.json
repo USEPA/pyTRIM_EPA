@@ -17,7 +17,7 @@
             "step": 0.1,
             "default": 0.2,
             "required": true,
-            "help": "Enter the fraction of wet deposition that is intercepted by coniferous tree needles. The default value of 0.2 is professional judgement."
+            "help": "Enter the fraction of wet deposition that is intercepted by coniferous tree needles. The default value of 0.2 is professional judgment."
         },
         {
             "id": "calculated_deciduous",
@@ -35,7 +35,7 @@
             "step": 0.1,
             "default": 0.2,
             "required": true,
-            "help": "Enter the fraction of wet deposition that is intercepted by deciduous tree leaves. The default value of 0.2 is professional judgement."
+            "help": "Enter the fraction of wet deposition that is intercepted by deciduous tree leaves. The default value of 0.2 is professional judgment."
         },
         {
             "id": "calculated_grass",
@@ -53,7 +53,7 @@
             "step": 0.1,
             "default": 0.2,
             "required": true,
-            "help": "Enter the fraction of wet deposition that is intercepted by grasses/herbs leaves. The default value of 0.2 is professional judgement."
+            "help": "Enter the fraction of wet deposition that is intercepted by grasses/herbs leaves. The default value of 0.2 is professional judgment."
         },
         {
             "id": "calculated_agriculture",
@@ -71,7 +71,7 @@
             "step": 0.1,
             "default": 0.2,
             "required": true,
-            "help": "Enter the fraction of wet deposition that is intercepted by agriculture leaves. The default value of 0.2 is professional judgement."
+            "help": "Enter the fraction of wet deposition that is intercepted by agriculture leaves. The default value of 0.2 is professional judgment."
         }
     ]
 }

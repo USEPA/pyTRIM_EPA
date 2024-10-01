@@ -33,6 +33,24 @@
             "data_type": "form",
             "form_definition": "subforms/erosion/erosion_parameters.json",
             "separator": "_"
+        },
+        {
+            "id": "erosionTable_opt1",
+            "label": "",
+            "data_type": "form",
+            "form_definition": "subforms/erosion/erosion_table1_props_form.json"
+        },
+        {
+            "id": "erosionTable_opt2",
+            "label": "",
+            "data_type": "form",
+            "form_definition": "subforms/erosion/erosion_table2_props_form.json"
+        },
+        {
+            "id": "erosionTable_opt3",
+            "label": "",
+            "data_type": "form",
+            "form_definition": "subforms/erosion/erosion_table3_props_form.json"
         }
     ]
 }

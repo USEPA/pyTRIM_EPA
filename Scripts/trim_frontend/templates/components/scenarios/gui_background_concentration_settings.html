@@ -71,197 +71,234 @@
 <script src="{{ url_for('static', filename='js/lib/dataTables/dataTables.bootstrap4.min.js') }}">
 </script>
 <script>
-        onDomLoad(function(e) {
+    onDomLoad(function(e) {
         var form = document.getElementById('background-conc-gui');
-        form.addEventListener('form:loaded', function() {
-            document.body.addEventListener('parcels:loaded', function() {
-                let fieldset = $('#background_chemicals-add-btn').closest("fieldset")
-                $('#background_chemicals-add-btn').hide()
-                let loadedData = $('#root').data('loadedParcels')
-                loadedData.scenario_head.scenario_chem.forEach((sc, i) => {
-                    window.TRIM.functions.addTabToFieldList(fieldset[0], sc)
 
-                    $("#background-conc-gui").find("span.chemInfo")[i+1].innerHTML = sc
-                    $(initialize_compartment_map()).insertAfter($($("#background-conc-gui").find("table.compMap")[i+1]).find("thead"))
+        form.addEventListener('form:visible', function() {
+            console.log('background concentrations form visible')
+            LoadingScreen.show('background_concentrations_loading');
+            loadChemicals();
+        });
 
-                    let dd_menu = $($("#background-conc-gui").find("table.compMap")[i+1]).prev("div.dropdown").find("div.dropdown-menu")
-                    populate_comp_dd(dd_menu);
-                })
-
-
-                $('tr.colps').on('click', function() {
-                    toggle_expand_icon(this, null)
-                    var findChildren = function(tr) {
-                        var depth = tr.data('depth');
-                        return tr.nextUntil($('tr').filter(function(i,e) {
-                            return $(e).data('depth') <= depth;
-                        }));
-                    };
-
-                    let this_depth = $(this).data('depth')
-                    var children = findChildren($(this));
-                    if ($(children).is(':visible')) {
-                        $(children).hide();
-                    } else {
-                        let next_level = this_depth + 1;
-                        let next_child = $(children).filter(function(i,e) {
-                            return $(e).data('depth') == next_level;
-                        });
-                        $(next_child).show()
-                    }
+        function loadChemicals() {
+            if ($(form).filter(':not(.form-loaded)').length) {
+                // Form hasn't loaded yet; wait a bit and try again
+                setTimeout(function() { loadChemicals(); }, 1000);
+                return;
+            }
+            if (TRIM.store.currentScenario.chemicals) {
+                TRIM.forms.populate(form, TRIM.store.currentScenario.chemicals);
+                TRIM.refreshParcels();
+                document.body.addEventListener('parcels:ready', updateBackgroundConcentrations());
+            }
+            else {
+                TRIM.api.getChemicals(TRIM.store.currentScenario).on('load', function () {
+                    var chems = this.responseJSON.chemicals;
+                    TRIM.store.currentScenario.chemicals = chems;
+                    loadChemicals();
                 });
+                return;
+            }
+        }
 
-                $('button.comp_show_all').on('click', function(e) {
-                    e.preventDefault()
-                    let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap")
-                    $(this_table).find("tr.colps").show();
-                    $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "down"))
-                    $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "down"))
-                    $(this).closest("div").find("button.btn_show_comp").text("Show Compartment")
-                });
+        function updateBackgroundConcentrations() {
+            if (!TRIM.store.currentScenario.parcels) {
+                // Parcels haven't loaded yet; wait a bit and try again
+                setTimeout(function() { updateBackgroundConcentrations(); }, 1000);
+                return;
+            }
 
-                $('button.comp_hide_all').on('click', function(e) {
-                    e.preventDefault()
-                    let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap")
-                    $(this_table).find("tr.colps:not([data-depth='0'])").hide();
-                    $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "up"))
-                    $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "up"))
-                    $(this).closest("div").find("button.btn_show_comp").text("Show Compartment")
-                });
+            let fieldset = $('#background_chemicals-add-btn').closest("fieldset")
+            $('#background_chemicals-add-btn').hide()
 
-                $('button.comp_show_nz').on('click', function(e) {
-                    e.preventDefault()
-                    let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap");
-                    $('button.comp_hide_all').trigger('click');
-                    let non_zeros = $(this_table).find("tr.colps.level2").filter((i,e) => $(e).find("td.ems").text() > 0);
-                    $(non_zeros).show()
-                    $(non_zeros).prev("tr.level1").show()
-                    $(this).closest("div").find("button.btn_show_comp").text("Show Compartment")
-                });
+            // clear existing fields
+            fieldset.find('[data-pill-id]').each(function() {
+                var i = this.getAttribute('data-pill-id')
+                TRIM.functions.removeTabFromFieldList(fieldset[0], i);
+            });
 
-                $('button.comp_reset_all').on('click', function(e) {
-                    e.preventDefault()
-                    let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap");
-                });
+            TRIM.store.currentScenario.chemicals.map(x => x.name).forEach((sc, i) => {
+                window.TRIM.functions.addTabToFieldList(fieldset[0], sc)
 
-                $(document).ready(function() {
-                    $('button.comp_hide_all').trigger('click');
-                });
+                $("#background-conc-gui").find("span.chemInfo")[i+1].innerHTML = sc
+                $(initialize_compartment_map()).insertAfter($($("#background-conc-gui").find("table.compMap")[i+1]).find("thead"))
 
-                function toggle_expand_icon(tr, dir){
-                    if ($(tr).find("i.fas").length <= 0) return;
-                    if (!dir) {
-                        if ($(tr).find("i.fas").attr("class").indexOf("fa-angle-right") > -1) {
-                            $(tr).find("i.fas").attr("class", "fas fa-angle-down")
-                        } else {
-                            $(tr).find("i.fas").attr("class", "fas fa-angle-right")
-                        }
-                    } else {
-                        if (dir == "down") {
-                            $(tr).find("i.fas").attr("class", "fas fa-angle-down")
-                        } else {
-                            $(tr).find("i.fas").attr("class", "fas fa-angle-right")
-                        }
-                    }
-
-                }
-
-                $('label.editableCell').click(function () {
-                    $(this).siblings("input").show()
-                    $(this).siblings("input").focus()
-                    $(this).hide();
-                });
-
-                $('input.editableCell').blur(function () {
-                    if (!$("#Background-Concentrations-tab-pill").hasClass("active")) {
-                        return;
-                    }
-                    
-                    ErrorValidation.isPositiveValue(this);
-                    let parcel_name = $(this).closest("tr.level2")
-                    let parcel_info = [{
-                        'type': 'data',
-                        'name': 'id',
-                        'value': "parcel_name"
-                    },{
-                        'type': 'data',
-                        'name': 'chemical',
-                        'value': "chemical_name"
-                    },{
-                        'type': 'input',
-                        'name': 'compartment_name',
-                        'value': $(this).val()
-                    }]
-                    if (parcel_info) {
-                        submit_emission_value(this, parcel_info);
-                    }
-                })
-
-                function submit_emission_value(elem, parcel_info) {
-                    if (elementIsValid($(this).parent())){
-                        let data = $(elem).val() == "" ? 0 : $(elem).val()
-                        let $label = $(elem).next("label.editableCell")
-                        $label.siblings("input").hide()
-                        $label.show().text(data)
-
-                        parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                        // TRIM.api.updateParcel(parcel_info)
-                    } else {
-                        return
-                    }
-                }
-
+                let dd_menu = $($("#background-conc-gui").find("table.compMap")[i+1]).prev("div.dropdown").find("div.dropdown-menu")
+                populate_comp_dd(dd_menu);
             })
 
-            function initialize_compartment_map(spec) {
-                let loadedData = $('#root').data('loadedParcels')
-                var map_html = "<tbody>"
-                let exclude = spec == "Particulate" ? "VaporSource" : "ParticleSource"
-                loadedData.scenario.forEach( function(e,i){
-                    map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>" + e.name + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
-                    for (ve in e.compartment_map) {
-                        if (ve.indexOf(exclude) == -1) {
-                            map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td>" + ve + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td></tr>"
-                        }
-                        for (comp in e.compartment_map[ve]) {
-                            if (e.compartment_map[ve][comp].indexOf(exclude) == -1){
-                                map_html = map_html + "<tr data-depth='2' class='level2 colps'><td></td><td></td><td class='comp'>" + e.compartment_map[ve][comp] + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='editableCell badge badge-light'>0</label></td></tr>"
-                            }
-                        }
+            $('tr.colps').on('click', function() {
+                toggle_expand_icon(this, null)
+                var findChildren = function(tr) {
+                    var depth = tr.data('depth');
+                    return tr.nextUntil($('tr').filter(function(i,e) {
+                        return $(e).data('depth') <= depth;
+                    }));
+                };
+
+                let this_depth = $(this).data('depth')
+                var children = findChildren($(this));
+                if ($(children).is(':visible')) {
+                    $(children).hide();
+                } else {
+                    let next_level = this_depth + 1;
+                    let next_child = $(children).filter(function(i,e) {
+                        return $(e).data('depth') == next_level;
+                    });
+                    $(next_child).show()
+                }
+            });
+
+            $('button.comp_show_all').on('click', function(e) {
+                e.preventDefault()
+                let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap")
+                $(this_table).find("tr.colps").show();
+                $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "down"))
+                $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "down"))
+                $(this).closest("div").find("button.btn_show_comp").text("Show Compartment")
+            });
+
+            $('button.comp_hide_all').on('click', function(e) {
+                e.preventDefault()
+                let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap")
+                $(this_table).find("tr.colps:not([data-depth='0'])").hide();
+                $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "up"))
+                $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "up"))
+                $(this).closest("div").find("button.btn_show_comp").text("Show Compartment")
+            });
+
+            $('button.comp_show_nz').on('click', function(e) {
+                e.preventDefault()
+                let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap");
+                $('button.comp_hide_all').trigger('click');
+                let non_zeros = $(this_table).find("tr.colps.level2").filter((i,e) => $(e).find("td.ems").text() > 0);
+                $(non_zeros).show()
+                $(non_zeros).prev("tr.level1").show()
+                $(this).closest("div").find("button.btn_show_comp").text("Show Compartment")
+            });
+
+            $('button.comp_reset_all').on('click', function(e) {
+                e.preventDefault()
+                let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap");
+            });
+
+            $(document).ready(function() {
+                $('button.comp_hide_all').trigger('click');
+            });
+
+            function toggle_expand_icon(tr, dir){
+                if ($(tr).find("i.fas").length <= 0) return;
+                if (!dir) {
+                    if ($(tr).find("i.fas").attr("class").indexOf("fa-angle-right") > -1) {
+                        $(tr).find("i.fas").attr("class", "fas fa-angle-down")
+                    } else {
+                        $(tr).find("i.fas").attr("class", "fas fa-angle-right")
                     }
-                })
-                map_html += "</tbody>"
-                return map_html
+                } else {
+                    if (dir == "down") {
+                        $(tr).find("i.fas").attr("class", "fas fa-angle-down")
+                    } else {
+                        $(tr).find("i.fas").attr("class", "fas fa-angle-right")
+                    }
+                }
+
             }
 
-            function populate_comp_dd(dd_menu){
-                let comp_array = []
-                let loadedData = $('#root').data('loadedParcels')
-                loadedData.scenario.forEach( function(e,i){
-                    for (let ve in e.compartment_map) {
-                        for (let comp in e.compartment_map[ve]) {
-                            comp_array.push(e.compartment_map[ve][comp])
+            $('label.editableCell').click(function () {
+                $(this).siblings("input").show()
+                $(this).siblings("input").focus()
+                $(this).hide();
+            });
+
+            $('input.editableCell').blur(function () {
+                if (!$("#background-concentrations-tab-pill").hasClass("active")) {
+                    return;
+                }
+                
+                ErrorValidation.isPositiveValue(this);
+                let parcel_name = $(this).closest("tr.level2")
+                let parcel_info = [{
+                    'type': 'data',
+                    'name': 'id',
+                    'value': "parcel_name"
+                },{
+                    'type': 'data',
+                    'name': 'chemical',
+                    'value': "chemical_name"
+                },{
+                    'type': 'input',
+                    'name': 'compartment_name',
+                    'value': $(this).val()
+                }]
+                if (parcel_info) {
+                    submit_emission_value(this, parcel_info);
+                }
+            })
+
+            function submit_emission_value(elem, parcel_info) {
+                if (elementIsValid($(elem).parent())){
+                    let data = $(elem).val() == "" ? 0 : $(elem).val()
+                    let $label = $(elem).next("label.editableCell")
+                    $label.siblings("input").hide()
+                    $label.show().text(data)
+
+                    parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
+                    // TRIM.api.updateParcel(parcel_info)
+                } else {
+                    return
+                }
+            }
+
+            console.log('populated background concentrations form!')
+            LoadingScreen.hide('background_concentrations_loading');
+        };
+
+        function initialize_compartment_map(spec) {
+            var map_html = "<tbody>"
+            let exclude = spec == "Particulate" ? "VaporSource" : "ParticleSource"
+            TRIM.store.currentScenario.parcels.forEach( function(e,i){
+                map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>" + e.name + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
+                for (ve in e.compartment_map) {
+                    if (ve.indexOf(exclude) == -1) {
+                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td>" + ve + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td></tr>"
+                    }
+                    for (comp in e.compartment_map[ve]) {
+                        if (e.compartment_map[ve][comp].indexOf(exclude) == -1){
+                            map_html = map_html + "<tr data-depth='2' class='level2 colps'><td></td><td></td><td class='comp'>" + e.compartment_map[ve][comp] + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='editableCell badge badge-light'>0</label></td></tr>"
                         }
                     }
-                })
-                let uniq_comp = [... new Set(comp_array)]
-                uniq_comp.sort().forEach(function(e) {
-                    let menu_item = "<a class='dropdown-item comp-item'>" + e + "</a>"
-                    $(menu_item).appendTo(dd_menu)
-                })
-                $("a.dropdown-item.comp-item").on("click",function (e){
-                    e.preventDefault()
-                    let this_table = $(this).closest("div.dropdown").next("table.compMap")
-                    let this_dd_btn = $(this).closest("div.dropdown").find("button.btn_show_comp")
-                    $('button.comp_hide_all').trigger('click');
-                    let only_comps = $(this_table).find("tr.colps.level2").filter((i,tr) => $(tr).find("td.comp").text() == $(this).text());
+                }
+            })
+            map_html += "</tbody>"
+            return map_html
+        }
 
-                    $(only_comps).show()
-                    $(this_dd_btn).text($(this).text())
+        function populate_comp_dd(dd_menu){
+            let comp_array = []
+            TRIM.store.currentScenario.parcels.forEach( function(e,i){
+                for (let ve in e.compartment_map) {
+                    for (let comp in e.compartment_map[ve]) {
+                        comp_array.push(e.compartment_map[ve][comp])
+                    }
+                }
+            })
+            let uniq_comp = [... new Set(comp_array)]
+            uniq_comp.sort().forEach(function(e) {
+                let menu_item = "<a class='dropdown-item comp-item'>" + e + "</a>"
+                $(menu_item).appendTo(dd_menu)
+            })
+            $("a.dropdown-item.comp-item").on("click",function (e){
+                e.preventDefault()
+                let this_table = $(this).closest("div.dropdown").next("table.compMap")
+                let this_dd_btn = $(this).closest("div.dropdown").find("button.btn_show_comp")
+                $('button.comp_hide_all').trigger('click');
+                let only_comps = $(this_table).find("tr.colps.level2").filter((i,tr) => $(tr).find("td.comp").text() == $(this).text());
 
-                    $(only_comps).prev("tr.level1").show()
-                })
-            }
-        });
+                $(only_comps).show()
+                $(this_dd_btn).text($(this).text())
+
+                $(only_comps).prev("tr.level1").show()
+            })
+        }
     });
 </script>

@@ -1,4 +1,6 @@
+{% from 'macros/scenarios/static_value_macro.html' import table_static_value %}
 
+{% block content %}
 <form id="abiotic-props-gui"
     data-async-form="true"
     data-form-src="scenario_abiotic_props_form"
@@ -9,16 +11,29 @@
                 <div class="pill pill-alert col-sm">
                     <small>
                         <strong>
-                            <u>Click on the table cells to edit properties.</u>Please note that the values displayed in the table at the time of the "Save" operation are the values that will be incorporated into the calculations
+                            <u>Click on the table cells to edit properties</u>. Please note that the values displayed in the table at the time of the "Save" operation are the values that will be incorporated into the calculations
                         </strong>
                         <br><span style='color: firebrick;'>*</span> All editable cells are required.
                     </small>
+                </div>
+                <div class="row">
+                    <div class="col-md m-2 text-center">
+                        <h4>What Happens to Precipitation on the Surface</h4>
+                    </div>
+                </div>
+                {{ table_static_value(table_id='spatially_varying_table', columns=[]) }}
+                <div class ="row">
+                    <div class="col-md">
+                        <table data-slot="true" data-target="spatially_varying_table" class="hover" id="spatially_varying_table">
+                        </table>
+                    </div>
                 </div>
                 <div class = "row">
                     <div class="col-md m-2 text-center">
                         <h4>Air Properties</h4>
                     </div>
                 </div>
+                {{ table_static_value(table_id='AirAbioticTable', columns=[]) }}
                 <div class ="row">
                     <div class="col-md">
                         <table data-slot="true" data-target="AirAbioticTable" class="hover" id="AirAbioticTable"></table>
@@ -38,6 +53,7 @@
                         <h4>Surface Soil Properties</h4>
                     </div>
                 </div>
+                {{ table_static_value(table_id='SurfaceSoilAbioticTable', columns=[]) }}
                 <div class ="row">
                     <div class="col-md">
                         <table data-slot="true" data-target="SurfaceSoilAbioticTable" class="hover" id="SurfaceSoilAbioticTable"></table>
@@ -48,6 +64,7 @@
                         <h4>Root Soil Properties</h4>
                     </div>
                 </div>
+                {{ table_static_value(table_id='RootSoilAbioticTable', columns=[]) }}
                 <div class ="row">
                     <div class="col-md">
                         <table data-slot="true" data-target="RootSoilAbioticTable" class="hover" id="RootSoilAbioticTable"></table>
@@ -58,6 +75,7 @@
                         <h4>Vadose Zone Properties</h4>
                     </div>
                 </div>
+                {{ table_static_value(table_id='VadoseSoilAbioticTable', columns=[]) }}
                 <div class ="row">
                     <div class="col-md">
                         <table data-slot="true" data-target="VadoseSoilAbioticTable" class="hover" id="VadoseSoilAbioticTable"></table>
@@ -68,6 +86,7 @@
                         <h4>Groundwater Zone Properties</h4>
                     </div>
                 </div>
+                {{ table_static_value(table_id='GWSoilAbioticTable', columns=[]) }}
                 <div class ="row">
                     <div class="col-md">
                         <table data-slot="true" data-target="GWSoilAbioticTable" class="hover" id="GWSoilAbioticTable"></table>
@@ -77,20 +96,25 @@
         </div>
     </section>
 </form>
+<link rel="stylesheet" href="{{url_for('static', filename='css/form_styles.css')}}"/>
 <script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}">
 </script>
 <script src="{{ url_for('static', filename='js/lib/dataTables/jquery.dataTables.min.js') }}">
 </script>
 <script src="{{ url_for('static', filename='js/lib/dataTables/dataTables.bootstrap4.min.js') }}">
 </script>
-<!--<script src="https://cdn.datatables.net/2.0.7/js/dataTables.js">-->
-<!--</script>-->
-<!--<script src="https://cdn.datatables.net/fixedcolumns/5.0.0/js/dataTables.fixedColumns.js">-->
-<!--</script>-->
-<!--<script src="https://cdn.datatables.net/fixedcolumns/5.0.0/js/fixedColumns.dataTables.js">-->
-<!--</script>-->
 <script>
     onDomLoad(function() {
+        var form = document.getElementById('abiotic-props-gui');
+
+        form.addEventListener('form:visible', function() {
+            console.log('abiotic form visible')
+            LoadingScreen.show('abiotic_info_loading');
+            TRIM.refreshParcels();
+            document.body.addEventListener('parcels:ready', updateAbioticData());
+        });
+
+        let spatially_varying_apTable = null;
         let air_apTable = null;
         let soil_apTable = null;
         let root_apTable = null;
@@ -108,6 +132,7 @@
         //     'FractionofAreaAvailableforVerticalDiffusion', 'TotalRunoffRate'
         // ]
         function TableRedraw(table_data) {
+            let spatially_varying_tblId = "#spatially_varying_table";
             let air_tblId = "#AirAbioticTable";
             let soil_tblId = "#SurfaceSoilAbioticTable";
             let root_tblId = "#RootSoilAbioticTable";
@@ -124,6 +149,80 @@
                 return dd
             })
 
+            spatially_varying_apTable = $(spatially_varying_tblId).removeAttr('width').dataTable({
+                data : table_data,
+                paging: false,
+                bFilter: false,
+                info: false,
+                bAutoWidth: false,
+                scrollX: true,
+                scrollY: 500,
+                fnCreatedRow: function (row, data, index) {
+                    $(row).find("td.rightBorder").addClass("freeze-column")
+                },
+                columns: [
+                    {
+                        'bSortable': false,
+                        'data': "Surface Parcel",
+                        'className': 'font-weight-bold rightBorder freeze-column'
+                    },
+                    {
+                        'data': "EvapotranspirationFractions",
+                        'bSortable': false,
+                        'render': function (data, type, row) {
+                            let this_cell_prop = 'editableCell badge badge-light';
+                            let parcel_info = create_parcel_object('EvapotranspirationFractions', row, data);
+                            let err_html = "onblur='ErrorValidation.isValidFraction(this);ErrorValidation.rowTotalIsValid(this);'";
+                            return create_cell_html(parcel_info, data, this_cell_prop, data, err_html);
+                        }
+                    },
+                    {
+                        'data': "GroundwaterSeepageFractions",
+                        'bSortable': false,
+                        'render': function (data, type, row) {
+                            let this_cell_prop = 'editableCell badge badge-light';
+                            let parcel_info = create_parcel_object('GroundwaterSeepageFractions', row, data);
+                            let err_html = "onblur='ErrorValidation.isValidFraction(this);ErrorValidation.rowTotalIsValid(this);'";
+                            return create_cell_html(parcel_info, data, this_cell_prop, data, err_html);
+                        }
+                    },
+                    {
+                        'data': "RunoffFractions",
+                        'bSortable': false,
+                        'render': function (data, type, row) {
+                            let this_cell_prop = 'editableCell badge badge-light';
+                            let parcel_info = create_parcel_object('RunoffFractions', row, data);
+                            let err_html = "onblur='ErrorValidation.isValidFraction(this);ErrorValidation.rowTotalIsValid(this);'";
+                            return create_cell_html(parcel_info, data, this_cell_prop, data, err_html);
+                        }
+                    }
+                ],
+                initComplete: function (settings, json) {
+                    // remove water parcels
+                    let waterPcls = [];
+                    TRIM.store.currentScenario.parcels.forEach((p, i) => {
+                        if (p?.parcelType?.includes("Water")) waterPcls.push(p.name)
+                    });
+                    $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
+                    $('[data-toggle="tooltip"]').tooltip()
+                    $('[data-toggle="popover"]').popover()
+                    $(spatially_varying_tblId).find("tr").each(function (i,e) {
+                        let pclName = $(e).children(":first").text();
+                        if (waterPcls.includes(pclName)) {
+                            $(e).remove();
+                        }
+                        else {
+                            $(e).attr({
+                                "data-rsval": 1,
+                                "data-entity": "fractions for given precipitation"
+                            })
+                        }
+                    })
+                    $(spatially_varying_tblId).DataTable().columns.adjust();
+                    appendHeaderOptions(this, skip_columns=["Parcel Name"]);
+                }
+            });
+
             let render_function_air = function(param_name, err_validation_type){
                 let ret_func = function (data, type, row) {
                             let parcel_info = create_parcel_object(param_name, row, data);
@@ -136,14 +235,21 @@
             }
 
             air_apTable =  $(air_tblId).removeAttr('width').dataTable({
+                destroy: true,
                 data : air_props,
                 paging: false,
                 bFilter: false,
                 info: false,
+                scrollX: true,
+                scrollY: 500,
                 bAutoWidth: false,
+                fnCreatedRow: function (row, data, index) {
+                    $(row).find("td.rightBorder").addClass("freeze-column")
+                },
                 columns: [
                     {
                         'data': "Surface Parcel",
+                        'className': 'font-weight-bold rightBorder freeze-column'
                     },
                     {
                         'data': "DustParticleConcentration",
@@ -172,7 +278,9 @@
                     }
                 ],
                 initComplete: function (settings, json) {
-                    $(air_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    // $(air_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
+                    appendHeaderOptions(this, skip_columns=["Parcel Name"]);
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
                 }
@@ -190,14 +298,21 @@
             }
 
             soil_apTable =  $(soil_tblId).removeAttr('width').dataTable({
+                destroy: true,
                 data : soil_props,
                 paging: false,
                 bFilter: false,
                 info: false,
                 bAutoWidth: false,
+                scrollX: true,
+                scrollY: 500,
+                fnCreatedRow: function (row, data, index) {
+                    $(row).find("td.rightBorder").addClass("freeze-column")
+                },
                 columns: [
                     {
                         'data': "Surface Parcel",
+                        'className': 'font-weight-bold rightBorder freeze-column'
                     },
                     {
                         data: "Tillage",
@@ -279,21 +394,30 @@
                     }
                 ],
                 initComplete: function (settings, json) {
-                    $(soil_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    // $(soil_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
+                    appendHeaderOptions(this, skip_columns=["Parcel Name", "Tillage"]);
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
                 }
             });
 
             root_apTable =  $(root_tblId).removeAttr('width').dataTable({
+                destroy: true,
                 data : soil_props,
                 paging: false,
                 bFilter: false,
                 info: false,
                 bAutoWidth: false,
+                scrollX: true,
+                scrollY: 500,
+                fnCreatedRow: function (row, data, index) {
+                    $(row).find("td.rightBorder").addClass("freeze-column")
+                },
                 columns: [
                     {
                         'data': "Surface Parcel",
+                        'className': 'font-weight-bold rightBorder freeze-column'
                     },
                     {
                         'data': "RootSoilThick",
@@ -337,21 +461,30 @@
                     }
                 ],
                 initComplete: function (settings, json) {
-                    $(root_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    // $(root_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
+                    appendHeaderOptions(this, skip_columns=["Parcel Name"]);
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
                 }
             });
 
             vadose_apTable =  $(vadose_tblId).removeAttr('width').dataTable({
+                destroy: true,
                 data : soil_props,
                 paging: false,
                 bFilter: false,
                 info: false,
+                scrollX: true,
+                scrollY: 500,
                 bAutoWidth: false,
+                fnCreatedRow: function (row, data, index) {
+                    $(row).find("td.rightBorder").addClass("freeze-column")
+                },
                 columns: [
                     {
                         'data': "Surface Parcel",
+                        'className': 'font-weight-bold rightBorder freeze-column'
                     },
                     {
                         'data': "VadoseZoneSoilThick",
@@ -395,21 +528,30 @@
                     }
                 ],
                 initComplete: function (settings, json) {
-                    $(vadose_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    // $(vadose_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
+                    appendHeaderOptions(this, skip_columns=["Parcel Name"]);
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
                 }
             });
 
             gw_apTable =  $(gw_tblId).removeAttr('width').dataTable({
+                destroy: true,
                 data : soil_props,
                 paging: false,
                 bFilter: false,
                 info: false,
+                scrollX: true,
+                scrollY: 500,
                 bAutoWidth: false,
+                fnCreatedRow: function (row, data, index) {
+                    $(row).find("td.rightBorder").addClass("freeze-column")
+                },
                 columns: [
                     {
                         'data': "Surface Parcel",
+                        'className': 'font-weight-bold rightBorder freeze-column'
                     },
                     {
                         'data': "GroundwaterZoneSoilThick",
@@ -443,7 +585,9 @@
                     }
                 ],
                 initComplete: function (settings, json) {
-                    $(gw_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    // $(gw_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
+                    appendHeaderOptions(this, skip_columns=["Parcel Name"]);
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
                 }
@@ -469,31 +613,31 @@
             // save modified cell
             $(`input.editableCell, select.editableCell`).blur(function () {
                 let focusTblId = $(this).closest(`table`).attr('id');
-                if (`#${focusTblId}` !== air_tblId && `#${focusTblId}` !== soil_tblId && `#${focusTblId}` !== root_tblId
+                if (`#${focusTblId}` !== spatially_varying_tblId && `#${focusTblId}` !== air_tblId && `#${focusTblId}` !== soil_tblId && `#${focusTblId}` !== root_tblId
                 && `#${focusTblId}` !== vadose_tblId && `#${focusTblId}` !== gw_tblId) {
                     return;
                 }
 
-                let is_valid = elementIsValid($(this).parent());
-                if (is_valid) {
-                    let data = $(this).val()
-                    let $label = $(this).next("label")
-                    $label.siblings().hide()
-                    $label.show().text(data)
+                let data = $(this).val();
+                let $label = $(this).next("label");
+                $label.siblings("input").hide();
+                $label.show().text(data);
 
-                    let parcel_info = $(this).data('parcelinfo')
-                    if (parcel_info) {
-                        parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                        TRIM.api.updateParcel('{{ scenario.id }}', parcel_info)
-                        table_data = get_Data_from_table(`#${focusTblId}`)
+                let is_valid = elementIsValid($(this).parent());
+
+                if (`#${focusTblId}` === spatially_varying_tblId) {
+                    if (is_valid) {
+                        submit_spatially_varying_row(focusTblId, this, data);
                     }
+                    else {
+                        let parcel_info = $(this).data('parcelinfo')
+                        parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
+                    }
+                } else if (is_valid) {
+                    submit_abiotic_cell(focusTblId, this, data);
                 }
             })
         }
-
-        var form = document.getElementById('abiotic-props-gui');
-        form.addEventListener('form:loaded', function() {
-        });
 
         function create_parcel_object(id, row, data, comp_name=undefined){
             let parcel_info = [{
@@ -525,6 +669,38 @@
                     "<label "+err_html+" class='" + cell_prop + "'>" + cell_data + "</label>"
         }
 
+        function submit_abiotic_cell(focusTblId, cell, data) {
+            let parcel_info = $(cell).data('parcelinfo')
+            if (parcel_info) {
+                let ls_info = "Abiotic_Prop_update"
+                LoadingScreen.show(ls_info)
+                let old_data = parcel_info[parcel_info.findIndex(e => e.type == 'input')].value
+                parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
+                let param_store_key = "soil_params"
+                TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', (rsp)=>{
+                    update_data_store_callback(rsp, elm, parcel_info, param_store_key, data, old_data)
+                    LoadingScreen.hide(ls_info)
+                })
+                table_data = get_Data_from_table(`#${focusTblId}`)
+            }
+        }
+
+        function submit_spatially_varying_row(focusTblId, cell, data) {
+            $(cell).parents("tr").find("input.editableCell").each((i,f)=>{
+                LoadingScreen.show('submit_sv_val');
+                let parcel_info = $(f).data('parcelinfo');
+                if (parcel_info) {
+                    if (f == cell) {
+                        parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data;
+                    }
+                    TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', ()=>{
+                        LoadingScreen.hide('submit_sv_val');
+                    })
+                    table_data = get_Data_from_table(`#${focusTblId}`);
+                }
+            })
+        }
+
         function get_Data_from_table(thisTableID){
             var myRows = [];
             var headersText = [];
@@ -548,47 +724,71 @@
             return myRows
         }
 
-        document.body.addEventListener('parcels:loaded', function() {
-            let loadedData = $('#root').data('loadedParcels')
+        function updateAbioticData() {
+            if (!TRIM.store.currentScenario.parcels) {
+                // Parcels haven't loaded yet; wait a bit and try again
+                setTimeout(function() { updateAbioticData(); }, 1000);
+                return;
+            }
+            if ($(form).filter(':not(.form-loaded)').length) {
+                // Form hasn't loaded yet; wait a bit and try again
+                setTimeout(function() { updateAbioticData(); }, 1000);
+                return;
+            }
+
+            let parcels = TRIM.store.currentScenario.parcels;
             let abiotic_data = []
-            if (loadedData.scenario.length > 0) {
-                loadedData['scenario'].forEach(function (e, i) {
-                    let till_val = e.tillage == "Yes" ? "tilled" : "untilled";
+            if (parcels.length > 0) {
+                parcels.forEach(function (e, i) {
+                    // default surface soil thickness depends on tilled/untilled
+                    let till_val = "untilled";
+                    if (e.soilTillage == "Yes" || e.soilTillage == true) {
+                        till_val = "tilled";
+                    }
+                    let surface_soil_thickness = (e.surfaceSoilThickness ? e.surfaceSoilThickness : TRIM.forms.fetchDefault('SurfaceSoilThick')[till_val]);
+                    
+                    // default root soil thickness depends on (0.8 - surface soil thickness)
+                    let root_soil_default = Math.abs(0.8 - surface_soil_thickness);
+
                     let s = e.hasLand == "Yes" ? e["soil_params"] : e;
                     let comps = ["Soil_Surface", "Soil_Root_Zone", "Soil_Vadose_Zone", "Groundwater"]
                     let param_dict = {
-                            'parcelid': e.id,
-                            'Surface Parcel': e.name,
-                            'hasAir': e.hasAir,
-                            'hasLand': e.hasLand,
-                            'parcelType': e.parcelType,
-                            'DustParticleConcentration': (e.dustLoad ? e.dustLoad : TRIM.forms.fetchDefault('DustParticleConcentration')),
-                            'DustParticleDensity': (e.dustDensity ? e.dustDensity : TRIM.forms.fetchDefault('DustParticleDensity')),
-                            'AirDensity': (e.airDensity ? e.airDensity : TRIM.forms.fetchDefault('AirDensity')),
-                            'DustParticleOrganicMatter': (e.fractionOrganicMatterOnParticulates ? e.fractionOrganicMatterOnParticulates : TRIM.forms.fetchDefault('DustParticleOrganicMatter')),
-                            'AirHeight': (e.airHeight ? e.airHeight : TRIM.forms.fetchDefault('AirHeight')),
-                            'Tillage': (e.soilTillage ? e.soilTillage : TRIM.forms.fetchDefault('Tillage')),
-                            'SurfaceSoilThick': (e.surfaceSoilThickness ? e.surfaceSoilThickness : TRIM.forms.fetchDefault('SurfaceSoilThick')[till_val]),
-                            'RootSoilThick': (e.rootSoilThickness ? e.rootSoilThickness : TRIM.forms.fetchDefault('RootSoilThick')[till_val]),
-                            'VadoseZoneSoilThick': (e.vadoseSoilThickness ? e.vadoseSoilThickness : TRIM.forms.fetchDefault('VadoseZoneSoilThick')),
-                            'GroundwaterZoneSoilThick': (e.groundwaterZoneThickness ? e.groundwaterZoneThickness : TRIM.forms.fetchDefault('GroundwaterZoneSoilThick')),
-                        }
+                        'parcelid': e.id,
+                        'Surface Parcel': e.name,
+                        'hasAir': e.hasAir,
+                        'hasLand': e.hasLand,
+                        'parcelType': e.parcelType,
+                        'DustParticleConcentration': (e.dustLoad !== null ? e.dustLoad : TRIM.forms.fetchDefault('DustParticleConcentration')),
+                        'DustParticleDensity': (e.dustDensity !== null ? e.dustDensity : TRIM.forms.fetchDefault('DustParticleDensity')),
+                        'AirDensity': (e.airDensity !== null ? e.airDensity : TRIM.forms.fetchDefault('AirDensity')),
+                        'DustParticleOrganicMatter': (e.fractionOrganicMatterOnParticulates !== null ? e.fractionOrganicMatterOnParticulates : TRIM.forms.fetchDefault('DustParticleOrganicMatter')),
+                        'AirHeight': (e.airHeight !== null ? e.airHeight : TRIM.forms.fetchDefault('AirHeight')),
+                        'Tillage': (e.soilTillage !== null ? e.soilTillage : TRIM.forms.fetchDefault('Tillage')),
+                        'SurfaceSoilThick': surface_soil_thickness,
+                        'RootSoilThick': (e.rootSoilThickness !== null ? e.rootSoilThickness : root_soil_default),
+                        'VadoseZoneSoilThick': (e.vadoseSoilThickness !== null ? e.vadoseSoilThickness : TRIM.forms.fetchDefault('VadoseZoneSoilThick')),
+                        'GroundwaterZoneSoilThick': (e.groundwaterZoneThickness !== null ? e.groundwaterZoneThickness : TRIM.forms.fetchDefault('GroundwaterZoneSoilThick')),
+                        'EvapotranspirationFractions': (e.evapotrans_frac === null) || (e.evapotrans_frac === "") ? TRIM.forms.fetchDefault('EvapotranspirationFractions') : e.evapotrans_frac,
+                        'GroundwaterSeepageFractions': (e.seepage_frac === null) || (e.seepage_frac === "") ? TRIM.forms.fetchDefault('GroundwaterSeepageFractions') : e.seepage_frac,
+                        'RunoffFractions': (e.runoff_fraction === null) || (e.runoff_fraction === "")  ? TRIM.forms.fetchDefault('RunoffFractions') : e.runoff_fraction,
+                    }
                     comps.forEach(function(c,i) {
                         if (e.hasLand == "Yes") {
+                            sc = s[c] || {};
                             param_dict[c] = {
-                                'pH': s[c].pH ,
-                                'rho': s[c].rho ,
-                                'AverageVerticalVelocity': s[c].AverageVerticalVelocity,
-                                'FractionSand': s[c].FractionSand ,
-                                'OrganicCarbonContent': s[c].OrganicCarbonContent,
-                                'VolumeFraction_Liquid': s[c].VolumeFraction_Liquid,
-                                'VolumeFraction_Vapor': s[c].VolumeFraction_Vapor ,
-                                'Porosity': s[c].Porosity ,
-                                'AirSoilBoundaryThickness': s[c].AirSoilBoundaryThickness,
-                                'FractionofAreaAvailableforErosion': s[c].FractionofAreaAvailableforErosion,
-                                'FractionofAreaAvailableforRunoff': s[c].FractionofAreaAvailableforRunoff,
-                                'FractionofAreaAvailableforVerticalDiffusion': s[c].FractionofAreaAvailableforVerticalDiffusion,
-                                'TotalRunoffRate': s[c].TotalRunoffRate
+                                'pH': sc.pH ,
+                                'rho': sc.rho ,
+                                'AverageVerticalVelocity': sc.AverageVerticalVelocity,
+                                'FractionSand': sc.FractionSand ,
+                                'OrganicCarbonContent': sc.OrganicCarbonContent,
+                                'VolumeFraction_Liquid': sc.VolumeFraction_Liquid,
+                                'VolumeFraction_Vapor': sc.VolumeFraction_Vapor ,
+                                'Porosity': sc.Porosity ,
+                                'AirSoilBoundaryThickness': sc.AirSoilBoundaryThickness,
+                                'FractionofAreaAvailableforErosion': sc.FractionofAreaAvailableforErosion,
+                                'FractionofAreaAvailableforRunoff': sc.FractionofAreaAvailableforRunoff,
+                                'FractionofAreaAvailableforVerticalDiffusion': sc.FractionofAreaAvailableforVerticalDiffusion,
+                                'TotalRunoffRate': sc.TotalRunoffRate
                             }
                         }
                     })
@@ -596,7 +796,10 @@
                 })
             }
             TableRedraw(abiotic_data)
-        });
+            console.log('populated abiotic form!')
+            LoadingScreen.hide('abiotic_info_loading');
+        }
     })
 
 </script>
+{% endblock content %}

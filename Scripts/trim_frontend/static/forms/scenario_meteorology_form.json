@@ -51,12 +51,6 @@
             "separator": "_"
         },
         {
-            "id": "spatially_varying_table",
-            "label": "",
-            "data_type": "form",
-            "form_definition": "subforms/meteorological/table_spatially_varying.json"
-        },
-        {
             "id": "precipitation",
             "label": "",
             "data_type": "form",
