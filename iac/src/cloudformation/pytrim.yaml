@@ -1014,12 +1014,12 @@ Resources:
       # Memory: "16384"
       
       # 8 vCPU / 32 GB RAM. Again, about 20 minutes
-      Cpu: "8192"
-      Memory: "32768"
+      # Cpu: "8192"
+      # Memory: "32768"
       
       # 8 vCPU / 60 GB RAM. Works, took about 19 minutes.
-      # Cpu: "8192"
-      # Memory: "61440"
+      Cpu: "8192"
+      Memory: "61440"
       ContainerDefinitions: 
         - Image: !Join
           - ':'
