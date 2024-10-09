@@ -380,7 +380,7 @@ def get_water_params(pcl, parcel_type):
 
         connected_soil_comps = []
         for this_parcel in pcl.scenario.parcels:
-            soil_comp = this_parcel.get_compartment("Soil_Surface")
+            soil_comp = get_comp(this_parcel, {"name":"Soil_Surface"})
             if soil_comp and soil_comp.connects_to(sw):
                 connected_soil_comps.append(soil_comp)
         # sum up watershed area of connected Soil parcels.
