@@ -110,7 +110,7 @@ def get_general_params(pcl):
     biomass_by_media = {}
     bw_by_media = {}
 
-    land_use = 'Impervious'
+    land_use = 'Grasses/Herbs'
 
     # FIXME verify this is okay
     if root_soil_height:
@@ -120,7 +120,7 @@ def get_general_params(pcl):
     if groundwater_height:
         groundwater_height = groundwater_height.volume_element.height.m_as('m')
 
-    for comp in comp_local_cache["all"]:
+    for comp in comp_local_cache["all"]:        
         # Check parcel type
         if comp.media.isa('Air', or_child=False):
             air = True
@@ -132,17 +132,28 @@ def get_general_params(pcl):
                 fraction_organic_matter_on_particulates = safe_get_val(
                     comp, 'FractionOrganicMatteronParticulates', None
                 )
-        elif comp.media.isa('Surface_Soil', or_child=False):
+        elif comp.media.isa('Surface_Soil'):
             land = True
+            if comp.media.isa('Tilled_Soil'):
+                land_use = 'Tilled Soil'
+            elif comp.media.isa('Untilled_Soil'):
+                land_use = 'Untilled Soil'
+
             if surface_soil_height is None:
                 surface_soil_height = comp.volume_element.height.m_as('m')
                 total_erosion_rate = safe_get_val(comp, 'TotalErosionRate', None)
-                tillage = safe_get_val(comp, 'soilTillage', 0)
-                try:
-                    if int(tillage) == 1:
-                        is_tilled = True
-                except ValueError:
+                if land_use == 'Tilled Soil': 
+                    is_tilled = True
+                elif land_use == 'Untilled Soil':
                     is_tilled = False
+                else:
+                    tillage = safe_get_val(comp, 'soilTillage', 0)
+                    try:
+                        if int(tillage) == 1:
+                            is_tilled = True
+                    except ValueError:
+                        is_tilled = False
+                        
         elif comp.media.isa('Surface_Water'):
             water = True
         elif comp.media.isa('Wetland'):
@@ -166,20 +177,6 @@ def get_general_params(pcl):
             land_use = 'Agriculture - General'
         elif comp.media.isa('Grass'):
             land_use = 'Grasses/Herbs'
-        elif comp.media.isa('Tilled_Soil'):
-            land = True
-            if surface_soil_height is None:
-                surface_soil_height = comp.volume_element.height.m_as('m')
-                total_erosion_rate = safe_get_val(comp, 'TotalErosionRate', None)
-                is_tilled = True
-            land_use = 'Tilled Soil'
-        elif comp.media.isa('Untilled_Soil'):
-            land = True
-            if surface_soil_height is None:
-                surface_soil_height = comp.volume_element.height.m_as('m')
-                total_erosion_rate = safe_get_val(comp, 'TotalErosionRate', None)
-                is_tilled = False
-            land_use = 'Untilled Soil'
 
     if not land:
         land_use = 'N/A'  # No land use for air-only and water-only parcels

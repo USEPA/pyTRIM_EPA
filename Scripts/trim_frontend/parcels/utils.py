@@ -683,7 +683,7 @@ def get_land_use(pcl):
     land = False
     land_use = 'Grasses/Herbs'
     for comp in pcl.compartments:
-        if comp.media.isa('Surface_Soil'):
+        if comp.media.isa('Surface_Soil', or_child=False):
             land = True
         elif comp.media.isa('Coniferous_Forest'):  # Check land use
             land = True
@@ -774,6 +774,7 @@ def get_default_value_from_json_form(form_name, parameter_name):
     json_forms = {
         'Abiotic_Air': ScenarioAbioticPropertiesForm.__getattribute__(ScenarioAbioticPropertiesForm, "AirAbioticTable"),
         'Abiotic_Surface_Soil': ScenarioAbioticPropertiesForm.__getattribute__(ScenarioAbioticPropertiesForm, "SurfaceSoilAbioticTable"),
+        'Abiotic_Tilled_Soil': ScenarioAbioticPropertiesForm.__getattribute__(ScenarioAbioticPropertiesForm, "SurfaceSoilAbioticTable"),
         'Abiotic_Root_Zone': ScenarioAbioticPropertiesForm.__getattribute__(ScenarioAbioticPropertiesForm, "RootSoilAbioticTable"),
         'Abiotic_Vadose_Zone': ScenarioAbioticPropertiesForm.__getattribute__(ScenarioAbioticPropertiesForm, "VadoseSoilAbioticTable"),
         'Abiotic_Groundwater': ScenarioAbioticPropertiesForm.__getattribute__(ScenarioAbioticPropertiesForm, "GWSoilAbioticTable")
@@ -789,13 +790,11 @@ def create_base_land_compartments(parcels_data, p, land_use):
     c_surfsoil = CompartmentService.get(name="Soil_Surface", volume_element_id=ve_surfsoil.id)
 
     custom_param_erosion = c_surfsoil.parameters.get("TotalErosionRate")
-    if not isinstance(custom_param_erosion, CustomParameter):
-        if isinstance(custom_param_erosion, ParameterDefinition):
-            er = CustomParameter(definition=custom_param_erosion, scenario=p.scenario,
-                                    requirements=f'(self.id == {c_surfsoil.id})', value=0,
-                                    unit=custom_param_erosion.default_unit)
-            ParameterService.create(er)
-            ParameterService.commit()
+    custom_param_erosion = get_or_create_custom_param(custom_param_erosion, {
+        "scenario_id": p.scenario_id,
+        "requirements": f'(self.id == {c_surfsoil.id})',
+        "value": 0
+    })
 
     # delete existing compartments
     if land_use in ['Tilled Soil', 'Untilled Soil', 'Impervious']:
