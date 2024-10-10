@@ -230,6 +230,7 @@
 
 					if (!success) {
 						alert('An error occurred during upload.');
+                        console.log(responseData)
 					} else {
 						/*
 						// TODO - can we use this data to just redraw the map/table w/o a full page reload? probably!
@@ -403,7 +404,7 @@
                     },
                     {
                         data: "properties.landuse",
-                        render: function (data, type, row) {                            
+                        render: function (data, type, row) {
                             let parcel_info = [{
                                 'type': 'data',
                                 'name': 'id',
