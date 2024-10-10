@@ -231,6 +231,7 @@
 					if (!success) {
 						alert('An error occurred during upload.');
                         console.log(responseData)
+                        console.log(c)
 					} else {
 						/*
 						// TODO - can we use this data to just redraw the map/table w/o a full page reload? probably!
@@ -836,6 +837,8 @@
                         
                         if (!success) {
                             alert('An error occurred during upload.');
+                            console.log(responseData)
+                            console.log(c)
                         } else {
                             console.log("reload...");
                             window.location.reload();
