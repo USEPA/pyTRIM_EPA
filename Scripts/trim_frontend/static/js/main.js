@@ -72,17 +72,17 @@ function update_data_store_callback(rsp, el, this_parcel_info, this_param_store_
             TRIM.store.currentScenario.parcels[parcel_index][this_param_store_key][comp_name][param_name] = data
             // console.log("Case1")
         } else if (this_param_store_key && this_param_store_key.indexOf(".") > -1) {
-            let keys = this_param_store_key.split(".")
-            if (this_param_store_key.split(".").length == 2) {
-                TRIM.store.currentScenario.parcels[parcel_index][keys[0]][keys[1]][param_name] = data
-                // console.log("Case2a")
-            } else if (this_param_store_key.split(".").length == 3) {
-                TRIM.store.currentScenario.parcels[parcel_index][keys[0]][keys[1]][keys[2]][param_name] = data
-                // console.log("Case2b")
+            let par = TRIM.store.currentScenario.parcels[parcel_index]
+            let par_keys = this_param_store_key.split(".")
+            for (let ky_i in [...Array(par_keys.length-1).keys()]) {
+                let ky = par_keys[ky_i]
+                par = par[ky]
             }
+            par[par_keys[par_keys.length-1]][param_name] = data
+            // console.log("Case2")
         } else {
-            // console.log("Case3")
             TRIM.store.currentScenario.parcels[parcel_index][param_name] = data
+            // console.log("Case3")
         }
         is_success = true
     }

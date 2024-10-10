@@ -532,15 +532,27 @@ def get_water_params(pcl, parcel_type):
 
 def get_source_params(pcl):
     chem_objs = {c for c in pcl.scenario.chemicals}
-    source_comps = [c for c in comp_local_cache["all"] if c.media.isa("Source")]
+    # source_comps = [c for c in comp_local_cache["all"] if c.media.isa("Source")]
+    source_comps = [c for c in comp_local_cache["all"]]
     chems = {c.name: {} for c in pcl.scenario.chemicals}
     source_params = {"sources": chems}
     for comp in source_comps:
         for chem in chem_objs:
             try:
-                source_params["sources"][chem.name][comp.volume_element.name] = {comp.name: comp.surfaceDepositionRate(chemical=chem).magnitude}
+                # source_params["sources"][chem.name][comp.volume_element.name] = {comp.name: comp.surfaceDepositionRate(chemical=chem).magnitude}
+                spd = source_params["sources"][chem.name].get(comp.volume_element.name)
+                if spd:
+                    spd.setdefault(comp.name, comp.surfaceDepositionRate(chemical=chem).magnitude)
+                else:
+                    source_params["sources"][chem.name].setdefault(comp.volume_element.name, {comp.name: comp.surfaceDepositionRate(chemical=chem).magnitude})
             except AttributeError:
-                source_params["sources"][chem.name][comp.volume_element.name] = {comp.name: comp.surfaceDepositionRate(chemical=chem)}
+                # source_params["sources"][chem.name][comp.volume_element.name] = {comp.name: comp.surfaceDepositionRate(chemical=chem)}
+                spd = source_params["sources"][chem.name].get(comp.volume_element.name)
+                if spd:
+                    spd.setdefault(comp.name, comp.surfaceDepositionRate(chemical=chem))
+                else:
+                    source_params["sources"][chem.name].setdefault(comp.volume_element.name, {
+                        comp.name: comp.surfaceDepositionRate(chemical=chem)})
     return source_params
 
 

@@ -208,7 +208,7 @@ Parameters:
   WebTierInstanceType:
     Description: instance type for the web tier
     Type: String
-    Default: m1.medium
+    Default: m5n.2xlarge
     # Default: t3.nano
     AllowedValues:
       - c1.medium
@@ -467,7 +467,7 @@ Parameters:
   DatabaseInstanceType:
     Description: RDS instance type
     Type: String
-    Default: db.t3.medium
+    Default: db.t3.large
     AllowedValues:
       - db.m5.large
       - db.m5.xlarge
