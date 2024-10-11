@@ -4,7 +4,7 @@
     "fields": [
         {
             "id": "time_varying",
-            "help": "Check the box to use values that vary in time for leaf litterfall rate (fraction per day of plant leaves falling to the ground) and whether leaves are exchanging chemical with the air. This feature is typically used for this plant type. For non-evergreen leaves, it is typically assumed that the exchange does not occur during litterfall and that litterfall occurs over a 30-day period at a rate of 0.15 /day, allowing 99% of leaves to fall over the period. Litterfall is typically set to start at the typical date of first frost/freeze, while exchange is typically set to start after the typical date of last frost/freeze."
+            "help": "Check the box to use values that vary in time for leaf litterfall rate (fraction per day of plant leaves falling to the ground) and whether leaves are exchanging chemical with the air. This feature is typically used for this plant type. For non-evergreen leaves, it is typically assumed that the exchange does not occur during litterfall and that litterfall occurs over a 30-day period at a rate of 0.15/day, allowing 99% of leaves to fall over the period. Litterfall is typically set to start at the typical date of first frost/freeze, while exchange is typically set to start after the typical date of last frost/freeze."
         },
         {
             "id": "field_name",

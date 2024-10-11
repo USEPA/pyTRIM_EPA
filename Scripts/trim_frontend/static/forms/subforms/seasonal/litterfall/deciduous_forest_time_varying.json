@@ -5,7 +5,7 @@
         {
             "id": "time_varying",
             "label": "Use Time-Varying Litterfall Rate",
-            "help": "Check the box to use values that vary in time for deciduous forest leaf Litterfall rate (fraction per day of plant leaves falling to the ground). This feature is typically used for this plant type. For non-evergreen leaves, it is typically assumed that litterfall occurs over a 30-day period at a rate of 0.15 /day, allowing 99% of leaves to fall over the period. Litterfall is typically set to start at the typical date of first frost/freeze."
+            "help": "Check the box to use values that vary in time for deciduous forest leaf Litterfall rate (fraction per day of plant leaves falling to the ground). This feature is typically used for this plant type. For non-evergreen leaves, it is typically assumed that litterfall occurs over a 30-day period at a rate of 0.15/day, allowing 99% of leaves to fall over the period. Litterfall is typically set to start at the typical date of first frost/freeze."
         },
         {
             "id": "field_name",

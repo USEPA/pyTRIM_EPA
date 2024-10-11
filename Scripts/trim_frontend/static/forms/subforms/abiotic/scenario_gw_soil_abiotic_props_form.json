@@ -20,15 +20,15 @@
     },
     {
       "id": "rho",
-      "label": "Density of Solid material in aquifer",
+      "label": "Density of Solid Material in Aquifer",
       "data_type": "float",
       "default": 2600,
       "tooltip": "kg [soil]/m<sup>3</sup> [soil]",
-      "help": "Enter the density of soil solids in the groundwater layer. Valid values are > 0. The default value of 2,600 is the value used for by the CalTOX model (see Table 1 of: CalEPA (California Environmental Protection Agency), Department of Toxic Substances Control. 1996. The Distribution of California Landscape Variables for CalTOX. Draft (February)."
+      "help": "Enter the density of soil solids in the groundwater layer. Valid values are > 0. The default value of 2,600 is the value used by the CalTOX model (see Table 1 of: CalEPA (California Environmental Protection Agency), Department of Toxic Substances Control. 1996. The Distribution of California Landscape Variables for CalTOX. Draft (February)."
     },
     {
       "id": "FractionSand",
-      "label": "Fraction sand",
+      "label": "Fraction Sand",
       "data_type": "float",
       "default": 0.25,
       "tooltip": "unitless",
@@ -36,7 +36,7 @@
     },
     {
       "id": "OrganicCarbonContent",
-      "label": "Organic carbon fraction",
+      "label": "Organic Carbon Fraction",
       "data_type": "float",
       "default": 0.008,
       "tooltip": "unitless",
@@ -48,7 +48,7 @@
       "data_type": "float",
       "default": 6.8,
       "tooltip": "unitless",
-      "help": "Enter the pH of the soil layer. Valid values are 0 to 14. The default value fo 6.8 is professional judgment. Typical sources of site-specific values include the U.S. Department of Agriculture's Web Soil Survey (Soil Survey Staff, Natural Resources Conservation Service, United States Department of Agriculture. Web Soil Survey. Available online at https://websoilsurvey.nrcs.usda.gov/.)."
+      "help": "Enter the pH of the soil layer. Valid values are 0 to 14. The default value of 6.8 is professional judgment. Typical sources of site-specific values include the U.S. Department of Agriculture's Web Soil Survey (Soil Survey Staff, Natural Resources Conservation Service, United States Department of Agriculture. Web Soil Survey. Available online at https://websoilsurvey.nrcs.usda.gov/.)."
     },
     {
       "id": "Porosity",
