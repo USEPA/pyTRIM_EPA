@@ -32,7 +32,7 @@
             "widget": "select",
             "choices": ["Uniform", "Non-Uniform"],
             "required": true,
-            "help": "Enter the Spacing of your emission sources. For the receptors in the AERMOD deposition file, indicate whether they are uniformly spaced or non-uniformly spaced.",
+            "help": "For the receptors in the AERMOD deposition file, indicate whether they are uniformly spaced or non-uniformly spaced.",
             "if_true": ["have_AERMOD_file"]
         },
         {
