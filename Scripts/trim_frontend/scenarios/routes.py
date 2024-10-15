@@ -192,6 +192,7 @@ def update_scenario():
     ret_val = ''
 
     def create_new_custom_param_meteo(scen, comp, par_name):
+        print(f"\n{par_name}\n")
         default_param = ParameterService.definitions.get_all(variable_name=par_name)
         
         if par_name == "AirTemperature":
@@ -380,7 +381,14 @@ def update_scenario():
                     update_custom_param(s, s, param_name, param_data, create_if_dne=True)
                 elif field_name.endswith("_TS"):
                     ret_val = meteo_wgt_avg_value_from_timeseries(param_data, "MET")
-                    update_custom_param(s, s, param_name, list(ret_val.values())[0], create_if_dne=True)
+                    if isinstance(ret_val, dict) and "wt_av_Rain" in ret_val.keys():
+                        param_value = ret_val["wt_av_Rain"]
+                    elif isinstance(ret_val, dict) and "wt_av_CumulativeRain" in ret_val.keys():
+                        param_value = ret_val["wt_av_CumulativeRain"]
+                    else:
+                        param_value = list(ret_val.values())[0]
+                    update_custom_param(s, s, param_name, param_value, create_if_dne=True)
+
         elif field_name.startswith("seasonal_"):  # Data from the seasonal dynamics tab
             param_media = param_map["seasonal"].get(field_name)[0]
             param_name = param_map["seasonal"].get(field_name)[1]
