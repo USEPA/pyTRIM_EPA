@@ -32,7 +32,7 @@
       "data_type": "float",
       "default": 0,
       "tooltip": "(kg/m<sup>2</sup>-d)",
-      "help": "Enter the total effective erosion rate of the parcel (kilograms per square meter per day). Under Options 2 and 3 on this page, it is calculated as: unit soil loss (A) * sediment delivery ratio (SD) (and * organic enrichment ratio for organic contaminants). A can be calculated using the Universal Soil Loss Equation as: rainfall erosivity index (R) * soil erodibility index (K) * topographical length-slope factor (LS) * cover/management factor (C) * supporting practices factor (P), with additional unit conversions to go from tons per acre per year to kilograms per square meter per day. SD can be calculated as: empirical intercept factor (a) * area<sup>-empirical slope factor (b)</sup> (area in square meters)."
+      "help": "Enter the total effective erosion rate of the parcel (kilograms per square meter per day). Valid values are >= 0. Under Options 2 and 3 on this page, it is calculated as: unit soil loss (A) * sediment delivery ratio (SD) (and * organic enrichment ratio for organic contaminants). A can be calculated using the Universal Soil Loss Equation as: rainfall erosivity index (R) * soil erodibility index (K) * topographical length-slope factor (LS) * cover/management factor (C) * supporting practices factor (P), with additional unit conversions to go from tons per acre per year to kilograms per square meter per day. SD can be calculated as: empirical intercept factor (a) * area<sup>-empirical slope factor (b)</sup> (area in square meters)."
     }
   ]
 }

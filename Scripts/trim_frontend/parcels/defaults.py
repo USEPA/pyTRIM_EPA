@@ -174,7 +174,7 @@ def get_general_params(pcl):
         elif comp.media.isa('Deciduous_Forest'):
             land_use = 'Deciduous Forest'
         elif comp.media.isa('Agriculture'):
-            land_use = 'Agriculture - General'
+            land_use = 'Agriculture (General)'
         elif comp.media.isa('Grass'):
             land_use = 'Grasses/Herbs'
 

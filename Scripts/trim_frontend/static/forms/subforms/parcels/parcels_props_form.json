@@ -59,7 +59,7 @@
       "label": "Wetland",
       "data_type": "str",
       "default": "",
-      "help": "(only for land parcels with land uses other than Impervious) Indicate whether the parcel will be modeled with wetland characteristics (e.g., modified water percolation and mercury methylation in soil; you later will provide information on these wetland characteristics). The default selection is 'No'."
+      "help": "(only for land parcels) Indicate whether the parcel will be modeled with wetland characteristics (e.g., modified water percolation and mercury methylation in soil; you later will provide information on these wetland characteristics). The default selection is 'No'."
     }
   ]
 }

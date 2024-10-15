@@ -67,7 +67,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             initialize_parcel_contents(p, water_and_air_parcel_vol_elem_defaults)
 
     if field_name == "landUse":
-        if parcels_data['landUse'] in ['Coniferous Forest', 'Deciduous Forest', 'Agriculture - General',
+        if parcels_data['landUse'] in ['Coniferous Forest', 'Deciduous Forest', 'Agriculture (General)',
                                        'Grasses/Herbs', 'Tilled Soil', 'Untilled Soil', 'Impervious']:
             # COMPARTMENT CHANGE
             if not parcels_data['landUse'] == land_use:
@@ -693,7 +693,7 @@ def get_land_use(pcl):
             land_use = 'Deciduous Forest'
         elif comp.media.isa('Agriculture'):
             land = True
-            land_use = 'Agriculture - General'
+            land_use = 'Agriculture (General)'
         elif comp.media.isa('Grass'):
             land = True
             land_use = 'Grasses/Herbs'
@@ -881,12 +881,12 @@ def create_base_land_compartments(parcels_data, p, land_use):
                                                    media=[m for m in CompartmentService.media.get_all() if m.isa('Grass_Stem')][0]))
         new_comps.append(CompartmentService.create(name="Root_Grasses_Herbs", volume_element=ve_surfsoil,
                                                    media=[m for m in CompartmentService.media.get_all() if m.isa('Grass_Root')][0]))
-    elif parcels_data['landUse'] == 'Agriculture - General':
+    elif parcels_data['landUse'] == 'Agriculture (General)':
         new_comps.append(CompartmentService.create(name="Leaf_Agriculture", volume_element=ve_surfsoil,
                                                    media=[m for m in CompartmentService.media.get_all() if m.isa('Agriculture_Leaf')][0]))
         new_comps.append(CompartmentService.create(name="Leaf_Particle_Agriculture", volume_element=ve_surfsoil,
-                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Agriculture_Leaf_Particle')][0].id))
-        new_comps.append(CompartmentService.create(name="Stem_Agriculture", volume_element=ve_surfsoil.id,
+                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Agriculture_Leaf_Particle')][0]))
+        new_comps.append(CompartmentService.create(name="Stem_Agriculture", volume_element=ve_surfsoil,
                                                    media=[m for m in CompartmentService.media.get_all() if m.isa('Agriculture_Stem')][0]))
         new_comps.append(CompartmentService.create(name="Root_Agriculture", volume_element=ve_surfsoil,
                                                    media=[m for m in CompartmentService.media.get_all() if m.isa('Agriculture_Root')][0]))
