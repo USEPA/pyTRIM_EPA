@@ -2,6 +2,7 @@ from trim_db.schema import Parcel
 from trim_db.schema.utils.serialize import register_serializer
 from trim_db.schema.parameters.models import ParameterDefinition, CustomParameter
 from trim_db.services import *
+from trim_frontend.scenarios.defaults import EROSION_TABLE_KWARGS
 import pint
 
 comp_local_cache = {}
@@ -92,7 +93,7 @@ def get_general_params(pcl):
     is_tilled = False
 
     erosion_table_params = {}
-    default_erosion = ParameterService.definitions.get_all(variable_name="erosion_table")
+    default_erosion = [ParameterService.definitions.get(full_name=kwargs["full_name"]) for kwargs in EROSION_TABLE_KWARGS]
     for default_param in default_erosion:
         custom_param = ParameterService.get(
             scenario_id=pcl.scenario_id,
