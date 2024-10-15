@@ -250,8 +250,9 @@
                 let daytime_val = parseFloat($(e.target).val());
                 let valid_daytime = (daytime_val == 0 || daytime_val == 1);
                 let is_valid = ErrToolTip(e.target, valid_daytime, "Daytime Indicator must be either 0 or 1.", "div");
-                if (is_valid)
+                if (is_valid) {
                     submit_meteo_value(e.target);
+                }
             });
             $('#precipitation_static_value_rate').on('change', function(e) {
                 submit_meteo_value(e.target);
@@ -294,9 +295,8 @@
 
         function submit_meteo_value(elem) {
             let param_info = get_form_data(elem)
-            if (elementIsValid($(elem).parent()))
+            if ($(elem).get(0).tagName == "INPUT")
                 ErrorValidation.isPositiveValue(elem, $(elem).parent());
-
             if (elementIsValid($(elem).parent())){
                 console.log(param_info);
                 let resp = TRIM.api.updateScenario(param_info).on('load',function(){
