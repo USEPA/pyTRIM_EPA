@@ -294,7 +294,9 @@
 
         function submit_meteo_value(elem) {
             let param_info = get_form_data(elem)
-            ErrorValidation.isPositiveValue(elem, $(elem).parent());
+            if (elementIsValid($(elem).parent()))
+                ErrorValidation.isPositiveValue(elem, $(elem).parent());
+
             if (elementIsValid($(elem).parent())){
                 console.log(param_info);
                 let resp = TRIM.api.updateScenario(param_info).on('load',function(){
