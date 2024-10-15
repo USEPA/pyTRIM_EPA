@@ -62,6 +62,7 @@ def init_comp_cache(pcl):
 
 
 def get_comp(pcl, kwargs):
+    # comp_local_cache.clear()
     uuid = f"{pcl.id}_{str(kwargs.keys())}_{str(kwargs.values())}"
     comp = comp_local_cache.get(uuid)
     if not comp:
@@ -120,7 +121,8 @@ def get_general_params(pcl):
     if groundwater_height:
         groundwater_height = groundwater_height.volume_element.height.m_as('m')
 
-    for comp in comp_local_cache["all"]:        
+    # for comp in comp_local_cache["all"]:
+    for comp in pcl.compartments:
         # Check parcel type
         if comp.media.isa('Air', or_child=False):
             air = True
@@ -533,7 +535,7 @@ def get_water_params(pcl, parcel_type):
 def get_source_params(pcl):
     chem_objs = {c for c in pcl.scenario.chemicals}
     # source_comps = [c for c in comp_local_cache["all"] if c.media.isa("Source")]
-    source_comps = [c for c in comp_local_cache["all"]]
+    source_comps = [c for c in pcl.compartments]
     chems = {c.name: {} for c in pcl.scenario.chemicals}
     source_params = {"sources": chems}
     for comp in source_comps:
