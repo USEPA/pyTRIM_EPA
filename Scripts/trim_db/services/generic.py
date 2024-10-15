@@ -89,7 +89,11 @@ class GenericService(metaclass=ServiceMetaClass):
         # cls.clear_cache()
         for k in CacheManager._CACHERS:
             CacheManager.clear_cache(k)
-        cls.db.session.commit()
+        try:
+            cls.db.session.commit()
+        except Exception as e:
+            cls.db.session.rollback()
+            print(f"Error on commit {e}")
 
     @classmethod
     @CacheManager.without_caching
