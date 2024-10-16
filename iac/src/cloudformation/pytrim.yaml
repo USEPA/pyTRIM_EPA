@@ -1322,11 +1322,11 @@ Resources:
         -
           Namespace: 'aws:elasticbeanstalk:container:python'
           OptionName: NumProcesses
-          Value: 12
+          Value: 11
         -
           Namespace: 'aws:elasticbeanstalk:container:python'
           OptionName: NumThreads
-          Value: 20
+          Value: 11
         -
           Namespace: 'aws:elasticbeanstalk:application:environment'
           OptionName: RDS_HOSTNAME
