@@ -515,16 +515,19 @@ def parse_runoff_matrix_upload():
                 continue
             del row["parcels"]
             
-            row_receivers = [f"ro_{k}" for k in row.keys()]
-            row_vals = [f"{float(Decimal(v))}" for v in row.values()]
-            payload = {
-                "id": sender_pcl.id,
-                "field": "runoff_matrix_value",
-                "sender": f"ro_{sender_pcl.name}",
-                "receiver": ",".join(row_receivers),
-                "ro_value": ",".join(row_vals)
-            }
-            handle_parcel_update(sender_pcl, payload)
+            row_receivers_all = [f"ro_{k}" for k in row.keys()]
+            row_vals_all = [(vi, f"{float(Decimal(v))}") for vi, v in enumerate(row.values())]
+            row_receivers = [row_receivers_all[vi] for vi, v in row_vals_all if float(Decimal(v)) > 0]
+            row_vals = [row_vals_all[vi][1] for vi, v in row_vals_all if float(Decimal(v)) > 0]
+            if len(row_vals) > 0:
+                payload = {
+                    "id": sender_pcl.id,
+                    "field": "runoff_matrix_value",
+                    "sender": f"ro_{sender_pcl.name}",
+                    "receiver": ",".join(row_receivers),
+                    "ro_value": ",".join(row_vals)
+                }
+                handle_parcel_update(sender_pcl, payload)
                 
     except Exception as e:
         print(traceback.format_exc())
