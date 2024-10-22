@@ -30,6 +30,7 @@ class CacheManager:
                 #     print_this = True
                 #     print(f'\n--- args {args} --- kwargs {kwargs} ---\n f is {f}')
                 if CacheManager.DISABLED_REQUESTS:
+                    # print(f'{90*"^"}\n{35*" "} CACHE DISABLED!!!! {35*" "}\n{90*"^"}\n')
                     return f(*args, **kwargs)
 
                 k = CacheManager.cache_key(*args, **kwargs)
@@ -43,7 +44,7 @@ class CacheManager:
                     if print_this:
                         print(f'Existing Cache "{k}" -> {ans}\n')
                     if isinstance(ans, Exception):
-                        # print(f"key {k} exists but this exception occurred: {ans}")
+                        print(f"key {k} exists but this exception occurred: {ans}")
                         raise ans
                     return ans
 
