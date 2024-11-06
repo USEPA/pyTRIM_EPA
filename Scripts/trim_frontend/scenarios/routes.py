@@ -937,3 +937,106 @@ def fetch_run_results():
 
 
     return ApiResult(resp)
+
+
+@scenario_api.route('/api/scenario/<int:scenario_id>/export/mirc', methods=['GET'])
+# TODO: Need some way for MIRC *app* to authenticate?
+@login_required
+def export_for_mirc(scenario_id):
+    scen = ScenarioService.get(scenario_id)
+    if not scen:
+        raise ApiException("Unknown Scenario")
+
+    logger = make_logger('mirc_exporter')
+
+    chems = [c.name for c in scen.chemicals]
+
+    trim_data = {
+        'scenario_name': scen.name,
+        'chemicals': chems
+    }
+
+    timestamps = []
+    # TODO: Need to get a list of the timestamps at which data is available
+    # for the latest run. Should look like:
+    # ["01/01/1990 00:00:00 EST", "12/31/1990 20:00:00 EST", etc]
+    trim_data['timestamps'] = timestamps
+
+    parcels = []
+    for parcel in scen.parcels:
+        p = {
+            'name': parcel.name,
+            'vertices': parcel.vertices,
+            'volume_elements': []
+        }
+        for volume_element in parcel.volume_elements:
+            ve = {
+                'name': volume_element.name,
+                'compartments': []
+            }
+            for compartment in volume_element.compartments:
+                c = {
+                    'name': compartment.name,
+                    'properties': {}
+                }
+                # TODO: Need to add values of properties used by MIRC,
+                # which are listed below.
+                # Some are constant:
+                # {
+                #     "rho_a": {
+                #         "value": 0.0012,
+                #         "unit": "g/cm^3"
+                #     },
+                #     "Kd": {
+                #         "value": 58000.0,
+                #         "unit": "L/kg"
+                #     },
+                #     "FMD": 1.658e-06,
+                #     "Fv": 0.0
+                # }
+                # Others are need to have values for each timestamp:
+                # {
+                #     "C": {  # == 'concentration'
+                #         "01/01/1990 00:00:00 EST": {
+                #             "value": 0.0,
+                #             "unit": "ug/g"
+                #         },
+                #         "12/31/1990 20:00:00 EST": {
+                #             "value": 6.53152455e-13,
+                #             "unit": "ug/g"
+                #         },
+                #         etc
+                #     }
+                #     "Drwp": {
+                #         "01/01/1990 00:00:00 EST": {
+                #             "value": 0.0,
+                #             "unit": "g/day/m^2"
+                #         },
+                #         "12/31/1990 20:00:00 EST": {
+                #             "value": 2.79137802e-22,
+                #             "unit": "g/day/m^2"
+                #         },
+                #         etc
+                #     }
+                #     "Drdp": {
+                #         "01/01/1990 00:00:00 EST": {
+                #             "value": 0.0,
+                #             "unit": "g/day/m^2"
+                #         },
+                #         "12/31/1990 20:00:00 EST": {
+                #             "value": 6.66459595e-22,
+                #             "unit": "g/day/m^2"
+                #         },
+                #         etc
+                #     }
+                # }
+                # If a property is not relevant for a given compartment,
+                # it can be skipped
+                ve['compartments'].append(c)
+            p['volume_elements'].append(ve)
+        parcels.append(p)
+    trim_data['parcels'] = parcels
+
+    return ApiResult({
+        'trim_data': trim_data
+    })
