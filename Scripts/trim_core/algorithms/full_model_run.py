@@ -298,6 +298,13 @@ def make_transition_matrix(scenario):
         transition_matrix, index=index_names,
         columns=index_names
     )
+
+    # ------- THIS IS FOR ARUN'S CHECKS -------
+    ts = datetime.now().strftime('%Y-%m-%d--%H_%M_%S')
+    fname_tm = f'./trim_frontend/static/.output/TM_{scenario.name}_{scenario.creator_id}_{ts}.csv'
+    df_tm.to_csv(fname_tm)
+    # ----------- END ARUN'S CHECKS -----------
+
     df_sm = pd.DataFrame(
         source_matrix, index=index_names,
         columns=['deposition_rate_g_day-1']
