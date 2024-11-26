@@ -300,9 +300,9 @@ def make_transition_matrix(scenario):
     )
 
     # ------- THIS IS FOR ARUN'S CHECKS -------
-    ts = datetime.now().strftime('%Y-%m-%d--%H_%M_%S')
-    fname_tm = f'./trim_frontend/static/.output/TM_{scenario.name}_{scenario.creator_id}_{ts}.csv'
-    df_tm.to_csv(fname_tm)
+    # ts = datetime.now().strftime('%Y-%m-%d--%H_%M_%S')
+    # fname_tm = f'./trim_frontend/static/.output/TM_{scenario.name}_{scenario.creator_id}_{ts}.csv'
+    # df_tm.to_csv(fname_tm)
     # ----------- END ARUN'S CHECKS -----------
 
     df_sm = pd.DataFrame(
