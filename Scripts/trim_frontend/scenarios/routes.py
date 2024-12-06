@@ -2,6 +2,7 @@ import json
 import os
 import re
 import time
+import pint
 from datetime import datetime
 from pathlib import Path
 
@@ -948,95 +949,122 @@ def export_for_mirc(scenario_id):
         raise ApiException("Unknown Scenario")
 
     logger = make_logger('mirc_exporter')
+    logger.info(f"Compiling required MIRC data for scenario {scen.name}...")
+    try:
+        latest_model_run = [v for v in scen.proc_status if not v.is_run_error]
+        if len(latest_model_run) == 0:
+            return ApiResult({
+                'trim_data': {"message": "No valid data found"}
+            })
+        latest_model_run = latest_model_run[0]
 
-    chems = [c.name for c in scen.chemicals]
+        mass = json.loads(latest_model_run.result_nt)
+        mass = json.loads("{"+mass+"}")
+        conc = json.loads(latest_model_run.result_conc)
+        conc = json.loads("{"+conc+"}")
 
-    trim_data = {
-        'scenario_name': scen.name,
-        'chemicals': chems
-    }
+        logger.info(f"Model run found, using run with id [{latest_model_run.id}]...")
 
-    timestamps = []
-    # TODO: Need to get a list of the timestamps at which data is available
-    # for the latest run. Should look like:
-    # ["01/01/1990 00:00:00 EST", "12/31/1990 20:00:00 EST", etc]
-    trim_data['timestamps'] = timestamps
+        chems = {c.name : c for c in scen.chemicals}
+        timestamps = [f"01/01/{year} 00:00:00 EST" for year in mass['year'].values()]
 
-    parcels = []
-    for parcel in scen.parcels:
-        p = {
-            'name': parcel.name,
-            'vertices': parcel.vertices,
-            'volume_elements': []
+        trim_data = {
+            'scenario_name': scen.name,
+            'chemicals': list(chems.keys()),
+            'timestamps': timestamps,
         }
-        for volume_element in parcel.volume_elements:
-            ve = {
-                'name': volume_element.name,
-                'compartments': []
-            }
-            for compartment in volume_element.compartments:
-                c = {
-                    'name': compartment.name,
-                    'properties': {}
-                }
-                # TODO: Need to add values of properties used by MIRC,
-                # which are listed below.
-                # Some are constant:
-                # {
-                #     "rho_a": {
-                #         "value": 0.0012,
-                #         "unit": "g/cm^3"
-                #     },
-                #     "Kd": {
-                #         "value": 58000.0,
-                #         "unit": "L/kg"
-                #     },
-                #     "FMD": 1.658e-06,
-                #     "Fv": 0.0
-                # }
-                # Others are need to have values for each timestamp:
-                # {
-                #     "C": {  # == 'concentration'
-                #         "01/01/1990 00:00:00 EST": {
-                #             "value": 0.0,
-                #             "unit": "ug/g"
-                #         },
-                #         "12/31/1990 20:00:00 EST": {
-                #             "value": 6.53152455e-13,
-                #             "unit": "ug/g"
-                #         },
-                #         etc
-                #     }
-                #     "Drwp": {
-                #         "01/01/1990 00:00:00 EST": {
-                #             "value": 0.0,
-                #             "unit": "g/day/m^2"
-                #         },
-                #         "12/31/1990 20:00:00 EST": {
-                #             "value": 2.79137802e-22,
-                #             "unit": "g/day/m^2"
-                #         },
-                #         etc
-                #     }
-                #     "Drdp": {
-                #         "01/01/1990 00:00:00 EST": {
-                #             "value": 0.0,
-                #             "unit": "g/day/m^2"
-                #         },
-                #         "12/31/1990 20:00:00 EST": {
-                #             "value": 6.66459595e-22,
-                #             "unit": "g/day/m^2"
-                #         },
-                #         etc
-                #     }
-                # }
-                # If a property is not relevant for a given compartment,
-                # it can be skipped
-                ve['compartments'].append(c)
-            p['volume_elements'].append(ve)
-        parcels.append(p)
-    trim_data['parcels'] = parcels
+
+        trim_data["parcels"] = compile_mirc_parcel_data(scen, chems, conc, timestamps, logger)
+    except Exception as e:
+        logger.error(e)
+        traceback.print_exc()
+        trim_data = {"error": "No valid data found"}
 
     return ApiResult({
         'trim_data': trim_data
     })
+
+def compile_mirc_parcel_data(scen, chems, conc, timestamps, logger):
+    logger.info(f"Compiling parcel data for...")
+    parcels = []
+    for parcel in scen.parcels:
+        logger.info(f"{parcel.name}")
+        p = {
+            "name": parcel.name,
+            "vertices": parcel.vertices,
+            "volume_elements": [],
+        }
+        for volume_element in parcel.volume_elements:
+            ve = {
+                "name": volume_element.name,
+                "compartments": [],
+            }
+            for compartment in volume_element.compartments:
+                c = {
+                    "name": compartment.name,
+                    "properties": {},
+                }
+
+                # properties not relevant for a given compartment can be skipped
+                for chem_name in chems.keys():
+                    props = {}
+                    filtered_key = f'{chem_name}_{compartment.standard_name}'
+                    filtered_conc = list(conc[filtered_key].values())
+                    filtered_conc_units = list(conc[filtered_key+"_units"].values())
+
+                    # constants
+                    if "air" in c["name"].lower():
+                        props["rho_a"] = {
+                            "value": compartment.rho.magnitude,
+                            "unit": str(compartment.rho.units), # "g/cm^3"
+                        }
+
+                    chem_kd = chems[chem_name].Kd(compartment=compartment)
+                    props["Kd"] = {
+                        "value": chem_kd.magnitude,
+                        "unit": str(chem_kd.units), # "L/kg"
+                    }
+
+                    chem_fmd = chems[chem_name].FractionMass_Dissolved(compartment=compartment)
+                    if chem_fmd:
+                        if isinstance(chem_fmd, pint.Quantity):
+                            props["FMD"] = chem_fmd.magnitude
+                        else:
+                            props["FMD"] = chem_fmd
+    
+                    chem_fv = chems[chem_name].FractionMass_Vapor(compartment=compartment)
+                    if chem_fv:
+                        if isinstance(chem_fv, pint.Quantity):
+                            props["Fv"] = chem_fv.magnitude
+                        else:
+                            props["Fv"] = chem_fv
+
+
+                    # timestamp values
+                    props["C"] = {}  # concentration
+
+                    chem_wet = chems[chem_name].ParticleVolumetricWetDepositionRate(compartment=compartment)
+                    props["Drwp"] = {}  # deposition rate wet particle
+
+                    chem_dry = chems[chem_name].ParticleVolumetricDRYDepositionRate(compartment=compartment)
+                    props["Drdp"] = {}  # deposition rate dry particle
+                    for i, timestamp in enumerate(timestamps):
+                        if isinstance(filtered_conc_units[0], str):
+                            props["C"][timestamp] = {
+                                "value": filtered_conc[i],
+                                "unit": filtered_conc_units[i] # "ug/g"
+                            }
+                        props["Drwp"][timestamp] = {
+                            "value": chem_wet.magnitude,
+                            "unit": str(chem_wet.units) # "g/day/m^2"
+                        }
+                        props["Drdp"][timestamp] = {
+                            "value": chem_dry.magnitude,
+                            "unit": str(chem_dry.units) # "g/day/m^2"
+                        }
+
+                    c["properties"][chem_name] = props
+                ve["compartments"].append(c)
+            p["volume_elements"].append(ve)
+        parcels.append(p)
+    return parcels

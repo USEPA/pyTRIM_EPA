@@ -44,7 +44,7 @@ class CacheManager:
                     if print_this:
                         print(f'Existing Cache "{k}" -> {ans}\n')
                     if isinstance(ans, Exception):
-                        print(f"key {k} exists but this exception occurred: {ans}")
+                        #print(f"key {k} exists but this exception occurred: {ans}")
                         raise ans
                     return ans
 
