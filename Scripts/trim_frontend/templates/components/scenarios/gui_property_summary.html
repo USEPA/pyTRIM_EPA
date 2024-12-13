@@ -12,7 +12,6 @@
                     <thead>
                         <tr>
                             <th>Entity</th>
-                            <th></th>
                             <th>Property</th>
                             <th>Property Value</th>
                         </tr>
@@ -27,13 +26,6 @@
                 <button class="comp_show_all btn btn-warning">Show All</button>
                 <button class="comp_hide_all btn btn-warning">Hide All</button>
                 <button class="comp_show_nz btn btn-outline-success">Show Non-Zero</button>
-                <div class="dropdown d-inline">
-                    <button class="btn_show_comp btn btn-outline-success dropdown-toggle" type="button" data-toggle="dropdown">
-                        Show Property
-                    </button>
-                    <div class="dropdown-menu">
-                    </div>
-                </div>
                 <table class="chemMap" style="border-collapse: collapse" cellpadding="6">
                     <thead>
                         <tr>
@@ -94,12 +86,17 @@
             $($("#property-summary-gui").find("table.compMap")[0]).find("tbody").text("");
             $(initialize_compartment_map()).insertAfter($($("#property-summary-gui").find("table.compMap")[0]).find("thead"))
             $($("#property-summary-gui").find("table.scenarioMap")[0]).find("tbody").text("");
-            $(initialize_scenario_map()).insertAfter($($("#property-summary-gui").find("table.scenarioMap")[0]).find("thead"))
+            $($("#property-summary-gui").find("table.chemMap")[0]).find("tbody").text("");
+            $($("#property-summary-gui").find("table.compMap")[0]).find("tbody").text("");
+            let gen_map_html = initialize_project_map("general")
+            $(gen_map_html).insertAfter($($("#property-summary-gui").find("table.scenarioMap")[0]).find("thead"))
+            let chem_map_html = initialize_project_map("chem")
+            $(chem_map_html).insertAfter($($("#property-summary-gui").find("table.chemMap")[0]).find("thead"))
+            let env_map_html = initialize_project_map("env")
+            $(env_map_html).insertAfter($($("#property-summary-gui").find("table.compMap")[0]).find("thead"))
 
             let dd_menu = $($("#property-summary-gui").find("table.compMap")[0]).prev("div.dropdown").find("div.dropdown-menu")
             populate_comp_dd(dd_menu);
-
-
 
             $('tr.colps').on('click', function() {
                 toggle_expand_icon(this, null)
@@ -252,7 +249,7 @@
         }
 
         // FIXME no daytime_indicator
-        function initialize_scenario_map(spec) {
+        function initialize_project_map(type) {
             let scenario = TRIM.store.currentScenario
             var map_html = "<tbody>"
             let scenario_map = {
@@ -264,27 +261,75 @@
                 "Scenario": {
                     "name": scenario['name'],
                     "description": scenario['description'],
+                    "precipitation rate": scenario.parcels[0].precip_rate
                 }
             }
-            try {
-                scenario_map["Scenario"] = Object.assign({}, scenario_map["Scenario"], scenario['meteorology'])
-            }
-            catch {}
-            try {
-                scenario_map["Scenario"] = Object.assign({}, scenario_map["Scenario"], scenario['meteorology']['wet_dep_interception'])
-            }
-            catch {}
-            try {
-                scenario_map["Scenario"] = Object.assign({}, scenario_map["Scenario"], scenario['seasonal_dynamics'])
-            }
-            catch {}
-            
-            for (const [entity_key, entity_value] of Object.entries(scenario_map)) {
-                map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>" + entity_key + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
-                for (const [property_key, property_value] of Object.entries(entity_value)) {
-                    map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td></td><td class='comp'>" + property_key + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted'>"+ property_value +"</label></td></tr>"
+            let chem_map = {}
+            Object.keys(scenario.parcels[0].sources).forEach(e=>chem_map[e]={})
+
+            let env_map = {}
+
+            for (const [prc_ind, entity_name] of Object.entries(scenario.parcels)){
+                let prc_name =  scenario.parcels[prc_ind].name
+                env_map[prc_name] = {
+                    "Parcel": {
+                        "Parcel Type": scenario.parcels[prc_ind].parcelType,
+                        "Has Air": scenario.parcels[prc_ind].hasAir,
+                        "Has Land": scenario.parcels[prc_ind].hasLand,
+                        "Has Water": scenario.parcels[prc_ind].hasWater,
+                        "Has Wetland": scenario.parcels[prc_ind].hasWetland,
+                        "Has Farm Food Chain": scenario.parcels[prc_ind].hasFarmFoodChain,
+                        "Has Fish Food Web": scenario.parcels[prc_ind].hasFishFoodWeb,
+                        "Land Use": scenario.parcels[prc_ind].landUse,
+                        "Soil Tillage": scenario.parcels[prc_ind].soilTillage,
+                        "Air Density": scenario.parcels[prc_ind].airDensity,
+                        "Air Height": scenario.parcels[prc_ind].airHeight,
+                        "Area": scenario.parcels[prc_ind].area
+                    },
+                    "Compartment":{},
+                    "Volume Element": {}
                 }
             }
+
+            let map = {}
+            if (type == "general") {
+                map = scenario_map
+            } else if (type == "chem") {
+                map = chem_map
+            } else if (type == "env") {
+                map = env_map
+            }
+            // try {
+            //     scenario_map["Scenario"] = Object.assign({}, scenario_map["Scenario"], scenario['meteorology'])
+            // }
+            // catch {}
+            // try {
+            //     scenario_map["Scenario"] = Object.assign({}, scenario_map["Scenario"], scenario['meteorology']['wet_dep_interception'])
+            // }
+            // catch {}
+            // try {
+            //     scenario_map["Scenario"] = Object.assign({}, scenario_map["Scenario"], scenario['seasonal_dynamics'])
+            // }
+            // catch {}
+            if (type != "env") {
+                for (const [entity_key, entity_value] of Object.entries(map)) {
+                map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>" + entity_key + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td></tr>"
+                    for (const [property_key, property_value] of Object.entries(entity_value)) {
+                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td class='comp'>" + property_key + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted'>"+ property_value +"</label></td></tr>"
+                    }
+                }
+            } else {
+                for (const [entity_key, entity_value] of Object.entries(map)) {
+                    map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>" + entity_key + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
+                    for (const [cat_key, cat_value] of Object.entries(entity_value)) {
+                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td class='comp'>" + cat_key + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td></tr>"
+                        for (const [property_key, property_value] of Object.entries(cat_value)) {
+                            map_html = map_html + "<tr data-depth='2' class='level2 colps'><td></td><td></td><td class='comp'>" + property_key + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted'>" + property_value + "</label></td></tr>"
+                        }
+                    }
+                }
+            }
+
             map_html += "</tbody>"
             return map_html        
         }
