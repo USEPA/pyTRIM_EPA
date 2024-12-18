@@ -32,6 +32,7 @@
                             <th>Chemical</th>
                             <th>Property Name</th>
                             <th>Property Value</th>
+                            <th>Property Unit</th>
                         </tr>
                     </thead>
                 </table>
@@ -58,6 +59,7 @@
                             <th>Entity</th>
                             <th>Property</th>
                             <th>Property Value</th>
+                            <th>Property Unit</th>
                         </tr>
                     </thead>
                 </table>
@@ -256,7 +258,7 @@
                 "Simulation": {
                     "simulation_start_date": scenario['simulation_start_date'],
                     "simulation_end_date": scenario['simulation_end_date'],
-                    "erosionRateSource": scenario['erosionRateSource'] || 1
+                    "erosionRateSource": "Option " + scenario['erosionRateSource']
                 },
                 "Scenario": {
                     "name": scenario['name'],
@@ -273,21 +275,98 @@
                 let prc_name =  scenario.parcels[prc_ind].name
                 env_map[prc_name] = {
                     "Parcel": {
-                        "Parcel Type": scenario.parcels[prc_ind].parcelType,
-                        "Has Air": scenario.parcels[prc_ind].hasAir,
-                        "Has Land": scenario.parcels[prc_ind].hasLand,
-                        "Has Water": scenario.parcels[prc_ind].hasWater,
-                        "Has Wetland": scenario.parcels[prc_ind].hasWetland,
-                        "Has Farm Food Chain": scenario.parcels[prc_ind].hasFarmFoodChain,
-                        "Has Fish Food Web": scenario.parcels[prc_ind].hasFishFoodWeb,
-                        "Land Use": scenario.parcels[prc_ind].landUse,
-                        "Soil Tillage": scenario.parcels[prc_ind].soilTillage,
-                        "Air Density": scenario.parcels[prc_ind].airDensity,
-                        "Air Height": scenario.parcels[prc_ind].airHeight,
-                        "Area": scenario.parcels[prc_ind].area
+                        "Parcel Type": {'value': scenario.parcels[prc_ind].parcelType, 'unit': '-', 'fieldname': ''},
+                        "Has Air": {'value': scenario.parcels[prc_ind].hasAir, 'unit': '-', 'fieldname': ''},
+                        "Has Land": {'value': scenario.parcels[prc_ind].hasLand, 'unit': '-', 'fieldname': ''},
+                        "Has Water": {'value': scenario.parcels[prc_ind].hasWater, 'unit': '-', 'fieldname': ''},
+                        "Has Wetland": {'value': scenario.parcels[prc_ind].hasWetland, 'unit': '-', 'fieldname': ''},
+                        "Has Farm Food Chain": {'value': scenario.parcels[prc_ind].hasFarmFoodChain, 'unit': '-', 'fieldname': ''},
+                        "Has Fish Food Web": {'value': scenario.parcels[prc_ind].hasFishFoodWeb, 'unit': '-', 'fieldname': ''},
+                        "Land Use": {'value': scenario.parcels[prc_ind].landUse, 'unit': '-', 'fieldname': ''},
+                        "Soil Tillage": {'value': scenario.parcels[prc_ind].soilTillage, 'unit': '-', 'fieldname': ''},
+                        "Air Density": {'value': scenario.parcels[prc_ind].airDensity, 'unit': 'g/cm<sup>3</sup>', 'fieldname': ''},
+                        "Air Height": {'value': scenario.parcels[prc_ind].airHeight, 'unit': 'm', 'fieldname': ''},
+                        "Area": {'value': scenario.parcels[prc_ind].area, 'unit': 'm<sup>2</sup>', 'fieldname': ''},
                     },
-                    "Compartment":{},
-                    "Volume Element": {}
+                    "Compartment":{
+                        "(Air) Air Density": {'value': scenario.parcels[prc_ind].airDensity, 'unit': 'g/cm<sup>3</sup>', 'fieldname': ''},
+                        "(Air) Dust Density": {'value': scenario.parcels[prc_ind].dustDensity, 'unit': 'kg[dust particles]/m<sup>3</sup>[dust particles]', 'fieldname': ''},
+                        "(Air) Dust Load": {'value': scenario.parcels[prc_ind].dustLoad, 'unit': 'kg[dust particles]/m<sup>3</sup>[air compartment]', 'fieldname': ''},
+                        "(Air) Fraction Organic Matter of Dust Particles ": {'value': scenario.parcels[prc_ind].fractionOrganicMatterOnParticulates, 'unit': '-', 'fieldname': ''},
+                        "(Surface Soil) Evapotranspiration Fraction": {'value': scenario.parcels[prc_ind].evapotrans_frac, 'unit': '-', 'fieldname': ''},
+                        "(Surface Soil) Precipitation Runoff Fraction": {'value': scenario.parcels[prc_ind].runoff_fraction, 'unit': '-', 'fieldname': ''},
+                        "(Surface Soil) Precipitation Seepage Fraction": {'value': scenario.parcels[prc_ind].seepage_frac, 'unit': '-', 'fieldname': ''},
+                        "(Surface Soil) Total Erosion Rate": {'value': scenario.parcels[prc_ind].totalErosionRate, 'unit': 'kg/m<sup>2</sup>/day', 'fieldname': ''},
+                        "(Surface Water) Biomass of Benthic Carnivore": {'value': scenario.parcels[prc_ind].aquatic_biomass?.Benthic_Carnivore ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
+                        "(Surface Water) Biomass of Benthic Invertebrate": {'value': scenario.parcels[prc_ind].aquatic_biomass?.Benthic_Invertebrate ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
+                        "(Surface Water) Biomass of Benthic Omnivore": {'value': scenario.parcels[prc_ind].aquatic_biomass?.Benthic_Omnivore ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
+                        "(Surface Water) Biomass of Macrophyte": {'value': scenario.parcels[prc_ind].aquatic_biomass?.Macrophyte ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
+                        "(Surface Water) Biomass of Water Column Carnivore": {'value': scenario.parcels[prc_ind].aquatic_biomass?.Water_Column_Carnivore ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
+                        "(Surface Water) Biomass of Water Column Herbivore": {'value': scenario.parcels[prc_ind].aquatic_biomass?.Water_Column_Herbivore ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
+                        "(Surface Water) Biomass of Water Column Omnivore": {'value': scenario.parcels[prc_ind].aquatic_biomass?.Water_Column_Omnivore ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
+                        "(Surface Water) Biomass of Zooplankton": {'value': scenario.parcels[prc_ind].aquatic_biomass?.Zooplankton ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
+                        "(Surface Water) Body Weight of Benthic Carnivore": {'value': scenario.parcels[prc_ind].aquatic_bw?.Benthic_Carnivore ?? '-', 'unit': 'kg', 'fieldname':''},
+                        "(Surface Water) Body Weight of Benthic Invertebrate": {'value': scenario.parcels[prc_ind].aquatic_bw?.Benthic_Invertebrate ?? '-', 'unit': 'kg', 'fieldname':''},
+                        "(Surface Water) Body Weight of Benthic Omnivore": {'value': scenario.parcels[prc_ind].aquatic_bw?.Benthic_Omnivore ?? '-', 'unit': 'kg', 'fieldname':''},
+                        "(Surface Water) Body Weight of Macrophyte": {'value': scenario.parcels[prc_ind].aquatic_bw?.Macrophyte ?? '-', 'unit': 'kg', 'fieldname':''},
+                        "(Surface Water) Body Weight of Water Column Carnivore": {'value': scenario.parcels[prc_ind].aquatic_bw?.Water_Column_Carnivore ?? '-', 'unit': 'kg', 'fieldname':''},
+                        "(Surface Water) Body Weight of Water Column Herbivore": {'value': scenario.parcels[prc_ind].aquatic_bw?.Water_Column_Herbivore ?? '-', 'unit': 'kg', 'fieldname':''},
+                        "(Surface Water) Body Weight of Water Column Omnivore": {'value': scenario.parcels[prc_ind].aquatic_bw?.Water_Column_Omnivore ?? '-', 'unit': 'kg', 'fieldname':''},
+                        "(Surface Water) Water Column pH": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.water_ph ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Surface Water) Water Column Temperature": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.water_temp ?? '-', 'unit': 'K', 'fieldname':''},
+                        "(Surface Water) Water Column Mean Depth": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.mean_depth ?? '-', 'unit': 'm', 'fieldname':''},
+                        "(Surface Water) Algae Density": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.algae_density ?? '-', 'unit': 'g[algae]/m<sup>3</sup>[algae]', 'fieldname':''},
+                        "(Surface Water) Chloride Concentration": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.chloride_conc ?? '-', 'unit': 'mg/L', 'fieldname':''},
+                        "(Surface Water) Chlorophyll Concentration": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.chlorophyll_conc ?? '-', 'unit': 'mg/L', 'fieldname':''},
+                        "(Surface Water) Water Column Organic Carbon Fraction in Suspended Sediments": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.suspended_organic_carbon ?? '-', 'unit': '', 'fieldname':''},
+                        "(Surface Water) Water Column Suspended Sediment Concentration": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.suspended_sed_conc ?? '-', 'unit': 'kg[sediment particles]/m<sup>3</sup>[water]', 'fieldname':''},
+                        "(Surface Water) Water Column External Sediment Inflow from Other Water Bodies": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.sed_inflow ?? '-', 'unit': 'kg[sediment particles]/day', 'fieldname':''},
+                        "(Surface Water) Water Column Sediment Deposition Velocity": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.sed_deposition_vel ?? '-', 'unit': 'm[water]/day', 'fieldname':''},
+                        "(Surface Water) Water Column Flush Rate": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.flush_rate ?? '-', 'unit': 'year<sup>-1</sup>', 'fieldname':''},
+                        "(Surface Water) Water Column Evaporation Rate": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.evaporation_rate ?? '-', 'unit': 'm[water]/year', 'fieldname':''},
+                        "(Sediment) Sediment Bed Density": {'value': scenario.parcels[prc_ind].surface_water?.sed_props.bed_density ?? '-', 'unit': 'kg[sediment particles]/m<sup>3</sup>[sediment particles]', 'fieldname':''},
+                        "(Sediment) Sediment Bed pH": {'value': scenario.parcels[prc_ind].surface_water?.sed_props.bed_pH ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Sediment) Organic Carbon Fraction in Sediment Bed": {'value': scenario.parcels[prc_ind].surface_water?.sed_props.organic_carbon_frac ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Sediment) Sediment Bed Porosity": {'value': scenario.parcels[prc_ind].surface_water?.sed_props.bed_porosity ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Surface Soil) Boundary Layer Thickness Above Surface Soil": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.AirSoilBoundaryThickness ?? '-', 'unit': 'm', 'fieldname':''},
+                        "(Surface Soil) Average Vertical Velocity of Water (Percolation)": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.AverageVerticalVelocity ?? '-', 'unit': 'm/day', 'fieldname':''},
+                        "(Surface Soil) Fraction Sand": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.FractionSand ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Surface Soil) Fraction of Area Available for Erosion": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.FractionofAreaAvailableforErosion ?? '-', 'unit': 'm<sup>2</sup>[area available]/m<sup>2</sup>[total]', 'fieldname':''},
+                        "(Surface Soil) Fraction of Area Available for Runoff": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.FractionofAreaAvailableforRunoff ?? '-', 'unit': 'm<sup>2</sup>[area available]/m<sup>2</sup>[total]', 'fieldname':''},
+                        "(Surface Soil) Fraction of Area Available for Vertical Diffusion": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.FractionofAreaAvailableforVerticalDiffusion ?? '-', 'unit': 'm<sup>2</sup>[area available]/m<sup>2</sup>[total]', 'fieldname':''},
+                        "(Surface Soil) Organic Carbon Fraction": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.OrganicCarbonContent ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Surface Soil) Total Runoff Rate": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.TotalRunoffRate ?? '-', 'unit': 'm<sup>3</sup>[water]/m<sup>2</sup>/day', 'fieldname':''},
+                        "(Surface Soil) Water Content": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.VolumeFraction_Liquid ?? '-', 'unit': 'm<sup>3</sup>[water]/m<sup>3</sup>[compartment]', 'fieldname':''},
+                        "(Surface Soil) Air Content": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.VolumeFraction_Vapor ?? '-', 'unit': 'm<sup>3</sup>[air]/m<sup>3</sup>[compartment]', 'fieldname':''},
+                        "(Surface Soil) Density of Soil Solids (Dry Weight)": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.rho ?? '-', 'unit': 'kg[soil]/m<sup>3</sup>[soil]', 'fieldname':''},
+                        "(Surface Soil) pH": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.pH ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Root Soil) Average Vertical Velocity of Water (Percolation)": {'value': scenario.parcels[prc_ind].soil_params.Soil_Root_Zone?.AverageVerticalVelocity ?? '-', 'unit': 'm/day', 'fieldname':''},
+                        "(Root Soil) Fraction Sand": {'value': scenario.parcels[prc_ind].soil_params.Soil_Root_Zone?.FractionSand ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Root Soil) Organic Carbon Fraction": {'value': scenario.parcels[prc_ind].soil_params.Soil_Root_Zone?.OrganicCarbonContent ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Root Soil) Water Content": {'value': scenario.parcels[prc_ind].soil_params.Soil_Root_Zone?.VolumeFraction_Liquid ?? '-', 'unit': 'm<sup>3</sup>[water]/m<sup>3</sup>[compartment]', 'fieldname':''},
+                        "(Root Soil) Air Content": {'value': scenario.parcels[prc_ind].soil_params.Soil_Root_Zone?.VolumeFraction_Vapor ?? '-', 'unit': 'm<sup>3</sup>[air]/m<sup>3</sup>[compartment]', 'fieldname':''},
+                        "(Root Soil) Density of Soil Solids (Dry Weight)": {'value': scenario.parcels[prc_ind].soil_params.Soil_Root_Zone?.rho ?? '-', 'unit': 'kg[soil]/m<sup>3</sup>[soil]', 'fieldname':''},
+                        "(Root Soil) pH": {'value': scenario.parcels[prc_ind].soil_params.Soil_Root_Zone?.pH ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Vadose Zone) Average Vertical Velocity of Water (Percolation)": {'value': scenario.parcels[prc_ind].soil_params.Soil_Vadose_Zone?.AverageVerticalVelocity ?? '-', 'unit': 'm/day', 'fieldname':''},
+                        "(Vadose Zone) Fraction Sand": {'value': scenario.parcels[prc_ind].soil_params.Soil_Vadose_Zone?.FractionSand ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Vadose Zone) Organic Carbon Fraction": {'value': scenario.parcels[prc_ind].soil_params.Soil_Vadose_Zone?.OrganicCarbonContent ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Vadose Zone) Water Content": {'value': scenario.parcels[prc_ind].soil_params.Soil_Vadose_Zone?.VolumeFraction_Liquid ?? '-', 'unit': 'm<sup>3</sup>[water]/m<sup>3</sup>[compartment]', 'fieldname':''},
+                        "(Vadose Zone) Air Content": {'value': scenario.parcels[prc_ind].soil_params.Soil_Vadose_Zone?.VolumeFraction_Vapor ?? '-', 'unit': 'm<sup>3</sup>[air]/m<sup>3</sup>[compartment]', 'fieldname':''},
+                        "(Vadose Zone) Density of Soil Solids (Dry Weight)": {'value': scenario.parcels[prc_ind].soil_params.Soil_Vadose_Zone?.rho ?? '-', 'unit': 'kg[soil]/m<sup>3</sup>[soil]', 'fieldname':''},
+                        "(Vadose Zone) pH": {'value': scenario.parcels[prc_ind].soil_params.Soil_Vadose_Zone?.pH ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Groundwater Zone) Fraction Sand": {'value': scenario.parcels[prc_ind].soil_params.Groundwater?.FractionSand ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Groundwater Zone) Organic Carbon Fraction": {'value': scenario.parcels[prc_ind].soil_params.Groundwater?.OrganicCarbonContent ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Groundwater Zone) Porosity": {'value': scenario.parcels[prc_ind].soil_params.Groundwater?.Porosity ?? '-', 'unit': 'm<sup>3</sup>[total pore space]/m<sup>3</sup>[compartment]', 'fieldname':''},
+                        "(Groundwater Zone) Density of Solid Material in Aquifer": {'value': scenario.parcels[prc_ind].soil_params.Groundwater?.rho ?? '-', 'unit': 'kg[soil]/m<sup>3</sup>[soil]', 'fieldname':''},
+                        "(Groundwater Zone) pH": {'value': scenario.parcels[prc_ind].soil_params.Groundwater?.pH ?? '-', 'unit': '-', 'fieldname':''},
+                    },
+                    "Volume Element": {
+                        "(Air) Air Height": {'value': scenario.parcels[prc_ind].airHeight, 'unit': 'm', 'fieldname': ''},
+                        "(Surface Soil) Thickness": {'value': scenario.parcels[prc_ind].surfaceSoilThickness, 'unit': 'm', 'fieldname': ''},
+                        "(Vadose Soil) Thickness": {'value': scenario.parcels[prc_ind].vadoseSoilThickness, 'unit': 'm', 'fieldname': ''},
+                        "(Root Soil) Thickness": {'value': scenario.parcels[prc_ind].rootSoilThickness, 'unit': 'm', 'fieldname': ''},
+                        "(Groundwater Zone) Thickness": {'value': scenario.parcels[prc_ind].groundwaterZoneThickness, 'unit': 'm', 'fieldname': ''},
+                    }
                 }
             }
 
@@ -315,16 +394,16 @@
                 for (const [entity_key, entity_value] of Object.entries(map)) {
                 map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>" + entity_key + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td></tr>"
                     for (const [property_key, property_value] of Object.entries(entity_value)) {
-                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td class='comp'>" + property_key + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted'>"+ property_value +"</label></td></tr>"
+                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td class='comp'>" + property_key + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted'>"+ property_value +"</label></td><td></td></tr>"
                     }
                 }
             } else {
                 for (const [entity_key, entity_value] of Object.entries(map)) {
-                    map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>" + entity_key + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
+                    map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>" + entity_key + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td><td></td><td></td></tr>"
                     for (const [cat_key, cat_value] of Object.entries(entity_value)) {
-                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td class='comp'>" + cat_key + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td></tr>"
+                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td class='comp'>" + cat_key + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
                         for (const [property_key, property_value] of Object.entries(cat_value)) {
-                            map_html = map_html + "<tr data-depth='2' class='level2 colps'><td></td><td></td><td class='comp'>" + property_key + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted'>" + property_value + "</label></td></tr>"
+                            map_html = map_html + "<tr data-depth='2' class='level2 colps'><td></td><td></td><td class='comp'>" + property_key + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted'>" + property_value.value + "</label></td><td>" + property_value.unit + "</td></tr>"
                         }
                     }
                 }
