@@ -15,6 +15,7 @@ def serialize_parcel(pcl: Parcel):
     water_params = get_water_params(pcl, general_params['parcelType'])
     source_params = get_source_params(pcl)
     soil_abiotic_params = get_soil_abiotic_params(pcl)
+    initial_conc = get_initial_concetrations(pcl)
 
     s = {
         'id': pcl.id,
@@ -26,7 +27,8 @@ def serialize_parcel(pcl: Parcel):
         **general_params,
         **water_params,
         **source_params,
-        **soil_abiotic_params
+        **soil_abiotic_params,
+        **initial_conc
     }
 
     comp_local_cache.clear()
@@ -531,6 +533,22 @@ def get_water_params(pcl, parcel_type):
         }
     water_params['surface_water'] = sw_params
     return water_params
+
+
+def get_initial_concetrations(pcl):
+    chem_objs = {c for c in pcl.scenario.chemicals}
+    chems = {c.name: {} for c in pcl.scenario.chemicals}
+    initial_conc = {"initialConcentrations": chems}
+    for chem in chem_objs:
+        for comp in pcl.compartments:
+            spd = initial_conc["initialConcentrations"][chem.name].get(comp.volume_element.name)
+            # Ultimately we need to use initialConcentrationConverted but we need to solve the unit incomaptibility issue.
+            if spd:
+                spd.setdefault(comp.name, chem.initialConcentration(comp).magnitude)
+            else:
+                initial_conc["initialConcentrations"][chem.name].setdefault(comp.volume_element.name, {
+                    comp.name: chem.initialConcentration(comp).magnitude})
+    return initial_conc
 
 
 def get_source_params(pcl):
