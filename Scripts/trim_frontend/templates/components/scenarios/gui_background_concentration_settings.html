@@ -50,6 +50,7 @@
                                                     <th>Volume Element</th>
                                                     <th>Compartment</th>
                                                     <th>Initial Concentration</th>
+                                                    <th>Unit</th>
                                                 </tr>
                                             </thead>
                                         </table>
@@ -218,26 +219,43 @@
                 }
                 
                 ErrorValidation.isPositiveValue(this);
-                let parcel_name = $(this).closest("tr.level2")
+                let parcels = TRIM.store.currentScenario.parcels
+                let parcel_name = $($(this).closest("tr.level2").find("td")[0]).attr("data-pcl-name")
+                let parcel_id = parcels.filter(e => e.name == parcel_name)[0].id
+                let compartment_name = $($(this).closest("tr.level2").find("td")[2]).attr("data-comp-name")
+                let ve_name = $($(this).closest("tr.level2").find("td")[1]).attr("data-ve-name")
+                let chem_name = $(this).closest("div.tab-pane").data("tab-name").split(" (")[0]
                 let parcel_info = [{
                     'type': 'data',
-                    'name': 'id',
-                    'value': "parcel_name"
+                    'name': 'field',
+                    'value': "initial concentration"
                 },{
                     'type': 'data',
-                    'name': 'chemical',
-                    'value': "chemical_name"
+                    'name': 'id',
+                    'value': parcel_id
+                },{
+                    'type': 'data',
+                    'name': 'chemical_name',
+                    'value': chem_name
+                },{
+                    'type': 'data',
+                    'name': 'compartment_name',
+                    'value': compartment_name
                 },{
                     'type': 'input',
-                    'name': 'compartment_name',
-                    'value': $(this).val()
+                    'name': 'initial_concentration_value',
+                    'value': ''
+                },{
+                    'type': 'data',
+                    'name': 've_name',
+                    'value': ve_name
                 }]
                 if (parcel_info) {
-                    submit_emission_value(this, parcel_info);
+                    submit_initial_concentration_value(this, parcel_info);
                 }
             })
 
-            function submit_emission_value(elem, parcel_info) {
+            function submit_initial_concentration_value(elem, parcel_info) {
                 if (elementIsValid($(elem).parent())){
                     let data = $(elem).val() == "" ? 0 : $(elem).val()
                     let $label = $(elem).next("label.editableCell")
@@ -245,7 +263,7 @@
                     $label.show().text(data)
 
                     parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                    // TRIM.api.updateParcel(parcel_info)
+                    TRIM.api.updateParcel(TRIM.store.currentScenario.id, parcel_info)
                 } else {
                     return
                 }
@@ -255,18 +273,18 @@
             LoadingScreen.hide('background_concentrations_loading');
         };
 
-        function initialize_compartment_map(spec) {
+        function initialize_compartment_map() {
             var map_html = "<tbody>"
-            let exclude = spec == "Particulate" ? "VaporSource" : "ParticleSource"
+            let exclude = ["WetVaporSource", "DryVaporSource", "WetParticleSource", "DryParticleSource", "Degradation_Reaction_Sink", "Degradation_Reaction_Sink_Air", "Flush_Rate_Sink"]
             TRIM.store.currentScenario.parcels.forEach( function(e,i){
-                map_html = map_html + "<tr data-depth='0' class='level0 colps'><td data-pcl-name='" + e.name + "'>" + e.name + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
+                map_html = map_html + "<tr data-depth='0' class='level0 colps'><td data-pcl-name='" + e.name + "'>" + e.name + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td><td></td></tr>"
                 for (ve in e.compartment_map) {
-                    if (ve.indexOf(exclude) == -1) {
-                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td data-ve-name='" + ve + "'>" + ve + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td></tr>"
+                    if (exclude.indexOf(ve) == -1) {
+                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td data-pcl-name='" + e.name + "'></td><td data-ve-name='" + ve + "'>" + ve + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
                     }
                     for (comp in e.compartment_map[ve]) {
-                        if (e.compartment_map[ve][comp].indexOf(exclude) == -1){
-                            map_html = map_html + "<tr data-depth='2' class='level2 colps'><td></td><td></td><td class='comp' data-comp-name='" + e.compartment_map[ve][comp] + "'>" + e.compartment_map[ve][comp] + "</td><td class='ic'><input class='editableCell' style='width: 50px; display:none'/><label class='editableCell badge badge-light'>0</label></td></tr>"
+                        if (exclude.indexOf(e.compartment_map[ve][comp]) == -1){
+                            map_html = map_html + "<tr data-depth='2' class='level2 colps'><td data-pcl-name='" + e.name + "'><td data-ve-name='" + ve + "'><td class='comp' data-comp-name='" + e.compartment_map[ve][comp] + "'>" + e.compartment_map[ve][comp]+ "</td><td class='ic'><input class='editableCell' style='width: 50px; display:none'/><label class='editableCell badge badge-light'>0</label></td><td class='ic_unit'></td></tr>"
                         }
                     }
                 }
@@ -284,14 +302,17 @@
                         let ves = Object.keys(p.initialConcentrations[chem])
                         ves.forEach(function(ve,k) {
                             let comps = Object.keys(p.initialConcentrations[chem][ve])
-                            comps.forEach(function(comp,l){
+                            comps.filter(cc => cc !== "Degradation_Reaction_Sink" ).forEach(function(comp,l){
                                 let pcl_find_str = "td[data-pcl-name='" + p.name + "']"
                                 let ve_find_str = "td[data-ve-name='" + ve + "']"
                                 let comp_find_str = "td[data-comp-name='" + comp + "']"
                                 let ic_cell = $(cmap).find(pcl_find_str).next(ve_find_str).next(comp_find_str).next("td.ic")
-                                let ic_val =  Number(p.initialConcentrations[chem][ve][comp]).toExponential()
+                                let ic_val =  Number(p.initialConcentrations[chem][ve][comp]['ic']).toExponential()
+                                let ic_unit_cell = $(cmap).find(pcl_find_str).next(ve_find_str).next(comp_find_str).next("td.ic").next("td.ic_unit")
+                                let ic_unit = p.initialConcentrations[chem][ve][comp]['unit']
                                 $(ic_cell).find("input").val(ic_val)
                                 $(ic_cell).find("label.editableCell").text(ic_val)
+                                $(ic_unit_cell).text(ic_unit)
                             })
                         })
                     }

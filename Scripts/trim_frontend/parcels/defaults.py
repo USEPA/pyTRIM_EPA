@@ -541,13 +541,14 @@ def get_initial_concetrations(pcl):
     initial_conc = {"initialConcentrations": chems}
     for chem in chem_objs:
         for comp in pcl.compartments:
+            unit = "g / m^3" if comp.media.id in [2, 5, 7, 56, 55, 8, 9] else "g / kg" if comp.media.id in [23, 24, 27, 28, 29, 31, 32, 33, 37, 39, 41, 43, 44, 45, 46, 47, 48, 49, 50, 51] else "g / L" if comp.media.id in [10, 4] else ""
             spd = initial_conc["initialConcentrations"][chem.name].get(comp.volume_element.name)
             # Ultimately we need to use initialConcentrationConverted but we need to solve the unit incomaptibility issue.
             if spd:
-                spd.setdefault(comp.name, chem.initialConcentration(comp).magnitude)
+                spd.setdefault(comp.name, {'ic': comp.initialConcentration(chem).magnitude, 'unit': unit})
             else:
                 initial_conc["initialConcentrations"][chem.name].setdefault(comp.volume_element.name, {
-                    comp.name: chem.initialConcentration(comp).magnitude})
+                    comp.name: {'ic': comp.initialConcentration(chem).magnitude, 'unit': unit}})
     return initial_conc
 
 
