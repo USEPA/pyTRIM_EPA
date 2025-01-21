@@ -1,4 +1,4 @@
-name: Sync pyTRIM EPA GitHub Mirror
+name: On Demand Sync pyTRIM EPA GitHub Mirror
 on:
   workflow_dispatch:
     inputs:
