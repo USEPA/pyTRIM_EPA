@@ -1,0 +1,43 @@
+name: Sync pyTRIM EPA GitHub Mirror
+on:
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'warning'
+        type: choice
+        options:
+        - info
+        - warning
+        - debug
+      tags:
+        description: 'EPA Synch'
+        required: false
+        type: boolean
+      environment:
+        description: 'Environment to EPA Sync'
+        type: environment
+        required: true
+permissions:
+  contents: read
+concurrency:
+  group: pytrim_mirror_repo
+jobs:
+  pytrim_mirror_repo:
+    runs-on: ubuntu-latest
+    if: ${{ github.repository == 'ICF-Corp/trim-builder' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+            ssh-private-key: |
+              ${{ secrets.RTR_SOURCE_SSH_PRIVATE_KEY }}
+              ${{ secrets.RTR_MIRROR_SSH_PRIVATE_KEY }}\
+      - name: Clone Source
+        env: 
+          MIRROR_AT: ${{ secrets.MIRRORING_ACTION_ACCESS_TOKEN }}
+        run: |
+          cd ~ && git clone --bare https://"$MIRROR_AT"@github.com/ICF-Corp/trim-builder.git
+      - name: Push Mirror
+        run: cd ~/trim-builder.git && git push --mirror git@github.com:USEPA/pyTRIM_EPA.git
