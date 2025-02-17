@@ -1,0 +1,61 @@
+# h/t https://gis.stackexchange.com/questions/462843/setting-up-qgis-python-scripts-in-docker-container
+#
+# start with base Python image
+# FROM python:3.12-alpine
+# start with QGIS image
+# FROM qgis/qgis
+FROM --platform=linux/amd64 qgis/qgis
+
+# Set environment variables for QGIS
+ENV QGIS_PREFIX_PATH=/usr
+ENV QT_QPA_PLATFORM=offscreen
+ENV XDG_RUNTIME_DIR=/tmp/runtime-root
+
+WORKDIR /app
+
+# install numpy, pandas, etc. qgis.core installed by virtue of our base image.
+# note - pip install doesn't work on this image, but this does:
+RUN apt install -y python3-pandas
+RUN apt install -y python3-numpy
+RUN apt install -y python3-boto3
+RUN apt install -y python3-shapely
+
+# don't need this normally - but useful if we want to connect and mess around...
+RUN apt install -y vim
+
+# saga needed for one of the processing plugins
+# apt-get install saga
+RUN apt install -y unzip
+RUN apt install -y saga
+
+
+# copy getflow src, supporting .tif, etc. in;
+# you need to have run /docker/getflow/prepare_dockerized.py first!!!
+# COPY temp/ /tmp/pytrim_getflow_src/
+COPY temp/ /app/pytrim_getflow_src/
+
+
+# perform GIS setup
+WORKDIR /usr/share/qgis/python/plugins
+# RUN mv /app/pytrim_getflow_src/processing_saga_nextgen-1.0.0.zip /usr/share/qgis/python/plugins
+RUN mv /app/pytrim_getflow_src/processing_saga_nextgen-1.0.0.zip .
+
+RUN unzip processing_saga_nextgen-1.0.0.zip
+
+RUN rm processing_saga_nextgen-1.0.0.zip
+
+# not entirely sure why we need this twice ("plugins"), but seems like we do?
+RUN qgis_process plugins enable processing_saga_nextgen
+
+RUN qgis_process plugins
+
+
+
+
+
+
+WORKDIR /app
+
+# A) install bash and let us peek around by attaching
+# RUN apk add --no-cache bash
+CMD ["bash"]
