@@ -1,0 +1,1350 @@
+// TRIM.FaTE scenario properties
+
+// TNC0
+// Recreation of Tier 1 Thresholds
+
+// Generated:  5/16/2023 4:22:51 PM
+
+// *****************************************************
+// NOTE: You must use the TRIM.FaTE interface to perform
+//   a smart link BEFORE importing this properties file!
+// *****************************************************
+
+Version:1
+Scenario: TNC0
+Run: BaseRun
+
+
+// ----------------------------------------------------------------------------
+// Erosion rates
+// ----------------------------------------------------------------------------
+
+
+Compartment: Soil - Surface in SurfSoil_Source
+Property: TotalErosionRate_kg_m2_day
+Form: Constant
+Value: 1.13848064422184E-02
+
+Compartment: Soil - Surface in SurfSoil_N1
+Property: TotalErosionRate_kg_m2_day
+Form: Constant
+Value: 5.74032731904327E-03
+
+Compartment: Soil - Surface in SurfSoil_N6
+Property: TotalErosionRate_kg_m2_day
+Form: Constant
+Value: 1.20143641903568E-02
+
+Compartment: Soil - Surface in SurfSoil_N7
+Property: TotalErosionRate_kg_m2_day
+Form: Constant
+Value: 5.58018961632054E-03
+
+Compartment: Soil - Surface in SurfSoil_N3
+Property: TotalErosionRate_kg_m2_day
+Form: Constant
+Value: 4.15059734807294E-03
+
+Compartment: Soil - Surface in SurfSoil_N4
+Property: TotalErosionRate_kg_m2_day
+Form: Constant
+Value: 3.33104780095033E-03
+
+Compartment: Soil - Surface in SurfSoil_N5
+Property: TotalErosionRate_kg_m2_day
+Form: Constant
+Value: 2.11585737790382E-03
+
+Compartment: Soil - Surface in SurfSoil_S1
+Property: TotalErosionRate_kg_m2_day
+Form: Constant
+Value: 5.74032731904327E-03
+
+Compartment: Soil - Surface in SurfSoil_S4
+Property: TotalErosionRate_kg_m2_day
+Form: Constant
+Value: 3.33104780095033E-03
+
+Compartment: Soil - Surface in SurfSoil_S5
+Property: TotalErosionRate_kg_m2_day
+Form: Constant
+Value: 2.11585737790382E-03
+
+
+// ----------------------------------------------------------------------------
+// Surface water properties
+// ----------------------------------------------------------------------------
+
+VolumeElement: SW_Pond
+Property: WaterTemperature_K
+Form: Constant
+Value: 298
+
+Compartment: Surface water in SW_Pond
+Property: AlgaeDensityInWaterColumn_g_L
+Form: Constant
+Value: 0.0025
+Property: ChlorideConcentration_mg_L
+Form: Constant
+Value: 8
+Property: ChlorophyllConcentration_mg_L
+Form: Constant
+Value: 0.0029
+Property: OrganicCarbonContent
+Form: Constant
+Value: 0.02
+Property: pH
+Form: Constant
+Value: 7.3
+Property: SuspendedSedimentConcentration
+Form: Constant
+Value: 0.05
+Property: WaterTemperature_K
+Form: Constant
+Value: 298
+Property: Flushes_per_year
+Form: Constant
+Value: 12.1666666666667
+// Flowing water bodies currently unsupported in this workbook.
+Property: IsFlowing
+Form: Constant
+Value: False
+Property: CurrentVelocity
+Form: Constant
+Value: 0
+
+
+// ----------------------------------------------------------------------------
+// Sediment properties
+// ----------------------------------------------------------------------------
+
+Compartment: Sediment in Sed_Pond
+Property: OrganicCarbonContent
+Form: Constant
+Value: 0.02
+Property: pH
+Form: Constant
+Value: 7.3
+Property: rho
+Form: Constant
+Value: 2600
+Property: SedimentResuspensionVelocity
+Form: Constant
+Value: 6.68799700375953E-05
+
+
+// ----------------------------------------------------------------------------
+// Fish food web(s)
+// ----------------------------------------------------------------------------
+
+
+Compartment: Macrophyte in SW_Pond
+Property: BiomassPerArea_kg_m2
+Form: Constant
+Value: 0.5
+Property: FractionDietAlgae
+Form: Constant
+Value: 0
+Property: FractionDietMacrophyte
+Form: Constant
+Value: 0
+Property: FractionDietZooplankton
+Form: Constant
+Value: 0
+Property: FractionDietBenthicInvertebrate
+Form: Constant
+Value: 0
+Property: FractionDietFishHerbivore
+Form: Constant
+Value: 0
+Property: FractionDietFishBenthicOmnivore
+Form: Constant
+Value: 0
+Property: FractionDietFishOmnivore
+Form: Constant
+Value: 0
+Property: FractionDietFishBenthicCarnivore
+Form: Constant
+Value: 0
+Property: FractionDietFishCarnivore
+Form: Constant
+Value: 0
+
+Compartment: Zooplankton in SW_Pond
+Property: BiomassPerArea_kg_m2
+Form: Constant
+Value: 0.00636
+Property: BW
+Form: Constant
+Value: 0.000000057
+Property: FractionDietAlgae
+Form: Constant
+Value: 1
+Property: FractionDietMacrophyte
+Form: Constant
+Value: 0
+Property: FractionDietZooplankton
+Form: Constant
+Value: 0
+Property: FractionDietBenthicInvertebrate
+Form: Constant
+Value: 0
+Property: FractionDietFishHerbivore
+Form: Constant
+Value: 0
+Property: FractionDietFishBenthicOmnivore
+Form: Constant
+Value: 0
+Property: FractionDietFishOmnivore
+Form: Constant
+Value: 0
+Property: FractionDietFishBenthicCarnivore
+Form: Constant
+Value: 0
+Property: FractionDietFishCarnivore
+Form: Constant
+Value: 0
+
+Compartment: Benthic Invertebrate in Sed_Pond
+Property: BiomassPerArea_kg_m2
+Form: Constant
+Value: 0.02
+Property: BW
+Form: Constant
+Value: 0.000255
+Property: FractionDietAlgae
+Form: Constant
+Value: 0
+Property: FractionDietMacrophyte
+Form: Constant
+Value: 0
+Property: FractionDietZooplankton
+Form: Constant
+Value: 0
+Property: FractionDietBenthicInvertebrate
+Form: Constant
+Value: 0
+Property: FractionDietFishHerbivore
+Form: Constant
+Value: 0
+Property: FractionDietFishBenthicOmnivore
+Form: Constant
+Value: 0
+Property: FractionDietFishOmnivore
+Form: Constant
+Value: 0
+Property: FractionDietFishBenthicCarnivore
+Form: Constant
+Value: 0
+Property: FractionDietFishCarnivore
+Form: Constant
+Value: 0
+
+Compartment: Water Column Herbivore in SW_Pond
+Property: BiomassPerArea_kg_m2
+Form: Constant
+Value: 0.002
+Property: BW
+Form: Constant
+Value: 0.025
+Property: FractionDietAlgae
+Form: Constant
+Value: 0
+Property: FractionDietMacrophyte
+Form: Constant
+Value: 0
+Property: FractionDietZooplankton
+Form: Constant
+Value: 1
+Property: FractionDietBenthicInvertebrate
+Form: Constant
+Value: 0
+Property: FractionDietFishHerbivore
+Form: Constant
+Value: 0
+Property: FractionDietFishBenthicOmnivore
+Form: Constant
+Value: 0
+Property: FractionDietFishOmnivore
+Form: Constant
+Value: 0
+Property: FractionDietFishBenthicCarnivore
+Form: Constant
+Value: 0
+Property: FractionDietFishCarnivore
+Form: Constant
+Value: 0
+
+Compartment: Benthic Omnivore in Sed_Pond
+Property: BiomassPerArea_kg_m2
+Form: Constant
+Value: 0.002
+Property: BW
+Form: Constant
+Value: 0.25
+Property: FractionDietAlgae
+Form: Constant
+Value: 0
+Property: FractionDietMacrophyte
+Form: Constant
+Value: 0
+Property: FractionDietZooplankton
+Form: Constant
+Value: 0
+Property: FractionDietBenthicInvertebrate
+Form: Constant
+Value: 1
+Property: FractionDietFishHerbivore
+Form: Constant
+Value: 0
+Property: FractionDietFishBenthicOmnivore
+Form: Constant
+Value: 0
+Property: FractionDietFishOmnivore
+Form: Constant
+Value: 0
+Property: FractionDietFishBenthicCarnivore
+Form: Constant
+Value: 0
+Property: FractionDietFishCarnivore
+Form: Constant
+Value: 0
+
+Compartment: Water Column Omnivore in SW_Pond
+Property: BiomassPerArea_kg_m2
+Form: Constant
+Value: 0.0005
+Property: BW
+Form: Constant
+Value: 0.25
+Property: FractionDietAlgae
+Form: Constant
+Value: 0
+Property: FractionDietMacrophyte
+Form: Constant
+Value: 0
+Property: FractionDietZooplankton
+Form: Constant
+Value: 0
+Property: FractionDietBenthicInvertebrate
+Form: Constant
+Value: 0
+Property: FractionDietFishHerbivore
+Form: Constant
+Value: 1
+Property: FractionDietFishBenthicOmnivore
+Form: Constant
+Value: 0
+Property: FractionDietFishOmnivore
+Form: Constant
+Value: 0
+Property: FractionDietFishBenthicCarnivore
+Form: Constant
+Value: 0
+Property: FractionDietFishCarnivore
+Form: Constant
+Value: 0
+
+Compartment: Benthic Carnivore in Sed_Pond
+Property: BiomassPerArea_kg_m2
+Form: Constant
+Value: 0.001
+Property: BW
+Form: Constant
+Value: 2
+Property: FractionDietAlgae
+Form: Constant
+Value: 0
+Property: FractionDietMacrophyte
+Form: Constant
+Value: 0
+Property: FractionDietZooplankton
+Form: Constant
+Value: 0
+Property: FractionDietBenthicInvertebrate
+Form: Constant
+Value: 0.5
+Property: FractionDietFishHerbivore
+Form: Constant
+Value: 0
+Property: FractionDietFishBenthicOmnivore
+Form: Constant
+Value: 0.5
+Property: FractionDietFishOmnivore
+Form: Constant
+Value: 0
+Property: FractionDietFishBenthicCarnivore
+Form: Constant
+Value: 0
+Property: FractionDietFishCarnivore
+Form: Constant
+Value: 0
+
+Compartment: Water Column Carnivore in SW_Pond
+Property: BiomassPerArea_kg_m2
+Form: Constant
+Value: 0.0002
+Property: BW
+Form: Constant
+Value: 2
+Property: FractionDietAlgae
+Form: Constant
+Value: 0
+Property: FractionDietMacrophyte
+Form: Constant
+Value: 0
+Property: FractionDietZooplankton
+Form: Constant
+Value: 0
+Property: FractionDietBenthicInvertebrate
+Form: Constant
+Value: 0
+Property: FractionDietFishHerbivore
+Form: Constant
+Value: 0
+Property: FractionDietFishBenthicOmnivore
+Form: Constant
+Value: 0
+Property: FractionDietFishOmnivore
+Form: Constant
+Value: 1
+Property: FractionDietFishBenthicCarnivore
+Form: Constant
+Value: 0
+Property: FractionDietFishCarnivore
+Form: Constant
+Value: 0
+
+// ----------------------------------------------------------------------------
+// Parameters for "Scenario: TNC0"
+// ----------------------------------------------------------------------------
+Scenario: TNC0
+Property: outputDir
+Form: Constant
+Value: C:\\TRIM\\Legacy\\Revised\\Output
+Property: simulationBeginDateTime
+Form: Constant
+Value: 01/01/1990 00:00:00 EST
+// Description: [[ Consistent with met data. ]]
+Property: simulationEndDateTime
+Form: Constant
+Value: 01/01/2040 00:00:00 EST
+// Description: [[ Consistent with met data set; selected to provide a 50-year modeling period. ]]
+Property: evaluateHTMLPropertiesAtTime
+Form: Constant
+Value: 06/15/2039 12:00:00 EST
+// Description: [[ Six months before end of simulation. ]]
+Property: simulationTimeStep
+Form: Constant
+Value: 1
+// Description: [[ Selected value. ]]
+Property: simulationStepsPerOutputStep
+Form: Constant
+Value: 4
+// Description: [[ Selected value. ]]
+Property: simulateSteadyState
+Form: Constant
+Value: FALSE
+Property: averageResultsFiles
+Form: Constant
+Value: TRUE
+Property: averagingInterval
+Form: Constant
+Value: annual
+Property: enableBoundaryContributions
+Form: Constant
+Value: FALSE
+Property: exportAllResultsToDB
+Form: Constant
+Value: FALSE
+Property: exportAvgResultsToDB
+Form: Constant
+Value: FALSE
+Property: exportIngestionInputs
+Form: Constant
+Value: FALSE
+Property: exportDeposition
+Form: Constant
+Value: TRUE
+Property: exportBiotaIntakeRates
+Form: Constant
+Value: FALSE
+Property: exportOutdoorEnvironmentBeforeRun
+Form: Constant
+Value: TRUE
+Property: exportPropertiesBeforeRun
+Form: Constant
+Value: TRUE
+Property: exportRiskECOInputs
+Form: Constant
+Value: FALSE
+Property: FractionInitialConcentrations
+Form: Constant
+Value: 0
+Property: exportMass
+Form: Constant
+Value: TRUE
+Property: exportConcentration
+Form: Constant
+Value: TRUE
+Property: exportHTML
+Form: Constant
+Value: TRUE
+Property: exportTimeStepsDown
+Form: Constant
+Value: TRUE
+Property: significantDigits
+Form: Constant
+Value: 4
+Property: isDay_SteadyState_forAir
+Form: Constant
+Value: 0
+Property: isDay_SteadyState_forOther
+Form: Constant
+Value: 0
+Property: verticalWindSpeed
+Form: Constant
+Value: 0
+// Description: [[ Constant 0 m/sec. Professional judgment; vertical wind speed not used by any of the algorithms in the current version of the TRIM.FaTE library. ]]
+Property: AirTemperature_K
+Form: InputFromFile
+Value: C:\\TRIM\\Legacy\\Revised\\MetData_streamlined.csv, AirTemperature, ","
+// Description: [[ Constant 298 K. USEPA 2005. ]]
+Property: horizontalWindSpeed
+Form: InputFromFile
+Value: C:\\TRIM\\Legacy\\Revised\\MetData_streamlined.csv, HorizontalWindSpeed, ","
+// Description: [[ Constant 2.8 m/sec. 5th percentile annual average value for contiguous US, calculated from 30 yrs of annual normal temperature values. ]]
+Property: windDirection
+Form: InputFromFile
+Value: C:\\TRIM\\Legacy\\Revised\\MetData_streamlined.csv, WindDirection, ","
+// Description: [[ 3-days-on, 4-days-off. On is defined as time during which wind is blowing into the model domain.  A conservative estimate of time during which wind should blow into the modeling domain was determined by evaluating HUSWO; it was concluded that a conservative estimate would be approximately 42% of the time. ]]
+Property: Rain
+Form: InputFromFile
+Value: C:\\TRIM\\Legacy\\Revised\\MetData_streamlined.csv, Rain, ","
+// Description: [[ 1.5 m/yr is the maximum statewide 30-year (1971-2000) average for the contiguous United States, excluding Rhode Island because of extreme weather conditions on Mt. Washington.  Data obtained from the National Climatic Data Center at http://www.ncdc.noaa.gov/oa/climate/online/ccd/nrmpcp.txt.  The precipitation frequency was 3-days-on:4-days-off based on data from Holzworth, 1972. ]]
+Property: cumulativeRain
+Form: InputFromFile
+Value: C:\\TRIM\\Legacy\\Revised\\MetData_streamlined.csv, CumulativeRain, ","
+// Description: [[ Constant 0 m. ]]
+Property: isDay_Dynamic
+Form: InputFromFile
+Value: C:\\TRIM\\Legacy\\Revised\\MetData_streamlined.csv, IsDay, ","
+// Description: [[ Constant 1. Overridden below for plant leaves. ]]
+
+// ----------------------------------------------------------------------------
+// Parameters for "VolumeElement: Air_*"
+// ----------------------------------------------------------------------------
+VolumeElement: Air_Source
+VolumeElement: Air_N1
+VolumeElement: Air_N6
+VolumeElement: Air_N7
+VolumeElement: Air_N3
+VolumeElement: Air_N4
+VolumeElement: Air_N5
+VolumeElement: Air_S1
+VolumeElement: Air_Pond
+VolumeElement: Air_S4
+VolumeElement: Air_S5
+Property: top
+Form: InputFromFile
+Value: C:\\TRIM\\Legacy\\Revised\\MetData_streamlined.csv, MixingHeight, ","
+// Description: [[ 710m ]]
+
+// ----------------------------------------------------------------------------
+// Parameters for "VolumeElement: UpperAir_*"
+// ----------------------------------------------------------------------------
+VolumeElement: UpperAir_Source
+Property: bottom
+Form: InputFromFile
+Value: C:\\TRIM\\Legacy\\Revised\\MetData_streamlined.csv, MixingHeight, ","
+// Description: [[ 710m ]]
+
+// ----------------------------------------------------------------------------
+// Parameters for "Compartment: Air in *"
+// ----------------------------------------------------------------------------
+Compartment: Air in Air_Source
+Compartment: Air in Air_N1
+Compartment: Air in Air_N6
+Compartment: Air in Air_N7
+Compartment: Air in Air_N3
+Compartment: Air in Air_N4
+Compartment: Air in Air_N5
+Compartment: Air in Air_S1
+Compartment: Air in Air_Pond
+Compartment: Air in Air_S4
+Compartment: Air in Air_S5
+Property: DustLoad
+Form: Constant
+Value: 0.0000000615
+// Description: [[ Bidleman 1988 ]]
+Property: AirDensity_g_cm3
+Form: Constant
+Value: 0.0012
+// Description: [[ U.S. EPA 1997 ]]
+Property: DustDensity
+Form: Constant
+Value: 1400
+// Description: [[ Bidleman 1988 ]]
+Property: FractionOrganicMatteronParticulates
+Form: Constant
+Value: 0.2
+// Description: [[ Harner and Bidleman 1998 ]]
+
+// ----------------------------------------------------------------------------
+// Parameters for "Compartment: Soil - Surface in *"
+// ----------------------------------------------------------------------------
+Compartment: Soil - Surface in SurfSoil_Source
+Compartment: Soil - Surface in SurfSoil_N1
+Compartment: Soil - Surface in SurfSoil_N6
+Compartment: Soil - Surface in SurfSoil_N7
+Compartment: Soil - Surface in SurfSoil_N3
+Compartment: Soil - Surface in SurfSoil_N4
+Compartment: Soil - Surface in SurfSoil_N5
+Compartment: Soil - Surface in SurfSoil_S1
+Compartment: Soil - Surface in SurfSoil_S4
+Compartment: Soil - Surface in SurfSoil_S5
+Property: VolumeFraction_vapor
+Form: Constant
+Value: 0.28
+// Description: [[ McKone et al. 2001. ]]
+Property: AverageVerticalVelocity
+Form: Constant
+Value: 0.000821917808219178
+// Description: [[ Assumed to be 0.2 times average precipitation for site. ]]
+Property: AirSoilBoundaryThickness
+Form: Constant
+Value: 0.005
+// Description: [[ Thibodeaux 1996; McKone et al. 2001 (Table 3). ]]
+Property: rho
+Form: Constant
+Value: 2600
+// Description: [[ Default in McKone et al. 2001 (Table 3) ]]
+Property: Fractionofareaavailableforerosion
+Form: Constant
+Value: 1
+// Description: [[ Professional judgment; area assumed rural. ]]
+Property: FractionofAreaAvailableforRunoff
+Form: Constant
+Value: 1
+// Description: [[ Professional judgment; area assumed rural. ]]
+Property: Fractionofareaavailableforverticaldiffusion
+Form: Constant
+Value: 1
+// Description: [[ Professional judgment; area assumed rural. ]]
+Property: FractionSand
+Form: Constant
+Value: 0.25
+// Description: [[ Professional judgment. ]]
+Property: OrganicCarbonContent
+Form: Constant
+Value: 0.008
+// Description: [[ U.S. average in McKone et al. 2001 (Table 16 and A-3). ]]
+Property: pH
+Form: Constant
+Value: 6.8
+// Description: [[ Professional judgment. ]]
+Property: TotalRunoffRate_m3_m2_day
+Form: Constant
+Value: 1.6438E-03
+// Description: [[ Calculated using scenario-specific precipitation rate and assumptions associated with water balance. ]]
+Property: VolumeFraction_liquid
+Form: Constant
+Value: 0.19
+// Description: [[ McKone et al 2001 (Table 15). ]]
+
+// ----------------------------------------------------------------------------
+// Parameters for "Compartment: Soil - Root Zone in *"
+// ----------------------------------------------------------------------------
+Compartment: Soil - Root Zone in RootSoil_Source
+Compartment: Soil - Root Zone in RootSoil_N1
+Compartment: Soil - Root Zone in RootSoil_N6
+Compartment: Soil - Root Zone in RootSoil_N7
+Compartment: Soil - Root Zone in RootSoil_N3
+Compartment: Soil - Root Zone in RootSoil_N4
+Compartment: Soil - Root Zone in RootSoil_N5
+Compartment: Soil - Root Zone in RootSoil_S1
+Compartment: Soil - Root Zone in RootSoil_S4
+Compartment: Soil - Root Zone in RootSoil_S5
+Property: VolumeFraction_vapor
+Form: Constant
+Value: 0.25
+// Description: [[ McKone et al 2001 (Table 16). ]]
+Property: AverageVerticalVelocity
+Form: Constant
+Value: 0.000821917808219178
+// Description: [[ Assumed as 0.2 times average precipitation for New England in McKone et al. 2001. ]]
+Property: rho
+Form: Constant
+Value: 2600
+// Description: [[ McKone et al. 2001 (Table 3). ]]
+Property: FractionSand
+Form: Constant
+Value: 0.25
+// Description: [[ Professional judgment. ]]
+Property: OrganicCarbonContent
+Form: Constant
+Value: 0.008
+// Description: [[ McKone et al. 2001 (Table 16 and A-3, U.S. Average). ]]
+Property: pH
+Form: Constant
+Value: 6.8
+// Description: [[ Professional judgment. ]]
+Property: VolumeFraction_liquid
+Form: Constant
+Value: 0.21
+// Description: [[ McKone et al. 2001 (Table 16). ]]
+
+// ----------------------------------------------------------------------------
+// Parameters for "Compartment: Soil - Vadose Zone in *"
+// ----------------------------------------------------------------------------
+Compartment: Soil - Vadose Zone in VadoseSoil_Source
+Compartment: Soil - Vadose Zone in VadoseSoil_N1
+Compartment: Soil - Vadose Zone in VadoseSoil_N6
+Compartment: Soil - Vadose Zone in VadoseSoil_N7
+Compartment: Soil - Vadose Zone in VadoseSoil_N3
+Compartment: Soil - Vadose Zone in VadoseSoil_N4
+Compartment: Soil - Vadose Zone in VadoseSoil_N5
+Compartment: Soil - Vadose Zone in VadoseSoil_S1
+Compartment: Soil - Vadose Zone in VadoseSoil_S4
+Compartment: Soil - Vadose Zone in VadoseSoil_S5
+Property: VolumeFraction_vapor
+Form: Constant
+Value: 0.22
+// Description: [[ McKone et al. 2001 (Table 17). ]]
+Property: AverageVerticalVelocity
+Form: Constant
+Value: 0.000821917808219178
+// Description: [[ Assumed as 0.2 times average precipitation for New England in McKone et al. 2001. ]]
+Property: rho
+Form: Constant
+Value: 2600
+// Description: [[ Default in McKone et al. 2001 (Table 3). ]]
+Property: FractionSand
+Form: Constant
+Value: 0.35
+// Description: [[ Pofessional judgment. ]]
+Property: OrganicCarbonContent
+Form: Constant
+Value: 0.003
+// Description: [[ McKone et al. 2001 (Table 16 and A-3, U.S. Average). ]]
+Property: pH
+Form: Constant
+Value: 6.8
+// Description: [[ Professional judgment. ]]
+Property: VolumeFraction_liquid
+Form: Constant
+Value: 0.21
+// Description: [[ McKone et al. 2001 (Table 17 - national average). ]]
+
+// ----------------------------------------------------------------------------
+// Parameters for "Compartment: Groundwater in *"
+// ----------------------------------------------------------------------------
+Compartment: Groundwater in GW_Source
+Compartment: Groundwater in GW_N1
+Compartment: Groundwater in GW_N6
+Compartment: Groundwater in GW_N7
+Compartment: Groundwater in GW_N3
+Compartment: Groundwater in GW_N4
+Compartment: Groundwater in GW_N5
+Compartment: Groundwater in GW_S1
+Compartment: Groundwater in GW_S4
+Compartment: Groundwater in GW_S5
+Property: FractionSand
+Form: Constant
+Value: 0.4
+// Description: [[ Professional judgment. ]]
+Property: OrganicCarbonContent
+Form: Constant
+Value: 0.004
+// Description: [[ Professional judgment. ]]
+Property: pH
+Form: Constant
+Value: 6.8
+// Description: [[ Professional judgment. ]]
+Property: Porosity
+Form: Constant
+Value: 0.2
+// Description: [[ Default in McKone et al. 2001 (Table 3). ]]
+Property: rho
+Form: Constant
+Value: 2600
+// Description: [[ Default in McKone et al. 2001 (Table 3). ]]
+
+// ----------------------------------------------------------------------------
+// Parameters for "Compartment: * in Coniferous Forest in *"
+// ----------------------------------------------------------------------------
+Compartment: Leaf - Coniferous Forest in Coniferous Forest in SurfSoil_N4
+Compartment: Leaf Particle - Coniferous Forest in Coniferous Forest in SurfSoil_N4
+Compartment: Leaf - Coniferous Forest in Coniferous Forest in SurfSoil_N5
+Compartment: Leaf Particle - Coniferous Forest in Coniferous Forest in SurfSoil_N5
+Compartment: Leaf - Coniferous Forest in Coniferous Forest in SurfSoil_S4
+Compartment: Leaf Particle - Coniferous Forest in Coniferous Forest in SurfSoil_S4
+Compartment: Leaf - Coniferous Forest in Coniferous Forest in SurfSoil_S5
+Compartment: Leaf Particle - Coniferous Forest in Coniferous Forest in SurfSoil_S5
+Property: AllowExchange_Dynamic
+Form: Constant
+Value: 1
+// Description: [[ Coniferous plants assumed to be constantly growing ]]
+Property: AllowExchange_SteadyState_forAir
+Form: Constant
+Value: 1
+Property: AllowExchange_SteadyState_forOther
+Form: Constant
+Value: 1
+
+// ----------------------------------------------------------------------------
+// Parameters for "Compartment: Leaf -* in Coniferous Forest in *"
+// ----------------------------------------------------------------------------
+Compartment: Leaf - Coniferous Forest in Coniferous Forest in SurfSoil_N4
+Compartment: Leaf - Coniferous Forest in Coniferous Forest in SurfSoil_N5
+Compartment: Leaf - Coniferous Forest in Coniferous Forest in SurfSoil_S4
+Compartment: Leaf - Coniferous Forest in Coniferous Forest in SurfSoil_S5
+Property: LitterFallRate
+Form: Constant
+Value: 0.0021
+// Description: [[ value assumes 1st-order relationship and that 99% of leaves fall over 6 years ]]
+
+// ----------------------------------------------------------------------------
+// Parameters for "Compartment: * in Coniferous Forest in *"
+// ----------------------------------------------------------------------------
+Compartment: Leaf - Coniferous Forest in Coniferous Forest in SurfSoil_N4
+Compartment: Leaf Particle - Coniferous Forest in Coniferous Forest in SurfSoil_N4
+Compartment: Leaf - Coniferous Forest in Coniferous Forest in SurfSoil_N5
+Compartment: Leaf Particle - Coniferous Forest in Coniferous Forest in SurfSoil_N5
+Compartment: Leaf - Coniferous Forest in Coniferous Forest in SurfSoil_S4
+Compartment: Leaf Particle - Coniferous Forest in Coniferous Forest in SurfSoil_S4
+Compartment: Leaf - Coniferous Forest in Coniferous Forest in SurfSoil_S5
+Compartment: Leaf Particle - Coniferous Forest in Coniferous Forest in SurfSoil_S5
+Property: CalculateWetDepInterceptionFraction
+Form: Constant
+Value: FALSE
+// Description: [[ Professional judgment. ]]
+Property: WetDepInterceptionFraction_UserSupplied
+Form: Constant
+Value: 0.2
+// Description: [[ Calculated based on 5 years of local met data, 1987-1991. ]]
+
+// ----------------------------------------------------------------------------
+// Parameters for "Compartment: * in Grasses/Herbs in *"
+// ----------------------------------------------------------------------------
+Compartment: Leaf - Grasses/Herbs in Grasses/Herbs in SurfSoil_N1
+Compartment: Leaf Particle - Grasses/Herbs in Grasses/Herbs in SurfSoil_N1
+Compartment: Root - Grasses/Herbs in Grasses/Herbs in SurfSoil_N1
+Compartment: Stem - Grasses/Herbs in Grasses/Herbs in SurfSoil_N1
+Compartment: Leaf - Grasses/Herbs in Grasses/Herbs in SurfSoil_N7
+Compartment: Leaf Particle - Grasses/Herbs in Grasses/Herbs in SurfSoil_N7
+Compartment: Root - Grasses/Herbs in Grasses/Herbs in SurfSoil_N7
+Compartment: Stem - Grasses/Herbs in Grasses/Herbs in SurfSoil_N7
+Compartment: Leaf - Grasses/Herbs in Grasses/Herbs in SurfSoil_N3
+Compartment: Leaf Particle - Grasses/Herbs in Grasses/Herbs in SurfSoil_N3
+Compartment: Root - Grasses/Herbs in Grasses/Herbs in SurfSoil_N3
+Compartment: Stem - Grasses/Herbs in Grasses/Herbs in SurfSoil_N3
+Compartment: Leaf - Grasses/Herbs in Grasses/Herbs in SurfSoil_S1
+Compartment: Leaf Particle - Grasses/Herbs in Grasses/Herbs in SurfSoil_S1
+Compartment: Root - Grasses/Herbs in Grasses/Herbs in SurfSoil_S1
+Compartment: Stem - Grasses/Herbs in Grasses/Herbs in SurfSoil_S1
+Property: AllowExchange_Dynamic
+Form: InputFromFile
+Value: C:\\TRIM\\Legacy\\Revised\\AllowExchange.csv, AllowExchange, ","
+// Description: [[ Begins March 9 (set to 1), ends November 7 (set to 0).  Nation-wide 80th percentile. ]]
+Property: AllowExchange_SteadyState_forAir
+Form: Constant
+Value: 1
+Property: AllowExchange_SteadyState_forOther
+Form: Constant
+Value: 1
+
+// ----------------------------------------------------------------------------
+// Parameters for "Compartment: Leaf -* in Grasses/Herbs in *"
+// ----------------------------------------------------------------------------
+Compartment: Leaf - Grasses/Herbs in Grasses/Herbs in SurfSoil_N1
+Compartment: Leaf - Grasses/Herbs in Grasses/Herbs in SurfSoil_N7
+Compartment: Leaf - Grasses/Herbs in Grasses/Herbs in SurfSoil_N3
+Compartment: Leaf - Grasses/Herbs in Grasses/Herbs in SurfSoil_S1
+Property: LitterFallRate
+Form: InputFromFile
+Value: C:\\TRIM\\Legacy\\Revised\\LitterFallRate.csv, LitterfallRate, ","
+// Description: [[ Begins November 7, ends December 6; rate = 0.15/day during this time (value assumes 99 percent of leaves fall in 30 days). ]]
+
+// ----------------------------------------------------------------------------
+// Parameters for "Compartment: * in Grasses/Herbs in *"
+// ----------------------------------------------------------------------------
+Compartment: Leaf - Grasses/Herbs in Grasses/Herbs in SurfSoil_N1
+Compartment: Leaf Particle - Grasses/Herbs in Grasses/Herbs in SurfSoil_N1
+Compartment: Root - Grasses/Herbs in Grasses/Herbs in SurfSoil_N1
+Compartment: Stem - Grasses/Herbs in Grasses/Herbs in SurfSoil_N1
+Compartment: Leaf - Grasses/Herbs in Grasses/Herbs in SurfSoil_N7
+Compartment: Leaf Particle - Grasses/Herbs in Grasses/Herbs in SurfSoil_N7
+Compartment: Root - Grasses/Herbs in Grasses/Herbs in SurfSoil_N7
+Compartment: Stem - Grasses/Herbs in Grasses/Herbs in SurfSoil_N7
+Compartment: Leaf - Grasses/Herbs in Grasses/Herbs in SurfSoil_N3
+Compartment: Leaf Particle - Grasses/Herbs in Grasses/Herbs in SurfSoil_N3
+Compartment: Root - Grasses/Herbs in Grasses/Herbs in SurfSoil_N3
+Compartment: Stem - Grasses/Herbs in Grasses/Herbs in SurfSoil_N3
+Compartment: Leaf - Grasses/Herbs in Grasses/Herbs in SurfSoil_S1
+Compartment: Leaf Particle - Grasses/Herbs in Grasses/Herbs in SurfSoil_S1
+Compartment: Root - Grasses/Herbs in Grasses/Herbs in SurfSoil_S1
+Compartment: Stem - Grasses/Herbs in Grasses/Herbs in SurfSoil_S1
+Property: CalculateWetDepInterceptionFraction
+Form: Constant
+Value: FALSE
+// Description: [[ Professional judgment. ]]
+Property: WetDepInterceptionFraction_UserSupplied
+Form: Constant
+Value: 0.2
+// Description: [[ Calculated based on 5 years of local met data, 1987-1991. ]]
+
+// ----------------------------------------------------------------------------
+// Parameters for "Compartment: Leaf -*"
+// ----------------------------------------------------------------------------
+Compartment: Leaf - Grasses/Herbs in Grasses/Herbs in SurfSoil_N1
+Compartment: Leaf - Grasses/Herbs in Grasses/Herbs in SurfSoil_N7
+Compartment: Leaf - Grasses/Herbs in Grasses/Herbs in SurfSoil_N3
+Compartment: Leaf - Coniferous Forest in Coniferous Forest in SurfSoil_N4
+Compartment: Leaf - Coniferous Forest in Coniferous Forest in SurfSoil_N5
+Compartment: Leaf - Grasses/Herbs in Grasses/Herbs in SurfSoil_S1
+Compartment: Leaf - Coniferous Forest in Coniferous Forest in SurfSoil_S4
+Compartment: Leaf - Coniferous Forest in Coniferous Forest in SurfSoil_S5
+Property: IsDay_forAir
+Form: Formula
+Value: 1-0.448
+// Description: [[ From previous screening setup workbook. Source unknown. ]]
+Property: IsDay_forOther
+Form: Formula
+Value: 1-0.391
+// Description: [[ From previous screening setup workbook. Source unknown. ]]
+
+// ----------------------------------------------------------------------------
+// Parameters for "Compartment: Soil - Surface in SurfSoil_source"
+// ----------------------------------------------------------------------------
+Compartment: Soil - Surface in SurfSoil_Source
+Property: TotalErosionRate_kg_m2_day
+Form: Formula
+Value: 0
+// Description: [[ Source parcel erosion disabled ]]
+Property: TotalRunoffRate_m3_m2_day
+Form: Formula
+Value: 0
+// Description: [[ Source parcel runoff disabled ]]
+
+// ----------------------------------------------------------------------------
+// Parameters for "Scenario: TNC0"
+// ----------------------------------------------------------------------------
+Scenario: TNC0
+Property: AirTemperature_K
+Form: Formula
+Value: 298
+// Description: [[ Constant 298 K. USEPA 2005. ]]
+Property: cumulativeRain
+Form: Formula
+Value: 0
+// Description: [[ Constant 0 m. ]]
+Property: isDay_Dynamic
+Form: Formula
+Value: 1
+// Description: [[ Constant 1. Overridden below for plant leaves. ]]
+
+// ----------------------------------------------------------------------------
+// Parameters for "VolumeElement: Air_*"
+// ----------------------------------------------------------------------------
+VolumeElement: Air_Source
+VolumeElement: Air_N1
+VolumeElement: Air_N6
+VolumeElement: Air_N7
+VolumeElement: Air_N3
+VolumeElement: Air_N4
+VolumeElement: Air_N5
+VolumeElement: Air_S1
+VolumeElement: Air_Pond
+VolumeElement: Air_S4
+VolumeElement: Air_S5
+Property: top
+Form: Formula
+Value: 710
+// Description: [[ Constant 710 m; 5th percentile annual average mixing heights (calculated from daily morning and afternoon values), for all stations on SCRM (40 state, 70 stations). ]]
+
+// ----------------------------------------------------------------------------
+// Parameters for "VolumeElement: UpperAir_*"
+// ----------------------------------------------------------------------------
+VolumeElement: UpperAir_Source
+Property: bottom
+Form: Formula
+Value: 710
+// Description: [[ Constant 710 m; 5th percentile annual average mixing heights (calculated from daily morning and afternoon values), for all stations on SCRM (40 state, 70 stations). ]]
+
+
+// ----------------------------------------------------------------------------
+// Watershed links
+// ----------------------------------------------------------------------------
+
+// Originating from Source
+
+NewLink:
+SendingCompartment: Soil - Surface in Surfsoil_Source
+ReceivingCompartment: Soil Advection Sink in SurfSoil_Source
+Algorithm: Erosion from Surface Soil to Soil Advection Sink
+Algorithm: Runoff from Surface Soil to Soil Advection Sink
+
+Link: Soil - Surface in Surfsoil_Source to Soil Advection Sink in SurfSoil_Source
+Property: FractionOfTotalErosion
+Form: Constant
+Value: 1
+Property: FractionOfTotalRunoff
+Form: Constant
+Value: 1
+Property: Enabled
+Form: Constant
+Value: True
+
+
+// Originating from N1
+
+NewLink:
+SendingCompartment: Soil - Surface in Surfsoil_N1
+ReceivingCompartment: Soil Advection Sink in SurfSoil_N1
+Algorithm: Erosion from Surface Soil to Soil Advection Sink
+Algorithm: Runoff from Surface Soil to Soil Advection Sink
+
+Link: Soil - Surface in Surfsoil_N1 to Soil Advection Sink in SurfSoil_N1
+Property: FractionOfTotalErosion
+Form: Constant
+Value: 0
+Property: FractionOfTotalRunoff
+Form: Constant
+Value: 0
+Property: Enabled
+Form: Constant
+Value: False
+
+NewLink:
+SendingCompartment: Soil - Surface in Surfsoil_N1
+ReceivingCompartment: Surface water in SW_Pond
+Algorithm: Erosion from Surface Soil to Surface Water, General(AlgInstID_3515)
+Algorithm: Runoff from Surface Soil to Surface Water, General(AlgInstID_3520)
+
+Link: Soil - Surface in Surfsoil_N1 to Surface water in SW_Pond
+Property: FractionOfTotalErosion
+Form: Constant
+Value: 1
+Property: FractionOfTotalRunoff
+Form: Constant
+Value: 1
+Property: Enabled
+Form: Constant
+Value: True
+
+
+// Originating from N6
+
+NewLink:
+SendingCompartment: Soil - Surface in Surfsoil_N6
+ReceivingCompartment: Soil Advection Sink in SurfSoil_N6
+Algorithm: Erosion from Surface Soil to Soil Advection Sink
+Algorithm: Runoff from Surface Soil to Soil Advection Sink
+
+Link: Soil - Surface in Surfsoil_N6 to Soil Advection Sink in SurfSoil_N6
+Property: FractionOfTotalErosion
+Form: Constant
+Value: 0
+Property: FractionOfTotalRunoff
+Form: Constant
+Value: 0
+Property: Enabled
+Form: Constant
+Value: False
+
+NewLink:
+SendingCompartment: Soil - Surface in Surfsoil_N6
+ReceivingCompartment: Surface water in SW_Pond
+Algorithm: Erosion from Surface Soil to Surface Water, General(AlgInstID_3515)
+Algorithm: Runoff from Surface Soil to Surface Water, General(AlgInstID_3520)
+
+Link: Soil - Surface in Surfsoil_N6 to Surface water in SW_Pond
+Property: FractionOfTotalErosion
+Form: Constant
+Value: 1
+Property: FractionOfTotalRunoff
+Form: Constant
+Value: 1
+Property: Enabled
+Form: Constant
+Value: True
+
+
+// Originating from N7
+
+NewLink:
+SendingCompartment: Soil - Surface in Surfsoil_N7
+ReceivingCompartment: Soil Advection Sink in SurfSoil_N7
+Algorithm: Erosion from Surface Soil to Soil Advection Sink
+Algorithm: Runoff from Surface Soil to Soil Advection Sink
+
+Link: Soil - Surface in Surfsoil_N7 to Soil Advection Sink in SurfSoil_N7
+Property: FractionOfTotalErosion
+Form: Constant
+Value: 0
+Property: FractionOfTotalRunoff
+Form: Constant
+Value: 0
+Property: Enabled
+Form: Constant
+Value: False
+
+NewLink:
+SendingCompartment: Soil - Surface in Surfsoil_N7
+ReceivingCompartment: Surface water in SW_Pond
+Algorithm: Erosion from Surface Soil to Surface Water, General(AlgInstID_3515)
+Algorithm: Runoff from Surface Soil to Surface Water, General(AlgInstID_3520)
+
+Link: Soil - Surface in Surfsoil_N7 to Surface water in SW_Pond
+Property: FractionOfTotalErosion
+Form: Constant
+Value: 1
+Property: FractionOfTotalRunoff
+Form: Constant
+Value: 1
+Property: Enabled
+Form: Constant
+Value: True
+
+
+// Originating from N3
+
+NewLink:
+SendingCompartment: Soil - Surface in Surfsoil_N3
+ReceivingCompartment: Soil Advection Sink in SurfSoil_N3
+Algorithm: Erosion from Surface Soil to Soil Advection Sink
+Algorithm: Runoff from Surface Soil to Soil Advection Sink
+
+Link: Soil - Surface in Surfsoil_N3 to Soil Advection Sink in SurfSoil_N3
+Property: FractionOfTotalErosion
+Form: Constant
+Value: 0
+Property: FractionOfTotalRunoff
+Form: Constant
+Value: 0
+Property: Enabled
+Form: Constant
+Value: False
+
+NewLink:
+SendingCompartment: Soil - Surface in Surfsoil_N3
+ReceivingCompartment: Surface water in SW_Pond
+Algorithm: Erosion from Surface Soil to Surface Water, General(AlgInstID_3515)
+Algorithm: Runoff from Surface Soil to Surface Water, General(AlgInstID_3520)
+
+Link: Soil - Surface in Surfsoil_N3 to Surface water in SW_Pond
+Property: FractionOfTotalErosion
+Form: Constant
+Value: 1
+Property: FractionOfTotalRunoff
+Form: Constant
+Value: 1
+Property: Enabled
+Form: Constant
+Value: True
+
+
+// Originating from N4
+
+NewLink:
+SendingCompartment: Soil - Surface in Surfsoil_N4
+ReceivingCompartment: Soil Advection Sink in SurfSoil_N4
+Algorithm: Erosion from Surface Soil to Soil Advection Sink
+Algorithm: Runoff from Surface Soil to Soil Advection Sink
+
+Link: Soil - Surface in Surfsoil_N4 to Soil Advection Sink in SurfSoil_N4
+Property: FractionOfTotalErosion
+Form: Constant
+Value: 0
+Property: FractionOfTotalRunoff
+Form: Constant
+Value: 0
+Property: Enabled
+Form: Constant
+Value: False
+
+NewLink:
+SendingCompartment: Soil - Surface in Surfsoil_N4
+ReceivingCompartment: Surface water in SW_Pond
+Algorithm: Erosion from Surface Soil to Surface Water, General(AlgInstID_3515)
+Algorithm: Runoff from Surface Soil to Surface Water, General(AlgInstID_3520)
+
+Link: Soil - Surface in Surfsoil_N4 to Surface water in SW_Pond
+Property: FractionOfTotalErosion
+Form: Constant
+Value: 1
+Property: FractionOfTotalRunoff
+Form: Constant
+Value: 1
+Property: Enabled
+Form: Constant
+Value: True
+
+
+// Originating from N5
+
+NewLink:
+SendingCompartment: Soil - Surface in Surfsoil_N5
+ReceivingCompartment: Soil Advection Sink in SurfSoil_N5
+Algorithm: Erosion from Surface Soil to Soil Advection Sink
+Algorithm: Runoff from Surface Soil to Soil Advection Sink
+
+Link: Soil - Surface in Surfsoil_N5 to Soil Advection Sink in SurfSoil_N5
+Property: FractionOfTotalErosion
+Form: Constant
+Value: 0
+Property: FractionOfTotalRunoff
+Form: Constant
+Value: 0
+Property: Enabled
+Form: Constant
+Value: False
+
+NewLink:
+SendingCompartment: Soil - Surface in Surfsoil_N5
+ReceivingCompartment: Soil - Surface in SurfSoil_N4
+Algorithm: Erosion from Surface Soil to Surface Soil, General(AlgInstID_2460)
+Algorithm: Runoff from Surface Soil to Surface Soil, General(AlgInstID_2465)
+
+Link: Soil - Surface in Surfsoil_N5 to Soil - Surface in SurfSoil_N4
+Property: FractionOfTotalErosion
+Form: Constant
+Value: 0.5
+Property: FractionOfTotalRunoff
+Form: Constant
+Value: 0.5
+Property: Enabled
+Form: Constant
+Value: True
+
+NewLink:
+SendingCompartment: Soil - Surface in Surfsoil_N5
+ReceivingCompartment: Soil - Surface in SurfSoil_S5
+Algorithm: Erosion from Surface Soil to Surface Soil, General(AlgInstID_2460)
+Algorithm: Runoff from Surface Soil to Surface Soil, General(AlgInstID_2465)
+
+Link: Soil - Surface in Surfsoil_N5 to Soil - Surface in SurfSoil_S5
+Property: FractionOfTotalErosion
+Form: Constant
+Value: 0.5
+Property: FractionOfTotalRunoff
+Form: Constant
+Value: 0.5
+Property: Enabled
+Form: Constant
+Value: True
+
+
+// Originating from S1
+
+NewLink:
+SendingCompartment: Soil - Surface in Surfsoil_S1
+ReceivingCompartment: Soil Advection Sink in SurfSoil_S1
+Algorithm: Erosion from Surface Soil to Soil Advection Sink
+Algorithm: Runoff from Surface Soil to Soil Advection Sink
+
+Link: Soil - Surface in Surfsoil_S1 to Soil Advection Sink in SurfSoil_S1
+Property: FractionOfTotalErosion
+Form: Constant
+Value: 0
+Property: FractionOfTotalRunoff
+Form: Constant
+Value: 0
+Property: Enabled
+Form: Constant
+Value: False
+
+NewLink:
+SendingCompartment: Soil - Surface in Surfsoil_S1
+ReceivingCompartment: Surface water in SW_Pond
+Algorithm: Erosion from Surface Soil to Surface Water, General(AlgInstID_3515)
+Algorithm: Runoff from Surface Soil to Surface Water, General(AlgInstID_3520)
+
+Link: Soil - Surface in Surfsoil_S1 to Surface water in SW_Pond
+Property: FractionOfTotalErosion
+Form: Constant
+Value: 1
+Property: FractionOfTotalRunoff
+Form: Constant
+Value: 1
+Property: Enabled
+Form: Constant
+Value: True
+
+
+
+// Originating from S4
+
+NewLink:
+SendingCompartment: Soil - Surface in Surfsoil_S4
+ReceivingCompartment: Soil Advection Sink in SurfSoil_S4
+Algorithm: Erosion from Surface Soil to Soil Advection Sink
+Algorithm: Runoff from Surface Soil to Soil Advection Sink
+
+Link: Soil - Surface in Surfsoil_S4 to Soil Advection Sink in SurfSoil_S4
+Property: FractionOfTotalErosion
+Form: Constant
+Value: 0
+Property: FractionOfTotalRunoff
+Form: Constant
+Value: 0
+Property: Enabled
+Form: Constant
+Value: False
+
+NewLink:
+SendingCompartment: Soil - Surface in Surfsoil_S4
+ReceivingCompartment: Surface water in SW_Pond
+Algorithm: Erosion from Surface Soil to Surface Water, General(AlgInstID_3515)
+Algorithm: Runoff from Surface Soil to Surface Water, General(AlgInstID_3520)
+
+Link: Soil - Surface in Surfsoil_S4 to Surface water in SW_Pond
+Property: FractionOfTotalErosion
+Form: Constant
+Value: 1
+Property: FractionOfTotalRunoff
+Form: Constant
+Value: 1
+Property: Enabled
+Form: Constant
+Value: True
+
+
+// Originating from S5
+
+NewLink:
+SendingCompartment: Soil - Surface in Surfsoil_S5
+ReceivingCompartment: Soil Advection Sink in SurfSoil_S5
+Algorithm: Erosion from Surface Soil to Soil Advection Sink
+Algorithm: Runoff from Surface Soil to Soil Advection Sink
+
+Link: Soil - Surface in Surfsoil_S5 to Soil Advection Sink in SurfSoil_S5
+Property: FractionOfTotalErosion
+Form: Constant
+Value: 0
+Property: FractionOfTotalRunoff
+Form: Constant
+Value: 0
+Property: Enabled
+Form: Constant
+Value: False
+
+NewLink:
+SendingCompartment: Soil - Surface in Surfsoil_S5
+ReceivingCompartment: Soil - Surface in SurfSoil_S4
+Algorithm: Erosion from Surface Soil to Surface Soil, General(AlgInstID_2460)
+Algorithm: Runoff from Surface Soil to Surface Soil, General(AlgInstID_2465)
+
+Link: Soil - Surface in Surfsoil_S5 to Soil - Surface in SurfSoil_S4
+Property: FractionOfTotalErosion
+Form: Constant
+Value: 1
+Property: FractionOfTotalRunoff
+Form: Constant
+Value: 1
+Property: Enabled
+Form: Constant
+Value: True
+
+
