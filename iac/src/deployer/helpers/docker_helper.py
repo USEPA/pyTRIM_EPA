@@ -4,7 +4,8 @@ import docker
 from datetime import datetime
 from common import await_stack_completion, extract_output_val, die, figure_parent_dir, whoami_aws, loggy
 
-IMAGE_TAG_NAME = "pytrim_iac"
+IMAGE_TAG_NAME_MODELRUN = "pytrim_iac"
+IMAGE_TAG_NAME_GETFLOW = "pytrim_getflow"
 
 class DockerHelper(object):
     def __init__(self):
@@ -22,13 +23,14 @@ class DockerHelper(object):
     # note - I had to edit ~/.docker/config.json and change "credHelpers" to
     # "_credHelpers" (effectively commenting it out); before that I would get 
     # gcloud-sdk errors when attempting to call build on the image client.
-    def build_image(self):
+    def build_image(self, relative_prep_script_path, build_cmd, temp_dir):
         parent_dir = figure_parent_dir()
         sep = os.path.sep
 
-        loggy("setting up Docker temp directory (application code + entrypoint for image building)...")
+        loggy(f"setting up Docker temp directory (application code + entrypoint for image building) at {temp_dir}...")
 
-        exit_status = subprocess.call(["python", f"{parent_dir}docker{sep}prepare_dockerized_pytrim.py", "-q"])
+        # exit_status = subprocess.call(["python", f"{parent_dir}docker{sep}prepare_dockerized_pytrim.py", "-q"])
+        exit_status = subprocess.call(["python", f"{parent_dir}docker{sep}{relative_prep_script_path}", "-q"])
         if exit_status != 0:
             die("fatal error while preparing Docker image...")
 
@@ -37,28 +39,30 @@ class DockerHelper(object):
         use_docker_sdk_to_build = False
 
         if use_docker_sdk_to_build:
+            die("DISABLED -- NOT USED SINCE WE MOVED TO SUPPORT MULTIPLE IMAGES/REPOS...NEEDS TESTING/POTENTIAL UPDATING...")
             try:
                 loggy(f"building Docker image from src '{parent_dir}docker{sep}' using SDK...")
                 self.docker_client.images.build(
                     path = f"{parent_dir}docker{sep}",
-                    tag = IMAGE_TAG_NAME,
+                    tag = IMAGE_TAG_NAME_MODELRUN,
                 )
 
-                loggy(f"build of '{IMAGE_TAG_NAME}' complete")
+                loggy(f"build of '{IMAGE_TAG_NAME_MODELRUN}' complete")
             except Exception as e:
                 die("fatal exception '{e}' while building Docker image...")
         else:
             loggy("Alternate Docker build; SDK disabled...")
             exit_status = -1
             try:
-                exit_status = subprocess.call(["docker", "build", "-t", IMAGE_TAG_NAME, f"{parent_dir}docker"])
+                # exit_status = subprocess.call(["docker", "build", "-t", IMAGE_TAG_NAME_MODELRUN, f"{parent_dir}docker"])
+                exit_status = subprocess.call(build_cmd)
             except Exception as e:
                 die(f"fatal exception '{e}' while building Docker image...")
 
             if exit_status != 0:
                 die(f"fatal issue while building Docker image...")
 
-        temp_dir = f"{parent_dir}docker{sep}temp"
+        # temp_dir = f"{parent_dir}docker{sep}temp"
         loggy(f"Cleaning up temp directory '{temp_dir}'...")
         if os.path.exists(temp_dir):
             shutil.rmtree(temp_dir)
@@ -95,12 +99,13 @@ class DockerHelper(object):
     # this is the equivalent of manually running e.g.:
     #
     #       docker tag pytrim_iac:latest 426714360284.dkr.ecr.us-east-1.amazonaws.com/pytrim-dev-iac/private_ecr_repo:pushtest
-    def tag_image(self, repo_uri):
+    def tag_image(self, repo_uri, image_tag_name):
         loggy(f"Tagging image for {repo_uri}...")
         # ecr_registry_name = "pytrim-dev-iac/private_ecr_repo" # TODO -- get this from CF outputs?
 
         # low-level API; had trouble doing this with the images client directly
-        image = self.docker_client.images.get(IMAGE_TAG_NAME)
+        # image = self.docker_client.images.get(IMAGE_TAG_NAME_MODELRUN)
+        image = self.docker_client.images.get(image_tag_name)
 
         # tag = datetime.today().strftime('%Y%m%d%H%M')
         tag = 'latest'
@@ -137,16 +142,55 @@ class DockerHelper(object):
     # https://stackoverflow.com/questions/45839549/docker-python-api-tagging-containers
     def build_etc(self, stack_name):
         (stack_id, outputs) = await_stack_completion(stack_name)
-        ecr_repo_uri = extract_output_val(outputs, "PyTrimPrivateECRRepoUri")
-        """
+
+        # new way - multiple repos (one for "model run", one for "getflow", can add more later...)
+        registry_url, ecr_username, ecr_password = self.get_login_data()
+
         parent_dir = figure_parent_dir()
-        loggy(f"IMAGES ({parent_dir}):")
-        for img in self.docker_client.images.list():
-            loggy(f"\t{img.id=}, {img.tags=}")
+        sep = os.path.sep
+        config_blobs = [
+            {
+                "disabled": False,
+                "description": "docker image for the 'run model' operation, added in mid-2024",
+                "repo_uri_output_name": "PyTrimPrivateECRModelRunRepoUri",
+                "image_tag_name": IMAGE_TAG_NAME_MODELRUN,
+                "relative_prep_script_path": "prepare_dockerized_pytrim.py",
+                "build_cmd": ["docker", "build", "-t", IMAGE_TAG_NAME_MODELRUN, f"{parent_dir}docker"],
+                "temp_dir": f"{parent_dir}docker{sep}temp",
+            },
+            {
+                # "disabled": False,
+                "description": "docker image for the 'getflow' operation, added in early-2025",
+                "repo_uri_output_name": "PyTrimPrivateECRGetFlowRepoUri",
+                "image_tag_name": IMAGE_TAG_NAME_GETFLOW,
+                "relative_prep_script_path": f"getflow{sep}prepare_dockerized.py",
+                "build_cmd": ["docker", "build", "-t", IMAGE_TAG_NAME_GETFLOW, "-f", f"{parent_dir}docker{sep}getflow{sep}Dockerfile_getflow", f"{parent_dir}docker{sep}getflow"],
+                "temp_dir": f"{parent_dir}docker{sep}getflow{sep}temp",
+            },
+        ]
+
+        for cfg in config_blobs:
+            if cfg.get("disabled") is not True:
+                print(f"===================================================================================")
+                print(f"Proceeding with docker build/push for [{cfg["description"]}]")
+                ecr_repo_uri = extract_output_val(outputs, cfg["repo_uri_output_name"])
+                self.build_image(cfg["relative_prep_script_path"], cfg["build_cmd"], cfg["temp_dir"])
+                # print(f"STOPPING AFTER BUILD; DID WE GET THIS FAR?")
+                img_tag = self.tag_image(ecr_repo_uri, cfg["image_tag_name"])
+                self.push_image_to_ecr(ecr_username, ecr_password, ecr_repo_uri, img_tag)
+
+
         """
+        # old way: single repo, single docker image
+        ecr_repo_uri = extract_output_val(outputs, "PyTrimPrivateECRModelRunRepoUri")
+        #parent_dir = figure_parent_dir()
+        #loggy(f"IMAGES ({parent_dir}):")
+        #for img in self.docker_client.images.list():
+            #loggy(f"\t{img.id=}, {img.tags=}")
         self.build_image()
 
         registry_url, ecr_username, ecr_password = self.get_login_data()
         img_tag = self.tag_image(ecr_repo_uri)
         self.push_image_to_ecr(ecr_username, ecr_password, ecr_repo_uri, img_tag)
+        """
 

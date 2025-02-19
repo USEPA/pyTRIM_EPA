@@ -106,6 +106,11 @@ Parameters:
     Description: used to set beanstalk condition
     Default: true
 
+  KludgeDoSecret:
+    Type: String
+    Description: used to set db condition
+    Default: false
+
   EnvironmentName:
     Type: String
     Description: Environment name prefixed/appended to resource names; dashes only, no underscores!
@@ -521,6 +526,7 @@ Parameters:
 Conditions:
   DoCreateDatabaseInfrastructure: !Equals [!Ref "KludgeDoDb", "true"]
   DoCreateBeanstalkInfrastructure: !Equals [!Ref "KludgeDoBeanstalk", "true"]
+  DoCreateSecret: !Equals [!Ref "KludgeDoSecret", "true"]
 
 
 Resources:
@@ -797,11 +803,14 @@ Resources:
             Statement:
               - Effect: "Allow"
                 Action: "states:*"
-                Resource: !Ref DockerStateMachineWrapper
+                Resource: !Ref DockerStateMachineWrapperModelRun
+              - Effect: "Allow"
+                Action: "states:*"
+                Resource: !Ref DockerStateMachineWrapperGetFlow
               - Effect: "Allow"
                 Action: "states:DescribeExecution"
                 Resource: "*"
-                # Resource is like: arn:aws:states:us-east-1:426714360284:execution:DockerStateMachineWrapper-6igLbCu7FQcL:70e6b149-0e1d-4f43-b689-bdeda0d30f96 but I can't get wildcards working with that, so for now just allow on all. Just describe so low-risk.
+                # Resource is like: arn:aws:states:us-east-1:426714360284:execution:DockerStateMachineWrapperModelRun-6igLbCu7FQcL:70e6b149-0e1d-4f43-b689-bdeda0d30f96 but I can't get wildcards working with that, so for now just allow on all. Just describe so low-risk.
                 #Resource:
                 #- !Join
                 #- ''
@@ -809,7 +818,7 @@ Resources:
                 #- 'arn:'
                 #- !Sub "${AWS::Partition}"
                 #- ':states:::execution:'
-                #- !GetAtt DockerStateMachineWrapper.Name
+                #- !GetAtt DockerStateMachineWrapperModelRun.Name
                 #- ':*'
               - Effect: "Allow"
                 Action: "s3:*"
@@ -904,17 +913,30 @@ Resources:
   # DOCKER
   #
   #
-  ContainerRepository:
+  ContainerRepositoryModelRun:
     Type: 'AWS::ECR::Repository' # private; "PublicRepository" is a different type altogether
     Properties:
       EmptyOnDelete: false
-      RepositoryName: !Sub '${EnvironmentName}/private_ecr_repo'
+      RepositoryName: !Sub '${EnvironmentName}/private_ecr_repo_modelrun'
+
+  ContainerRepositoryGetFlow:
+    Type: 'AWS::ECR::Repository'
+    Properties:
+      EmptyOnDelete: false
+      RepositoryName: !Sub '${EnvironmentName}/private_ecr_repo_getflow'
 
   # NOTE - for some reason this fails the first time you try it; I had to create one manual cluster first before it would work?
-  ContainerCluster:
+  ContainerClusterModelRun:
     Type: 'AWS::ECS::Cluster'
     Properties:
-      ClusterName: !Sub '${EnvironmentName}_container_cluster'
+      ClusterName: !Sub '${EnvironmentName}_container_cluster_modelrun'
+      CapacityProviders: 
+        - 'FARGATE'
+
+  ContainerClusterGetFlow:
+    Type: 'AWS::ECS::Cluster'
+    Properties:
+      ClusterName: !Sub '${EnvironmentName}_container_cluster_getflow'
       CapacityProviders: 
         - 'FARGATE'
 
@@ -1002,7 +1024,7 @@ Resources:
                   Resource: '*'
                 # Path: /
 
-  DockerTaskDef:
+  DockerTaskDefModelRun:
     Type: 'AWS::ECS::TaskDefinition'
     Properties:
       # 1 vCPU / 4 GB RAM. hangs eventually...
@@ -1024,7 +1046,7 @@ Resources:
         - Image: !Join
           - ':'
           -
-            - !GetAtt ContainerRepository.RepositoryUri
+            - !GetAtt ContainerRepositoryModelRun.RepositoryUri
             - 'latest'
           Cpu: 0
           DisableNetworking: false
@@ -1084,6 +1106,77 @@ Resources:
       TaskRoleArn: !GetAtt DockerTaskTaskRole.Arn
       # Volumes: 
         # - Volume
+
+  DockerTaskDefGetFlow:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      # 8 vCPU / 32 GB RAM. Again, about 20 minutes
+      Cpu: "8192"
+      Memory: "32768"
+      
+      ContainerDefinitions: 
+        - Image: !Join
+          - ':'
+          -
+            - !GetAtt ContainerRepositoryGetFlow.RepositoryUri
+            - 'latest'
+          Cpu: 0
+          DisableNetworking: false
+
+          Environment:
+            - Name: STORAGE_BUCKET_NAME
+              Value: !Ref ModelRunOutputStorageBucket
+            - Name: RDS_HOSTNAME
+              Value: !GetAtt DatabaseInstance.Endpoint.Address
+            - Name: RDS_PORT
+              Value: !GetAtt DatabaseInstance.Endpoint.Port
+            - Name: RDS_DB_NAME
+              Value: !Ref DatabaseName
+            # RDS_USERNAME, RDS_PASSWORD, SQLALCHEMY_DATABASE_URI get set on-the-fly by the Docker image...
+
+          Essential: true
+          Interactive: false
+          LogConfiguration: 
+            LogDriver: "awslogs"
+            Options:
+              "awslogs-create-group": "true"
+              "awslogs-group": "/ecs/pytrim_getflow_taskdef"
+              "awslogs-region": "us-east-1"
+              "awslogs-stream-prefix": "ecs"
+
+          Name: "pytrim_getflow_container"
+          PortMappings: 
+            - Name: "pytrim_getflow_container-80-tcp"
+              ContainerPort: 80
+              HostPort: 80
+              Protocol: "tcp"
+              AppProtocol: "http"
+          #Secrets: 
+            #- Secret
+      #EphemeralStorage: 
+        #EphemeralStorage
+      ExecutionRoleArn: !GetAtt DockerTaskExecutionRole.Arn
+      Family: "pytrim_getflow_taskdef_family"
+      #InferenceAccelerators: 
+        #- InferenceAccelerator
+      # IpcMode: String
+      NetworkMode: "awsvpc"
+      # PidMode: String
+      # PlacementConstraints: 
+        #- TaskDefinitionPlacementConstraint
+      # ProxyConfiguration: 
+        # ProxyConfiguration
+      RequiresCompatibilities: 
+        - "FARGATE"
+      RuntimePlatform: 
+        CPUArchitecture: "X86_64"
+        OperatingSystemFamily: "LINUX"
+      Tags: 
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-getflow-taskdef'
+      TaskRoleArn: !GetAtt DockerTaskTaskRole.Arn
+      # Volumes: 
+        # - Volume
           
   StateMachineSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
@@ -1109,7 +1202,7 @@ Resources:
           ToPort: 65535
           IpProtocol: "tcp"
 
-  DockerStateMachineWrapper:
+  DockerStateMachineWrapperModelRun:
     Type: 'AWS::StepFunctions::StateMachine'
     Properties:
       RoleArn: !GetAtt StepFunctionAssumedRole.Arn
@@ -1126,8 +1219,8 @@ Resources:
             Resource: arn:aws:states:::ecs:runTask.waitForTaskToken
             Parameters:
               LaunchType: FARGATE
-              Cluster: !GetAtt ContainerCluster.Arn
-              TaskDefinition: !GetAtt DockerTaskDef.TaskDefinitionArn
+              Cluster: !GetAtt ContainerClusterModelRun.Arn
+              TaskDefinition: !GetAtt DockerTaskDefModelRun.TaskDefinitionArn
               NetworkConfiguration:
                 AwsvpcConfiguration:
                   AssignPublicIp: ENABLED
@@ -1150,6 +1243,44 @@ Resources:
       Tags:
         - Key: StateMachineName
           Value: !Sub '${EnvironmentName}-dockerized-runmodel-statemachine'
+
+  DockerStateMachineWrapperGetFlow:
+    Type: 'AWS::StepFunctions::StateMachine'
+    Properties:
+      RoleArn: !GetAtt StepFunctionAssumedRole.Arn
+      Definition:
+        Comment: State Machine that launches Docker container to perform GetFlow running
+        StartAt: ECS RunTask
+        States:
+          ECS RunTask:
+            Type: Task
+            Resource: arn:aws:states:::ecs:runTask.waitForTaskToken
+            Parameters:
+              LaunchType: FARGATE
+              Cluster: !GetAtt ContainerClusterGetFlow.Arn
+              TaskDefinition: !GetAtt DockerTaskDefGetFlow.TaskDefinitionArn
+              NetworkConfiguration:
+                AwsvpcConfiguration:
+                  AssignPublicIp: ENABLED
+                  Subnets:
+                  - !Ref SubnetPublicAlphaAZ
+                  - !Ref SubnetPublicBravoAZ
+                  SecurityGroups:
+                  - !Ref StateMachineSecurityGroup
+              Overrides:
+                ContainerOverrides:
+                - Environment:
+                  - Name: TASK_TOKEN_ENV_VARIABLE
+                    Value.$: $$.Task.Token
+                  - Name: TRIM_SCENARIO_ID.$
+                    Value.$: $.scenarioId
+                  - Name: GENERATE_FAKE_RESULTS.$
+                    Value.$: $.generateFakeResults
+                  Name: pytrim_runmodel_container
+            End: true
+      Tags:
+        - Key: StateMachineName
+          Value: !Sub '${EnvironmentName}-dockerized-getflow-statemachine'
   
   #
   #
@@ -1210,11 +1341,12 @@ Resources:
   # 
   #
   DatabaseSecret:
+    Condition: DoCreateSecret
     Type: AWS::SecretsManager::Secret
     Properties: 
-      Description: !Sub 'MySQL credentials for ${EnvironmentName}'
-      Name: !Sub 'pytrim/mysql'
-      SecretString: !Sub '{"username":"${DatabaseMasterAccountUsername}","password":"${DatabaseMasterAccountPassword}"}'
+    Description: !Sub 'MySQL credentials for ${EnvironmentName}'
+    Name: !Sub 'pytrim/mysql'
+    SecretString: !Sub '{"username":"${DatabaseMasterAccountUsername}","password":"${DatabaseMasterAccountPassword}"}'
 
     
   #
@@ -1334,7 +1466,7 @@ Resources:
         -
           Namespace: 'aws:elasticbeanstalk:application:environment'
           OptionName: TRIM_DOCKERIZED_STATEMACHINE_ARN
-          Value: !Ref DockerStateMachineWrapper
+          Value: !Ref DockerStateMachineWrapperModelRun
         -
           Namespace: 'aws:elasticbeanstalk:application:environment'
           OptionName: AWS_DEFAULT_REGION
@@ -1465,11 +1597,24 @@ Resources:
         Type: Standard
           
 Outputs:
-  PyTrimPrivateECRRepoName:
-    Value: !Ref ContainerRepository
+  # basic modelrun related: start
+  PyTrimPrivateECRModelRunRepoName:
+    Value: !Ref ContainerRepositoryModelRun
 
-  PyTrimPrivateECRRepoUri:
-    Value: !GetAtt ContainerRepository.RepositoryUri
+  PyTrimPrivateECRModelRunRepoUri:
+    Value: !GetAtt ContainerRepositoryModelRun.RepositoryUri
 
-  PyTrimDockerizedStateMachineArn:
-    Value: !Ref DockerStateMachineWrapper
+  PyTrimDockerizedModelRunStateMachineArn:
+    Value: !Ref DockerStateMachineWrapperModelRun
+  # basic modelrun related: end
+
+  # getflow-related: start
+  PyTrimPrivateECRGetFlowRepoName:
+    Value: !Ref ContainerRepositoryGetFlow
+
+  PyTrimPrivateECRGetFlowRepoUri:
+    Value: !GetAtt ContainerRepositoryGetFlow.RepositoryUri
+
+  PyTrimDockerizedGetFlowStateMachineArn:
+    Value: !Ref DockerStateMachineWrapperGetFlow
+  # getflow-related: end
