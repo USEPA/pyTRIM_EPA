@@ -1,265 +1,30 @@
-from Scripts.trim_db.porting.config import *
-from Scripts.trim_db.schema import Chemical
-from Scripts.trim_db.services import ChemicalService
+import json
+import os
+import time
+from trim_db.porting import *
+from trim_db.schema import *
+from trim_db.services import *
 
 DEFAULT_IMPORT_RULES = \
     {
     "chemicals": [
-        "Mercury"
+        "Benzo(A)Pyrene"
     ],
     "media": {
-        "restrict_emissions": [
-            "Abiotic|Air",
-            "Sink"
-        ],
-        "restrict_absorption": [
-            "Source"
-        ]
+        "restrict_emissions": [],
+        "restrict_absorption": []
     },
     "default_entries": {
-        "external_data_files": {
-            "met_file": "MetData_streamlined.csv",
-            "allowexchange_file": "AllowExchange.csv",
-        }
+        "external_data_files": {}
     },
-    "transport_processes": [
-        "Advection from Air to Air, Steady-state Approx",
-        "Advection from Air to Air(AlgInstID_4075)",
-
-        "Algae Deposition from Surface Water to Sediment, General(AlgInstID_2144)",
-
-        "Bulk Advection from Air to Advection Sink, General(AlgInstID_4095)",
-        "Bulk Advection from Air to Advection Sink, Steady-state Approx",
-
-        "Degradation/Reaction Sink in Air(AlgInstID_4675)",
-        "Degradation/Reaction Sink in Benthic Invertebrate(AlgInstID_4580)",
-        "Degradation/Reaction Sink in Fish(AlgInstID_4570)",
-        "Degradation/Reaction Sink in Groundwater(AlgInstID_4145)",
-        "Degradation/Reaction Sink in Leaf(AlgInstID_4165)",
-        "Degradation/Reaction Sink in Macrophyte",
-        "Degradation/Reaction Sink in Root(AlgInstID_4175)",
-        "Degradation/Reaction Sink in Root Zone(AlgInstID_4155)",
-        "Degradation/Reaction Sink in Sediment(AlgInstID_4565)",
-        "Degradation/Reaction Sink in Stem(AlgInstID_4170)",
-        "Degradation/Reaction Sink in Surface Soil(AlgInstID_4160)",
-        "Degradation/Reaction Sink in Surface Water(AlgInstID_4585)",
-        "Degradation/Reaction Sink in Vadose Zone(AlgInstID_4150)",
-        "Degradation/Reaction Sink in Zooplankton(AlgInstID_4570_Z)",
-
-        "Demethylation (MHg->Hg2) in Fish(AlgInstID_1446)",
-        "Demethylation(MHg -> Hg2) in Abiotic Media, Rate is input(AlgInstID_1892)",
-        "Demethylation(MHg -> Hg2) in Plant Leaves, Rate is input(AlgInstID_1249)",
-        "Demethylation(MHg -> Hg2) in Plant Stem, Rate is input(AlgInstID_1271)",
-
-        "Diffusion from Air to Plant Leaf, Hg0, Alternative (Bennett 1998)(AlgInstID_2515)",
-        "Diffusion from Air to Plant Leaf, Hg0, Default(Riederer 1995)",
-        "Diffusion from Air to Plant Leaf, MHg, Alternative (Bennett 1998)(AlgInstID_2515)",
-        "Diffusion from Air to Plant Leaf, MHg, Default(Riederer 1995)",
-        "Diffusion from Air to Plant Leaf, Organics, Alternative (Bennett 1998)(AlgInstID_2515)",
-        "Diffusion from Air to Plant Leaf, Organics, Default(Riederer 1995)",
-        "Diffusion from Air to Surface Soil, Hg0(AlgInstID_2507)",
-        "Diffusion from Air to Surface Soil, MHg(AlgInstID_2509)",
-        "Diffusion from Air to Surface Soil, Organics(AlgInstID_2505)",
-        "Diffusion from Air to Surface Water, Hg0, Two Film(AlgInstID_3710)",
-        "Diffusion from Air to Surface Water, MHg, Two Film(AlgInstID_3710)",
-        "Diffusion from Air to Surface Water, Organics, Two Film(AlgInstID_3710)",
-        "Diffusion from DryVaporSource to Surface Soil, Hg0",
-        "Diffusion from Plant Leaf to Air, Hg0, Default (Bennett 1998)(AlgInstID_4005)",
-        "Diffusion from Plant Leaf to Air, MHg, Default (Bennett 1998)(AlgInstID_4005)",
-        "Diffusion from Plant Leaf to Air, Organics, Default (Bennett 1998)(AlgInstID_4005)",
-        "Diffusion from Root Zone to Surface Soil(AlgInstID_1939)",
-        "Diffusion from Root Zone to Vadose Zone(AlgInstID_1904)",
-        "Diffusion from Sediment to Surface Water, Fugacity-based(AlgInstID_2195)",
-        "Diffusion from Surface Soil to Air, Hg0(AlgInstID_3997)",
-        "Diffusion from Surface Soil to Air, MHg(AlgInstID_3999)",
-        "Diffusion from Surface Soil to Air, Organics(AlgInstID_3995)",
-        "Diffusion from Surface Soil to Root Zone(AlgInstID_1919)",
-        "Diffusion from Surface Water to Air, Two Film(AlgInstID_4080)-Hg",
-        "Diffusion from Surface Water to Air, Two Film(AlgInstID_4080)-Organic",
-        "Diffusion from Surface Water to Sediment, Fugacity-based(AlgInstID_2149)",
-        "Diffusion from Vadose Zone to Root Zone(AlgInstID_1914)",
-        "Diffusion from Vadose Zone to Vadose Zone(AlgInstID_2445)",
-
-        "Dispersive Waterflow from Surface Water to Surface Water, General(AlgInstID_3680)",
-
-        "Direct Transfer from PseudoSource to Surface water",
-
-        "Dry Deposition of Particles from Air to Plants",
-        "Dry Deposition of Particles from Air to Soil(AlgInstID_2490)",
-        "Dry Deposition of Particles from Air to Surface Water(AlgInstID_3695)",
-
-        "Dry Deposition of Particles from DryParticleSource to Plants",
-        "Dry Deposition of Particles from DryParticleSource to Soil",
-
-        "Wet Deposition of Particles from WetParticleSource to Plants",
-        "Wet Deposition of Particles from WetParticleSource to Soil",
-
-        "Dry Deposition of Vapor from Air to Plants",
-        "Dry Deposition of Vapor from Air to Surface Soil(AlgInstID_2488)",
-        "Dry Deposition of Vapor from Air to Surface Water(AlgInstID_3693)",
-
-        "Diffusion from DryVaporSource to Plant Leaf, Hg0",
-        "Dry Deposition of Vapor from DryVaporSource to Plants,  Hg2",
-        "Dry Deposition of Vapor from DryVaporSource to Soil, Hg2",
-
-        "Wet Deposition of Vapor Phase from WetVaporSource to Plants,  Hg0",
-        "Wet Deposition of Vapor Phase from WetVaporSource to Plants,  Hg2",
-        "Wet Deposition of Vapor Phase from WetVaporSource to Plants,  Organics",
-
-        "Wet Deposition of Vapor Phase from WetVaporSource to Soil, Hg0",
-        "Wet Deposition of Vapor Phase from WetVaporSource to Soil, Hg2",
-
-        "Elimination from Fish to Surface Water(AlgInstID_1512)",
-        "Elimination from Zooplankton to Surface Water",
-
-        "Erosion from Surface Soil to Soil Advection Sink",
-        "Erosion from Surface Soil to Surface Soil Sink",
-        "Erosion from Surface Soil to Surface Soil, General(AlgInstID_2460)",
-        "Erosion from Surface Soil to Surface Water, General(AlgInstID_3515)",
-
-        "Exchange from Benthic Invertebrate to Sediment, dioxins",
-        "Exchange from Benthic Invertebrate to Sediment, PAHs",
-        "Exchange from Fish to Surface Water, Organics(AlgInstID_1515)",
-        "Exchange from Macrophyte to Surface Water(AlgInstID_1547)",
-        "Exchange from Sediment to Benthic Invertebrate, Interacts with Pore Water, dioxins",
-        "Exchange from Sediment to Benthic Invertebrate, Interacts with Pore Water, PAHs",
-        "Exchange from Surface Water to Fish, Cd",
-        "Exchange from Surface Water to Fish, Organics(AlgInstID_1517)",
-        "Exchange from Surface Water to Fish, Pb",
-        "Exchange from Surface Water to Macrophyte(AlgInstID_1552)",
-        "Exchange from Surface Water to Zooplankton, Cd (AlgInstID_CdAbs_Z)",
-        "Exchange from Surface Water to Zooplankton, Organics(AlgInstID_1517_Z)",
-        "Exchange from Surface Water to Zooplankton, Pb",
-
-        "Fish Bioenergetic Model - Ingestion of Algae by Fish(AlgInstID_1527)",
-        "Fish Bioenergetic Model - Ingestion of Algae by Zooplankton",
-        "Fish Bioenergetic Model - Ingestion of Benthic Carnivore by Benthic Omnivore(AlgInstID_1455)",
-        "Fish Bioenergetic Model - Ingestion of Benthic Carnivore by Water Column Carnivore(AlgInstID_2245)",
-        "Fish Bioenergetic Model - Ingestion of Benthic Carnivore by Water Column Omnivore(AlgInstID_2277)",
-        "Fish Bioenergetic Model - Ingestion of Benthic Invertebrate by Benthic Carnivore(ICFID_08-001)",
-        "Fish Bioenergetic Model - Ingestion of Benthic Invertebrate by Benthic Omnivore(AlgInstID_1467)",
-        "Fish Bioenergetic Model - Ingestion of Benthic Invertebrate by Water Column Carnivore(AlgInstID_2255)",
-        "Fish Bioenergetic Model - Ingestion of Benthic Invertebrate by Water Column Herbivore(AlgInstID_2270)",
-        "Fish Bioenergetic Model - Ingestion of Benthic Invertebrate by Water Column Omnivore(AlgInstID_2287)",
-        "Fish Bioenergetic Model - Ingestion of Benthic Omnivore by Benthic Carnivore(AlgInstID_1447)",
-        "Fish Bioenergetic Model - Ingestion of Benthic Omnivore by Water Column Carnivore(AlgInstID_2250)",
-        "Fish Bioenergetic Model - Ingestion of Benthic Omnivore by Water Column Omnivore(AlgInstID_2282)",
-        "Fish Bioenergetic Model - Ingestion of Macrophyte by Water Column Herbivore(AlgInstID_1646)",
-        "Fish Bioenergetic Model - Ingestion of Macrophyte by Water Column Omnivore(AlgInstID_1655)",
-        "Fish Bioenergetic Model - Ingestion of Water Column Carnivore by Benthic Carnivore(AlgInstID_2158)",
-        "Fish Bioenergetic Model - Ingestion of Water Column Carnivore by Benthic Omnivore(AlgInstID_2175)",
-        "Fish Bioenergetic Model - Ingestion of Water Column Carnivore by Water Column Omnivore(AlgInstID_1618)",
-        "Fish Bioenergetic Model - Ingestion of Water Column Herbivore by Benthic Carnivore(AlgInstID_2163)",
-        "Fish Bioenergetic Model - Ingestion of Water Column Herbivore by Benthic Omnivore(AlgInstID_2180)",
-        "Fish Bioenergetic Model - Ingestion of Water Column Herbivore by Water Column Carnivore(AlgInstID_1600)",
-        "Fish Bioenergetic Model - Ingestion of Water Column Herbivore by Water Column Omnivore(AlgInstID_1638)",
-        "Fish Bioenergetic Model - Ingestion of Water Column Omnivore by Benthic Carnivore(AlgInstID_2168)",
-        "Fish Bioenergetic Model - Ingestion of Water Column Omnivore by Benthic Omnivore(AlgInstID_2185)",
-        "Fish Bioenergetic Model - Ingestion of Water Column Omnivore by Water Column Carnivore(AlgInstID_1610)",
-        "Fish Bioenergetic Model - Ingestion of Zooplankton by Water Column Herbivore",
-
-        "Litterfall from Leaves to Soil(AlgInstID_1088)",
-        "Litterfall of Leaf Particle to Soil(AlgInstID_1098)",
-
-        "Methylation(Hg2 -> MHg) in Abiotic Media, Rate is input(AlgInstID_1891)",
-        "Methylation(Hg2 -> MHg) in Plant Leaves, Rate is input(AlgInstID_1248)",
-        "Methylation(Hg2 -> MHg) in Plant Stem, Rate is input(AlgInstID_1270)",
-
-        "Oxidation(Hg0 -> Hg2) in Abiotic Media, Rate is input(AlgInstID_1894)",
-        "Oxidation(Hg0 -> Hg2) in Fish(AlgInstID_1443)",
-        "Oxidation(Hg0 -> Hg2) in Macrophytes",
-
-        "Particles Blown off from Plant Leaf to Air (DRY)(AlgInstID_4010)",
-        "Particles Washed off Leaf onto Ground(AlgInstID_1103)",
-
-        "Percolation from Root Zone to Root Zone(AlgInstID_2455)",
-        "Percolation from Root Zone to Vadose Zone(AlgInstID_1909)",
-        "Percolation from Surface Soil to Root Zone(AlgInstID_1924)",
-        "Percolation from Vadose Zone to Groundwater(AlgInstID_1899)",
-        "Percolation from Vadose Zone to Vadose Zone(AlgInstID_2450)",
-
-        "Pore Water Diffusion from Sediment to Sediment, General(AlgInstID_3505)",
-
-        "Recharge from Groundwater to Surface Water, General(AlgInstID_3510)",
-
-        "Reduction(Hg2 -> Hg0) in Abiotic Media, Rate is input(AlgInstID_1893)",
-
-        "Resuspension from Sediment to Surface Water, General(AlgInstID_2190)",
-        "Resuspension from Surface Soil to Air, Set to Deposition rate of particles(AlgInstID_4000)",
-
-        "Runoff from Surface Soil to Soil Advection Sink",
-        "Runoff from Surface Soil to Surface Soil Sink",
-        "Runoff from Surface Soil to Surface Soil, General(AlgInstID_2465)",
-        "Runoff from Surface Soil to Surface Water, General(AlgInstID_3520)",
-
-        "Sediment Burial from Sediment to Sediment Burial Sink, Zero net deposition, General(AlgInstID_4135)",
-        "Sediment Deposition from Surface Water to Sediment, General(AlgInstID_2139)",
-
-        "Time-dependent Partition from Benthic Invertebrate to Bulk Sediment for Dioxins(ICFID_08-003)",
-        "Time-dependent Partition from Benthic Invertebrate to Sediment(AlgInstID_1433)",
-        "Time-dependent Partition from Bulk Sediment to Benthic Invertebrate for Dioxins(ICFID_08-002)",
-        "Time-dependent Partition from Macrophyte to Surface Water(AlgInstID_1544),Cd",
-        "Time-dependent Partition from Macrophyte to Surface Water(AlgInstID_1544),Hg",
-        "Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Agriculture, Cd(AlgInstID_1932)",
-        "Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Agriculture, Hg(AlgInstID_1932)",
-        "Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Grasses/Herbs, Cd(AlgInstID_1933)",
-        "Time-dependent Partition from Root to Root Zone, Interacts with bulk soil - Grasses/Herbs, Hg(AlgInstID_1933)",
-        "Time-dependent Partition from Root to Root Zone, Interacts with soil pore water - Agriculture, Organics",
-        "Time-dependent Partition from Root to Root Zone, Interacts with soil pore water - Grasses/Herbs, Organics(AlgInstID_1929)",
-        "Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Agriculture, Cd(AlgInstID_1953)",
-        "Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Agriculture, Hg(AlgInstID_1953)",
-        "Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Grasses/Herbs,Cd(AlgInstID_1952)",
-        "Time-dependent Partition from Root Zone to Root, Interacts with bulk soil - Grasses/Herbs,Hg(AlgInstID_1952)",
-        "Time-dependent Partition from Root Zone to Root, Interacts with soil pore water - Agriculture, Organics",
-        "Time-dependent Partition from Root Zone to Root, Interacts with soil pore water - Grasses/Herbs, Organics(AlgInstID_1949)",
-        "Time-dependent Partition from Sediment to Benthic Invertebrate(AlgInstID_1438)",
-        "Time-dependent Partition from Surface Water to Macrophyte, Cd(AlgInstID_1549)",
-        "Time-dependent Partition from Surface Water to Macrophyte, Hg(AlgInstID_1549)",
-
-        "Transfer from Leaf Particle on Surface to Leaf, Cd(AlgInstID_1250)",
-        "Transfer from Leaf Particle on Surface to Leaf, Hg(AlgInstID_1250)",
-        "Transfer from Leaf Particle on Surface to Leaf, Organic(AlgInstID_1250)",
-        "Transfer from Leaf to Leaf Particle on Surface, Cd(AlgInstID_1255)",
-        "Transfer from Leaf to Leaf Particle on Surface, Hg(AlgInstID_1255)",
-        "Transfer from Leaf to Leaf Particle on Surface, Organic(AlgInstID_1255)",
-        "Transfer from Leaf to Stem - Agriculture, Cd(AlgInstID_1265)",
-        "Transfer from Leaf to Stem - Agriculture, Hg(AlgInstID_1265)",
-        "Transfer from Leaf to Stem - Agriculture, Organic(AlgInstID_1265)",
-        "Transfer from Leaf to Stem - Grasses/Herbs, Cd",
-        "Transfer from Leaf to Stem - Grasses/Herbs, Hg",
-        "Transfer from Leaf to Stem - Grasses/Herbs, Organic",
-        "Transfer from Root Zone to Stem - Agriculture, Cd",
-        "Transfer from Root Zone to Stem - Agriculture, Hg",
-        "Transfer from Root Zone to Stem - Agriculture, Organic",
-        "Transfer from Root Zone to Stem - Grasses/Herbs, Cd(AlgInstID_1944)",
-        "Transfer from Root Zone to Stem - Grasses/Herbs, Hg(AlgInstID_1944)",
-        "Transfer from Root Zone to Stem - Grasses/Herbs, Organics(AlgInstID_1944)",
-        "Transfer from Stem to Leaf - Agriculture, Cd",
-        "Transfer from Stem to Leaf - Agriculture, Hg",
-        "Transfer from Stem to Leaf - Agriculture, Organic",
-        "Transfer from Stem to Leaf - Grasses/Herbs, Cd(AlgInstID_1260)",
-        "Transfer from Stem to Leaf - Grasses/Herbs, Hg(AlgInstID_1260)",
-        "Transfer from Stem to Leaf - Grasses/Herbs, Organic(AlgInstID_1260)",
-
-        "Waterflow from Surface Water to Surface Water, General(AlgInstID_3685)",
-
-        "Wet Deposition of Particles from Air to Plants",
-        "Wet Deposition of Particles from Air to Surface Water(AlgInstID_3700)",
-        "Wet Deposition of Particles to Surface Soil(AlgInstID_2495)",
-        "Wet Deposition of Particles from WetParticleSource to Surface Soil",
-        "Wet Deposition of Vapor Phase from Air to Surface Soil, Hg0",
-        "Wet Deposition of Vapor Phase from Air to Surface Soil, Hg2",
-        "Wet Deposition of Vapor Phase from Air to Surface Soil, Organics",
-        "Wet Deposition of Vapor Phase from Air to Surface Water, Hg0(AlgInstID_3707)",
-        "Wet Deposition of Vapor Phase from Air to Surface Water, Hg2(AlgInstID_3708)",
-        "Wet Deposition of Vapor Phase from Air to Surface Water, Organics(AlgInstID_3705)",
-        "Wet Deposition of Vapor Phase to Plant Leaf from Air, Hg0(AlgInstID_2512)",
-        "Wet Deposition of Vapor Phase to Plant Leaf from Air, Hg2",
-        "Wet Deposition of Vapor Phase to Plant Leaf from Air, Organics(AlgInstID_2510)"
-    ],
-    "_notes": {
-    }
+    "transport_processes": [],
+    "_notes": {}
 }
+
+CHEMICAL_PROPS_DONT_TRANSFER = [
+    'CAS', 'enabled'
+]
+
 
 def parse_chemicals(chemical_parameters):
 
@@ -297,3 +62,135 @@ def parse_chemicals(chemical_parameters):
             prop_entity.parameters.add(prop, **prop_data)
 
     ChemicalService.commit()
+
+
+def add_chem_params(parlib):
+    chems = [ChemicalService.get(name=ch) for ch, pars in parlib['Chemical'].items() if ch in DEFAULT_IMPORT_RULES['chemicals']]
+    default_scenario = ScenarioService.get(name='Default')
+    for ch in chems:
+        missing_pars = {}
+        for p, v in parlib['Chemical'][ch.name].items():
+            if p in CHEMICAL_PROPS_DONT_TRANSFER:
+                continue
+            if p == 'category':
+                ch.category = parlib['Chemical'][ch.name][p]['value']
+                continue
+            existing_par = ch.parameters.get(p)
+            if not existing_par:
+                missing_pars.setdefault(p, v)
+                # Create new parameter
+                # if new parameter value is a formula set it as default formula
+                # if new parameter value is numeric create custom parameter with (self.id == chemical.id) requirement.
+                # BUT WAIT!! If it is a new parameter that means it is not in the form fields in the UI.
+                # However, since it is a chemical property it does not depend on scenario or other environmental
+                # entities. Therefore, it will not need to be changed for different cases. SO even though it is
+                # technically a constant or a default value at this point, we may be changing it later, so it is better
+                # to keep it as custom parameter. Note that nearly all chemical parameters (parameters within chemical
+                # domain) are set up this way and all have custom parameters instead of default values.
+
+
+                # npd = ParameterDefinition(variable_name=p, full_name=p, domain_id=2,
+                #                                   default_unit=parlib['Chemical'][ch.name][p]['unit'])
+                # new_par_def = ParameterService.create(npd)
+                # ParameterService.commit()
+                # print(f"{'!' * 100}\n NEW PARAMETER CREATED FOR {p} {'!' * 100}\n")
+                #
+                # if isinstance(parlib['Chemical'][ch.name][p]['value'], str):  # it is a formula
+                #     new_formula = parlib['Chemical'][ch.name][p]['value'].replace("chemical.", "self.")
+                #     # TODO Crate new formula and create custom parameter with that formula
+                #     # obj_formula = FormulaService.create(equation=new_formula)
+                #     # Create new formula arguments.
+                #     # Create custom parameter
+                #     # ParameterService.create()
+                # else:
+                #     # Create custom param using default formula
+                #     if isinstance(parlib['Chemical'][ch.name][p]['value'], bool):
+                #         value = 1 if parlib['Chemical'][ch.name][p]['value'] else 0
+                #     else:
+                #         value = parlib['Chemical'][ch.name][p]['value']
+                #     ParameterService.create(definition=new_par_def, scenario=default_scenario,
+                #                             requirements=f"(self.id == {ch.id})", value=value,
+                #                             unit=new_par_def.default_unit)
+
+
+            elif isinstance(existing_par, ParameterDefinition):
+                # if parameter already exist create custom parameter with (self.id == chemical.id) requirement and for DEFAULT Scenario with id = 1.
+                if isinstance(parlib['Chemical'][ch.name][p]['value'], str):  # it is a formula
+                    print(f'{p} is custom and has formula {v}')
+                    if existing_par.default_formula.equation == parlib['Chemical'][ch.name][p]['value'].replace("chemical.", "self."):
+                        print(f"Formulas are the same, NO need to create new... Using the existing formula {existing_par.default_formula.equation}\n")
+                        # Create custom param using default formula
+                        ParameterService.create(definition=existing_par, scenario=default_scenario,
+                                                requirements=f"(self.id == {ch.id})",
+                                                unit=existing_par.default_unit, formula=existing_par.default_formula)
+                    else:
+                        print(f"These are not the same; lib-> {parlib['Chemical'][ch.name][p]['value'].replace('chemical.', 'self.')}, existing {existing_par.default_formula.equation}\n")
+                        # Create new formula, then add custom parameter with that formula id
+                        new_formula = parlib['Chemical'][ch.name][p]['value'].replace("chemical.", "self.")
+                        # obj_formula = FormulaService.create(equation=new_formula)
+                        # Create new formula arguments.
+                else:  # it is a number
+                    print(f'{p} is custom and has numeric value {v}\n')
+                    # Create new custom parameter with numeric value
+                    if isinstance(parlib['Chemical'][ch.name][p]['value'], bool):
+                        value = 1 if parlib['Chemical'][ch.name][p]['value'] else 0
+                    else:
+                        value = parlib['Chemical'][ch.name][p]['value']
+                    ParameterService.create(definition=existing_par, scenario=default_scenario,
+                                            requirements=f"(self.id == {ch.id})", value=value,
+                                            unit=existing_par.default_unit)
+    ParameterService.commit()
+
+def load_data(trim_file_root, import_rules):
+
+    if not isinstance(import_rules, dict):
+        import_rules = {}
+
+    master_library = [
+        os.path.join(trim_file_root, f) for f in os.listdir(trim_file_root)
+        if 'Master_Library' in f and f.endswith('_PropertyExporter.txt')
+    ]
+    if not master_library:
+        return
+
+    parameter_library = {}
+    for f in master_library:
+        parameter_library.update(read_master_library(f, import_rules=import_rules))
+        break  # Should only be one??
+
+    # parse_chemicals(parameter_library['Chemical'])
+    return parameter_library
+
+
+if __name__ == '__main__':
+    from trim_db.utils.users_roles import implement_users_roles
+    try:
+        import time
+        implement_users_roles()
+        time.sleep(5)
+    except Exception as e:
+        print(f'-- Unable to create Users/Roles.\n{e}')
+
+    try:
+        ScenarioService.get(id=2)
+    except Exception as e:
+        print(e)
+        raise
+
+    directory = "./trim_core/backend/Legacy_Input_Files"
+    trim_files = directory
+    if not trim_files:
+        raise AssertionError('Must specify a directory!')
+
+    import_rules = DEFAULT_IMPORT_RULES
+
+    print('\n==========================\n')
+
+    print(f'Loading ...')
+    print('')
+    start = time.time()
+    param_lib = load_data(trim_files, import_rules)
+    add_chem_params(param_lib)
+    end = time.time()
+    print('Time to load data = ', round((end - start), 2), ' seconds')
+    print('\n==========================\n')
