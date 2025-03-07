@@ -14,8 +14,8 @@ def get_temp_dir():
     return get_docker_dir() + f"{SEP}temp"
 
 def copy_application_code_to_temp_dir(src_dir, dest_dir):
+    shutil.copytree(src_dir, dest_dir)
     os.makedirs(f"{dest_dir}{SEP}Scripts{SEP}trim_frontend{SEP}external_API{SEP}helpers{SEP}")
-    # shutil.copytree(src_dir, dest_dir)
     shutil.copy(f"{src_dir}{SEP}trim_core{SEP}algorithms{SEP}GetFlow{SEP}getflow.py", dest_dir)
     # shutil.copy(f"{src_dir}{SEP}trim_core{SEP}algorithms{SEP}GetFlow{SEP}USGS_1_n36w083_20220512.tif", dest_dir)
     # shutil.copy(f"{src_dir}/../unsynced/dynamic_elevation_data.tif", dest_dir)

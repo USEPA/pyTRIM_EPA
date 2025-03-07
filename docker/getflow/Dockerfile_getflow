@@ -1,10 +1,13 @@
+ARG PYTRIM_GETFLOW_BUILD_PLATFORM="linux/amd64"
+
 # h/t https://gis.stackexchange.com/questions/462843/setting-up-qgis-python-scripts-in-docker-container
 #
 # start with base Python image
 # FROM python:3.12-alpine
 # start with QGIS image
 # FROM qgis/qgis
-FROM --platform=linux/amd64 qgis/qgis
+# FROM --platform=linux/amd64 qgis/qgis
+FROM --platform=${PYTRIM_GETFLOW_BUILD_PLATFORM} qgis/qgis
 
 # Set environment variables for QGIS
 ENV QGIS_PREFIX_PATH=/usr
@@ -15,10 +18,16 @@ WORKDIR /app
 
 # install numpy, pandas, etc. qgis.core installed by virtue of our base image.
 # note - pip install doesn't work on this image, but this does:
-RUN apt install -y python3-pandas
-RUN apt install -y python3-numpy
-RUN apt install -y python3-boto3
-RUN apt install -y python3-shapely
+
+# RUN apt install -y python3-pandas
+# RUN apt install -y python3-numpy
+# RUN apt install -y python3-boto3
+# RUN apt install -y python3-shapely
+
+# take 2, Feb 2025
+COPY requirements.txt /tmp/requirements.txt
+RUN python3 -m venv /app/getflow_venv
+RUN /app/getflow_venv/bin/pip install -r /tmp/requirements.txt
 
 # don't need this normally - but useful if we want to connect and mess around...
 RUN apt install -y vim
@@ -54,8 +63,14 @@ RUN qgis_process plugins
 
 
 
-WORKDIR /app
+WORKDIR /app/pytrim_getflow_src
 
 # A) install bash and let us peek around by attaching
 # RUN apk add --no-cache bash
-CMD ["bash"]
+# CMD ["bash"]
+
+# B) or, run the actual getflow code and quit when done
+# old - builtin OS-managed version; has qgis but no other needed pytrim packages
+# CMD ["python3", "getflow_entrypoint.py" ]
+# new: use the virtual environment
+CMD ["/app/getflow_venv/bin/python3", "getflow_entrypoint.py"]

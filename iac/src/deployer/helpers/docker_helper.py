@@ -65,7 +65,10 @@ class DockerHelper(object):
         # temp_dir = f"{parent_dir}docker{sep}temp"
         loggy(f"Cleaning up temp directory '{temp_dir}'...")
         if os.path.exists(temp_dir):
-            shutil.rmtree(temp_dir)
+            # shutil.rmtree(temp_dir)
+            pass
+
+        # die("just peeking at tempdir")
 
     def get_login_data(self):
         ecr_client = boto3.client("ecr")
@@ -150,21 +153,21 @@ class DockerHelper(object):
         sep = os.path.sep
         config_blobs = [
             {
-                "disabled": False,
+                "disabled": True,
                 "description": "docker image for the 'run model' operation, added in mid-2024",
                 "repo_uri_output_name": "PyTrimPrivateECRModelRunRepoUri",
                 "image_tag_name": IMAGE_TAG_NAME_MODELRUN,
                 "relative_prep_script_path": "prepare_dockerized_pytrim.py",
-                "build_cmd": ["docker", "build", "-t", IMAGE_TAG_NAME_MODELRUN, f"{parent_dir}docker"],
+                "build_cmd": ["docker", "build", "--platform", "linux/amd64", "-t", IMAGE_TAG_NAME_MODELRUN, f"{parent_dir}docker"],
                 "temp_dir": f"{parent_dir}docker{sep}temp",
             },
             {
-                # "disabled": False,
+                "disabled": False,
                 "description": "docker image for the 'getflow' operation, added in early-2025",
                 "repo_uri_output_name": "PyTrimPrivateECRGetFlowRepoUri",
                 "image_tag_name": IMAGE_TAG_NAME_GETFLOW,
                 "relative_prep_script_path": f"getflow{sep}prepare_dockerized.py",
-                "build_cmd": ["docker", "build", "-t", IMAGE_TAG_NAME_GETFLOW, "-f", f"{parent_dir}docker{sep}getflow{sep}Dockerfile_getflow", f"{parent_dir}docker{sep}getflow"],
+                "build_cmd": ["docker", "build", "--platform", "linux/amd64", "-t", IMAGE_TAG_NAME_GETFLOW, "-f", f"{parent_dir}docker{sep}getflow{sep}Dockerfile_getflow", f"{parent_dir}docker{sep}getflow"],
                 "temp_dir": f"{parent_dir}docker{sep}getflow{sep}temp",
             },
         ]
