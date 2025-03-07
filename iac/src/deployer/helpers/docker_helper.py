@@ -153,7 +153,7 @@ class DockerHelper(object):
         sep = os.path.sep
         config_blobs = [
             {
-                "disabled": True,
+                "disabled": False,
                 "description": "docker image for the 'run model' operation, added in mid-2024",
                 "repo_uri_output_name": "PyTrimPrivateECRModelRunRepoUri",
                 "image_tag_name": IMAGE_TAG_NAME_MODELRUN,
