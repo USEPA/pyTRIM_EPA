@@ -16,6 +16,15 @@
                         <br><span style='color: firebrick;'>*</span> All editable cells are required.
                     </small>
                 </div>
+                <div class = "row">
+                    <div class="col-md mt-3">
+                    </div>
+                    <div class="col-md mt-3">
+                        <button id="abiotic-usda-soil-btn" class="btn btn-warning">Get data from USDA Soil DataMart</button>
+                    </div>
+                    <div class="col-md mt-3">
+                    </div>
+                </div>
                 <div class="row">
                     <div class="col-md m-2 text-center">
                         <h4>What Happens to Precipitation on the Surface</h4>
@@ -37,15 +46,6 @@
                 <div class ="row">
                     <div class="col-md">
                         <table data-slot="true" data-target="AirAbioticTable" class="hover" id="AirAbioticTable"></table>
-                    </div>
-                </div>
-                <div class = "row">
-                    <div class="col-md mt-3">
-                    </div>
-                    <div class="col-md mt-3">
-                        <button class="btn btn-warning">Get data from USDA Soil DataMart</button>
-                    </div>
-                    <div class="col-md mt-3">
                     </div>
                 </div>
                 <div class = "row">
@@ -705,6 +705,30 @@
                 }
             })
         }
+
+        $("#abiotic-usda-soil-btn").on('click', (e) => {
+            e.preventDefault();
+            /*
+            LoadingScreen.show('parcel_soil_data');
+            function parseSoilData(resp) { // till and notill
+                $.each(resp, (pcl, data) => {
+                    resp[pcl] = JSON.parse(data);
+                    
+                    let surface_idx = Object.values(resp[pcl].layer).indexOf('surface');
+                    let root_idx = Object.values(resp[pcl].layer).indexOf('root');
+                    let vadose_idx = Object.values(resp[pcl].layer).indexOf('vadose');
+                });
+                return resp;
+            }
+            TRIM.api.getSoilData('both').on('load', function () {
+                LoadingScreen.hide('parcel_soil_data');
+                let soil_data = JSON.parse(this.responseText);
+                let till = parseSoilData(soil_data.tilled_data);
+                let notill = parseSoilData(soil_data.no_till_data);
+
+                console.log("!")
+            });*/
+        });
 
         function get_Data_from_table(thisTableID){
             var myRows = [];
