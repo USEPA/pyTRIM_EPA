@@ -24,6 +24,7 @@ jobs:
       - name: Build zip archive for deployment
         run: |
           # Compile the code for the TRIM webapp and compress into a zip archive
+          ls
           cd ./iac/
           python ./deployer/build_eb_archive.py
 
