@@ -891,6 +891,15 @@ Resources:
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/AWSCodeDeployRoleForECS"
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSElasticBeanstalkRoleCore"
+      Policies:
+        - PolicyName: GitHubOidcElasticBeanstalkAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: 
+                  - "elasticbeanstalk:*"
+                Resource: "*"
 
   ## BASTION
 
