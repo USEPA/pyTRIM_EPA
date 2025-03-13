@@ -25,7 +25,7 @@ jobs:
         run: |
           # Compile the code for the TRIM webapp and compress into a zip archive
           python -m pip install --upgrade pip setuptools wheel
-          pip install -r requirements.txt
+          pip install boto3
           python ./iac/src/deployer/build_eb_archive.py
 
       - name: Upload zip archive to S3
