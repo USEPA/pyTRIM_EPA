@@ -9,9 +9,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: dev    
     steps:
-      - name: Store build timestamp
-        run: echo "{timestamp}={$(date +'%Y-%m-%dT%H:%M:%S')}" >> "$GITHUB_ENV"
-
       - name: Checkout repo
         uses: actions/checkout@v3
 
@@ -21,6 +18,9 @@ jobs:
           role-to-assume: ${{ secrets.TRIM_DEPLOY_IAM_ROLE }}
           aws-region: us-east-1
 
+      - name: Store build timestamp
+        run: echo "{TIMESTAMP}={$(date +'%Y-%m-%dT%H:%M:%S')}" >> "$GITHUB_ENV"
+
       - name: Build zip archive for deployment
         run: |
           # Compile the code for the TRIM webapp and compress into a zip archive
@@ -28,14 +28,16 @@ jobs:
           pip install boto3
           python ./iac/src/deployer/build_eb_archive.py
 
+      - name: Store version name
+        run:  echo "{APP_VERSION}=PyTRIM_${{ env.TIMESTAMP }}.zip" >> "$GITHUB_ENV"
+
       - name: Upload zip archive to S3
         run: |
           # Copy the archive to S3
-          echo "{version}=PyTRIM_$timestamp.zip" >> "$GITHUB_ENV"
-          aws s3 cp ./iac/flask_temp_package_dir/TOMTEST.zip "s3://${{ secrets.TRIM_DEPLOY_S3_BUCKET }}/$version.zip"
+          aws s3 cp ./iac/flask_temp_package_dir/TOMTEST.zip "s3://${{ secrets.TRIM_DEPLOY_S3_BUCKET }}/${{ env.APP_VERSION }}.zip"
 
       - name: Create an app version from the archive on EB
-        run: aws elasticbeanstalk create-application-version --application-name "${{ secrets.TRIM_DEPLOY_EB_APP_NAME }}" --version-label "$version" --source-bundle S3Bucket="${{ secrets.TRIM_DEPLOY_S3_BUCKET }}",S3Key="$version.zip"
+        run: aws elasticbeanstalk create-application-version --application-name "${{ secrets.TRIM_DEPLOY_EB_APP_NAME }}" --version-label "${{ env.APP_VERSION }}" --source-bundle S3Bucket="${{ secrets.TRIM_DEPLOY_S3_BUCKET }}",S3Key="${{ env.APP_VERSION }}.zip"
 
       # - name: Update the EB environment
-      #   run: aws elasticbeanstalk update-environment --application-name "${{ secrets.TRIM_DEPLOY_EB_APP_NAME }}" --environment-name "${{ secrets.TRIM_DEPLOY_EB_ENV_NAME }}" --version-label "$version"
+      #   run: aws elasticbeanstalk update-environment --application-name "${{ secrets.TRIM_DEPLOY_EB_APP_NAME }}" --environment-name "${{ secrets.TRIM_DEPLOY_EB_ENV_NAME }}" --version-label "${{ env.APP_VERSION }}"
