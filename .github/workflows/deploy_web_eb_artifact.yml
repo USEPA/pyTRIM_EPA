@@ -19,7 +19,7 @@ jobs:
           aws-region: us-east-1
 
       - name: Store build timestamp
-        run: echo "{TIMESTAMP}={$(date +'%Y-%m-%dT%H:%M:%S')}" >> "$GITHUB_ENV"
+        run: echo "TIMESTAMP=$(date +'%Y-%m-%dT%H:%M:%S')" >> "$GITHUB_ENV"
 
       - name: Build zip archive for deployment
         run: |
@@ -29,7 +29,7 @@ jobs:
           python ./iac/src/deployer/build_eb_archive.py
 
       - name: Store version name
-        run:  echo "{APP_VERSION}=PyTRIM_${{ env.TIMESTAMP }}.zip" >> "$GITHUB_ENV"
+        run:  echo "APP_VERSION=PyTRIM_${{ env.TIMESTAMP }}.zip" >> "$GITHUB_ENV"
 
       - name: Upload zip archive to S3
         run: |
