@@ -138,6 +138,11 @@
                     $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
+                    let first_row = $($("#RunoffMatrix").find("tr")[1])
+                    $('#ROHead').closest("table").find("th").each((i, e)=>{
+                        let col_width = $($(first_row).find("td")[i]).width()
+                        $(e).width(col_width)
+                    })
                 }
             });
 
@@ -346,14 +351,14 @@
             // Define row headers as sender parcel names
             let columns = [{
                 'data': 'sender',
-                'title': '<tr>' +
+                'title': '<table><tbody><tr id="ROHead">' +
                     '<td style="border-bottom: 0px; padding: 0px">receiver</td>' +
                     '<td style="border-bottom: 0px; padding: 0px"><i class="fa fa-arrow-right"></i></td>' +
                     '</tr>' +
                     '<tr>' +
                     '<td style="border-bottom: 0px; padding: 0px">sender</td>' +
                     '<td style="border-bottom: 0px; padding: 0px"><i class="fa fa-arrow-down"></i></td>' +
-                    '</tr>',
+                    '</tr></tbody></table>',
                 'bSortable': false,
                 'className': 'font-weight-bold rightBorder freeze-column runoff-matrix-corner-header'
             }]

@@ -125,7 +125,7 @@
                 $("#background-conc-gui").find("span.chemInfo")[i+1].innerHTML = sc
                 $(initialize_compartment_map()).insertAfter($($("#background-conc-gui").find("table.compMap")[i+1]).find("thead"))
 
-                let dd_menu = $($("#background-conc-gui").find("table.compMap")[i+1]).prev("div.dropdown").find("div.dropdown-menu")
+                let dd_menu = $($("#background-conc-gui").find("table.compMap")[i+1]).prevAll("div.dropdown:first").find("div.dropdown-menu")
                 populate_comp_dd(dd_menu);
                 populate_values($($("#background-conc-gui").find("table.compMap")[current_index]))
             })
@@ -173,10 +173,10 @@
             $('button.comp_show_nz').on('click', function(e) {
                 e.preventDefault()
                 let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap");
-                $('button.comp_hide_all').trigger('click');
-                let non_zeros = $(this_table).find("tr.colps.level2").filter((i,e) => $(e).find("td.ems").text() > 0);
+                $(this).closest("div[role=tabpanel]").find('button.comp_hide_all').trigger('click');
+                let non_zeros = $(this_table).find("tr.colps.level2").filter((i,e) => $(e).find("td.ic").text() > 0);
                 $(non_zeros).show()
-                $(non_zeros).prev("tr.level1").show()
+                $(non_zeros).each((i, e)=> $(e).prevAll("tr.level1:first").show())
                 $(this).closest("div").find("button.btn_show_comp").text("Show Compartment")
             });
 
@@ -336,7 +336,7 @@
             })
             $("a.dropdown-item.comp-item").on("click",function (e){
                 e.preventDefault()
-                let this_table = $(this).closest("div.dropdown").next("table.compMap")
+                let this_table = $(this).closest("div.dropdown").nextAll("table.compMap:first")
                 let this_dd_btn = $(this).closest("div.dropdown").find("button.btn_show_comp")
                 $('button.comp_hide_all').trigger('click');
                 let only_comps = $(this_table).find("tr.colps.level2").filter((i,tr) => $(tr).find("td.comp").text() == $(this).text());
@@ -344,7 +344,7 @@
                 $(only_comps).show()
                 $(this_dd_btn).text($(this).text())
 
-                $(only_comps).prev("tr.level1").show()
+                $(only_comps).each((i,e)=> $(e).prevAll("tr.level1:first").show())
             })
         }
     });
