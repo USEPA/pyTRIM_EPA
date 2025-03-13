@@ -111,6 +111,11 @@ Parameters:
     Description: used to set db condition
     Default: false
 
+  KludgeDoOidc:
+    Type: String
+    Description: used to set OIDC condition
+    Default: false
+
   EnvironmentName:
     Type: String
     Description: Environment name prefixed/appended to resource names; dashes only, no underscores!
@@ -517,10 +522,21 @@ Parameters:
     Type: String
     MinLength: 8
 
+  ## GitHub Actions-related
+  GitHubOrg:
+    Description: Name of GitHub organization/user (case sensitive)
+    Type: String
+    Default: ICF-Corp
+  GitHubRepositoryName:
+    Description: Name of GitHub repository (case sensitive)
+    Type: String
+    Default: trim-builder
+
 Conditions:
   DoCreateDatabaseInfrastructure: !Equals [!Ref "KludgeDoDb", "true"]
   DoCreateBeanstalkInfrastructure: !Equals [!Ref "KludgeDoBeanstalk", "true"]
   DoCreateSecret: !Equals [!Ref "KludgeDoSecret", "true"]
+  CreateGitHubOIDC: !Equals [!Ref "KludgeDoOidc", "true"]
 
 Resources:
   ## S3
@@ -844,6 +860,37 @@ Resources:
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/AutoScalingFullAccess"
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/ElasticLoadBalancingFullAccess"
       Path: /
+
+  # OIDC used for authentication in GitHub Actions
+  GitHubOIDC:
+    Type: AWS::IAM::OIDCProvider
+    Condition: CreateGitHubOIDC
+    Properties:
+      Url: https://token.actions.githubusercontent.com
+      ClientIdList:
+        - sts.amazonaws.com
+      ThumbprintList:
+        - ffffffffffffffffffffffffffffffffffffffff
+
+  GitHubOidcRole:
+    Type: AWS::IAM::Role
+    Condition: CreateGitHubOIDC
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Action: sts:AssumeRoleWithWebIdentity
+            Principal:
+              Federated: !Ref GitHubOIDC
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+              StringLike:
+                token.actions.githubusercontent.com:sub: !Sub repo:${GitHubOrg}/${GitHubRepositoryName}:*
+      ManagedPolicyArns:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AWSCodeDeployRoleForECS"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSElasticBeanstalkRoleCore"
 
   ## BASTION
 
