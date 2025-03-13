@@ -24,12 +24,14 @@ jobs:
       - name: Build zip archive for deployment
         run: |
           # Compile the code for the TRIM webapp and compress into a zip archive
-          cd ~/trim-builder.git/iac/
+          ls
+          cd ~/trim-builder/iac/
           python ./deployer/build_eb_archive.py
 
       - name: Upload zip archive to S3
         run: |
           # Copy the archive to S3
+          cd ~/trim-builder/iac/
           echo "{version}=PyTRIM_$timestamp.zip" >> "$GITHUB_ENV"
           aws s3 cp ./flask_temp_package_dir/TOMTEST.zip "s3://${{ secrets.TRIM_DEPLOY_S3_BUCKET }}/$version.zip"
 
