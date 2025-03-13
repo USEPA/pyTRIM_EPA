@@ -29,7 +29,7 @@ jobs:
           python ./iac/src/deployer/build_eb_archive.py
 
       - name: Store version name
-        run:  echo "APP_VERSION=PyTRIM_${{ env.TIMESTAMP }}.zip" >> "$GITHUB_ENV"
+        run:  echo "APP_VERSION=PyTRIM_${{ env.TIMESTAMP }}" >> "$GITHUB_ENV"
 
       - name: Upload zip archive to S3
         run: |
