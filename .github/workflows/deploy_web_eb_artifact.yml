@@ -24,7 +24,7 @@ jobs:
       - name: Build zip archive for deployment
         run: |
           # Compile the code for the TRIM webapp and compress into a zip archive
-          python -m pip install --upgrade pip,setuptools,wheel
+          python -m pip install --upgrade pip setuptools wheel
           pip install -r requirements.txt
           python ./iac/src/deployer/build_eb_archive.py
 
