@@ -24,16 +24,14 @@ jobs:
       - name: Build zip archive for deployment
         run: |
           # Compile the code for the TRIM webapp and compress into a zip archive
-          ls
-          cd ./iac/
-          python ./deployer/build_eb_archive.py
+          pip install -r requirements.txt
+          python ./iac/src/deployer/build_eb_archive.py
 
       - name: Upload zip archive to S3
         run: |
           # Copy the archive to S3
           echo "{version}=PyTRIM_$timestamp.zip" >> "$GITHUB_ENV"
-          cd ./iac/
-          aws s3 cp ./flask_temp_package_dir/TOMTEST.zip "s3://${{ secrets.TRIM_DEPLOY_S3_BUCKET }}/$version.zip"
+          aws s3 cp ./iac/flask_temp_package_dir/TOMTEST.zip "s3://${{ secrets.TRIM_DEPLOY_S3_BUCKET }}/$version.zip"
 
       - name: Create an app version from the archive on EB
         run: aws elasticbeanstalk create-application-version --application-name "${{ secrets.TRIM_DEPLOY_EB_APP_NAME }}" --version-label "$version" --source-bundle S3Bucket="${{ secrets.TRIM_DEPLOY_S3_BUCKET }}",S3Key="$version.zip"
