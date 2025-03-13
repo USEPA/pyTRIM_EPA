@@ -30,7 +30,7 @@ class PyTrimDeployer(object):
             self.do_cf_stack_work()
 
         if mode == "full" or mode == "docker":
-            self.build_and_push_docker_image()
+            self.build_and_push_docker_images()
 
         if mode == "_full" or mode == "push_flask_build":
             self.build_and_push_flask_app()
@@ -92,7 +92,7 @@ class PyTrimDeployer(object):
             "NATGatewayElasticIPAllocationID": elastic_ip_allocation_id,
         }, ingress_data)
 
-    def build_and_push_docker_image(self):
+    def build_and_push_docker_images(self):
         loggy(f"DOCKER SETUP!")
         docker_helper = DockerHelper()
         env_name = self.get_cfg_val("environment_name")
