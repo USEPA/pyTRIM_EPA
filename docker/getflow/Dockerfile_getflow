@@ -28,7 +28,9 @@ WORKDIR /app
 COPY requirements.txt /tmp/requirements.txt
 RUN python3 -m venv /app/getflow_venv
 RUN /app/getflow_venv/bin/python3 -m pip install --upgrade pip setuptools wheel
-RUN /app/getflow_venv/bin/pip install -r /tmp/requirements.txt
+# We need numpy to be 1.26 or greater for python 3.12 ...
+RUN cat /tmp/requirements.txt | sed "s;numpy.=\(.*\);numpy>=1.26.0;" > /tmp/requirements_fixed.txt
+RUN /app/getflow_venv/bin/pip install -r /tmp/requirements_fixed.txt
 
 # don't need this normally - but useful if we want to connect and mess around...
 RUN apt install -y vim
