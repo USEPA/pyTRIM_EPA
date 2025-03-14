@@ -26,9 +26,13 @@ WORKDIR /app
 
 # take 2, Feb 2025
 COPY requirements.txt /tmp/requirements.txt
-RUN python3 -m venv /app/getflow_venv
-RUN /app/getflow_venv/bin/python3 -m pip install --upgrade pip setuptools wheel
-RUN /app/getflow_venv/bin/pip install -r /tmp/requirements.txt
+# RUN python3 -m venv /app/getflow_venv
+# RUN /app/getflow_venv/bin/pip install -r /tmp/requirements.txt
+
+# take 3, Mar 2025
+RUN python3 -m ensurepip --upgrade
+RUN python3 -m pip install --upgrade pip setuptools wheel
+RUN python3 -m pip install -r /tmp/requirements.txt
 
 # don't need this normally - but useful if we want to connect and mess around...
 RUN apt install -y vim
@@ -74,4 +78,6 @@ WORKDIR /app/pytrim_getflow_src
 # old - builtin OS-managed version; has qgis but no other needed pytrim packages
 # CMD ["python3", "getflow_entrypoint.py" ]
 # new: use the virtual environment
-CMD ["/app/getflow_venv/bin/python3", "getflow_entrypoint.py"]
+# CMD ["/app/getflow_venv/bin/python3", "getflow_entrypoint.py"]
+# new2 - use ensurepip above and install packages that way
+# CMD ["python3", "getflow_entrypoint.py" ]
