@@ -80,4 +80,4 @@ WORKDIR /app/pytrim_getflow_src
 # new: use the virtual environment
 # CMD ["/app/getflow_venv/bin/python3", "getflow_entrypoint.py"]
 # new2 - use ensurepip above and install packages that way
-# CMD ["python3", "getflow_entrypoint.py" ]
+CMD ["python3", "getflow_entrypoint.py" ]
