@@ -26,6 +26,7 @@ WORKDIR /app
 
 # take 2, Feb 2025
 COPY requirements.txt /tmp/requirements.txt
+RUN python3 -m pip install --upgrade pip
 RUN python3 -m venv /app/getflow_venv
 RUN /app/getflow_venv/bin/pip install -r /tmp/requirements.txt
 
