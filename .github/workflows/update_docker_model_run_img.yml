@@ -1,11 +1,12 @@
 name: Update the Docker Image on AWS ECR for the TRIM Worker
-on: workflow_dispatch:
-  inputs:
-    image_tag:
-      type: string
-      description: "Tag Value for Docker Image"
-      required: true
-      default: "latest"
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        type: string
+        description: "Tag Value for Docker Image"
+        required: true
+        default: "latest"
 permissions:
   id-token: write
   contents: read
