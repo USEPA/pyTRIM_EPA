@@ -30,7 +30,7 @@ COPY requirements.txt /tmp/requirements.txt
 # RUN /app/getflow_venv/bin/pip install -r /tmp/requirements.txt
 
 # take 3, Mar 2025
-RUN python3 -m ensurepip --upgrade
+RUN apt install python3-pip
 RUN python3 -m pip install --upgrade pip setuptools wheel
 RUN python3 -m pip install -r /tmp/requirements.txt
 
