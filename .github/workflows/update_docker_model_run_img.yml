@@ -1,5 +1,11 @@
 name: Update the Docker Image on AWS ECR for the TRIM Worker
-on: workflow_dispatch
+on: workflow_dispatch:
+  inputs:
+    image_tag:
+      type: string
+      description: "Tag Value for Docker Image"
+      required: true
+      default: "latest"
 permissions:
   id-token: write
   contents: read
@@ -26,8 +32,11 @@ jobs:
           python -m pip install --upgrade pip setuptools wheel
           python ./docker/prepare_dockerized_pytrim.py -q
 
-      - name: Build, tag, and push image to Amazon ECR
+      - name: Build Docker image
         run: |
           docker build --platform linux/amd64 -t pytrim_iac -f ./docker/Dockerfile ./docker
-          docker tag pytrim_iac:latest ${{ secrets.TRIM_DEPLOY_MODELRUN_ECR_REPO }}:testing
-          docker push ${{ secrets.TRIM_DEPLOY_MODELRUN_ECR_REPO }}:testing
+
+      - name: Tag and push image to Amazon ECR
+        run: |
+          docker tag pytrim_iac:latest ${{ secrets.TRIM_DEPLOY_MODELRUN_ECR_REPO }}:${{ inputs.image_tag }}
+          docker push ${{ secrets.TRIM_DEPLOY_MODELRUN_ECR_REPO }}:${{ inputs.image_tag }}
