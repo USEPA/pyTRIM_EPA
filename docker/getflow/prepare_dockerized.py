@@ -57,6 +57,8 @@ if __name__ == "__main__":
     # copy the complete webapp codebase in
     print(f"\tPREPARE DOCKERIZED: Copying application code...")
     copy_application_code_to_temp_dir(f"{proj_base_dir}{SEP}Scripts", temp_dir)
+    if not os.path.isfile(os.path.join(docker_dir, 'requirements.txt')):
+        shutil.copy(os.path.join(docker_dir, '..', 'requirements.txt'), docker_dir)
 
 	# copy GIS stuff in
     shutil.copy(f"{proj_base_dir}{SEP}docker{SEP}getflow{SEP}processing_saga_nextgen-1.0.0.zip", temp_dir)
