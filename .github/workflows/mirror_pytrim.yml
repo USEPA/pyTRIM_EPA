@@ -13,6 +13,7 @@ jobs:
       - name: Add SSH Private Keys
         run: |
           mkdir -p ~/.ssh/
+          eval "$(ssh-agent -s)"
           echo "${{ secrets.TRIM_SOURCE_SSH_PRIVATE_KEY }}" > ~/.ssh/trim_src_key
           echo "${{ secrets.TRIM_MIRROR_SSH_PRIVATE_KEY }}" > ~/.ssh/trim_mirror_key
           ssh-add ~/.ssh/authorized_keys
