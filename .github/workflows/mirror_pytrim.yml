@@ -1,19 +1,37 @@
 name: Sync pyTRIM EPA GitHub Mirror
-on: push
+on: [push, workflow_dispatch]
 concurrency:
   group: mirror_repo
+env:
+  SSH_AUTH_SOCK: /tmp/ssh_agent.sock
 jobs:
   mirror_repo:
     runs-on: ubuntu-latest
     if: ${{ github.repository == 'ICF-Corp/trim-builder' }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: webfactory/ssh-agent@v0.9.0
-        with:
-            ssh-private-key: |
-              ${{ secrets.TRIM_SOURCE_SSH_PRIVATE_KEY }}
-              ${{ secrets.TRIM_MIRROR_SSH_PRIVATE_KEY }}
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh/
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null 
+
+      - name: Add SSH Source Key
+        run: |
+          echo "${{ secrets.TRIM_SOURCE_SSH_PRIVATE_KEY }}" > ~/.ssh/trim_src_key
+          chmod 600 ~/.ssh/trim_src_key
+          ssh-add ~/.ssh/trim_src_key
+
       - name: Clone Source
         run: cd ~ && git clone --bare git@github.com:ICF-Corp/trim-builder.git
+
+      - name: Add SSH Mirror Key
+        run: |
+          ssh-add -D
+          echo "${{ secrets.TRIM_MIRROR_SSH_PRIVATE_KEY }}" > ~/.ssh/trim_mirror_key
+          chmod 600 ~/.ssh/trim_mirror_key
+          ssh-add ~/.ssh/trim_mirror_key
+
       - name: Push Mirror
         run: cd ~/trim-builder.git && git push --mirror git@github.com:USEPA/pyTRIM_EPA.git
