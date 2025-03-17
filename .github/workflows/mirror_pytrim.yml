@@ -12,19 +12,25 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Add SSH Private Keys
-        run: |
+      - name: Set up SSH
           mkdir -p ~/.ssh/
-          echo "${{ secrets.TRIM_SOURCE_SSH_PRIVATE_KEY }}" > ~/.ssh/trim_src_key
-          echo "${{ secrets.TRIM_MIRROR_SSH_PRIVATE_KEY }}" > ~/.ssh/trim_mirror_key
-          chmod 600 ~/.ssh/trim_src_key
-          chmod 600 ~/.ssh/trim_mirror_key
           ssh-agent -a $SSH_AUTH_SOCK > /dev/null 
+
+      - name: Add SSH Source Key
+        run: |
+          echo "${{ secrets.TRIM_SOURCE_SSH_PRIVATE_KEY }}" > ~/.ssh/trim_src_key
+          chmod 600 ~/.ssh/trim_src_key
           ssh-add ~/.ssh/trim_src_key
-          ssh-add ~/.ssh/trim_mirror_key
 
       - name: Clone Source
         run: cd ~ && git clone --bare git@github.com:ICF-Corp/trim-builder.git
+
+      - name: Add SSH Mirror Key
+        run: |
+          ssh-add -D
+          echo "${{ secrets.TRIM_MIRROR_SSH_PRIVATE_KEY }}" > ~/.ssh/trim_mirror_key
+          chmod 600 ~/.ssh/trim_mirror_key
+          ssh-add ~/.ssh/trim_mirror_key
 
       - name: Push Mirror
         run: cd ~/trim-builder.git && git push --mirror git@github.com:USEPA/pyTRIM_EPA.git
