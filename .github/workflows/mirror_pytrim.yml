@@ -2,6 +2,8 @@ name: Sync pyTRIM EPA GitHub Mirror
 on: [push, workflow_dispatch]
 concurrency:
   group: mirror_repo
+env:
+  SSH_AUTH_SOCK: /tmp/ssh_agent.sock
 jobs:
   mirror_repo:
     runs-on: ubuntu-latest
@@ -17,7 +19,7 @@ jobs:
           echo "${{ secrets.TRIM_MIRROR_SSH_PRIVATE_KEY }}" > ~/.ssh/trim_mirror_key
           chmod 600 ~/.ssh/trim_src_key
           chmod 600 ~/.ssh/trim_mirror_key
-          eval "$(ssh-agent -s)"
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null 
           ssh-add ~/.ssh/trim_src_key
           ssh-add ~/.ssh/trim_mirror_key
 
