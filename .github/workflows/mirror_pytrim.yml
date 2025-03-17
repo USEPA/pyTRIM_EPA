@@ -12,10 +12,11 @@ jobs:
 
       - name: Add SSH Private Keys
         run: |
-          touch ~/.ssh/authorized_keys
-          echo "${{ secrets.TRIM_SOURCE_SSH_PRIVATE_KEY }}" >> ~/.ssh/authorized_keys
-          echo "${{ secrets.TRIM_MIRROR_SSH_PRIVATE_KEY }}" >> ~/.ssh/authorized_keys
-          chmod 600 ~/.ssh/authorized_keys
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.TRIM_SOURCE_SSH_PRIVATE_KEY }}" > ~/.ssh/trim_src_key
+          echo "${{ secrets.TRIM_MIRROR_SSH_PRIVATE_KEY }}" > ~/.ssh/trim_mirror_key
+          ssh-add ~/.ssh/authorized_keys
+          ssh-add ~/.ssh/authorized_keys
 
       - name: Clone Source
         run: cd ~ && git clone --bare git@github.com:ICF-Corp/trim-builder.git
