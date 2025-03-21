@@ -72,7 +72,7 @@
                 <div class="pill pill-alert col-sm">
                     <small>
                         <strong>
-                            <u>Click on the table cells to edit properties</u>. Please note that the values displayed in the table at the time of the "Save" operation are the values that will be incorporated into the calculations
+                            <u>Click on the table cells to edit properties</u>. 
                         </strong>
                     </small>
                 </div>
@@ -230,6 +230,8 @@
 
 					if (!success) {
 						alert('An error occurred during upload.');
+                        console.log(responseData)
+                        console.log(c)
 					} else {
 						/*
 						// TODO - can we use this data to just redraw the map/table w/o a full page reload? probably!
@@ -403,7 +405,7 @@
                     },
                     {
                         data: "properties.landuse",
-                        render: function (data, type, row) {                            
+                        render: function (data, type, row) {
                             let parcel_info = [{
                                 'type': 'data',
                                 'name': 'id',
@@ -697,7 +699,7 @@
             var feature = parcel.feature = parcel.feature || {};
             feature.type = "Feature";
             feature.properties = feature.properties || {};
-            let parcelDrawHelpText = "Enter an arbitrary but unique name for the parcel. Names should not begin with Air, SW, Sed, SurfSoil, RootSoil, VadoseSoil, or GW. Names should not contain spaces. We recommend short names (e.g., less than about 15 characters) because they will be displayed on other pages of this user interface.";
+            let parcelDrawHelpText = "Enter an arbitrary but unique name for the parcel. Names should not begin with Air, SW, Sed, SurfSoil, RootSoil, VadoseSoil, or GW. Names should not contain spaces. We recommend short names (e.g., less than about 15 characters) because they will be displayed on other pages of this user interface.<br/><br/>Also enter an arbitrary description of the parcel. It will not be used within the modeling.";
             var content = '<span>'+parcelDrawHelpText+'<br/><br/><b>Parcel Name</b></span><br/><input id="shapeName" type="text"/><br/><br/><span><b>Parcel Description<b/></span><br/><textarea id="shapeDesc" cols="25" rows="5"></textarea><br/><br/><input type="button" id="okBtn" value="Save"/>';
             idIW.setContent(content);
             idIW.setLatLng(l.getBounds().getCenter());
@@ -835,6 +837,8 @@
                         
                         if (!success) {
                             alert('An error occurred during upload.');
+                            console.log(responseData)
+                            console.log(c)
                         } else {
                             console.log("reload...");
                             window.location.reload();

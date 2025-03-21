@@ -44,7 +44,7 @@
             "step": 0.01,
             "default": 0,
             "required": true,
-            "help": "Enter the fraction (0 to 1) of starting (background) concentrations This is typically set to 0."
+            "help": "Enter the fraction (0 to 1) of starting (background) concentrations. This is typically set to 0."
         },
         {
             "id": "time_step_duration",

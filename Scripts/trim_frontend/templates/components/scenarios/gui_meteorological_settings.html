@@ -89,20 +89,6 @@
     </section>
 
     <section id="spatially-varying-values" class="container px-0">
-        <div class="row">
-            <div class="col-sm">
-                <h5 class="text-center">What Happens to Precipitation on the Surface</h5>
-            </div>
-        </div>
-        <!-- <div class="row">
-            <div class="col-sm">
-                <div data-slot="true" data-target="default_spatially_varying_file"></div>
-            </div>
-        </div> -->
-
-        <table data-slot="true" data-target="spatially_varying_table" class="hover" id="spatially_varying_table">
-        </table>
-
         <div data-slot="true" data-target="runoff">
             {{ dimensionally_varying_subform(
                 is_varying_field='spatially_varying',
@@ -263,8 +249,10 @@
             $('#daytime_indicator_static_value').on('change', function(e) {
                 let daytime_val = parseFloat($(e.target).val());
                 let valid_daytime = (daytime_val == 0 || daytime_val == 1);
-                ErrToolTip(e.target, valid_daytime, "Daytime Indicator must be either 0 or 1.", "div");
-                submit_meteo_value(e.target);
+                let is_valid = ErrToolTip(e.target, valid_daytime, "Daytime Indicator must be either 0 or 1.", "div");
+                if (is_valid) {
+                    submit_meteo_value(e.target);
+                }
             });
             $('#precipitation_static_value_rate').on('change', function(e) {
                 submit_meteo_value(e.target);
@@ -307,6 +295,8 @@
 
         function submit_meteo_value(elem) {
             let param_info = get_form_data(elem)
+            if ($(elem).get(0).tagName == "INPUT")
+                ErrorValidation.isPositiveValue(elem, $(elem).parent());
             if (elementIsValid($(elem).parent())){
                 console.log(param_info);
                 let resp = TRIM.api.updateScenario(param_info).on('load',function(){
@@ -479,198 +469,7 @@
                 LoadingScreen.show('met_parcels_loading');
             }
             TRIM.refreshParcels();
-            document.body.addEventListener('parcels:ready', updateVaryingTable())
-        });
-
-        ///////////////// Spatially Varying table
-        function updateVaryingTable() {
-            if (!TRIM.store.currentScenario.parcels) {
-                // Parcels haven't loaded yet; wait a bit and try again
-                setTimeout(function() { updateVaryingTable(); }, 1000);
-                return;
-            }
-
-            let parcels = TRIM.store.currentScenario.parcels;
-            let spatially_varying_table_data = []
-            if (parcels.length > 0) {
-                parcels.forEach(function (e, i) {
-                    if (e.parcelType.indexOf("Water") == -1) {
-                        spatially_varying_table_data.push({
-                            'parcelid': e.id,
-                            'Surface Parcel': e.name,
-                            'EvapotranspirationFractions': (e.evapotrans_frac === null) || (e.evapotrans_frac === "") ? TRIM.forms.fetchDefault('EvapotranspirationFractions') : e.evapotrans_frac,
-                            'GroundwaterSeepageFractions': (e.seepage_frac === null) || (e.seepage_frac === "") ? TRIM.forms.fetchDefault('GroundwaterSeepageFractions') : e.seepage_frac,
-                            'RunoffFractions': (e.runoff_fraction === null) || (e.runoff_fraction === "")  ? TRIM.forms.fetchDefault('RunoffFractions') : e.runoff_fraction
-                        })
-                    }
-                })
-            }
-            TableRedraw(spatially_varying_table_data);
             LoadingScreen.hide('met_parcels_loading');
-        }
-
-        let apTable = null;
-        function TableRedraw(table_data) {
-            let tblId = "#spatially_varying_table";
-            apTable = $(tblId).removeAttr('width').DataTable();
-            apTable.destroy();
-            apTable = $(tblId).removeAttr('width');
-            apTable.DataTable({
-                data : table_data,
-                paging: false,
-                bFilter: false,
-                info: false,
-                bAutoWidth: false,
-                scrollX: true,
-                scrollY: 500,
-                fnCreatedRow: function (row, data, index) {
-                    $(row).find("td.rightBorder").addClass("freeze-column")
-                },
-                columns: [
-                    {
-                        'data': "Surface Parcel",
-                        'className': 'font-weight-bold rightBorder freeze-column'
-                    },
-                    {
-                        'data': "EvapotranspirationFractions",
-                        'bSortable': false,
-                        'render': function (data, type, row) {
-                            let this_cell_prop = 'editableCell badge badge-light';
-                            let parcel_info = create_parcel_object('EvapotranspirationFractions', row, data);
-                            return create_cell_html(parcel_info, data, this_cell_prop, data);
-                        }
-                    },
-                    {
-                        'data': "GroundwaterSeepageFractions",
-                        'bSortable': false,
-                        'render': function (data, type, row) {
-                            let this_cell_prop = 'editableCell badge badge-light';
-                            let parcel_info = create_parcel_object('GroundwaterSeepageFractions', row, data);
-                            return create_cell_html(parcel_info, data, this_cell_prop, data);
-                        }
-                    },
-                    {
-                        'data': "RunoffFractions",
-                        'bSortable': false,
-                        'render': function (data, type, row) {
-                            let this_cell_prop = 'editableCell badge badge-light';
-                            let parcel_info = create_parcel_object('RunoffFractions', row, data);
-                            return create_cell_html(parcel_info, data, this_cell_prop, data);
-                        }
-                    }
-                ],
-                initComplete: function (settings, json) {
-                    // $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
-                    $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
-                    $('[data-toggle="tooltip"]').tooltip()
-                    $('[data-toggle="popover"]').popover()
-                    $(tblId).find("tr").each((i,e)=>$(e).attr({
-                        "data-rsval": 1,
-                        "data-entity": "fractions for given precipitation"
-                    })
-                    )
-                }
-            });
-
-            let sort_order = "asc"
-            $('.sortClass').click(function(e){
-                e.preventDefault();
-                let Table = $(tblId).dataTable()
-                let cellIndex = $(this).closest("th").index()
-                Table.fnSort([[cellIndex,sort_order]]);//use asc/desc as you want
-                sort_order= sort_order == "desc" ? "asc" : "desc"
-            });
-
-            $('label.editableCell').click(function () {
-                $(this).siblings("input").show()
-                $(this).siblings("select").show()
-                $(this).prev("input").focus()
-                $(this).prev("select").focus()
-                $(this).hide();
-            });
-
-            function create_cell_html(parcel_info, data, cell_prop, cell_data, err_html=""){
-                return "<input "+err_html+" class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                        "<label "+err_html+" class='" + cell_prop + "'>" + cell_data + "</label>";
-            };
-
-            function create_parcel_object(id, row, data){
-                let parcel_info = [{
-                                    'type': 'data',
-                                    'name': 'id',
-                                    'value': row.parcelid,
-                                },{
-                                    'type': 'data',
-                                    'name': 'field',
-                                    'value': id
-                                },{
-                                    'type': 'input',
-                                    'name': id,
-                                    'value': data
-                                }]
-                return JSON.stringify(parcel_info)
-            };
-
-            // save modified cell
-            $(`input.editableCell, select.editableCell`).blur(function () {
-                let focusTblId = $(this).closest(`table`).attr('id');
-                if (`#${focusTblId}` !== tblId) {
-                    return;
-                }
-
-                let data = $(this).val()
-                let $label = $(this).next("label")
-                $label.siblings().hide()
-                $label.show().text(data)
-
-                ErrorValidation.isValidFraction(this);
-                ErrorValidation.rowTotalIsValid(this);
-
-                let is_valid = elementIsValid($(this).parent());
-
-                let this_par = this
-                if (is_valid) {
-                    $(this_par).parents("tr").find("input.editableCell").each((i,f)=>{
-                        LoadingScreen.show('submit_sv_val');
-                        let parcel_info = $(f).data('parcelinfo')
-                        if (parcel_info) {
-                            if (f == this_par) {
-                                parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                            }
-                            TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', ()=>{
-                                LoadingScreen.hide('submit_sv_val')
-                            })
-                            table_data = get_Data_from_table(`#${focusTblId}`)
-                        }
-                    })
-                } else {
-                    let parcel_info = $(this_par).data('parcelinfo')
-                    parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                }
-            });
-
-            function get_Data_from_table(thisTableID){
-                var myRows = [];
-                var headersText = [];
-                var head_section = thisTableID + ' thead th'
-                var $headers = $(head_section);
-
-                // Loop through grabbing everything
-                thisRows = thisTableID + ' tbody tr'
-                var $rows = $(thisRows).each(function(index) {
-                    $cells = $(this).find("td");
-                    myRows[index] = {};
-                    $cells.each(function(cellIndex) {
-                        // Set the header text
-                        if(headersText[cellIndex] === undefined) {
-                            headersText[cellIndex] = $($headers[cellIndex]).text();
-                        }
-                        // Update the row object with the header/cell combo
-                        myRows[index][headersText[cellIndex]] = $(this).text();
-                    });
-                });
-                return myRows
-            }
-        };
+        });
     });
 </script>

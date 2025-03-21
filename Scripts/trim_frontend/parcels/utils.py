@@ -67,7 +67,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             initialize_parcel_contents(p, water_and_air_parcel_vol_elem_defaults)
 
     if field_name == "landUse":
-        if parcels_data['landUse'] in ['Coniferous Forest', 'Deciduous Forest', 'Agriculture - General',
+        if parcels_data['landUse'] in ['Coniferous Forest', 'Deciduous Forest', 'Agriculture (General)',
                                        'Grasses/Herbs', 'Tilled Soil', 'Untilled Soil', 'Impervious']:
             # COMPARTMENT CHANGE
             if not parcels_data['landUse'] == land_use:
@@ -438,6 +438,39 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                 print(new_formula)
             FormulaService.get(src_par.formula.id).equation = new_formula
             FormulaService.commit()
+    if field_name == "initial concentration":
+        ic_comp = [c for c in p.compartments if c.name == parcels_data["compartment_name"]][0]
+        ic_par = [par for parn, par in ic_comp.parameters.items() if parn == "initialConcentration"]
+        chem = ChemicalService.get(name=parcels_data["chemical_name"])
+        if len(ic_par) > 0:
+            unit = "g / m^3" if ic_comp.media.id in [2, 5, 7, 56, 55, 8, 9] else "g / kg" if ic_comp.media.id in [23, 24, 27, 28, 29, 31, 32, 33, 37, 39, 41, 43, 44, 45, 46, 47, 48, 49, 50, 51] else "g / L" if ic_comp.media.id in [10, 4] else ""
+            ic_par = get_or_create_custom_param(
+                ic_par[0],
+                {"requirements": f"(self.id == {ic_comp.id})", "scenario_id": p.scenario.id, "unit": unit},
+                new_formula=True
+            )
+
+            eq = ic_par.formula.equation
+            # We have the chemical in the formula
+            if f'chemical.id == {str(chem.id)}' in eq:
+                formula_parts = eq.split(f"if chemical.id == {chem.id}")
+                formula_part = formula_parts[0]
+                if "else" in formula_part:
+                    arr = formula_part.split("else")[:-1]
+                    formula_part = "else".join(arr + [f' {parcels_data["initial_concentration_value"]} '])
+                else:
+                    formula_part = f'{parcels_data["initial_concentration_value"]} '
+                formula_parts[0] = formula_part
+                new_formula = f"if chemical.id == {chem.id}".join(formula_parts)
+                print(new_formula)
+            # We do not have the chemical in the formula. We need to add it...
+            else:
+                eq_arr = eq.split("else")
+                eq_arr.insert(-2, f' {parcels_data["initial_concentration_value"]} if chemical.id == {chem.id} ')
+                new_formula = "else".join(eq_arr)
+                print(new_formula)
+            FormulaService.get(ic_par.formula.id).equation = new_formula
+            FormulaService.commit()
     if field_name == "runoff_matrix_value":
         scn = ScenarioService.get(id=p.scenario.id)
         sender_parcel_name = parcels_data["sender"].replace("ro_", "")
@@ -683,7 +716,7 @@ def get_land_use(pcl):
     land = False
     land_use = 'Grasses/Herbs'
     for comp in pcl.compartments:
-        if comp.media.isa('Surface_Soil'):
+        if comp.media.isa('Surface_Soil', or_child=False):
             land = True
         elif comp.media.isa('Coniferous_Forest'):  # Check land use
             land = True
@@ -693,7 +726,7 @@ def get_land_use(pcl):
             land_use = 'Deciduous Forest'
         elif comp.media.isa('Agriculture'):
             land = True
-            land_use = 'Agriculture - General'
+            land_use = 'Agriculture (General)'
         elif comp.media.isa('Grass'):
             land = True
             land_use = 'Grasses/Herbs'
@@ -774,6 +807,7 @@ def get_default_value_from_json_form(form_name, parameter_name):
     json_forms = {
         'Abiotic_Air': ScenarioAbioticPropertiesForm.__getattribute__(ScenarioAbioticPropertiesForm, "AirAbioticTable"),
         'Abiotic_Surface_Soil': ScenarioAbioticPropertiesForm.__getattribute__(ScenarioAbioticPropertiesForm, "SurfaceSoilAbioticTable"),
+        'Abiotic_Tilled_Soil': ScenarioAbioticPropertiesForm.__getattribute__(ScenarioAbioticPropertiesForm, "SurfaceSoilAbioticTable"),
         'Abiotic_Root_Zone': ScenarioAbioticPropertiesForm.__getattribute__(ScenarioAbioticPropertiesForm, "RootSoilAbioticTable"),
         'Abiotic_Vadose_Zone': ScenarioAbioticPropertiesForm.__getattribute__(ScenarioAbioticPropertiesForm, "VadoseSoilAbioticTable"),
         'Abiotic_Groundwater': ScenarioAbioticPropertiesForm.__getattribute__(ScenarioAbioticPropertiesForm, "GWSoilAbioticTable")
@@ -789,13 +823,11 @@ def create_base_land_compartments(parcels_data, p, land_use):
     c_surfsoil = CompartmentService.get(name="Soil_Surface", volume_element_id=ve_surfsoil.id)
 
     custom_param_erosion = c_surfsoil.parameters.get("TotalErosionRate")
-    if not isinstance(custom_param_erosion, CustomParameter):
-        if isinstance(custom_param_erosion, ParameterDefinition):
-            er = CustomParameter(definition=custom_param_erosion, scenario=p.scenario,
-                                    requirements=f'(self.id == {c_surfsoil.id})', value=0,
-                                    unit=custom_param_erosion.default_unit)
-            ParameterService.create(er)
-            ParameterService.commit()
+    custom_param_erosion = get_or_create_custom_param(custom_param_erosion, {
+        "scenario_id": p.scenario_id,
+        "requirements": f'(self.id == {c_surfsoil.id})',
+        "value": 0
+    })
 
     # delete existing compartments
     if land_use in ['Tilled Soil', 'Untilled Soil', 'Impervious']:
@@ -882,12 +914,12 @@ def create_base_land_compartments(parcels_data, p, land_use):
                                                    media=[m for m in CompartmentService.media.get_all() if m.isa('Grass_Stem')][0]))
         new_comps.append(CompartmentService.create(name="Root_Grasses_Herbs", volume_element=ve_surfsoil,
                                                    media=[m for m in CompartmentService.media.get_all() if m.isa('Grass_Root')][0]))
-    elif parcels_data['landUse'] == 'Agriculture - General':
+    elif parcels_data['landUse'] == 'Agriculture (General)':
         new_comps.append(CompartmentService.create(name="Leaf_Agriculture", volume_element=ve_surfsoil,
                                                    media=[m for m in CompartmentService.media.get_all() if m.isa('Agriculture_Leaf')][0]))
         new_comps.append(CompartmentService.create(name="Leaf_Particle_Agriculture", volume_element=ve_surfsoil,
-                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Agriculture_Leaf_Particle')][0].id))
-        new_comps.append(CompartmentService.create(name="Stem_Agriculture", volume_element=ve_surfsoil.id,
+                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Agriculture_Leaf_Particle')][0]))
+        new_comps.append(CompartmentService.create(name="Stem_Agriculture", volume_element=ve_surfsoil,
                                                    media=[m for m in CompartmentService.media.get_all() if m.isa('Agriculture_Stem')][0]))
         new_comps.append(CompartmentService.create(name="Root_Agriculture", volume_element=ve_surfsoil,
                                                    media=[m for m in CompartmentService.media.get_all() if m.isa('Agriculture_Root')][0]))

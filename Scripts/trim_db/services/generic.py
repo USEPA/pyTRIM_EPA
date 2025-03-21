@@ -89,7 +89,11 @@ class GenericService(metaclass=ServiceMetaClass):
         # cls.clear_cache()
         for k in CacheManager._CACHERS:
             CacheManager.clear_cache(k)
-        cls.db.session.commit()
+        try:
+            cls.db.session.commit()
+        except Exception as e:
+            cls.db.session.rollback()
+            print(f"Error on commit {e}")
 
     @classmethod
     @CacheManager.without_caching
@@ -127,16 +131,16 @@ class GenericService(metaclass=ServiceMetaClass):
 
     @classmethod
     def get_all(cls, **kwargs):
-        key = make_key(**kwargs)
-        if not cls.cached(key):
-            with cls.db.session.no_autoflush:
-                model_query = cls.db.session.query(cls.__model__)
-                if kwargs:
-                    model_query = model_query.filter_by(**kwargs)
-                models = model_query.all()
-                cls.cache(key, models)
-        ret = cls.cached(key) or []
-
+        # key = make_key(**kwargs)
+        # if not cls.cached(key):
+        with cls.db.session.no_autoflush:
+            model_query = cls.db.session.query(cls.__model__)
+            if kwargs:
+                model_query = model_query.filter_by(**kwargs)
+            models = model_query.all()
+                # cls.cache(key, models)
+        # ret = cls.cached(key) or []
+        ret = models
         if isinstance(ret, cls.__model__):
             ret = [ret]
 
@@ -158,16 +162,17 @@ class GenericService(metaclass=ServiceMetaClass):
                     f' not {model_id.__class__.__name__}'
                 )
             if model_id > 0:
-                if not cls.cached(model_id):
-                    with cls.db.session.no_autoflush:
-                        q = cls.db.session.query(cls.__model__)
-                        if query_options is not None:
-                            q = q.options(query_options)
-                        model = q.get(
-                            model_id
-                        )
-                        cls.cache(model_id, model)
-                ret = cls.cached(model_id)
+                # if not cls.cached(model_id):
+                with cls.db.session.no_autoflush:
+                    q = cls.db.session.query(cls.__model__)
+                    if query_options is not None:
+                        q = q.options(query_options)
+                    model = q.get(
+                        model_id
+                    )
+                    # cls.cache(model_id, model)
+                # ret = cls.cached(model_id)
+                ret = model
         elif kwargs:
             models = cls.get_all(**kwargs)
             models.append(None)

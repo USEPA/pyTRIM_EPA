@@ -2,6 +2,12 @@
     "title": "Abiotic Properties",
     "fields": [
         {
+            "id": "spatially_varying_table",
+            "label": "",
+            "data_type": "form",
+            "form_definition": "subforms/abiotic/scenario_spatially_varying_props_form.json"
+        },
+        {
             "id": "AirAbioticTable",
             "label": "Abiotic Properties for Air Compartments",
             "data_type": "form",

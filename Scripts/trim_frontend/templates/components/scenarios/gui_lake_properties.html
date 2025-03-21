@@ -9,7 +9,7 @@
                 <div class="pill pill-alert col-sm">
                     <small>
                         <strong>
-                            <u>Click on the table cells to edit properties</u>. Please note that the values displayed in the table at the time of the "Save" operation are the values that will be incorporated into the calculations
+                            <u>Click on the table cells to edit properties</u>. 
                         </strong>
                         <br><span style='color: firebrick;'>*</span> All editable cells are required.
                     </small>
@@ -131,7 +131,7 @@
                 'is_editable': true,
                 'default_value': 0,
                 'unit': 'kg [sediment particles]/d',
-                'helpText': 'Enter the volumetric inflow rate of suspended sediment received from other water bodies. Valid values are >= 0. The default value is 0 (i.e., assumption of no inflow from other water bodies). If that assumption is not valid, this inflow can be equal to (or some fraction of) the product of the other water bodyâ€™s discharge (which is based on that other water bodyâ€™s Water Column Flush Rate) and its Water Column Suspended Sediment Concentration, divided by 365 d.'
+                'helpText': "Enter the volumetric inflow rate of suspended sediment received from other water bodies. Valid values are >= 0. The default value is 0 (i.e., assumption of no inflow from other water bodies). If that assumption is not valid, this inflow can be equal to (or some fraction of) the product of the other water body&#39;s discharge (which is based on that other water body&#39;s Water Column Flush Rate) and its Water Column Suspended Sediment Concentration, divided by 365 d."
             },
             'Water Column Sediment Deposition Velocity':{
                 'short_name':'sed_deposition_vel',
@@ -153,7 +153,7 @@
                 'is_editable': true,
                 'default_value': 0,
                 'unit': 'y<sup>-1</sup>',
-                'helpText': 'Enter the flush rate of the water column (the number of times per year that the water column is completely refreshed with new water). Valid values are > 0. There is no default value recommended. Typical sources of site-specific values include state departments of fish and wildlife or natural resources, and state or local lake stewardship programs. Otherwise, if water column retention time is available, the flush rate is a simple conversion: the ratio of 365 d to the water column retention time (also in unit of d). If a value is not available for flush rate or retention time, then flush rate will be calculated for you as the ratio of the water bodyâ€™s estimated annual discharge and the water bodyâ€™s volume, with the assumption that the water body maintains a constant volumeâ€”that is, water input (from precipitation, watershed runoff, groundwater seepage, and any contributions from other water bodies) is balanced against output (from evaporation and discharge).'
+                'helpText': 'Enter the flush rate of the water column (the number of times per year that the water column is completely refreshed with new water). Valid values are > 0. There is no default value recommended. Typical sources of site-specific values include state departments of fish and wildlife or natural resources, and state or local lake stewardship programs. Otherwise, if water column retention time is available, the flush rate is a simple conversion: the ratio of 365 d to the water column retention time (also in unit of d). If a value is not available for flush rate or retention time, then flush rate will be calculated for you as the ratio of the water body&#39;s estimated annual discharge and the water body&#39;s volume, with the assumption that the water body maintains a constant volume, that is, water input (from precipitation, watershed runoff, groundwater seepage, and any contributions from other water bodies) is balanced against output (from evaporation and discharge).'
             },
             'Water Column Discharge Volumetric Rate':{
                 'short_name':'discharge_vol_rate',
@@ -199,7 +199,7 @@
                 'unit': 'm<sup>3</sup> [water]/y',
                 'helpText': 'Volume of water inflow received per year by the water column from precipitation runoff from the watershed. Product of the precipitation rate, fraction of precipitation that contributes to overland runoff, and Precipitation Runoff Watershed Area' +
                     '<p><strong>= (precipitation rate * fraction of precipitation that contributes to overland runoff * Precipitation Runoff Watershed Area)</strong></p>' +
-                    '<small>If spatially-varying (i.e., parcel-specific) values are used for fraction of precipitation that contributes to overland runoff, then the math here would be: precipitation rate * sum across all parcels [parcelâ€™s fraction of precipitation that contributes to overland runoff * parcelâ€™s precipitation runoff area]</small>'
+                    'If spatially-varying (i.e., parcel-specific) values are used for fraction of precipitation that contributes to overland runoff, then the math here would be: precipitation rate * sum across all parcels [parcel&#39;s fraction of precipitation that contributes to overland runoff * parcel&#39;s precipitation runoff area]'
             },
             'Precipitation Volumetric Rate to Water Body':{
                 'short_name':'precip_vol_rate_to_SW',
@@ -267,7 +267,7 @@
                 'is_editable': false,
                 'default_value': 0,
                 'unit': 'm<sup>3</sup> [sediment] /m<sup>2</sup> [sediment bed interface] /d',
-                'helpText': 'Volume of sediment received per day by the water bodyâ€™s sediment bed (per unit area) from the suspended sediment in the water column. Ratio of the product of the water column sediment deposition velocity (2 m [water] / d; source unknown) and the Water Column Suspended Sediment Concentration to the Sediment Bed Density.' +
+                'helpText': 'Volume of sediment received per day by the water body&#39;s sediment bed (per unit area) from the suspended sediment in the water column. Ratio of the product of the water column sediment deposition velocity (2 m [water] / d; source unknown) and the Water Column Suspended Sediment Concentration to the Sediment Bed Density.' +
                     '<strong><p>= (water column sediment deposition velocity (2 m [water] / d) * Water Column Suspended Sediment Concentration / Sediment Bed Density)</p></strong>'
             },
             'Soil Erosion Rate to Water Body':{
@@ -275,7 +275,7 @@
                 'is_editable': false,
                 'default_value': 0,
                 'unit': 'kg [soil] / d',
-                'helpText': 'Mass of soil per day eroding into the water body. Sum-product of the runoff fractions from parcel to water body, the parcel erosion rates, and the parcel surface areas, for the parcels directly adjacent to the water body. For example: If Parcel A sends 100% of its runoff directly to the water body, then that sending parcel&apos;s whole surface area is multiplied by that parcelâ€™s erosion rate. If Parcel B sends 10% of its runoff the water body, then 10% of that sending parcel&apos;s surface area is multiplied by that parcelâ€™s erosion rate.'
+                'helpText': 'Mass of soil per day eroding into the water body. Sum-product of the runoff fractions from parcel to water body, the parcel erosion rates, and the parcel surface areas, for the parcels directly adjacent to the water body. For example: If Parcel A sends 100% of its runoff directly to the water body, then that sending parcel&apos;s whole surface area is multiplied by that parcel&#39;s erosion rate. If Parcel B sends 10% of its runoff the water body, then 10% of that sending parcel&apos;s surface area is multiplied by that parcel&#39;s erosion rate.'
             },
             'Sediment Burial Volumetric Rate':{
                 'short_name':'sed_burial_vol_rate',
@@ -820,10 +820,12 @@
                         let unit = row.unit
                         return  "<label data-toggle='tooltip' data-placement='top' data-html='true' title='" + unit + "'>" + data + "</label>" +
                         "<sup>" +
-                            "<a href='javascript:void(0);' title='"+ data +"' data-toggle='popover' data-html='true' data-placement='left' data-content='" + help_text +"'>" +
+                            "<a href='javascript:void(0);' title='"+ data +"' data-trigger='focus' data-toggle='popover' data-html='true' data-placement='left' data-content='" + help_text +"'>" +
                                 "<i class='fa fa-question'></i>" +
                             "</a>" +
                         "</sup>"
+
+
                     }
                 }]
             let parcels = TRIM.store.currentScenario.parcels;

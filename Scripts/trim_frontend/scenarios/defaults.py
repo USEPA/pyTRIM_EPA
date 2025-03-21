@@ -104,11 +104,11 @@ def get_seasonal_dynamics(scen):
     sd = {
         'litterfall_coniferous': get_seasonal_dynamics_params(scen, 'lf', 'Coniferous_Leaf'),
         'allow_exchange_coniferous': get_seasonal_dynamics_params(scen, 'ae', 'Coniferous_Leaf'),
-        'litterfall_deciduous': get_seasonal_dynamics_params(scen, 'lf', 'Deciduous_Leaf'),
+        'litterfall_deciduous': get_seasonal_dynamics_params(scen, 'lf', 'Deciduous_Leaf', 0.0126),
         'allow_exchange_deciduous': get_seasonal_dynamics_params(scen, 'ae', 'Deciduous_Leaf'),
-        'litterfall_grass': get_seasonal_dynamics_params(scen, 'lf', 'Grass_Leaf'),
+        'litterfall_grass': get_seasonal_dynamics_params(scen, 'lf', 'Grass_Leaf', 0.0126),
         'allow_exchange_grass': get_seasonal_dynamics_params(scen, 'ae', 'Grass_Leaf'),
-        'litterfall_agriculture': get_seasonal_dynamics_params(scen, 'lf', 'Agriculture_Leaf'),
+        'litterfall_agriculture': get_seasonal_dynamics_params(scen, 'lf', 'Agriculture_Leaf', 0.0126),
         'allow_exchange_agriculture': get_seasonal_dynamics_params(scen, 'ae', 'Agriculture_Leaf')
     }
     return sd
@@ -206,7 +206,9 @@ param_map = {
         'meteo_daytime_indicator_static_value': 'isDay_Dynamic',
         'meteo_daytime_indicator_field_name_TS': 'isDay_Dynamic',
         'meteo_precipitation_static_value_rate': 'Rain',
-        'meteo_precipitation_field_name_TS': 'Rain',
+        'meteo_precipitation_field_name_rate_TS': 'Rain',
+        'meteo_precipitation_static_value_cumulative': 'cumulativeRain',
+        'meteo_precipitation_field_name_cumulative_TS': 'cumulativeRain',
         'meteo_interception_fractions_static_deciduous': ['Deciduous_Leaf', 'WetDepInterceptionFraction_UserSupplied'],
         'meteo_interception_fractions_static_grass': ['Grass', 'WetDepInterceptionFraction_UserSupplied'],
         'meteo_interception_fractions_static_coniferous': ['Coniferous_Leaf', 'WetDepInterceptionFraction_UserSupplied'],
@@ -300,7 +302,7 @@ EROSION_TABLE_KWARGS = [
             "variable_name": "erosion_table",
             "full_name": "erosion3-topographical_length-slope_factor",
             "domain_id": 1,
-            "default_value": 1.5e-2,
+            "default_value": 1.5,
         },
         {
             "variable_name": "erosion_table",

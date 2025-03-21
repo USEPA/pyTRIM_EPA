@@ -269,6 +269,19 @@ def parse_parcel_upload():
         "parcels": []
     }
 
+    def full_stack():
+        import traceback, sys
+        exc = sys.exc_info()[0]
+        stack = traceback.extract_stack()[:-1]  # last one would be full_stack()
+        if exc is not None:  # i.e. an exception is present
+            del stack[-1]  # remove call of full_stack, the printed exception
+            # will contain the caught exception caller instead
+        trc = 'Traceback (most recent call last):\n'
+        stackstr = trc + ''.join(traceback.format_list(stack))
+        if exc is not None:
+            stackstr += '  ' + traceback.format_exc().lstrip(trc)
+        return stackstr
+
     scenario_id = request.form["scenario_id"]
     coord_system = request.form.get("coord_system")
     raw_utm_zone = request.form.get("utm_zone")
@@ -385,6 +398,7 @@ def parse_parcel_upload():
             print(f"\tDONE FOR LINE {line_num}")
         except Exception as e:
             errors.append(f"Error processing CSV line {line_num}: {e}")
+            print(f'{60*"*"}\nLINE {line_num}\n{full_stack()}')
 
         line_num += 1
 
@@ -501,16 +515,19 @@ def parse_runoff_matrix_upload():
                 continue
             del row["parcels"]
             
-            row_receivers = [f"ro_{k}" for k in row.keys()]
-            row_vals = [f"{float(Decimal(v))}" for v in row.values()]
-            payload = {
-                "id": sender_pcl.id,
-                "field": "runoff_matrix_value",
-                "sender": f"ro_{sender_pcl.name}",
-                "receiver": ",".join(row_receivers),
-                "ro_value": ",".join(row_vals)
-            }
-            handle_parcel_update(sender_pcl, payload)
+            row_receivers_all = [f"ro_{k}" for k in row.keys()]
+            row_vals_all = [(vi, f"{float(Decimal(v))}") for vi, v in enumerate(row.values())]
+            row_receivers = [row_receivers_all[vi] for vi, v in row_vals_all if float(Decimal(v)) > 0]
+            row_vals = [row_vals_all[vi][1] for vi, v in row_vals_all if float(Decimal(v)) > 0]
+            if len(row_vals) > 0:
+                payload = {
+                    "id": sender_pcl.id,
+                    "field": "runoff_matrix_value",
+                    "sender": f"ro_{sender_pcl.name}",
+                    "receiver": ",".join(row_receivers),
+                    "ro_value": ",".join(row_vals)
+                }
+                handle_parcel_update(sender_pcl, payload)
                 
     except Exception as e:
         print(traceback.format_exc())

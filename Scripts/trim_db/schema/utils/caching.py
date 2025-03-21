@@ -1,4 +1,5 @@
 from functools import wraps, partial
+from uuid import uuid4
 
 __all__ = ['CacheManager']
 
@@ -7,7 +8,7 @@ import sqlalchemy.orm.exc
 
 class CacheManager:
     _CACHERS = {}
-    DISABLED = False  # caching generates multiple problems such as detached db session and old values showing up in the UI rather than the updated value
+    DISABLED_REQUESTS = {}  # caching generates multiple problems such as detached db session and old values showing up in the UI rather than the updated value
 
     @classmethod
     def cache_key(cls, *args, **kwargs):
@@ -28,12 +29,13 @@ class CacheManager:
                 # if 'AirTemperature' in args:
                 #     print_this = True
                 #     print(f'\n--- args {args} --- kwargs {kwargs} ---\n f is {f}')
-                if CacheManager.DISABLED:
+                if CacheManager.DISABLED_REQUESTS:
+                    # print(f'{90*"^"}\n{35*" "} CACHE DISABLED!!!! {35*" "}\n{90*"^"}\n')
                     return f(*args, **kwargs)
 
                 k = CacheManager.cache_key(*args, **kwargs)
 
-                if not CacheManager.DISABLED and k in self:
+                if not CacheManager.DISABLED_REQUESTS and k in self:
                     # print(
                     #     f'Cached for "{self.__base_key__}"'
                     #     f' and {k}: {self[k]}'
@@ -42,7 +44,7 @@ class CacheManager:
                     if print_this:
                         print(f'Existing Cache "{k}" -> {ans}\n')
                     if isinstance(ans, Exception):
-                        # print(f"key {k} exists but this exception occurred: {ans}")
+                        #print(f"key {k} exists but this exception occurred: {ans}")
                         raise ans
                     return ans
 
@@ -51,7 +53,7 @@ class CacheManager:
                 except Exception as e:
                     ans = e
 
-                if not CacheManager.DISABLED:
+                if not CacheManager.DISABLED_REQUESTS:
                     # print(
                     #     f'Caching: {ans} for "{self.__base_key__}"'
                     #     f' and {k}'
@@ -70,6 +72,7 @@ class CacheManager:
                     # print(f"key {k} created but this exception occurred: {ans}")
                     raise ans
                 return ans
+
             return cached
 
     @classmethod
@@ -83,20 +86,16 @@ class CacheManager:
         cls._CACHERS.get(key, {}).clear()
 
     @classmethod
-    def toggle_caching(cls, on_off=None):
-        if on_off is None:
-            on_off = cls.DISABLED
-        cls.DISABLED = not (on_off or False)
-
-    @classmethod
     def without_caching(cls, f):
         @wraps(f)
         def wrapped(*args, **kwargs):
-            cls.toggle_caching()
+            k = str(uuid4())
+            cls.DISABLED_REQUESTS[k] = True
             try:
                 return f(*args, **kwargs)
             finally:
-                cls.toggle_caching()
+                cls.DISABLED_REQUESTS.pop(k)
+
         return wrapped
 
     @classmethod
@@ -106,4 +105,5 @@ class CacheManager:
                 base_key = str(f)
             # print(f"BASE KEY IS {base_key}")
             return CacheManager.subcache(base_key).wrap(f)
+
         return partial(decorated, base_key)
