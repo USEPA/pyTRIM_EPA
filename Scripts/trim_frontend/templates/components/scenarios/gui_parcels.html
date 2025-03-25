@@ -82,6 +82,7 @@
     </section>
 </form>
 <link rel="stylesheet" href="{{url_for('static', filename='css/form_styles.css')}}"/>
+<link rel="stylesheet" href="{{url_for('static', filename='css/custom_icons.css')}}"/>
 <script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}">
 </script>
 <script src="{{ url_for('static', filename='js/lib/dataTables/jquery.dataTables.min.js') }}">
@@ -96,6 +97,150 @@
 </script>
 <script>
     var map = L.map('mapid', { drawControl: false }).setView([35.99, -78.90], 12);
+
+	// START -- dots on vertices
+
+	// dot is the leaflet internal id
+	// parcel is object containing the TRIM parcel id and the leaflet internal id
+	// e.g.:
+	// { leafletDotIdOne: { trimParcelId: A, leafletPolygonId: B }, leafletDotIdTwo: { trimParcelId: foo, leafletPolygonId: bar } }
+	let dotToParcel = {};
+
+	let addParcelAssociation = function(elementId, storageStructure, storageKey, associationType) {
+		if (associationType === undefined) {
+			associationType = "oneToOne";
+		}
+
+		if (associationType == "oneToMany") {
+			if (!(storageKey in storageStructure)) {
+				storageStructure[storageKey] = [];
+			}
+			if (!(elementId in storageStructure[storageKey])) {
+				storageStructure[storageKey].push(elementId);
+			}
+		} else if (associationType == "oneToOne") {
+			storageStructure[storageKey] = elementId;
+		}
+	};
+
+	let clearParcelAssociations = function(parcelId) {
+		for (let dotId in dotToParcel) {
+			if (dotToParcel[dotId] == parcelId) {
+				delete dotToParcel[dotId];
+			}
+		}
+	};
+
+	map.on('layerremove', function(e) {
+		if (e.layer.feature !== undefined) { // a parcel polygon was just deleted by the user...
+			// console.log("parcel remove: '" + e.layer.feature.properties.name + "' (leafletid==" + L.stamp(e.layer) + ", TRIM parcelid==" + e.layer.feature.properties.parcelid + ")");
+			clearParcelAssociations(e.layer.feature.properties.parcelid);
+
+			let relatedStampId = L.stamp(e.layer);
+			map.eachLayer(function(probe) {
+				if (probe.dotMarkerData !== undefined &&
+					probe.dotMarkerData.type == "VertexDotMarkers" &&
+					(probe.dotMarkerData.properties.relatedParcelId == e.layer.feature.properties.parcelid ||
+					 probe.dotMarkerData.properties.relatedLeafletId == relatedStampId)) {
+					map.removeLayer(probe);
+					return;
+				}
+			});
+		} else {
+			let deletedId = L.stamp(e.layer);
+			if (deletedId in dotToParcel) {
+				// user clicked on an individual dot making up a parcel, not the middle of the parcel...let's delete the
+				// underlying parcel...
+
+				// console.log("dot '" + deletedId + "' removed: that's parcel " + dotToParcel[deletedId]);
+
+				map.eachLayer(function(probe) {
+					if (probe.feature !== undefined &&
+						probe.feature.type == "Feature" &&
+						(probe.feature.properties.parcelid == dotToParcel[deletedId].trimParcelId ||
+						 L.stamp(probe) == dotToParcel[deletedId].leafletPolygonId)) {
+						window.deleteParcelFromServer({"properties": { "parcelid": probe.feature.properties.parcelid } });
+						map.removeLayer(probe);
+						return;
+					}
+				});
+			}
+		}
+	});
+
+	let mapDotColor = "#3388ff";
+
+	// case 1 -- fires on initial load, NOT when drawing a parcel on-the-fly
+	map.on('layeradd', function(e) {
+		if (e.layer.feature !== undefined) { // a parcel polygon was just added...doesn't fire for e.g. dotMarkers
+			// see also e.layer._leaflet_id
+			// console.log("layer add: '" + e.layer.feature.properties.name + "' (leafletid==" + L.stamp(e.layer) + ", TRIM parcelid==" + e.layer.feature.properties.parcelid + ")");
+
+			// add arbitrary something to the layer?
+			// e.layer.feature.properties.leafletLayerId = "hello-" + L.stamp(e.layer) + "-world";
+
+			let parcelDefinition = TRIM.store.currentScenario.parcels.find((element) => element.id == e.layer.feature.properties.parcelid);
+			if (parcelDefinition !== undefined) {
+				let dotMarkers = [];
+				for (let i = 0 ; i < parcelDefinition.vertices.length - 1 ; i++) {
+					let vertex = parcelDefinition.vertices[i];
+					// reverse lat/long; leaflet expects different order than we use in TRIM
+					let dotMarker = L.circleMarker([vertex[1], vertex[0]], { radius: 3, stroke: true, color: mapDotColor});
+					dotMarkers.push(dotMarker);
+
+					// note that these dots are currently "behind" the lines; that's ok since they're the same color.
+					// If we wanted a different color, look into:
+					// https://gis.stackexchange.com/questions/137061/changing-layer-order-in-leaflet
+					// basically we could call bringToFront on each marker - not doing it as long as colors are same.
+
+					// track this for later; need it during deletions
+					addParcelAssociation({
+						"trimParcelId": e.layer.feature.properties.parcelid,
+						"leafletPolygonId": L.stamp(e.layer)
+					}, dotToParcel, L.stamp(dotMarker));
+				}
+
+				let lg = L.layerGroup(dotMarkers).addTo(map);
+
+				// We need to be able to delete this group when the underlying parcel is deleted, otherwise we'll
+				// have some random dots still left on the map.
+				// could either store "lg" somewhere to access later...
+				// ...or we can just put some data onto the leaflet object in relatedParcelId, and look it up during a delete.
+				// that's what we'll do.
+				let dotMarkerData = lg.dotMarkerData = lg.dotMarkerData || {};
+				dotMarkerData.type = "VertexDotMarkers";
+				dotMarkerData.properties = dotMarkerData.properties || {};
+				lg.dotMarkerData.properties.relatedParcelId = e.layer.feature.properties.parcelid;
+				lg.dotMarkerData.properties.relatedLeafletId = L.stamp(e.layer);
+			}
+		}
+	});
+
+	// case 2 -- fires when drawing a parcel on-the-fly. We don't have an entry in currentScenario.parcels so all we can use is
+	// the internal leaflet id we get by calling L.stamp
+	map.on('pm:create', ({layer})=>{
+		let dotMarkers = [];
+		for (let i = 0 ; i < layer._latlngs[0].length ; i++) {
+			let dotMarker = L.circleMarker(layer._latlngs[0][i], { radius: 3, stroke: true, color: mapDotColor});
+			dotMarkers.push(dotMarker);
+
+			// track here as well
+			addParcelAssociation({
+				"trimParcelId": null,
+				"leafletPolygonId": L.stamp(layer)
+			}, dotToParcel, L.stamp(dotMarker));
+		}
+
+		let lg = L.layerGroup(dotMarkers).addTo(map);
+
+		let dotMarkerData = lg.dotMarkerData = lg.dotMarkerData || {};
+		dotMarkerData.type = "VertexDotMarkers";
+		dotMarkerData.properties = dotMarkerData.properties || {};
+		lg.dotMarkerData.properties.relatedParcelId = null; // no entry in currentScenario.parcels...
+		lg.dotMarkerData.properties.relatedLeafletId = L.stamp(layer);
+	});
+	// FINISH -- dots on vertices
+
     var observer = new MutationObserver(function(mutations) {
         map.invalidateSize(true)
     });
@@ -123,6 +268,8 @@
         var parcelsReadyEvent = document.createEvent('Event');
         parcelsReadyEvent.initEvent('parcels:ready', true, true);
         TRIM.refreshParcels = function(force) {
+			// console.log("refreshing parcels (" + force + ")...");
+
             force = force || false;
             if (TRIM.store.currentScenario.parcels && !force) {
                 document.body.dispatchEvent(parcelsReadyEvent);
@@ -231,15 +378,13 @@
 					if (!success) {
 						alert('An error occurred during upload.');
 					} else {
-						/*
 						// TODO - can we use this data to just redraw the map/table w/o a full page reload? probably!
-						console.log("WORKED:");
-						console.log(responseData);
-						for (let i = 0 ; i < responseData.parcels.length ; i++) {
-							let new_parcel = responseData.parcels[i];
-							console.log("NEW PARCEL: " + JSON.stringify(new_parcel));
-						}
-						*/
+						// console.log("WORKED:");
+						// console.log(responseData);
+						// for (let i = 0 ; i < responseData.parcels.length ; i++) {
+							// let new_parcel = responseData.parcels[i];
+							// console.log("NEW PARCEL: " + JSON.stringify(new_parcel));
+						// }
 						console.log("reload...");
 						window.location.reload();
 					}
@@ -264,6 +409,16 @@
             parcels.clearLayers();
             shapes = parcels.toGeoJSON();
             var scenarioParcels = TRIM.store.currentScenario.parcels;
+
+			/*
+			console.log("!!!SCENARIO PARCELS ARE:");
+			console.log(scenarioParcels);
+			for (let i = 0 ; i < scenarioParcels.length ; i++) {
+				let p = scenarioParcels[i];
+				console.log("   EXISTING PARCEL: [" + p.id + "]: '" + p.name + "'");
+			}
+			*/
+
             var standardMedia = TRIM.store.currentScenario.standardMedia;
             if (scenarioParcels.length > 0) {
                 let lat_means = []
@@ -298,8 +453,16 @@
             new_parcel.feature.properties.farmfoodchain = parcel.data.hasFarmFoodChain;
             new_parcel.feature.properties.fishfoodweb = parcel.data.hasFishFoodWeb;
             new_parcel.feature.properties.wetland = parcel.data.hasWetland;
-            parcels.addLayer(new_parcel).addTo(map)
-            new_parcel.bindTooltip(new_parcel.feature.properties.name, {permanent: false}).addTo(map);
+
+
+            let x = parcels.addLayer(new_parcel).addTo(map)
+            let y = new_parcel.bindTooltip(new_parcel.feature.properties.name, {permanent: false}).addTo(map);
+
+			// console.log("LISTENING FOR SNAPS ON: " + new_parcel._tooltip._content);
+			// this only fires when an existing parcel snaps. 
+			// e.g. during a resize
+			// y.on('pm:snap', function(e) { console.log("DEBUGME snap edit"); });
+
             shapes = parcels.toGeoJSON()
         }
 
@@ -676,18 +839,186 @@
             dragMode: false,
             cutPolygon : false,
             rotateMode : false,
-            editMode  : false
+            editMode  : false,
         });
 
+		// proof of concept -- add a red dot near Duke
+		// var barMarker = L.circleMarker([35.997895, -78.922519], { radius: 3, stroke: true, color: "red"}).bindPopup('BAR!').addTo(map);
+
+		conditionalSnapSettings = {
+			"vertices": true,
+			"segments": false
+		};
+
+		window.getSmartSnapSetting = function(typeOfSnap) {
+			if (typeOfSnap == "vertices" || typeOfSnap == "segments") {
+				return conditionalSnapSettings[typeOfSnap];
+			} else {
+				console.log("getSmartSnapSetting doesn't work with '" + typeOfSnap + "'");
+			}
+		};
+
+		window.smartSnapEnableOrDisable = function(typeOfSnap, enableOrDisable) {
+			if (typeOfSnap == "vertices" || typeOfSnap == "segments") {
+				conditionalSnapSettings[typeOfSnap] = enableOrDisable;
+
+				if (typeOfSnap == "vertices") {
+					map.pm.setGlobalOptions({ snapVertex: enableOrDisable });
+				} else if (typeOfSnap == "segments") {
+					map.pm.setGlobalOptions({ snapSegment: enableOrDisable });
+				}
+
+				let bothSnapsDisabled = conditionalSnapSettings["vertices"] == false && conditionalSnapSettings["segments"] == false;
+				map.pm.setGlobalOptions({ snappable: !bothSnapsDisabled });
+			} else {
+				console.log("smartSnapEnableOrDisable doesn't work with '" + typeOfSnap + "'");
+			}
+		};
+
+		let customSnapControls = [
+			{ "name": "ToggleSnapToVertices", "thing": "vertices" },
+			{ "name": "ToggleSnapToSegments", "thing": "segments" },
+		];
+
+		for (let i = 0 ; i < customSnapControls.length ; i++) {
+			let snapThing = customSnapControls[i].thing;
+			map.pm.Toolbar.createCustomControl({
+				name: customSnapControls[i].name,
+				block: "custom", // draw,edit,custom,options
+				title: "Snap to " + snapThing,
+				onClick: function(evt, btn) { smartSnapEnableOrDisable(snapThing, !this.toggleStatus); },
+				disableOtherButtons: false, disableByOtherButtons: false,
+				className: "trim-custom-icon-" + snapThing,
+			});
+
+			// I can't find a way to programmatically select these, so do it with jquery...
+			if (conditionalSnapSettings[snapThing] === true) {
+				$("div.button-container[title='Snap to " + snapThing + "'] a div").click();
+			}
+		}
+
+		map.on('pm:drawstart', function(e) {
+		  var layer = e.workingLayer;
+
+		/*
+		// not used anymore; was used when we had implemented "disable snap to segments after first vertex placed". That's
+		// since been abandoned in favor of providing controls to let users toggle vertex/segment snapping manually.
+		  layer.on('pm:vertexadded', function(e) {
+			// e includes the new vertex, it's marker
+			// the index in the coordinates array
+			// the working layer and shape
+
+			  // map.pm.setGlobalOptions({ snapSegment: false });
+		  });
+		*/
+
+		  /*
+		  layer.on('pm:snap', function(e) {
+			  if (e.layerInteractedWith.feature !== undefined) {
+				  console.log("DEBUGME DRAWING snap (to " + e.layerInteractedWith.feature.properties.name + ")!");
+			  } else {
+				  console.log("DEBUGME DRAWING snap (to myself)!");
+			  }
+			  // console.log(e);
+		  });
+		  */
+		});
+
         map.pm.enableDraw(
-            'Polygon',{ snappable: true, allowSelfIntersection : false
-        });
+            'Polygon', {
+				snappable: true,
+				snapSegment: getSmartSnapSetting("segments"),
+				snapVertex: getSmartSnapSetting("vertices"),
+				allowSelfIntersection : false
+			}
+		);
+
+		// experimental function -- can we check/warn about gaps/overlap? The snap changes help
+		/*
+		window.checkVerticesDebug = function(parcelName) {
+			console.log("checkVerticesDebug '" + parcelName + "'");
+			let p = null;
+			let otherParcels = [];
+			for (let i = 0 ; i < TRIM.store.currentScenario.parcels.length ; i++) {
+				if (TRIM.store.currentScenario.parcels[i].name == parcelName) {
+					p = TRIM.store.currentScenario.parcels[i];
+			    } else {
+					otherParcels.push(TRIM.store.currentScenario.parcels[i]);
+			    }
+		    }
+
+			if (p != null) {
+				console.log("check: " + JSON.stringify(p.vertices));
+				for (let i = 0 ; i < p.vertices.length - 1 ; i++) {
+					let v = p.vertices[i];
+
+					if (i == 0) {
+						let lastV = p.vertices[p.vertices.length - 1];
+						if (v[0] == lastV[0] && v[1] == lastV[1]) {
+							console.log("polygon looks closed...");
+						} else {
+							console.log("polygon looks not closed!");
+						}
+					}
+
+					console.log("consider point [" + i + "]: " + v);
+					let matchFound = false;
+					for (let otherParcelIdx = 0 ; !matchFound && otherParcelIdx < otherParcels.length ; otherParcelIdx++) {
+						let otherP = otherParcels[otherParcelIdx];
+						console.log("  compare against vertices of '" + otherP.name + "'...");
+
+						for (let k = 0 ; !matchFound && k < otherP.vertices.length - 1 ; k++) {
+							let otherV = otherP.vertices[k];
+							console.log("    compare against vertex [" + k + "]: " + otherV);
+							if (v[0] == otherV[0] && v[1] == otherV[1]) {
+								console.log("EXACT VERTEX MATCH!!!!!!");
+								matchFound = true;
+							}
+						}
+					}
+
+					if (!matchFound) {
+						console.log("no vertex match found; now let's try lines...");
+						for (let otherParcelIdx = 0 ; !matchFound && otherParcelIdx < otherParcels.length ; otherParcelIdx++) {
+							let otherP = otherParcels[otherParcelIdx];
+							console.log("  compare against lines of '" + otherP.name + "'...");
+
+							for (let k = 0 ; !matchFound && k < otherP.vertices.length - 1 ; k++) {
+								let otherStartVertex = otherP.vertices[k];
+								let otherEndVertex = otherP.vertices[k+1];
+								console.log("    compare against line [" + k + "]: " + otherStartVertex + " -> " + otherEndVertex);
+								let pt = turf.point(v);
+								let line = turf.lineString([otherStartVertex, otherEndVertex]);
+								let isPointOnLine = turf.booleanPointOnLine( pt, line, { epsilon: 5e-8 });
+
+								if (isPointOnLine) {
+									console.log("SEGMENT MATCH!!!!!!");
+									matchFound = true;
+								} else {
+									if (turf.booleanPointOnLine( pt, line, { epsilon: 0.25 })) {
+										console.log("SECOND LEVEL CHECK MATCH!");
+									}
+								}
+							}
+						}
+					}
+
+					if (!matchFound) {
+						console.log("STILL NO MATCH AFTER CHECKING LINES...");
+					}
+				}
+			} else {
+				console.log("couldnt find it...");
+			}
+		};
+		*/
 
         // CREATING A NEW PARCEL //
         var shapes = L.geoJSON()
 
         map.on('pm:create', ({layer})=>{
-            newLayer(layer)
+			map.pm.setGlobalOptions({ snapSegment: getSmartSnapSetting("segments") });
+			newLayer(layer);
         });
 
         // Map and Parcel Table Functions
@@ -781,10 +1112,24 @@
           }), file);
         }
 
+		// parcelObj must contain at a minimum "properties.parcelid"; if pulling from geojson it will have more.
+		// making this global so that it's callable from elsewhere on the page w/o a major rewrite (kludgey)
+		window.deleteParcelFromServer = function(parcelObj) {
+			// console.log("DELETING: " + JSON.stringify(parcelObj));
+            LoadingScreen.show('delete_parcel');
+            TRIM.api.deleteParcels(TRIM.store.currentScenario.id, parcelObj).on('load', function(){
+                TRIM.refreshParcels();
+                requires_reload = true;
+                LoadingScreen.hide('delete_parcel');
+            })
+            mapTableRedraw()
+		};
+
         // REMOVE A PARCEL//
         map.on('pm:remove', ({layer})=>{
             // LoadingScreen.show('deleting_parcel');
             parcels.removeLayer(layer._leaflet_id)
+			/*
             shapes = parcels.toGeoJSON()
             LoadingScreen.show('delete_parcel');
             TRIM.api.deleteParcels(TRIM.store.currentScenario.id, layer.toGeoJSON()).on('load', function(){
@@ -793,7 +1138,41 @@
                 LoadingScreen.hide('delete_parcel');
             })
             mapTableRedraw()
+			*/
+
+			deleteParcelFromServer(layer.toGeoJSON());
         });
+
+		// see https://geoman.io/docs/leaflet/modes/edit-mode
+		/*
+		map.on('pm:intersect', e => { console.log("DEBUGME intersect!"); });
+		map.on('pm:edit', e => { console.log("DEBUGME edit!"); });
+		map.on('pm:update', e => { console.log("DEBUGME update!"); });
+		map.on('pm:enable', e => { console.log("DEBUGME enable!"); });
+		map.on('pm:disable', e => { console.log("DEBUGME disable!"); });
+		map.on('pm:vertexadded', e => { console.log("DEBUGME vertexadded!"); });
+		map.on('pm:vertexremoved', e => { console.log("DEBUGME vertexremoved!"); });
+		map.on('pm:vertexclick', e => { console.log("DEBUGME vertexclick!"); });
+		map.on('pm:markerdragstart', e => { console.log("DEBUGME markerdragstart!"); });
+		map.on('pm:markerdrag', e => { console.log("DEBUGME markerdrag!"); });
+		map.on('pm:markerdragend', e => { console.log("DEBUGME markerdragend!"); });
+		map.on('pm:layerreset', e => { console.log("DEBUGME layerreset!"); });
+		map.on('pm:snapdrag', e => { console.log("DEBUGME snapdrag!"); });
+		map.on('pm:snap', e => { console.log("DEBUGME snapme!"); });
+		map.on('pm:unsnap', e => { console.log("DEBUGME unsnap!"); });
+		map.on('pm:centerplaced', e => { console.log("DEBUGME centerplaced!"); });
+		map.on('pm:change', e => { console.log("DEBUGME change!"); });
+		map.on('pm:cancel', e => { console.log("DEBUGME cancel!"); });
+
+		// fires when  you enter drawing mode; NOT when you place first vertex!
+		// map.on('pm:drawstart', e => { console.log("DEBUGME drawstart!"); });
+
+		// fires when you place last vertex, cancel drawing, etc.
+		map.on('pm:drawend', e => { console.log("DEBUGME drawend!"); });
+
+		// fires when layer actually creates
+		map.on('pm:create', e => { console.log("DEBUGME create!"); });
+		*/
 
         L.easyButton('<span class = DownArrowBar style = "font-size: 1.5em;">&DownArrowBar;</span>', function(btn, map){
             saveToFile(shapes, "Test")
