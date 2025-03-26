@@ -5,6 +5,7 @@ import pandas as pd
 import traceback
 import re
 import json
+import requests as pyRequest
 from decimal import Decimal
 from flask import Blueprint, request
 from flask_security import login_required
@@ -473,30 +474,49 @@ def parse_runoff_matrix_upload():
     parcel_names = {p.name : p for p in parcels}
 
     files = request.files
-    if not files:
+    presigned_url = request.form.get("presigned_url")
+    if not files and not presigned_url:
         return ApiException("No files were uploaded")
     
     try:
-        fpn = [f.stream for n, f in files.items()][0]
-        fpn.seek(0)
-        lines = fpn.read().decode("utf-8")
-        reader = csv.DictReader(io.StringIO(lines))
+        if presigned_url: # getflow generated matrix
+            r = pyRequest.get(presigned_url)
+            csv_data = io.StringIO(r.content.decode('utf-8'))
+            df = pd.read_csv(csv_data, delimiter=',')
+            df.rename(columns={ df.columns[0]: 'parcels' }, inplace = True)
 
-        # TODO make sure all parcels are accounted for
-        # verify headers are valid parcels + sink exists
-        for header in reader.fieldnames:
-            if header == 'sink' or header == 'parcels':
-                continue
-            elif header not in parcel_names.keys():
-                return ApiException(f"Parcel '{header}' does not exist in the scenario")
-        for row in reader:
-            if row.get("parcels") not in parcel_names.keys():
-                return ApiException(f"Parcel '{row.get('parcels')}' does not exist in the scenario")    
-        if "sink" not in reader.fieldnames:
-            return ApiException("Required header 'sink' is missing")
+            # getflow does not include sink
+            if not 'sink' in df.columns:
+                df['sink'] = df.sum(axis=1, numeric_only=True)
+                for idx, row in df.iterrows():
+                    if row['sink'] > 1.0 or row['sink'] <= 0.0:
+                        df.loc[idx, 'sink'] = 0
+                    else:
+                        df.loc[idx, 'sink'] = 1 - df.loc[idx, 'sink']
 
+            reader = df.to_dict('records')
+        else:
+            fpn = [f.stream for n, f in files.items()][0]
+            fpn.seek(0)
+            lines = fpn.read().decode("utf-8")
+            reader = csv.DictReader(io.StringIO(lines))
+
+            # TODO make sure all parcels are accounted for
+            # verify headers are valid parcels + sink exists
+            for header in reader.fieldnames:
+                if header == 'sink' or header == 'parcels':
+                    continue
+                elif header not in parcel_names.keys():
+                    return ApiException(f"Parcel '{header}' does not exist in the scenario")
+            for row in reader:
+                if row.get("parcels") not in parcel_names.keys():
+                    return ApiException(f"Parcel '{row.get('parcels')}' does not exist in the scenario")    
+            if "sink" not in reader.fieldnames:
+                return ApiException("Required header 'sink' is missing")
+            
         # verify values are valid
-        reader = csv.DictReader(io.StringIO(lines))
+        if files:
+            reader = csv.DictReader(io.StringIO(lines))
         for row in reader:
             row_total = []
             for k, v in row.items():
@@ -508,7 +528,8 @@ def parse_runoff_matrix_upload():
                 return ApiException("Sum of runoff fractions should be 1")
 
         # submit
-        reader = csv.DictReader(io.StringIO(lines))
+        if files:
+            reader = csv.DictReader(io.StringIO(lines))
         for row in reader:
             sender_pcl = parcel_names[row.get("parcels")]
             if sender_pcl.name in request.form["water_parcels"]:

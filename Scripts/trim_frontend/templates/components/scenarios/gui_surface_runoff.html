@@ -346,6 +346,17 @@
 			let executionArn = "";
 			let keepCheckingId = -1;
 
+            function toggleBtnState(disable) {
+                $(e.target).attr('disabled', disable);
+                if (disable) {
+                    $(e.target).html(`<span><label class="lds-dual-ring mr-3"></label></span> Run GetFlow`);
+                }
+                else {
+                    $(e.target).html('Run GetFlow');
+                }
+            };
+            toggleBtnState(true);
+
 			// polling function
 			let keepChecking = function() {
 				api.checkStepFunctionStatus(executionArn, function(success,data) {
@@ -360,11 +371,50 @@
 						getflowStatusArea.html("Run complete!&nbsp;&nbsp;");
 						getflowStatusArea.css("background-color", "lime");
 						$("<a/>").attr("href", data.output.presigned_url).html("Download results").appendTo(getflowStatusArea);
+                        toggleBtnState(false);
+
+                        // import getflow generated matrix
+                        $("<button/>").addClass('ml-3 btn btn-warning').html("Update matrix").appendTo(getflowStatusArea).on('click', (e) => {
+                            e.preventDefault();
+                            let fieldData = [{
+                                "type": "input",
+                                "name": "presigned_url",
+                                "value": data.output.presigned_url
+                            }]; 
+                            fieldData.push({
+                                "type": "input",
+                                "name": "scenario_id",
+                                "value": TRIM.store.currentScenario.id
+                            });
+
+                            // list of water parcels to skip
+                            let waterPcls = [];
+                            TRIM.store.currentScenario.parcels.forEach((p, i) => {
+                                if (p?.parcelType?.includes("Water")) waterPcls.push(p.name)
+                            });
+                            fieldData.push({
+                                "type": "input",
+                                "name": "water_parcels",
+                                "value": waterPcls
+                            });
+                            
+                            LoadingScreen.show('upload_matrix_csv');
+                            TRIM.api.uploadSurfaceRunoffMatrixFile(fieldData, function(success,responseData,c) {
+                                LoadingScreen.hide('upload_matrix_csv');
+                                if (!success) {
+                                    alert('An error occurred during upload:\n' + responseData.message);
+                                } else {
+                                    console.log("reload...");
+                                    window.location.reload();
+                                }
+                            });
+                        });
 					} else if (data.status == "FAILED" || data.status == "TIMED_OUT" || data.status == "ABORTED") {
 						alert("An error occurred; run resulted in " + data.status + " status");
 						getflowStatusArea.html("Run in " + data.status + " state. Please contact support.");
 						getflowStatusArea.css("background-color", "red");
 						clearInterval(keepCheckingId);
+                        toggleBtnState(false);
 					} else {
 						console.log("keep waiting...");
 						getflowStatusArea.html("Run still ongoing... (" + (new Date()).toLocaleTimeString() + ")");
@@ -397,16 +447,22 @@
 			console.log("getflow kickoff (gui_surface_runoff.html)!");
 			api.runGetFlow(scenario_id, function(success,data) {
 				console.log("back in gui_surface_runoff.html callback!");
-				 console.log(success);
-				 console.log(data);
-				 console.log("-----");
+                console.log(success);
+                console.log(data);
+                console.log("-----");
 
-
-				 executionArn = data["executionArn"];
-				  console.log("start polling for '" + executionArn + "'");
-				 keepCheckingId = setInterval(keepChecking, 15000);
+                executionArn = data["executionArn"];
+                console.log("start polling for '" + executionArn + "'");
+            
+                if (data.error) {
+                    alert(data.error);
+                    toggleBtnState(false);
+                    getflowStatusArea.html("Run failed. Please contact support.");
+                    getflowStatusArea.css("background-color", "red");
+                    return;
+                }
+                keepCheckingId = setInterval(keepChecking, 15000);
 			});
- 
 			return false;
 		});
 

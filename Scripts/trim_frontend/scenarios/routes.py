@@ -991,7 +991,7 @@ def run_getflow(scenario_id):
             data_resp = {"not": "implemented!"}
     except Exception as e:
         print(e)
-        data_resp = {"error": e}
+        data_resp = {"error": repr(e)}
 
     return ApiResult(data_resp)
 
