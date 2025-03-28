@@ -293,7 +293,7 @@ def parse_parcel_upload():
     if coord_system == "UTM":
         valid_zone, default_utm_zone = is_utm_zone_valid(raw_utm_zone)
         if not valid_zone:
-            errors.append("Invalid default utm zone '{raw_utm_zone}' supplied.")
+            errors.append(f"Invalid default utm zone '{raw_utm_zone}' supplied.")
 
     if not files and not geojson:
         errors.append("No files were uploaded")
