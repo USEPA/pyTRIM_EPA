@@ -486,7 +486,7 @@ def parse_runoff_matrix_upload():
             df.rename(columns={ df.columns[0]: 'parcels' }, inplace = True)
 
             # getflow does not include sink
-            if not 'sink' in df.columns:
+            if 'sink' not in df.columns:
                 df['sink'] = df.sum(axis=1, numeric_only=True)
                 for idx, row in df.iterrows():
                     if row['sink'] > 1.0 or row['sink'] <= 0.0:
