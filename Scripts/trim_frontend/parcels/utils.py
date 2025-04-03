@@ -623,7 +623,7 @@ def initialize_compartment_custom_parameters(nc):
         add_compartment_custom_parameters(nc, "TotalErosionRate", ter_val, "kg/m^2/day")
         # add Total Runoff Rate
         # using Groundwater seepage fraction and precipitation to calculate runoff
-        trr_val = (1 - nc.GroundwaterSeepageFraction) * (nc.volume_element.parcel.scenario.Rain).magnitude
+        trr_val = (nc.PrecipitationRunoffFraction) * (nc.volume_element.parcel.scenario.Rain).magnitude
         add_compartment_custom_parameters(nc, "TotalRunoffRate", trr_val, "m^3/m^2/day")
 
     if nc.media.isa("Flora"):
