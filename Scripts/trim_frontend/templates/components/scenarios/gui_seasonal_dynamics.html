@@ -211,7 +211,7 @@
                 let this_text_ae = $('#seasonal-gui').find(search_txt_ae_str)
                 let val_lf = seasonal_dyn_obj[`litterfall_${e}`]
                 let val_ae = seasonal_dyn_obj[`allow_exchange_${e}`]
-                if (val_lf == -1 && val_ae == -1) {
+                if (val_lf == -1 || val_ae == -1) {
                     this_chkbx.closest('div[data-slot=true]').css('display', 'none')
                 }
                 $(this_text_lf).val(val_lf)
