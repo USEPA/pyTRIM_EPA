@@ -975,6 +975,10 @@ Water_Parcel_VolElem_defaults = {
                 'name': 'Degradation_Reaction_Sink',
                 'media_name': 'Degradation_Reaction'
             },
+            'Burial_Sink': {
+                'name': 'Burial_Sink',
+                'media_name': 'Burial'
+            }
         }
     }
 }
