@@ -57,6 +57,13 @@
                                             <div class="dropdown-menu">
                                             </div>
                                         </div>
+                                        <div class="pill pill-alert">
+                                            <small>
+                                                <strong>
+                                                    Note that the non-pseudo source compartments (compartments other than Wet/Dry Vapor/Particle Source) do not follow a differentiated state (Gaseous or Particulate) and will automatically have the same value for both states of the source chemical.
+                                                </strong>
+                                            </small>
+                                        </div>
                                         <table class="compMap" style="border-collapse: collapse" cellpadding="6">
                                             <thead>
                                                 <tr>
@@ -78,7 +85,7 @@
     </section>
 </form>
 <style>
-    tr.level0 td:first-child, tr.level0 td:nth-child(2), tr.level0 td:nth-child(3){
+    tr.level0 td:first-child, tr.level0 td:nth-child(2), tr.level0 td:nth-child(3) {
         background-color: lightgray;
     }
     tr.level1 td:nth-child(2), tr.level1 td:nth-child(3){
@@ -86,6 +93,9 @@
     }
     tr.level2 td:nth-child(3) {
         background-color: #818181;
+    }
+    tr.level0 td:last-child, tr.level1 td:last-child, tr.level2 td:last-child{
+        background-color: white;
     }
 
 </style>
@@ -176,7 +186,7 @@
                     $("#emissions-settings-gui").find("span.stateInfo")[current_index].innerHTML = spec
                     $(initialize_compartment_map(spec)).insertAfter($($("#emissions-settings-gui").find("table.compMap")[current_index]).find("thead"))
 
-                    let dd_menu = $($("#emissions-settings-gui").find("table.compMap")[current_index]).prev("div.dropdown").find("div.dropdown-menu")
+                    let dd_menu = $($("#emissions-settings-gui").find("table.compMap")[current_index]).prevAll("div.dropdown:first").find("div.dropdown-menu")
                     populate_comp_dd(dd_menu);
                     populate_values($($("#emissions-settings-gui").find("table.compMap")[current_index]))
                     }
@@ -212,7 +222,7 @@
                     $("#emissions-settings-gui").find("span.chemInfo")[current_index].innerHTML = chem
                     $("#emissions-settings-gui").find("span.stateInfo")[current_index].innerHTML = spec
                     $(initialize_compartment_map(spec)).insertAfter($($("#emissions-settings-gui").find("table.compMap")[current_index]).find("thead"))
-                    let dd_menu = $($("#emissions-settings-gui").find("table.compMap")[current_index]).prev("div.dropdown").find("div.dropdown-menu")
+                    let dd_menu = $($("#emissions-settings-gui").find("table.compMap")[current_index]).prevAll("div.dropdown:first").find("div.dropdown-menu")
                     populate_comp_dd(dd_menu);
                     populate_values($($("#emissions-settings-gui").find("table.compMap")[current_index]))
                 })
@@ -384,6 +394,7 @@
                 let parcel_name = $($(this).closest("tr.level2").find("td")[0]).attr("data-pcl-name")
                 let parcel_id = parcels.filter(e => e.name == parcel_name)[0].id
                 let compartment_name = $($(this).closest("tr.level2").find("td")[2]).attr("data-comp-name")
+                let ve_name = $($(this).closest("tr.level2").find("td")[1]).attr("data-ve-name")
                 let chem_name = $(this).closest("div.tab-pane").data("tab-name").split(" (")[0]
                 let parcel_info = [{
                     'type': 'data',
@@ -405,6 +416,10 @@
                     'type': 'input',
                     'name': 'emission_value',
                     'value': ''
+                },{
+                    'type': 'data',
+                    'name': 've_name',
+                    'value': ve_name
                 }]
                 if (parcel_info) {
                     submit_emission_value(this, parcel_info);
@@ -566,17 +581,36 @@
         }
 
         function submit_emission_value(elem, parcel_info) {
+            let ls_info = 'submit_pseudo_emission'
             ErrorValidation.isPositiveValue(elem)
             if (elementIsValid($(elem).parent())){
                 let data = $(elem).val() == "" ? 0 : $(elem).val()
                 parcel_info[4].value = data
                 let $label = $(elem).next("label.editableCell")
                 $label.siblings("input").hide()
+                let old_data = $label.text() == "" ? 0 : $label.text()
                 $label.show().text(data)
 
                 parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
                 console.log(parcel_info)              
-                TRIM.api.updateParcel(TRIM.store.currentScenario.id, parcel_info)
+                TRIM.api.updateParcel(TRIM.store.currentScenario.id, parcel_info).on('load', (rsp)=>{
+                    let chem_name = parcel_info[parcel_info.findIndex(e => e.type == 'data' & e.name == 'chemical_name')].value
+                    let ve_name = parcel_info[parcel_info.findIndex(e => e.type == 'data' & e.name == 've_name')].value
+                    let comp_name = parcel_info[parcel_info.findIndex(e => e.type == 'data' & e.name == 'compartment_name')].value
+                    let param_store_key =  'sources' + '.' + chem_name + '.' + ve_name
+                    parcel_info[parcel_info.findIndex(e => e.type == 'data' & e.name == 'field')].value = comp_name
+                    update_data_store_callback(rsp, elem, parcel_info, param_store_key, data, old_data)
+                    LoadingScreen.hide(ls_info);
+                    // if updated value is a non-pseudo source compartment updated the other chemical state as both states are the same
+                    let chem_tabs = $(elem).closest("div.tab-pane").parent("div").find("div.tab-pane")
+                    let this_chem = $(elem).closest('div.tab-pane').data('tab-name').split("(")[0].trim()
+                    let this_state = $(elem).closest('div.tab-pane').data('tab-name').split("(")[1].replace(")","").trim()
+                    let other_state = this_state == "Gaseous" ? "Particulate" : "Gaseous"
+                    let other_chem = this_chem +" (" + other_state +")"
+                    let other_tab = chem_tabs.filter((i,e) =>{ return $(e).attr("data-tab-name") == other_chem })
+                    let cmp_map = $(other_tab).find("table.compMap")
+                    populate_values($(other_tab).find(cmp_map))
+                })
             } else {
                 return
             }
@@ -585,6 +619,7 @@
         function initialize_compartment_map(spec) {
             let parcels = TRIM.store.currentScenario.parcels;
             var map_html = "<tbody>"
+            let skip_comps = ['Degradation_Reaction_Sink', 'Soil_Advection_Sink', 'Flush_Rate_Sink']
             let exclude = spec == "Particulate" ? "VaporSource" : "ParticleSource"
             parcels.forEach( function(e,i){
                 map_html = map_html + "<tr data-depth='0' class='level0 colps'><td data-pcl-name='" + e.name + "'>" + e.name + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
@@ -593,6 +628,10 @@
                         map_html = map_html + "<tr data-depth='1' class='level1 colps'><td data-pcl-name='" + e.name + "'></td><td data-ve-name='" + ve + "'>" + ve + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td></tr>"
                     }
                     for (comp in e.compartment_map[ve]) {
+                        if (skip_comps.map(el => el + '_' + ve).indexOf(e.compartment_map[ve][comp]) > -1 ||
+                        skip_comps.indexOf(e.compartment_map[ve][comp]) > -1) {
+                            continue
+                        }
                         if (e.compartment_map[ve][comp].indexOf(exclude) == -1){
                             map_html = map_html + "<tr data-depth='2' class='level2 colps'><td data-pcl-name='" + e.name + "'></td><td data-ve-name='" + ve + "'></td><td class='comp' data-comp-name='" + e.compartment_map[ve][comp] + "'>" + e.compartment_map[ve][comp] + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='editableCell badge badge-light'>0</label></td></tr>"
                         }
@@ -644,7 +683,7 @@
             })
             $("a.dropdown-item.comp-item").on("click",function (e){
                 e.preventDefault()
-                let this_table = $(this).closest("div.dropdown").next("table.compMap")
+                let this_table = $(this).closest("div.dropdown").nextAll("table.compMap:first")
                 let this_dd_btn = $(this).closest("div.dropdown").find("button.btn_show_emission_comp")
                 $('button.comp_hide_all').trigger('click');
                 let only_comps = $(this_table).find("tr.colps.level2").filter((i,tr) => $(tr).find("td.comp").text() == $(this).text());
@@ -652,7 +691,7 @@
                 $(only_comps).show()
                 $(this_dd_btn).text($(this).text())
 
-                $(only_comps).prev("tr.level1").show()
+                $(only_comps).each((i, e)=>{$(e).prevAll("tr.level1:first").show()})
             })
         }
     });

@@ -211,7 +211,7 @@
                 let this_text_ae = $('#seasonal-gui').find(search_txt_ae_str)
                 let val_lf = seasonal_dyn_obj[`litterfall_${e}`]
                 let val_ae = seasonal_dyn_obj[`allow_exchange_${e}`]
-                if (val_lf == -1 && val_ae == -1) {
+                if (val_lf == -1 || val_ae == -1) {
                     this_chkbx.closest('div[data-slot=true]').css('display', 'none')
                 }
                 $(this_text_lf).val(val_lf)
@@ -243,6 +243,14 @@
                 } else {
                     let bad_data = $(elem).data("seasonal").filter((e,i)=>parseFloat(e.LitterfallRate) > 1)
                     ErrToolTip(elem, bad_data.length == 0, `${type_text} rates must be <= 1.`, "div");
+                }
+            }
+
+            // all allow exchange rates must be either 0 or 1
+            if ($(elem).attr("id").includes("allowexchange") && elementIsValid($(elem).parent())) {
+                if ($(elem).attr('name').indexOf("_field_name") === -1) {
+                    let val = parseFloat($(elem).val());
+                    ErrToolTip(elem, (val == 0 || val == 1), `${type_text} rates must be either 0 or 1.`, "div");
                 }
             }
 

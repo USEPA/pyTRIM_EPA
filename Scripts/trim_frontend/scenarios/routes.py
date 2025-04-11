@@ -2,6 +2,7 @@ import json
 import os
 import re
 import time
+import pint
 from datetime import datetime
 from pathlib import Path
 
@@ -24,6 +25,7 @@ from .defaults import *
 from .forms import *
 from ..utils.logging import make_logger
 from trim_core.algorithms.full_model_run import run_full_model
+# from trim_core.algorithms.GetFlow.getflow import run_getflow_v7_for_scenario_id
 # from sqlalchemy import inspect
 
 import traceback
@@ -192,6 +194,7 @@ def update_scenario():
     ret_val = ''
 
     def create_new_custom_param_meteo(scen, comp, par_name):
+        print(f"\n{par_name}\n")
         default_param = ParameterService.definitions.get_all(variable_name=par_name)
         
         if par_name == "AirTemperature":
@@ -380,7 +383,14 @@ def update_scenario():
                     update_custom_param(s, s, param_name, param_data, create_if_dne=True)
                 elif field_name.endswith("_TS"):
                     ret_val = meteo_wgt_avg_value_from_timeseries(param_data, "MET")
-                    update_custom_param(s, s, param_name, list(ret_val.values())[0], create_if_dne=True)
+                    if isinstance(ret_val, dict) and "wt_av_Rain" in ret_val.keys():
+                        param_value = ret_val["wt_av_Rain"]
+                    elif isinstance(ret_val, dict) and "wt_av_CumulativeRain" in ret_val.keys():
+                        param_value = ret_val["wt_av_CumulativeRain"]
+                    else:
+                        param_value = list(ret_val.values())[0]
+                    update_custom_param(s, s, param_name, param_value, create_if_dne=True)
+
         elif field_name.startswith("seasonal_"):  # Data from the seasonal dynamics tab
             param_media = param_map["seasonal"].get(field_name)[0]
             param_name = param_map["seasonal"].get(field_name)[1]
@@ -781,9 +791,9 @@ def run_result_scenario():
     try:
         # in dev/prod, we execute an AWS StepFunction to run the model via Docker/ECS. Locally,
         # we just run the model directly.
-        if trim_env_profile in [ "dev", "prod" ]:
+        if trim_env_profile in [ "dev", "devgetflow", "prod" ]:
             sfn_client = boto3.client("stepfunctions")
-            state_machine_arn = os.environ.get("TRIM_DOCKERIZED_STATEMACHINE_ARN")
+            state_machine_arn = os.environ.get("TRIM_DOCKERIZED_RUNMODEL_STATEMACHINE_ARN")
 
             if state_machine_arn is not None:
                 resp = sfn_client.start_execution(
@@ -929,3 +939,225 @@ def fetch_run_results():
 
 
     return ApiResult(resp)
+
+@scenario_api.route(
+    '/api/scenario/<int:scenario_id>/run_getflow', methods=['POST']
+)
+@login_required
+def run_getflow(scenario_id):
+    """
+    flow is as follows:
+    * gui_surface_runoff.html is the template for the url /scenario/{id}/edit?default_runoff_matrix_file=#surface_runoff-tab
+    * clicking "Run GetFlow" btn runs a small JavaScript function defined in that html file
+    * that function calls api.runGetFlow, defined in api.js. That packages some stuff up and hits
+      /api/scenario/{id}/run_getflow
+    * that's this function! This now kicks off a Step Function and returns the execution arn or whatever
+    """
+    trim_env_profile = os.environ.get("TRIM_ENV_PROFILE", "").lower()
+
+    print(f"TOM in run_getflow within routes.py, env==[{trim_env_profile}]...")
+    print(f"scenario id is [{scenario_id}] / {type(scenario_id)}")
+    print(f"data is ?!?!!?")
+
+    s = ScenarioService.get(scenario_id)
+    if not s:
+        raise ApiException("Unknown Scenario")
+
+    print(f"scenario: {s}")
+
+    print(f"Starting/Kicking Off GetFlow Run ({datetime.now()}...")
+    try:
+        # unlike runmodel, here we use ECS even when running locally. (getting a working qgis
+        # install is non-trivial, but if you wanted to run local you'd need to do that, then
+        # modify this section of code to do something like "run_result_scenario".
+        if True or trim_env_profile in [ "dev", "devgetflow", "prod" ]:
+            sfn_client = boto3.client("stepfunctions")
+            state_machine_arn = os.environ.get("TRIM_DOCKERIZED_GETFLOW_STATEMACHINE_ARN")
+
+            print(f"arn is '{state_machine_arn}'")
+
+            if state_machine_arn is not None:
+                resp = sfn_client.start_execution(
+                    stateMachineArn=state_machine_arn,
+                    input=json.dumps({ "scenarioId": str(scenario_id), "generateFakeResults": "false" })
+                )
+                data_resp = { "executionArn": resp["executionArn"] }
+                # data_resp = { "to": "do" }
+            else:
+                data_resp = { "error": "Missing required envrionment variable to run getflow" }
+
+            print(f"Back (Kicked Off) ({datetime.now()}...")
+        else:
+            data_resp = {"not": "implemented!"}
+    except Exception as e:
+        print(e)
+        data_resp = {"error": repr(e)}
+
+    return ApiResult(data_resp)
+
+@scenario_api.route(
+    '/api/stepfxn_check', methods=['POST']
+)
+@login_required
+def check_stepfunction_status():
+    print(f"checking stepfxn status...")
+    print(request.form.to_dict())
+
+    execution_arn = request.form.to_dict().get("arn")
+
+    if execution_arn is None:
+        data_resp = {"error": "no execution arn supplied"}
+    else:
+        try:
+            sfn_client = boto3.client("stepfunctions")
+            resp = sfn_client.describe_execution(
+                executionArn=execution_arn
+            )
+            data_resp = {
+                "status": resp.get("status")
+            }
+
+            if resp.get("status", "").upper() == "SUCCEEDED":
+                data_resp["output"] = {}
+
+                stepfxn_output = resp.get("output")
+                print(f"RAW OUTPUT: {stepfxn_output}")
+                parsed = json.loads(stepfxn_output)
+                for key in parsed:
+                    data_resp["output"][key] = parsed[key]
+
+
+
+        except Exception as e:
+            data_resp = {"error": str(e) }
+
+    return ApiResult(data_resp)
+
+@scenario_api.route('/api/scenario/<int:scenario_id>/export/mirc', methods=['GET'])
+# TODO: Need some way for MIRC *app* to authenticate?
+@login_required
+def export_for_mirc(scenario_id):
+    scen = ScenarioService.get(scenario_id)
+    if not scen:
+        raise ApiException("Unknown Scenario")
+
+    logger = make_logger('mirc_exporter')
+    logger.info(f"Compiling required MIRC data for scenario {scen.name}...")
+    try:
+        latest_model_run = [v for v in scen.proc_status if not v.is_run_error]
+        if len(latest_model_run) == 0:
+            return ApiResult({
+                'trim_data': {"message": "No valid data found"}
+            })
+        latest_model_run = latest_model_run[0]
+
+        mass = json.loads(latest_model_run.result_nt)
+        mass = json.loads("{"+mass+"}")
+        conc = json.loads(latest_model_run.result_conc)
+        conc = json.loads("{"+conc+"}")
+
+        logger.info(f"Model run found, using run with id [{latest_model_run.id}]...")
+
+        chems = {c.name : c for c in scen.chemicals}
+        timestamps = [f"01/01/{year} 00:00:00 EST" for year in mass['year'].values()]
+
+        trim_data = {
+            'scenario_name': scen.name,
+            'chemicals': list(chems.keys()),
+            'timestamps': timestamps,
+        }
+
+        trim_data["parcels"] = compile_mirc_parcel_data(scen, chems, conc, timestamps, logger)
+    except Exception as e:
+        logger.error(e)
+        traceback.print_exc()
+        trim_data = {"error": "No valid data found"}
+
+    return ApiResult({
+        'trim_data': trim_data
+    })
+
+def compile_mirc_parcel_data(scen, chems, conc, timestamps, logger):
+    logger.info(f"Compiling parcel data for...")
+    parcels = []
+    for parcel in scen.parcels:
+        logger.info(f"{parcel.name}")
+        p = {
+            "name": parcel.name,
+            "vertices": parcel.vertices,
+            "volume_elements": [],
+        }
+        for volume_element in parcel.volume_elements:
+            ve = {
+                "name": volume_element.name,
+                "compartments": [],
+            }
+            for compartment in volume_element.compartments:
+                c = {
+                    "name": compartment.name,
+                    "properties": {},
+                }
+
+                # properties not relevant for a given compartment can be skipped
+                for chem_name in chems.keys():
+                    props = {}
+                    filtered_key = f'{chem_name}_{compartment.standard_name}'
+                    filtered_conc = list(conc[filtered_key].values())
+                    filtered_conc_units = list(conc[filtered_key+"_units"].values())
+
+                    # constants
+                    if "air" in c["name"].lower():
+                        props["rho_a"] = {
+                            "value": compartment.rho.magnitude,
+                            "unit": str(compartment.rho.units), # "g/cm^3"
+                        }
+
+                    chem_kd = chems[chem_name].Kd(compartment=compartment)
+                    props["Kd"] = {
+                        "value": chem_kd.magnitude,
+                        "unit": str(chem_kd.units), # "L/kg"
+                    }
+
+                    chem_fmd = chems[chem_name].FractionMass_Dissolved(compartment=compartment)
+                    if chem_fmd:
+                        if isinstance(chem_fmd, pint.Quantity):
+                            props["FMD"] = chem_fmd.magnitude
+                        else:
+                            props["FMD"] = chem_fmd
+    
+                    chem_fv = chems[chem_name].FractionMass_Vapor(compartment=compartment)
+                    if chem_fv:
+                        if isinstance(chem_fv, pint.Quantity):
+                            props["Fv"] = chem_fv.magnitude
+                        else:
+                            props["Fv"] = chem_fv
+
+
+                    # timestamp values
+                    props["C"] = {}  # concentration
+
+                    chem_wet = chems[chem_name].ParticleVolumetricWetDepositionRate(compartment=compartment)
+                    props["Drwp"] = {}  # deposition rate wet particle
+
+                    chem_dry = chems[chem_name].ParticleVolumetricDRYDepositionRate(compartment=compartment)
+                    props["Drdp"] = {}  # deposition rate dry particle
+                    for i, timestamp in enumerate(timestamps):
+                        if isinstance(filtered_conc_units[0], str):
+                            props["C"][timestamp] = {
+                                "value": filtered_conc[i],
+                                "unit": filtered_conc_units[i] # "ug/g"
+                            }
+                        props["Drwp"][timestamp] = {
+                            "value": chem_wet.magnitude,
+                            "unit": str(chem_wet.units) # "g/day/m^2"
+                        }
+                        props["Drdp"][timestamp] = {
+                            "value": chem_dry.magnitude,
+                            "unit": str(chem_dry.units) # "g/day/m^2"
+                        }
+
+                    c["properties"][chem_name] = props
+                ve["compartments"].append(c)
+            p["volume_elements"].append(ve)
+        parcels.append(p)
+    return parcels

@@ -6,21 +6,21 @@
             "label": "Total Effective Erosion Rate File",
             "data_type": "file",
             "required": false,
-            "help": "Indicate the file containing total effective erosion rate information. You may later choose to manually enter values on the screen for certain parameters, \n\trather than use the file. This file must contain the names of the surface parcels as well values for the erosion parameters you wish to provide. \n\tAny required parameters that are not imported will be assigned default values which you can later update"
+            "help": "Indicate the file containing total effective erosion rate information. You may later choose to manually enter values on the screen for certain parameters, \n\trather than use the file. This file must contain the names of the surface parcels as well as values for the erosion parameters you wish to provide. \n\tAny required parameters that are not imported will be assigned default values which you can later update"
         },
         {
             "id": "erosion_params_file_opt2",
             "label": "Unit Soil Loss & Sediment Delivery Ratio File",
             "data_type": "file",
             "required": false,
-            "help": "Indicate the file containing unit soil loss and sediment delivery rate information. You may later choose to manually enter values on the screen for certain parameters, \n\trather than use the file. This file must contain the names of the surface parcels as well values for the erosion parameters you wish to provide. \n\tAny required parameters that are not imported will be assigned default values which you can later update"
+            "help": "Indicate the file containing unit soil loss and sediment delivery rate information. You may later choose to manually enter values on the screen for certain parameters, \n\trather than use the file. This file must contain the names of the surface parcels as well as values for the erosion parameters you wish to provide. \n\tAny required parameters that are not imported will be assigned default values which you can later update"
         },
         {
             "id": "erosion_params_file_opt3",
             "label": "Universal Soil Loss Equation Parameters & Sediment Delivery Ratio File",
             "data_type": "file",
             "required": false,
-            "help": "Indicate the file containing universal soil loss equation parameters and sediment delivery rate information. You may later choose to manually enter values on the screen for certain parameters, \n\trather than use the file. This file must contain the names of the surface parcels as well values for the erosion parameters you wish to provide. \n\tAny required parameters that are not imported will be assigned default values which you can later update"
+            "help": "Indicate the file containing universal soil loss equation parameters and sediment delivery rate information. You may later choose to manually enter values on the screen for certain parameters, \n\trather than use the file. This file must contain the names of the surface parcels as well as values for the erosion parameters you wish to provide. \n\tAny required parameters that are not imported will be assigned default values which you can later update"
         },
         {
             "id": "have_user_file_opt2_USL",

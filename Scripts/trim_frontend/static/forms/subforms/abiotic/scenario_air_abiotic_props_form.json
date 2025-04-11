@@ -48,7 +48,7 @@
       "data_type": "integer",
       "default": 226,
       "tooltip": "(m)",
-      "help": "Enter the default height of air volume elements. Valid values are >= 20. The default value of 226 is a health-protective choice from: approximately the 5th percentile of median hourly mixing heights, derived from data at 824 meteorological stations paired with upper-air stations across the United States from January 1–December 31, 2016. You may later override this value using site-specific a single value or a time series of mixing heights."
+      "help": "Enter the default height of air volume elements. Valid values are >= 20. The default value of 226 is a health-protective choice from: approximately the 5th percentile of median hourly mixing heights, derived from data at 824 meteorological stations paired with upper-air stations across the United States from January 1–December 31, 2016. You may later override this value using a site-specific single value or a time series of mixing heights."
     }
   ]
 }

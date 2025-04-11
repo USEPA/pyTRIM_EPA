@@ -5,6 +5,7 @@ import pandas as pd
 import traceback
 import re
 import json
+import requests as pyRequest
 from decimal import Decimal
 from flask import Blueprint, request
 from flask_security import login_required
@@ -269,6 +270,19 @@ def parse_parcel_upload():
         "parcels": []
     }
 
+    def full_stack():
+        import traceback, sys
+        exc = sys.exc_info()[0]
+        stack = traceback.extract_stack()[:-1]  # last one would be full_stack()
+        if exc is not None:  # i.e. an exception is present
+            del stack[-1]  # remove call of full_stack, the printed exception
+            # will contain the caught exception caller instead
+        trc = 'Traceback (most recent call last):\n'
+        stackstr = trc + ''.join(traceback.format_list(stack))
+        if exc is not None:
+            stackstr += '  ' + traceback.format_exc().lstrip(trc)
+        return stackstr
+
     scenario_id = request.form["scenario_id"]
     coord_system = request.form.get("coord_system")
     raw_utm_zone = request.form.get("utm_zone")
@@ -279,7 +293,7 @@ def parse_parcel_upload():
     if coord_system == "UTM":
         valid_zone, default_utm_zone = is_utm_zone_valid(raw_utm_zone)
         if not valid_zone:
-            errors.append("Invalid default utm zone '{raw_utm_zone}' supplied.")
+            errors.append(f"Invalid default utm zone '{raw_utm_zone}' supplied.")
 
     if not files and not geojson:
         errors.append("No files were uploaded")
@@ -385,6 +399,7 @@ def parse_parcel_upload():
             print(f"\tDONE FOR LINE {line_num}")
         except Exception as e:
             errors.append(f"Error processing CSV line {line_num}: {e}")
+            print(f'{60*"*"}\nLINE {line_num}\n{full_stack()}')
 
         line_num += 1
 
@@ -459,30 +474,49 @@ def parse_runoff_matrix_upload():
     parcel_names = {p.name : p for p in parcels}
 
     files = request.files
-    if not files:
+    presigned_url = request.form.get("presigned_url")
+    if not files and not presigned_url:
         return ApiException("No files were uploaded")
     
     try:
-        fpn = [f.stream for n, f in files.items()][0]
-        fpn.seek(0)
-        lines = fpn.read().decode("utf-8")
-        reader = csv.DictReader(io.StringIO(lines))
+        if presigned_url: # getflow generated matrix
+            r = pyRequest.get(presigned_url)
+            csv_data = io.StringIO(r.content.decode('utf-8'))
+            df = pd.read_csv(csv_data, delimiter=',')
+            df.rename(columns={ df.columns[0]: 'parcels' }, inplace = True)
 
-        # TODO make sure all parcels are accounted for
-        # verify headers are valid parcels + sink exists
-        for header in reader.fieldnames:
-            if header == 'sink' or header == 'parcels':
-                continue
-            elif header not in parcel_names.keys():
-                return ApiException(f"Parcel '{header}' does not exist in the scenario")
-        for row in reader:
-            if row.get("parcels") not in parcel_names.keys():
-                return ApiException(f"Parcel '{row.get('parcels')}' does not exist in the scenario")    
-        if "sink" not in reader.fieldnames:
-            return ApiException("Required header 'sink' is missing")
+            # getflow does not include sink
+            if 'sink' not in df.columns:
+                df['sink'] = df.sum(axis=1, numeric_only=True)
+                for idx, row in df.iterrows():
+                    if row['sink'] > 1.0 or row['sink'] <= 0.0:
+                        df.loc[idx, 'sink'] = 0
+                    else:
+                        df.loc[idx, 'sink'] = 1 - df.loc[idx, 'sink']
 
+            reader = df.to_dict('records')
+        else:
+            fpn = [f.stream for n, f in files.items()][0]
+            fpn.seek(0)
+            lines = fpn.read().decode("utf-8")
+            reader = csv.DictReader(io.StringIO(lines))
+
+            # TODO make sure all parcels are accounted for
+            # verify headers are valid parcels + sink exists
+            for header in reader.fieldnames:
+                if header == 'sink' or header == 'parcels':
+                    continue
+                elif header not in parcel_names.keys():
+                    return ApiException(f"Parcel '{header}' does not exist in the scenario")
+            for row in reader:
+                if row.get("parcels") not in parcel_names.keys():
+                    return ApiException(f"Parcel '{row.get('parcels')}' does not exist in the scenario")    
+            if "sink" not in reader.fieldnames:
+                return ApiException("Required header 'sink' is missing")
+            
         # verify values are valid
-        reader = csv.DictReader(io.StringIO(lines))
+        if files:
+            reader = csv.DictReader(io.StringIO(lines))
         for row in reader:
             row_total = []
             for k, v in row.items():
@@ -494,23 +528,27 @@ def parse_runoff_matrix_upload():
                 return ApiException("Sum of runoff fractions should be 1")
 
         # submit
-        reader = csv.DictReader(io.StringIO(lines))
+        if files:
+            reader = csv.DictReader(io.StringIO(lines))
         for row in reader:
             sender_pcl = parcel_names[row.get("parcels")]
             if sender_pcl.name in request.form["water_parcels"]:
                 continue
             del row["parcels"]
             
-            row_receivers = [f"ro_{k}" for k in row.keys()]
-            row_vals = [f"{float(Decimal(v))}" for v in row.values()]
-            payload = {
-                "id": sender_pcl.id,
-                "field": "runoff_matrix_value",
-                "sender": f"ro_{sender_pcl.name}",
-                "receiver": ",".join(row_receivers),
-                "ro_value": ",".join(row_vals)
-            }
-            handle_parcel_update(sender_pcl, payload)
+            row_receivers_all = [f"ro_{k}" for k in row.keys()]
+            row_vals_all = [(vi, f"{float(Decimal(v))}") for vi, v in enumerate(row.values())]
+            row_receivers = [row_receivers_all[vi] for vi, v in row_vals_all if float(Decimal(v)) > 0]
+            row_vals = [row_vals_all[vi][1] for vi, v in row_vals_all if float(Decimal(v)) > 0]
+            if len(row_vals) > 0:
+                payload = {
+                    "id": sender_pcl.id,
+                    "field": "runoff_matrix_value",
+                    "sender": f"ro_{sender_pcl.name}",
+                    "receiver": ",".join(row_receivers),
+                    "ro_value": ",".join(row_vals)
+                }
+                handle_parcel_update(sender_pcl, payload)
                 
     except Exception as e:
         print(traceback.format_exc())

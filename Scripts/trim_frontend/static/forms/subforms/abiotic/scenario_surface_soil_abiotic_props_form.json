@@ -30,7 +30,7 @@
     },
     {
       "id": "VolumeFraction_Vapor",
-      "label": "Air content",
+      "label": "Air Content",
       "data_type": "float",
       "default": 0.28,
       "tooltip": "volume [air]/volume [compartment]",
@@ -38,7 +38,7 @@
     },
     {
       "id": "AverageVerticalVelocity",
-      "label": "Average vertical velocity of water (percolation)",
+      "label": "Average Vertical Velocity of Water (Percolation)",
       "data_type": "float",
       "default": "<<<0.2 * e.precip_rate>>>",
       "tooltip": "m/day",
@@ -46,7 +46,7 @@
     },
     {
       "id": "AirSoilBoundaryThickness",
-      "label": "Boundary layer thickness above surface soil",
+      "label": "Boundary Layer Thickness Above Surface Soil",
       "data_type": "float",
       "default": 0.005,
       "tooltip": "m",
@@ -54,15 +54,15 @@
     },
     {
       "id": "rho",
-      "label": "Density of soil solids (dry weight)",
+      "label": "Density of Soil Solids (Dry Weight)",
       "data_type": "float",
       "default": 2600,
       "tooltip": "kg [soil]/m<sup>3</sup> [soil]",
-      "help": "Enter the dry weight density of soil solids in the soil layer. Valid values are > 0. The default value of 2,600 is the value used for by the CalTOX model (see Table 1 of: CalEPA (California Environmental Protection Agency), Department of Toxic Substances Control. 1996. The Distribution of California Landscape Variables for CalTOX. Draft (February). For wetland parcels, a value of 500 might be appropriate (professional judgment)."
+      "help": "Enter the dry weight density of soil solids in the soil layer. Valid values are > 0. The default value of 2,600 is the value used by the CalTOX model (see Table 1 of: CalEPA (California Environmental Protection Agency), Department of Toxic Substances Control. 1996. The Distribution of California Landscape Variables for CalTOX. Draft (February). For wetland parcels, a value of 500 might be appropriate (professional judgment)."
     },
     {
       "id": "Fractionofareaavailableforerosion",
-      "label": "Fraction of area available for erosion",
+      "label": "Fraction of Area Available for Erosion",
       "data_type": "float",
       "default": 1,
       "tooltip": "m<sup>2</sup> [area available]/m<sup>2</sup> [total]",
@@ -70,7 +70,7 @@
     },
     {
       "id": "FractionofAreaAvailableforRunoff",
-      "label": "Fraction of area available for runoff",
+      "label": "Fraction of Area Available for Runoff",
       "data_type": "float",
       "default": 1,
       "tooltip": "m<sup>2</sup> [area available]/m<sup>2</sup> [total]",
@@ -78,7 +78,7 @@
     },
     {
       "id": "Fractionofareaavailableforverticaldiffusion",
-      "label": "Fraction of area available for vertical diffusion",
+      "label": "Fraction of Area Available for Vertical Diffusion",
       "data_type": "float",
       "default": 1,
       "tooltip": "m<sup>2</sup> [area available]/m<sup>2</sup> [total]",
@@ -86,7 +86,7 @@
     },
     {
       "id": "FractionSand",
-      "label": "Fraction sand",
+      "label": "Fraction Sand",
       "data_type": "float",
       "default": 0.25,
       "tooltip": "unitless",
@@ -94,7 +94,7 @@
     },
     {
       "id": "OrganicCarbonContent",
-      "label": "Organic carbon fraction",
+      "label": "Organic Carbon Fraction",
       "data_type": "float",
       "default": 0.008,
       "tooltip": "unitless",
@@ -106,11 +106,11 @@
       "data_type": "float",
       "default": 6.8,
       "tooltip": "unitless",
-      "help": "Enter the pH of the soil layer. Valid values are 0 to 14. The default value fo 6.8 is professional judgment. Typical sources of site-specific values include the U.S. Department of Agriculture's Web Soil Survey (Soil Survey Staff, Natural Resources Conservation Service, United States Department of Agriculture. Web Soil Survey. Available online at https://websoilsurvey.nrcs.usda.gov/.)."
+      "help": "Enter the pH of the soil layer. Valid values are 0 to 14. The default value of 6.8 is professional judgment. Typical sources of site-specific values include the U.S. Department of Agriculture's Web Soil Survey (Soil Survey Staff, Natural Resources Conservation Service, United States Department of Agriculture. Web Soil Survey. Available online at https://websoilsurvey.nrcs.usda.gov/.)."
     },
     {
       "id": "TotalRunoffRate",
-      "label": "Total runoff rate",
+      "label": "Total Runoff Rate",
       "data_type": "float",
       "default": "<<<formula: e.precip_rate * e.runoff_fraction>>>",
       "tooltip": "m<sup>3</sup> [water]/m<sup>2</sup>/day",
@@ -118,7 +118,7 @@
     },
     {
       "id": "VolumeFraction_Liquid",
-      "label": "Water content",
+      "label": "Water Content",
       "data_type": "float",
       "default": "0.19",
       "tooltip": "volume [water]/volume [compartment]",

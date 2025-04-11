@@ -40,6 +40,14 @@ window.TRIM = (function(trim) {
         })
     }
 
+    api.exportScenarioForMirc = function(scenario_id) {
+        var url = api.getUrl('scenario_api.export_for_mirc').replace('/0', '/' + scenario_id);
+        return AJAX.call({
+            method: 'GET',
+            url: url
+        });
+    }
+
     api.getMeteorology = function(scenario) {
         var url = api.getUrl('scenario_api.get_scenario_met_data');
         return AJAX.call({
@@ -254,6 +262,34 @@ window.TRIM = (function(trim) {
             url: url,
             data: data,
 			callback: callback_fxn
+        });
+    }
+
+	api.checkStepFunctionStatus = function(execution_arn, callback_fxn) {
+        let url = api.getUrl('general_api.stepfxn_check');
+        console.log("CHECK STEPFXN STATUS URL IS: [" + url + "]");
+        let data = makeFormData({type: "data", name: "arn", value: execution_arn})
+
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: data,
+            callback: callback_fxn
+        });
+	}
+
+    api.runGetFlow = function(scenario_id, callback_fxn) {
+        console.log("runGetFlow (api.js");
+        let url = api.getUrl('scenario_api.run_getflow').replace("/0/", "/" + scenario_id + "/");
+        console.log("RUN GETFLOW URL IS: [" + url + "]");
+
+        let data = makeFormData([]);//scenario_info);
+
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: data,
+            callback: callback_fxn
         });
     }
 

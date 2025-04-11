@@ -70,6 +70,29 @@ let ErrorValidation = {
         let is_valid = isNumber(data);
         return ErrToolTip(ele, is_valid, "Invalid values found within number.", parent_ele);
     },
+    isWithinRange : function (ele, parent_ele="td", min=undefined, max=undefined) {
+        if (!this.isValidNumber(ele)) {
+            return false;
+        }
+        let data = $(ele).val();
+        let is_valid = parseFloat(data);
+        let msg = "Value is not valid.";
+
+        if (min !== undefined && max !== undefined) {
+            is_valid = (is_valid >= min && is_valid <= max);
+            msg = `Value must be between, or equal to, ${min} and ${max}.`;
+        }
+        else if (min !== undefined) {
+            is_valid = is_valid >= min;
+            msg = `Value must be greater than or equal to ${min}.`;
+        }
+        else if (max !== undefined) {
+            is_valid = is_valid <= max;
+            msg = `Value must be less than or equal to ${max}.`;
+        }
+
+        return ErrToolTip(ele, is_valid, msg, parent_ele);
+    },
     rowTotalIsValid : function (ele) {
         let row = ele.closest("tr");
         let cells = $(row).find("input.editableCell");

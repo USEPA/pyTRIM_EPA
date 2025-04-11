@@ -2,6 +2,7 @@ from trim_db.schema import Parcel
 from trim_db.schema.utils.serialize import register_serializer
 from trim_db.schema.parameters.models import ParameterDefinition, CustomParameter
 from trim_db.services import *
+from trim_frontend.scenarios.defaults import EROSION_TABLE_KWARGS
 import pint
 
 comp_local_cache = {}
@@ -14,6 +15,7 @@ def serialize_parcel(pcl: Parcel):
     water_params = get_water_params(pcl, general_params['parcelType'])
     source_params = get_source_params(pcl)
     soil_abiotic_params = get_soil_abiotic_params(pcl)
+    initial_conc = get_initial_concetrations(pcl)
 
     s = {
         'id': pcl.id,
@@ -25,7 +27,8 @@ def serialize_parcel(pcl: Parcel):
         **general_params,
         **water_params,
         **source_params,
-        **soil_abiotic_params
+        **soil_abiotic_params,
+        **initial_conc
     }
 
     comp_local_cache.clear()
@@ -62,6 +65,7 @@ def init_comp_cache(pcl):
 
 
 def get_comp(pcl, kwargs):
+    # comp_local_cache.clear()
     uuid = f"{pcl.id}_{str(kwargs.keys())}_{str(kwargs.values())}"
     comp = comp_local_cache.get(uuid)
     if not comp:
@@ -91,7 +95,7 @@ def get_general_params(pcl):
     is_tilled = False
 
     erosion_table_params = {}
-    default_erosion = ParameterService.definitions.get_all(variable_name="erosion_table")
+    default_erosion = [ParameterService.definitions.get(full_name=kwargs["full_name"]) for kwargs in EROSION_TABLE_KWARGS]
     for default_param in default_erosion:
         custom_param = ParameterService.get(
             scenario_id=pcl.scenario_id,
@@ -120,7 +124,8 @@ def get_general_params(pcl):
     if groundwater_height:
         groundwater_height = groundwater_height.volume_element.height.m_as('m')
 
-    for comp in comp_local_cache["all"]:        
+    # for comp in comp_local_cache["all"]:
+    for comp in pcl.compartments:
         # Check parcel type
         if comp.media.isa('Air', or_child=False):
             air = True
@@ -174,7 +179,7 @@ def get_general_params(pcl):
         elif comp.media.isa('Deciduous_Forest'):
             land_use = 'Deciduous Forest'
         elif comp.media.isa('Agriculture'):
-            land_use = 'Agriculture - General'
+            land_use = 'Agriculture (General)'
         elif comp.media.isa('Grass'):
             land_use = 'Grasses/Herbs'
 
@@ -530,17 +535,46 @@ def get_water_params(pcl, parcel_type):
     return water_params
 
 
+def get_initial_concetrations(pcl):
+    chem_objs = {c for c in pcl.scenario.chemicals}
+    chems = {c.name: {} for c in pcl.scenario.chemicals}
+    initial_conc = {"initialConcentrations": chems}
+    for chem in chem_objs:
+        for comp in pcl.compartments:
+            unit = "g / m^3" if comp.media.id in [2, 5, 7, 56, 55, 8, 9] else "g / kg" if comp.media.id in [23, 24, 27, 28, 29, 31, 32, 33, 37, 39, 41, 43, 44, 45, 46, 47, 48, 49, 50, 51] else "g / L" if comp.media.id in [10, 4] else ""
+            spd = initial_conc["initialConcentrations"][chem.name].get(comp.volume_element.name)
+            # Ultimately we need to use initialConcentrationConverted but we need to solve the unit incomaptibility issue.
+            if spd:
+                spd.setdefault(comp.name, {'ic': comp.initialConcentration(chem).magnitude, 'unit': unit})
+            else:
+                initial_conc["initialConcentrations"][chem.name].setdefault(comp.volume_element.name, {
+                    comp.name: {'ic': comp.initialConcentration(chem).magnitude, 'unit': unit}})
+    return initial_conc
+
+
 def get_source_params(pcl):
     chem_objs = {c for c in pcl.scenario.chemicals}
-    source_comps = [c for c in comp_local_cache["all"] if c.media.isa("Source")]
+    # source_comps = [c for c in comp_local_cache["all"] if c.media.isa("Source")]
+    source_comps = [c for c in pcl.compartments]
     chems = {c.name: {} for c in pcl.scenario.chemicals}
     source_params = {"sources": chems}
     for comp in source_comps:
         for chem in chem_objs:
             try:
-                source_params["sources"][chem.name][comp.volume_element.name] = {comp.name: comp.surfaceDepositionRate(chemical=chem).magnitude}
+                # source_params["sources"][chem.name][comp.volume_element.name] = {comp.name: comp.surfaceDepositionRate(chemical=chem).magnitude}
+                spd = source_params["sources"][chem.name].get(comp.volume_element.name)
+                if spd:
+                    spd.setdefault(comp.name, comp.surfaceDepositionRate(chemical=chem).magnitude)
+                else:
+                    source_params["sources"][chem.name].setdefault(comp.volume_element.name, {comp.name: comp.surfaceDepositionRate(chemical=chem).magnitude})
             except AttributeError:
-                source_params["sources"][chem.name][comp.volume_element.name] = {comp.name: comp.surfaceDepositionRate(chemical=chem)}
+                # source_params["sources"][chem.name][comp.volume_element.name] = {comp.name: comp.surfaceDepositionRate(chemical=chem)}
+                spd = source_params["sources"][chem.name].get(comp.volume_element.name)
+                if spd:
+                    spd.setdefault(comp.name, comp.surfaceDepositionRate(chemical=chem))
+                else:
+                    source_params["sources"][chem.name].setdefault(comp.volume_element.name, {
+                        comp.name: comp.surfaceDepositionRate(chemical=chem)})
     return source_params
 
 

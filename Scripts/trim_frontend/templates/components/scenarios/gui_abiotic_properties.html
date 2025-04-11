@@ -11,10 +11,19 @@
                 <div class="pill pill-alert col-sm">
                     <small>
                         <strong>
-                            <u>Click on the table cells to edit properties</u>. Please note that the values displayed in the table at the time of the "Save" operation are the values that will be incorporated into the calculations
+                            <u>Click on the table cells to edit properties</u>.
                         </strong>
                         <br><span style='color: firebrick;'>*</span> All editable cells are required.
                     </small>
+                </div>
+                <div class = "row">
+                    <div class="col-md mt-3">
+                    </div>
+                    <div class="col-md mt-3">
+                        <button id="abiotic-usda-soil-btn" class="btn btn-warning">Get data from USDA Soil DataMart</button>
+                    </div>
+                    <div class="col-md mt-3">
+                    </div>
                 </div>
                 <div class="row">
                     <div class="col-md m-2 text-center">
@@ -37,15 +46,6 @@
                 <div class ="row">
                     <div class="col-md">
                         <table data-slot="true" data-target="AirAbioticTable" class="hover" id="AirAbioticTable"></table>
-                    </div>
-                </div>
-                <div class = "row">
-                    <div class="col-md mt-3">
-                    </div>
-                    <div class="col-md mt-3">
-                        <button class="btn btn-warning">Get data from USDA Soil DataMart</button>
-                    </div>
-                    <div class="col-md mt-3">
                     </div>
                 </div>
                 <div class = "row">
@@ -157,6 +157,7 @@
                 bAutoWidth: false,
                 scrollX: true,
                 scrollY: 500,
+                bDestroy: true,
                 fnCreatedRow: function (row, data, index) {
                     $(row).find("td.rightBorder").addClass("freeze-column")
                 },
@@ -678,7 +679,7 @@
                 parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
                 let param_store_key = "soil_params"
                 TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', (rsp)=>{
-                    update_data_store_callback(rsp, elm, parcel_info, param_store_key, data, old_data)
+                    update_data_store_callback(rsp, cell, parcel_info, param_store_key, data, old_data)
                     LoadingScreen.hide(ls_info)
                 })
                 table_data = get_Data_from_table(`#${focusTblId}`)
@@ -687,19 +688,47 @@
 
         function submit_spatially_varying_row(focusTblId, cell, data) {
             $(cell).parents("tr").find("input.editableCell").each((i,f)=>{
-                LoadingScreen.show('submit_sv_val');
                 let parcel_info = $(f).data('parcelinfo');
                 if (parcel_info) {
+                    let ls_info = 'submit_sv_val'
+                    LoadingScreen.show(ls_info);
+                    let old_data = parcel_info[parcel_info.findIndex(e => e.type == 'input')].value
                     if (f == cell) {
                         parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data;
                     }
-                    TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', ()=>{
-                        LoadingScreen.hide('submit_sv_val');
+                    let param_store_key = ""
+                    TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', (rsp)=>{
+                        // update_data_store_callback(rsp, cell, parcel_info, param_store_key, data, old_data)
+                        LoadingScreen.hide(ls_info);
                     })
                     table_data = get_Data_from_table(`#${focusTblId}`);
                 }
             })
         }
+
+        $("#abiotic-usda-soil-btn").on('click', (e) => {
+            e.preventDefault();
+            /*
+            LoadingScreen.show('parcel_soil_data');
+            function parseSoilData(resp) { // till and notill
+                $.each(resp, (pcl, data) => {
+                    resp[pcl] = JSON.parse(data);
+                    
+                    let surface_idx = Object.values(resp[pcl].layer).indexOf('surface');
+                    let root_idx = Object.values(resp[pcl].layer).indexOf('root');
+                    let vadose_idx = Object.values(resp[pcl].layer).indexOf('vadose');
+                });
+                return resp;
+            }
+            TRIM.api.getSoilData('both').on('load', function () {
+                LoadingScreen.hide('parcel_soil_data');
+                let soil_data = JSON.parse(this.responseText);
+                let till = parseSoilData(soil_data.tilled_data);
+                let notill = parseSoilData(soil_data.no_till_data);
+
+                console.log("!")
+            });*/
+        });
 
         function get_Data_from_table(thisTableID){
             var myRows = [];
