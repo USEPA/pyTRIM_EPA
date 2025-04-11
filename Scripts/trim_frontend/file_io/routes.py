@@ -1,6 +1,7 @@
 import csv
 import io
 import os
+import boto3
 import pandas as pd
 import traceback
 import re
@@ -404,6 +405,151 @@ def parse_parcel_upload():
         line_num += 1
 
     lines = lines.split("\r\n")
+
+    if len(errors) > 0:
+        raise ApiException("; ".join(errors))
+    else:
+        return ApiResult(return_data)
+
+@file_api.route('/api/misc_scen_file', methods=['GET', 'POST', 'DELETE'])
+@login_required
+def manage_misc_scenario_file():
+    # this is a generic endpoint for handling storage (upload/deletion/retrieval) of miscellaneous files
+    # associated with a scenario. Pass in a 'misc_file_type'==x and you'll get:
+    # a file /{scenarioId}/x and /{scenarioId}/_x.json in the appropriate
+    # S3 bucket. the json file is metadata; it will contain any other fields you passed in at upload time, as well as
+    # some standard fields like the original file name, etc.
+    #
+    # this function can be configured to handle specific misc_file_type's in the way it sets up MIME_TYPES and
+    # FILE_EXTENSIONS (like developers can customize this function to set appropriate ContentTypes) but it will
+    # fall back to sensible defaults if a new one is passed in. Could also easily be extended to do things based on
+    # misc_file_type like process a file before storing it, store multiple files, etc.
+    #
+    # initially this is only used for overlay uploads on the parcels tab, but it could be used in other places
+    # going forward.
+
+    # initially modeled after parse_parcel_upload
+    errors = []
+    return_data = {}
+
+    file_storage_bucket = os.getenv("SCENARIO_MISC_FILES_BUCKET_NAME")
+
+    s3_client = boto3.client("s3")
+    s3_resource = boto3.resource("s3")
+
+    scenario_id = None
+    if request.method == "POST":
+        scenario_id = request.form["scenario_id"]
+        misc_file_type = request.form["misc_file_type"]
+        # upload file to S3...
+    else:
+        scenario_id = request.args.get("scenario_id")
+        misc_file_type = request.args.get("misc_file_type")
+        # check S3 for existing file...
+
+    # right now just overlays. Later if we add other types could be handy.
+    MIME_TYPES = {
+        "overlay": "text/plt"
+    }
+
+    FILE_EXTENSIONS = {
+        "overlay": "plt"
+    }
+
+    content_type = MIME_TYPES.get(misc_file_type, "text/plain")
+    file_extension = FILE_EXTENSIONS.get(misc_file_type)
+
+    if scenario_id is None:
+        errors.append("No scenario id supplied")
+
+    if misc_file_type is None:
+        errors.append("No filetype supplied")
+
+    if len(errors) == 0:
+        print(f"working on scenario '{scenario_id}', misctype='{misc_file_type}' in {request.method}...")
+
+        # s3_file_path = f"{scenario_id}/overlay.plt"
+        s3_file_path = f"{scenario_id}/{misc_file_type}{'.' if file_extension is not None else ''}{file_extension}"
+        s3_metadata_path = f"{scenario_id}/_{misc_file_type}.json"
+
+        if request.method == "GET":
+            file_metadata = None
+            try:
+                content_object = s3_resource.Object(file_storage_bucket, s3_metadata_path)
+                file_content = content_object.get()["Body"].read().decode("utf-8")
+                file_metadata = json.loads(file_content)
+            except:
+                file_metadata = None
+
+            
+            if file_metadata is not None:
+                return_data["file_metadata"] = file_metadata
+            else:
+                return_data["file_metadata"] = None
+
+            try:
+                data_url = s3_client.generate_presigned_url("get_object",
+                                                            Params={
+                                                                "Bucket": file_storage_bucket,
+                                                                "Key": s3_file_path
+                                                            },
+                                                            ExpiresIn=600) # expires in 10 minute(s)
+                return_data["presigned_url"] = data_url
+            except:
+                return_data["presigned_url"] = None
+
+        elif request.method == "POST":
+            ignore = ["scenario_id", "misc_file_type", "csrf_token"]
+            submitted_metadata = { x[0]: x[1] for x in request.form.items() if x[0] not in ignore }
+
+            files = request.files
+
+            if not files:
+                errors.append("No file was uploaded")
+
+            if len(errors) == 0:
+                print(f"let's upload {type(files)} to s3://{file_storage_bucket}...")
+
+                try:
+                    for name, file_obj in files.items():
+                        original_name = secure_filename(file_obj.filename)
+                        submitted_metadata["original_file_name"] = original_name
+                        s3_client.put_object(
+                            Body=file_obj,
+                            Bucket=file_storage_bucket,
+                            Key=s3_file_path,
+                            ContentType=content_type
+                        )
+                        break
+
+                    # update the metadata too
+                    s3_client.put_object(
+                        Body=json.dumps(submitted_metadata),
+                        Bucket=file_storage_bucket,
+                        Key=s3_metadata_path,
+                        ContentType="application/json"
+                    )
+                except Exception as e:
+                    errors.append(str(e))
+        elif request.method == "DELETE":
+            try:
+                s3_client.delete_object(
+                    Bucket=file_storage_bucket,
+                    Key=s3_file_path
+                )
+            except:
+                pass
+
+            try:
+                s3_client.delete_object(
+                    Bucket=file_storage_bucket,
+                    Key=s3_metadata_path
+                )
+            except:
+                pass
+
+            return_data["message"] = "file(s) deleted"
+
 
     if len(errors) > 0:
         raise ApiException("; ".join(errors))

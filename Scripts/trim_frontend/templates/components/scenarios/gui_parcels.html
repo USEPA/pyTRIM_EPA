@@ -31,6 +31,26 @@
 				</div>
 			</div>
 		</fieldset>
+		<fieldset>
+			<legend>Overlay Upload</legend>
+			<div class="row mb-1">
+				<div class="col-sm">
+					<div data-slot="true" data-target="overlay_file"></div>
+
+					<div class="row mb-1 subform">
+						<div class="col-md">
+							<div data-slot="true" data-target="overlay_upload_coordinates_system"></div>
+						</div>
+						<div class="col-md" style="opacity:0">
+							<div data-slot="true" data-target="overlay_upload_utm_zone"></div>
+						</div>
+					</div>
+
+					<!-- <div data-slot="true" data-target="parcel_coordinates_description"></div> -->
+					<a id="overlay-upload-btn" href="#" class="btn btn-secondary"><i class="fas fa-upload mr-1"></i>Upload</a>
+				</div>
+			</div>
+		</fieldset>
         <div id="parcel_file_fields_div">
             <div class="row">
                 <div class="col-sm">
@@ -311,11 +331,17 @@
 
 		function onUploadCoordinateSystemChanged() {
 			let parcelGui = $("#parcels-gui");
-			let coordsSystem = parcelGui.find("#upload_coordinates_system");
-			let utmZone = parcelGui.find("#upload_utm_zone");
 
-			// show/hide the div containing the UTM zone widget
-			utmZone.parents("div[class='col-md']").css("opacity", (coordsSystem.val() == "UTM" ? 1 : 0));
+			let uploadPrefixes = ["",				// parcel upload
+									"overlay_"];	// overlay upload
+
+			for (let i = 0 ; i < uploadPrefixes.length ; i++) {
+				let prefix = uploadPrefixes[i];
+				let coordsSystem = parcelGui.find("#" + prefix + "upload_coordinates_system");
+				let utmZone = parcelGui.find("#" + prefix + "upload_utm_zone");
+				// show/hide the div containing the UTM zone widget
+				utmZone.parents("div[class='col-md']").css("opacity", (coordsSystem.val() == "UTM" ? 1 : 0));
+			}
 		}
 
 		// zones are 1A-60Z with no I/O. case/whitespace insensitive.
@@ -334,7 +360,13 @@
 			let utmZone = parcelGui.find("#upload_utm_zone");
 			let parcelUploader = parcelGui.find("#upload-btn");
 
+			let overlayFile = parcelGui.find("#overlay_file");
+			let overlayCoordsSystem = parcelGui.find("#overlay_upload_coordinates_system");
+			let overlayUtmZone = parcelGui.find("#overlay_upload_utm_zone");
+			let overlayUploader = parcelGui.find("#overlay-upload-btn");
+
 			coordsSystem.on('change', onUploadCoordinateSystemChanged);
+			overlayCoordsSystem.on('change', onUploadCoordinateSystemChanged);
 			onUploadCoordinateSystemChanged();
 
 			parcelUploader.on('click', function() {
@@ -393,6 +425,65 @@
 				});
 				return false;
 			});
+
+			overlayUploader.on('click', function() {
+				let overlayFileData = overlayFile.prop('files')[0];
+
+				if (overlayFileData == undefined) {
+					alert('Please select a file to upload.');
+					return false;
+				} else if (overlayCoordsSystem.val() == "UTM") {
+					if (!isValidUtmZone(overlayUtmZone.val())) {
+						alert('Please enter a valid UTM zone (e.g. 16T, 32A, etc.).');
+						return false;
+					}
+				}
+
+				// if we made it here, we're good to submit to server
+				let fieldData = [overlayFile.get(0)];
+
+				fieldData.push({
+					"type": "input",
+					"name": "scenario_id",
+					"value": TRIM.store.currentScenario.id
+				});
+
+				fieldData.push({
+					"type": "input",
+					"name": "misc_file_type",
+					"value": "overlay"
+				});
+
+				fieldData.push({
+					"type": "input",
+					"name": "coord_system",
+					"value": overlayCoordsSystem.val()
+				});
+
+				fieldData.push({
+					"type": "input",
+					"name": "utm_zone",
+					"value": overlayCoordsSystem.val() == "UTM" ? overlayUtmZone.val() : "n/a"
+				});
+
+				LoadingScreen.show('upload_overlay_plt');
+				TRIM.api.uploadMiscScenarioFile(fieldData, function(success,responseData,c) {
+					LoadingScreen.hide('upload_overlay_plt');
+
+					if (!success) {
+						alert('An error occurred during upload.');
+					} else {
+						// console.log("reload...");
+						// window.location.reload();
+						console.log("Look!");
+						console.log(success);
+						console.log(responseData);
+						console.log(c);
+					}
+				});
+
+				return false;
+			});
 		}
 
         function drawAllParcels() {
@@ -406,6 +497,25 @@
         }
 
         document.body.addEventListener('parcels:ready', drawAllParcels);
+
+		document.body.addEventListener('parcels:ready', function() {
+			LoadingScreen.show('check_overlay_status');
+			TRIM.api.checkMiscScenarioFile(TRIM.store.currentScenario.id, "overlay", function(success,responseData,c) {
+				LoadingScreen.hide('check_overlay_status');
+
+				if (!success) {
+					alert('An error occurred during upload.');
+				} else {
+					// console.log("reload...");
+					// window.location.reload();
+					console.log("Look!");
+					console.log(success);
+					console.log(responseData);
+					console.log(c);
+				}
+			});
+		});
+
 
         function retrieveSavedParcels() {
             parcels.clearLayers();
@@ -817,12 +927,15 @@
             format: 'image/png'
         });
 
+        window.aermodTestOverlay = L.layerGroup();
+
         var togglelayers = L.layerGroup([wmsNLCD2016])
 
         var overlayMaps= {
             "NLCD" : togglelayers,
             "Flowline - Large Scale" : wmsFlowLine,
-            "HUC12 Boundaries" : wmsHUC12
+            "HUC12 Boundaries" : wmsHUC12,
+			"AERMod Demo": aermodTestOverlay
         }
         var baseMaps = {
             "Streets Basemap" : StreetBM,
@@ -1364,5 +1477,23 @@
                 });
             });
         }
+
+
+		// LAT, LNG
+		a = [44.282225, -85.37830428060558];
+		b =[44.282225, -85.341451];
+		c = [44.262225, -85.352451];
+
+		var fooMarker = L.circleMarker(a, { pmIgnore: true, radius: 10, stroke: true, color: "green"}).bindPopup('FOO!').addTo(aermodTestOverlay);
+		var barMarker = L.circleMarker(b, { pmIgnore: true, radius: 10, stroke: true, color: "red"}).bindPopup('BAR!').addTo(aermodTestOverlay);
+		var bazMarker = L.circleMarker(c, { pmIgnore: true, radius: 10, stroke: true, color: "purple"}).bindPopup('BAZ!').addTo(aermodTestOverlay);
+
+		var polyTest = L.polygon([a,b,c], { pmIgnore: true, color: "orange"}).addTo(aermodTestOverlay);
+
+		aermodTestOverlay.addTo(map); // preselects it in the layers control!
+
+		// delete fooMarker.pm; // makes it undeletable...
+		// delete barMarker.pm; // makes it undeletable...
+		// pmIgnore: true makes it undeletable and unsnappable, great!
     });
 </script>
