@@ -1,0 +1,351 @@
+
+<form id="background-conc-gui"
+    data-async-form="true"
+    data-form-src="scenario_background_conc_form"
+>
+    <section class="container px-0">
+        <div class="row mb-1">
+            <div class="col-sm">
+                <div data-slot="true" data-target="background_chemicals">
+                    <div class="row mb-1">
+                        <div class="col-sm">
+                            <h5>Chemical Name:</h5><h6><span class="chemInfo"></span></h6>
+                        </div>
+                    </div>
+                    <div class="row mb-1">
+                        <div class="col-sm">
+                            <div>
+                                <div class="row mb-1">
+                                    <div class="col-sm">
+                                        <div data-slot="true" data-target="have_input_file"></div>
+                                        <div class="form-group">
+                                            <div data-slot="true" data-target="concentration_source_file"></div>
+                                            <div class="form-text mb-2">
+                                                <small class="text-muted">
+                                                    <a href="{{ url_for(
+                                                        'static', filename='templates/background_concentrations.csv'
+                                                    ) }}">Click here</a> to download the template for creating a CSV file containing initial concentrations.
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mb-1">
+                                    <div class="col-sm">
+                                        <button class="comp_show_all btn btn-warning">Show All</button>
+                                        <button class="comp_hide_all btn btn-warning">Hide All</button>
+                                        <button class="comp_show_nz btn btn-outline-success">Show Non-Zero</button>
+                                        <div class="dropdown d-inline">
+                                            <button class="btn_show_comp btn btn-outline-success dropdown-toggle" type="button" data-toggle="dropdown">
+                                                Show Compartment
+                                            </button>
+                                            <div class="dropdown-menu">
+                                            </div>
+                                        </div>
+                                        <button class="comp_reset_all btn btn-danger">Reset All to Zero</button>
+                                        <table class="compMap" style="border-collapse: collapse" cellpadding="6">
+                                            <thead>
+                                                <tr>
+                                                    <th>Parcel</th>
+                                                    <th>Volume Element</th>
+                                                    <th>Compartment</th>
+                                                    <th>Initial Concentration</th>
+                                                    <th>Unit</th>
+                                                </tr>
+                                            </thead>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</form>
+
+<script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}">
+</script>
+<script src="{{ url_for('static', filename='js/lib/dataTables/jquery.dataTables.min.js') }}">
+</script>
+<script src="{{ url_for('static', filename='js/lib/dataTables/dataTables.bootstrap4.min.js') }}">
+</script>
+<script>
+    onDomLoad(function(e) {
+        var form = document.getElementById('background-conc-gui');
+
+        form.addEventListener('form:visible', function() {
+            console.log('background concentrations form visible')
+            LoadingScreen.show('background_concentrations_loading');
+            loadChemicals();
+        });
+
+        function loadChemicals() {
+            if ($(form).filter(':not(.form-loaded)').length) {
+                // Form hasn't loaded yet; wait a bit and try again
+                setTimeout(function() { loadChemicals(); }, 1000);
+                return;
+            }
+            if (TRIM.store.currentScenario.chemicals) {
+                TRIM.forms.populate(form, TRIM.store.currentScenario.chemicals);
+                TRIM.refreshParcels();
+                document.body.addEventListener('parcels:ready', updateBackgroundConcentrations());
+            }
+            else {
+                TRIM.api.getChemicals(TRIM.store.currentScenario).on('load', function () {
+                    var chems = this.responseJSON.chemicals;
+                    TRIM.store.currentScenario.chemicals = chems;
+                    loadChemicals();
+                });
+                return;
+            }
+        }
+
+        function updateBackgroundConcentrations() {
+            if (!TRIM.store.currentScenario.parcels) {
+                // Parcels haven't loaded yet; wait a bit and try again
+                setTimeout(function() { updateBackgroundConcentrations(); }, 1000);
+                return;
+            }
+
+            let fieldset = $('#background_chemicals-add-btn').closest("fieldset")
+            $('#background_chemicals-add-btn').hide()
+
+            // clear existing fields
+            fieldset.find('[data-pill-id]').each(function() {
+                var i = this.getAttribute('data-pill-id')
+                TRIM.functions.removeTabFromFieldList(fieldset[0], i);
+            });
+
+            TRIM.store.currentScenario.chemicals.map(x => x.name).forEach((sc, i) => {
+                window.TRIM.functions.addTabToFieldList(fieldset[0], sc)
+                let current_index = ($("#background-conc-gui").find("span.chemInfo")).length-1
+
+                $("#background-conc-gui").find("span.chemInfo")[i+1].innerHTML = sc
+                $(initialize_compartment_map()).insertAfter($($("#background-conc-gui").find("table.compMap")[i+1]).find("thead"))
+
+                let dd_menu = $($("#background-conc-gui").find("table.compMap")[i+1]).prevAll("div.dropdown:first").find("div.dropdown-menu")
+                populate_comp_dd(dd_menu);
+                populate_values($($("#background-conc-gui").find("table.compMap")[current_index]))
+            })
+
+            $('tr.colps').on('click', function() {
+                toggle_expand_icon(this, null)
+                var findChildren = function(tr) {
+                    var depth = tr.data('depth');
+                    return tr.nextUntil($('tr').filter(function(i,e) {
+                        return $(e).data('depth') <= depth;
+                    }));
+                };
+
+                let this_depth = $(this).data('depth')
+                var children = findChildren($(this));
+                if ($(children).is(':visible')) {
+                    $(children).hide();
+                } else {
+                    let next_level = this_depth + 1;
+                    let next_child = $(children).filter(function(i,e) {
+                        return $(e).data('depth') == next_level;
+                    });
+                    $(next_child).show()
+                }
+            });
+
+            $('button.comp_show_all').on('click', function(e) {
+                e.preventDefault()
+                let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap")
+                $(this_table).find("tr.colps").show();
+                $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "down"))
+                $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "down"))
+                $(this).closest("div").find("button.btn_show_comp").text("Show Compartment")
+            });
+
+            $('button.comp_hide_all').on('click', function(e) {
+                e.preventDefault()
+                let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap")
+                $(this_table).find("tr.colps:not([data-depth='0'])").hide();
+                $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "up"))
+                $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "up"))
+                $(this).closest("div").find("button.btn_show_comp").text("Show Compartment")
+            });
+
+            $('button.comp_show_nz').on('click', function(e) {
+                e.preventDefault()
+                let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap");
+                $(this).closest("div[role=tabpanel]").find('button.comp_hide_all').trigger('click');
+                let non_zeros = $(this_table).find("tr.colps.level2").filter((i,e) => $(e).find("td.ic").text() > 0);
+                $(non_zeros).show()
+                $(non_zeros).each((i, e)=> $(e).prevAll("tr.level1:first").show())
+                $(this).closest("div").find("button.btn_show_comp").text("Show Compartment")
+            });
+
+            $('button.comp_reset_all').on('click', function(e) {
+                e.preventDefault()
+                let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap");
+            });
+
+            $(document).ready(function() {
+                $('button.comp_hide_all').trigger('click');
+            });
+
+            function toggle_expand_icon(tr, dir){
+                if ($(tr).find("i.fas").length <= 0) return;
+                if (!dir) {
+                    if ($(tr).find("i.fas").attr("class").indexOf("fa-angle-right") > -1) {
+                        $(tr).find("i.fas").attr("class", "fas fa-angle-down")
+                    } else {
+                        $(tr).find("i.fas").attr("class", "fas fa-angle-right")
+                    }
+                } else {
+                    if (dir == "down") {
+                        $(tr).find("i.fas").attr("class", "fas fa-angle-down")
+                    } else {
+                        $(tr).find("i.fas").attr("class", "fas fa-angle-right")
+                    }
+                }
+
+            }
+
+            $('label.editableCell').click(function () {
+                $(this).siblings("input").show()
+                $(this).siblings("input").focus()
+                $(this).hide();
+            });
+
+            $('input.editableCell').blur(function () {
+                if (!$("#background-concentrations-tab-pill").hasClass("active")) {
+                    return;
+                }
+                
+                ErrorValidation.isPositiveValue(this);
+                let parcels = TRIM.store.currentScenario.parcels
+                let parcel_name = $($(this).closest("tr.level2").find("td")[0]).attr("data-pcl-name")
+                let parcel_id = parcels.filter(e => e.name == parcel_name)[0].id
+                let compartment_name = $($(this).closest("tr.level2").find("td")[2]).attr("data-comp-name")
+                let ve_name = $($(this).closest("tr.level2").find("td")[1]).attr("data-ve-name")
+                let chem_name = $(this).closest("div.tab-pane").data("tab-name").split(" (")[0]
+                let parcel_info = [{
+                    'type': 'data',
+                    'name': 'field',
+                    'value': "initial concentration"
+                },{
+                    'type': 'data',
+                    'name': 'id',
+                    'value': parcel_id
+                },{
+                    'type': 'data',
+                    'name': 'chemical_name',
+                    'value': chem_name
+                },{
+                    'type': 'data',
+                    'name': 'compartment_name',
+                    'value': compartment_name
+                },{
+                    'type': 'input',
+                    'name': 'initial_concentration_value',
+                    'value': ''
+                },{
+                    'type': 'data',
+                    'name': 've_name',
+                    'value': ve_name
+                }]
+                if (parcel_info) {
+                    submit_initial_concentration_value(this, parcel_info);
+                }
+            })
+
+            function submit_initial_concentration_value(elem, parcel_info) {
+                if (elementIsValid($(elem).parent())){
+                    let data = $(elem).val() == "" ? 0 : $(elem).val()
+                    let $label = $(elem).next("label.editableCell")
+                    $label.siblings("input").hide()
+                    $label.show().text(data)
+
+                    parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
+                    TRIM.api.updateParcel(TRIM.store.currentScenario.id, parcel_info)
+                } else {
+                    return
+                }
+            }
+
+            console.log('populated background concentrations form!')
+            LoadingScreen.hide('background_concentrations_loading');
+        };
+
+        function initialize_compartment_map() {
+            var map_html = "<tbody>"
+            let exclude = ["WetVaporSource", "DryVaporSource", "WetParticleSource", "DryParticleSource", "Degradation_Reaction_Sink", "Degradation_Reaction_Sink_Air", "Flush_Rate_Sink"]
+            TRIM.store.currentScenario.parcels.forEach( function(e,i){
+                map_html = map_html + "<tr data-depth='0' class='level0 colps'><td data-pcl-name='" + e.name + "'>" + e.name + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td><td></td></tr>"
+                for (ve in e.compartment_map) {
+                    if (exclude.indexOf(ve) == -1) {
+                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td data-pcl-name='" + e.name + "'></td><td data-ve-name='" + ve + "'>" + ve + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
+                    }
+                    for (comp in e.compartment_map[ve]) {
+                        if (exclude.indexOf(e.compartment_map[ve][comp]) == -1){
+                            map_html = map_html + "<tr data-depth='2' class='level2 colps'><td data-pcl-name='" + e.name + "'><td data-ve-name='" + ve + "'><td class='comp' data-comp-name='" + e.compartment_map[ve][comp] + "'>" + e.compartment_map[ve][comp]+ "</td><td class='ic'><input class='editableCell' style='width: 50px; display:none'/><label class='editableCell badge badge-light'>0</label></td><td class='ic_unit'></td></tr>"
+                        }
+                    }
+                }
+            })
+            map_html += "</tbody>"
+            return map_html
+        }
+
+        function populate_values(cmap) {
+            let this_chem = $(cmap).closest("div.tab-pane").data("tab-name")
+            let parcels = TRIM.store.currentScenario.parcels;
+            parcels.forEach(function(p,i){
+                Object.keys(p.initialConcentrations).forEach(function(chem,j) {
+                    if (chem == this_chem) {
+                        let ves = Object.keys(p.initialConcentrations[chem])
+                        ves.forEach(function(ve,k) {
+                            let comps = Object.keys(p.initialConcentrations[chem][ve])
+                            comps.filter(cc => cc !== "Degradation_Reaction_Sink" ).forEach(function(comp,l){
+                                let pcl_find_str = "td[data-pcl-name='" + p.name + "']"
+                                let ve_find_str = "td[data-ve-name='" + ve + "']"
+                                let comp_find_str = "td[data-comp-name='" + comp + "']"
+                                let ic_cell = $(cmap).find(pcl_find_str).next(ve_find_str).next(comp_find_str).next("td.ic")
+                                let ic_val =  Number(p.initialConcentrations[chem][ve][comp]['ic']).toExponential()
+                                let ic_unit_cell = $(cmap).find(pcl_find_str).next(ve_find_str).next(comp_find_str).next("td.ic").next("td.ic_unit")
+                                let ic_unit = p.initialConcentrations[chem][ve][comp]['unit']
+                                $(ic_cell).find("input").val(ic_val)
+                                $(ic_cell).find("label.editableCell").text(ic_val)
+                                $(ic_unit_cell).text(ic_unit)
+                            })
+                        })
+                    }
+                })
+            })
+        }
+
+        function populate_comp_dd(dd_menu){
+            let comp_array = []
+            TRIM.store.currentScenario.parcels.forEach( function(e,i){
+                for (let ve in e.compartment_map) {
+                    for (let comp in e.compartment_map[ve]) {
+                        comp_array.push(e.compartment_map[ve][comp])
+                    }
+                }
+            })
+            let uniq_comp = [... new Set(comp_array)]
+            uniq_comp.sort().forEach(function(e) {
+                let menu_item = "<a class='dropdown-item comp-item'>" + e + "</a>"
+                $(menu_item).appendTo(dd_menu)
+            })
+            $("a.dropdown-item.comp-item").on("click",function (e){
+                e.preventDefault()
+                let this_table = $(this).closest("div.dropdown").nextAll("table.compMap:first")
+                let this_dd_btn = $(this).closest("div.dropdown").find("button.btn_show_comp")
+                $('button.comp_hide_all').trigger('click');
+                let only_comps = $(this_table).find("tr.colps.level2").filter((i,tr) => $(tr).find("td.comp").text() == $(this).text());
+
+                $(only_comps).show()
+                $(this_dd_btn).text($(this).text())
+
+                $(only_comps).each((i,e)=> $(e).prevAll("tr.level1:first").show())
+            })
+        }
+    });
+</script>

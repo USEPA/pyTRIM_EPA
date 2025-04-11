@@ -1,0 +1,21 @@
+{
+    "title": "Grasses/Herbs",
+    "inherits": "subforms/seasonal/allowexchange/seasonal_time_varying_input_form.json",
+    "fields": [
+        {
+            "id": "time_varying",
+            "label": "Use Time-Varying Allow Exchange",
+            "help": "Check the box to use values that vary in time for grasses/herbs leaf 'allow exchange' indicating whether leaves are exchanging chemical with the air. This feature is typically used for this plant type. For non-evergreen leaves, it is typically assumed that the exchange does not occur during litterfall. Exchange is typically set to start after the typical date of last frost/freeze."
+        },
+        {
+            "id": "field_name",
+            "label": "Field Name for Values of Allow Exchange for Grasses/Herbs",
+            "help": "Indicate the field name for the time-varying values of allow exchange for grasses/herbs."
+        },
+        {
+            "id": "static_value",
+            "label": "Static Value of Allow Exchange for Grasses/Herbs",
+            "help": "Enter a single value of 'allow exchange' to use for grasses/herbs throughout your model run. The default value is to allow exchange (1)."
+        }
+    ]
+}

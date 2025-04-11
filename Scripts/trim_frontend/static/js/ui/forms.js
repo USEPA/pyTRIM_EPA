@@ -2,7 +2,7 @@
 window.TRIM = (function(trim) {
     var forms = trim.forms || {};
 
-    forms.updateSelect = function(select, options) {
+    forms.updateSelect = function(select, options, sel_values) {
         if (typeof(select) === typeof('')) {
             select = document.getElementById(select);
         }
@@ -25,7 +25,7 @@ window.TRIM = (function(trim) {
             option.innerText = opt.label;
             select.appendChild(option);
 
-            if (defaultVal !== undefined && defaultVal == opt.value) {
+            if (sel_values && defaultVal !== undefined && defaultVal == opt.value) {
                 selectIndex = i;
             }
         }
@@ -182,13 +182,17 @@ window.TRIM = (function(trim) {
             if (defaultVal !== undefined) {
                 field.setAttribute('data-default', defaultVal);
             }
-            forms.updateSelect(field, fieldDef.choices);
+            forms.updateSelect(field, fieldDef.choices, true);
         }
         else if (widget == 'textarea') {
             field = document.createElement('textarea');
             if (defaultVal) {
                 field.innerText = defaultVal;
             }
+        }
+        else if (widget == 'button') {
+           field = document.createElement('a');
+           field.innerHTML = fieldDef.buttonHtml;
         }
         else {
             var type = dataType;
@@ -217,8 +221,12 @@ window.TRIM = (function(trim) {
         }
         field.id = id;
         field.name = id;
-        field.className = 'form-control form-control-sm';
-        field.style.maxWidth = '100%';
+        if (widget == 'button') {
+            field.className = "btn btn-secondary";
+        }  else {
+            field.className = 'form-control form-control-sm';
+            field.style.maxWidth = '100%';
+        }
 
         if (fieldDef.readonly) {
             field.setAttribute('readonly', 'readonly');
@@ -288,6 +296,13 @@ window.TRIM = (function(trim) {
             addTabToFieldList(fieldset);
         }
 
+        let as_modal = fieldListDef.list_view || "page";
+
+        if (as_modal == "modal") {
+            let modalContent = renderModalForm(fieldListDef, template)
+            fieldset.appendChild(modalContent)
+        }
+
         wrapper.appendChild(fieldset);
         return wrapper;
     }
@@ -311,11 +326,95 @@ window.TRIM = (function(trim) {
         addBtn.setAttribute('data-fieldlist-add', 'true');
         addBtn.innerHTML = '<i class="fa fa-plus"></i>&nbsp;Add';
 
+        let as_modal = fieldListDef.list_view || "page";
+
+        if (as_modal == "modal") {
+            addBtn.setAttribute('data-in-modal', 'true');
+            addBtn.setAttribute('data-toggle', "modal");
+            addBtn.setAttribute('data-target', "#" + fieldListDef.id + "-modal")
+        } else {
+            addBtn.setAttribute('data-in-modal', 'false');
+        }
+
         addLi.appendChild(addBtn);
         add.appendChild(addLi);
         header.appendChild(add);
 
         return header;
+    }
+
+    function renderModalForm(fieldListDef, template) {
+        var modal = document.createElement('div');
+        modal.id = fieldListDef.id + '-modal'
+        modal.className = 'modal fade';
+        modal.tabIndex = -1;
+        modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-labelledby', fieldListDef.id + '-label');
+
+        let modalDialog = document.createElement('div');
+        modalDialog.className = 'modal-dialog';
+        modalDialog.setAttribute('role','document');
+
+        let modalContent = document.createElement('div');
+        modalContent.className = 'modal-content';
+
+        let modalHeader = document.createElement('div');
+        modalHeader.className = 'modal-header' ;
+
+        let modalTitle = document.createElement('h5');
+        modalTitle.id = fieldListDef.id + '-modal-title'
+        modalTitle.className = 'modal-title';
+        modalTitle.innerHTML = 'Specify ' + fieldListDef.label;
+
+        let modalClose =document.createElement('button');
+        modalClose.type = 'button';
+        modalClose.className = 'close';
+        modalClose.setAttribute('data-dismiss', 'modal');
+        modalClose.setAttribute('aria-label', 'Close');
+        modalClose.innerHTML = '<span aria-hidden="true">&times;</span>';
+
+        modalHeader.appendChild(modalTitle);
+        modalHeader.appendChild(modalClose);
+
+        let modalBody = document.createElement("div");
+        modalBody.className = 'modal-body';
+        let new_fields = JSON.parse(JSON.stringify(fieldListDef.field))
+        let fields = fieldListDef.field.form_definition.fields.filter(function(e,i) {
+            return e.location == "modal"
+        })
+        new_fields.form_definition.fields = fields
+        fields.forEach(function(e,i) {
+            let elem = forms.render(e)
+            modalBody.appendChild(elem)
+        })
+
+
+
+        let modalFooter = document.createElement('div');
+        modalFooter.className = 'modal-footer';
+        let modalFooterCancel =document.createElement('button')
+        modalFooterCancel.className = 'btn btn-light';
+        modalFooterCancel.type = 'button';
+        modalFooterCancel.setAttribute('data-dismiss', 'modal');
+        modalFooterCancel.innerHTML = 'Cancel'
+
+        let modalFooterCreate = document.createElement('button');
+        modalFooterCreate.id = "add-" + fieldListDef.id + "-btn"
+        modalFooterCreate.className = 'btn btn-primary';
+        modalFooterCreate.type = 'button';
+        modalFooterCreate.innerHTML = 'Create';
+        modalFooterCreate.disabled = 'disabled';
+
+        modalFooter.appendChild(modalFooterCancel);
+        modalFooter.appendChild(modalFooterCreate);
+
+        modalContent.appendChild(modalHeader);
+        modalContent.appendChild(modalBody);
+        modalContent.appendChild(modalFooter);
+        modalDialog.appendChild(modalContent);
+        modal.appendChild(modalDialog);
+
+        return modal;
     }
 
     function renderFieldListNav(fieldListDef) {
@@ -396,7 +495,7 @@ window.TRIM = (function(trim) {
         return tabContent;
     }
 
-    function addTabToFieldList(fieldset) {
+    function addTabToFieldList(fieldset, custom_label) {
         var values = JSON.parse(fieldset.getAttribute('data-value'));
         var label = fieldset.getAttribute('data-label');
         var id = fieldset.id;
@@ -418,13 +517,19 @@ window.TRIM = (function(trim) {
 
         var wrapper = document.createElement('div');
         wrapper.innerHTML = pillTemplate.outerHTML
-            .replace(repl, next).replace(/#pillnum;/g, values.length + 1);
+                .replace(repl, next).replace(/#pillnum;/g, values.length + 1);
+        // if (custom_label) {
+        //     $(wrapper).find("a.nav-link").text(custom_label)
+        // }
 
         var newPill = wrapper.children[0];
         newPill.removeAttribute('data-template');
         newPill.setAttribute('data-pill-id', values.length);
         newPill.style.display = '';
         newPill.getElementsByTagName('a')[0].className += ' active';
+        if (custom_label) {
+            $(newPill).find("a.nav-link").text(custom_label)
+        }
         nav.appendChild(newPill);
 
         var tabs = fieldset.querySelector('.tab-content');
@@ -446,6 +551,9 @@ window.TRIM = (function(trim) {
         newTab.setAttribute('data-tab-id', values.length);
         newTab.className += ' show active';
         newTab.style.display = '';
+        if (custom_label) {
+            newTab.setAttribute('data-tab-name', custom_label);
+        }
 
         var remBtn = newTab.querySelector(
             '[data-fieldlist-rem][href="#remove-' + newTab.id + '"]');
@@ -501,10 +609,17 @@ window.TRIM = (function(trim) {
         if (btn == null || !btn.hasAttribute('data-fieldlist-add')) {
             return;
         }
-        e.preventDefault();
 
+        if (btn.hasAttribute('data-in-modal')) {
+            if (btn.getAttribute('data-in-modal') == "true") {
+                return
+            }
+        }
+
+        e.preventDefault();
+        var entity_name = e.currentTarget.entity || null
         var fieldset = btn.closest('fieldset');
-        addTabToFieldList(fieldset);
+        addTabToFieldList(fieldset, entity_name);
     });
     // Create a global event listener for removing from field lists
     document.body.addEventListener('click', function(e) {
@@ -521,6 +636,7 @@ window.TRIM = (function(trim) {
     });
 
     function makeDependent(field_id, if_true, if_false, prefix) {
+        let template_field_id = field_id;
         if_true = if_true || [];
         if_false = if_false || [];
         prefix = prefix || '';
@@ -536,12 +652,16 @@ window.TRIM = (function(trim) {
             return;
         }
 
+
         for (var i = 0, len = if_true.length; i < len; i++) {
             if_true[i] = prefix + if_true[i];
         }
         for (var i = 0, len = if_false.length; i < len; i++) {
             if_false[i] = prefix + if_false[i];
         }
+
+        let template_if_true = if_true;
+        let template_if_false = if_false;
 
         function toggleVisible() {
             var field = document.getElementById(field_id);
@@ -566,6 +686,12 @@ window.TRIM = (function(trim) {
         }
 
         document.body.addEventListener('change', function(e) {
+            let tab_num = $(e.target).closest(".tab-pane").attr('data-tab-id')
+            // Take care of fieldset components if dependency is in a fieldList
+            if_true = template_if_true.map(e=> e.replace("##",tab_num))
+            if_false = template_if_false.map(e=> e.replace("##",tab_num))
+            field_id = template_field_id.replace("##",tab_num)
+
             if (if_true.indexOf(e.target.id) < 0 &&
                 if_false.indexOf(e.target.id) < 0) {
                 return;
@@ -622,11 +748,23 @@ window.TRIM = (function(trim) {
             !template.hasAttribute('data-slot')) {
             return;
         }
-
         if (!template.hasAttribute('data-async-form')) {
             template.setAttribute('data-async-form', 'true');
         }
 
+        if (data.table_id) {
+            forms.drawTable(data, template, prefix);
+        } 
+        else {
+            forms.drawForm(data, template, prefix);
+        }
+
+        if (data.render === false) {
+            $("#"+data.table_id).hide()
+        }
+    }
+
+    forms.drawForm = function(data, template, prefix) {
         var slotElements = template.querySelectorAll('[data-slot]');
         var slots = {};
         for (var i = 0, len = slotElements.length; i < len; i++) {
@@ -669,17 +807,20 @@ window.TRIM = (function(trim) {
         return fields
     }
 
+    var formPopulatedEvent = document.createEvent('Event');
+    formPopulatedEvent.initEvent('form:populated', true, true);
     forms.populate = function(form, data) {
-
         // Convert data to an array if necessary
         // (helps us handle field-list/fieldsets)
         if (!Array.isArray(data)) {
             data = [data];
         }
 
+        var isFieldset = form.tagName.toLowerCase() == 'fieldset';
+
         // Check if we need to build an id-prefix for field-list/fieldsets
         var pref = '';
-        if (form.tagName.toLowerCase() == 'fieldset') {
+        if (isFieldset) {
             pref = form.id + '-';
 
             // Also check if we need to add tabs to the fieldset
@@ -699,32 +840,41 @@ window.TRIM = (function(trim) {
             for (var i = 0, len = fields.inputs.length; i < len; i++) {
                 var input = fields.inputs[i];
                 var checkId = input.id.replace(fullPref, '');
-                if (subData[checkId] !== undefined) {
-                    input.value = subData[checkId];
+                if (subData[checkId] === undefined) {
+                    continue;
                 }
+                if (input.value != null && subData[checkId] === null) {
+                    continue;
+                }
+                input.value = subData[checkId];
             }
 
             // Fill in textarea fields
             for (var i = 0, len = fields.textareas.length; i < len; i++) {
                 var textarea = fields.textareas[i];
                 var checkId = textarea.id.replace(fullPref, '');
-                if (subData[checkId] !== undefined) {
-                    textarea.innerText = subData[checkId];
+                if (subData[checkId] === undefined) {
+                    continue;
                 }
+                if (textarea.innerText && subData[checkId] === null) {
+                    continue
+                }
+                textarea.innerText = subData[checkId];
             }
 
             // Fill in select fields
             for (var i = 0, len = fields.selects.length; i < len; i++) {
                 var select = fields.selects[i];
                 var checkId = select.id.replace(fullPref, '');
-                if (subData[checkId] !== undefined) {
-                    select.selectedIndex = -1;
-                    var opts = select.children;
-                    for (var j = 0; j < opts.length; j++) {
-                        if (opts[j].value == subData[checkId]) {
-                            select.selectedIndex = j;
-                            break;
-                        }
+                if (subData[checkId] === undefined) {
+                    continue;
+                }
+                select.selectedIndex = -1;
+                var opts = select.children;
+                for (var j = 0; j < opts.length; j++) {
+                    if (opts[j].value == subData[checkId]) {
+                        select.selectedIndex = j;
+                        break;
                     }
                 }
             }
@@ -733,12 +883,96 @@ window.TRIM = (function(trim) {
             for (var i = 0, len = fields.fieldsets.length; i < len; i++) {
                 var fieldset = fields.fieldsets[i];
                 var checkId = fieldset.id.replace(fullPref, '');
-                if (subData[checkId] !== undefined) {
-                    forms.populate(fieldset, subData[checkId])
+                if (subData[checkId] === undefined) {
+                    continue;
                 }
+                forms.populate(fieldset, subData[checkId])
+            }
+        }
+
+        if (!isFieldset) {
+            form.dispatchEvent(formPopulatedEvent);
+        }
+    };
+
+    forms.drawTable = function(data, template, prefix) {
+        let tableSlot = document.querySelector('#'+data.table_id);
+        if (data.pivot) {
+            let tbody = create_element('tbody', tableSlot);
+            let fields = data.fields || [];
+            for (var i = 0, len = fields.length; i < len; i++) {  
+                let tr = create_element('tr', tbody);        
+                let td = create_element('td', tr)
+                forms.renderTableHeader(fields[i], td);
+            }
+        }
+        else {
+            let thead = create_element('thead', tableSlot);
+            let tr = create_element('tr', thead);
+            let fields = data.fields || [];
+            for (var i = 0, len = fields.length; i < len; i++) {          
+                let th = create_element('th', tr)
+                forms.renderTableHeader(fields[i], th);
             }
         }
     };
+
+    // TODO: Need to remove embedded HTML in help text
+    forms.renderTableHeader = function(fieldDef, th) {
+        let labelId = fieldDef.id;
+        if (typeof labelId !== 'string' && !(labelId instanceof String)) {
+            labelId = JSON.stringify(fieldDef.id);
+        }
+        let labelText = fieldDef.label;
+        let tooltip = fieldDef.tooltip;
+        let default_val = JSON.stringify(fieldDef.default);
+        let help = fieldDef.help;
+
+        let label = create_element("label", th);
+        label.innerHTML = labelText;
+        label.setAttribute('data-id', labelId);
+        label.setAttribute('data-default', default_val);
+
+        label.setAttribute('data-toggle', 'tooltip');
+        label.setAttribute('data-placement', 'auto');
+        label.setAttribute('data-html', 'true');
+        if (tooltip) {
+            label.title = "";
+            label.setAttribute('data-original-title', tooltip);
+        }
+        if (help) {
+            forms.renderTableHelp(help, labelText, th)
+        }
+        return label;
+    }
+
+    forms.renderTableHelp = function(note, title, node){
+        let marker = create_element("sup", node);
+
+        let toggle = create_element("a", marker);
+        toggle.href = 'javascript:void(0);';
+        toggle.setAttribute('data-toggle', 'popover');
+        toggle.setAttribute('data-html', 'true');
+        toggle.setAttribute('data-trigger', 'focus');
+        toggle.setAttribute('data-original-title', title);
+        toggle.setAttribute('data-content', note);
+
+        let symbol = create_element("i", toggle);
+        symbol.className = 'fa fa-question';
+    }
+
+    // Helper method
+    function create_element(EleToCreate, parent) {
+        let child = document.createElement(EleToCreate);
+        return parent.appendChild(child);
+    }
+
+    // Grab default value stuck in column header
+    forms.fetchDefault = function(id){
+        let ele = $('[data-id="'+id+'"]')[0];
+        let val = ele.getAttribute("data-default");
+        return JSON.parse(val);
+    }
 
     // On dom load, auto-draw forms that are labelled async
     var formLoadEvent = document.createEvent('Event');
@@ -774,6 +1008,12 @@ window.TRIM = (function(trim) {
         });
     }
 
+    var functions = {
+        addTabToFieldList,
+        removeTabFromFieldList
+    }
+
     trim.forms = forms;
+    trim.functions = functions
     return trim;
 })(window.TRIM || {});

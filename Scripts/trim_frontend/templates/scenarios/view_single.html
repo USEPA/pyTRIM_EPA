@@ -29,14 +29,36 @@
     <div class="row">
         <div class="col-md"></div>
         <div class="col-md-6 col-lg-4 p-0">
-            <button type="button" class="btn btn-primary btn-lg btn-block">
+            <a id="MIRC-export" href="#" class="btn btn-primary btn-lg btn-block">
                 <i class="fa fa-file-download"></i>&nbsp;
-                Export TRIM.FaTE Inputs
-            </button>
+                Export TRIM.FaTE for MIRC
+            </a>
         </div>
         <div class="col-md"></div>
     </div>
 </div>
 
+<script>
+    onDomLoad(function() {
+        LoadingScreen.show("export_mirc");
+        TRIM.api.exportScenarioForMirc("{{scenario.id}}").on('load', (rsp)=>{
+            LoadingScreen.hide("export_mirc");
+
+            let responseJSON = JSON.stringify(rsp.target.responseJSON);
+            jsonData = 'data:application/json;charset=utf-8,' + encodeURIComponent(responseJSON);
+
+            let filename = "{{scenario.name}}_MIRC Export_" + moment(new Date()).format('YYYY_MM_DD-HH_MM') + ".json";
+            if (window.navigator.msSaveBlob) { // IE 10+
+                window.navigator.msSaveOrOpenBlob(new Blob([json], {type: "text/plain;charset=utf-8;"}), filename);
+            } 
+            else {
+                let ele = $("#MIRC-export");
+                $(ele).attr("download", filename);
+                $(ele).attr("href", jsonData);
+                $(ele).attr("target", "_blank");
+            }
+        });
+    });
+</script>
 
 {% endblock content %}

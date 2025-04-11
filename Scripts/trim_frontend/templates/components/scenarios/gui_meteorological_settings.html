@@ -19,6 +19,7 @@
                             'static',
                             filename='templates/meteorology_time_varying_inputs.csv'
                         ) }}">Click here</a> to download the template for creating a time-varying inputs file.
+                        <br><span>Values in the date column are expected in MM/DD/YYYY format.</span>
                     </small>
                 </div>
             </div>
@@ -88,27 +89,6 @@
     </section>
 
     <section id="spatially-varying-values" class="container px-0">
-        <div class="row">
-            <div class="col-sm">
-                <h5 class="text-center">Spatially-Varying Values</h5>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-sm">
-                <div data-slot="true" data-target="default_spatially_varying_file"></div>
-            </div>
-        </div>
-        
-        <div data-slot="true" data-target="groundwater_seepage">
-            {{ dimensionally_varying_subform(
-                is_varying_field='spatially_varying',
-                use_custom_field='use_custom_file',
-                custom_file_field='custom_file',
-                var_name_fields=['field_name'],
-                static_value_fields=['static_value']
-            ) }}
-        </div>
-        
         <div data-slot="true" data-target="runoff">
             {{ dimensionally_varying_subform(
                 is_varying_field='spatially_varying',
@@ -137,8 +117,8 @@
                     <div data-slot="true" data-target="static_deciduous"></div>
                 </div>
                 <div class="col-sm">
-                    <div data-slot="true" data-target="calculated_grass_herbs"></div>
-                    <div data-slot="true" data-target="static_grass_herbs"></div>
+                    <div data-slot="true" data-target="calculated_grass"></div>
+                    <div data-slot="true" data-target="static_grass"></div>
 
                     <div data-slot="true" data-target="calculated_agriculture"></div>
                     <div data-slot="true" data-target="static_agriculture"></div>
@@ -147,12 +127,203 @@
         </div>
     </section>
 </form>
+<link rel="stylesheet" href="{{url_for('static', filename='css/form_styles.css')}}"/>
 <script>
     onDomLoad(function(e) {
         var form = document.getElementById('met-settings-gui');
-        form.addEventListener('form:loaded', function() {
-            enableFieldUpdates();
+
+        form.addEventListener('form:visible', function() {
+            LoadingScreen.show('met_info_loading');
+            console.log('met form visible')
+            populateMetForm();
         });
+
+        function populateMetForm() {
+            if ($(form).filter(':not(.form-loaded)').length) {
+                // Form hasn't loaded yet; wait a bit and try again
+                setTimeout(function() { populateMetForm(); }, 1000);
+                return;
+            }
+            // console.log(form)
+            // console.log(TRIM.store.currentScenario)
+
+            if (TRIM.store.currentScenario.meteorology) {
+                TRIM.forms.populate(form, TRIM.store.currentScenario.meteorology);
+                renderWetDep();
+            }
+            else {
+                TRIM.api.getMeteorology(TRIM.store.currentScenario).on('load', function () {
+                    var met = this.responseJSON.meteorology;
+                    TRIM.store.currentScenario.meteorology = met;
+                    populateMetForm();
+                });
+                return;
+            }
+            console.log('populated met form!')
+            LoadingScreen.hide('met_info_loading');
+        }
+
+        // Render Wet Deposition Interception Fractions
+        function renderWetDep () {
+            let met = TRIM.store.currentScenario.meteorology;
+            if (Object.keys(met).length === 0) {
+                return;
+            }
+            let leaves = ["coniferous", "deciduous", "grass", "agriculture"]
+            leaves.forEach((e,i) => {
+                let search_cbx_str = `input[type="checkbox"][id$="${e}"]`
+                let search_txt_str = `input[type="number"][id$="${e}"]`
+                let this_chkbx = $('#met-settings-gui').find(search_cbx_str)
+                let this_text =  $('#met-settings-gui').find(search_txt_str)
+                let is_calculated = met.wet_dep_interception[`calc_wet_dep_interception_frac_${e}_leaf`]
+                let is_comp_exists = met.wet_dep_interception[`wet_dep_interception_frac_${e}_leaf`]
+                let val_user = met.wet_dep_interception[`wet_dep_interception_frac_${e}_leaf`]
+                let val_calc = met.wet_dep_interception[`wet_dep_interception_frac_${e}_leaf_calculated`]
+                if (is_calculated == 1) {
+                    this_chkbx.attr('checked','checked')
+                    this_text.attr('disabled','disabled')
+                    this_text.val(val_calc)
+                } else {
+                    this_chkbx.removeAttr('checked')
+                    this_text.removeAttr('disabled')
+                    this_text.val(val_user)
+                }
+                if (is_comp_exists == -1) {
+                    this_chkbx.closest('div.form-group').css('display','none')
+                    this_text.closest('div.form-group').css('display','none')
+                }
+                // Check if the first column has all hidden form_groups and move current to its place
+                if (i == 3) {
+                    let this_col = $(this_chkbx).closest("div.col-sm")
+                    let first_col = $(this_col).parent("div").find("div.col-sm")[0]
+                    if ($(first_col).find("div.form-group").filter((i,e)=>$(e).css('display')!='none').length == 0) {
+                        $(this_col).detach().insertBefore(first_col)
+                    }
+                }
+                // Add Listeners for Wet Dep. Interception Params.
+                this_chkbx.change(function(){
+                    if (this_chkbx.prop('checked')) {
+                        // Set Calculated_WDIF for this media-compartment to 1 in the backend
+                        // Display the calculated result and make the static value inactive
+                        this_text.prop('disabled',true)
+                        this_text.val(val_calc)
+                    } else {
+                        // Set Calculated_WDIF for this media-compartment to 1 in the backend
+                        // Display the calculated result and make the static value inactive
+                        this_text.prop('disabled',false)
+                        this_text.val(val_user)
+                    }
+                    submit_meteo_value(this)
+                })
+                this_text.change(function (){
+                    ErrorValidation.isPositiveValue(this);
+                    submit_meteo_value(this)
+                })
+            })
+        }
+
+        var ENABLED_FORM = false;
+
+        // Add Listeners for Meteorology Params.
+        form.addEventListener('form:populated', function() {
+            if (ENABLED_FORM) {
+                return;
+            }
+            $('#daytime_indicator_static_value').removeAttr('disabled');
+
+            enableFieldUpdates();
+            $('#precipitation_static_value_rate').change();
+
+            $('#ambient_air_static_value').on('change', function(e) {
+                submit_meteo_value(e.target);
+            });
+            $('#wind_speed_static_value').on('change', function(e) {
+                submit_meteo_value(e.target);
+            });
+            $('#wind_direction_static_value').on('change', function(e) {
+                submit_meteo_value(e.target);
+            });
+            $('#mixing_height_static_value').on('change', function(e) {
+                submit_meteo_value(e.target);
+            });
+            $('#daytime_indicator_static_value').on('change', function(e) {
+                let daytime_val = parseFloat($(e.target).val());
+                let valid_daytime = (daytime_val == 0 || daytime_val == 1);
+                let is_valid = ErrToolTip(e.target, valid_daytime, "Daytime Indicator must be either 0 or 1.", "div");
+                if (is_valid) {
+                    submit_meteo_value(e.target);
+                }
+            });
+            $('#precipitation_static_value_rate').on('change', function(e) {
+                submit_meteo_value(e.target);
+            });
+
+            ENABLED_FORM = true;
+        });
+
+        function get_form_data(elem) {
+            let param_name = $(elem).attr("name")
+            let param_info = [
+                {
+                    'type': 'data',
+                    'name': 'id',
+                    'value': TRIM.store.currentScenario.id
+                }, {
+                    'type': 'data',
+                    'name': 'field',
+                    'value': 'meteo_' + param_name
+                }, {
+                    'type': 'input',
+                    'name': 'meteo_' + param_name,
+                    'value': ''
+                }
+            ]
+            let param_data = ""
+            if ($(elem).attr('type') == "checkbox") {
+                param_data = $(elem).prop('checked') ? 1 : 0
+            } else if ($(elem).attr('type') == "number") {
+                param_data = $(elem).val()
+            } else if ($(elem).attr("name").includes("_field_name")) {
+                param_data = $(elem).attr("data-meteo")
+                param_info[param_info.findIndex(e => e.name == 'field')].value += "_TS"
+                param_info[param_info.findIndex(e => e.type == 'input')].name += "_TS"
+            }
+
+            param_info[param_info.findIndex(e => e.type == 'input')].value = param_data;
+            return param_info
+        }
+
+        function submit_meteo_value(elem) {
+            let param_info = get_form_data(elem)
+            if ($(elem).get(0).tagName == "INPUT") {
+                ErrorValidation.isPositiveValue(elem, $(elem).parent());
+                
+                if (elementIsValid($(elem).parent())) {
+                    let min = parseFloat(elem.getAttribute('min')) || undefined;
+                    let max = parseFloat(elem.getAttribute('max')) || undefined;
+                    if (min || max)
+                        ErrorValidation.isWithinRange(elem, $(elem).parent(), min, max);
+                }
+            }
+            if (elementIsValid($(elem).parent())){
+                console.log(param_info);
+                let resp = TRIM.api.updateScenario(param_info).on('load',function(){
+                    let val_resp = this.responseJSON
+                    if (val_resp) {
+                        let val = val_resp[Object.keys(val_resp)[0]]
+                        let lb_static_val = $(elem).closest('div.form-group').find("label.wt_avg_val")
+                        if (lb_static_val.length > 0) {
+                            lb_static_val.text(`Time-weighted average from file: ${val}`)
+                        } else {
+                            let lb_static_val = `<label class=wt_avg_val>Time-weighted average from file: ${val}</label>`
+                            $(elem).closest('div.form-group').append(lb_static_val)
+                        }
+                    }
+                })
+            } else {
+                return
+            }
+        }
 
         function enableFieldUpdates() {
             var gui = $('#met-settings-gui');
@@ -181,7 +352,7 @@
                     me.html('');
                     if (data) {
                         var fields = data.fields;
-                        TRIM.forms.updateSelect(this, fields);
+                        TRIM.forms.updateSelect(this, fields, false);
                         me.removeAttr('disabled');
                     }
                     else {
@@ -203,20 +374,67 @@
                 TRIM.api.parseFiles(this).on('load', function() {
                     try {
                         var data = JSON.parse(this.responseText);
-                        if (data.success) {
+                        if (data.files[me.attr('name')]) {
                             var myData = data.files[me.attr('name')];
                             me.attr(
                                 'data-filedata',
                                 JSON.stringify(myData)
                             );
                         }
-                        updateFields(me.closest('section'));
+                        // Make sure the file has the column with name "Date"
+                        var filedata = data.files[me.attr('name')]['file_data'];
+                        if (ErrorValidation.tsFileHasDateColumn(me.closest("div").siblings("label"),  filedata)) {
+                            updateFields(me.closest('section'));
+                        }
                     }
                     finally {
                         LoadingScreen.hide(loadingRequest);
                     }
                 });
             });
+
+            gui.find('select').on('change',function (){
+                let sel = $(this);
+                let section = sel.closest('section');
+                var globalFileFiled = section.find('[type="file"][name^="default_"]');
+                let data = globalFileFiled.attr('data-filedata');
+
+                let scenario = TRIM.store.currentScenario;
+                let sim_start = Date.parse(scenario["simulation_start_date"])
+                let sim_end = Date.parse(scenario["simulation_end_date"])
+                let subform = sel.closest('.subform');
+                if (subform.find('[type="checkbox"][id$="use_custom_file"]').prop('checked')) {
+                    data = subform.find('[type="file"]').attr('data-filedata');
+                }
+                data = data || 'null';
+                data = JSON.parse(data);
+                let selected_val = $(sel).val();
+                let def_data_name = $(sel).attr("data-default")
+
+                function convertDate(inputFormat) {
+                    function pad(s) { return (s < 10) ? '0' + s : s; }
+                    let d = new Date(inputFormat)
+                    return [pad(d.getDate()), pad(d.getMonth()+1), d.getFullYear()].join('/')
+                }
+
+                // Restrict file data date range to the simulation period
+                let new_data = data.file_data.filter(e=>Date.parse(e['Date'])>=sim_start & Date.parse(e['Date'])<=sim_end)
+                // make sure we have data in the time window of simulation
+                ErrorValidation.isInSimulationTimeSpan(sel, new_data)
+                // Get only the column for this select
+                let this_sel_data = new_data.map((e,i) => {
+                    let this_row = {
+                        'Date': convertDate(e['Date']),
+                        'xHour': e['xHour'],
+                        'TimeZone': e['TimeZone']
+                    }
+                    this_row[def_data_name]= e[selected_val]
+                    return this_row
+                });
+                sel.attr('data-meteo',JSON.stringify(this_sel_data))
+
+                submit_meteo_value(sel)
+            })
 
             var staticPrecip = $('#precipitation_static_value_rate');
             var staticCum = $('#precipitation_static_value_cumulative');
@@ -246,6 +464,20 @@
                 }
             });
             staticPrecip.change();
+
+            var daytimeVaries = $('#daytime_indicator_time_varying');
+            var daytimeIndicator = $('#daytime_indicator_static_value');
+            daytimeVaries.change(function() {
+                daytimeIndicator.removeAttr('disabled');
+            });
         }
+
+        form.addEventListener('form:visible', function() {
+            if (!TRIM.store.currentScenario.parcels) {
+                LoadingScreen.show('met_parcels_loading');
+            }
+            TRIM.refreshParcels();
+            LoadingScreen.hide('met_parcels_loading');
+        });
     });
 </script>

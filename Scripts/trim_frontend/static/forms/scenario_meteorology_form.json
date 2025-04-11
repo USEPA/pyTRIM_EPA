@@ -51,20 +51,6 @@
             "separator": "_"
         },
         {
-            "id": "groundwater_seepage",
-            "label": "",
-            "data_type": "form",
-            "form_definition": "subforms/meteorological/groundwater_seepage_spatially_varying.json",
-            "separator": "_"
-        },
-        {
-            "id": "runoff",
-            "label": "",
-            "data_type": "form",
-            "form_definition": "subforms/meteorological/runoff_spatially_varying.json",
-            "separator": "_"
-        },
-        {
             "id": "precipitation",
             "label": "",
             "data_type": "form",

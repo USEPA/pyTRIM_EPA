@@ -1,0 +1,1615 @@
+AWSTemplateFormatVersion: 2010-09-09
+Metadata:
+  'AWS::CloudFormation::Designer':
+    8ec168cc-89b5-4ec9-8943-639ee943c3f7:
+      size:
+        width: 360
+        height: 260
+      position:
+        x: -160
+        'y': 170
+      z: 0
+      embeds: []
+    b0bff243-9ae5-4a69-8c6c-07f89b9305e4:
+      size:
+        width: 150
+        height: 80
+      position:
+        x: 270
+        'y': 170
+      z: 0
+      embeds: []
+      iscontainedinside:
+        - 8ec168cc-89b5-4ec9-8943-639ee943c3f7
+    879a339f-5422-44e1-98fc-bb33f4fad0ee:
+      source:
+        id: b0bff243-9ae5-4a69-8c6c-07f89b9305e4
+        selector: 'g:nth-child(1) g:nth-child(5) g:nth-child(3) circle:nth-child(1)     '
+        port: 'AWS::ContainedInsideLink-AWS::EC2::VPC-VpcId'
+      target:
+        id: 8ec168cc-89b5-4ec9-8943-639ee943c3f7
+      z: 12
+    e4839b63-dca0-4070-9251-761bdbad59ab:
+      size:
+        width: 60
+        height: 60
+      position:
+        x: 470
+        'y': 170
+      z: 0
+      iscontainedinside:
+        - b0bff243-9ae5-4a69-8c6c-07f89b9305e4
+    b4ab4263-ab2f-490c-bc7f-398d13366a85:
+      source:
+        id: e4839b63-dca0-4070-9251-761bdbad59ab
+      target:
+        id: b0bff243-9ae5-4a69-8c6c-07f89b9305e4
+      z: 11
+  'AWS::CloudFormation::Interface':
+    ParameterGroups:
+      - Label:
+          default: General
+        Parameters:
+          - EnvironmentName
+          - ShortEnvironmentProfile
+          - AlphaAZSuffix
+          - BravoAZSuffix
+      - Label:
+          default: Network Configuration
+        Parameters:
+          - CidrSegmentVPC
+          - CidrSegmentPublicSubnetAlphaAZ
+          - CidrSegmentPublicSubnetBravoAZ
+          - CidrSegmentPrivateSubnetAlphaAZ
+          - CidrSegmentPrivateSubnetBravoAZ
+          - CidrSegmentRdsPrivateSubnetAlphaAZ
+          - CidrSegmentRdsPrivateSubnetBravoAZ
+          - CidrSegmentNatSubnet
+          - BastionPassthroughKeyPairName
+          - NATGatewayElasticIPAllocationID
+      - Label:
+          default: MySQL Database
+        Parameters:
+          - DatabaseInstanceType
+          - DatabaseName
+          - DatabaseMySQLEngineVersion
+          - DatabaseMasterAccountUsername
+          - DatabaseMasterAccountPassword
+      - Label:
+          default: Beanstalk (web tiers)
+        Parameters:
+          - NotificationEmail
+          - WebServerCertId
+          - WebTierInstanceType
+          - WebTierMinNumOfInstances
+          - WebTierMaxNumOfInstances
+    ParameterLabels:
+      EnvironmentName:
+        default: Environment Name
+      ShortEnvironmentProfile:
+        default: dev
+      AlphaAZSuffix:
+        default: Alpha Availability Zone Suffix
+      BravoAZSuffix:
+        default: Bravo Availability Zone Suffix
+      BastionPassthroughKeyPairName:
+        default: SSH KeyPair
+
+Parameters:
+  KludgeDoDb:
+    Type: String
+    Description: used to set db condition
+    Default: true
+
+  KludgeDoBeanstalk:
+    Type: String
+    Description: used to set beanstalk condition
+    Default: true
+
+  KludgeDoSecret:
+    Type: String
+    Description: used to set db condition
+    Default: false
+
+  EnvironmentName:
+    Type: String
+    Description: Environment name prefixed/appended to resource names; dashes only, no underscores!
+    Default: pytrim-icfdev
+  ShortEnvironmentProfile:
+    Type: String
+    Description: simple name like "dev" or "prod" to tell the app what env it is running in
+    Default: dev
+  CidrSegmentVPC:
+    Type: Number
+    MinValue: 0
+    MaxValue: 255
+    Description: >-
+      for input value X, VPC will be configured with IPv4 CIDR of 10.X.0.0/16.
+      See existing ones already in use!
+    Default: 1
+  AlphaAZSuffix:
+    Description: >-
+      suffix for the first AZ; will be combined with the current region (e.g.
+      us-east-1[AlphaAZSuffix]) in created resources as needed
+    Type: String
+    Default: a
+  BravoAZSuffix:
+    Description: suffix for the second AZ. Must be different from AlphaAZSuffix!
+    Type: String
+    Default: b
+  CidrSegmentRdsPrivateSubnetAlphaAZ:
+    Type: Number
+    MinValue: 0
+    MaxValue: 255
+    Description: >-
+      for input value Y, private RDS subnet in AZ alpha will be configured with
+      IPv4 CIDR of 10.?.Y.0/24.
+    Default: 0
+  CidrSegmentRdsPrivateSubnetBravoAZ:
+    Type: Number
+    MinValue: 0
+    MaxValue: 255
+    Description: >-
+      for input value Y, private RDS subnet in AZ bravo will be configured with
+      IPv4 CIDR of 10.?.Y.0/24.
+    Default: 1
+  CidrSegmentPrivateSubnetAlphaAZ:
+    Type: Number
+    MinValue: 0
+    MaxValue: 255
+    Description: >-
+      for input value Y, private subnet in AZ alpha will be configured with IPv4
+      CIDR of 10.?.Y.0/24.
+    Default: 2
+  CidrSegmentPrivateSubnetBravoAZ:
+    Type: Number
+    MinValue: 0
+    MaxValue: 255
+    Description: >-
+      for input value Y, private subnet in AZ bravo will be configured with IPv4
+      CIDR of 10.?.Y.0/24.
+    Default: 3
+  CidrSegmentPublicSubnetAlphaAZ:
+    Type: Number
+    MinValue: 0
+    MaxValue: 255
+    Description: >-
+      for input value Y, public subnet in AZ alpha will be configured with IPv4
+      CIDR of 10.?.Y.0/24.
+    Default: 4
+  CidrSegmentPublicSubnetBravoAZ:
+    Type: Number
+    MinValue: 0
+    MaxValue: 255
+    Description: >-
+      for input value Y, public subnet in AZ bravo will be configured with IPv4
+      CIDR of 10.?.Y.0/24.
+    Default: 5
+  CidrSegmentNatSubnet:
+    Type: Number
+    MinValue: 0
+    MaxValue: 255
+    Description: >-
+      for input value Y, NAT-related subnet will be configured with
+      IPv4 CIDR of 10.?.Y.0/24.
+    Default: 6
+  NotificationEmail:
+    Description: 'email address for AWS-related notifications'
+    Type: String
+    Default: 'tom.feiler@icf.com'
+  WebServerCertId:
+    Description: The Amazon Resource Name (ARN) of an SSL certificate to bind to the web tier listener. Visit ACM to find the appropriate value.
+    Type: String
+    # default dev one for testing
+    Default: "arn:aws:acm:us-east-1:426714360284:certificate/6f39535c-f167-4048-9304-6af9803a2498"
+  WebTierMinNumOfInstances:
+    Description: 'minimum # of instances in the web tier'
+    Type: Number
+    Default: 1
+  WebTierMaxNumOfInstances:
+    Description: 'maximum # of instances in the web tier'
+    Type: Number
+    Default: 1
+  WebTierInstanceType:
+    Description: instance type for the web tier
+    Type: String
+    Default: m1.medium
+    AllowedValues:
+      - c1.medium
+      - c1.xlarge
+      - c3.2xlarge
+      - c3.4xlarge
+      - c3.8xlarge
+      - c3.large
+      - c3.xlarge
+      - c4.2xlarge
+      - c4.4xlarge
+      - c4.8xlarge
+      - c4.large
+      - c4.xlarge
+      - c5.12xlarge
+      - c5.18xlarge
+      - c5.24xlarge
+      - c5.2xlarge
+      - c5.4xlarge
+      - c5.9xlarge
+      - c5.large
+      - c5.metal
+      - c5.xlarge
+      - c5d.18xlarge
+      - c5d.2xlarge
+      - c5d.4xlarge
+      - c5d.9xlarge
+      - c5d.large
+      - c5d.xlarge
+      - c5n.18xlarge
+      - c5n.2xlarge
+      - c5n.4xlarge
+      - c5n.9xlarge
+      - c5n.large
+      - c5n.xlarge
+      - cc2.8xlarge
+      - d2.2xlarge
+      - d2.4xlarge
+      - d2.8xlarge
+      - d2.xlarge
+      - f1.16xlarge
+      - f1.2xlarge
+      - f1.4xlarge
+      - g2.2xlarge
+      - g2.8xlarge
+      - g3.16xlarge
+      - g3.4xlarge
+      - g3.8xlarge
+      - g3s.xlarge
+      - g4dn.12xlarge
+      - g4dn.2xlarge
+      - g4dn.4xlarge
+      - g4dn.xlarge
+      - h1.16xlarge
+      - h1.2xlarge
+      - h1.4xlarge
+      - h1.8xlarge
+      - i2.2xlarge
+      - i2.4xlarge
+      - i2.8xlarge
+      - i2.xlarge
+      - i3.16xlarge
+      - i3.2xlarge
+      - i3.4xlarge
+      - i3.8xlarge
+      - i3.large
+      - i3.xlarge
+      - i3en.12xlarge
+      - i3en.24xlarge
+      - i3en.2xlarge
+      - i3en.3xlarge
+      - i3en.6xlarge
+      - i3en.large
+      - i3en.metal
+      - i3en.xlarge
+      - m1.large
+      - m1.medium
+      - m1.small
+      - m1.xlarge
+      - m2.2xlarge
+      - m2.4xlarge
+      - m2.xlarge
+      - m3.2xlarge
+      - m3.large
+      - m3.medium
+      - m3.xlarge
+      - m4.10xlarge
+      - m4.16xlarge
+      - m4.2xlarge
+      - m4.4xlarge
+      - m4.large
+      - m4.xlarge
+      - m5.12xlarge
+      - m5.24xlarge
+      - m5.2xlarge
+      - m5.4xlarge
+      - m5.large
+      - m5.metal
+      - m5.xlarge
+      - m5a.12xlarge
+      - m5a.24xlarge
+      - m5a.2xlarge
+      - m5a.4xlarge
+      - m5a.large
+      - m5a.xlarge
+      - m5ad.12xlarge
+      - m5ad.24xlarge
+      - m5ad.2xlarge
+      - m5ad.4xlarge
+      - m5ad.large
+      - m5ad.xlarge
+      - m5d.12xlarge
+      - m5d.24xlarge
+      - m5d.2xlarge
+      - m5d.4xlarge
+      - m5d.large
+      - m5d.metal
+      - m5d.xlarge
+      - m5dn.12xlarge
+      - m5dn.16xlarge
+      - m5dn.24xlarge
+      - m5dn.2xlarge
+      - m5dn.4xlarge
+      - m5dn.8xlarge
+      - m5dn.large
+      - m5dn.xlarge
+      - m5n.12xlarge
+      - m5n.16xlarge
+      - m5n.24xlarge
+      - m5n.2xlarge
+      - m5n.4xlarge
+      - m5n.8xlarge
+      - m5n.large
+      - m5n.xlarge
+      - p2.16xlarge
+      - p2.8xlarge
+      - p2.xlarge
+      - p3.16xlarge
+      - p3.2xlarge
+      - p3.8xlarge
+      - r3.2xlarge
+      - r3.4xlarge
+      - r3.8xlarge
+      - r3.large
+      - r3.xlarge
+      - r4.16xlarge
+      - r4.2xlarge
+      - r4.4xlarge
+      - r4.8xlarge
+      - r4.large
+      - r4.xlarge
+      - r5.12xlarge
+      - r5.24xlarge
+      - r5.2xlarge
+      - r5.4xlarge
+      - r5.large
+      - r5.metal
+      - r5.xlarge
+      - r5a.12xlarge
+      - r5a.24xlarge
+      - r5a.2xlarge
+      - r5a.4xlarge
+      - r5a.large
+      - r5a.xlarge
+      - r5ad.12xlarge
+      - r5ad.24xlarge
+      - r5ad.2xlarge
+      - r5ad.4xlarge
+      - r5ad.large
+      - r5ad.xlarge
+      - r5d.12xlarge
+      - r5d.24xlarge
+      - r5d.2xlarge
+      - r5d.4xlarge
+      - r5d.large
+      - r5d.metal
+      - r5d.xlarge
+      - r5dn.12xlarge
+      - r5dn.16xlarge
+      - r5dn.24xlarge
+      - r5dn.2xlarge
+      - r5dn.4xlarge
+      - r5dn.8xlarge
+      - r5dn.large
+      - r5dn.xlarge
+      - r5n.12xlarge
+      - r5n.16xlarge
+      - r5n.24xlarge
+      - r5n.2xlarge
+      - r5n.4xlarge
+      - r5n.8xlarge
+      - r5n.large
+      - r5n.xlarge
+      - t1.micro
+      - t2.2xlarge
+      - t2.large
+      - t2.medium
+      - t2.micro
+      - t2.nano
+      - t2.small
+      - t2.xlarge
+      - t3.2xlarge
+      - t3.large
+      - t3.medium
+      - t3.micro
+      - t3.nano
+      - t3.small
+      - t3.xlarge
+      - t3a.2xlarge
+      - t3a.large
+      - t3a.medium
+      - t3a.micro
+      - t3a.nano
+      - t3a.small
+      - t3a.xlarge
+      - x1.16xlarge
+      - x1.32xlarge
+      - x1e.16xlarge
+      - x1e.2xlarge
+      - x1e.32xlarge
+      - x1e.4xlarge
+      - x1e.8xlarge
+      - x1e.xlarge
+      - z1d.12xlarge
+      - z1d.2xlarge
+      - z1d.3xlarge
+      - z1d.6xlarge
+      - z1d.large
+      - z1d.metal
+      - z1d.xlarge
+    ConstraintDescription: must be a valid EC2 instance type for this region.
+
+  NATGatewayElasticIPAllocationID:
+    Description: See EC2 Dashboard | Network & Security | Elastic IPs and take an Allocation ID for an
+      unused elastic IP. This will be used in creating the NAT Gateway that allows the private subnets
+      to talk to other services on the internet (such as the Elastic Beanstalk service, external MongoDB
+      hosts, etc.)
+    Type: String
+
+  ## Bastion Related
+  BastionPassthroughKeyPairName:
+    Description: Enter a Public/private key pair for ssh access to the bastion and instances.
+      If you do not have one in this region, please create it before continuing.
+    Type: 'AWS::EC2::KeyPair::KeyName'
+      
+  ## RDS-related
+  DatabaseName:
+    Description: name for the database
+    Type: String
+    Default: pytrim
+  DatabaseInstanceType:
+    Description: RDS instance type
+    Type: String
+    Default: db.t3.medium
+    AllowedValues:
+      - db.m5.large
+      - db.m5.xlarge
+      - db.m5.2xlarge
+      - db.m5.4xlarge
+      - db.m5.8xlarge
+      - db.m5.12xlarge
+      - db.m5.16xlarge
+      - db.m5.24xlarge
+      - db.m6g.large
+      - db.m6g.xlarge
+      - db.m6g.2xlarge
+      - db.m6g.4xlarge
+      - db.m6g.8xlarge
+      - db.m6g.12xlarge
+      - db.m6g.16xlarge
+      - db.r5.large
+      - db.r5.xlarge
+      - db.r5.2xlarge
+      - db.r5.4xlarge
+      - db.r5.8xlarge
+      - db.r5.12xlarge
+      - db.r5.16xlarge
+      - db.r5.24xlarge
+      - db.r6g.large
+      - db.r6g.xlarge
+      - db.r6g.2xlarge
+      - db.r6g.4xlarge
+      - db.r6g.8xlarge
+      - db.r6g.12xlarge
+      - db.r6g.16xlarge
+      - db.t3.micro
+      - db.t3.small
+      - db.t3.medium
+      - db.t3.large
+      - db.t3.xlarge
+      - db.t3.2xlarge
+    ConstraintDescription: must be a valid RDS instance type for this region.
+  DatabaseMySQLEngineVersion:
+    Description: version number to use; see DescribeDBEngineVersions for up-to-date values
+    Type: String
+    Default: "8.0.35"
+  DatabaseMasterAccountUsername:
+    Description: master user name
+    Type: String
+  DatabaseMasterAccountPassword:
+    Description: master user password - 8+ characters
+    Type: String
+    MinLength: 8
+
+Conditions:
+  DoCreateDatabaseInfrastructure: !Equals [!Ref "KludgeDoDb", "true"]
+  DoCreateBeanstalkInfrastructure: !Equals [!Ref "KludgeDoBeanstalk", "true"]
+  DoCreateSecret: !Equals [!Ref "KludgeDoSecret", "true"]
+
+Resources:
+  ## S3
+  ModelRunOutputStorageBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${EnvironmentName}-model-run-storage-bucket'
+      AccessControl: Private
+
+  GetFlowOutputStorageBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${EnvironmentName}-getflow-storage-bucket'
+      AccessControl: Private
+
+  ## BASIC VPC CONFIGURATION
+  Vpc:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: !Sub '10.${CidrSegmentVPC}.0.0/16'
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}_vpc'
+
+  SubnetPrivateAlphaAZ:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref Vpc
+      AvailabilityZone: !Sub '${AWS::Region}${AlphaAZSuffix}'
+      CidrBlock: !Sub '10.${CidrSegmentVPC}.${CidrSegmentPrivateSubnetAlphaAZ}.0/24'
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub 'subnet_${EnvironmentName}_private_${AlphaAZSuffix}'
+
+  SubnetPrivateBravoAZ:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref Vpc
+      AvailabilityZone: !Sub '${AWS::Region}${BravoAZSuffix}'
+      CidrBlock: !Sub '10.${CidrSegmentVPC}.${CidrSegmentPrivateSubnetBravoAZ}.0/24'
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: !Sub 'subnet_${EnvironmentName}_private_${BravoAZSuffix}'
+  SubnetPublicAlphaAZ:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref Vpc
+      AvailabilityZone: !Sub '${AWS::Region}${AlphaAZSuffix}'
+      CidrBlock: !Sub '10.${CidrSegmentVPC}.${CidrSegmentPublicSubnetAlphaAZ}.0/24'
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub 'subnet_${EnvironmentName}_public_${AlphaAZSuffix}'
+  SubnetPublicBravoAZ:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref Vpc
+      AvailabilityZone: !Sub '${AWS::Region}${BravoAZSuffix}'
+      CidrBlock: !Sub '10.${CidrSegmentVPC}.${CidrSegmentPublicSubnetBravoAZ}.0/24'
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub 'subnet_${EnvironmentName}_public_${BravoAZSuffix}'
+
+  SubnetRdsPrivateAlphaAZ:
+    Condition: DoCreateDatabaseInfrastructure
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref Vpc
+      AvailabilityZone: !Sub '${AWS::Region}${AlphaAZSuffix}'
+      CidrBlock: !Sub '10.${CidrSegmentVPC}.${CidrSegmentRdsPrivateSubnetAlphaAZ}.0/24'
+      Tags:
+        - Key: Name
+          Value: !Sub 'subnet_${EnvironmentName}_rds_private_${AlphaAZSuffix}'
+
+  SubnetRdsPrivateBravoAZ:
+    Condition: DoCreateDatabaseInfrastructure
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref Vpc
+      AvailabilityZone: !Sub '${AWS::Region}${BravoAZSuffix}'
+      CidrBlock: !Sub '10.${CidrSegmentVPC}.${CidrSegmentRdsPrivateSubnetBravoAZ}.0/24'
+      Tags:
+        - Key: Name
+          Value: !Sub 'subnet_${EnvironmentName}_rds_private_${BravoAZSuffix}'
+
+  SubnetForNAT:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref Vpc
+      AvailabilityZone: !Sub '${AWS::Region}${BravoAZSuffix}'
+      CidrBlock: !Sub '10.${CidrSegmentVPC}.${CidrSegmentNatSubnet}.0/24'
+      Tags:
+        - Key: Name
+          Value: !Sub 'subnet_${EnvironmentName}_public_forNAT'
+
+  NATGatewayForPrivateSubnets:
+    Type: AWS::EC2::NatGateway
+    Properties: 
+      ConnectivityType: public
+      AllocationId: !Ref NATGatewayElasticIPAllocationID
+      SubnetId: !Ref SubnetForNAT
+      Tags:
+        - Key: Name
+          Value: !Sub 'natgateway-${EnvironmentName}'
+
+  RouteTableNGW:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: !Sub 'rtb-${EnvironmentName}-nat'
+
+  NGWRoute:
+    Type: AWS::EC2::Route
+    Properties: 
+      DestinationCidrBlock: '0.0.0.0/0'
+      NatGatewayId: !Ref NATGatewayForPrivateSubnets
+      RouteTableId: !Ref RouteTableNGW
+            
+  InternetGatewayForVPC:
+    Type: 'AWS::EC2::InternetGateway'
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub 'igw-${EnvironmentName}'
+
+  VpcGatewayAssociation:
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Properties:
+      VpcId: !Ref Vpc
+      InternetGatewayId: !Ref InternetGatewayForVPC
+
+  RouteTableIGW:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref Vpc
+      Tags:
+        - Key: Name
+          Value: !Sub 'rtb-${EnvironmentName}-igw'
+
+  IGWRoute:
+    Type: AWS::EC2::Route
+    Properties: 
+      DestinationCidrBlock: '0.0.0.0/0'
+      GatewayId: !Ref InternetGatewayForVPC
+      RouteTableId: !Ref RouteTableIGW
+        
+  # no way to alter the default route table that comes w/ the VPC in a CF template
+  # (at least not without a custom lambda-backed resource). instead make manual associations for
+  # the appropriate subnet/RouteTable
+  SubnetRouteTableAssociationOne:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: SubnetPublicAlphaAZ
+      RouteTableId:
+        Ref: RouteTableIGW
+
+  SubnetRouteTableAssociationTwo:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: SubnetPublicBravoAZ
+      RouteTableId:
+        Ref: RouteTableIGW
+
+  SubnetRouteTableAssociationThree:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: SubnetForNAT
+      RouteTableId:
+        Ref: RouteTableIGW
+
+  SubnetRouteTableAssociationFour:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: SubnetPrivateAlphaAZ
+      RouteTableId:
+        Ref: RouteTableNGW
+
+  SubnetRouteTableAssociationFive:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId:
+        Ref: SubnetPrivateBravoAZ
+      RouteTableId:
+        Ref: RouteTableNGW
+            
+  ## BastionSecurityGroup
+  
+  # TODO - do I need this?
+  BastionSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: !Sub 'security group for bastion instance in ${EnvironmentName}'
+      GroupName: !Sub '${EnvironmentName}-secgrp-bastion'
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-secgrp-bastion'
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+#START_DYNAMIC_SECTION ec2_ingress
+#END_DYNAMIC_SECTION ec2_ingress
+            
+  ## IAM
+
+  # TODO - more restrictive role permissions...
+                
+  # this is the role the script running within the Docker container runs as...
+  # TODO CURRENLTY NOT IN USE?!?!
+  DockerRuntimeAssumedRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - 'ecs-tasks.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+      # in IAM console, search for the managed policy to find the arn for it
+      ManagedPolicyArns:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AWSStepFunctionsFullAccess" # needed for token access
+        # TODO - will need database access?
+        
+  # role the web tier runs as - used e.g. for making AWS SDK calls
+  WebTierInstanceProfileRole:
+    Condition: DoCreateBeanstalkInfrastructure
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - 'ec2.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+      # in IAM console, search for the managed policy to find the arn for it
+      ManagedPolicyArns:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AWSElasticBeanstalkWebTier"
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "states:*"
+                Resource: !Ref DockerStateMachineWrapperModelRun
+              - Effect: "Allow"
+                Action: "states:*"
+                Resource: !Ref DockerStateMachineWrapperGetFlow
+              - Effect: "Allow"
+                Action: "states:DescribeExecution"
+                Resource: "*"
+                # Resource is like: arn:aws:states:us-east-1:426714360284:execution:DockerStateMachineWrapperModelRun-6igLbCu7FQcL:70e6b149-0e1d-4f43-b689-bdeda0d30f96 but I can't get wildcards working with that, so for now just allow on all. Just describe so low-risk.
+              - Effect: "Allow"
+                Action: "s3:*"
+                Resource:
+                  - !GetAtt ModelRunOutputStorageBucket.Arn
+                  - !Join
+                    - ''
+                    -
+                      - 'arn:'
+                      - !Sub "${AWS::Partition}"
+                      - ':s3:::'
+                      - !Ref ModelRunOutputStorageBucket
+                      - '/*'
+              - Effect: "Allow"
+                Action: "s3:*"
+                Resource:
+                  - !GetAtt GetFlowOutputStorageBucket.Arn
+                  - !Join
+                    - ''
+                    -
+                      - 'arn:'
+                      - !Sub "${AWS::Partition}"
+                      - ':s3:::'
+                      - !Ref GetFlowOutputStorageBucket
+                      - '/*'
+      Path: /
+
+  WebTierInstanceProfile:
+    Condition: DoCreateBeanstalkInfrastructure
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+        - !Ref WebTierInstanceProfileRole
+        
+  # role Beanstalk uses when constructing resources for the web tier
+  WebTierServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              # see https://gist.github.com/shortjared/4c1e3fe52bdfa47522cfe5b41e5d6f22
+              Service:
+                - 'elasticbeanstalk.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+            Condition:
+              StringEquals:
+                'sts:ExternalId': elasticbeanstalk
+      # in IAM console, search for the managed policy to find the arn for it
+      ManagedPolicyArns:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AutoScalingFullAccess"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/ElasticLoadBalancingFullAccess"
+      Path: /
+
+  ## BASTION
+
+  # see https://aws-ia.github.io/cfn-ps-linux-bastion/#_deployment_options
+  #
+  # BASTION AMI OS? (Amazon-Linux2-HVM)
+  # ROOT VOLUME SIZE (10)
+  # BASTION HOST NAME (LinuxBastion)
+  # BASTION TENANCY (default)
+  # BASTION BANNER (false)
+  # BANNER TEXT ("")
+  # TCP FORWARDING (false)
+  # X11 FORWARDING (false)
+  # QUICK START S3 BUCKTE NAME (aws-quickstart)
+  # quickstart s3 prefix (quickstart-linux-bastion/)
+  # QS bucket region (us-east-1)
+
+  # how can we embed one template:
+  # https://aws-quickstart.s3.amazonaws.com/quickstart-linux-bastion/templates/linux-bastion.template
+  # inside this one?
+  BastionJumpbox:
+    Type: 'AWS::CloudFormation::Stack'
+    # DeletionPolicy: Retain
+    Properties:
+      # TemplateURL: 'https://aws-quickstart.s3.amazonaws.com/quickstart-linux-bastion/templates/linux-bastion.template'
+      TemplateURL: 'https://aws-ia-us-east-1.s3.us-east-1.amazonaws.com/cfn-ps-linux-bastion/templates/linux-bastion-entrypoint-existing-vpc.template.yaml'
+      Parameters:
+        BastionHostName: !Sub '${EnvironmentName}-bastionhost'
+        BastionInstanceType: 't2.micro'
+        NumBastionHosts: 1
+        RemoteAccessCIDR: '0.0.0.0/0' # TODO - how to lock this down a bit, maybe post-construction?
+        VPCID: !Ref Vpc
+        PublicSubnet1ID: !Ref SubnetPublicAlphaAZ
+        PublicSubnet2ID: !Ref SubnetPublicBravoAZ
+        KeyPairName: !Ref BastionPassthroughKeyPairName
+        EnableTCPForwarding: true
+            
+  ## DOCKER
+  ContainerRepositoryModelRun:
+    Type: 'AWS::ECR::Repository' # private
+    Properties:
+      EmptyOnDelete: false
+      RepositoryName: !Sub '${EnvironmentName}/private_ecr_repo_modelrun'
+
+  ContainerRepositoryGetFlow:
+    Type: 'AWS::ECR::Repository'
+    Properties:
+      EmptyOnDelete: false
+      RepositoryName: !Sub '${EnvironmentName}/private_ecr_repo_getflow'
+
+  # NOTE - for some reason this fails the first time you try it; I had to create one manual cluster first before it would work?
+  ContainerClusterModelRun:
+    Type: 'AWS::ECS::Cluster'
+    Properties:
+      ClusterName: !Sub '${EnvironmentName}_container_cluster_modelrun'
+      CapacityProviders: 
+        - 'FARGATE'
+
+  ContainerClusterGetFlow:
+    Type: 'AWS::ECS::Cluster'
+    Properties:
+      ClusterName: !Sub '${EnvironmentName}_container_cluster_getflow'
+      CapacityProviders: 
+        - 'FARGATE'
+
+  DockerTaskExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - 'ecs-tasks.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/CloudWatchLogsFullAccess"
+
+  DockerTaskTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - 'ecs-tasks.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AWSStepFunctionsFullAccess"
+        # - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonS3FullAccess"
+        # TODO - will need database access? network access for getting outside the dcker container?
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "secretsmanager:GetSecretValue"
+                Resource: !Sub "arn:${AWS::Partition}:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:pytrim/*"
+              - Effect: "Allow"
+                Action: "s3:*"
+                Resource:
+                  - !GetAtt ModelRunOutputStorageBucket.Arn
+                  - !Join
+                    - ''
+                    -
+                      - 'arn:'
+                      - !Sub "${AWS::Partition}"
+                      - ':s3:::'
+                      - !Ref ModelRunOutputStorageBucket
+                      - '/*'
+              - Effect: "Allow"
+                Action: "s3:*"
+                Resource:
+                  - !GetAtt GetFlowOutputStorageBucket.Arn
+                  - !Join
+                    - ''
+                    -
+                      - 'arn:'
+                      - !Sub "${AWS::Partition}"
+                      - ':s3:::'
+                      - !Ref GetFlowOutputStorageBucket
+                      - '/*'
+    
+  # this is the role the step function assumes when running...
+  # TODO CURRENTLY NOT IN USE?!?!?!
+  StepFunctionAssumedRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - 'states.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+      # in IAM console, search for the managed policy to find the arn for it
+      ManagedPolicyArns:
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AdministratorAccess"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonECS_FullAccess"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaRole"
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AWSXrayFullAccess"
+      Policies:
+        - PolicyName: !Sub '${EnvironmentName}CustomStepFunctionRolePolicy'
+          PolicyDocument:
+             Version: 2012-10-17
+             Statement:
+                - Sid: CloudWatchAccessStmt
+                  Effect: Allow
+                  Action: "cloudwatch:*"
+                  Resource: '*'
+                # Path: /
+
+  DockerTaskDefModelRun:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      # 1 vCPU / 4 GB RAM. hangs eventually...
+      # Cpu: "1024"
+      # Memory: "4096"
+
+      # 4 vCPU / 16 GB RAM. Works, took about 20 minutes on scenario 2
+      # Cpu: "4096"
+      # Memory: "16384"
+      
+      # 8 vCPU / 32 GB RAM. Again, about 20 minutes
+      # Cpu: "8192"
+      # Memory: "32768"
+      
+      # 8 vCPU / 60 GB RAM. Works, took about 19 minutes.
+      Cpu: "8192"
+      Memory: "61440"
+      ContainerDefinitions: 
+        - Image: !Join
+          - ':'
+          -
+            - !GetAtt ContainerRepositoryModelRun.RepositoryUri
+            - 'latest'
+          Cpu: 0
+          DisableNetworking: false
+
+          Environment:
+            - Name: STORAGE_BUCKET_NAME
+              Value: !Ref ModelRunOutputStorageBucket
+            - Name: RDS_HOSTNAME
+              # Value: pytrim-dev-stalk-mysql.c4kmy933ys6z.us-east-1.rds.amazonaws.com
+              Value: !GetAtt DatabaseInstance.Endpoint.Address
+            - Name: RDS_PORT
+              Value: !GetAtt DatabaseInstance.Endpoint.Port
+            - Name: RDS_DB_NAME
+              Value: !Ref DatabaseName
+            # RDS_USERNAME, RDS_PASSWORD, SQLALCHEMY_DATABASE_URI get set on-the-fly by the Docker image...
+
+          Essential: true
+          Interactive: false
+          LogConfiguration: 
+            LogDriver: "awslogs"
+            Options:
+              "awslogs-create-group": "true"
+              "awslogs-group": "/ecs/pytrim_sample_taskdef"
+              "awslogs-region": "us-east-1"
+              "awslogs-stream-prefix": "ecs"
+
+          Name: "pytrim_runmodel_container"
+          PortMappings: 
+            - Name: "pytrim_runmodel_container-80-tcp"
+              ContainerPort: 80
+              HostPort: 80
+              Protocol: "tcp"
+              AppProtocol: "http"
+          #Secrets: 
+            #- Secret
+      #EphemeralStorage: 
+        #EphemeralStorage
+      ExecutionRoleArn: !GetAtt DockerTaskExecutionRole.Arn
+      # Family: "pytrim_runmodel_taskdef_family"
+      Family: !Sub '${EnvironmentName}-runmodel_taskdef_family'
+      #InferenceAccelerators: 
+        #- InferenceAccelerator
+      # IpcMode: String
+      NetworkMode: "awsvpc"
+      # PidMode: String
+      # PlacementConstraints: 
+        #- TaskDefinitionPlacementConstraint
+      # ProxyConfiguration: 
+        # ProxyConfiguration
+      RequiresCompatibilities: 
+        - "FARGATE"
+      RuntimePlatform: 
+        CPUArchitecture: "X86_64"
+        OperatingSystemFamily: "LINUX"
+      Tags: 
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-runmodel-taskdef'
+      TaskRoleArn: !GetAtt DockerTaskTaskRole.Arn
+      # Volumes: 
+        # - Volume
+
+  DockerTaskDefGetFlow:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      # 8 vCPU / 32 GB RAM. Again, about 20 minutes
+      Cpu: "8192"
+      Memory: "32768"
+      
+      ContainerDefinitions: 
+        - Image: !Join
+          - ':'
+          -
+            - !GetAtt ContainerRepositoryGetFlow.RepositoryUri
+            - 'latest'
+          Cpu: 0
+          DisableNetworking: false
+
+          Environment:
+            - Name: STORAGE_BUCKET_NAME
+              Value: !Ref GetFlowOutputStorageBucket
+            - Name: RDS_HOSTNAME
+              Value: !GetAtt DatabaseInstance.Endpoint.Address
+            - Name: RDS_PORT
+              Value: !GetAtt DatabaseInstance.Endpoint.Port
+            - Name: RDS_DB_NAME
+              Value: !Ref DatabaseName
+            # RDS_USERNAME, RDS_PASSWORD, SQLALCHEMY_DATABASE_URI get set on-the-fly by the Docker image...
+
+          Essential: true
+          Interactive: false
+          LogConfiguration: 
+            LogDriver: "awslogs"
+            Options:
+              "awslogs-create-group": "true"
+              "awslogs-group": "/ecs/pytrim_getflow_taskdef"
+              "awslogs-region": "us-east-1"
+              "awslogs-stream-prefix": "ecs"
+
+          Name: "pytrim_getflow_container"
+          PortMappings: 
+            - Name: "pytrim_getflow_container-80-tcp"
+              ContainerPort: 80
+              HostPort: 80
+              Protocol: "tcp"
+              AppProtocol: "http"
+          #Secrets: 
+            #- Secret
+      #EphemeralStorage: 
+        #EphemeralStorage
+      ExecutionRoleArn: !GetAtt DockerTaskExecutionRole.Arn
+      # Family: "pytrim_getflow_taskdef_family"
+      Family: !Sub '${EnvironmentName}-getflow_taskdef_family'
+      #InferenceAccelerators: 
+        #- InferenceAccelerator
+      # IpcMode: String
+      NetworkMode: "awsvpc"
+      # PidMode: String
+      # PlacementConstraints: 
+        #- TaskDefinitionPlacementConstraint
+      # ProxyConfiguration: 
+        # ProxyConfiguration
+      RequiresCompatibilities: 
+        - "FARGATE"
+      RuntimePlatform: 
+        CPUArchitecture: "X86_64"
+        OperatingSystemFamily: "LINUX"
+      Tags: 
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-getflow-taskdef'
+      TaskRoleArn: !GetAtt DockerTaskTaskRole.Arn
+      # Volumes: 
+        # - Volume
+          
+  StateMachineSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: !Sub 'controls statemachine access for ${EnvironmentName}'
+      GroupName: !Sub '${EnvironmentName}-secgrp-statemachine'
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-secgrp-statemachine'
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        -
+          CidrIp: '0.0.0.0/0'
+          Description: !Sub 'incoming access for the statemachine on ${EnvironmentName}'
+          FromPort: 0
+          ToPort: 65535
+          IpProtocol: "tcp"
+      SecurityGroupEgress:
+        -
+          CidrIp: '0.0.0.0/0'
+          Description: !Sub 'outgoing access for the statemachine on ${EnvironmentName}'
+          FromPort: 0
+          ToPort: 65535
+          IpProtocol: "tcp"
+
+  DockerStateMachineWrapperModelRun:
+    Type: 'AWS::StepFunctions::StateMachine'
+    Properties:
+      RoleArn: !GetAtt StepFunctionAssumedRole.Arn
+      Definition:
+        Comment: State Machine that launches Docker container to perform PyTrim model running
+        StartAt: ECS RunTask
+        States:
+          #ECS RunTask:
+          #Type: Pass
+          #Result: Hello
+          #End: true
+          ECS RunTask:
+            Type: Task
+            Resource: arn:aws:states:::ecs:runTask.waitForTaskToken
+            Parameters:
+              LaunchType: FARGATE
+              Cluster: !GetAtt ContainerClusterModelRun.Arn
+              TaskDefinition: !GetAtt DockerTaskDefModelRun.TaskDefinitionArn
+              NetworkConfiguration:
+                AwsvpcConfiguration:
+                  AssignPublicIp: ENABLED
+                  Subnets:
+                  - !Ref SubnetPublicAlphaAZ
+                  - !Ref SubnetPublicBravoAZ
+                  SecurityGroups:
+                  - !Ref StateMachineSecurityGroup
+              Overrides:
+                ContainerOverrides:
+                - Environment:
+                  - Name: TASK_TOKEN_ENV_VARIABLE
+                    Value.$: $$.Task.Token
+                  - Name: TRIM_SCENARIO_ID.$
+                    Value.$: $.scenarioId
+                  - Name: GENERATE_FAKE_RESULTS.$
+                    Value.$: $.generateFakeResults
+                  Name: pytrim_runmodel_container
+            End: true
+      Tags:
+        - Key: StateMachineName
+          Value: !Sub '${EnvironmentName}-dockerized-runmodel-statemachine'
+
+  DockerStateMachineWrapperGetFlow:
+    Type: 'AWS::StepFunctions::StateMachine'
+    Properties:
+      RoleArn: !GetAtt StepFunctionAssumedRole.Arn
+      Definition:
+        Comment: State Machine that launches Docker container to perform GetFlow running
+        StartAt: ECS RunTask
+        States:
+          ECS RunTask:
+            Type: Task
+            Resource: arn:aws:states:::ecs:runTask.waitForTaskToken
+            Parameters:
+              LaunchType: FARGATE
+              Cluster: !GetAtt ContainerClusterGetFlow.Arn
+              TaskDefinition: !GetAtt DockerTaskDefGetFlow.TaskDefinitionArn
+              NetworkConfiguration:
+                AwsvpcConfiguration:
+                  AssignPublicIp: ENABLED
+                  Subnets:
+                  - !Ref SubnetPublicAlphaAZ
+                  - !Ref SubnetPublicBravoAZ
+                  SecurityGroups:
+                  - !Ref StateMachineSecurityGroup
+              Overrides:
+                ContainerOverrides:
+                - Environment:
+                  - Name: TASK_TOKEN_ENV_VARIABLE
+                    Value.$: $$.Task.Token
+                  - Name: TRIM_SCENARIO_ID.$
+                    Value.$: $.scenarioId
+                  - Name: GENERATE_FAKE_RESULTS.$
+                    Value.$: $.generateFakeResults
+                  Name: pytrim_getflow_container
+            End: true
+      Tags:
+        - Key: StateMachineName
+          Value: !Sub '${EnvironmentName}-dockerized-getflow-statemachine'
+  
+  #
+  #
+  # RDS/MYSQL
+  
+  
+  DatabaseSubnetGroup:
+    Condition: DoCreateDatabaseInfrastructure
+    Type: 'AWS::RDS::DBSubnetGroup'
+    Properties:
+      DBSubnetGroupDescription: !Sub 'rds db subnet group for ${EnvironmentName}'
+      SubnetIds:
+        - !Ref SubnetRdsPrivateBravoAZ
+        - !Ref SubnetRdsPrivateAlphaAZ
+  
+  DatabaseSecurityGroup:
+    Condition: DoCreateDatabaseInfrastructure
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: !Sub 'controls rds instance access for ${EnvironmentName}'
+      GroupName: !Sub '${EnvironmentName}-secgrp-rds'
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-secgrp-rds'
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        -
+          CidrIp: !Sub '10.${CidrSegmentVPC}.0.0/16'
+          Description: !Sub 'access to the RDS instance from the ${EnvironmentName} VPC'
+          FromPort: 0
+          ToPort: 65535
+          IpProtocol: "tcp"
+
+  DatabaseInstance:
+    Condition: DoCreateDatabaseInfrastructure
+    Type: 'AWS::RDS::DBInstance'
+    Properties:
+      AllocatedStorage: "100"
+      AllowMajorVersionUpgrade: true
+      AutoMinorVersionUpgrade: true
+      BackupRetentionPeriod: 7
+      DBInstanceClass: !Ref DatabaseInstanceType
+      DBInstanceIdentifier: !Sub '${EnvironmentName}-mysql'
+      DBName: !Ref DatabaseName
+      VPCSecurityGroups:
+        - !Ref DatabaseSecurityGroup
+      DBSubnetGroupName: !Ref DatabaseSubnetGroup
+      Engine: "mysql"
+      EngineVersion: !Ref DatabaseMySQLEngineVersion
+      MasterUsername: !Ref DatabaseMasterAccountUsername
+      MasterUserPassword: !Ref DatabaseMasterAccountPassword
+      PubliclyAccessible: false
+      StorageType: "gp2"
+
+  #
+  #
+  # SECRETS
+  # 
+  #
+  DatabaseSecret:
+    Condition: DoCreateSecret
+    Type: AWS::SecretsManager::Secret
+    Properties: 
+      Description: !Sub 'MySQL credentials for ${EnvironmentName}'
+      Name: !Sub 'pytrim/mysql'
+      SecretString: !Sub '{"username":"${DatabaseMasterAccountUsername}","password":"${DatabaseMasterAccountPassword}"}'
+
+    
+  #
+  #
+  # Beanstalk
+  # 
+  #
+  BeanstalkApp:
+    Condition: DoCreateBeanstalkInfrastructure
+    Type: AWS::ElasticBeanstalk::Application
+    Properties: 
+      ApplicationName: !Sub '${EnvironmentName}'
+
+  BeanstalkWebSecurityGroup:
+    Condition: DoCreateBeanstalkInfrastructure
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: !Sub 'security group for web tier in ${EnvironmentName}'
+      GroupName: !Sub '${EnvironmentName}-secgrp-webtier'
+      Tags:
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-secgrp-webtier'
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        -
+          CidrIp: !Sub '10.${CidrSegmentVPC}.0.0/16'
+          Description: !Sub 'access to the web tier instances from the ${EnvironmentName} VPC'
+          FromPort: 22
+          ToPort: 22
+          IpProtocol: "tcp"
+
+  BeanstalkWebEnv:
+    Condition: DoCreateBeanstalkInfrastructure
+    Type: AWS::ElasticBeanstalk::Environment
+    Properties: 
+      ApplicationName: !Ref BeanstalkApp
+      Description: !Sub 'web tier for ${EnvironmentName}'
+      EnvironmentName: !Sub '${EnvironmentName}-web'
+      SolutionStackName: '64bit Amazon Linux 2023 v4.0.11 running Python 3.11' # see https://docs.aws.amazon.com/elasticbeanstalk/latest/platforms/platforms-supported.html#platforms-supported.python
+      OptionSettings: 
+        -
+          Namespace: 'aws:autoscaling:launchconfiguration'
+          OptionName: IamInstanceProfile
+          Value: !Ref WebTierInstanceProfile
+          # Value: 'aws-elasticbeanstalk-ec2-role'
+        -
+          Namespace: 'aws:ec2:vpc'
+          OptionName: AssociatePublicIpAddress
+          Value: false
+        -
+          Namespace: 'aws:ec2:vpc'
+          OptionName: VPCId
+          Value: !Ref Vpc
+        -
+          Namespace: 'aws:ec2:vpc'
+          OptionName: Subnets
+          Value: !Join
+            - ','
+            -
+              - !Ref SubnetPrivateAlphaAZ
+              - !Ref SubnetPrivateBravoAZ
+        -
+          Namespace: 'aws:ec2:vpc'
+          OptionName: ELBSubnets
+          Value: !Join
+            - ','
+            -
+              - !Ref SubnetPublicAlphaAZ
+              - !Ref SubnetPublicBravoAZ
+        -
+          Namespace: 'aws:autoscaling:launchconfiguration'
+          OptionName: SecurityGroups
+          Value: !Ref BeanstalkWebSecurityGroup
+          # Value: !Sub '${EnvironmentName}-secgrp-webtier'
+        - 
+          Namespace: 'aws:elasticbeanstalk:environment'
+          OptionName: ServiceRole
+          Value: !Ref WebTierServiceRole
+          # Value: 'aws-elasticbeanstalk-service-role'  
+        - 
+          Namespace: 'aws:elasticbeanstalk:environment'
+          OptionName: EnvironmentType
+          Value: 'LoadBalanced'
+        - 
+          Namespace: 'aws:autoscaling:asg'
+          OptionName: MinSize
+          Value: !Ref WebTierMinNumOfInstances
+        - 
+          Namespace: 'aws:autoscaling:asg'
+          OptionName: MaxSize
+          Value: !Ref WebTierMaxNumOfInstances
+        - 
+          Namespace: 'aws:ec2:instances'
+          OptionName: InstanceTypes
+          Value: !Ref WebTierInstanceType
+        -
+          Namespace: 'aws:elasticbeanstalk:environment:proxy'
+          OptionName: ProxyServer
+          # ResourceName:
+          Value: 'nginx'
+        -
+          Namespace: 'aws:elasticbeanstalk:container:python'
+          OptionName: WSGIPath
+          Value: 'webapp:application'
+        -
+          Namespace: 'aws:elasticbeanstalk:container:python'
+          OptionName: NumProcesses
+          Value: 11
+        -
+          Namespace: 'aws:elasticbeanstalk:container:python'
+          OptionName: NumThreads
+          Value: 11
+        -
+          Namespace: 'aws:elasticbeanstalk:application:environment'
+          OptionName: RDS_HOSTNAME
+          Value: !GetAtt DatabaseInstance.Endpoint.Address
+        -
+          Namespace: 'aws:elasticbeanstalk:application:environment'
+          OptionName: RDS_DB_NAME
+          Value: !Ref DatabaseName
+        -
+          Namespace: 'aws:elasticbeanstalk:application:environment'
+          OptionName: TRIM_ENV_PROFILE
+          Value: !Ref ShortEnvironmentProfile
+        -
+          Namespace: 'aws:elasticbeanstalk:application:environment'
+          OptionName: TRIM_DOCKERIZED_RUNMODEL_STATEMACHINE_ARN
+          Value: !Ref DockerStateMachineWrapperModelRun
+        -
+          Namespace: 'aws:elasticbeanstalk:application:environment'
+          OptionName: TRIM_DOCKERIZED_GETFLOW_STATEMACHINE_ARN
+          Value: !Ref DockerStateMachineWrapperGetFlow
+        -
+          Namespace: 'aws:elasticbeanstalk:application:environment'
+          OptionName: AWS_DEFAULT_REGION
+          Value: "us-east-1"
+        -
+          Namespace: 'aws:elasticbeanstalk:application:environment'
+          OptionName: RDS_USERNAME
+          Value: !Ref DatabaseMasterAccountUsername
+        -
+          Namespace: 'aws:elasticbeanstalk:application:environment'
+          OptionName: RDS_PORT
+          Value: !GetAtt DatabaseInstance.Endpoint.Port
+        -
+          Namespace: 'aws:elasticbeanstalk:application:environment'
+          OptionName: SECRET_KEY
+          Value: xxxxfromcf
+        -
+          Namespace: 'aws:elasticbeanstalk:application:environment'
+          OptionName: SQLALCHEMY_DATABASE_URI
+          Value: !Join
+            - ''
+            -
+              - 'mysql+pymysql://'
+              - !Ref DatabaseMasterAccountUsername
+              - ':'
+              - !Ref DatabaseMasterAccountPassword
+              - '@'
+              - !GetAtt DatabaseInstance.Endpoint.Address
+              - ':'
+              - !GetAtt DatabaseInstance.Endpoint.Port
+              - '/'
+              - !Ref DatabaseName
+        -
+          Namespace: 'aws:elasticbeanstalk:application:environment'
+          OptionName: RDS_PASSWORD
+          Value: !Ref DatabaseMasterAccountPassword
+        -
+          # I can't get this setting to work...
+          Namespace: 'aws:elasticbeanstalk:environment:process:default'
+          OptionName: StickinessEnabled
+          Value: 'true'
+        -
+          Namespace: 'aws:elasticbeanstalk:environment:process:default'
+          OptionName: StickinessLBCookieDuration
+          Value: 86400
+        -
+          Namespace: 'aws:elasticbeanstalk:environment:process:default'
+          OptionName: StickinessType
+          Value: lb_cookie
+        -
+          Namespace: 'aws:elb:policies'
+          OptionName: LoadBalancerPorts
+          Value: "443"
+        -
+          Namespace: 'aws:elb:policies'
+          OptionName: ConnectionDrainingEnabled
+          Value: true
+        -
+          Namespace: 'aws:elb:listener'
+          OptionName: ListenerEnabled
+          Value: false
+        -
+          Namespace: 'aws:elb:listener:443'
+          OptionName: ListenerEnabled
+          Value: true
+        -
+          Namespace: 'aws:elb:listener:443'
+          OptionName: ListenerProtocol
+          Value: HTTPS
+        -
+          Namespace: 'aws:elb:listener:443'
+          OptionName: InstancePort
+          Value: 80
+        -
+          Namespace: 'aws:elb:listener:443'
+          OptionName: InstanceProtocol
+          Value: HTTP
+        -
+          Namespace: 'aws:elb:listener:443'
+          OptionName: SSLCertificateId
+          Value: !Ref WebServerCertId
+        -
+          Namespace: 'aws:elasticbeanstalk:command'
+          OptionName: DeploymentPolicy
+          Value: Rolling
+        -
+          Namespace: 'aws:elasticbeanstalk:command'
+          OptionName: BatchSizeType
+          Value: Percentage
+        -
+          Namespace: 'aws:elasticbeanstalk:command'
+          OptionName: BatchSize
+          Value: 30
+        -
+          Namespace: 'aws:autoscaling:updatepolicy:rollingupdate'
+          OptionName: RollingUpdateType
+          Value: Health
+        -
+          Namespace: 'aws:autoscaling:updatepolicy:rollingupdate'
+          OptionName: MaxBatchSize
+          Value: 1
+        -
+          Namespace: 'aws:autoscaling:updatepolicy:rollingupdate'
+          OptionName: MinInstancesInService
+          Value: 1
+        -
+          Namespace: 'aws:autoscaling:launchconfiguration'
+          OptionName: EC2KeyName
+          Value: !Ref BastionPassthroughKeyPairName
+        -
+          Namespace: 'aws:elasticbeanstalk:sns:topics'
+          OptionName: Notification Endpoint
+          Value: !Ref NotificationEmail
+        # see https://aws.amazon.com/blogs/security/how-to-control-tls-ciphers-in-your-aws-elastic-beanstalk-application-by-using-aws-cloudformation/
+        # if not set, the load balancer defaults to the insecure ELBSecurityPolicy-2016-08 (see
+        # EC2 console, find the LB, look at listeners, look at Cipher).
+        # actually I couldn't get this to work either so in interests of time just did it manually.
+        -
+          Namespace: 'aws:elb:policies:TLSHighPolicy'
+          OptionName: SSLReferencePolicy
+          Value: ELBSecurityPolicy-TLS-1-2-2017-01
+        -
+          Namespace: aws:elb:listener:443
+          OptionName: PolicyNames
+          Value: TLSHighPolicy
+      Tier: 
+        Name: WebServer
+        Type: Standard
+          
+Outputs:
+  # basic modelrun related: start
+  PyTrimPrivateECRModelRunRepoName:
+    Value: !Ref ContainerRepositoryModelRun
+
+  PyTrimPrivateECRModelRunRepoUri:
+    Value: !GetAtt ContainerRepositoryModelRun.RepositoryUri
+
+  PyTrimDockerizedModelRunStateMachineArn:
+    Value: !Ref DockerStateMachineWrapperModelRun
+  # basic modelrun related: end
+
+  # getflow-related: start
+  PyTrimPrivateECRGetFlowRepoName:
+    Value: !Ref ContainerRepositoryGetFlow
+
+  PyTrimPrivateECRGetFlowRepoUri:
+    Value: !GetAtt ContainerRepositoryGetFlow.RepositoryUri
+
+  PyTrimDockerizedGetFlowStateMachineArn:
+    Value: !Ref DockerStateMachineWrapperGetFlow
+  # getflow-related: end

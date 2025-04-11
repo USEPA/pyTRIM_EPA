@@ -1,0 +1,62 @@
+{
+  "title": "Surface Soil Properties",
+  "table_id": "GWSoilAbioticTable",
+  "pivot": false,
+  "header": "",
+  "fields": [
+    {
+      "id": "parcel_name",
+      "label": "Parcel Name",
+      "data_type": "str",
+      "default": ""
+    },
+    {
+      "id": "GroundwaterZoneSoilThick",
+      "label": "Groundwater Zone Soil Thickness",
+      "data_type": "float",
+      "default": 3,
+      "tooltip": "(m)",
+      "help": "Enter the thickness of the groundwater layer. Valid values are > 0. The default value of 3 is from Table 3 - Thickness of the aquifer layer from McKone et al. 2001 (Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models). See the TRIM User Guide Appendix for full reference information."
+    },
+    {
+      "id": "rho",
+      "label": "Density of Solid Material in Aquifer",
+      "data_type": "float",
+      "default": 2600,
+      "tooltip": "kg [soil]/m<sup>3</sup> [soil]",
+      "help": "Enter the density of soil solids in the groundwater layer. Valid values are > 0. The default value of 2,600 is the value used by the CalTOX model (see Table 1 of: CalEPA (California Environmental Protection Agency), Department of Toxic Substances Control. 1996. The Distribution of California Landscape Variables for CalTOX. Draft (February)."
+    },
+    {
+      "id": "FractionSand",
+      "label": "Fraction Sand",
+      "data_type": "float",
+      "default": 0.25,
+      "tooltip": "unitless",
+      "help": "Enter the fraction of the soil layer that is sand. Valid values are 0 to 1. The default value of 0.25 is professional judgment. Typical sources of site-specific values include the U.S. Department of Agriculture's Web Soil Survey (Soil Survey Staff, Natural Resources Conservation Service, United States Department of Agriculture. Web Soil Survey. Available online at https://websoilsurvey.nrcs.usda.gov/.)."
+    },
+    {
+      "id": "OrganicCarbonContent",
+      "label": "Organic Carbon Fraction",
+      "data_type": "float",
+      "default": 0.008,
+      "tooltip": "unitless",
+      "help": "Enter the mass fraction of the soil solids which is made up of organic carbon in the soil layer. Valid values are > 0. The default value of 0.008 is the U.S. average in Table 16 of McKone, T.E., A. Bodnar, and E. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. University of California at Berkeley. Supported by U.S. Environmental Protection Agency (Sustainable Technology Division, National Risk Management Research Laboratory) and Environmental Defense Fund. July. LBNL-43722. Available online at: https://escholarship.org/uc/item/9f1164rk. Typical sources of site-specific values include the U.S. Department of Agriculture's Web Soil Survey (Soil Survey Staff, Natural Resources Conservation Service, United States Department of Agriculture. Web Soil Survey. Available online at https://websoilsurvey.nrcs.usda.gov/.)."
+    },
+    {
+      "id": "pH",
+      "label": "pH",
+      "data_type": "float",
+      "default": 6.8,
+      "tooltip": "unitless",
+      "help": "Enter the pH of the soil layer. Valid values are 0 to 14. The default value of 6.8 is professional judgment. Typical sources of site-specific values include the U.S. Department of Agriculture's Web Soil Survey (Soil Survey Staff, Natural Resources Conservation Service, United States Department of Agriculture. Web Soil Survey. Available online at https://websoilsurvey.nrcs.usda.gov/.)."
+    },
+    {
+      "id": "Porosity",
+      "label": "Porosity",
+      "data_type": "float",
+      "default": 0.2,
+      "tooltip": "volume [total pore space]/volume [compartment]",
+      "help": "Enter the volume fraction of pore space in the groundwater layer. Valid values are 0 to 1. The default value of 0.2 is the value used for the sediment zone for California residential sites by version 1.5 of the CalTOX model (see Table VI of: CalEPA (California Environmental Protection Agency), Department of Toxic Substances Control. 1993. Parameter Values and Ranges for CalTOX. Draft (July)."
+    }
+  ]
+}

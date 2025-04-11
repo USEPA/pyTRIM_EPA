@@ -1,0 +1,445 @@
+<form id="property-summary-gui"
+    data-async-form="true"
+    data-form-src="scenario_property_summary_form"
+>
+    <section class="container px-0">
+        <div class="row mb-1">
+            <div class="col-sm">
+                <h3> General Properties </h3>
+                <button class="scenario_show_all comp_show_all btn btn-warning">Show All</button>
+                <button class="scenario_hide_all comp_hide_all btn btn-warning">Hide All</button>
+                <table class="scenarioMap" style="border-collapse: collapse" cellpadding="6">
+                    <thead>
+                        <tr>
+                            <th>Entity</th>
+                            <th>Property</th>
+                            <th>Property Value</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+
+        <div class="row mb-1">
+            <div class="col-sm">
+                <h3> Chemical Properties </h3>
+                <button class="comp_show_all btn btn-warning">Show All</button>
+                <button class="comp_hide_all btn btn-warning">Hide All</button>
+                <button class="comp_show_nz btn btn-outline-success">Show Non-Zero</button>
+                <table class="chemMap" style="border-collapse: collapse" cellpadding="6">
+                    <thead>
+                        <tr>
+                            <th>Chemical</th>
+                            <th>Property Name</th>
+                            <th>Property Value</th>
+                            <th>Property Unit</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+
+        <div class="row mb-1">
+            <div class="col-sm">
+                <h3> Environment Properties </h3>
+                <button class="comp_show_all btn btn-warning">Show All</button>
+                <button class="comp_hide_all btn btn-warning">Hide All</button>
+                <button class="comp_show_nz btn btn-outline-success">Show Non-Zero</button>
+                <div class="dropdown d-inline">
+                    <button class="btn_show_comp btn btn-outline-success dropdown-toggle" type="button" data-toggle="dropdown">
+                        Show Property
+                    </button>
+                    <div class="dropdown-menu">
+                    </div>
+                </div>
+                <table class="compMap" style="border-collapse: collapse" cellpadding="6">
+                    <thead>
+                        <tr>
+                            <th>Parcel</th>
+                            <th>Entity</th>
+                            <th>Property</th>
+                            <th>Property Value</th>
+                            <th>Property Unit</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </section>
+</form>
+<script>
+    onDomLoad(function(e) {
+        var form = document.getElementById('property-summary-gui');
+
+        form.addEventListener('form:visible', function() {
+            console.log('property summary form visible')
+            LoadingScreen.show('property_summary_loading');
+            TRIM.refreshParcels();
+            document.body.addEventListener('parcels:ready', updateSummaryFields());
+        });
+
+        function updateSummaryFields() {
+            if (!TRIM.store.currentScenario.parcels) {
+                // Parcels haven't loaded yet; wait a bit and try again
+                setTimeout(function() { updateSummaryFields(); }, 1000);
+                return;
+            }
+
+            $($("#property-summary-gui").find("table.compMap")[0]).find("tbody").text("");
+            $(initialize_compartment_map()).insertAfter($($("#property-summary-gui").find("table.compMap")[0]).find("thead"))
+            $($("#property-summary-gui").find("table.scenarioMap")[0]).find("tbody").text("");
+            $($("#property-summary-gui").find("table.chemMap")[0]).find("tbody").text("");
+            $($("#property-summary-gui").find("table.compMap")[0]).find("tbody").text("");
+            let gen_map_html = initialize_project_map("general")
+            $(gen_map_html).insertAfter($($("#property-summary-gui").find("table.scenarioMap")[0]).find("thead"))
+            let chem_map_html = initialize_project_map("chem")
+            $(chem_map_html).insertAfter($($("#property-summary-gui").find("table.chemMap")[0]).find("thead"))
+            let env_map_html = initialize_project_map("env")
+            $(env_map_html).insertAfter($($("#property-summary-gui").find("table.compMap")[0]).find("thead"))
+
+            let dd_menu = $($("#property-summary-gui").find("table.compMap")[0]).prev("div.dropdown").find("div.dropdown-menu")
+            populate_comp_dd(dd_menu);
+
+            $('tr.colps').on('click', function() {
+                toggle_expand_icon(this, null)
+                var findChildren = function(tr) {
+                    var depth = tr.data('depth');
+                    return tr.nextUntil($('tr').filter(function(i,e) {
+                        return $(e).data('depth') <= depth;
+                    }));
+                };
+
+                let this_depth = $(this).data('depth')
+                var children = findChildren($(this));
+                if ($(children).is(':visible')) {
+                    $(children).hide();
+                } else {
+                    let next_level = this_depth + 1;
+                    let next_child = $(children).filter(function(i,e) {
+                        return $(e).data('depth') == next_level;
+                    });
+                    $(next_child).show()
+                }
+            });
+
+            $('button.scenario_show_all').on('click', function(e) {
+                let this_table =$(this).closest("div[role=tabpanel]").find("table.scenarioMap")
+                $(this_table).find("tr.colps").show();
+                $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "down"))
+                $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "down"))
+            });
+            $('button.comp_show_all').on('click', function(e) {
+                e.preventDefault()
+                let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap")
+                $(this_table).find("tr.colps").show();
+                $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "down"))
+                $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "down"))
+                $(this).closest("div").find("button.btn_show_comp").text("Show Compartment")
+            });
+
+            $('button.scenario_hide_all').on('click', function(e) {
+                let this_table =$(this).closest("div[role=tabpanel]").find("table.scenarioMap")
+                $(this_table).find("tr.colps:not([data-depth='0'])").hide();
+                $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "up"))
+                $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "up"))
+            });
+            $('button.comp_hide_all').on('click', function(e) {
+                e.preventDefault()
+                let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap")
+                $(this_table).find("tr.colps:not([data-depth='0'])").hide();
+                $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "up"))
+                $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "up"))
+                $(this).closest("div").find("button.btn_show_comp").text("Show Compartment")
+            });
+
+            $('button.comp_show_nz').on('click', function(e) {
+                e.preventDefault()
+                let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap");
+                $('button.comp_hide_all').trigger('click');
+                let non_zeros = $(this_table).find("tr.colps.level2").filter((i,e) => $(e).find("td.ems").text() > 0);
+                $(non_zeros).show()
+                $(non_zeros).prev("tr.level1").show()
+                $(this).closest("div").find("button.btn_show_comp").text("Show Compartment")
+            });
+
+            $(document).ready(function() {
+                $('button.comp_hide_all').trigger('click');
+            });
+
+            function toggle_expand_icon(tr, dir){
+                if ($(tr).find("i.fas").length <= 0) return;
+                if (!dir) {
+                    if ($(tr).find("i.fas").attr("class").indexOf("fa-angle-right") > -1) {
+                        $(tr).find("i.fas").attr("class", "fas fa-angle-down")
+                    } else {
+                        $(tr).find("i.fas").attr("class", "fas fa-angle-right")
+                    }
+                } else {
+                    if (dir == "down") {
+                        $(tr).find("i.fas").attr("class", "fas fa-angle-down")
+                    } else {
+                        $(tr).find("i.fas").attr("class", "fas fa-angle-right")
+                    }
+                }
+
+            }
+
+            $('label.editableCell').click(function () {
+                $(this).siblings("input").show()
+                $(this).siblings("input").focus()
+                $(this).hide();
+            });
+
+            $('input.editableCell').blur(function () {
+                if (!$("#summary-tab-pill").hasClass("active")) {
+                    return;
+                }
+
+                ErrorValidation.isPositiveValue(this);
+                let parcel_name = $(this).closest("tr.level2")
+                let parcel_info = [{
+                    'type': 'data',
+                    'name': 'id',
+                    'value': "parcel_name"
+                },{
+                    'type': 'data',
+                    'name': 'chemical',
+                    'value': "chemical_name"
+                },{
+                    'type': 'input',
+                    'name': 'compartment_name',
+                    'value': $(this).val()
+                }]
+                if (parcel_info) {
+                    submit_new_value(this, parcel_info);
+                }
+            })
+
+            function submit_new_value(elem, parcel_info) {
+                if (elementIsValid($(elem).parent())){
+                    let data = $(elem).val() == "" ? 0 : $(elem).val()
+                    let $label = $(elem).next("label.editableCell")
+                    $label.siblings("input").hide()
+                    $label.show().text(data)
+
+                    parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
+                    // TRIM.api.updateParcel(parcel_info)
+                } else {
+                    return
+                }
+            }
+
+            console.log('populated property summary form!')
+            LoadingScreen.hide('property_summary_loading');
+        }
+
+        var entities = {'Parcel':'Parcel', 'Compartment':'Compartment', 'Volume Element':'Volume Element'}
+        function initialize_compartment_map(spec) {
+            let parcels = TRIM.store.currentScenario.parcels;
+            var map_html = "<tbody>"
+            parcels.forEach( function(e,i){
+                map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>" + e.name + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
+                for (ve in entities) {
+                    map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td>" + ve + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td></tr>"
+                    for (comp in e.compartment_map[ve]) {
+                        map_html = map_html + "<tr data-depth='2' class='level2 colps'><td></td><td></td><td class='comp'>" + e.compartment_map[ve][comp] + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='editableCell badge badge-light'>0</label></td></tr>"
+                    }
+                }
+            })
+            map_html += "</tbody>"
+            return map_html
+        }
+
+        // FIXME no daytime_indicator
+        function initialize_project_map(type) {
+            let scenario = TRIM.store.currentScenario
+            var map_html = "<tbody>"
+            let scenario_map = {
+                "Simulation": {
+                    "simulation_start_date": scenario['simulation_start_date'],
+                    "simulation_end_date": scenario['simulation_end_date'],
+                    "erosionRateSource": "Option " + scenario['erosionRateSource']
+                },
+                "Scenario": {
+                    "name": scenario['name'],
+                    "description": scenario['description'],
+                    "precipitation rate": scenario.parcels[0].precip_rate
+                }
+            }
+            let chem_map = {}
+            Object.keys(scenario.parcels[0].sources).forEach(e=>chem_map[e]={})
+
+            let env_map = {}
+
+            for (const [prc_ind, entity_name] of Object.entries(scenario.parcels)){
+                let prc_name =  scenario.parcels[prc_ind].name
+                env_map[prc_name] = {
+                    "Parcel": {
+                        "Parcel Type": {'value': scenario.parcels[prc_ind].parcelType, 'unit': '-', 'fieldname': ''},
+                        "Has Air": {'value': scenario.parcels[prc_ind].hasAir, 'unit': '-', 'fieldname': ''},
+                        "Has Land": {'value': scenario.parcels[prc_ind].hasLand, 'unit': '-', 'fieldname': ''},
+                        "Has Water": {'value': scenario.parcels[prc_ind].hasWater, 'unit': '-', 'fieldname': ''},
+                        "Has Wetland": {'value': scenario.parcels[prc_ind].hasWetland, 'unit': '-', 'fieldname': ''},
+                        "Has Farm Food Chain": {'value': scenario.parcels[prc_ind].hasFarmFoodChain, 'unit': '-', 'fieldname': ''},
+                        "Has Fish Food Web": {'value': scenario.parcels[prc_ind].hasFishFoodWeb, 'unit': '-', 'fieldname': ''},
+                        "Land Use": {'value': scenario.parcels[prc_ind].landUse, 'unit': '-', 'fieldname': ''},
+                        "Soil Tillage": {'value': scenario.parcels[prc_ind].soilTillage, 'unit': '-', 'fieldname': ''},
+                        "Air Density": {'value': scenario.parcels[prc_ind].airDensity, 'unit': 'g/cm<sup>3</sup>', 'fieldname': ''},
+                        "Air Height": {'value': scenario.parcels[prc_ind].airHeight, 'unit': 'm', 'fieldname': ''},
+                        "Area": {'value': scenario.parcels[prc_ind].area, 'unit': 'm<sup>2</sup>', 'fieldname': ''},
+                    },
+                    "Compartment":{
+                        "(Air) Air Density": {'value': scenario.parcels[prc_ind].airDensity, 'unit': 'g/cm<sup>3</sup>', 'fieldname': ''},
+                        "(Air) Dust Density": {'value': scenario.parcels[prc_ind].dustDensity, 'unit': 'kg[dust particles]/m<sup>3</sup>[dust particles]', 'fieldname': ''},
+                        "(Air) Dust Load": {'value': scenario.parcels[prc_ind].dustLoad, 'unit': 'kg[dust particles]/m<sup>3</sup>[air compartment]', 'fieldname': ''},
+                        "(Air) Fraction Organic Matter of Dust Particles ": {'value': scenario.parcels[prc_ind].fractionOrganicMatterOnParticulates, 'unit': '-', 'fieldname': ''},
+                        "(Surface Soil) Evapotranspiration Fraction": {'value': scenario.parcels[prc_ind].evapotrans_frac, 'unit': '-', 'fieldname': ''},
+                        "(Surface Soil) Precipitation Runoff Fraction": {'value': scenario.parcels[prc_ind].runoff_fraction, 'unit': '-', 'fieldname': ''},
+                        "(Surface Soil) Precipitation Seepage Fraction": {'value': scenario.parcels[prc_ind].seepage_frac, 'unit': '-', 'fieldname': ''},
+                        "(Surface Soil) Total Erosion Rate": {'value': scenario.parcels[prc_ind].totalErosionRate, 'unit': 'kg/m<sup>2</sup>/day', 'fieldname': ''},
+                        "(Surface Water) Biomass of Benthic Carnivore": {'value': scenario.parcels[prc_ind].aquatic_biomass?.Benthic_Carnivore ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
+                        "(Surface Water) Biomass of Benthic Invertebrate": {'value': scenario.parcels[prc_ind].aquatic_biomass?.Benthic_Invertebrate ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
+                        "(Surface Water) Biomass of Benthic Omnivore": {'value': scenario.parcels[prc_ind].aquatic_biomass?.Benthic_Omnivore ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
+                        "(Surface Water) Biomass of Macrophyte": {'value': scenario.parcels[prc_ind].aquatic_biomass?.Macrophyte ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
+                        "(Surface Water) Biomass of Water Column Carnivore": {'value': scenario.parcels[prc_ind].aquatic_biomass?.Water_Column_Carnivore ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
+                        "(Surface Water) Biomass of Water Column Herbivore": {'value': scenario.parcels[prc_ind].aquatic_biomass?.Water_Column_Herbivore ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
+                        "(Surface Water) Biomass of Water Column Omnivore": {'value': scenario.parcels[prc_ind].aquatic_biomass?.Water_Column_Omnivore ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
+                        "(Surface Water) Biomass of Zooplankton": {'value': scenario.parcels[prc_ind].aquatic_biomass?.Zooplankton ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
+                        "(Surface Water) Body Weight of Benthic Carnivore": {'value': scenario.parcels[prc_ind].aquatic_bw?.Benthic_Carnivore ?? '-', 'unit': 'kg', 'fieldname':''},
+                        "(Surface Water) Body Weight of Benthic Invertebrate": {'value': scenario.parcels[prc_ind].aquatic_bw?.Benthic_Invertebrate ?? '-', 'unit': 'kg', 'fieldname':''},
+                        "(Surface Water) Body Weight of Benthic Omnivore": {'value': scenario.parcels[prc_ind].aquatic_bw?.Benthic_Omnivore ?? '-', 'unit': 'kg', 'fieldname':''},
+                        "(Surface Water) Body Weight of Macrophyte": {'value': scenario.parcels[prc_ind].aquatic_bw?.Macrophyte ?? '-', 'unit': 'kg', 'fieldname':''},
+                        "(Surface Water) Body Weight of Water Column Carnivore": {'value': scenario.parcels[prc_ind].aquatic_bw?.Water_Column_Carnivore ?? '-', 'unit': 'kg', 'fieldname':''},
+                        "(Surface Water) Body Weight of Water Column Herbivore": {'value': scenario.parcels[prc_ind].aquatic_bw?.Water_Column_Herbivore ?? '-', 'unit': 'kg', 'fieldname':''},
+                        "(Surface Water) Body Weight of Water Column Omnivore": {'value': scenario.parcels[prc_ind].aquatic_bw?.Water_Column_Omnivore ?? '-', 'unit': 'kg', 'fieldname':''},
+                        "(Surface Water) Water Column pH": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.water_ph ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Surface Water) Water Column Temperature": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.water_temp ?? '-', 'unit': 'K', 'fieldname':''},
+                        "(Surface Water) Water Column Mean Depth": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.mean_depth ?? '-', 'unit': 'm', 'fieldname':''},
+                        "(Surface Water) Algae Density": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.algae_density ?? '-', 'unit': 'g[algae]/m<sup>3</sup>[algae]', 'fieldname':''},
+                        "(Surface Water) Chloride Concentration": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.chloride_conc ?? '-', 'unit': 'mg/L', 'fieldname':''},
+                        "(Surface Water) Chlorophyll Concentration": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.chlorophyll_conc ?? '-', 'unit': 'mg/L', 'fieldname':''},
+                        "(Surface Water) Water Column Organic Carbon Fraction in Suspended Sediments": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.suspended_organic_carbon ?? '-', 'unit': '', 'fieldname':''},
+                        "(Surface Water) Water Column Suspended Sediment Concentration": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.suspended_sed_conc ?? '-', 'unit': 'kg[sediment particles]/m<sup>3</sup>[water]', 'fieldname':''},
+                        "(Surface Water) Water Column External Sediment Inflow from Other Water Bodies": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.sed_inflow ?? '-', 'unit': 'kg[sediment particles]/day', 'fieldname':''},
+                        "(Surface Water) Water Column Sediment Deposition Velocity": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.sed_deposition_vel ?? '-', 'unit': 'm[water]/day', 'fieldname':''},
+                        "(Surface Water) Water Column Flush Rate": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.flush_rate ?? '-', 'unit': 'year<sup>-1</sup>', 'fieldname':''},
+                        "(Surface Water) Water Column Evaporation Rate": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.evaporation_rate ?? '-', 'unit': 'm[water]/year', 'fieldname':''},
+                        "(Sediment) Sediment Bed Density": {'value': scenario.parcels[prc_ind].surface_water?.sed_props.bed_density ?? '-', 'unit': 'kg[sediment particles]/m<sup>3</sup>[sediment particles]', 'fieldname':''},
+                        "(Sediment) Sediment Bed pH": {'value': scenario.parcels[prc_ind].surface_water?.sed_props.bed_pH ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Sediment) Organic Carbon Fraction in Sediment Bed": {'value': scenario.parcels[prc_ind].surface_water?.sed_props.organic_carbon_frac ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Sediment) Sediment Bed Porosity": {'value': scenario.parcels[prc_ind].surface_water?.sed_props.bed_porosity ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Surface Soil) Boundary Layer Thickness Above Surface Soil": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.AirSoilBoundaryThickness ?? '-', 'unit': 'm', 'fieldname':''},
+                        "(Surface Soil) Average Vertical Velocity of Water (Percolation)": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.AverageVerticalVelocity ?? '-', 'unit': 'm/day', 'fieldname':''},
+                        "(Surface Soil) Fraction Sand": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.FractionSand ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Surface Soil) Fraction of Area Available for Erosion": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.FractionofAreaAvailableforErosion ?? '-', 'unit': 'm<sup>2</sup>[area available]/m<sup>2</sup>[total]', 'fieldname':''},
+                        "(Surface Soil) Fraction of Area Available for Runoff": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.FractionofAreaAvailableforRunoff ?? '-', 'unit': 'm<sup>2</sup>[area available]/m<sup>2</sup>[total]', 'fieldname':''},
+                        "(Surface Soil) Fraction of Area Available for Vertical Diffusion": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.FractionofAreaAvailableforVerticalDiffusion ?? '-', 'unit': 'm<sup>2</sup>[area available]/m<sup>2</sup>[total]', 'fieldname':''},
+                        "(Surface Soil) Organic Carbon Fraction": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.OrganicCarbonContent ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Surface Soil) Total Runoff Rate": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.TotalRunoffRate ?? '-', 'unit': 'm<sup>3</sup>[water]/m<sup>2</sup>/day', 'fieldname':''},
+                        "(Surface Soil) Water Content": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.VolumeFraction_Liquid ?? '-', 'unit': 'm<sup>3</sup>[water]/m<sup>3</sup>[compartment]', 'fieldname':''},
+                        "(Surface Soil) Air Content": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.VolumeFraction_Vapor ?? '-', 'unit': 'm<sup>3</sup>[air]/m<sup>3</sup>[compartment]', 'fieldname':''},
+                        "(Surface Soil) Density of Soil Solids (Dry Weight)": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.rho ?? '-', 'unit': 'kg[soil]/m<sup>3</sup>[soil]', 'fieldname':''},
+                        "(Surface Soil) pH": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.pH ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Root Soil) Average Vertical Velocity of Water (Percolation)": {'value': scenario.parcels[prc_ind].soil_params.Soil_Root_Zone?.AverageVerticalVelocity ?? '-', 'unit': 'm/day', 'fieldname':''},
+                        "(Root Soil) Fraction Sand": {'value': scenario.parcels[prc_ind].soil_params.Soil_Root_Zone?.FractionSand ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Root Soil) Organic Carbon Fraction": {'value': scenario.parcels[prc_ind].soil_params.Soil_Root_Zone?.OrganicCarbonContent ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Root Soil) Water Content": {'value': scenario.parcels[prc_ind].soil_params.Soil_Root_Zone?.VolumeFraction_Liquid ?? '-', 'unit': 'm<sup>3</sup>[water]/m<sup>3</sup>[compartment]', 'fieldname':''},
+                        "(Root Soil) Air Content": {'value': scenario.parcels[prc_ind].soil_params.Soil_Root_Zone?.VolumeFraction_Vapor ?? '-', 'unit': 'm<sup>3</sup>[air]/m<sup>3</sup>[compartment]', 'fieldname':''},
+                        "(Root Soil) Density of Soil Solids (Dry Weight)": {'value': scenario.parcels[prc_ind].soil_params.Soil_Root_Zone?.rho ?? '-', 'unit': 'kg[soil]/m<sup>3</sup>[soil]', 'fieldname':''},
+                        "(Root Soil) pH": {'value': scenario.parcels[prc_ind].soil_params.Soil_Root_Zone?.pH ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Vadose Zone) Average Vertical Velocity of Water (Percolation)": {'value': scenario.parcels[prc_ind].soil_params.Soil_Vadose_Zone?.AverageVerticalVelocity ?? '-', 'unit': 'm/day', 'fieldname':''},
+                        "(Vadose Zone) Fraction Sand": {'value': scenario.parcels[prc_ind].soil_params.Soil_Vadose_Zone?.FractionSand ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Vadose Zone) Organic Carbon Fraction": {'value': scenario.parcels[prc_ind].soil_params.Soil_Vadose_Zone?.OrganicCarbonContent ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Vadose Zone) Water Content": {'value': scenario.parcels[prc_ind].soil_params.Soil_Vadose_Zone?.VolumeFraction_Liquid ?? '-', 'unit': 'm<sup>3</sup>[water]/m<sup>3</sup>[compartment]', 'fieldname':''},
+                        "(Vadose Zone) Air Content": {'value': scenario.parcels[prc_ind].soil_params.Soil_Vadose_Zone?.VolumeFraction_Vapor ?? '-', 'unit': 'm<sup>3</sup>[air]/m<sup>3</sup>[compartment]', 'fieldname':''},
+                        "(Vadose Zone) Density of Soil Solids (Dry Weight)": {'value': scenario.parcels[prc_ind].soil_params.Soil_Vadose_Zone?.rho ?? '-', 'unit': 'kg[soil]/m<sup>3</sup>[soil]', 'fieldname':''},
+                        "(Vadose Zone) pH": {'value': scenario.parcels[prc_ind].soil_params.Soil_Vadose_Zone?.pH ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Groundwater Zone) Fraction Sand": {'value': scenario.parcels[prc_ind].soil_params.Groundwater?.FractionSand ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Groundwater Zone) Organic Carbon Fraction": {'value': scenario.parcels[prc_ind].soil_params.Groundwater?.OrganicCarbonContent ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Groundwater Zone) Porosity": {'value': scenario.parcels[prc_ind].soil_params.Groundwater?.Porosity ?? '-', 'unit': 'm<sup>3</sup>[total pore space]/m<sup>3</sup>[compartment]', 'fieldname':''},
+                        "(Groundwater Zone) Density of Solid Material in Aquifer": {'value': scenario.parcels[prc_ind].soil_params.Groundwater?.rho ?? '-', 'unit': 'kg[soil]/m<sup>3</sup>[soil]', 'fieldname':''},
+                        "(Groundwater Zone) pH": {'value': scenario.parcels[prc_ind].soil_params.Groundwater?.pH ?? '-', 'unit': '-', 'fieldname':''},
+                    },
+                    "Volume Element": {
+                        "(Air) Air Height": {'value': scenario.parcels[prc_ind].airHeight, 'unit': 'm', 'fieldname': ''},
+                        "(Surface Soil) Thickness": {'value': scenario.parcels[prc_ind].surfaceSoilThickness, 'unit': 'm', 'fieldname': ''},
+                        "(Vadose Soil) Thickness": {'value': scenario.parcels[prc_ind].vadoseSoilThickness, 'unit': 'm', 'fieldname': ''},
+                        "(Root Soil) Thickness": {'value': scenario.parcels[prc_ind].rootSoilThickness, 'unit': 'm', 'fieldname': ''},
+                        "(Groundwater Zone) Thickness": {'value': scenario.parcels[prc_ind].groundwaterZoneThickness, 'unit': 'm', 'fieldname': ''},
+                    }
+                }
+            }
+
+            let map = {}
+            if (type == "general") {
+                map = scenario_map
+            } else if (type == "chem") {
+                map = chem_map
+            } else if (type == "env") {
+                map = env_map
+            }
+            // try {
+            //     scenario_map["Scenario"] = Object.assign({}, scenario_map["Scenario"], scenario['meteorology'])
+            // }
+            // catch {}
+            // try {
+            //     scenario_map["Scenario"] = Object.assign({}, scenario_map["Scenario"], scenario['meteorology']['wet_dep_interception'])
+            // }
+            // catch {}
+            // try {
+            //     scenario_map["Scenario"] = Object.assign({}, scenario_map["Scenario"], scenario['seasonal_dynamics'])
+            // }
+            // catch {}
+            if (type != "env") {
+                for (const [entity_key, entity_value] of Object.entries(map)) {
+                map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>" + entity_key + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td></tr>"
+                    for (const [property_key, property_value] of Object.entries(entity_value)) {
+                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td class='comp'>" + property_key + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted'>"+ property_value +"</label></td><td></td></tr>"
+                    }
+                }
+            } else {
+                for (const [entity_key, entity_value] of Object.entries(map)) {
+                    map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>" + entity_key + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td><td></td><td></td></tr>"
+                    for (const [cat_key, cat_value] of Object.entries(entity_value)) {
+                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td class='comp'>" + cat_key + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
+                        for (const [property_key, property_value] of Object.entries(cat_value)) {
+                            map_html = map_html + "<tr data-depth='2' class='level2 colps'><td></td><td></td><td class='comp'>" + property_key + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted'>" + property_value.value + "</label></td><td>" + property_value.unit + "</td></tr>"
+                        }
+                    }
+                }
+            }
+
+            map_html += "</tbody>"
+            return map_html        
+        }
+
+        function populate_comp_dd(dd_menu){
+            let comp_array = []
+            let parcels = TRIM.store.currentScenario.parcels;
+            parcels.forEach( function(e,i){
+                for (let ve in e.compartment_map) {
+                    for (let comp in e.compartment_map[ve]) {
+                        comp_array.push(e.compartment_map[ve][comp])
+                    }
+                }
+            })
+            let uniq_comp = [... new Set(comp_array)]
+            uniq_comp.sort().forEach(function(e) {
+                let menu_item = "<a class='dropdown-item comp-item'>" + e + "</a>"
+                $(menu_item).appendTo(dd_menu)
+            })
+            $("a.dropdown-item.comp-item").on("click",function (e){
+                e.preventDefault()
+                let this_table = $(this).closest("div.dropdown").next("table.compMap")
+                let this_dd_btn = $(this).closest("div.dropdown").find("button.btn_show_comp")
+                $('button.comp_hide_all').trigger('click');
+                let only_comps = $(this_table).find("tr.colps.level2").filter((i,tr) => $(tr).find("td.comp").text() == $(this).text());
+
+                $(only_comps).show()
+                $(this_dd_btn).text($(this).text())
+
+                $(only_comps).prev("tr.level1").show()
+            })
+        }
+    });
+</script>

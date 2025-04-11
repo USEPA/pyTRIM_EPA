@@ -8,7 +8,7 @@
         },
         {
             "id": "static_value",
-            "data_type": "int",
+            "data_type": "float",
             "min": 0,
             "max": 360,
             "default": 270,

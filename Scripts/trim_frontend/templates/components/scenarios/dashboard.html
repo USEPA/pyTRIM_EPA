@@ -15,41 +15,65 @@
         New<span class="d-none d-sm-inline"> Scenario</span>
     </button>
 </div>
-
-<div class="row">
-    {% for scenario in scenarios|sort(attribute='updated', reverse = True) %}
-        <div class="col-lg-3 col-md-4 col-sm-6 py-2">
-            <div class="card border-primary">
-                <div class="card-header">
-                    <h5 class="card-title mb-0">{{ scenario.name }}</h5>
-                    <small class="text-muted">
-                        {{ scenario.updated.strftime('%Y-%m-%d %I:%M %p') }}
-                    </small>
-                </div>
-                <div class="card-body">
-                    <p class="card-text">
-                        {{ scenario.short_description }}
-                    </p>
-                    <a href="{{ url_for('scenario.view_scenario', id=scenario.id) }}"
-                        class="btn btn-block btn-outline-primary"
-                    >
-                        View
-                    </a>
+<div class="container-fluid content-row">
+    <div class="row">
+        {% for scenario in scenarios|sort(attribute='updated', reverse = True) %}
+            <div class="col-lg-3 col-md-4 col-sm-6 py-2">
+                <div class="card border-primary h-100">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">{{ scenario.name }}</h5>
+                        <small class="text-muted">
+                            {{ scenario.updated.strftime('%Y-%m-%d %I:%M %p') }}
+                        </small>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            {{ scenario.short_description }}
+                        </p>
+                    </div>
+                    <div class="card-footer">
+                        <a href="{{ url_for('scenario.view_scenario', id=scenario.id) }}"
+                            class="btn btn-block btn-outline-primary"
+                        >
+                            View
+                        </a>
+                         <div class="row">
+                            <div class="col-md">
+                                <div class="text-center">
+                                    <div class="btn-group">
+                                        <form action="{{ url_for('scenario_api.copy_scenario') }}" id="copy-scenario-form" method="POST">
+                                            <input name="user_id" value="{{logged_in_user.id}}" type=hidden>
+                                            <input name="scenario_id" value="{{scenario.id}}" type=hidden>
+                                            <button type="submit" class="btn btn-outline-primary m-1">
+                                            Copy
+                                            {{ scenario_form.csrf_token }}</button>
+                                        </form>
+                                        <form action="{{ url_for('scenario_api.delete_scenario') }}" id="delete-scenario-form" method="POST">
+                                            <input name="scenario_id" value="{{scenario.id}}" type=hidden>
+                                            <button type="submit" class="btn btn-outline-primary m-1">
+                                            Delete
+                                            {{ scenario_form.csrf_token }}</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    {% else %}
-        <div class="col-sm-12 text-center">
-            You haven't started working on any scenarios yet.
-            <button type="button"
-                class="btn btn-link p-0"
-                data-toggle="modal"
-                data-target="#{{ create_modal_id }}"
-            >
-                Start one now!
-            </button>
-        </div>
-    {% endfor %}
+        {% else %}
+            <div class="col-sm-12 text-center">
+                You haven't started working on any scenarios yet.
+                <button type="button"
+                    class="btn btn-link p-0"
+                    data-toggle="modal"
+                    data-target="#{{ create_modal_id }}"
+                >
+                    Start one now!
+                </button>
+            </div>
+        {% endfor %}
+    </div>
 </div>
 
 {% set modal_body %}
@@ -77,8 +101,18 @@
                 // Forward this click to the ACTUAL submit button for the form
                 // (This lets us get nice browser-handled validation 
                 // for our required fields)
+                let scenario_name = $("input#name");
+                if (scenario_name.val().length > 120) {
+                    alert("Enter a short name for your scenario (120 characters or less)");
+                    return;
+                }
                 $('#create-scenario-form [type="submit"]').click();
             });
+            
+            $("#copy-scenario-form, #delete-scenario-form").on("submit", function(){
+                var loadingRequest = 'load_' + this.id;
+                LoadingScreen.show(loadingRequest);
+            })
         });
     </script>
 {% endset %}

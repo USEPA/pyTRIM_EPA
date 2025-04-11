@@ -6,3 +6,17 @@
 
 # Ignore executables
 **/*.exe
+
+# Ignore .env file
+.env
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
+
+iac/output/*
+__pycache__
+.DS_Store
+
+unsynced/

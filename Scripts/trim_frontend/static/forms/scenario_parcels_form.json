@@ -9,6 +9,23 @@
             "help": "Indicate the file containing parcel information—either a shapefile containing parcel polygons, or a text or CSV file containing parcel vertex coordinates. These files must also contain fields for parcel name, air designation, land-use designation, farm-food-chain designation, fish-food-web designation, and wetland designation. The text or CSV file must also contain fields for X coordinate and Y coordinate."
         },
         {
+            "id": "upload_coordinates_system",
+            "label": "Coordinate System",
+            "data_type": "string",
+            "widget": "select",
+            "choices": ["WGS84 Longitude/Latitude", "UTM"],
+            "default": "WGS84 Longitude/Latitude",
+            "required": true,
+            "help": "Select the system for coordinate value pairs provided in your CSV file."
+        },
+        {
+            "id": "upload_utm_zone",
+            "label": "UTM Zone",
+            "data_type": "string",
+            "required": true,
+            "help": "Enter the default UTM zone number/letter for the coordinate values in your CSV file; e.g., \"16N\". Individual points can override this value if necessary."
+        },
+        {
             "id": "parcel_coordinates_description",
             "label": "Description of Coordinate System",
             "data_type": "string",
@@ -25,14 +42,14 @@
             "help": "Indicate the field name for the names of the parcels from your file. Note: parcel names should not begin with Air, SW, Sed, SurfSoil, RootSoil, VadoseSoil, or GW, as these prefixes will be added to the parcel names to create names of volume elements associated with those parcels. Also note: parcel names should not have any spaces."
         },
         {
-            "id": "parcel_air_field",
-            "label": "Field Name for Air Designation",
+            "id": "parcel_type_field",
+            "label": "Field Name for Parcel Type",
             "data_type": "string",
             "widget": "select",
             "choices": [],
             "default": "Air",
             "required": true,
-            "help": "Indicate the field name showing whether a parcel is an air parcel (valid values are Yes and No). Note: air-parcel boundaries can exactly match parcel boundaries for land and water, such that a parcel can be selected as both air and grasses/herbs, for example."
+            "help": "Indicate the field name showing whether a parcel is an air parcel (valid value is air), or a surface parcel (valid values are land, land & air, water, water & air). Note: air-parcel boundaries can exactly match parcel boundaries for land or water, such that a parcel can be selected as both land and air, for example."
         },
         {
             "id": "parcel_land_use_field",
@@ -42,7 +59,7 @@
             "choices": [],
             "default": "LandUse",
             "required": true,
-            "help": "Indicate the field name showing a parcel's land use (valid values: impervious, tilled soil, untilled soil, agriculture - general, grasses/herbs, deciduous forest, coniferous forest, and water). Note: air parcel boundaries can exactly match parcel boundaries for land and water, such that a parcel with deciduous forest land use can also be selected as an air parcel, for example. Also note: The land-use designation will dictate which areas will be modeled with vegetation (agriculture - general, grasses/herbs, deciduous forest, and coniferous forest) as well as which will be modeled with soil depths reflective of untilled soil (grasses/herbs, deciduous forest, coniferous forest, and untilled soil), and you will later need to provide additional properties about these features."
+            "help": "Indicate the field name showing a parcel's land use (valid values: tilled soil, untilled soil, agriculture (general), grasses/herbs, deciduous forest, coniferous forest, and water). Note: air parcel boundaries can exactly match parcel boundaries for land and water, such that a parcel with deciduous forest land use can also be selected as an air parcel, for example. Also note: The land-use designation will dictate which areas will be modeled with vegetation (agriculture (general), grasses/herbs, deciduous forest, and coniferous forest) as well as which will be modeled with soil depths reflective of untilled soil (grasses/herbs, deciduous forest, coniferous forest, and untilled soil), and you will later need to provide additional properties about these features."
         },
         {
             "id": "parcel_farm_food_field",
@@ -62,7 +79,7 @@
             "choices": [],
             "default": "FishFoodWeb",
             "required": true,
-            "help": "Indicate the field name showing whether a parcel will be modeled with a fish food web (i.e., for exposure from fish consumption) (a Yes/No field). Note: fish food webs are only allowed for the water land use; water parcels do not necessarily needfish food webs, but if they do not, they will not be evaluated for exposure through fish consumption. You will later need to provide additional properties about the fish food web and the water bodies overall."
+            "help": "Indicate the field name showing whether a parcel will be modeled with a fish food web (i.e., for exposure from fish consumption) (a Yes/No field). Note: fish food webs are only allowed for the water land use; water parcels do not necessarily need fish food webs, but if they do not, they will not be evaluated for exposure through fish consumption. You will later need to provide additional properties about the fish food web and the water bodies overall."
         },
         {
             "id": "parcel_wetland_field",
@@ -72,27 +89,23 @@
             "choices": [],
             "default": "Wetland",
             "required": true,
-            "help": "Indicate the field name showing whether a parcel will be modeled with wetland characteristics (e.g., modified water percolation and mercury methylation in soil; you will later need to provide information on these wetland characteristics) (a Yes/No field). Note: wetland designations are not allowed for land uses of water and impervious."
+            "help": "Indicate the field name showing whether a parcel will be modeled with wetland characteristics (e.g., modified water percolation and mercury methylation in soil; you will later need to provide information on these wetland characteristics) (a Yes/No field). Note: wetland designations are not allowed for land uses of water."
         },
         {
-            "id": "parcel_x_coordinates_field",
-            "label": "Field Name for X Coordinates",
+            "id": "parcel_coordinates_field",
+            "label": "Field Name for X and Y Coordinate pair list",
             "data_type": "string",
             "widget": "select",
             "choices": [],
-            "default": "Xcoordinate",
+            "default": "coordinates",
             "required": true,
-            "help": "Indicate the field name for the X coordinates of the parcels from your text or CSV file."
+            "help": "Indicate the field name for the coordinates of the parcels (polygon vertices) from your text or CSV file. This needs to be in the pair list format such that [[[X1,Y1], [X2,Y2], [X3,Y3]]] where XN and YN are X and Y coordiantes of the Nth vertice."
         },
         {
-            "id": "parcel_y_coordinates_field",
-            "label": "Field Name for Y Coordinates",
-            "data_type": "string",
-            "widget": "select",
-            "choices": [],
-            "default": "Ycoordinate",
-            "required": true,
-            "help": "Indicate the field name for the Y coordinates of the parcels from your text or CSV file."
+            "id": "mapTable",
+            "label": "",
+            "data_type": "form",
+            "form_definition": "subforms/parcels/parcels_props_form.json"
         }
     ]
 }

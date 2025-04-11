@@ -1,0 +1,128 @@
+{
+  "title": "Surface Soil Properties",
+  "table_id": "SurfaceSoilAbioticTable",
+  "pivot": false,
+  "header": "",
+  "fields": [
+    {
+      "id": "parcel_name",
+      "label": "Parcel Name",
+      "data_type": "str",
+      "default": ""
+    },
+    {
+      "id": "Tillage",
+      "label": "Tillage",
+      "data_type": "str",
+      "default": "No",
+      "help": "Indicate if the soil in the parcel has undergone tilling. This changes the thickness of the surface and root soil compartments."
+    },
+    {
+      "id": "SurfaceSoilThick",
+      "label": "Surface Soil Thickness",
+      "data_type": "float",
+      "default": {
+          "tilled": 0.2,
+          "untilled": 0.01
+      },
+      "tooltip": "(m)",
+      "help": "Enter the thickness of the surface soil. Valid values are > 0. The default value of 0.01 for untilled soils is from p. 30 of McKone et al. 2001 (Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models). The default value of 0.20 for tilled soils is from U.S. EPA 2005 (Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities, including the Hazardous Waste Companion Database of chemical-specific parameter values). See the TRIM User Guide Appendix for full reference information."
+    },
+    {
+      "id": "VolumeFraction_Vapor",
+      "label": "Air Content",
+      "data_type": "float",
+      "default": 0.28,
+      "tooltip": "volume [air]/volume [compartment]",
+      "help": "Enter the volume fraction of air in the soil layer (volumetric pore space occupied by air). Valid values are 0 to 1. The default value of 0.28 is the U.S. average in Table 15 of McKone, T.E., A. Bodnar, and E. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. University of California at Berkeley. Supported by U.S. Environmental Protection Agency (Sustainable Technology Division, National Risk Management Research Laboratory) and Environmental Defense Fund. July. LBNL-43722. Available online at: https://escholarship.org/uc/item/9f1164rk. For wetland parcels, a value of 0.1 might be appropriate (professional judgment)."
+    },
+    {
+      "id": "AverageVerticalVelocity",
+      "label": "Average Vertical Velocity of Water (Percolation)",
+      "data_type": "float",
+      "default": "<<<0.2 * e.precip_rate>>>",
+      "tooltip": "m/day",
+      "help": "Enter the average downward velocity of water in the soil layer. Valid values are >= 0. The default value is calculated based on the assumption of 0.2 multiplied by the average meters of daily precipitation for the modeled site. For wetland parcels, a value of 0 might be appropriate (professional judgment)."
+    },
+    {
+      "id": "AirSoilBoundaryThickness",
+      "label": "Boundary Layer Thickness Above Surface Soil",
+      "data_type": "float",
+      "default": 0.005,
+      "tooltip": "m",
+      "help": "Enter the thickness of the boundary layer directly above the surface soil layer -- the area where molecular diffusion between the soil and air can be significant. This is not the same as the atmospheric or planetary boundary layer. Valid values are > 0. The default value of 0.005 is the value used for California residential sites by version 1.5 of the CalTOX model (see Table VI of: CalEPA (California Environmental Protection Agency), Department of Toxic Substances Control. 1993. Parameter Values and Ranges for CalTOX. Draft (July)."
+    },
+    {
+      "id": "rho",
+      "label": "Density of Soil Solids (Dry Weight)",
+      "data_type": "float",
+      "default": 2600,
+      "tooltip": "kg [soil]/m<sup>3</sup> [soil]",
+      "help": "Enter the dry weight density of soil solids in the soil layer. Valid values are > 0. The default value of 2,600 is the value used by the CalTOX model (see Table 1 of: CalEPA (California Environmental Protection Agency), Department of Toxic Substances Control. 1996. The Distribution of California Landscape Variables for CalTOX. Draft (February). For wetland parcels, a value of 500 might be appropriate (professional judgment)."
+    },
+    {
+      "id": "Fractionofareaavailableforerosion",
+      "label": "Fraction of Area Available for Erosion",
+      "data_type": "float",
+      "default": 1,
+      "tooltip": "m<sup>2</sup> [area available]/m<sup>2</sup> [total]",
+      "help": "Enter the fraction of parcel surface area available for soil erosion. Valid values are 0 to 1. The default is 1."
+    },
+    {
+      "id": "FractionofAreaAvailableforRunoff",
+      "label": "Fraction of Area Available for Runoff",
+      "data_type": "float",
+      "default": 1,
+      "tooltip": "m<sup>2</sup> [area available]/m<sup>2</sup> [total]",
+      "help": "Enter the fraction of parcel surface area available for precipitation runoff. Valid values are 0 to 1. The default is 1."
+    },
+    {
+      "id": "Fractionofareaavailableforverticaldiffusion",
+      "label": "Fraction of Area Available for Vertical Diffusion",
+      "data_type": "float",
+      "default": 1,
+      "tooltip": "m<sup>2</sup> [area available]/m<sup>2</sup> [total]",
+      "help": "Enter the fraction of parcel surface area available for vertical chemical exchange via diffusion with the air. Valid values are 0 to 1. The default is 1."
+    },
+    {
+      "id": "FractionSand",
+      "label": "Fraction Sand",
+      "data_type": "float",
+      "default": 0.25,
+      "tooltip": "unitless",
+      "help": "Enter the fraction of the soil layer that is sand. Valid values are 0 to 1. The default value of 0.25 is professional judgment. Typical sources of site-specific values include the U.S. Department of Agriculture's Web Soil Survey (Soil Survey Staff, Natural Resources Conservation Service, United States Department of Agriculture. Web Soil Survey. Available online at https://websoilsurvey.nrcs.usda.gov/.)."
+    },
+    {
+      "id": "OrganicCarbonContent",
+      "label": "Organic Carbon Fraction",
+      "data_type": "float",
+      "default": 0.008,
+      "tooltip": "unitless",
+      "help": "Enter the mass fraction of the soil solids which is made up of organic carbon in the soil layer. Valid values are > 0. The default value of 0.008 is the U.S. average in Table 16 of McKone, T.E., A. Bodnar, and E. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. University of California at Berkeley. Supported by U.S. Environmental Protection Agency (Sustainable Technology Division, National Risk Management Research Laboratory) and Environmental Defense Fund. July. LBNL-43722. Available online at: https://escholarship.org/uc/item/9f1164rk. Typical sources of site-specific values include the U.S. Department of Agriculture's Web Soil Survey (Soil Survey Staff, Natural Resources Conservation Service, United States Department of Agriculture. Web Soil Survey. Available online at https://websoilsurvey.nrcs.usda.gov/.)."
+    },
+    {
+      "id": "pH",
+      "label": "pH",
+      "data_type": "float",
+      "default": 6.8,
+      "tooltip": "unitless",
+      "help": "Enter the pH of the soil layer. Valid values are 0 to 14. The default value of 6.8 is professional judgment. Typical sources of site-specific values include the U.S. Department of Agriculture's Web Soil Survey (Soil Survey Staff, Natural Resources Conservation Service, United States Department of Agriculture. Web Soil Survey. Available online at https://websoilsurvey.nrcs.usda.gov/.)."
+    },
+    {
+      "id": "TotalRunoffRate",
+      "label": "Total Runoff Rate",
+      "data_type": "float",
+      "default": "<<<formula: e.precip_rate * e.runoff_fraction>>>",
+      "tooltip": "m<sup>3</sup> [water]/m<sup>2</sup>/day",
+      "help": "Enter the water runoff rate in the soil layer. Valid values are >= 0. The default value is calculated based on the assumption of the fraction of precipitation that contributes to runoff multiplied by the average meters of daily precipitation for the modeled site. "
+    },
+    {
+      "id": "VolumeFraction_Liquid",
+      "label": "Water Content",
+      "data_type": "float",
+      "default": "0.19",
+      "tooltip": "volume [water]/volume [compartment]",
+      "help": "Enter the volume fraction of water in the soil layer (volumetric pore space occupied by water). Valid values are 0 to 1. The default value of 0.19 is the U.S. average in Table 15 of McKone, T.E., A. Bodnar, and E. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. University of California at Berkeley. Supported by U.S. Environmental Protection Agency (Sustainable Technology Division, National Risk Management Research Laboratory) and Environmental Defense Fund. July. LBNL-43722. Available online at: https://escholarship.org/uc/item/9f1164rk. Typical sources of site-specific values include the U.S. Department of Agriculture's Web Soil Survey (Soil Survey Staff, Natural Resources Conservation Service, United States Department of Agriculture. Web Soil Survey. Available online at https://websoilsurvey.nrcs.usda.gov/.). For wetland parcels, a value of 0.6 might be appropriate (professional judgment)."
+    }
+  ]
+}

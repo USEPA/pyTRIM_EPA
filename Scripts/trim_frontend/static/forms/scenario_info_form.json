@@ -12,7 +12,7 @@
             "help": "Indicate the time zone of your simulated location. Should match the time zone indicated in your inputs (e.g., meteorology)."
         },
         {
-            "id": "start_date",
+            "id": "simulation_start_date",
             "label": "First Day of Simulation",
             "data_type": "date",
             "format": "%Y-%m-%d",
@@ -21,7 +21,7 @@
             "help": "Indicate the first day of your simulation (inclusive; i.e., the simulation starts at 0:00)"
         },
         {
-            "id": "end_date",
+            "id": "simulation_end_date",
             "label": "Last Day of Simulation",
             "data_type": "date",
             "format": "%Y-%m-%d",
@@ -44,7 +44,7 @@
             "step": 0.01,
             "default": 0,
             "required": true,
-            "help": "Enter the fraction (0 to 1) of starting (background) concentrations This is typically set to 0."
+            "help": "Enter the fraction (0 to 1) of starting (background) concentrations. This is typically set to 0."
         },
         {
             "id": "time_step_duration",
@@ -64,7 +64,7 @@
         },
         {
             "id": "enable_air_contributions",
-            "label": "Enable Air Boundary Contributions",
+            "label": "Enable Boundary Contributions",
             "data_type": "boolean",
             "default": false,
             "help": "Check this box if you want the model to incorporate background air concentrations along the simulation's outer boundaries. This feature is not typically used."

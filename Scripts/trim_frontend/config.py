@@ -5,6 +5,30 @@ app_folder = os.path.abspath(os.path.dirname(__file__))
 root = os.path.dirname(app_folder)
 has_mail = os.getenv('MAIL_USERNAME') is not None
 
+if 'SQLITE_DB_NAME' in os.environ:
+    db_uri = f'sqlite:///{root}/database.db'
+else:
+    if 'RDS_DB_NAME' in os.environ:
+        USERNAME = os.environ['RDS_USERNAME']
+        PASSWORD = os.environ['RDS_PASSWORD']
+        HOST = os.environ['RDS_HOSTNAME']
+        PORT = os.environ['RDS_PORT']
+        DBNAME = os.environ['RDS_DB_NAME']
+    elif 'MYSQL_DB_NAME' in os.environ:
+        import urllib.parse
+        USERNAME = os.environ['MYSQL_USERNAME']
+        PASSWORD = str(os.environ['MYSQL_PASSWORD'])
+        HOST = os.environ['MYSQL_HOSTNAME']
+        PORT = os.environ['MYSQL_PORT']
+        DBNAME = os.environ['MYSQL_DB_NAME']
+    else:
+        import urllib.parse
+        USERNAME = "root"
+        PASSWORD = urllib.parse.quote_plus(str(os.getenv('MYSQLPASSWORD')))
+        HOST = "localhost"
+        PORT = "3306"
+        DBNAME = "pytrim"
+    db_uri = f'mysql+pymysql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}'
 
 class AppConfig:
     # Template config
@@ -25,6 +49,7 @@ class AppConfig:
     SECURITY_PASSWORD_HASH = 'bcrypt'
     SECURITY_REGISTERABLE = True
     SECURITY_TRACKABLE = True
+    SECURITY_SEND_REGISTER_EMAIL = False
     SECURITY_CONFIRMABLE = has_mail
     SECURITY_CHANGEABLE = has_mail
     SECURITY_RECOVERABLE = has_mail
@@ -46,16 +71,35 @@ class AppConfig:
     # You need to EXPLICITLY set this to avoid a bug
     SECURITY_EMAIL_SENDER = MAIL_DEFAULT_SENDER
 
+    # BOTO config
+    BOTO_AWS_KEY = ''
+    BOTO_AWS_SECRET = ''
+    BOTO_S3_BUCKET = ''
+    BOTO_AWS_REGION = 'us-east-1'
+
+    TRIM_ENV_PROFILE = os.getenv('TRIM_ENV_PROFILE', 'local')
+    print(f"LOADED TRIM_ENV_PROFILE: {TRIM_ENV_PROFILE}")
+
 
 class ProdConfig(AppConfig):
     SECRET_KEY = os.getenv('SECRET_KEY', '')
     SECURITY_PASSWORD_SALT = os.getenv('SECURITY_PASSWORD_SALT', '')
 
+    SQLALCHEMY_POOL_RECYCLE = 200
+    SQLALCHEMY_POOL_SIZE = 10
+    SQLALCHEMY_POOL_USE_LIFO = True
+    SQLALCHEMY_POOL_PRE_PING = True
+
 
 class DevConfig(AppConfig):
     SECRET_KEY = 'dcf917c34aec178987494a853bffa479'
     SECURITY_PASSWORD_SALT = ''
-    SQLALCHEMY_DATABASE_URI = f'sqlite:///{root}/database.db'
+    SQLALCHEMY_DATABASE_URI = db_uri
+    SQLALCHEMY_ECHO = False
+    SQLALCHEMY_POOL_RECYCLE = 200
+    SQLALCHEMY_POOL_SIZE = 10
+    SQLALCHEMY_POOL_USE_LIFO = True
+    SQLALCHEMY_POOL_PRE_PING = True
 
 
 class TestConfig(DevConfig):
@@ -64,7 +108,7 @@ class TestConfig(DevConfig):
     WTF_CSRF_ENABLED = False
     BCRYPT_LOG_ROUNDS = 4
     MAIL_SUPPRESS_SEND = True
-    SQLALCHEMY_DATABASE_URI = f'sqlite:///{app_folder}/test.db'
+    # SQLALCHEMY_DATABASE_URI = f'sqlite:///{app_folder}/test.db'
 
     # Security config
     SECURITY_CONFIRMABLE = False
@@ -75,8 +119,8 @@ class TestConfig(DevConfig):
 
 
 def init_config(app, testing=False):
-    env = os.getenv('FLASK_ENV', 'production')
-    if env == 'development':
+    # app.logger.info(f'************ Root is {root} and App_folder is {app_folder} ***************')
+    if os.getenv('FLASK_DEBUG'):
         if testing:
             app.config.from_object(TestConfig)
         else:

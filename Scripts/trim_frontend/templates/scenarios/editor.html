@@ -11,38 +11,74 @@
         'id': 'general-tab',
         'title': 'General Info',
         'gui': 'gui_scenario_info.html'
-    }, 
+    },
     {
         'id': 'parcels-tab',
         'title': 'Parcels',
         'gui': 'gui_parcels.html'
-    }, 
+    },
+    {
+        'id': 'emissions-tab',
+        'title': 'Emission Settings',
+        'gui': 'gui_emissions_settings.html'
+    },
     {
         'id': 'meteorological-tab',
         'title': 'Meteorology',
         'gui': 'gui_meteorological_settings.html'
-    }, 
+    },
     {
         'id': 'seasonal-tab',
         'title': 'Seasonal Dynamics',
         'gui': 'gui_seasonal_dynamics.html'
-    }, 
+    },
     {
         'id': 'abiotic-props-tab',
         'title': 'Abiotic Properties',
         'gui': 'gui_abiotic_properties.html'
-    }, 
+    },
     {
-        'id': 'emissions-tab',
-        'title': 'Emissions',
-        'gui': 'gui_emissions_settings.html'
-    }, 
+        'id': 'surface_runoff-tab',
+        'title': 'Surface Runoff',
+        'gui': 'gui_surface_runoff.html'
+    },
     {
-        'id': 'exports-tab',
-        'title': 'Export Settings',
-        'gui': 'gui_export_settings.html'
+        'id': 'lake-props-tab',
+        'title': 'Water Body Properties',
+        'gui': 'gui_lake_properties.html'
+    },
+    {
+        'id': 'aquatic-food-web-tab',
+        'title': 'Aquatic Food Web',
+        'gui': 'gui_aquatic_food_web_properties.html'
+    },
+    {
+        'id': 'erosion-tab',
+        'title': 'Erosion Settings',
+        'gui': 'gui_erosion_settings.html'
+    },
+    {
+        'id': 'background-concentrations-tab',
+        'title': 'Background Concentration Settings',
+        'gui': 'gui_background_concentration_settings.html'
+    },
+    {
+        'id': 'summary-tab',
+        'title': "Summary of Scenario Properties",
+        'gui': 'gui_property_summary.html'
+    },
+    {
+        'id': 'results-tab',
+        'title': "Run Model and View Results",
+        'gui': 'gui_execution_results.html'
     }
 ] %}
+
+<!--    {-->
+<!--        'id': 'exports-tab',-->
+<!--        'title': 'Export Settings',-->
+<!--        'gui': 'gui_export_settings.html'-->
+<!--    },-->
 
 <div class="card">
     <div class="card-body container p-0">
@@ -68,7 +104,7 @@
                     {% endfor %}
                 </nav>
             </div>
-            <div class="col-sm p-2 pl-sm-3">
+            <div class="col-sm-8 col-md-9 col-lg-10 p-2 pl-sm-3">
                 <div class="tab-content mb-3">
                     {% for tab in tabs %}
 
@@ -89,7 +125,7 @@
                         class="btn btn-secondary"
                     >
                         <i class="fas fa-save mr-1"></i>
-                        Save
+                        Recalculate
                     </a>
                 </div>
             </div>
@@ -97,44 +133,40 @@
     </div>
 </div>
 <script>
+    var scenarioReadyEvent = document.createEvent('Event');
+    scenarioReadyEvent.initEvent('scenario:ready', true, true);
+
+    var formVisibleEvent = document.createEvent('Event');
+    formVisibleEvent.initEvent('form:visible', true, true);
+
     onDomLoad(function() {
         // Show a loading screen while we pre-load
         // the current scenario data into editor forms
         LoadingScreen.show('scenario_loading');
-
         // Load current scenario values
-        TRIM.api.getScenario('{{ scenario.id }}').on('load', function() {
+        TRIM.api.getScenario('{{ scenario.id }}').on('load', function () {
             try {
                 if (this.responseJSON) {
-                    populateForms(this.responseJSON.scenario);
+                    TRIM.store.currentScenario = this.responseJSON.scenario;
+                    console.log('got scenario!')
+                    document.body.dispatchEvent(scenarioReadyEvent);
+                    // console.log(TRIM.store)
+
+                    // Notify forms on tab load
+                    $('#editor-nav [data-toggle="pill"]').on('shown.bs.tab', function(e) {
+                        var tabPane = $($(e.target).attr('href'));
+                        var forms = tabPane.find('form[data-async-form]');
+                        forms.each(function() {
+                            this.dispatchEvent(formVisibleEvent);
+                        });
+                    });
+                    $('.tab-pane.active form')[0].dispatchEvent(formVisibleEvent);
                 }
-            }
-            catch {
+                LoadingScreen.hide('scenario_loading');
+            } catch {
                 LoadingScreen.hide('scenario_loading');
             }
         });
-        function populateForms(scenario) {
-            if (!scenario) {
-                return; // if we didn't get a scenario, just give up
-                // TODO: alert the user that something went wrong
-            }
-
-            // Check if all json-generated forms have loaded
-            var forms = $('form[data-async-form]');
-            if (forms.filter(':not(.form-loaded)').length) {
-                // Some of our forms haven't loaded yet;
-                // wait a bit and try again
-                setTimeout(function() { populateForms(scenario); }, 1000);
-                return;
-            }
-
-            // Populate each form with data from the current scenario
-            forms.each(function() {
-                TRIM.forms.populate(this, scenario);
-            });
-            // And hide the loading screen when we finish
-            LoadingScreen.hide('scenario_loading');
-        }
 
         // Make tabs linkable in url
         (function enableHashPills() {
@@ -165,9 +197,16 @@
         // Save new scenario values
         $('#save-btn').click(function(e) {
             e.preventDefault();
+            window.location.reload()
             console.log('TODO: save data')
-            alert('TODO')
+            // alert('TODO')
         });
+
+        // {% for tab in tabs %}
+        //     $("#{{ tab['id'] }}-pill").click(function (event, ui) {
+        //         $($.fn.dataTable.tables(true)).DataTable().columns.adjust();
+        //     })
+        // {% endfor %}
     });
 </script>
 

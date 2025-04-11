@@ -49,6 +49,51 @@ function calculateDateDistance(start, end, funcs) {
     return diff;
 }
 
+// does not refresh parcels
+function getParcelByKey(key, val) {
+    return TRIM.store.currentScenario.parcels.filter(e=>e[key]==val)[0]
+}
+
+// update the TRIM.store object
+function update_data_store_callback(rsp, el, this_parcel_info, this_param_store_key, data, old_data){
+    let is_success = false
+    let $label = $(el).next("label")
+    if (rsp.target.responseJSON.message == 'success') {
+        let has_specific_comp = false
+        let comp_name = null
+        if (this_parcel_info.findIndex(e => e.type == 'data' & e.name == 'comp_name') > -1){
+            comp_name = this_parcel_info[this_parcel_info.findIndex(e => e.type == 'data' & e.name == 'comp_name')].value
+            has_specific_comp = true
+        }
+        let param_name = this_parcel_info[this_parcel_info.findIndex(e => e.type == 'data' & e.name == 'field')].value
+        let parcel_id = this_parcel_info[this_parcel_info.findIndex(e => e.type == 'data' & e.name == 'id')].value
+        let parcel_index = TRIM.store.currentScenario.parcels.findIndex(e => e.id == parcel_id)
+        if (has_specific_comp) {
+            TRIM.store.currentScenario.parcels[parcel_index][this_param_store_key][comp_name][param_name] = data
+            // console.log("Case1")
+        } else if (this_param_store_key && this_param_store_key.indexOf(".") > -1) {
+            let par = TRIM.store.currentScenario.parcels[parcel_index]
+            let par_keys = this_param_store_key.split(".")
+            for (let ky_i in [...Array(par_keys.length-1).keys()]) {
+                let ky = par_keys[ky_i]
+                par = par[ky]
+            }
+            par[par_keys[par_keys.length-1]][param_name] = data
+            // console.log("Case2")
+        } else {
+            TRIM.store.currentScenario.parcels[parcel_index][param_name] = data
+            // console.log("Case3")
+        }
+        is_success = true
+    }
+    if (!is_success){
+        // if call is not successful revert to previous value
+        this_parcel_info[this_parcel_info.findIndex(e => e.type == 'input')].value = old_data
+        $label.text(old_data)
+        $(el).val(old_data)
+    }
+}
+
 // Add global objects
 
 // An ajax handler
@@ -61,6 +106,30 @@ window.AJAX = (function(ajax) {
         var data = opts.data || null;
 
         var request = new XMLHttpRequest();
+
+		var callback = opts.callback || undefined;
+
+		request.addEventListener("readystatechange", () => {
+          let parsedResponseData = null;
+          if (request.responseText) {
+            try {
+                parsedResponseData = JSON.parse(request.responseText);
+            } catch (e) {
+                parsedResponseData = request.responseText;
+            }
+          }
+
+		  if (request.readyState === 4 && request.status === 200) {
+			if (callback !== undefined) { callback(true, parsedResponseData); }
+		  } 
+          else if (request.readyState === 4 && request.status >= 400) {
+            if (callback !== undefined) { callback(false, parsedResponseData); }
+          }
+          else if (request.readyState === 4) {
+		    if (callback !== undefined) { callback(false, "could not fetch the data"); }
+		  }
+		});
+
         request.open(method, url);
         request.send(data);
 
@@ -178,8 +247,9 @@ window.LoadingScreen = (function(loader) {
     loader.hide = function(reason) {
         // Clear the loading request that was made for this reason
         var i = loadingRequests.indexOf(reason || 1);
-        if (i !== -1) {
+        while (i !== -1) {
             loadingRequests.splice(i, 1);
+            i = loadingRequests.indexOf(reason || 1);
         }
         // Ask the loader to hide if appropriate
         hideLoader();
@@ -193,20 +263,27 @@ window.LoadingScreen = (function(loader) {
         hideLoader();
     };
 
+    loader.why = function() {
+        console.log([...loadingRequests]);
+    }
+
     return loader;
 })(window.LoadingScreen || {});
 
 // Initialize global event-handlers
 
 onDomLoad(function() {
+    // window.LoadingScreen.show()
     // Register actions on body click
     document.body.addEventListener('click', function(e) {
-        var classes = e.target.className.split(' ');
+        if (typeof(e.target.className)=="string") {
+            var classes = e.target.className.split(' ');
 
-        // Form text (in labels, specifically) shouldn't highlight
-        // the field when clicked
-        if (classes.indexOf('form-text') > -1) {
-            e.preventDefault();
+            // Form text (in labels, specifically) shouldn't highlight
+            // the field when clicked
+            if (classes.indexOf('form-text') > -1) {
+                e.preventDefault();
+            }
         }
     });
 });

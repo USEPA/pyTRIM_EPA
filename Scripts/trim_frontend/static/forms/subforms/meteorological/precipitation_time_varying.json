@@ -1,10 +1,10 @@
 {
-    "title": "Precipitation and Movement",
+    "title": "Precipitation",
     "inherits": "subforms/time_varying_input_form.json",
     "fields": [
         {
             "id": "field_name_rate",
-            "label": "Field Name for Values of Precipitation Rate",
+            "label": "Field Name for Values of Precipitation Rate (m/day)",
             "data_type": "string",
             "widget": "select",
             "choices": [],
@@ -18,15 +18,16 @@
             "label": "Static Value for Precipitation Rate (m/day)",
             "data_type": "float",
             "min": 0,
+            "max": 2,
             "step": 0.0001,
             "default": 0.0041,
             "required": true,
-            "help": "Enter a single value of precipitation rate to use throughout your model run [the default value of 0.0041 is a health-protective value resulting in constant rainfall totalling approximately 1.5 meters/year. 1.5 m/yr approximates the 95th percentile of annual average precipitation for 824 meteorological stations across the United States. This percentile was derived from 1981–2010 30-year normal values where available (for 813 stations), and otherwise from the January 1–December 31, 2016 period. 30-year normal values were from: Durre, I., M. F. Squires, R. S. Vose, X. Yin, A. Arguez, and S. Applequist, 2012: NOAA's 1981-2010 U.S. Climate Normals: Monthly Precipitation, Snowfall, and Snow Depth. Journal of Applied Meteorology and Climatology,  52, 2377–2395, doi:10.1175/JAMC-D-13-051.1. Available online at: <a href='http://dx.doi.org/10.1175/JAMC-D-13-051.1' target='_blank'>http://dx.doi.org/10.1175/JAMC-D-13-051.1</a>.].",
+            "help": "Enter a single value of precipitation rate to use throughout your model run. The default value of 0.0041 is a health-protective value resulting in constant rainfall totaling approximately 1.5 meters/year. 1.5 m/yr approximates the 95th percentile of annual average precipitation for 824 meteorological stations across the United States. This percentile was derived from 1981–2010 30-year normal values where available (for 813 stations), and otherwise from the January 1–December 31, 2016 period. 30-year normal values were from Durre et al. 2013 (NOAA's 1981-2010 U.S. Climate Normals: Monthly Precipitation, Snowfall, and Snow Depth). See the TRIM User Guide Appendix for full reference information.",
             "if_false": ["time_varying"]
         },
         {
             "id": "field_name_cumulative",
-            "label": "Field Name for Values of Cumulative Precipitation",
+            "label": "Field Name for Values of Cumulative Precipitation (m)",
             "data_type": "string",
             "widget": "select",
             "choices": [],

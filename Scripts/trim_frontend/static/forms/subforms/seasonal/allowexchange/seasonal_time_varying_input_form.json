@@ -1,0 +1,31 @@
+{
+    "title": "Seasonal Time-Varying Input",
+    "inherits": "subforms/time_varying_input_form.json",
+    "fields": [
+        {
+            "id": "time_varying",
+            "help": "Check the box to use values that vary in time for leaf 'allow exchange' indicating whether leaves are exchanging chemical with the air. This feature is typically used for this plant type. For non-evergreen leaves, it is typically assumed that the exchange does not occur during litterfall. Exchange is typically set to start after the typical date of last frost/freeze."
+        },
+        {
+            "id": "field_name",
+            "label": "Field Name for Values of Allow Exchange",
+            "data_type": "string",
+            "widget": "select",
+            "choices": [],
+            "default": "AllowExchange",
+            "required": true,
+            "help": "Indicate the field name for the time-varying values of Allow Exchange.",
+            "if_true": ["time_varying"]
+        },
+        {
+            "id": "static_value",
+            "label": "Static value for 'allow exchange'",
+            "data_type": "float",
+            "min": 0 ,
+            "max": 1,
+            "default": "1",
+            "required": true,
+            "help": "Enter a single value of 'allow exchange' to use throughout your model run. The default value is to allow exchange (1)."
+        }
+    ]
+}

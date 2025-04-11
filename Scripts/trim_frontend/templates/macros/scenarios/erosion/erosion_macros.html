@@ -1,0 +1,82 @@
+{% macro conditional_erosion_subform( file_input, have_user_file, optionNum) %}
+    <div class="row py-2">
+        <div class="col-sm">
+            <h6 class="text-center">
+                {% if optionNum == 1 %}
+                    Total Effective Erosion Rate Input
+                {% elif optionNum == 2 %}
+                    Unit Soil Loss & Sediment Delivery Ratio Input
+                {% else %}
+                    Universal Soil Loss Equation Parameters & Sediment Delivery Ratio Input
+                {% endif %}
+            </h6>
+        </div>
+    </div>
+    <div class="row mb-1">
+        <div class="col-sm">
+            <div data-slot="true" data-target="{{ file_input }}"></div>
+            <div class="form-text mb-2">
+                <small class="text-muted">
+                    {% if optionNum == 1 %}
+                        <a href="{{ url_for('static', filename='templates/erosion_Total_Effective_Rate.csv'
+                                   ) }}">Click here</a> to download the template CSV file containing effective erosion rate parameter.
+                    {% elif optionNum == 2 %}
+                         <a href="{{ url_for('static', filename='templates/erosion_USL_SDR.csv'
+                                   ) }}">Click here</a> to download the template CSV file containing unit soil loss and sediment-delivery ratio parameters.
+                    {% else %}
+                         <a href="{{ url_for('static', filename='templates/erosion_USLE_parameters.csv'
+                                   ) }}">Click here</a> to download the template CSV file containing universal soil loss equation parameters and sediment-delivery ratio.
+                    {% endif %}
+                </small>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-3">
+<!--        <div class="col-sm text-right">-->
+<!--            <button type="button" class="btn btn-dark"> Load Erosion Parameters from File </button>-->
+<!--        </div>-->
+    </div>
+
+    {% for this_param in have_user_file %}
+        <div class="row mb-1 div_checkbox">
+            {% set array = this_param.split("_",3)  %}
+            {% set array = array[3] %}
+            <div class="col-md">
+                {% if array.endswith("_PN") %}
+                    <div class="mt-2" >
+                        <span>Parcel Name</span>
+                    </div>
+                {% elif array.endswith("opt1_ER") %}
+                    <div class="mt-2" >
+                        <span>Total Effective Erosion Rate</span>
+                    </div>
+                {% else %}
+                    <div class="mt-2" data-slot="true" data-target="{{ this_param }}"></div>
+                {% endif %}
+            </div>
+            <div class="col-md">
+                <div data-slot="true" data-target="{{ 'field_name_' + array }}"></div>
+            </div>
+        </div>
+    {% endfor %}
+
+    <div>
+        {% if optionNum == 1 %}
+        <div id="tableDiv_opt1" class="col-md">
+            <div><small><strong><u>Click on the table cells to edit properties.</u> </strong></small></div>
+            <table data-slot="true" data-target="erosionTable_opt1" class="hover" id="erosionTable_opt1"></table>
+        </div>
+        {% elif optionNum == 2 %}
+        <div id="tableDiv_opt2" class="col-md">
+            <div class="pill pill-alert"><small><strong><u>Click on the table cells to edit properties.</u> </strong></small></div>
+            <table data-slot="true" data-target="erosionTable_opt2" class="hover" id="erosionTable_opt2"></table>
+        </div>
+        {% else %}
+        <div id="tableDiv_opt3" class="col-md">
+            <div class="pill pill-alert"><small><strong><u>Click on the table cells to edit properties.</u> </strong></small></div>
+            <button id="SoilData_btn_opt3" class="btn btn-secondary mt-2">Get USDA Soil Data</button>
+            <table data-slot="true" data-target="erosionTable_opt3" class="hover" id="erosionTable_opt3"></table>
+        </div>
+        {% endif %}
+    </div>
+{% endmacro %}

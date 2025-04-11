@@ -10,6 +10,7 @@
             "id": "static_value",
             "data_type": "float",
             "min": 0,
+            "max": 100,
             "step": 0.1,
             "default": 1.6,
             "help": "Enter a single value to use throughout your model run. The default value of 1.6 is a health-protective choice from: approximately the 5th percentile of median hourly wind speeds, partitioned by eight wind directions, recorded at 824 meteorological stations across the United States from January 1–December 31, 2016."

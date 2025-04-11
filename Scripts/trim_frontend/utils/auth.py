@@ -5,6 +5,7 @@ from flask_security.utils import hash_password
 def define_superusers(app, security):
     superusers = [
         'josiah.mccoy@icf.com',
+        'farha.zindah@icf.com'
     ]
     r = security.datastore.find_or_create_role('superuser')
     for name in superusers:

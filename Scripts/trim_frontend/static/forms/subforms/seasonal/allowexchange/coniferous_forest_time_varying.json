@@ -1,0 +1,21 @@
+{
+    "title": "Coniferous Forest",
+    "inherits": "subforms/seasonal/allowexchange/seasonal_time_varying_input_form.json",
+    "fields": [
+        {
+            "id": "time_varying",
+            "label": "Use Time-Varying Allow Exchange",
+            "help": "Check the box to use values that vary in time for coniferous forest leaf 'allow exchange' indicating whether leaves are exchanging chemical with the air. This feature is not typically used for this plant type. For evergreen leaves, it is typically assumed that exchange occurs continuously (i.e., the value typically is set to 1 for the whole simulation period)."
+        },
+        {
+            "id": "field_name",
+            "label": "Field Name for Values of Allow Exchange for Coniferous Forest",
+            "help": "Indicate the field name for the time-varying values of allow exchange for coniferous forest."
+        },
+        {
+            "id": "static_value",
+            "label": "Static Value of Allow Exchange for Coniferous Forest",
+            "help": "Enter a single value of 'allow exchange' to use for coniferous forest throughout your model run. The default value is to allow exchange (1)."
+        }
+    ]
+}

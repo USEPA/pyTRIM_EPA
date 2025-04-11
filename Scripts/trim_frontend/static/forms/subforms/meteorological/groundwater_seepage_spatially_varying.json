@@ -5,7 +5,7 @@
         {
             "id": "spatially_varying",
             "data_type": "boolean",
-            "default": true,
+            "default": false,
             "help": "Check the box to enter spatially varying values (i.e., one value per parcel) for fraction of precipitation that seeps into groundwater."
         },
         {
@@ -15,7 +15,7 @@
             "max": 1,
             "step": 0.01,
             "default": 0.25,
-            "help": "Enter the fraction of precipitation that seeps into groundwater for all areas in the modeling. The default value of 0.25 is <strong>provide reference source</strong>. Note that this fraction, the evapotranspiration fraction, and the runoff fraction must total 1.0."
+            "help": "Enter the fraction of precipitation that seeps into groundwater for all areas in the modeling. The default value of 0.25 is provide reference source. Note that this fraction, the evapotranspiration fraction, and the runoff fraction must total 1.0."
         }
     ]
 }

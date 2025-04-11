@@ -1,0 +1,529 @@
+
+<form id="surface-runoff-gui"
+    data-async-form="true"
+    data-form-src="scenario_surface_runoff_form"
+>
+    <section class="container px-0">
+        <div class="row">
+            <div class="col-sm">
+                <div data-slot="true" data-target="default_runoff_matrix_file"></div>
+                <div class="form-text mb-2">
+                    <small class="text-muted">
+                        <span>All rows and columns must match the existing scenario matrix.</span>
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md">
+                <div class="row">
+                    <div class="col-md align-content-center justify-content-center">
+                        <div class="text-center">
+                            <a id="surface-runoff-upload-btn" class="btn btn-warning"><i class="fas fa-upload mr-1"></i>Import Matrix</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md">
+                <div class="row">
+                    <div class="col-md align-content-center justify-content-center">
+                        <div class="text-center">
+                            <a id="export_runoff_matrix" class="btn btn-warning"><i class="fa fa-file-download"></i>&nbsp;Export Matrix</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md">
+                <div class="row">
+                    <div class="col-md align-content-center justify-content-center">
+                        <div class="text-center">
+                            <button id="run_getflow" class="btn btn-warning">Run GetFlow</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md">
+                        <div class="text-center">
+                            <small>Auto-calculate runoff values and populate the matrix below</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md">
+                <div class="pill pill-alert col-sm">
+                    <small>
+                        <strong>
+                            <u>Click on the table cells to edit properties</u>. 
+                        </strong>
+                        <br><span style='color: firebrick;'>*</span> All editable cells are required. Sink is calculated as 1-(row sum).
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md">
+                <table class="hover" id="RunoffMatrix">
+                </table>
+            </div>
+        </div>
+    </section>
+</form>
+<script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}">
+</script>
+<script src="{{ url_for('static', filename='js/lib/dataTables/jquery.dataTables.min.js') }}">
+</script>
+<script src="{{ url_for('static', filename='js/lib/dataTables/dataTables.bootstrap4.min.js') }}">
+</script>
+<link rel="stylesheet" href="{{url_for('static', filename='css/form_styles.css')}}"/>
+<script>
+    onDomLoad(function() {
+        var form = document.getElementById('surface-runoff-gui');
+
+        form.addEventListener('form:visible', function() {
+            console.log('surface runoff form visible')
+            LoadingScreen.show('surface_runoff_loading');
+            TRIM.refreshParcels();
+            document.body.addEventListener('parcels:ready', updateRunoffData());
+        });
+
+        function updateRunoffData() {
+            if (!TRIM.store.currentScenario.parcels) {
+                // Parcels haven't loaded yet; wait a bit and try again
+                setTimeout(function() { updateRunoffData(); }, 1000);
+                return;
+            }
+            if ($(form).filter(':not(.form-loaded)').length) {
+                // Form hasn't loaded yet; wait a bit and try again
+                setTimeout(function() { updateRunoffData(); }, 1000);
+                return;
+            }
+
+            if (TRIM.store.currentScenario.runoff_matrix) {
+                TRIM.forms.populate(form, TRIM.store.currentScenario.runoff_matrix);
+                renderRunoffForm();
+            }
+            else {
+                TRIM.api.getRunoffMatrix(TRIM.store.currentScenario).on('load', function () {
+                    var sd = this.responseJSON.runoff_matrix;
+                    TRIM.store.currentScenario.runoff_matrix = sd;
+                    updateRunoffData();
+                });
+                return;
+            }
+
+        }
+
+        let roTable = null;
+        function TableRedraw_RO(table_data, cols) {
+            let tblId = "#RunoffMatrix";
+            roTable =  $(tblId).removeAttr('width').dataTable({
+                destroy: true,
+                data : table_data,
+                paging: false,
+                bFilter: false,
+                info: false,
+                scrollX: true,
+                scrollY: 500,
+                bAutoWidth: false,
+                columns: cols,
+                fnCreatedRow: function (row, data, index) {
+                    $(row).attr("data-rsval","1")
+                    $(row).attr("data-entity","run off fractions")
+                    $(row).find("td.rightBorder").addClass("freeze-column")
+                },
+                initComplete: function (settings, json) {
+                    // $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
+                    $('[data-toggle="tooltip"]').tooltip()
+                    $('[data-toggle="popover"]').popover()
+                    let first_row = $($("#RunoffMatrix").find("tr")[1])
+                    $('#ROHead').closest("table").find("th").each((i, e)=>{
+                        let col_width = $($(first_row).find("td")[i]).width()
+                        $(e).width(col_width)
+                    })
+                }
+            });
+
+            let sort_order = "asc"
+            $('.sortClass').click(function(e){
+                e.preventDefault();
+                let Table = $(air_tblId, air_tblId, root_tblId, vadose_tblId, gw_tblId).dataTable()
+                let cellIndex = $(this).closest("th").index()
+                Table.fnSort([[cellIndex,sort_order]]);//use asc/desc as you want
+                sort_order= sort_order == "desc" ? "asc" : "desc"
+            });
+
+            $('label.editableCell').click(function () {
+                $(this).siblings("input").show()
+                $(this).siblings("select").show()
+                $(this).prev("input").focus()
+                $(this).prev("select").focus()
+                $(this).hide();
+            });
+
+            // save modified cell
+            $(`input.editableCell, select.editableCell`).blur(function () {
+                let this_input = this
+                let focusTblId = $(this_input).closest(`table`).attr('id');
+                let focusTblrow = $(this_input).closest(`tr`);
+                if (`#${focusTblId}` !== tblId) {
+                    return;
+                }
+                $(this_input).parent().find('label').addClass('modified')
+
+                // sum the row except sink and then set sink to 1-sum
+                let row_sink = $(focusTblrow).find('[data-receiver="sink"]')[0];
+                if (this_input != row_sink) {
+                    let matrix_row_sum = 0;
+                    $(focusTblrow).find("label").each(function(i,e)
+                        {
+                            this_input = $(e).parent().find("input.editableCell")
+                            if ($(this_input).data("receiver") != "sink")
+                                matrix_row_sum += parseFloat($(this_input).val());
+                        }
+                    )
+                    $(row_sink).val(Math.max(1-matrix_row_sum, 0));
+                    $(row_sink).parent().find('label').addClass('modified');
+                }
+
+                // make sure the element and the row is valid before posting the modified elements (all modified elements need to be posted)
+                ErrorValidation.rowTotalIsValid(this);
+                let is_valid = elementIsValid($(this).closest("tr")); //elementIsValid($(this).parent()) &&
+
+                if (is_valid) {
+                    let updated_inputs = [];
+                    let old_vals = [];
+                    $(focusTblrow).find("label.modified").each(function(i,e)
+                        {
+                            this_input = $(e).parent().find("input.editableCell")
+                            let data = $(this_input).val()
+                            $(e).siblings().hide()
+                            old_vals.push($(e).text())
+                            $(e).show().text(data)
+                            updated_inputs.push(this_input)
+                            $(e).removeClass("modified")
+                        }
+                    )
+                    submit_RO_value(updated_inputs, old_vals)
+                }
+            })
+        }
+
+        function get_form_data(elem_list) {
+            let sender = $(elem_list[0]).attr("data-sender")
+            let param_info = [
+                {
+                    'type': 'data',
+                    'name': 'id',
+                    'value': getParcelByKey("name", sender).id
+                }, {
+                    'type': 'data',
+                    'name': 'field',
+                    'value': 'runoff_matrix_value'
+                }, {
+                    'type': 'data',
+                    'name': 'sender',
+                    'value': 'ro_' + sender
+                }, {
+                    'type': 'data',
+                    'name': 'receiver',
+                    'value': []
+                }, {
+                    'type': 'input',
+                    'name': 'ro_value',
+                    'value': []
+                }
+            ]
+            elem_list.forEach(function (elem,i){
+                let receiver = $(elem).attr("data-receiver")
+                param_info[3]['value'].push(
+                    'ro_' + receiver
+                )
+                param_info[4]['value'].push(
+                    standardize_val($(elem).val())
+                )
+            })
+            return param_info
+        }
+
+        function submit_RO_value(elem_list, old_vals) {
+            if (elem_list.constructor == Array && elem_list.length > 0) {
+                let parcel_info = get_form_data(elem_list)
+                let elem = elem_list[0]
+                if (elementIsValid($(elem).closest('tr'))){
+                    console.log(parcel_info)
+                    TRIM.api.updateParcel('{{ scenario.id }}',parcel_info).on('load',function(){
+                        let msg =  this.responseJSON["message"]
+                        if (msg != "success") {
+                            // oops! something went wrong... if there is a message display it as alert and revert to
+                            // unmodified values
+                            elem_list.forEach((e,i) => {
+                                $(e).val(old_vals[i])
+                                $(e).siblings("label").text(old_vals[i])
+                                $(e).siblings("label").removeClass("modified")
+                            })
+                            alert(msg)
+                        }
+                    })
+                } else {
+                    return
+                }
+            }
+        }
+
+        function create_cell_html(data, cell_prop, cell_data, err_html="", sender="", receiver=""){
+            // disable water parcel inputs
+            let pcl = getParcelByKey("name", sender);
+            if (pcl.parcelType.includes("Water")) {
+                cell_prop = cell_prop.replace("editableCell", "text-muted");
+            }
+            return "<input "+err_html+" class='editableCell form-control form-control-sm type='text' value='" + data +
+                "' data-sender='"+ sender + "' data-receiver='"+ receiver + "' style='display:none'>" +
+                    "<label "+err_html+" class='" + cell_prop + "'>" + cell_data + "</label>"
+        }
+
+        $("#export_runoff_matrix").on('click', (e) => {
+            let filename = TRIM.store.currentScenario.name + "_Runoff Matrix_";
+            filename += moment(new Date()).format('YYYY_MM_DD-HH_MM') + ".csv";
+            
+            let cleanedTable = $('#RunoffMatrix').clone();
+            cleanedTable.find(".runoff-matrix-corner-header").children().remove();
+            cleanedTable.find(".runoff-matrix-corner-header")[0].append("parcels")
+            exportTableToCSV.apply(e.target, [cleanedTable, filename]);
+        });
+
+        $("#surface-runoff-upload-btn").on('click', function(e) {
+            let matrixImport = $(form).find('[type="file"]');
+            let matrixImportFileData = matrixImport.prop('files')[0];
+            if (matrixImportFileData == undefined) {
+                alert('Please select a file to upload.');
+                return false;
+            }
+
+            let matrixFile = $(form).find("#default_runoff_matrix_file");
+            let fieldData = [matrixFile.get(0)];
+            fieldData.push({
+                "type": "input",
+                "name": "scenario_id",
+                "value": TRIM.store.currentScenario.id
+            });
+
+            // list of water parcels to skip
+            let waterPcls = [];
+            TRIM.store.currentScenario.parcels.forEach((p, i) => {
+                if (p?.parcelType?.includes("Water")) waterPcls.push(p.name)
+            });
+            fieldData.push({
+                "type": "input",
+                "name": "water_parcels",
+                "value": waterPcls
+            });
+            
+            LoadingScreen.show('upload_matrix_csv');
+            TRIM.api.uploadSurfaceRunoffMatrixFile(fieldData, function(success,responseData,c) {
+                LoadingScreen.hide('upload_matrix_csv');
+                if (!success) {
+                    alert('An error occurred during upload:\n' + responseData.message);
+                    matrixImport.value = "";
+                } else {
+                    console.log("reload...");
+                    window.location.reload();
+                }
+            });
+        });
+
+        $("#run_getflow").on('click', function(e) {
+		   let rowWithButton = $("form#surface-runoff-gui section.container div.row:eq(1)");
+		    let getflowStatusArea = $("<div/>").addClass("getflow_status_area").insertAfter(rowWithButton);
+			getflowStatusArea.html("Kicking off getflow run...");
+			getflowStatusArea.css("background-color", "yellow");
+
+			let api = window.TRIM.api;
+
+			// setup the code for polling
+			let executionArn = "";
+			let keepCheckingId = -1;
+
+            function toggleBtnState(disable) {
+                $(e.target).attr('disabled', disable);
+                if (disable) {
+                    $(e.target).html(`<span><label class="lds-dual-ring mr-3"></label></span> Run GetFlow`);
+                }
+                else {
+                    $(e.target).html('Run GetFlow');
+                }
+            };
+            toggleBtnState(true);
+
+			// polling function
+			let keepChecking = function() {
+				api.checkStepFunctionStatus(executionArn, function(success,data) {
+					 console.log(success);
+					 console.log(data);
+					 console.log(typeof data);
+					 console.log("-----");
+				  console.log("STATUS == [" + data.status + "]");
+
+					if (data.status == "SUCCEEDED") {
+						clearInterval(keepCheckingId);
+						getflowStatusArea.html("Run complete!&nbsp;&nbsp;");
+						getflowStatusArea.css("background-color", "lime");
+						$("<a/>").attr("href", data.output.presigned_url).html("Download results").appendTo(getflowStatusArea);
+                        toggleBtnState(false);
+
+                        // import getflow generated matrix
+                        $("<button/>").addClass('ml-3 btn btn-link').html("Update matrix").appendTo(getflowStatusArea).on('click', (e) => {
+                            e.preventDefault();
+                            let fieldData = [{
+                                "type": "input",
+                                "name": "presigned_url",
+                                "value": data.output.presigned_url
+                            }]; 
+                            fieldData.push({
+                                "type": "input",
+                                "name": "scenario_id",
+                                "value": TRIM.store.currentScenario.id
+                            });
+
+                            // list of water parcels to skip
+                            let waterPcls = [];
+                            TRIM.store.currentScenario.parcels.forEach((p, i) => {
+                                if (p?.parcelType?.includes("Water")) waterPcls.push(p.name)
+                            });
+                            fieldData.push({
+                                "type": "input",
+                                "name": "water_parcels",
+                                "value": waterPcls
+                            });
+                            
+                            LoadingScreen.show('upload_matrix_csv');
+                            TRIM.api.uploadSurfaceRunoffMatrixFile(fieldData, function(success,responseData,c) {
+                                LoadingScreen.hide('upload_matrix_csv');
+                                if (!success) {
+                                    alert('An error occurred during upload:\n' + responseData.message);
+                                } else {
+                                    console.log("reload...");
+                                    window.location.reload();
+                                }
+                            });
+                        });
+					} else if (data.status == "FAILED" || data.status == "TIMED_OUT" || data.status == "ABORTED") {
+						alert("An error occurred; run resulted in " + data.status + " status");
+						getflowStatusArea.html("Run in " + data.status + " state. Please contact support.");
+						getflowStatusArea.css("background-color", "red");
+						clearInterval(keepCheckingId);
+                        toggleBtnState(false);
+					} else {
+						console.log("keep waiting...");
+						getflowStatusArea.html("Run still ongoing... (" + (new Date()).toLocaleTimeString() + ")");
+				    }
+				});
+
+			};
+
+
+
+			// START - FAKE
+			// if we just want to test the polling code...
+			// executionArn = "arn:aws:states:us-east-1:426714360284:execution:DockerStateMachineWrapperGetFlow-uD7RgxZSemK9:45b21e17-1447-4d81-aa3c-65f291b1ef68";
+			 // keepCheckingId = setInterval(keepChecking, 1000);
+			 // return;
+			// END - FAKE
+
+
+			// kick off the getflow run
+			let scenario_id = window.TRIM.store.currentScenario.id;
+			
+			/*
+			let scenario_info = [{
+				'type': 'data',
+				'name': 'scenario_id',
+				'value': scenario_id
+			}];
+			*/
+
+			console.log("getflow kickoff (gui_surface_runoff.html)!");
+			api.runGetFlow(scenario_id, function(success,data) {
+				console.log("back in gui_surface_runoff.html callback!");
+                console.log(success);
+                console.log(data);
+                console.log("-----");
+
+                executionArn = data["executionArn"];
+                console.log("start polling for '" + executionArn + "'");
+            
+                if (data.error) {
+                    alert(data.error);
+                    toggleBtnState(false);
+                    getflowStatusArea.html("Run failed. Please contact support.");
+                    getflowStatusArea.css("background-color", "red");
+                    return;
+                }
+                keepCheckingId = setInterval(keepChecking, 15000);
+			});
+			return false;
+		});
+
+        function renderRunoffForm() {
+            if (!TRIM.store.currentScenario.parcels) {
+                // Parcels haven't loaded yet; wait a bit and try again
+                setTimeout(function() { updateRunoffData(); }, 1000);
+                return;
+            }
+            if ($(form).filter(':not(.form-loaded)').length) {
+                // Form hasn't loaded yet; wait a bit and try again
+                setTimeout(function() { updateRunoffData(); }, 1000);
+                return;
+            }
+
+            let runoff_matrix = TRIM.store.currentScenario.runoff_matrix
+            let runoff_data = []
+            // Define row headers as sender parcel names
+            let columns = [{
+                'data': 'sender',
+                'title': '<table><tbody><tr id="ROHead">' +
+                    '<td style="border-bottom: 0px; padding: 0px">receiver</td>' +
+                    '<td style="border-bottom: 0px; padding: 0px"><i class="fa fa-arrow-right"></i></td>' +
+                    '</tr>' +
+                    '<tr>' +
+                    '<td style="border-bottom: 0px; padding: 0px">sender</td>' +
+                    '<td style="border-bottom: 0px; padding: 0px"><i class="fa fa-arrow-down"></i></td>' +
+                    '</tr></tbody></table>',
+                'bSortable': false,
+                'className': 'font-weight-bold rightBorder freeze-column runoff-matrix-corner-header'
+            }]
+            if (runoff_matrix) {
+                let parcel_list = TRIM.store.currentScenario.parcels.map(e=>e.name)
+                parcel_list.forEach(function (s, i) {
+                    runoff_data.push({
+                        'sender':s
+                    })
+                    let r = runoff_matrix[s]
+                    let full_p_list = ['sink'].concat(parcel_list)
+                    full_p_list.forEach((rc) => {
+                        let v = r[rc]
+                        runoff_data[i][rc] = (v).toLocaleString(undefined, { minimumFractionDigits: 4 })
+                        if (i == 0) {
+                            columns.push({
+                                'data': rc,
+                                'title': rc,
+                                'bSortable': false,
+                                'render': function (data, type, row) {
+                                    let this_cell_data = data
+                                    let this_cell_prop = 'editableCell badge badge-light'
+                                    let this_err_html = 'onblur="ErrorValidation.isPositiveValue(this)"';
+                                    return create_cell_html(data, this_cell_prop, this_cell_data, err_html = this_err_html, sender=row.sender, receiver=rc);
+                                }
+                            })
+                        }
+                    })
+                })
+            }
+            TableRedraw_RO(runoff_data, columns)
+            console.log('populated surface runoff form!')
+            LoadingScreen.hide('surface_runoff_loading');
+        }
+    })
+</script>

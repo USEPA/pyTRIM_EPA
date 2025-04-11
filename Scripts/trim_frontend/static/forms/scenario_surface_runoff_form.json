@@ -1,0 +1,11 @@
+{
+    "title": "Surface Runoff Matrix",
+    "fields": [
+        {
+            "id": "default_runoff_matrix_file",
+            "label": "Import Surface Runoff Matrix",
+            "data_type": "file",
+            "required": false
+        }
+    ]
+}

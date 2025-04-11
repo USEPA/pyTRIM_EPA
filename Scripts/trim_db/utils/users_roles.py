@@ -7,10 +7,12 @@ def implement_users_roles():
     migrations, so just build that on the fly.
     """
     try:
-        from trim_db.schema import Model, RoleMixin, UserMixin
+        from trim_db.schema.utils.base import Model
+        from trim_db.schema.users.models import RoleMixin, UserMixin
     except Exception:
-        from schema import Model, RoleMixin, UserMixin
-    print("Creating dummy User/Role ORM")
+        from schema.utils.base import Model
+        from schema.users.models import RoleMixin, UserMixin
+    print("-- Creating dummy User/Role ORM")
 
     class Role(RoleMixin, Model):
         pass

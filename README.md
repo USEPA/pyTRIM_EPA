@@ -37,3 +37,55 @@
 
 
     - *OutputFileGenerators* - contains GenerateCompartments.py, GenerateProperties.py, GenerateSources.py, and GenerateVolumeElements.py which produce the TRIM syntax output files. 
+
+
+
+### For Development Testing
+
+#### Console
+
+1. Navigate to the `./Scripts` folder.
+2. Start a Python console in your virtual environment.
+    1. If the DB has not previously been initialized, run the following,
+    then restart your python console:
+        ```python
+        from trim_db.migrate import run_migration
+        run_migration('./trim_db/migrations/scripts/migrate.sql')
+        ```
+3. Open a DB connection and initialize dummy User/Role classes:
+    ```python
+    from trim_db.local import *
+    ```
+4. Import the DB services:
+    ```python
+    from trim_db.services import *
+    ```
+
+    This will let you use the `db` object and `[name]Service` classes
+    from the console. E.g.,
+
+    ```python
+    c = ChemicalService.get(name='MethylMercury')
+    ```
+
+##### Importing Scenarios from Old Syntax
+
+1. To do this from the console, run the following in your virtual environment:
+```bash
+python ./Scripts/import_scenario.py -c "path/to/import/config.json"
+```
+Or,
+```bash
+python ./Scripts/import_scenario.py --scenario "Name" --directory "path/to/trim/files" --import-rules "import/rules/file.json"
+```
+See `./Scripts/import_config` for premade configs.
+
+2. To do this from the Python interpreter, run
+```python
+from import_scenario import import_scenario
+import_scenario({
+    "scenario_name": "Name",
+    "directory": "path/to/trim/files",
+    "import_rules": "import/rules/file.json"  # Optional
+})
+```

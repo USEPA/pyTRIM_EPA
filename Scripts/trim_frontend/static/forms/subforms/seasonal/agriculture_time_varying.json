@@ -1,6 +1,0 @@
-{
-    "title": "Agriculture",
-    "inherits": "subforms/seasonal/seasonal_time_varying_input_form.json",
-    "fields": [
-    ]
-}

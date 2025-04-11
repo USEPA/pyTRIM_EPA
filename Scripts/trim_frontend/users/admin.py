@@ -2,7 +2,7 @@ from flask_security.utils import hash_password
 from wtforms.widgets import PasswordInput
 from trim_frontend import db
 from .models import User, Role
-from ..utils.admin_views import AdminModelView
+from ..utils.admin_views import AdminModelView, AdminScenarioView
 
 
 class UserAdminView(AdminModelView):
@@ -36,5 +36,8 @@ admin_views = [
     AdminModelView(
         Role, db.session, name='Roles', category=users_category,
         delete=False
+    ),
+    AdminScenarioView(
+        name="Scenarios", endpoint='scenarios'
     )
 ]

@@ -1,0 +1,88 @@
+fieldset {
+    border: 1px solid;
+    margin: 5px;
+    padding: 5px;
+}
+legend {
+    width: inherit;
+    padding: 2px;
+}
+table {
+    white-space: nowrap;
+}
+td.rightBorder {
+    text-align: right;
+    border-right: 1px solid black;
+    padding: 10px
+}
+td.rightBorder-pivoted {
+    border-right: 1px solid black;
+    padding: 10px
+}
+td.freeze-column, th.freeze-column {
+    position: sticky;
+    left: 0;
+    background-color: white; /* to cover other cells when scrolling */
+    z-index: 1; /* to ensure the column stays on top */
+}
+.parcelMultiselect {
+  width: 100%;
+}
+
+.selectBox {
+  position: relative;
+}
+
+.selectBox select {
+  width: 100%;
+}
+
+.overSelect {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+
+.parcelSelectOptions {
+  display: none;
+  border: 0.5px #7c7c7c solid;
+  background-color: #ffffff;
+  max-height: 150px;
+  overflow-y: scroll;
+}
+
+.parcelSelectOptions label {
+  display: block;
+  font-weight: normal;
+  display: block;
+  white-space: nowrap;
+  min-height: 1.2em;
+  background-color: #ffffff00;
+  padding: 0 2.25rem 0 .75rem;
+}
+
+.parcelSelectOptions label:hover {
+  background-color: #1e90ff;
+}
+
+table.diet{
+    border:solid 1px;
+    margin: 20px auto;
+}
+
+th.rotated {
+    height: 220px;
+    white-space: nowrap;
+}
+
+th.rotated > div {
+    transform: translate(0px, 75px)
+    rotate(270deg);
+    width: 50px;
+}
+
+th.rotated > div > span {
+  padding: 10px 0px;
+}

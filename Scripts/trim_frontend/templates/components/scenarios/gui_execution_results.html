@@ -1,0 +1,926 @@
+<form id="model-run-result-gui"
+    data-async-form="true"
+    data-form-src="scenario_parcels_form.json">
+    <section class="container px-0">
+        <div class="row mb-1 mt-1">
+            <div class="col-sm">
+                <div class="row mb-1">
+                    <div class="col-sm">
+                        <button id="btn_execute_model" class="comp_show_all btn btn-warning">Run Model</button>
+                    </div>
+                </div>
+                <div class="row mb-1">
+                    <div class="col-sm">
+                        <div class="mt-3">
+                            <p id="cb_proc_trm"><span style="display: none"><label class="lds-dual-ring mr-2"></label></span><i class="fas fa-play"></i><label for="cb_proc_trm" class="ml-1">Calculating Transfer Matrix</label>&emsp;<label id="lb_perc_trm">(0%)</label></p>
+                            <p id="cb_proc_ode"><span style="display: none"><label class="lds-dual-ring mr-2"></label></span><i class="fas fa-play"></i><label for="cb_proc_ode" class="ml-1">Running ODE Solver</label>&emsp;<label id="lb_perc_ode">(0%)</label></p>
+                            <p id="cb_proc_out"><span style="display: none"><label class="lds-dual-ring mr-2"></label></span><i class="fas fa-play"></i><label for="cb_proc_out" class="ml-1">Writing results to Excel file </label>&emsp;<label id="lb_perc_out">(0%)</label></p>
+                            <p id="cb_proc_vis"><span style="display: none"><label class="lds-dual-ring mr-2"></label></span><i class="fas fa-play"></i><label for="cb_proc_vis" class="ml-1">Loading results for visualization </label>&emsp;<label id="lb_perc_vis">(0%)</label></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-1 mt-1">
+            <div class="col-sm">
+                <div>
+                    <a id="btn_get_mass_results" class="btn btn-warning" style="display: none" href="_top">Download Mass Results</a>
+                    <a id="btn_get_conc_results" class="btn btn-warning" style="display: none" href="_top">Download Concentration Results</a>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-1 mt-1">
+            <div class="col-sm">
+                <div class=row>
+                    <div class="col-sm">
+                        <label>Select Plot Type:</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm">
+                        <div id="plt_type" class="dropdown d-inline w-100">
+                            <button class="btn btn-outline-success dropdown-toggle w-100" data-toggle="dropdown">
+                                Plot Type
+                            </button>
+                            <div class="dropdown-menu">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm">
+                <div class="row">
+                    <div class="col-sm">
+                        <label id="lb_comp">Select Compartments:</label>
+                        <label id="lb_ve" style="display: none">Select Volume Elements:</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm">
+                        <div id="plt_comp" class="dropdown d-inline w-100">
+                            <button class="btn btn-outline-success dropdown-toggle w-100" data-toggle="dropdown" selected="selected">
+                                Compartment
+                            </button>
+                            <div class="dropdown-menu px-1">
+                                <form class="px-4 py-2">
+                                    <input type="search" class="form-control" id="inp_searchable_dd" placeholder="Search..." autofocus="autofocus">
+                                </form>
+                                <div id="menuItems_searchable_dd"></div>
+                                <div id="empty_searchable_dd" class="dropdown-header">No compartments found</div>
+                            </div>
+                        </div>
+                        <div id="plt_ve" class="dropdown w-100" style="display: none;">
+                            <button class="btn btn-outline-success dropdown-toggle w-100" data-toggle="dropdown" selected="selected">
+                                Volume Element
+                            </button>
+                            <div class="dropdown-menu px-1">
+                                <div id="menuItems_ve_searchable_dd"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm">
+                <div class="row">
+                    <div class="col-sm">
+                        <label>Select Chemical:</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm">
+                        <div id="plt_chem" class="dropdown d-inline w-100">
+                            <button class="btn btn-outline-success dropdown-toggle w-100" data-toggle="dropdown">
+                                Chemical
+                            </button>
+                            <div class="dropdown-menu w-100">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mb-1 mt-1">
+            <div class="col-sm">
+                <div id="div_comp_pill"><span>Selected Compartments:</span></div>
+                <div id="div_ve_pill" style="display: none"><span>Selected Volume Elements:</span></div>
+            </div>
+        </div>
+        <div class="row mb-1 mt-1">
+            <div class="col-sm">
+            </div>
+            <div class="col-sm">
+                <button id="btn_visualize" class="btn btn-warning w-100 mt-1" disabled="disabled">Visualize</button>
+            </div>
+            <div class="col-sm">
+            </div>
+        </div>
+        <div class="row mb-1 mt-1">
+            <div class="col-sm">
+                <div id="div_visuals">
+                    <h6 class="mt-3" id="res_version"></h6>
+                    <div class="mb-1">
+                        <label class="switch">
+                            <input type="checkbox" id="switch_res_conc">
+                            <span class="slider round"></span>
+                        </label>
+                        <span>Plot results in Concentrations</span>
+                    </div>
+                    <div id="plot_div">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</form>
+<style>
+    .dropdown-menu {
+        max-height: 20rem;
+        overflow-y: auto;
+    }
+
+    .lds-dual-ring {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+    }
+    .lds-dual-ring:after {
+        content: " ";
+        display: block;
+        width: 16px;
+        height: 16px;
+        margin: 4px;
+        border-radius: 50%;
+        border: 2px solid #fd0000;
+        border-color: #fd0000 transparent #fd0000 transparent;
+        animation: lds-dual-ring 1.2s linear infinite;
+    }
+    @keyframes lds-dual-ring {
+        0% {
+            transform: rotate(0deg);
+        }
+        100% {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* The switch - the box around the slider */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 30px;
+      height: 17px;
+    }
+
+    /* Hide default HTML checkbox */
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    /* The slider */
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      -webkit-transition: .4s;
+      transition: .4s;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 13px;
+      width: 13px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      -webkit-transition: .4s;
+      transition: .4s;
+    }
+
+    input:checked + .slider {
+      background-color: #2196F3;
+    }
+
+    input:focus + .slider {
+      box-shadow: 0 0 1px #2196F3;
+    }
+
+    input:checked + .slider:before {
+      -webkit-transform: translateX(13px);
+      -ms-transform: translateX(13px);
+      transform: translateX(13px);
+    }
+
+    /* Rounded sliders */
+    .slider.round {
+      border-radius: 17px;
+    }
+
+    .slider.round:before {
+      border-radius: 50%;
+    }
+
+</style>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script>
+    onDomLoad(function(e) {
+        // Load the Visualization API and the corechart package.
+        google.charts.load('current', {'packages':['corechart']});
+        var form = document.getElementById('model-run-result-gui');
+
+        var default_no_latest_run = {
+            "has_run": false,
+            "lastest_run_date": "",
+            "run_has_results": false,
+            "run_results": {}
+        }
+
+        var resultsReadyEvent = document.createEvent('Event');
+        resultsReadyEvent.initEvent('results:ready', true, true);
+        TRIM.refreshResults = function(force) {
+            force = force || false;
+            if (TRIM.store.latestRunInfo && !force) {
+                document.body.dispatchEvent(resultsReadyEvent);
+                return
+            }
+            LoadingScreen.show('loading_results');
+            TRIM.api.getLastResults(TRIM.store.currentScenario).on('load', function() {
+                try{
+                    TRIM.store.latestRunInfo = this.responseJSON.latest_run_info;
+                } catch(err) {
+                    console.log("Error pulling latest run info\n", err);
+                    TRIM.store.latestRunInfo = default_no_latest_run;
+                }
+                document.body.dispatchEvent(resultsReadyEvent);
+                LoadingScreen.hide('loading_results');
+            });
+        }
+
+        form.addEventListener('form:visible', function() {
+            console.log('model run form visible')
+            LoadingScreen.show('model_run_loading');
+            TRIM.refreshResults();
+            document.body.addEventListener('results:ready', updateModelResults());
+        });
+
+        function updateModelResults() {
+            if (!TRIM.store.latestRunInfo) {
+                // Parcels haven't loaded yet; wait a bit and try again
+                setTimeout(function() { updateModelResults(); }, 1000);
+                return;
+            }
+
+            let plot_types = ['Time Series', 'Mass Distribution (Bar Chart)', 'Mass Distribution (Pie Chart)', 'Mass Distribution (Animated Bar Chart)']
+            plot_types.forEach((e, i) => {$('#plt_type').find("div.dropdown-menu").append(`<a class='dropdown-item'> ${e} </a>`)})
+            var comp_list = {}
+            var ve_list = {}
+            var chem_list = {}
+
+            $('#plt_type').find('a.dropdown-item').on('click', function (){
+                let type_text =$(this).text().trim()
+                $('#plt_type').find('button.dropdown-toggle').text(type_text)
+                if (plot_types.indexOf(type_text) > 0) {
+                    $('#plt_comp').removeClass('d-inline').css("display","none")
+                    $('#lb_comp').css("display","none")
+                    $('#plt_ve').addClass('d-inline').css("display","block")
+                    $('#lb_ve').css("display","block")
+                    $('#div_comp_pill').css("display",'none')
+                    $('#div_ve_pill').css("display",'block')
+                } else {
+                    $('#plt_ve').removeClass('d-inline').css("display","none")
+                    $('#lb_ve').css("display","none")
+                    $('#plt_comp').addClass('d-inline').css("display","block")
+                    $('#lb_comp').css("display","block")
+                    $('#div_comp_pill').css("display",'block')
+                    $('#div_ve_pill').css("display",'none')
+                }
+            })
+
+            function initialize_components() {
+                let dt = JSON.parse(TRIM.store.latestRunInfo.run_results.mass_results)
+                comp_list = Object.keys(dt).filter(e => ['year','time'].indexOf(e) == -1).map(e=> e.split("_").slice(1).join("_")).filter((v, i, a) => {
+                    return a.indexOf(v) === i  // Get unique compartment names
+                })
+                comp_list.forEach((e, i) => {
+                    $('#plt_comp').find("div#menuItems_searchable_dd").append(`<a class='dropdown-item'> ${e} </a>`)
+                })
+                ve_list = Object.keys(dt).filter(e => ['year','time'].indexOf(e) == -1).map(e=> e.split(" in ").slice(1)[0].split("_")[0]).filter((v, i, a) => {
+                    return a.indexOf(v) === i  // Get unique compartment names
+                })
+                ve_list.forEach((e, i) => {
+                    $('#plt_ve').find("div#menuItems_ve_searchable_dd").append(`<a class='dropdown-item'> ${e} </a>`)
+                })
+                chem_list = Object.keys(dt).filter(e => ['year','time'].indexOf(e) == -1).map(e=> e.split("_").slice(0,1).join("")).filter((v, i, a) => {
+                    return a.indexOf(v) === i  // Get unique chemical names
+                })
+                chem_list.forEach((e, i) => {
+                    $('#plt_chem').find("div.dropdown-menu").append(`<a class='dropdown-item'> ${e} </a>`)
+                })
+                $('#empty_searchable_dd').hide()
+                $('#btn_get_mass_results').show()
+                $('#btn_get_conc_results').show()
+                $('#div_visuals').show()
+
+                add_dynamic_props()
+            }
+
+            if (TRIM.store.latestRunInfo.run_results.mass_results) {
+                // $('#btn_execute_model').attr('disabled', "disabled")
+                setChecked("p#cb_proc_trm", "on")
+                setChecked("p#cb_proc_ode", "on")
+                setChecked("p#cb_proc_out", "on")
+                setChecked("p#cb_proc_vis", "on")
+                $('#lb_perc_trm').text("(100%)")
+                $('#lb_perc_ode').text("(100%)")
+                $('#lb_perc_out').text("(100%)")
+                $('#lb_perc_vis').text("(100%)")
+                let m_file = TRIM.store.latestRunInfo.run_results.mass_results_file
+                let c_file = TRIM.store.latestRunInfo.run_results.conc_results_file
+                let fpath = "{{ url_for('static', filename='.output') }}"
+                let m_filepath =  m_file.includes(".s3.amazonaws.com") ? m_file : fpath + "/" + m_file
+                let c_filepath =  c_file.includes(".s3.amazonaws.com") ? c_file : fpath + "/" + c_file
+                $('#btn_get_mass_results').attr("href",m_filepath)
+                $('#btn_get_mass_results').attr("download","mass_results.xlsx")
+                $('#btn_get_conc_results').attr("href",c_filepath)
+                $('#btn_get_conc_results').attr("download","concentration_results.xlsx")
+                initialize_components()
+                $('#btn_visualize').prop('disabled', false)
+            }
+
+            function add_dynamic_props(){
+                $('#menuItems_searchable_dd').find('.dropdown-item').on('click', function(){
+                    var existing_sel_comps = []
+                    $("#div_comp_pill").find("h5").each((i,e)=> existing_sel_comps.push($(e).text().trim()))
+                    let this_comp = $(this).text().trim()
+                    if (existing_sel_comps.indexOf(this_comp) == -1) {
+                        $("#div_comp_pill").append(`<h5 class="d-inline ml-2"><span class="badge badge-warning">${$(this).text()}</span></h5>`)
+                        $(this).css("background-color","coral")
+                    } else {
+                        $(this).css("background-color","transparent")
+                        $("#div_comp_pill").find("h5").each((i,e) => {
+                            if ($(e).find("span").text().trim() == this_comp) {
+                                $(e).remove()
+                            }
+                        })
+                    }
+                    let btn_text = "Compartment"
+                    if ($("#div_comp_pill").find("h5").length > 1) {
+                        btn_text = `${$("#div_comp_pill").find("h5").length} compartments`
+                    } else if ($("#div_comp_pill").find("h5").length == 1)  {
+                        btn_text = $("#div_comp_pill").find("h5").find("span").text()
+                    }
+                    $('#plt_comp').find('button.dropdown-toggle').text(btn_text)
+                })
+
+                $('#menuItems_ve_searchable_dd').find('.dropdown-item').on('click', function(){
+                    var existing_sel_ves = []
+                    $("#div_ve_pill").find("h5").each((i,e)=> existing_sel_ves.push($(e).text().trim()))
+                    let this_ve = $(this).text().trim()
+                    if (existing_sel_ves.indexOf(this_ve) == -1) {
+                        $("#div_ve_pill").append(`<h5 class="d-inline ml-2"><span class="badge badge-warning">${$(this).text()}</span></h5>`)
+                        $(this).css("background-color","coral")
+                    } else {
+                        $(this).css("background-color","transparent")
+                        $("#div_ve_pill").find("h5").each((i,e) => {
+                            if ($(e).find("span").text().trim() == this_ve) {
+                                $(e).remove()
+                            }
+                        })
+                    }
+                    let btn_text = "Volume Element"
+                    if ($("#div_ve_pill").find("h5").length > 1) {
+                        btn_text = `${$("#div_ve_pill").find("h5").length} volume elements`
+                    } else if ($("#div_ve_pill").find("h5").length == 1)  {
+                        btn_text = $("#div_ve_pill").find("h5").find("span").text()
+                    }
+                    $('#plt_ve').find('button.dropdown-toggle').text(btn_text)
+                })
+
+                $('#plt_chem').find('a.dropdown-item').on('click', function (){
+                    $('#plt_chem').find('button.dropdown-toggle').text($(this).text())
+                })
+
+                $("#inp_searchable_dd").on('input', function() {
+                    filter($(this).val())
+                })
+
+                $('#btn_visualize').on('click', function(e) {
+                    e.preventDefault()
+                    let last_run_date_time = TRIM.store.latestRunInfo.lastest_run_date
+                    $('#res_version').text("Displaying results of last model run on " + last_run_date_time)
+                    let sel_type = $('#plt_type').find('button.dropdown-toggle').text().trim()
+                    if (sel_type == "Time Series") {
+                        draw_ts_chart()
+                    } else if (sel_type == "Mass Distribution (Bar Chart)") {
+                        draw_mass_dist_chart("bar")
+                    } else if (sel_type == "Mass Distribution (Pie Chart)") {
+                        draw_mass_dist_chart("pie")
+                    } else if (sel_type == "Mass Distribution (Animated Bar Chart)") {
+                        draw_mass_dist_chart("animated_bar")
+                    }
+                })
+
+                function filter(word) {
+                    let $comp_list = $('#plt_comp').find('a.dropdown-item')
+                    let length = $comp_list.length
+                    let collection = []
+                    let hidden = 0
+                    for (let i = 0; i < length; i++) {
+                        if ($comp_list[i].innerHTML.includes(word)) {
+                            $($comp_list[i]).css("display","block")
+                        } else {
+                            $($comp_list[i]).css("display","none")
+                            hidden++
+                        }
+                    }
+
+                    //If all items are hidden, show the empty view
+                    if (hidden === length) {
+                        $('#empty_searchable_dd').css("display","block")
+                    }
+                    else {
+                        $('#empty_searchable_dd').css("display","none")
+                    }
+                }
+
+                $('#switch_res_conc').change(function(e){
+                    $('#btn_visualize').trigger('click')
+                })
+            }
+
+            function setChecked(id, check) {
+                if (check == "off") {
+                    $(id).find("span").hide()
+                    $(id).find("i.fas").show().attr("class", "fas fa-play").css('color','black')
+                } else if (check == "on") {
+                    $(id).find("span").hide()
+                    $(id).find("i.fas").show().attr("class","fas fa-check").css('color','black')
+                } else if (check == "err") {
+                    $(id).find("span").hide()
+                    $(id).find("i.fas").show().css('color','red')
+                } else if (check == "run") {
+                    $(id).find("span").show()
+                    $(id).find("i.fas").hide()
+                }
+            }
+
+            function reset_for_run() {
+                setChecked("p#cb_proc_trm", "off")
+                setChecked("p#cb_proc_ode", "off")
+                setChecked("p#cb_proc_out", "off")
+                setChecked("p#cb_proc_vis", "off")
+                $('#lb_perc_trm').text("(0%)")
+                $('#lb_perc_ode').text("(0%)")
+                $('#lb_perc_out').text("(0%)")
+                $('#lb_perc_vis').text("(0%)")
+                $('#btn_get_mass_results').css("display","none")
+                $('#btn_get_conc_results').css("display","none")
+                $('#btn_visualize').prop('disabled', true)
+                $('#plt_type').find('button.dropdown-toggle').text("Plot Type")
+                $('#plt_comp').find('button.dropdown-toggle').text("Compartment")
+                $('#menuItems_searchable_dd').empty()
+                $('#plt_ve').find('button.dropdown-toggle').text("Volume Element")
+                $('#menuItems_ve_searchable_dd').empty()
+                $('#plt_chem').find('button.dropdown-toggle').text("Chemical")
+                $('#plt_chem').find('div.dropdown-menu').empty()
+                $('#div_comp_pill').find("h5").remove()
+                $('#div_ve_pill').find("h5").remove()
+                $('#plot_div').empty()
+                $('#div_visuals').css("display","none")
+                $('#div_visuals').find('h6').empty()
+                $('#model_err_msg').remove()
+            }
+
+            $('#btn_execute_model').on('click', function (e) {
+                e.preventDefault()
+                reset_for_run()
+                let scenario_info = [{
+                    'type': 'data',
+                    'name': 'scenario_id',
+                    'value': TRIM.store.currentScenario.id
+                },{
+                    'type': 'data',
+                    'name': 'scenario_name',
+                    'value': TRIM.store.currentScenario.name
+                }]
+                let resp = TRIM.api.clearOldResults(scenario_info).on('load',function() {
+                    let m_results, c_results = run_model(TRIM.store.currentScenario)
+                })
+            })
+
+            function run_model(scenario_head) {
+                let scenario_info = [{
+                        'type': 'data',
+                        'name': 'scenario_id',
+                        'value': scenario_head.id
+                    },{
+                        'type': 'data',
+                        'name': 'scenario_name',
+                        'value': scenario_head.name
+                    }]
+
+                $('p#cb_proc_trm').find("span").show()
+                $('p#cb_proc_trm').find("i.fas").css('display','none')
+                function exec_model_run(){
+                    var resp = TRIM.api.runModel(scenario_info).on('load',function(){
+                        resp = this.responseJSON
+                        return resp
+                    })
+                    return resp
+                }
+
+                function get_result_data(scenario_head){
+                    let scenario_info = [{
+                        'type': 'data',
+                        'name': 'scenario_id',
+                        'value': scenario_head.id
+                    },{
+                        'type': 'data',
+                        'name': 'scenario_name',
+                        'value': scenario_head.name
+                    }]
+                    let results_data = TRIM.api.getResults(scenario_info).on('load',function(){
+                        let result_data = {}
+                        let m_results = JSON.parse(JSON.stringify(this.responseJSON.mass))
+                        result_data["m_results"] = "{" + m_results.trimStart().trimEnd() + "}"
+                        let c_results = JSON.parse(JSON.stringify(this.responseJSON.conc))
+                        result_data["c_results"] = "{" + c_results.trimStart().trimEnd() + "}"
+                        result_data["m_file"] = JSON.parse(JSON.stringify(this.responseJSON.outputMass))
+                        result_data["c_file"] = JSON.parse(JSON.stringify(this.responseJSON.outputConc))
+                        result_data["Last_run"] = JSON.parse(JSON.stringify(this.responseJSON.run_date))
+                        let id_sting = "_id" + scenario_info[0]["value"]
+                        TRIM.store.latestRunInfo.run_results.mass_results = result_data["m_results"]
+                        TRIM.store.latestRunInfo.run_results.conc_results = result_data["c_results"]
+                        TRIM.store.latestRunInfo.run_results.mass_results_file = result_data["m_file"]
+                        TRIM.store.latestRunInfo.run_results.conc_results_file = result_data["c_file"]
+                        TRIM.store.latestRunInfo.lastest_run_date = result_data["Last_run"]
+                        let fpath = "{{ url_for('static', filename='.output') }}"
+                        let m_filepath = result_data["m_file"].includes(".s3.amazonaws.com") ? result_data["m_file"] : fpath + "/" + result_data["m_file"]
+                        let c_filepath = result_data["c_file"].includes(".s3.amazonaws.com") ? result_data["c_file"] : fpath + "/" + result_data["c_file"]
+                        $('#btn_get_mass_results').attr("href",m_filepath)
+                        $('#btn_get_mass_results').attr("download","mass_results.xlsx")
+                        $('#btn_get_conc_results').attr("href",c_filepath)
+                        $('#btn_get_conc_results').attr("download","concentration_results.xlsx")
+                        return result_data
+                    })
+                    return results_data
+                }
+
+                // let result = ''
+                const poll = async function (fn, fnCondition, result, ms, deployment_type) {
+                    await fn();
+                    while (fnCondition(result)) {
+                        await wait(ms);
+                        TRIM.api.poll(scenario_head.id).on('load', function() {
+                            // ignore the responses if a scenario is already run and we are running it again but the container takes long time to initiate
+                            let status = (result == 'new' && this.responseJSON.status == 'fin') ? 'new' : this.responseJSON.status
+                            result = status;
+                            let percent = this.responseJSON.percent
+                            if (status == "ode") {
+                                setChecked("p#cb_proc_trm", "on")
+                                setChecked("p#cb_proc_ode", "run")
+                                $('#lb_perc_trm').text("(100%)")
+                                $('#lb_perc_ode').text("(" + percent + "%)")
+                            } else if (status == "csv") {
+                                setChecked("p#cb_proc_trm", "on")
+                                setChecked("p#cb_proc_ode", "on")
+                                $('#lb_perc_ode').text("(100%)")
+                                setChecked("p#cb_proc_out", "run")
+                                $('#lb_perc_out').text("(" + percent + "%)")
+                            } else if (status == "fin") {
+                                setChecked("p#cb_proc_trm", "on")
+                                setChecked("p#cb_proc_ode", "on")
+                                setChecked("p#cb_proc_out", "on")
+                                setChecked("p#cb_proc_vis", "run")
+                                $('#btn_get_mass_results').show()
+                                $('#btn_get_conc_results').show()
+                                $('#btn_visualize').prop('disabled', false)
+                                $('#lb_perc_ode').text("(100%)")
+                                $('#lb_perc_out').text("(100%)")
+                                $('#lb_perc_trm').text("(100%)")
+                                let result_data = get_result_data(scenario_head)
+                            } else if (status == "tm") {
+                                setChecked("p#cb_proc_trm", "run")
+                                $('#lb_perc_trm').text("(" + percent + "%)")
+                            } else if (status == "err") {
+                                setChecked('p#cb_proc_trm', "err")
+                                setChecked('p#cb_proc_ode', "err")
+                                setChecked('p#cb_proc_out', "err")
+                                setChecked('p#cb_proc_vis', "err")
+                                // $('p#cb_proc_vis').find("span").hide()
+                                // $('p#cb_proc_vis').find("i.fas").show().css('color','red')
+                                $("#model_err_msg").remove()
+                                $("#btn_execute_model").parent().append(
+                                    "<p style='color:red;' id='model_err_msg'>Model ran into an error and stopped running.</p>"
+                                )
+                            }
+                        })
+                        if (deployment_type == 'prod') {
+                            break
+                        }
+                    }
+
+                    if (result == "err") {
+                        setChecked("p#cb_proc_trm", "err")
+                        setChecked("p#cb_proc_ode", "err")
+                        setChecked("p#cb_proc_out", "err")
+                        setChecked("p#cb_proc_vis", "err")
+                        return result;
+                    }
+                    if (deployment_type == 'local') {
+                        setTimeout(function(){
+                            initialize_components()
+                            $($('#plt_type').find('a.dropdown-item')[0]).trigger('click')
+                            $('#btn_visualize').prop('disabled', false).trigger('click')
+                            setChecked("p#cb_proc_vis", "on")
+                            $('#lb_perc_vis').text("(100%)")
+                        }, ms)
+                    }
+                    return result;
+                };
+
+                const wait = function (ms = 1000) {
+                    return new Promise(resolve => {
+                        setTimeout(resolve, ms);
+                    });
+                };
+
+                console.log("TRIM_ENV_PROFILE == '" + TRIM.trim_env_profile + "'");
+
+                if (TRIM.trim_env_profile == "local") {
+                    // run the model locally
+                    let fetchResults = () => exec_model_run();
+                    let validate = status => (status !== 'fin' && status !== 'err');
+                    poll(fetchResults, validate, '', 5000, 'local');
+                } else {
+                    // run the model via AWS StepFunction / Docker on ECS
+                    var poller = function(executionArn, callback, numAttempts) {
+                        if (numAttempts === undefined) { numAttempts = 1; }
+                        console.log("POLLER ATTEMPT #" + numAttempts + "...");
+
+                        if (true || numAttempts < 30) {
+                            TRIM.api.checkExecutionCompletion(executionArn, function(success, data) {
+                                // pass it along to the actual callback...
+                                if ("sfn_output" in data && data.sfn_output !== false) {
+                                    callback(success, data);
+                                } else {
+                                    let dev_poll = function() {
+                                        setTimeout(function () {
+                                            poller(executionArn, callback, numAttempts + 1);
+                                        }, 30000); // sleep for 30 seconds
+                                    }
+                                    let validate = status => (status !== 'fin' && status !== 'err');
+                                    let this_result = (numAttempts < 3) ? 'new' : ''
+                                    poll(dev_poll, validate, this_result, 1000, 'prod');
+                                }
+                            });
+                        } else {
+                          console.log("no more tries...");
+                        }
+                    }
+
+                    var fetchAndDisplayResults = function(bucket, uuid) {
+                        TRIM.api.fetchRunResults(bucket, uuid, function(success, data) {
+                            var mass = "{" + data.model_output.mass + "}";
+                            var conc = "{" + data.model_output.conc + "}";
+                            console.log("DATA IS ....")
+                            console.log(data)
+                            TRIM.store.latestRunInfo.run_results.mass_results = mass
+                            TRIM.store.latestRunInfo.run_results.conc_results = conc
+                            TRIM.store.latestRunInfo.run_results.mass_results_file = data.outputMass
+                            TRIM.store.latestRunInfo.run_results.conc_results_file = data.outputConc
+                            TRIM.store.latestRunInfo.lastest_run_date = data.run_date
+                            $('#btn_get_mass_results').attr("href",data.outputMass)
+                            $('#btn_get_mass_results').attr("download","mass_results.xlsx")
+                            $('#btn_get_conc_results').attr("href",data.outputConc)
+                            $('#btn_get_conc_results').attr("download","concentration_results.xlsx")
+                            setChecked("p#cb_proc_trm", "on")
+                            setChecked("p#cb_proc_ode", "on")
+                            setChecked("p#cb_proc_out", "on")
+                            setChecked("p#cb_proc_vis", "on")
+                            $('#lb_perc_trm').text("(100%)")
+                            $('#lb_perc_ode').text("(100%)")
+                            $('#lb_perc_out').text("(100%)")
+                            $('#lb_perc_vis').text("(100%)")
+                            setTimeout(function(){
+                                initialize_components()
+                                $('#btn_visualize').prop('disabled', false)
+                                $($('#plt_type').find('a.dropdown-item')[0]).trigger('click')
+                                $('#btn_visualize').prop('disabled', false).trigger('click');
+                            }, 3000)
+                        });
+                    };
+
+                    // hardcoded test
+                    // fetchAndDisplayResults("pytrim-dev-stalk-model-run-storage-bucket", "98a921a2-1788-11ef-a37f-0a58a9feac02");
+
+                    var resp = TRIM.api.runModel(scenario_info, function(kickoffSuccess, kickoffData) {
+                        let executionArn = kickoffData.executionArn;
+                        poller(executionArn, function(checkSuccess, checkData) {
+                            console.log("ALL THE WAY BACK IN THE CALLBACK:");
+                            console.log(checkData);
+                            fetchAndDisplayResults(checkData["sfn_output"]["bucket"], checkData["sfn_output"]["uuid"]);
+                        });
+                    });
+                }
+            }
+
+            // Plot something for the first load
+            if (TRIM.store.latestRunInfo.run_has_results) {
+                $($('#plt_type').find('a.dropdown-item')[0]).trigger('click')
+                $('#btn_visualize').trigger('click')
+            }
+            console.log('populated model run form!')
+            LoadingScreen.hide('model_run_loading');
+        }
+
+        function draw_ts_chart() {
+            let results = {}
+            let unit_type = ""
+            let unit = ""
+            if ($('#switch_res_conc').prop("checked")) {
+                results = JSON.parse(TRIM.store.latestRunInfo.run_results.conc_results)
+                unit_type = "Concentration"
+                unit = "(g/g)"
+                results["year"]={};
+                Object.keys(results[Object.keys(results)[0]]).forEach((e,i) => results["year"][e]=e)
+            } else {
+                results = JSON.parse(TRIM.store.latestRunInfo.run_results.mass_results)
+                unit_type = "Mass"
+                unit = "(g)"
+            }
+
+            let selected_chem_name = $('#plt_chem').find("button.dropdown-toggle").text().trim() == "Chemical" ?
+                $($('#plt_chem').find("a.dropdown-item")[0]).text().trim() :
+                $('#plt_chem').find("button.dropdown-toggle").text().trim()
+
+            if ($('#plt_chem').find("button.dropdown-toggle").text().trim() == "Chemical") {
+                $($('#plt_chem').find("a.dropdown-item")[0]).trigger("click")
+            }
+
+            let selected_comp_name = $('#plt_comp').find("button.dropdown-toggle").text().trim() == "Compartment" ?
+                $($('#plt_comp').find("a.dropdown-item")[0]).text().trim() :
+                $('#plt_comp').find("button.dropdown-toggle").text().trim()
+
+            let comp_names = []
+            if ($('#plt_comp').find("button.dropdown-toggle").text().trim() == "Compartment") {
+                $($('#plt_comp').find("a.dropdown-item")[0]).trigger("click")
+                comp_names = [$('#plt_comp').find("button.dropdown-toggle").text().trim()]
+            } else {
+                comp_names = $('#div_comp_pill').find('h5').map((i,e) => $(e).find('span').text().trim())
+            }
+
+            let pData = []
+
+            pData[0]=["year"]
+            for (let ind = 0; ind <= comp_names.length-1; ind++) {
+                let selected_comp = selected_chem_name + '_' + comp_names[ind]
+                pData[0].push(selected_comp)
+            }
+
+            Object.keys(results["year"]).forEach(
+                function(e, i) {
+                    pData[i+1]=[];
+                    pData[0].forEach(
+                        (c, ii) => {
+                            pData[i+1].push(Number(results[c][e]))
+                        }
+                    )
+                }
+            )
+
+            // data.addRows(pData)
+            let data = google.visualization.arrayToDataTable(pData)
+
+            // Set chart options
+            let options = {
+                'title':`${unit_type} for ` + selected_comp_name,
+                'subtitle': 'in grams',
+                'width':800,
+                'height':600,
+                'hAxis': {
+                    'title': 'Year',
+                    'format': '####'
+                },
+                'vAxis': {
+                    'title': `${unit_type} ${unit}`
+                }
+            };
+
+            let chart = new google.visualization.LineChart(document.getElementById('plot_div'));
+            chart.draw(data, options)
+        }
+
+        function draw_mass_dist_chart(c_type){
+            let results = {}
+            let unit_type = ""
+            let unit = ""
+            if ($('#switch_res_conc').prop("checked")) {
+                results = JSON.parse(TRIM.store.latestRunInfo.run_results.conc_results)
+                unit_type = "Concentration"
+                unit = "(g/g)"
+                results["year"]={};
+                Object.keys(results[Object.keys(results)[0]]).forEach((e,i) => results["year"][e]=e)
+            } else {
+                results = JSON.parse(TRIM.store.latestRunInfo.run_results.mass_results)
+                unit_type = "Mass"
+                unit = "(g)"
+            }
+
+            let selected_chem_name = $('#plt_chem').find("button.dropdown-toggle").text().trim() == "Chemical" ?
+                $($('#plt_chem').find("a.dropdown-item")[0]).text().trim() :
+                $('#plt_chem').find("button.dropdown-toggle").text().trim()
+
+            if ($('#plt_chem').find("button.dropdown-toggle").text().trim() == "Chemical") {
+                $($('#plt_chem').find("a.dropdown-item")[0]).trigger("click")
+            }
+
+            let selected_ve_name = $('#plt_ve').find("button.dropdown-toggle").text().trim() == "Volume Element" ?
+                $($('#plt_ve').find("a.dropdown-item")[0]).text().trim() :
+                $('#plt_ve').find("button.dropdown-toggle").text().trim()
+
+            let ve_names = []
+            if ($('#plt_ve').find("button.dropdown-toggle").text().trim() == "Volume Element") {
+                $($('#plt_ve').find("a.dropdown-item")[0]).trigger("click")
+                ve_names = [$('#plt_ve').find("button.dropdown-toggle").text().trim()]
+            } else {
+                $('#div_ve_pill').find('h5').each((i,e) => ve_names.push($(e).find('span').text().trim()))
+            }
+
+            let pData = {}
+
+            Object.keys(results["year"]).forEach(
+                function(e, i) {
+                    let year = results["year"][e]
+                    pData[year]=[];
+                    pData[year].push(['Volume Element', unit_type])
+                    ve_names.forEach(
+                        (c, ii) => {
+                            let ves = Object.keys(results).map(e=> [e,e.split(" in ")[1]]).filter(e=> typeof e[1] != 'undefined').filter(e=>e[1].includes(c) && e[0].includes(selected_chem_name))
+                            let this_ve_total = ves.reduce((p, ve, i, ar) => {return p + results[ve[0]][e]}, 0)
+                            pData[year].push([c, Number(this_ve_total)])
+                        }
+                    )
+                }
+            )
+
+            let years = Object.keys(pData)
+            let bar_max = 0
+            years.forEach((y, i) => {
+                let this_years_max = pData[y].filter((e, ii) => ii > 0).reduce((max, d, ii) => {
+                    return max > d[1] ? max : d[1]
+                },0)
+                bar_max = bar_max > this_years_max ? bar_max : this_years_max
+            })
+
+            // Set chart options
+            let options = {
+                'title':`${unit_type} Distribution for ` + selected_ve_name + ` at year ${years[years.length-1]}`,
+                'width':800,
+                'height':600,
+                'hAxis': {
+                    'title': `${unit_type} ${unit}`,
+                    'minValue': 0
+                },
+                'vAxis': {
+                    'title': 'Volume Elements'
+                }
+            };
+
+            let chart = new google.visualization.BarChart(document.getElementById('plot_div'));
+            if (c_type == "pie") {
+                chart = new google.visualization.PieChart(document.getElementById('plot_div'));
+            }
+
+            if (c_type == "animated_bar") {
+                options["animation"] = {
+                    duration: 100,
+                    easing: 'out'
+                }
+                let y = Number(years[0])
+                var ih = setInterval(function() {
+                    options['title']=`${unit_type} Distribution for ` + selected_ve_name + ` at year ${y}`
+                    options['hAxis']['minValue']= 0
+                    options['hAxis']['maxValue']= bar_max
+                    let sub_data = pData[y]
+                    let data = google.visualization.arrayToDataTable(sub_data)
+                    chart.draw(data, options)
+                    y += 1
+                    if (y >= Number(years[years.length-1])){
+                        clearInterval(ih)
+                    }
+                }, 200)
+            } else {
+                let sub_data = pData[years[years.length-1]]
+                let data = google.visualization.arrayToDataTable(sub_data)
+                chart.draw(data, options)
+            }
+        }
+    });
+</script>
