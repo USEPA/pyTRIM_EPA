@@ -267,10 +267,10 @@ class VolumeElement(Model):
         else:
             z_side = top_a - bottom_b
 
-        if intersection.area > 0:
-            # Both vertical AND horizontal overlap!
-            # The interface is actually an area?
-            return (z_side * intersection.area) * ureg('m^3')
+        # if intersection.area > 0:
+        #     # Both vertical AND horizontal overlap!
+        #     # The interface is actually an area?
+        #     return (z_side * intersection.area) * ureg('m^3')
 
         # Else, only vertical overlap
         xy_side = intersection.length  # Is this arc units?
