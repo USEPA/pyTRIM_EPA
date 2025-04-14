@@ -5,7 +5,7 @@
         {
             "id": "time_varying",
             "label": "Use Time-Varying Allow Exchange",
-            "help": "Check the box to use values that vary in time for coniferous forest leaf 'allow exchange' indicating whether leaves are exchanging chemical with the air. This feature is typically used for this plant type. For non-evergreen leaves, it is typically assumed that the exchange does not occur during litterfall. Exchange is typically set to start after the typical date of last frost/freeze."
+            "help": "Check the box to use values that vary in time for coniferous forest leaf 'allow exchange' indicating whether leaves are exchanging chemical with the air. This feature is not typically used for this plant type. For evergreen leaves, it is typically assumed that exchange occurs continuously (i.e., the value typically is set to 1 for the whole simulation period)."
         },
         {
             "id": "field_name",

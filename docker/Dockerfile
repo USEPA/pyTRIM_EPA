@@ -25,8 +25,11 @@
 # in here commented out in case we ever need to revisit.
 # END June 2024
 
+ARG PYTRIM_BUILD_PLATFORM="linux/amd64"
+
 # FROM python:3.11-alpine as builder
-FROM --platform=linux/amd64 python:3.11-alpine as builder
+# FROM --platform=linux/amd64 python:3.11-alpine AS builder
+FROM --platform=${PYTRIM_BUILD_PLATFORM} python:3.11-alpine AS builder
 
 # Install all the python libraries we need to run...Alpine lacks a compiler toolchain for building some things we need, like pandas.
 RUN apk add --no-cache gcc python3-dev musl-dev alpine-sdk
@@ -73,7 +76,8 @@ RUN python3 -m pip install cython
 RUN python3 -m pip install -r /tmp/requirements.txt
 
 FROM python:3.11-alpine
-FROM --platform=linux/amd64 python:3.11-alpine
+# FROM --platform=linux/amd64 python:3.11-alpine
+FROM --platform=${PYTRIM_BUILD_PLATFORM} python:3.11-alpine
 COPY --from=builder /usr/local/lib/python3.11 /usr/local/lib/python3.11
 
 # was getting errors around libstc++ when doing "import pandas";

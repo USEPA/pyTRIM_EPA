@@ -265,6 +265,34 @@ window.TRIM = (function(trim) {
         });
     }
 
+	api.checkStepFunctionStatus = function(execution_arn, callback_fxn) {
+        let url = api.getUrl('general_api.stepfxn_check');
+        console.log("CHECK STEPFXN STATUS URL IS: [" + url + "]");
+        let data = makeFormData({type: "data", name: "arn", value: execution_arn})
+
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: data,
+            callback: callback_fxn
+        });
+	}
+
+    api.runGetFlow = function(scenario_id, callback_fxn) {
+        console.log("runGetFlow (api.js");
+        let url = api.getUrl('scenario_api.run_getflow').replace("/0/", "/" + scenario_id + "/");
+        console.log("RUN GETFLOW URL IS: [" + url + "]");
+
+        let data = makeFormData([]);//scenario_info);
+
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: data,
+            callback: callback_fxn
+        });
+    }
+
     api.clearOldResults = function(scenario_info, callback_fxn) {
         let url = api.getUrl('scenario_api.clear_old_result');
         let data = makeFormData(scenario_info);
