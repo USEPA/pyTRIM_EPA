@@ -84,6 +84,8 @@ def make_transition_matrix(scenario):
     matrix_dimensions = n_chem * n_comp
 
     source_matrix = np.zeros(matrix_dimensions, dtype=float)
+    ic_matrix = np.zeros(matrix_dimensions, dtype=float)
+    ic_units = [''] * matrix_dimensions  # create empty list of c0 units
     transition_matrix = np.zeros(
         (matrix_dimensions, matrix_dimensions), dtype=float
     )
@@ -95,6 +97,18 @@ def make_transition_matrix(scenario):
     }
 
     i_perc = int(100/n_chem)
+
+    def compute_initial_mass(df_c0, df_vmu):  # arguments are the chemical mass array (nt), mass dataframe
+
+        df = df_c0.merge(df_vmu, left_index=True, right_index=True)
+        df['n0_g'] = 0
+        df.loc[df['initial_concentration_units'] == 'g/m^3', 'n0_g'] = df['initial_concentration'] * df['volume_m3']
+        df.loc[df['initial_concentration_units'] == 'g/L', 'n0_g'] = df['initial_concentration'] * df[
+            'volume_m3'] * 1000
+        df.loc[df['initial_concentration_units'] == 'g/kg', 'n0_g'] = df['initial_concentration'] * df['mass_kg']
+        df_n0 = df[['initial_concentration_units', 'n0_g']]
+
+        return (df_n0)
 
     try:
         for chem_idx, chem in enumerate(chem_list):
@@ -123,6 +137,22 @@ def make_transition_matrix(scenario):
                 except Exception as e:
                     print(f'{"*" * 20} Problem with getting Surface Deposition Rate for compartment={sender.name}, '
                           f'chemical={chem} {"*" * 20}\nException is {e}')
+                    pass
+
+                try:
+                    ic = sender.initialConcentration(chem)
+                    if not (str(ic) == 'nan'):
+                        ic_matrix[tm_x] += ic.magnitude
+                        if hasattr(ic, "unit"):
+                            ic_units[x] = ic.unit.replace(" ", "")
+                        else:
+                            ic_units[x] = 'g/kg'
+                    else:
+                        ic_matrix[tm_x] += 0
+                        ic_units[x] = 'g/kg'
+                except Exception as e_ic:
+                    print(f'{"*" * 20} Problem with getting initial concentration for compartment={sender.name}, '
+                          f'chemical={chem} {"*" * 20}\nException is {e_ic}')
                     pass
 
                 try:
@@ -179,6 +209,13 @@ def make_transition_matrix(scenario):
                 except Exception as e:
                     print(f'{"*" * 20} Problem with getting Surface Concentration Output factor for '
                           f'compartment={sender.name}, chemical={chem} {"*" * 20}\nException is {full_stack()}')
+                    vol = np.nan
+                    mass = np.nan
+                    cof = np.nan
+                    cou = ""
+                    denom = "mass"
+                    vmu_tup = (sender.name, vol, mass, cou, cof, denom)
+                    vmu.append(vmu_tup)
 
                 # Some media just don't send anything
                 if not sender.media.can_emit:
@@ -305,19 +342,26 @@ def make_transition_matrix(scenario):
     # df_tm.to_csv(fname_tm)
     # ----------- END ARUN'S CHECKS -----------
 
-    df_sm = pd.DataFrame(
-        source_matrix, index=index_names,
-        columns=['deposition_rate_g_day-1']
-    )
+    try:
+        df_sm = pd.DataFrame(
+            source_matrix, index=index_names,
+            columns=['deposition_rate_g_day-1']
+        )
 
-    df_vmu = pd.DataFrame(vmu, index=index_names,
-                          columns=['comp_name', 'volume_m3', 'mass_kg', 'concentrationOutputUnits',
-                                   'concentrationOutputFactor', 'denominator'])
+        df_vmu = pd.DataFrame(vmu, index=index_names,
+                              columns=['comp_name', 'volume_m3', 'mass_kg', 'concentrationOutputUnits',
+                                       'concentrationOutputFactor', 'denominator'])
 
-    return transition_matrix, df_tm, source_matrix, df_sm, df_vmu
+        df_ic = pd.DataFrame({'initial_concentration': ic_matrix, 'initial_concentration_units': ic_units, }, index=index_names)
+        df_n0 = compute_initial_mass(df_ic, df_vmu)  # dataframe of initial masses computed
+    except Exception as a:
+        print(full_stack())
 
 
-def ode_sim(tm, sm, df_sm, scn):
+    return transition_matrix, df_tm, source_matrix, df_sm, df_vmu, df_n0
+
+
+def ode_sim(tm, sm, df_sm, df_n0, scn):
 
     tm = np.nan_to_num(tm, copy=True, nan=0.0, posinf=None, neginf=None)  # replace nans with zero
     steps_per_day = 24  # steps per day for integration and output -- will need to be input / argument eventually
@@ -351,10 +395,12 @@ def ode_sim(tm, sm, df_sm, scn):
     # ts = np.linspace(0, 365 * nyear,
     #               365 * nyear * steps_per_day)  # time line in hours for nyear years, tstart and tend should be inputs
 
-    n0 = np.zeros(ndim)  # zero mass initial condition
+    n0 = np.array(df_n0['n0_g'], dtype='float64')  # get initial masses
+    n0 = pd.Series(n0).fillna(0).to_numpy()
     nt = odeint(dn_dt, n0, ts, hmax=24)  # mass at time t
 
     df_nt = pd.DataFrame(nt)
+    print(df_nt)
     cols = list(df_sm.index)
     df_nt.columns = cols
     df_nt['time'] = ts
@@ -504,7 +550,7 @@ def run_full_model(scn):
     ScenarioService.commit()
     scn = ScenarioService.get(id=scn.id)
     try:
-        (tm, df_tm, sm, df_sm, df_vmu) = make_transition_matrix(scn)
+        (tm, df_tm, sm, df_sm, df_vmu, df_n0) = make_transition_matrix(scn)
     except Exception as e:
         print(full_stack())
         return model_err(scn, f"ERRORED WHILE MAKING TRANSITION MATRIX: {e}", 'err tm 0')
@@ -514,12 +560,13 @@ def run_full_model(scn):
     ScenarioService.commit()
     scn = ScenarioService.get(id=scn.id)
     try:
-        (nt, df_nt) = ode_sim(tm, sm, df_sm, scn)
+        (nt, df_nt) = ode_sim(tm, sm, df_sm, df_n0, scn)
         [v for v in scn.proc_status][0].run_status = 'run ode 50'
         ScenarioService.commit()
         # make concentration output
         df_conc = compute_concentration(df_nt, df_vmu)
     except Exception as e:
+        print(full_stack())
         return model_err(scn, f"ERRORED WHILE MAKING CONCENTRATION OUTPUT: {e}", 'err ode 0')
 
     # compute annual average mass and conc time series
