@@ -25,6 +25,7 @@ from .defaults import *
 from .forms import *
 from ..utils.logging import make_logger
 from trim_core.algorithms.full_model_run import run_full_model
+# from trim_core.algorithms.GetFlow.getflow import run_getflow_v7_for_scenario_id
 # from sqlalchemy import inspect
 
 import traceback
@@ -790,9 +791,9 @@ def run_result_scenario():
     try:
         # in dev/prod, we execute an AWS StepFunction to run the model via Docker/ECS. Locally,
         # we just run the model directly.
-        if trim_env_profile in [ "dev", "prod" ]:
+        if trim_env_profile in [ "dev", "devgetflow", "prod" ]:
             sfn_client = boto3.client("stepfunctions")
-            state_machine_arn = os.environ.get("TRIM_DOCKERIZED_STATEMACHINE_ARN")
+            state_machine_arn = os.environ.get("TRIM_DOCKERIZED_RUNMODEL_STATEMACHINE_ARN")
 
             if state_machine_arn is not None:
                 resp = sfn_client.start_execution(
@@ -939,6 +940,98 @@ def fetch_run_results():
 
     return ApiResult(resp)
 
+@scenario_api.route(
+    '/api/scenario/<int:scenario_id>/run_getflow', methods=['POST']
+)
+@login_required
+def run_getflow(scenario_id):
+    """
+    flow is as follows:
+    * gui_surface_runoff.html is the template for the url /scenario/{id}/edit?default_runoff_matrix_file=#surface_runoff-tab
+    * clicking "Run GetFlow" btn runs a small JavaScript function defined in that html file
+    * that function calls api.runGetFlow, defined in api.js. That packages some stuff up and hits
+      /api/scenario/{id}/run_getflow
+    * that's this function! This now kicks off a Step Function and returns the execution arn or whatever
+    """
+    trim_env_profile = os.environ.get("TRIM_ENV_PROFILE", "").lower()
+
+    print(f"TOM in run_getflow within routes.py, env==[{trim_env_profile}]...")
+    print(f"scenario id is [{scenario_id}] / {type(scenario_id)}")
+    print(f"data is ?!?!!?")
+
+    s = ScenarioService.get(scenario_id)
+    if not s:
+        raise ApiException("Unknown Scenario")
+
+    print(f"scenario: {s}")
+
+    print(f"Starting/Kicking Off GetFlow Run ({datetime.now()}...")
+    try:
+        # unlike runmodel, here we use ECS even when running locally. (getting a working qgis
+        # install is non-trivial, but if you wanted to run local you'd need to do that, then
+        # modify this section of code to do something like "run_result_scenario".
+        if True or trim_env_profile in [ "dev", "devgetflow", "prod" ]:
+            sfn_client = boto3.client("stepfunctions")
+            state_machine_arn = os.environ.get("TRIM_DOCKERIZED_GETFLOW_STATEMACHINE_ARN")
+
+            print(f"arn is '{state_machine_arn}'")
+
+            if state_machine_arn is not None:
+                resp = sfn_client.start_execution(
+                    stateMachineArn=state_machine_arn,
+                    input=json.dumps({ "scenarioId": str(scenario_id), "generateFakeResults": "false" })
+                )
+                data_resp = { "executionArn": resp["executionArn"] }
+                # data_resp = { "to": "do" }
+            else:
+                data_resp = { "error": "Missing required envrionment variable to run getflow" }
+
+            print(f"Back (Kicked Off) ({datetime.now()}...")
+        else:
+            data_resp = {"not": "implemented!"}
+    except Exception as e:
+        print(e)
+        data_resp = {"error": repr(e)}
+
+    return ApiResult(data_resp)
+
+@scenario_api.route(
+    '/api/stepfxn_check', methods=['POST']
+)
+@login_required
+def check_stepfunction_status():
+    print(f"checking stepfxn status...")
+    print(request.form.to_dict())
+
+    execution_arn = request.form.to_dict().get("arn")
+
+    if execution_arn is None:
+        data_resp = {"error": "no execution arn supplied"}
+    else:
+        try:
+            sfn_client = boto3.client("stepfunctions")
+            resp = sfn_client.describe_execution(
+                executionArn=execution_arn
+            )
+            data_resp = {
+                "status": resp.get("status")
+            }
+
+            if resp.get("status", "").upper() == "SUCCEEDED":
+                data_resp["output"] = {}
+
+                stepfxn_output = resp.get("output")
+                print(f"RAW OUTPUT: {stepfxn_output}")
+                parsed = json.loads(stepfxn_output)
+                for key in parsed:
+                    data_resp["output"][key] = parsed[key]
+
+
+
+        except Exception as e:
+            data_resp = {"error": str(e) }
+
+    return ApiResult(data_resp)
 
 @scenario_api.route('/api/scenario/<int:scenario_id>/export/mirc', methods=['GET'])
 # TODO: Need some way for MIRC *app* to authenticate?

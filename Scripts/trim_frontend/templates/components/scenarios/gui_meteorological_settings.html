@@ -295,8 +295,16 @@
 
         function submit_meteo_value(elem) {
             let param_info = get_form_data(elem)
-            if ($(elem).get(0).tagName == "INPUT")
+            if ($(elem).get(0).tagName == "INPUT") {
                 ErrorValidation.isPositiveValue(elem, $(elem).parent());
+                
+                if (elementIsValid($(elem).parent())) {
+                    let min = parseFloat(elem.getAttribute('min')) || undefined;
+                    let max = parseFloat(elem.getAttribute('max')) || undefined;
+                    if (min || max)
+                        ErrorValidation.isWithinRange(elem, $(elem).parent(), min, max);
+                }
+            }
             if (elementIsValid($(elem).parent())){
                 console.log(param_info);
                 let resp = TRIM.api.updateScenario(param_info).on('load',function(){

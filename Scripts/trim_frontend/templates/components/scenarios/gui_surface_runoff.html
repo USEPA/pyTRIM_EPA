@@ -334,6 +334,138 @@
             });
         });
 
+        $("#run_getflow").on('click', function(e) {
+		   let rowWithButton = $("form#surface-runoff-gui section.container div.row:eq(1)");
+		    let getflowStatusArea = $("<div/>").addClass("getflow_status_area").insertAfter(rowWithButton);
+			getflowStatusArea.html("Kicking off getflow run...");
+			getflowStatusArea.css("background-color", "yellow");
+
+			let api = window.TRIM.api;
+
+			// setup the code for polling
+			let executionArn = "";
+			let keepCheckingId = -1;
+
+            function toggleBtnState(disable) {
+                $(e.target).attr('disabled', disable);
+                if (disable) {
+                    $(e.target).html(`<span><label class="lds-dual-ring mr-3"></label></span> Run GetFlow`);
+                }
+                else {
+                    $(e.target).html('Run GetFlow');
+                }
+            };
+            toggleBtnState(true);
+
+			// polling function
+			let keepChecking = function() {
+				api.checkStepFunctionStatus(executionArn, function(success,data) {
+					 console.log(success);
+					 console.log(data);
+					 console.log(typeof data);
+					 console.log("-----");
+				  console.log("STATUS == [" + data.status + "]");
+
+					if (data.status == "SUCCEEDED") {
+						clearInterval(keepCheckingId);
+						getflowStatusArea.html("Run complete!&nbsp;&nbsp;");
+						getflowStatusArea.css("background-color", "lime");
+						$("<a/>").attr("href", data.output.presigned_url).html("Download results").appendTo(getflowStatusArea);
+                        toggleBtnState(false);
+
+                        // import getflow generated matrix
+                        $("<button/>").addClass('ml-3 btn btn-link').html("Update matrix").appendTo(getflowStatusArea).on('click', (e) => {
+                            e.preventDefault();
+                            let fieldData = [{
+                                "type": "input",
+                                "name": "presigned_url",
+                                "value": data.output.presigned_url
+                            }]; 
+                            fieldData.push({
+                                "type": "input",
+                                "name": "scenario_id",
+                                "value": TRIM.store.currentScenario.id
+                            });
+
+                            // list of water parcels to skip
+                            let waterPcls = [];
+                            TRIM.store.currentScenario.parcels.forEach((p, i) => {
+                                if (p?.parcelType?.includes("Water")) waterPcls.push(p.name)
+                            });
+                            fieldData.push({
+                                "type": "input",
+                                "name": "water_parcels",
+                                "value": waterPcls
+                            });
+                            
+                            LoadingScreen.show('upload_matrix_csv');
+                            TRIM.api.uploadSurfaceRunoffMatrixFile(fieldData, function(success,responseData,c) {
+                                LoadingScreen.hide('upload_matrix_csv');
+                                if (!success) {
+                                    alert('An error occurred during upload:\n' + responseData.message);
+                                } else {
+                                    console.log("reload...");
+                                    window.location.reload();
+                                }
+                            });
+                        });
+					} else if (data.status == "FAILED" || data.status == "TIMED_OUT" || data.status == "ABORTED") {
+						alert("An error occurred; run resulted in " + data.status + " status");
+						getflowStatusArea.html("Run in " + data.status + " state. Please contact support.");
+						getflowStatusArea.css("background-color", "red");
+						clearInterval(keepCheckingId);
+                        toggleBtnState(false);
+					} else {
+						console.log("keep waiting...");
+						getflowStatusArea.html("Run still ongoing... (" + (new Date()).toLocaleTimeString() + ")");
+				    }
+				});
+
+			};
+
+
+
+			// START - FAKE
+			// if we just want to test the polling code...
+			// executionArn = "arn:aws:states:us-east-1:426714360284:execution:DockerStateMachineWrapperGetFlow-uD7RgxZSemK9:45b21e17-1447-4d81-aa3c-65f291b1ef68";
+			 // keepCheckingId = setInterval(keepChecking, 1000);
+			 // return;
+			// END - FAKE
+
+
+			// kick off the getflow run
+			let scenario_id = window.TRIM.store.currentScenario.id;
+			
+			/*
+			let scenario_info = [{
+				'type': 'data',
+				'name': 'scenario_id',
+				'value': scenario_id
+			}];
+			*/
+
+			console.log("getflow kickoff (gui_surface_runoff.html)!");
+			api.runGetFlow(scenario_id, function(success,data) {
+				console.log("back in gui_surface_runoff.html callback!");
+                console.log(success);
+                console.log(data);
+                console.log("-----");
+
+                executionArn = data["executionArn"];
+                console.log("start polling for '" + executionArn + "'");
+            
+                if (data.error) {
+                    alert(data.error);
+                    toggleBtnState(false);
+                    getflowStatusArea.html("Run failed. Please contact support.");
+                    getflowStatusArea.css("background-color", "red");
+                    return;
+                }
+                keepCheckingId = setInterval(keepChecking, 15000);
+			});
+			return false;
+		});
+
         function renderRunoffForm() {
             if (!TRIM.store.currentScenario.parcels) {
                 // Parcels haven't loaded yet; wait a bit and try again

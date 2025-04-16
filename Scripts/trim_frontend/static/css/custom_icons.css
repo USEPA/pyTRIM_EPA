@@ -1,0 +1,9 @@
+/* see https://stackoverflow.com/questions/61099149/svg-fill-color-not-working-with-hex-colors */
+.trim-custom-icon-vertices {
+	background-image:url('data:image/svg+xml,<?xml version="1.0" encoding="UTF-8"?><svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><circle cx="12" cy="12" r="5" style="stroke:none;fill:%233388ff"/></svg>')
+}
+
+.trim-custom-icon-segments {
+	background-image:url('data:image/svg+xml,<?xml version="1.0" encoding="UTF-8"?><svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><line x1="5" y1="20" x2="19" y2="4" style="stroke:%233388ff;fill:none;stroke-width:3"/></svg>')
+}
+

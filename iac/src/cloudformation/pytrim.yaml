@@ -106,6 +106,11 @@ Parameters:
     Description: used to set beanstalk condition
     Default: true
 
+  KludgeDoSecret:
+    Type: String
+    Description: used to set db condition
+    Default: false
+
   EnvironmentName:
     Type: String
     Description: Environment name prefixed/appended to resource names; dashes only, no underscores!
@@ -195,7 +200,7 @@ Parameters:
   WebServerCertId:
     Description: The Amazon Resource Name (ARN) of an SSL certificate to bind to the web tier listener. Visit ACM to find the appropriate value.
     Type: String
-    # this default is a dev one, just for testing purposes
+    # default dev one for testing
     Default: "arn:aws:acm:us-east-1:426714360284:certificate/6f39535c-f167-4048-9304-6af9803a2498"
   WebTierMinNumOfInstances:
     Description: 'minimum # of instances in the web tier'
@@ -209,7 +214,6 @@ Parameters:
     Description: instance type for the web tier
     Type: String
     Default: m1.medium
-    # Default: t3.nano
     AllowedValues:
       - c1.medium
       - c1.xlarge
@@ -447,19 +451,14 @@ Parameters:
       to talk to other services on the internet (such as the Elastic Beanstalk service, external MongoDB
       hosts, etc.)
     Type: String
-    # Default: 'eipalloc-ea8c74d8'
 
-  #
-  # Bastion Related
-  #
+  ## Bastion Related
   BastionPassthroughKeyPairName:
     Description: Enter a Public/private key pair for ssh access to the bastion and instances.
       If you do not have one in this region, please create it before continuing.
     Type: 'AWS::EC2::KeyPair::KeyName'
       
-  #
-  # RDS-related
-  #
+  ## RDS-related
   DatabaseName:
     Description: name for the database
     Type: String
@@ -521,25 +520,23 @@ Parameters:
 Conditions:
   DoCreateDatabaseInfrastructure: !Equals [!Ref "KludgeDoDb", "true"]
   DoCreateBeanstalkInfrastructure: !Equals [!Ref "KludgeDoBeanstalk", "true"]
-
+  DoCreateSecret: !Equals [!Ref "KludgeDoSecret", "true"]
 
 Resources:
-  #
-  #
-  # S3
-  #
-  #
+  ## S3
   ModelRunOutputStorageBucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub '${EnvironmentName}-model-run-storage-bucket'
       AccessControl: Private
 
-  #
-  #
-  # BASIC VPC CONFIGURATION
-  #
-  #
+  GetFlowOutputStorageBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${EnvironmentName}-getflow-storage-bucket'
+      AccessControl: Private
+
+  ## BASIC VPC CONFIGURATION
   Vpc:
     Type: 'AWS::EC2::VPC'
     Properties:
@@ -677,8 +674,8 @@ Resources:
       GatewayId: !Ref InternetGatewayForVPC
       RouteTableId: !Ref RouteTableIGW
         
-  # there's no way to alter the default route table that comes wiht the VPC in a CloudFormation template
-  # (at least not without a custom lambda-backed resource) so instead we make manual associations for
+  # no way to alter the default route table that comes w/ the VPC in a CF template
+  # (at least not without a custom lambda-backed resource). instead make manual associations for
   # the appropriate subnet/RouteTable
   SubnetRouteTableAssociationOne:
     Type: AWS::EC2::SubnetRouteTableAssociation
@@ -720,11 +717,7 @@ Resources:
       RouteTableId:
         Ref: RouteTableNGW
             
-  #
-  #
-  # BastionSecurityGroup
-  #
-  #
+  ## BastionSecurityGroup
   
   # TODO - do I need this?
   BastionSecurityGroup:
@@ -740,14 +733,9 @@ Resources:
 #START_DYNAMIC_SECTION ec2_ingress
 #END_DYNAMIC_SECTION ec2_ingress
             
-  #
-  #
-  # IAM
-  #
-  #
+  ## IAM
 
   # TODO - more restrictive role permissions...
-  
                 
   # this is the role the script running within the Docker container runs as...
   # TODO CURRENLTY NOT IN USE?!?!
@@ -768,11 +756,10 @@ Resources:
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/AWSStepFunctionsFullAccess" # needed for token access
         # TODO - will need database access?
         
-  # this is the role the web tier runs as - used e.g. for making AWS SDK calls
+  # role the web tier runs as - used e.g. for making AWS SDK calls
   WebTierInstanceProfileRole:
     Condition: DoCreateBeanstalkInfrastructure
     Type: AWS::IAM::Role
-    # Description: !Sub 'Instance profile role for the PyTRIM ${EnvironmentName} web tier'
     Properties:
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -785,11 +772,7 @@ Resources:
               - 'sts:AssumeRole'
       # in IAM console, search for the managed policy to find the arn for it
       ManagedPolicyArns:
-        # - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonSQSFullAccess"
-        # - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonS3FullAccess"
-        # - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonSESFullAccess"
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/AWSElasticBeanstalkWebTier"
-        # - !Sub "arn:${AWS::Partition}:iam::aws:policy/AdministratorAccess"
       Policies:
         - PolicyName: root
           PolicyDocument:
@@ -797,20 +780,14 @@ Resources:
             Statement:
               - Effect: "Allow"
                 Action: "states:*"
-                Resource: !Ref DockerStateMachineWrapper
+                Resource: !Ref DockerStateMachineWrapperModelRun
+              - Effect: "Allow"
+                Action: "states:*"
+                Resource: !Ref DockerStateMachineWrapperGetFlow
               - Effect: "Allow"
                 Action: "states:DescribeExecution"
                 Resource: "*"
-                # Resource is like: arn:aws:states:us-east-1:426714360284:execution:DockerStateMachineWrapper-6igLbCu7FQcL:70e6b149-0e1d-4f43-b689-bdeda0d30f96 but I can't get wildcards working with that, so for now just allow on all. Just describe so low-risk.
-                #Resource:
-                #- !Join
-                #- ''
-                #-
-                #- 'arn:'
-                #- !Sub "${AWS::Partition}"
-                #- ':states:::execution:'
-                #- !GetAtt DockerStateMachineWrapper.Name
-                #- ':*'
+                # Resource is like: arn:aws:states:us-east-1:426714360284:execution:DockerStateMachineWrapperModelRun-6igLbCu7FQcL:70e6b149-0e1d-4f43-b689-bdeda0d30f96 but I can't get wildcards working with that, so for now just allow on all. Just describe so low-risk.
               - Effect: "Allow"
                 Action: "s3:*"
                 Resource:
@@ -823,6 +800,18 @@ Resources:
                       - ':s3:::'
                       - !Ref ModelRunOutputStorageBucket
                       - '/*'
+              - Effect: "Allow"
+                Action: "s3:*"
+                Resource:
+                  - !GetAtt GetFlowOutputStorageBucket.Arn
+                  - !Join
+                    - ''
+                    -
+                      - 'arn:'
+                      - !Sub "${AWS::Partition}"
+                      - ':s3:::'
+                      - !Ref GetFlowOutputStorageBucket
+                      - '/*'
       Path: /
 
   WebTierInstanceProfile:
@@ -833,10 +822,9 @@ Resources:
       Roles:
         - !Ref WebTierInstanceProfileRole
         
-  # role Elastic Beanstalk uses when constructing resources for the web tier
+  # role Beanstalk uses when constructing resources for the web tier
   WebTierServiceRole:
     Type: AWS::IAM::Role
-    # Description: !Sub 'Service role for the PyTRIM ${EnvironmentName} web tier'
     Properties:
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -855,15 +843,9 @@ Resources:
       ManagedPolicyArns:
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/AutoScalingFullAccess"
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/ElasticLoadBalancingFullAccess"
-        # - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonSQSFullAccess"
-        # - !Sub "arn:${AWS::Partition}:iam::aws:policy/AdministratorAccess"
       Path: /
 
-  #
-  #
-  # BASTION
-  #
-  #
+  ## BASTION
 
   # see https://aws-ia.github.io/cfn-ps-linux-bastion/#_deployment_options
   #
@@ -899,22 +881,31 @@ Resources:
         KeyPairName: !Ref BastionPassthroughKeyPairName
         EnableTCPForwarding: true
             
-  #
-  #
-  # DOCKER
-  #
-  #
-  ContainerRepository:
-    Type: 'AWS::ECR::Repository' # private; "PublicRepository" is a different type altogether
+  ## DOCKER
+  ContainerRepositoryModelRun:
+    Type: 'AWS::ECR::Repository' # private
     Properties:
       EmptyOnDelete: false
-      RepositoryName: !Sub '${EnvironmentName}/private_ecr_repo'
+      RepositoryName: !Sub '${EnvironmentName}/private_ecr_repo_modelrun'
+
+  ContainerRepositoryGetFlow:
+    Type: 'AWS::ECR::Repository'
+    Properties:
+      EmptyOnDelete: false
+      RepositoryName: !Sub '${EnvironmentName}/private_ecr_repo_getflow'
 
   # NOTE - for some reason this fails the first time you try it; I had to create one manual cluster first before it would work?
-  ContainerCluster:
+  ContainerClusterModelRun:
     Type: 'AWS::ECS::Cluster'
     Properties:
-      ClusterName: !Sub '${EnvironmentName}_container_cluster'
+      ClusterName: !Sub '${EnvironmentName}_container_cluster_modelrun'
+      CapacityProviders: 
+        - 'FARGATE'
+
+  ContainerClusterGetFlow:
+    Type: 'AWS::ECS::Cluster'
+    Properties:
+      ClusterName: !Sub '${EnvironmentName}_container_cluster_getflow'
       CapacityProviders: 
         - 'FARGATE'
 
@@ -970,6 +961,18 @@ Resources:
                       - ':s3:::'
                       - !Ref ModelRunOutputStorageBucket
                       - '/*'
+              - Effect: "Allow"
+                Action: "s3:*"
+                Resource:
+                  - !GetAtt GetFlowOutputStorageBucket.Arn
+                  - !Join
+                    - ''
+                    -
+                      - 'arn:'
+                      - !Sub "${AWS::Partition}"
+                      - ':s3:::'
+                      - !Ref GetFlowOutputStorageBucket
+                      - '/*'
     
   # this is the role the step function assumes when running...
   # TODO CURRENTLY NOT IN USE?!?!?!
@@ -1002,7 +1005,7 @@ Resources:
                   Resource: '*'
                 # Path: /
 
-  DockerTaskDef:
+  DockerTaskDefModelRun:
     Type: 'AWS::ECS::TaskDefinition'
     Properties:
       # 1 vCPU / 4 GB RAM. hangs eventually...
@@ -1024,7 +1027,7 @@ Resources:
         - Image: !Join
           - ':'
           -
-            - !GetAtt ContainerRepository.RepositoryUri
+            - !GetAtt ContainerRepositoryModelRun.RepositoryUri
             - 'latest'
           Cpu: 0
           DisableNetworking: false
@@ -1063,7 +1066,8 @@ Resources:
       #EphemeralStorage: 
         #EphemeralStorage
       ExecutionRoleArn: !GetAtt DockerTaskExecutionRole.Arn
-      Family: "pytrim_runmodel_taskdef_family"
+      # Family: "pytrim_runmodel_taskdef_family"
+      Family: !Sub '${EnvironmentName}-runmodel_taskdef_family'
       #InferenceAccelerators: 
         #- InferenceAccelerator
       # IpcMode: String
@@ -1081,6 +1085,78 @@ Resources:
       Tags: 
         - Key: Name
           Value: !Sub '${EnvironmentName}-runmodel-taskdef'
+      TaskRoleArn: !GetAtt DockerTaskTaskRole.Arn
+      # Volumes: 
+        # - Volume
+
+  DockerTaskDefGetFlow:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      # 8 vCPU / 32 GB RAM. Again, about 20 minutes
+      Cpu: "8192"
+      Memory: "32768"
+      
+      ContainerDefinitions: 
+        - Image: !Join
+          - ':'
+          -
+            - !GetAtt ContainerRepositoryGetFlow.RepositoryUri
+            - 'latest'
+          Cpu: 0
+          DisableNetworking: false
+
+          Environment:
+            - Name: STORAGE_BUCKET_NAME
+              Value: !Ref GetFlowOutputStorageBucket
+            - Name: RDS_HOSTNAME
+              Value: !GetAtt DatabaseInstance.Endpoint.Address
+            - Name: RDS_PORT
+              Value: !GetAtt DatabaseInstance.Endpoint.Port
+            - Name: RDS_DB_NAME
+              Value: !Ref DatabaseName
+            # RDS_USERNAME, RDS_PASSWORD, SQLALCHEMY_DATABASE_URI get set on-the-fly by the Docker image...
+
+          Essential: true
+          Interactive: false
+          LogConfiguration: 
+            LogDriver: "awslogs"
+            Options:
+              "awslogs-create-group": "true"
+              "awslogs-group": "/ecs/pytrim_getflow_taskdef"
+              "awslogs-region": "us-east-1"
+              "awslogs-stream-prefix": "ecs"
+
+          Name: "pytrim_getflow_container"
+          PortMappings: 
+            - Name: "pytrim_getflow_container-80-tcp"
+              ContainerPort: 80
+              HostPort: 80
+              Protocol: "tcp"
+              AppProtocol: "http"
+          #Secrets: 
+            #- Secret
+      #EphemeralStorage: 
+        #EphemeralStorage
+      ExecutionRoleArn: !GetAtt DockerTaskExecutionRole.Arn
+      # Family: "pytrim_getflow_taskdef_family"
+      Family: !Sub '${EnvironmentName}-getflow_taskdef_family'
+      #InferenceAccelerators: 
+        #- InferenceAccelerator
+      # IpcMode: String
+      NetworkMode: "awsvpc"
+      # PidMode: String
+      # PlacementConstraints: 
+        #- TaskDefinitionPlacementConstraint
+      # ProxyConfiguration: 
+        # ProxyConfiguration
+      RequiresCompatibilities: 
+        - "FARGATE"
+      RuntimePlatform: 
+        CPUArchitecture: "X86_64"
+        OperatingSystemFamily: "LINUX"
+      Tags: 
+        - Key: Name
+          Value: !Sub '${EnvironmentName}-getflow-taskdef'
       TaskRoleArn: !GetAtt DockerTaskTaskRole.Arn
       # Volumes: 
         # - Volume
@@ -1109,7 +1185,7 @@ Resources:
           ToPort: 65535
           IpProtocol: "tcp"
 
-  DockerStateMachineWrapper:
+  DockerStateMachineWrapperModelRun:
     Type: 'AWS::StepFunctions::StateMachine'
     Properties:
       RoleArn: !GetAtt StepFunctionAssumedRole.Arn
@@ -1126,8 +1202,8 @@ Resources:
             Resource: arn:aws:states:::ecs:runTask.waitForTaskToken
             Parameters:
               LaunchType: FARGATE
-              Cluster: !GetAtt ContainerCluster.Arn
-              TaskDefinition: !GetAtt DockerTaskDef.TaskDefinitionArn
+              Cluster: !GetAtt ContainerClusterModelRun.Arn
+              TaskDefinition: !GetAtt DockerTaskDefModelRun.TaskDefinitionArn
               NetworkConfiguration:
                 AwsvpcConfiguration:
                   AssignPublicIp: ENABLED
@@ -1150,6 +1226,44 @@ Resources:
       Tags:
         - Key: StateMachineName
           Value: !Sub '${EnvironmentName}-dockerized-runmodel-statemachine'
+
+  DockerStateMachineWrapperGetFlow:
+    Type: 'AWS::StepFunctions::StateMachine'
+    Properties:
+      RoleArn: !GetAtt StepFunctionAssumedRole.Arn
+      Definition:
+        Comment: State Machine that launches Docker container to perform GetFlow running
+        StartAt: ECS RunTask
+        States:
+          ECS RunTask:
+            Type: Task
+            Resource: arn:aws:states:::ecs:runTask.waitForTaskToken
+            Parameters:
+              LaunchType: FARGATE
+              Cluster: !GetAtt ContainerClusterGetFlow.Arn
+              TaskDefinition: !GetAtt DockerTaskDefGetFlow.TaskDefinitionArn
+              NetworkConfiguration:
+                AwsvpcConfiguration:
+                  AssignPublicIp: ENABLED
+                  Subnets:
+                  - !Ref SubnetPublicAlphaAZ
+                  - !Ref SubnetPublicBravoAZ
+                  SecurityGroups:
+                  - !Ref StateMachineSecurityGroup
+              Overrides:
+                ContainerOverrides:
+                - Environment:
+                  - Name: TASK_TOKEN_ENV_VARIABLE
+                    Value.$: $$.Task.Token
+                  - Name: TRIM_SCENARIO_ID.$
+                    Value.$: $.scenarioId
+                  - Name: GENERATE_FAKE_RESULTS.$
+                    Value.$: $.generateFakeResults
+                  Name: pytrim_getflow_container
+            End: true
+      Tags:
+        - Key: StateMachineName
+          Value: !Sub '${EnvironmentName}-dockerized-getflow-statemachine'
   
   #
   #
@@ -1210,6 +1324,7 @@ Resources:
   # 
   #
   DatabaseSecret:
+    Condition: DoCreateSecret
     Type: AWS::SecretsManager::Secret
     Properties: 
       Description: !Sub 'MySQL credentials for ${EnvironmentName}'
@@ -1341,8 +1456,12 @@ Resources:
           Value: !Ref ShortEnvironmentProfile
         -
           Namespace: 'aws:elasticbeanstalk:application:environment'
-          OptionName: TRIM_DOCKERIZED_STATEMACHINE_ARN
-          Value: !Ref DockerStateMachineWrapper
+          OptionName: TRIM_DOCKERIZED_RUNMODEL_STATEMACHINE_ARN
+          Value: !Ref DockerStateMachineWrapperModelRun
+        -
+          Namespace: 'aws:elasticbeanstalk:application:environment'
+          OptionName: TRIM_DOCKERIZED_GETFLOW_STATEMACHINE_ARN
+          Value: !Ref DockerStateMachineWrapperGetFlow
         -
           Namespace: 'aws:elasticbeanstalk:application:environment'
           OptionName: AWS_DEFAULT_REGION
@@ -1473,11 +1592,24 @@ Resources:
         Type: Standard
           
 Outputs:
-  PyTrimPrivateECRRepoName:
-    Value: !Ref ContainerRepository
+  # basic modelrun related: start
+  PyTrimPrivateECRModelRunRepoName:
+    Value: !Ref ContainerRepositoryModelRun
 
-  PyTrimPrivateECRRepoUri:
-    Value: !GetAtt ContainerRepository.RepositoryUri
+  PyTrimPrivateECRModelRunRepoUri:
+    Value: !GetAtt ContainerRepositoryModelRun.RepositoryUri
 
-  PyTrimDockerizedStateMachineArn:
-    Value: !Ref DockerStateMachineWrapper
+  PyTrimDockerizedModelRunStateMachineArn:
+    Value: !Ref DockerStateMachineWrapperModelRun
+  # basic modelrun related: end
+
+  # getflow-related: start
+  PyTrimPrivateECRGetFlowRepoName:
+    Value: !Ref ContainerRepositoryGetFlow
+
+  PyTrimPrivateECRGetFlowRepoUri:
+    Value: !GetAtt ContainerRepositoryGetFlow.RepositoryUri
+
+  PyTrimDockerizedGetFlowStateMachineArn:
+    Value: !Ref DockerStateMachineWrapperGetFlow
+  # getflow-related: end
