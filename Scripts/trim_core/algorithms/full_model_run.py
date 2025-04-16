@@ -139,17 +139,18 @@ def make_transition_matrix(scenario):
                           f'chemical={chem} {"*" * 20}\nException is {e}')
                     pass
 
+                ureg.default_format = '~'
                 try:
                     ic = sender.initialConcentration(chem)
                     if not (str(ic) == 'nan'):
                         ic_matrix[tm_x] += ic.magnitude
-                        if hasattr(ic, "unit"):
-                            ic_units[x] = ic.unit.replace(" ", "")
+                        if hasattr(ic, "units"):
+                            ic_units[tm_x] = str(ic.units).replace(" ", "").replace("**", "^")
                         else:
-                            ic_units[x] = 'g/kg'
+                            ic_units[tm_x] = 'g/kg'
                     else:
                         ic_matrix[tm_x] += 0
-                        ic_units[x] = 'g/kg'
+                        ic_units[tm_x] = 'g/kg'
                 except Exception as e_ic:
                     print(f'{"*" * 20} Problem with getting initial concentration for compartment={sender.name}, '
                           f'chemical={chem} {"*" * 20}\nException is {e_ic}')
@@ -352,8 +353,9 @@ def make_transition_matrix(scenario):
                               columns=['comp_name', 'volume_m3', 'mass_kg', 'concentrationOutputUnits',
                                        'concentrationOutputFactor', 'denominator'])
 
-        df_ic = pd.DataFrame({'initial_concentration': ic_matrix, 'initial_concentration_units': ic_units, }, index=index_names)
+        df_ic = pd.DataFrame({'initial_concentration': ic_matrix, 'initial_concentration_units': ic_units}, index=index_names)
         df_n0 = compute_initial_mass(df_ic, df_vmu)  # dataframe of initial masses computed
+
     except Exception as a:
         print(full_stack())
 
@@ -400,7 +402,7 @@ def ode_sim(tm, sm, df_sm, df_n0, scn):
     nt = odeint(dn_dt, n0, ts, hmax=24)  # mass at time t
 
     df_nt = pd.DataFrame(nt)
-    print(df_nt)
+    # print(df_nt)
     cols = list(df_sm.index)
     df_nt.columns = cols
     df_nt['time'] = ts
