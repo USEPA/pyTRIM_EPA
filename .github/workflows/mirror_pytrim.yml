@@ -34,4 +34,4 @@ jobs:
           ssh-add ~/.ssh/trim_mirror_key
 
       - name: Push Mirror
-        run: cd ~/trim-builder.git && git push --mirror git@github.com:USEPA/pyTRIM_EPA.git
+        run: cd ~/trim-builder.git && git push --force --mirror git@github.com:USEPA/pyTRIM_EPA.git
