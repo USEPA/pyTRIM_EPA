@@ -35,3 +35,4 @@ jobs:
 
       - name: Push Mirror
         run: cd ~/trim-builder.git && git push --force --mirror git@github.com:USEPA/pyTRIM_EPA.git
+        continue-on-error: true
