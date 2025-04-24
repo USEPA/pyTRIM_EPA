@@ -139,6 +139,7 @@ def add_chem_params(parlib):
                     ParameterService.create(definition=existing_par, scenario=default_scenario,
                                             requirements=f"(self.id == {ch.id})", value=value,
                                             unit=existing_par.default_unit)
+        print(missing_pars)
     ParameterService.commit()
 
 def load_data(trim_file_root, import_rules):
