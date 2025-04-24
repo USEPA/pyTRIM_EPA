@@ -24,7 +24,7 @@ from ..utils.forms import assemble_json_form
 from ..utils.logging import make_logger
 from ..utils.spatial import determine_location, determine_nearest_neighbor_distance, ensure_closed_polygon, is_utm_zone_valid, translate_coordinates, translate_position
 from shapely.geometry import Polygon
-
+from pint import UnitRegistry
 
 file_api = Blueprint('file_api', __name__)
 api.use_api_errors(file_api)
@@ -260,6 +260,94 @@ def parse_aermod():
 
     return ApiResult({'aermod_result': res_json})
 
+
+@file_api.route('/api/backgroundConc_file', methods=['POST'])
+@login_required
+def upload_background_conc():
+    data = json.loads(request.form["file_data"])
+    scenario_id = request.form["scenario_id"]
+    chem_name = request.form["chemical_name"]
+    scenario = ScenarioService.get(id=scenario_id)
+    chem = ChemicalService.get(name=chem_name)
+    ureg = UnitRegistry()
+    # First check if there are any existing CustomParameters
+    custom_pars = [c.parameters.get("initialConcentration") for c in scenario.compartments if not isinstance(c.parameters.get("initialConcentration"), ParameterDefinition)]
+    # We are going to reset all existing custom background conc values and start clean for file uploads. We do not want
+    # to mistakenly keep existing values and have piece-meal addition of values from earlier uploads or manual entries.
+    try:
+        for cp in custom_pars:
+            ParameterService.delete(cp, False)
+    except Exception as e:
+        print(f"problem deleting existing custom parameters: {e}")
+    try:
+        for ii, d in enumerate(data):
+            print(d)
+            val = d["Background Concentration Value"]
+            # Check parcel
+            parcel = [p for p in scenario.parcels if p.name == d["Parcel Name"]]
+            if len(parcel) == 0:
+                return ApiException(f"Parcel {d['Parcel Name']} does not exist for scenario {scenario.name}"
+                                    f"... Upload aborted...")
+            else:
+                parcel = parcel[0]
+            # Check compartment
+            comp_id = [c.id for c in parcel.compartments if c.name == d["Compartment Name"]]
+            if len(comp_id) == 0:
+                return ApiException(f"compartment {d['Compartment Name']} does not exist for parcel {parcel.name}"
+                                    f"... Upload aborted...")
+            else:
+                comp_id = comp_id[0]
+
+            comp = CompartmentService.get(id=comp_id)
+
+            data[ii].setdefault("Volume Element Name", comp.volume_element.name)
+
+            bc_par = [par for parn, par in comp.parameters.items() if parn == "initialConcentration"]
+            if len(bc_par) > 0:
+                bc_par = bc_par[0]
+                bc_par = get_or_create_custom_param(
+                    bc_par,
+                    {"requirements": f"(self.id == {comp_id})", "scenario_id": scenario.id},
+                    new_formula=True
+                )
+
+                # check the unit and see if we can convert to default if we have one that is different from default unit
+                input_unit = d['Unit']
+                default_unit = "g / m^3" if comp.media.id in [2, 5, 7, 56, 55, 8, 9] else "g / kg" if comp.media.id in [23, 24, 27, 28, 29, 31, 32, 33, 37, 39, 41, 43, 44, 45, 46, 47, 48, 49, 50, 51] else "g / L" if comp.media.id in [10, 4] else ""
+                try:
+                    input_val = float(val) * ureg(input_unit)
+                    conv_val = input_val.to(default_unit)
+                    print(f'input {input_val} -> default_unit {conv_val}')
+                    val = conv_val.magnitude
+                except Exception as e:
+                    return ApiException(f'Problem converting the provided unit {input_unit} '
+                                        f'to default unit of {default_unit}\n{e}')
+
+                eq = bc_par.formula.equation
+                print(f'old eq is {eq}')
+                # We have the chemical in the formula
+                if f'chemical.id == {str(chem.id)}' in eq:
+                    formula_parts = eq.split(f"if chemical.id == {chem.id}")
+                    formula_part = formula_parts[0]
+                    if "else" in formula_part:
+                        arr = formula_part.split("else")[:-1]
+                        formula_part = "else".join(arr + [f' {val} '])
+                    else:
+                        formula_part = f'{val} '
+                    formula_parts[0] = formula_part
+                    new_formula = f"if chemical.id == {chem.id}".join(formula_parts)
+                    print(new_formula)
+                # We do not have the chemical in the formula. We need to add it...
+                else:
+                    eq_arr = eq.split("else")
+                    eq_arr.insert(-2, f' {val} if chemical.id == {chem.id} ')
+                    new_formula = "else".join(eq_arr)
+                    print(new_formula)
+                FormulaService.get(bc_par.formula.id).equation = new_formula
+                FormulaService.commit()
+    except Exception as e:
+        print(e)
+    return ApiResult({'background_conc_file_data': data})
 
 @file_api.route('/api/parcel_file', methods=['POST'])
 @login_required
