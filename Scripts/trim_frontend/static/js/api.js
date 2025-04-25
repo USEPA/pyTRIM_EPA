@@ -196,6 +196,14 @@ window.TRIM = (function(trim) {
         });
     };
 
+    api.hitUrl = function(url, callbackFxn) {
+        return AJAX.call({
+            method: 'GET',
+            url: url,
+            callback: callbackFxn
+        });
+	};
+
     api.uploadMiscScenarioFile = function(fields, callbackFxn) {
         var url = api.getUrl('file_api.manage_misc_scen_file');
         var data = makeFormData(fields);

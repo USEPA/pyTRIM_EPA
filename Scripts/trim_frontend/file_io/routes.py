@@ -20,7 +20,7 @@ from trim_db.services.entities import ParcelService
 from trim_frontend import api
 from ..parcels.utils import delete_parcel_contents, get_canonical_land_use_type, get_canonical_parcel_type, get_ve_defaults_for_parcel_type, handle_parcel_update, initialize_parcel_contents
 from ..utils.data_structures import calculate_list_depth
-from ..utils.file_io import csv_to_df
+from ..utils.file_io import csv_to_df, MiscAssociatedFileVariety
 from ..utils.forms import assemble_json_form
 from ..utils.logging import make_logger
 from ..utils.spatial import determine_location, determine_nearest_neighbor_distance, ensure_closed_polygon, is_utm_zone_valid, translate_coordinates, translate_position
@@ -411,22 +411,25 @@ def parse_parcel_upload():
     else:
         return ApiResult(return_data)
 
+
+
 @file_api.route('/api/misc_scen_file', methods=['GET', 'POST', 'DELETE'])
 @login_required
 def manage_misc_scenario_file():
-    # this is a generic endpoint for handling storage (upload/deletion/retrieval) of miscellaneous files
+    # this is a generic endpoint for handling storage (upload/deletion/retrieval) on S3 of miscellaneous files
     # associated with a scenario. Pass in a 'misc_file_type'==x and you'll get:
-    # a file /{scenarioId}/x and /{scenarioId}/_x.json in the appropriate
+    # a file /{scenarioId}/x/data* and /{scenarioId}/x/_metadata.json in the appropriate
     # S3 bucket. the json file is metadata; it will contain any other fields you passed in at upload time, as well as
     # some standard fields like the original file name, etc.
     #
-    # this function can be configured to handle specific misc_file_type's in the way it sets up MIME_TYPES and
-    # FILE_EXTENSIONS (like developers can customize this function to set appropriate ContentTypes) but it will
-    # fall back to sensible defaults if a new one is passed in. Could also easily be extended to do things based on
-    # misc_file_type like process a file before storing it, store multiple files, etc.
+    # this function leverages the MiscAssociatedFileVariety class hierarchy defined in ../utils/file_io.py; provides basic defaults as
+    # described above for "store this file on S3 and do nothing else" but can also provide custom behavior easily like preprocessing a file, setting
+    # smarter MIME/content type, etc. For instance the "deposition_overlay" misc_file_type/variety:
+    # 1. processes the uploaded file
+    # 2. stores both the original uploaded file (just in case / proof-of-concept) and the processed version
+    # 3. returns presigned url for just the processed version on a GET
     #
-    # initially this is only used for overlay uploads on the parcels tab, but it could be used in other places
-    # going forward.
+    # initially this is only used for those aermod deposition overlays on the parcels tab, but it could be used in other places going forward.
 
     # initially modeled after parse_parcel_upload
     errors = []
@@ -445,19 +448,9 @@ def manage_misc_scenario_file():
     else:
         scenario_id = request.args.get("scenario_id")
         misc_file_type = request.args.get("misc_file_type")
-        # check S3 for existing file...
+        # check S3 for existing file...or delete it...
 
-    # right now just overlays. Later if we add other types could be handy.
-    MIME_TYPES = {
-        "overlay": "text/plt"
-    }
-
-    FILE_EXTENSIONS = {
-        "overlay": "plt"
-    }
-
-    content_type = MIME_TYPES.get(misc_file_type, "text/plain")
-    file_extension = FILE_EXTENSIONS.get(misc_file_type)
+    fv = MiscAssociatedFileVariety.construct_file_variety(misc_file_type)
 
     if scenario_id is None:
         errors.append("No scenario id supplied")
@@ -468,36 +461,11 @@ def manage_misc_scenario_file():
     if len(errors) == 0:
         print(f"working on scenario '{scenario_id}', misctype='{misc_file_type}' in {request.method}...")
 
-        # s3_file_path = f"{scenario_id}/overlay.plt"
-        s3_file_path = f"{scenario_id}/{misc_file_type}{'.' if file_extension is not None else ''}{file_extension}"
-        s3_metadata_path = f"{scenario_id}/_{misc_file_type}.json"
+        s3_metadata_path = f"{scenario_id}/{misc_file_type}/_metadata.json"
 
+        do_return_metadata_and_presigned_urls = False
         if request.method == "GET":
-            file_metadata = None
-            try:
-                content_object = s3_resource.Object(file_storage_bucket, s3_metadata_path)
-                file_content = content_object.get()["Body"].read().decode("utf-8")
-                file_metadata = json.loads(file_content)
-            except:
-                file_metadata = None
-
-            
-            if file_metadata is not None:
-                return_data["file_metadata"] = file_metadata
-            else:
-                return_data["file_metadata"] = None
-
-            try:
-                data_url = s3_client.generate_presigned_url("get_object",
-                                                            Params={
-                                                                "Bucket": file_storage_bucket,
-                                                                "Key": s3_file_path
-                                                            },
-                                                            ExpiresIn=600) # expires in 10 minute(s)
-                return_data["presigned_url"] = data_url
-            except:
-                return_data["presigned_url"] = None
-
+            do_return_metadata_and_presigned_urls = True
         elif request.method == "POST":
             ignore = ["scenario_id", "misc_file_type", "csrf_token"]
             submitted_metadata = { x[0]: x[1] for x in request.form.items() if x[0] not in ignore }
@@ -511,45 +479,104 @@ def manage_misc_scenario_file():
                 print(f"let's upload {type(files)} to s3://{file_storage_bucket}...")
 
                 try:
-                    for name, file_obj in files.items():
-                        original_name = secure_filename(file_obj.filename)
+                    file_obj = None
+                    for _, loop_file_obj in files.items():
+                        file_obj = loop_file_obj
+                        original_name = secure_filename(loop_file_obj.filename)
                         submitted_metadata["original_file_name"] = original_name
+                        break
+
+                    if fv.has_custom_upload_behavior():
+                        fpn = file_obj.stream
+                        try:
+                            fpn.seek(0)
+                            uploaded_file_content = fpn.read().decode("utf-8")
+
+                            upload_directives, additional_metadata = fv.perform_custom_upload_behavior(uploaded_contents=uploaded_file_content, metadata=submitted_metadata)
+                            for upload_filename in upload_directives:
+                                uploadable_dict = upload_directives[upload_filename]
+                                uploadable_item = uploadable_dict.get("contents")
+                                uploadable_mime = uploadable_dict.get("mime", fv.get_storage_mime_type())
+                                loop_s3_file_path = f"{scenario_id}/{misc_file_type}/{upload_filename}"
+
+                                s3_client.put_object(
+                                    Body=uploadable_item,
+                                    Bucket=file_storage_bucket,
+                                    Key=loop_s3_file_path,
+                                    ContentType=uploadable_mime
+                                )
+
+                            if additional_metadata is not None:
+                                submitted_metadata = submitted_metadata | additional_metadata
+                        except Exception as e:
+                            print(e)
+                    else:
+                        s3_file_path = f"{scenario_id}/{misc_file_type}/data{fv.get_storage_file_extension()}"
+
                         s3_client.put_object(
                             Body=file_obj,
                             Bucket=file_storage_bucket,
                             Key=s3_file_path,
-                            ContentType=content_type
+                            ContentType=fv.get_storage_mime_type()
                         )
-                        break
 
-                    # update the metadata too
+                    # update the metadata too - for default or custom
                     s3_client.put_object(
                         Body=json.dumps(submitted_metadata),
                         Bucket=file_storage_bucket,
                         Key=s3_metadata_path,
                         ContentType="application/json"
                     )
+                    do_return_metadata_and_presigned_urls = True
                 except Exception as e:
                     errors.append(str(e))
         elif request.method == "DELETE":
-            try:
-                s3_client.delete_object(
-                    Bucket=file_storage_bucket,
-                    Key=s3_file_path
-                )
-            except:
-                pass
-
-            try:
-                s3_client.delete_object(
-                    Bucket=file_storage_bucket,
-                    Key=s3_metadata_path
-                )
-            except:
-                pass
+            bucket = s3_resource.Bucket(file_storage_bucket)
+            bucket.objects.filter(Prefix=f"{scenario_id}/{misc_file_type}/").delete()
 
             return_data["message"] = "file(s) deleted"
 
+    if do_return_metadata_and_presigned_urls:
+        file_metadata = None
+        try:
+            content_object = s3_resource.Object(file_storage_bucket, s3_metadata_path)
+            file_content = content_object.get()["Body"].read().decode("utf-8")
+            file_metadata = json.loads(file_content)
+        except:
+            file_metadata = None
+        
+        if file_metadata is not None:
+            return_data["file_metadata"] = file_metadata
+        else:
+            return_data["file_metadata"] = None
+
+        # now make presigned urls
+        return_data["presigned_urls"] = {}
+        try:
+            # get everythign in the appropriate subdir
+            response = s3_client.list_objects_v2(
+                    Bucket=file_storage_bucket,
+                    Prefix = f"{scenario_id}/{misc_file_type}/",
+                    MaxKeys=100 )
+
+            s3_files = response.get("Contents", [])
+            for f in s3_files:
+                suppressed_files = fv.get_files_to_suppress_from_download()
+
+                loop_key = f.get("Key")
+                if loop_key != s3_metadata_path:
+                    nested_path = loop_key.replace(f"{scenario_id}/{misc_file_type}/", "")
+
+                    if nested_path not in suppressed_files:
+                        data_url = s3_client.generate_presigned_url("get_object",
+                                                                    Params={
+                                                                        "Bucket": file_storage_bucket,
+                                                                        "Key": loop_key
+                                                                    },
+                                                                    ExpiresIn=600) # expires in 10 minute(s)
+                        return_data["presigned_urls"][nested_path] = data_url
+        except Exception as e:
+            print(e)
 
     if len(errors) > 0:
         raise ApiException("; ".join(errors))

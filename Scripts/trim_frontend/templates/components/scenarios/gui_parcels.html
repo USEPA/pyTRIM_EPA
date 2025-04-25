@@ -32,24 +32,36 @@
 			</div>
 		</fieldset>
 		<fieldset>
-			<legend>Overlay Upload</legend>
+			<legend>Deposition Overlay</legend>
 			<div class="row mb-1">
 				<div class="col-sm">
-					<div data-slot="true" data-target="overlay_file"></div>
+					<div data-slot="true" data-target="deposition_overlay_file"></div>
 
 					<div class="row mb-1 subform">
 						<div class="col-md">
-							<div data-slot="true" data-target="overlay_upload_coordinates_system"></div>
+							<div data-slot="true" data-target="deposition_overlay_upload_coordinates_system"></div>
 						</div>
 						<div class="col-md" style="opacity:0">
-							<div data-slot="true" data-target="overlay_upload_utm_zone"></div>
+							<div data-slot="true" data-target="deposition_overlay_upload_utm_zone"></div>
 						</div>
 					</div>
 
+					<div data-slot="true" data-target="deposition_overlay_zflag_restriction"></div>
+
 					<!-- <div data-slot="true" data-target="parcel_coordinates_description"></div> -->
-					<a id="overlay-upload-btn" href="#" class="btn btn-secondary"><i class="fas fa-upload mr-1"></i>Upload</a>
+					<a id="deposition-overlay-upload-btn" href="#" class="btn btn-secondary"><i class="fas fa-upload mr-1"></i>Upload</a>
 				</div>
 			</div>
+
+			<div class="row mb-1" id="deposition-overlay-current-file" style="display:none; margin-top: 20px">
+				<div class="errors">
+				</div>
+
+				<div class="col-sm">
+					<a id="deposition-overlay-delete-btn" href="#" class="btn btn-secondary"><i class="fas fa-trash mr-1"></i>Delete <span id="deposition-overlay-current-filename"></a>
+				</div>
+			</div>
+
 		</fieldset>
         <div id="parcel_file_fields_div">
             <div class="row">
@@ -116,7 +128,99 @@
 <script src="{{ url_for('static', filename='js/lib/shp.js') }}">
 </script>
 <script>
-    var map = L.map('mapid', { drawControl: false }).setView([35.99, -78.90], 12);
+	// deposition overlay helper functions -- START
+	let addDepositionOverlayLegend = function(bucketRanges, bucketColors) {
+		if (typeof depositionOverlayLegend != "undefined") {
+			map.removeControl(depositionOverlayLegend); // removes the legend
+		}
+
+		// thx https://codepen.io/haakseth/pen/KQbjdO
+		window.depositionOverlayLegend = L.control({ position: "bottomright" });
+
+		depositionOverlayLegend.onAdd = function(map) {
+			var div = L.DomUtil.create("div", "leaflet-legend deposition-overlay");
+
+			div.innerHTML += "<h4>Total Deposition (g/m<sup>2</sup>)</h4>";
+			for (let i = quartileGradient.length - 1 ; i >= 0 ; i--) {
+				let jenksBucket = bucketRanges[i];
+				let rangeDisplay = jenksBucket.from.toExponential() + " - " + jenksBucket.to.toExponential();
+				div.innerHTML += '<i style="background: ' +
+					quartileGradient[i] +
+					'"></i><span>' + 
+					rangeDisplay +
+					'</span><br>';
+			}
+
+			return div;
+		};
+
+		depositionOverlayLegend.addTo(map);
+	};
+
+	let uninstallDepositionOverlayFromMap = function() {
+		if (typeof depositionOverlayLegend != "undefined") {
+			map.removeControl(depositionOverlayLegend); // removes the legend
+		}
+		mapLayers.removeLayer(depositionOverlayGroup); // removes from the layers menu
+		depositionOverlayGroup.removeFrom(map); // hides from the map
+		$("#deposition-overlay-current-file").hide(); // hide management ui
+	};
+
+	let installDepositionOverlayOntoMap = function(responseData) {
+		let errorDisplayArea = $("#deposition-overlay-current-file .errors");
+		errorDisplayArea.empty();
+
+		if (responseData.file_metadata != null) {
+			// show the management UI
+			$("#deposition-overlay-current-filename").html(responseData.file_metadata.original_file_name);
+			$("#deposition-overlay-current-file").show();
+
+			if (responseData.file_metadata.errors === undefined || responseData.file_metadata.errors.length == 0) {
+				// fetch the data
+				let presignedUrl = responseData.presigned_urls["processed.json"];
+
+				TRIM.api.hitUrl(presignedUrl, function(presignedSuccess, presignedResponse) {
+					// the https://stackoverflow.com/questions/10756313/javascript-jquery-map-a-range-of-numbers-to-another-range-of-numbers, with a twist
+					/*
+					function findGradientSlot (number, inMin, inMax, outMin, outMax) {
+						return Math.round((number - inMin) * (outMax - outMin) /
+							(inMax - inMin) + outMin);
+					}
+					*/
+
+					let overlayPolyPoints = [];
+					for (let i = 0 ; i < presignedResponse.row_data.length; i++) {
+						let el = presignedResponse.row_data[i];
+						let point = [ el.wgs84_lat, el.wgs84_long ];
+						overlayPolyPoints.push(point);
+						let colorForDisplay = quartileGradient[el.jenks_bucket];
+						var marker = L.circleMarker(point, { pmIgnore: true, radius: 1, stroke: true, color: colorForDisplay}).bindPopup("Total Depo == " + el.combined_deposition.toExponential()).addTo(depositionOverlayGroup);
+					}
+
+					addDepositionOverlayLegend(responseData.file_metadata.jenks_buckets, quartileGradient);
+
+					depositionOverlayGroup.on("add", function() { $(".leaflet-legend").removeClass("hidden"); });
+					depositionOverlayGroup.on("remove", function() { $(".leaflet-legend").addClass("hidden"); });
+					depositionOverlayGroup.addTo(map); // preselects it in the layers control!
+				});
+
+				mapLayers.addOverlay(depositionOverlayGroup, "Deposition");
+			} else {
+				$("<h4/>").html("Errors with uploaded file:").appendTo(errorDisplayArea);
+				for (let i = 0 ; i < responseData.file_metadata.errors.length ; i++) {
+					$("<li/>").html(responseData.file_metadata.errors[i]).appendTo(errorDisplayArea);
+				}
+			}
+		}
+	};
+	// deposition overlay helper functions -- END
+
+	var map = L.map('mapid', { drawControl: false }).setView([35.99, -78.90], 12);
+
+	// Useful links:
+	// https://colordesigner.io/gradient-generator !
+	// https://visualisingdata.com/2019/08/five-ways-to-design-for-red-green-colour-blindness/
+	let quartileGradient = [ "#D8C56C", "#C55B6C", "#A03C8E", "#7D1F4B" ]; // low->high
 
 	// START -- dots on vertices
 
@@ -161,7 +265,7 @@
 				if (probe.dotMarkerData !== undefined &&
 					probe.dotMarkerData.type == "VertexDotMarkers" &&
 					(probe.dotMarkerData.properties.relatedParcelId == e.layer.feature.properties.parcelid ||
-					 probe.dotMarkerData.properties.relatedLeafletId == relatedStampId)) {
+						probe.dotMarkerData.properties.relatedLeafletId == relatedStampId)) {
 					map.removeLayer(probe);
 					return;
 				}
@@ -178,7 +282,7 @@
 					if (probe.feature !== undefined &&
 						probe.feature.type == "Feature" &&
 						(probe.feature.properties.parcelid == dotToParcel[deletedId].trimParcelId ||
-						 L.stamp(probe) == dotToParcel[deletedId].leafletPolygonId)) {
+							L.stamp(probe) == dotToParcel[deletedId].leafletPolygonId)) {
 						window.deleteParcelFromServer({"properties": { "parcelid": probe.feature.properties.parcelid } });
 						map.removeLayer(probe);
 						return;
@@ -332,8 +436,8 @@
 		function onUploadCoordinateSystemChanged() {
 			let parcelGui = $("#parcels-gui");
 
-			let uploadPrefixes = ["",				// parcel upload
-									"overlay_"];	// overlay upload
+			let uploadPrefixes = ["",						// parcel upload
+									"deposition_overlay_"];	// depo overlay upload
 
 			for (let i = 0 ; i < uploadPrefixes.length ; i++) {
 				let prefix = uploadPrefixes[i];
@@ -360,13 +464,15 @@
 			let utmZone = parcelGui.find("#upload_utm_zone");
 			let parcelUploader = parcelGui.find("#upload-btn");
 
-			let overlayFile = parcelGui.find("#overlay_file");
-			let overlayCoordsSystem = parcelGui.find("#overlay_upload_coordinates_system");
-			let overlayUtmZone = parcelGui.find("#overlay_upload_utm_zone");
-			let overlayUploader = parcelGui.find("#overlay-upload-btn");
+			let depoOverlayFile = parcelGui.find("#deposition_overlay_file");
+			let depoOverlayCoordsSystem = parcelGui.find("#deposition_overlay_upload_coordinates_system");
+			let depoOverlayUtmZone = parcelGui.find("#deposition_overlay_upload_utm_zone");
+			let depoOverlayZFlagRestriction = parcelGui.find("#deposition_overlay_zflag_restriction");
+			let overlayUploader = parcelGui.find("#deposition-overlay-upload-btn");
+			let overlayDeleter = parcelGui.find("#deposition-overlay-delete-btn");
 
 			coordsSystem.on('change', onUploadCoordinateSystemChanged);
-			overlayCoordsSystem.on('change', onUploadCoordinateSystemChanged);
+			depoOverlayCoordsSystem.on('change', onUploadCoordinateSystemChanged);
 			onUploadCoordinateSystemChanged();
 
 			parcelUploader.on('click', function() {
@@ -426,21 +532,35 @@
 				return false;
 			});
 
+			overlayDeleter.on('click', function() {
+				LoadingScreen.show('delete_depo_overlay_plt');
+				TRIM.api.deleteMiscScenarioFile(TRIM.store.currentScenario.id, "deposition_overlay", function(success,responseData,c) {
+					if (!success) {
+						alert('An error occurred during deletion.');
+					} else {
+						uninstallDepositionOverlayFromMap();
+					}
+					LoadingScreen.hide('delete_depo_overlay_plt');
+				});
+
+				return false;
+			});
+
 			overlayUploader.on('click', function() {
-				let overlayFileData = overlayFile.prop('files')[0];
+				let overlayFileData = depoOverlayFile.prop('files')[0];
 
 				if (overlayFileData == undefined) {
 					alert('Please select a file to upload.');
 					return false;
-				} else if (overlayCoordsSystem.val() == "UTM") {
-					if (!isValidUtmZone(overlayUtmZone.val())) {
+				} else if (depoOverlayCoordsSystem.val() == "UTM") {
+					if (!isValidUtmZone(depoOverlayUtmZone.val())) {
 						alert('Please enter a valid UTM zone (e.g. 16T, 32A, etc.).');
 						return false;
 					}
 				}
 
 				// if we made it here, we're good to submit to server
-				let fieldData = [overlayFile.get(0)];
+				let fieldData = [depoOverlayFile.get(0)];
 
 				fieldData.push({
 					"type": "input",
@@ -451,34 +571,36 @@
 				fieldData.push({
 					"type": "input",
 					"name": "misc_file_type",
-					"value": "overlay"
+					"value": "deposition_overlay"
 				});
 
 				fieldData.push({
 					"type": "input",
 					"name": "coord_system",
-					"value": overlayCoordsSystem.val()
+					"value": depoOverlayCoordsSystem.val()
 				});
 
 				fieldData.push({
 					"type": "input",
 					"name": "utm_zone",
-					"value": overlayCoordsSystem.val() == "UTM" ? overlayUtmZone.val() : "n/a"
+					"value": depoOverlayCoordsSystem.val() == "UTM" ? depoOverlayUtmZone.val() : "n/a"
 				});
 
-				LoadingScreen.show('upload_overlay_plt');
+				fieldData.push({
+					"type": "input",
+					"name": "zflag_restriction",
+					"value": depoOverlayZFlagRestriction.val()
+				});
+
+				LoadingScreen.show('upload_depo_overlay_plt');
 				TRIM.api.uploadMiscScenarioFile(fieldData, function(success,responseData,c) {
-					LoadingScreen.hide('upload_overlay_plt');
+					uninstallDepositionOverlayFromMap();
+					LoadingScreen.hide('upload_depo_overlay_plt');
 
 					if (!success) {
 						alert('An error occurred during upload.');
 					} else {
-						// console.log("reload...");
-						// window.location.reload();
-						console.log("Look!");
-						console.log(success);
-						console.log(responseData);
-						console.log(c);
+						installDepositionOverlayOntoMap(responseData)
 					}
 				});
 
@@ -500,18 +622,15 @@
 
 		document.body.addEventListener('parcels:ready', function() {
 			LoadingScreen.show('check_overlay_status');
-			TRIM.api.checkMiscScenarioFile(TRIM.store.currentScenario.id, "overlay", function(success,responseData,c) {
+			TRIM.api.checkMiscScenarioFile(TRIM.store.currentScenario.id, "deposition_overlay", function(success,responseData) {
 				LoadingScreen.hide('check_overlay_status');
 
 				if (!success) {
 					alert('An error occurred during upload.');
 				} else {
-					// console.log("reload...");
-					// window.location.reload();
-					console.log("Look!");
-					console.log(success);
-					console.log(responseData);
-					console.log(c);
+					if (success) {
+						installDepositionOverlayOntoMap(responseData)
+					}
 				}
 			});
 		});
@@ -927,7 +1046,9 @@
             format: 'image/png'
         });
 
-        window.aermodTestOverlay = L.layerGroup();
+		// depositionOverlayGroup, mapLayers, depositionOverlayLegend, etc. are globals set
+		// on the window. Would be nice to not do that...
+        window.depositionOverlayGroup = L.layerGroup();
 
         var togglelayers = L.layerGroup([wmsNLCD2016])
 
@@ -935,7 +1056,7 @@
             "NLCD" : togglelayers,
             "Flowline - Large Scale" : wmsFlowLine,
             "HUC12 Boundaries" : wmsHUC12,
-			"AERMod Demo": aermodTestOverlay
+			// "Deposition": depositionOverlayGroup
         }
         var baseMaps = {
             "Streets Basemap" : StreetBM,
@@ -943,7 +1064,7 @@
             "Imagery" : Esri_WorldImagery,
         }
 
-        L.control.layers(baseMaps,overlayMaps).addTo(map);
+        window.mapLayers = L.control.layers(baseMaps,overlayMaps).addTo(map);
 
         map.pm.addControls({
             position: 'topleft',
@@ -1479,6 +1600,7 @@
         }
 
 
+		/*
 		// LAT, LNG
 		a = [44.282225, -85.37830428060558];
 		b =[44.282225, -85.341451];
@@ -1491,6 +1613,7 @@
 		var polyTest = L.polygon([a,b,c], { pmIgnore: true, color: "orange"}).addTo(aermodTestOverlay);
 
 		aermodTestOverlay.addTo(map); // preselects it in the layers control!
+		*/
 
 		// delete fooMarker.pm; // makes it undeletable...
 		// delete barMarker.pm; // makes it undeletable...
