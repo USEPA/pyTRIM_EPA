@@ -1,0 +1,32 @@
+{
+	"environment_name": "pytrim-v2",
+	"short_env_profile": "dev",
+
+	"aws": {
+		"ssh_keypair_name": "pytrim-dev-keypair-20240610",
+		"eip_name": "pytrim-v2-eip",
+		"cidr_segment_vpc": 24,
+
+		"ec2_ingress": [
+			{
+				"description": "berk b home IP",
+				"cidr": "108.77.86.235/32"
+			},
+			{
+				"description": "ICF VPN a",
+				"cidr": "199.223.30.0/24"
+			},
+			{
+				"description": "ICF VPN b",
+				"cidr": "199.223.31.0/24"
+			}
+		],
+
+		"db": {
+			"dbname": "pytrimv2",
+			"username": "pytrimUser",
+			"password": "B3rkB1ry0l1980"
+		}
+ 
+	}
+}

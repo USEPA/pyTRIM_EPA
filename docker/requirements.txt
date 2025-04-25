@@ -50,6 +50,7 @@ Mako==1.2.4
 MarkupSafe==2.1.5
 matplotlib-inline==0.1.6
 numpy==1.25.2
+--extra-index-url https://alpine-wheels.github.io/index
 pandas==2.2.3
 parso==0.8.3
 passlib==1.7.4

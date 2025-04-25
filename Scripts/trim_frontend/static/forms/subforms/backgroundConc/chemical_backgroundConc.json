@@ -15,6 +15,14 @@
             "required": true,
             "help": "Indicate the input file of initial concentration data.",
             "if_true": ["have_input_file"]
+        },
+        {
+            "id": "concentration_upload_button",
+            "label": "",
+            "data_type": "none",
+            "widget": "button",
+            "buttonHtml" : "<i class='fas fa-upload mr-1'></i>Upload",
+            "if_true": ["have_input_file"]
         }
     ]
 }

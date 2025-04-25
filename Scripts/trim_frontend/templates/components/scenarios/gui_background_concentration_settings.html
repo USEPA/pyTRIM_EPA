@@ -27,6 +27,7 @@
                                                     ) }}">Click here</a> to download the template for creating a CSV file containing initial concentrations.
                                                 </small>
                                             </div>
+                                            <div data-slot="true" data-target="concentration_upload_button"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -79,6 +80,7 @@
             console.log('background concentrations form visible')
             LoadingScreen.show('background_concentrations_loading');
             loadChemicals();
+            Enable_Background_Concentration_file_upload()
         });
 
         function loadChemicals() {
@@ -100,6 +102,7 @@
                 });
                 return;
             }
+            $(form).find("a[id*=_concentration_upload_button]").addClass("disabled")
         }
 
         function updateBackgroundConcentrations() {
@@ -272,6 +275,54 @@
             console.log('populated background concentrations form!')
             LoadingScreen.hide('background_concentrations_loading');
         };
+
+        function Enable_Background_Concentration_file_upload() {
+            var gui = $('#background-conc-gui');
+            var fileFields = gui.find('[type="file"]');
+            fileFields.change(function(e) {
+                let me = $(this);
+                console.log("me")
+                let my_upload_button = me.closest("div.form-group").parent("div.form-group").find("a.btn");
+                let loadingRequest = 'load_' + this.id;
+                LoadingScreen.show(loadingRequest);
+
+                me.removeAttr('data-filedata');
+                TRIM.api.parseFiles(this).on('load', function() {
+                    try {
+                        var data = JSON.parse(this.responseText);
+                        if (data.files[me.attr('name')]) {
+                            var myData = data.files[me.attr('name')];
+                            var filedata = data.files[me.attr('name')]['file_data'];
+                            me.attr(
+                                'data-filedata',
+                                JSON.stringify(myData)
+                            );
+                            let this_chem =  me.closest("div.tab-pane").data("tab-name")
+                            scenario_data = {
+                                'type': 'input',
+                                'name': 'scenario_id',
+                                'value': TRIM.store.currentScenario.id
+                            },
+                            chem_data = {
+                                'type': 'input',
+                                'name': 'chemical',
+                                'value': this_chem
+                            }
+                            field_data.push(scenario_data)
+                            field_data.push(chem_data)
+                        }
+                        // Validate file contents here
+                        // if (ErrorValidation.tsFileHasDateColumn(me.closest("div").siblings("label"),  filedata)) {
+                            //updateFields(me.closest('section'));
+                        // }
+                    }
+                    finally {
+                        LoadingScreen.hide(loadingRequest);
+                        my_upload_button.removeClass("disabled")
+                    }
+                });
+            });
+        }
 
         function initialize_compartment_map() {
             var map_html = "<tbody>"
