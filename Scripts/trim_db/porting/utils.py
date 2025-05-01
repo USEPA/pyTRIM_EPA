@@ -15,7 +15,9 @@ __all__ = [
     'UNIT_SUFFIXES',
     'split_unit_suffix',
     'clean_equation',
-    'transform_coordinates_to_decimal'
+    'transform_coordinates_to_decimal',
+    'do_replacements',
+    'GLOBAL_REPLACE'
 ]
 
 MET_DATA_MAP = {

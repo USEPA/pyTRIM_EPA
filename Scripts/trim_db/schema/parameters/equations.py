@@ -54,6 +54,7 @@ def as_function(equation, with_caching=True, **default_kwargs):
     equation = equation.replace('math.log', 'safe_log')
     equation = equation.replace('math.log10', 'safe_log10')
     equation = equation.replace('math.sqrt', 'safe_sqrt')
+    equation = equation.replace(' min(', ' safe_min(')
 
     def fix_non_callables(eq, evaluator):
         args = evaluated_args(eq, evaluator)
