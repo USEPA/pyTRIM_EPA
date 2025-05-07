@@ -184,6 +184,18 @@ window.TRIM = (function(trim) {
         });
     };
 
+    api.uploadBackgroundConcFile = function(fields) {
+        var url = api.getUrl('file_api.upload_background_conc');
+
+        var data = makeFormData(fields);
+
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: data
+        });
+    };
+
     api.uploadParcelFile = function(fields, callbackFxn) {
         var url = api.getUrl('file_api.parse_parcel');
         var data = makeFormData(fields);

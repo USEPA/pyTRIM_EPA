@@ -68,7 +68,7 @@ MEDIA_MAP = {
     'Flush_Rate_Sink': (
         'Sink|Abiotic_Sink|Advection|Flush_Rate'
     ),
-    'Sediment_Sink': (
+    'Burial_Sink': (
         'Sink|Abiotic_Sink|Burial'
     ),
     'Degradation_Reaction_Sink': (

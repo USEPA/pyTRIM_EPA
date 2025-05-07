@@ -175,7 +175,7 @@ class DockerHelper(object):
         for cfg in config_blobs:
             if cfg.get("disabled") is not True:
                 print(f"===================================================================================")
-                print(f"Proceeding with docker build/push for [{cfg["description"]}]")
+                print(f"Proceeding with docker build/push for [{cfg['description']}]")
                 ecr_repo_uri = extract_output_val(outputs, cfg["repo_uri_output_name"])
                 self.build_image(cfg["relative_prep_script_path"], cfg["build_cmd"], cfg["temp_dir"])
                 # print(f"STOPPING AFTER BUILD; DID WE GET THIS FAR?")

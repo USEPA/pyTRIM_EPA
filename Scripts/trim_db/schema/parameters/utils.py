@@ -313,10 +313,16 @@ def log10_quantity(x, *args, **kwargs):
 def sqrt_quantity(x, *args, **kwargs):
     return x ** 0.5
 
+
+def min_quantity(*args, **kwargs):
+    return min(args)
+
+
 UREG_CUSTOM_FUNCTIONS = {
     **simpleeval.DEFAULT_FUNCTIONS,
     'safe_exp': exp_quantity,
     'safe_log': log_quantity,
     'safe_log10': log10_quantity,
-    'safe_sqrt': sqrt_quantity
+    'safe_sqrt': sqrt_quantity,
+    'safe_min': min_quantity
 }

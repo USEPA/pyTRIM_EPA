@@ -366,15 +366,18 @@ def update_scenario():
             #     if cp.definition.variable_name == "erosionRateCalcSource":
             #         cp.value = ercs
             ParameterService.commit()
+        elif field_name == "name":  # Scenario Name
+            s.name = scenario_data["name"]
+            ParameterService.commit()
+        elif field_name == "description":  # Scenario Description
+            s.description = scenario_data["description"]
+            ParameterService.commit()
         elif field_name.startswith("meteo_"):  # Data from the meteorology tab
             if "_interception_" in field_name:
                 param_media = param_map["meteo"].get(field_name)[0]
                 param_name = param_map["meteo"].get(field_name)[1]
                 comp_list = [c for c in s.compartments if c.media.isa(param_media)]
                 for c in comp_list:
-                    # TODO Why is this not working???
-                    # c.parameters.get(param_name).value = scenario_data[field_name]
-                    # CompartmentService.update(c)
                     update_custom_param(s, c, param_name, scenario_data[field_name], create_if_dne=True)
             else:
                 param_name = param_map["meteo"].get(field_name)

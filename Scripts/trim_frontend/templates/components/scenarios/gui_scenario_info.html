@@ -6,7 +6,12 @@
     <section class="container px-0">
         <div class="row mb-1">
             <div class="col-md">
-                <div data-slot="true" data-target="description"></div>
+                <div class="row-fluid">
+                    <div data-slot="true" data-target="name"></div>
+                </div>
+                <div class="row-fluid">
+                    <div data-slot="true" data-target="description"></div>
+                </div>
             </div>
             <div class="col-md">
                 <div class="row-fluid">
@@ -70,11 +75,15 @@
             }
             var startDate = $('#simulation_start_date');
             var endDate = $('#simulation_end_date');
+            var scenarioName = $('#scenario-info-gui').find("input#name")
+            var scenarioDesc = $('#scenario-info-gui').find("textarea#description")
             startDate.on('change', calculateDateRange);
             endDate.on('change', calculateDateRange);
             startDate.change();
             startDate.on('blur', submit_scenario_value);
             endDate.on('blur', submit_scenario_value);
+            scenarioName.on('blur', submit_scenario_value)
+            scenarioDesc.on('blur', submit_scenario_value)
 
             ENABLED_FORM = true;
         });
@@ -97,7 +106,7 @@
                 }
             ]
             let param_data = ""
-            if ($(elem).attr('type') == "date") {
+            if ($(elem).attr('type') == "date" || $(elem).attr('name') == "name" || $(elem).attr('name') == "description") {
                 param_data = $(elem).val()
             }
             param_info[param_info.findIndex(e => e.type == 'input')].value = param_data;
@@ -109,7 +118,10 @@
             let param_info = get_form_data(form_field)
             let resp = TRIM.api.updateScenario(param_info).on('load',function(){
                 let val_resp = this.responseJSON
-                if (val_resp) {
+                if (this.responseText == 'success') {
+                    if ($(form_field).attr("name") == 'name') {
+                        $('#root').find('h1.text-center.pb-2').text($(form_field).val())
+                    }
                 }
             })
         }
