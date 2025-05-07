@@ -32,6 +32,37 @@
             "help": "Enter the coordinate system of X and Y coordinates you provided in your text or CSV file. Typical options include WGS 1984 or NAD 1983 for latitude/longitude, and UTM zones for metric X and Y coordinates. If you provided a shapefile instead of a text or CSV file, the coordinate system will be automatically detected and displayed here."
         },
         {
+            "id": "deposition_overlay_file",
+            "label": "File for Deposition Overlay Data",
+            "data_type": "file",
+            "required": true,
+            "help": ".PLT file for data to overlay on map; e.g. output from AERMOD"
+        },
+        {
+            "id": "deposition_overlay_upload_coordinates_system",
+            "label": "Coordinate System",
+            "data_type": "string",
+            "widget": "select",
+            "choices": ["WGS84 Longitude/Latitude", "UTM"],
+            "default": "WGS84 Longitude/Latitude",
+            "required": true,
+            "help": "Select the system for coordinate value pairs provided in your PLT file."
+        },
+        {
+            "id": "deposition_overlay_upload_utm_zone",
+            "label": "UTM Zone",
+            "data_type": "string",
+            "required": true,
+            "help": "Enter the UTM zone number/letter for the coordinate values in your PLT file; e.g. \"16T\"."
+        },
+        {
+            "id": "deposition_overlay_zflag_restriction",
+            "label": "ZFLAG Restriction",
+            "data_type": "string",
+            "required": false,
+            "help": "If your PLT file contains multiple ZFLAG values and none of them are 0, use this value to specify which rows to include. If omitted, will include either rows where ZFLAG value equals 0, or all rows if only a single unique ZFLAG value is present in the file."
+        },
+        {
             "id": "parcel_names_field",
             "label": "Field Name for Parcel Names",
             "data_type": "string",
