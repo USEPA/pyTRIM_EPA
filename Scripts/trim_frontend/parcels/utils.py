@@ -601,10 +601,15 @@ def initialize_parcel_contents(new_parcel, vol_elem_defaults=None):
                                                      top=ve["top"],
                                                      bottom=ve["bottom"])
         for c_name, c in ve["Compartments"].items():
+            print(f'creating {c_name} for volume element {ve_name}')
             # Create standard compartments linking them to default volume elements and media for each compartment
-            nc = new_parcel.get_compartment(c_name)
-            if not nc:
-                this_media = CompartmentService.media.get(name = c["media_name"])
+            # nc = new_parcel.get_compartment(c_name) # This won't work because the compartment names are not unique,
+            # get_compartment gets the first compartment with that name and ignores volume_element type.
+            # we need a list meeting both compartment name and volume_element name conditions.
+            nc = [c for c in new_parcel.compartments if c.name == c_name and c.volume_element.name == nve.name]
+            # if not nc:
+            if len(nc) == 0:
+                this_media = CompartmentService.media.get(name=c["media_name"])
                 nc = CompartmentService.get_or_create(name=c_name,
                                                       volume_element=nve,
                                                       media=this_media)
