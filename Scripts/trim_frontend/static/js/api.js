@@ -208,6 +208,51 @@ window.TRIM = (function(trim) {
         });
     };
 
+    api.hitUrl = function(url, callbackFxn) {
+        return AJAX.call({
+            method: 'GET',
+            url: url,
+            callback: callbackFxn
+        });
+	};
+
+    api.uploadMiscScenarioFile = function(fields, callbackFxn) {
+        var url = api.getUrl('file_api.manage_misc_scen_file');
+        var data = makeFormData(fields);
+
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: data,
+            callback: callbackFxn
+        });
+    };
+
+    api.deleteMiscScenarioFile = function(scenario_id, misc_file_type, callbackFxn) {
+        var url = api.getUrl('file_api.manage_misc_scen_file');
+		url += "?scenario_id=" + scenario_id + "&misc_file_type=" + misc_file_type;
+        var data = makeFormData([]);
+
+        return AJAX.call({
+            method: 'DELETE',
+            url: url,
+            data: data,
+            callback: callbackFxn
+        });
+    };
+
+    api.checkMiscScenarioFile = function(scenario_id, misc_file_type, callbackFxn) {
+        var url = api.getUrl('file_api.manage_misc_scen_file');
+		url += "?scenario_id=" + scenario_id + "&misc_file_type=" + misc_file_type;
+
+        return AJAX.call({
+            method: 'GET',
+            url: url,
+            // data: data,
+            callback: callbackFxn
+        });
+    };
+
     api.uploadSurfaceRunoffMatrixFile = function(fields, callbackFxn) {
         var url = api.getUrl('file_api.parse_runoff_matrix');
         var data = makeFormData(fields);
