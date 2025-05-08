@@ -657,7 +657,9 @@ def run_getflow_v10(parcels):
     # ----------------------------------------------------------
     output_path = current_folder_path + '/parcel_flow_matrix.csv'
     flow_matrix = create_flow_matrix_with_sink(parcels, ABS_ACCUMULATION, DRAINAGE)
-    flow_matrix.to_csv(output_path)
+    # convert to fraction of row total
+    flow_matrix_frac = flow_matrix.div(flow_matrix['TOTAL_IN'], axis='rows')
+    flow_matrix_frac.to_csv(output_path)
     # sankey_data = create_sankey_data(flow_matrix)
 
     print("Flow matrix created successfully!")
