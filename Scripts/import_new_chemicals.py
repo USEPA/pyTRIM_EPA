@@ -47,6 +47,10 @@ chem_specific_fix_replacements = {
     "self.UseInputCharacteristicDepth_0_MeansNo_ElseYes": "self.UseInputCharacteristicDepth_0_MeansNo_ElseYes(compartment)"
 }
 
+AUX_MEDIA_INTRA_MAP = {
+ 'Abiotic|Soil|Surface_Soil': ['Abiotic|Soil|Surface_Soil|Tilled_Soil', 'Abiotic|Soil|Surface_Soil|Untilled_Soil']
+}
+
 def parse_chemicals(chemical_parameters):
 
     for name, params in chemical_parameters.items():
@@ -126,6 +130,14 @@ def add_comp_chem_params(parlib):
                     parts[part["value"]] = [this_media_id]
                 else:
                     parts[part["value"]].append(this_media_id)
+                # we need to correctly mapped sub media types such as Tilled and Untille Soils.
+                aux_meds = AUX_MEDIA_INTRA_MAP.get(this_media)
+                if aux_meds:
+                    if not isinstance(aux_meds, list):
+                        aux_meds = [aux_meds]
+                    for am in aux_meds:
+                        aux_media_id = str(CompartmentService.media.get(category=am).id)
+                        parts[part["value"]].append(aux_media_id)
             pc = 0
             for p, a in parts.items():
                 pc += 1
