@@ -753,17 +753,23 @@ def parse_runoff_matrix_upload():
             df.drop('TOTAL_IN', axis='columns', inplace=True)
             df.columns = df.columns.str.lower()
 
-            # need to recalculate sink because decimal precision 
-            sink = df.pop('sink').reset_index()
-            df = df.round(decimals=6)
-            df['sink'] = df.sum(axis=1, numeric_only=True)
-            for idx, row in df.iterrows():
-                if sink.loc[idx, 'sink'] == 0.0:
-                    df.loc[idx, 'sink'] = 0.0
-                else:
-                    df.loc[idx, 'sink'] = 1.0 - df.loc[idx, 'sink']
-
+            # need to make adjustments for value to equal 1 exactly
+            precision = 4
+            df = df.round(decimals=precision)
             reader = df.to_dict('records')
+            for row in reader:
+                row_total = []
+                for k, v in row.items():
+                    if k == "parcels": continue
+                    row_total.append(Decimal(v))
+                row_total = float(sum(row_total))
+                if row_total == 0: continue
+                elif row_total != 1:
+                    row_diff = round(Decimal(1.0000) - Decimal(row_total), precision)
+                    for k, v in row.items():
+                        if k == "parcels" or k == 'sink' or v == 0: continue
+                        row[k] = round(row_diff + Decimal(v), precision)
+                        break
         else:
             fpn = [f.stream for n, f in files.items()][0]
             fpn.seek(0)
