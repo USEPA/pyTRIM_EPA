@@ -732,7 +732,7 @@ def get_parcel_row_geojson(row):
 def parse_runoff_matrix_upload():
     scenario_id = request.form["scenario_id"]
     parcels = ParcelService.get_all(scenario_id=int(scenario_id))
-    parcel_names = {p.name : p for p in parcels}
+    parcel_names = {p.name.lower() : p for p in parcels}
 
     files = request.files
     presigned_url = request.form.get("presigned_url")
@@ -746,16 +746,30 @@ def parse_runoff_matrix_upload():
             df = pd.read_csv(csv_data, delimiter=',')
             df.rename(columns={ df.columns[0]: 'parcels' }, inplace = True)
 
-            # getflow does not include sink
-            if 'sink' not in df.columns:
-                df['sink'] = df.sum(axis=1, numeric_only=True)
-                for idx, row in df.iterrows():
-                    if row['sink'] > 1.0 or row['sink'] <= 0.0:
-                        df.loc[idx, 'sink'] = 0
-                    else:
-                        df.loc[idx, 'sink'] = 1 - df.loc[idx, 'sink']
+            # clean up extra rows/columns
+            total_out_mask = df[df.columns[0]] != 'TOTAL_OUT'
+            sink_mask = df[df.columns[0]] != 'SINK'
+            df = df[total_out_mask & sink_mask]
+            df.drop('TOTAL_IN', axis='columns', inplace=True)
+            df.columns = df.columns.str.lower()
 
+            # need to make adjustments for value to equal 1 exactly
+            precision = 4
+            df = df.round(decimals=precision)
             reader = df.to_dict('records')
+            for row in reader:
+                row_total = []
+                for k, v in row.items():
+                    if k == "parcels": continue
+                    row_total.append(Decimal(v))
+                row_total = float(sum(row_total))
+                if row_total == 0: continue
+                elif row_total != 1:
+                    row_diff = round(Decimal(1.0000) - Decimal(row_total), precision)
+                    for k, v in row.items():
+                        if k == "parcels" or k == 'sink' or v == 0: continue
+                        row[k] = round(row_diff + Decimal(v), precision)
+                        break
         else:
             fpn = [f.stream for n, f in files.items()][0]
             fpn.seek(0)
@@ -775,24 +789,23 @@ def parse_runoff_matrix_upload():
             if "sink" not in reader.fieldnames:
                 return ApiException("Required header 'sink' is missing")
             
-        # verify values are valid
-        if files:
+            # verify values are valid
             reader = csv.DictReader(io.StringIO(lines))
-        for row in reader:
-            row_total = []
-            for k, v in row.items():
-                if k == "parcels": continue
-                if Decimal(v) < 0: return ApiException("All values must be positive")
-                row_total.append(Decimal(v))
-            row_total = float(sum(row_total))
-            if row_total != 1 and row_total != 0: 
-                return ApiException("Sum of runoff fractions should be 1")
+            for row in reader:
+                row_total = []
+                for k, v in row.items():
+                    if k == "parcels": continue
+                    if Decimal(v) < 0: return ApiException("All values must be positive")
+                    row_total.append(Decimal(v))
+                row_total = float(sum(row_total))
+                if row_total != 1 and row_total != 0: 
+                    return ApiException("Sum of runoff fractions should be 1")
 
         # submit
         if files:
             reader = csv.DictReader(io.StringIO(lines))
         for row in reader:
-            sender_pcl = parcel_names[row.get("parcels")]
+            sender_pcl = parcel_names[row.get("parcels").lower()]
             if sender_pcl.name in request.form["water_parcels"]:
                 continue
             del row["parcels"]

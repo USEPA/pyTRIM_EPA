@@ -40,7 +40,7 @@ for key, value in os.environ.items():
     print(f'{key}: {value}')
 print(f"ENVIRONMENT (end):")
 
-from getflow import run_getflow_v7, run_getflow_v7_for_scenario_id
+from getflow import run_getflow_v10, run_getflow_v10_for_scenario_id
 from trim_db import ScenarioService
 from trim_frontend import create_app
 
@@ -114,11 +114,11 @@ class DockerGetflowEntryPoint:
 
         loggy("running getflow 3:55...")
         if type(parcels_or_scenario_id) is int:
-            saved_output = run_getflow_v7_for_scenario_id(parcels_or_scenario_id)
+            saved_output = run_getflow_v10_for_scenario_id(parcels_or_scenario_id)
         else:
-            saved_output = run_getflow_v7(parcels)
+            saved_output = run_getflow_v10(parcels)
 
-        loggy(f"back from run_getflow_v7 ({saved_output})...")
+        loggy(f"back from run_getflow_v10 ({saved_output})...")
         qgs.exitQgis()
         loggy("gis exited...")
 

@@ -111,8 +111,11 @@ def download_elevation_data(bbox, output_path="elevation.tif"):
 
 ### END: Samuel's USGS_API_TNM.py functions
 
-### START: Samuel's GetFlow_V7 utility functions
-# (copied 100% as-is from GetFlow_V7, the Dec 31 2024 version)
+### START: Samuel's GetFlow_V10 utility functions
+# (copied 99% as-is from GetFlow_V10, the April 2025 version)
+#   commented out sankey save to json
+#   replaced parcel_name_col --> TEMP_PARCEL_NAME_COL
+#   get_parcel_boundaries did not exist in v10 but still referenced
 def get_parcel_boundaries(parcels_layer):
     """Get boundaries between parcels"""
     boundaries = []
@@ -139,13 +142,56 @@ def get_parcel_boundaries(parcels_layer):
     
     return boundaries
 
+def get_exterior_boundary(geom):
+    """Extract the exterior boundary as a line geometry from a polygon geometry."""
+    if geom.isMultipart():
+        multi_poly = geom.asMultiPolygon()
+        if multi_poly and len(multi_poly) > 0 and len(multi_poly[0]) > 0:
+            ring = multi_poly[0][0]
+            return QgsGeometry.fromPolylineXY(ring)
+    else:
+        poly = geom.asPolygon()
+        if poly and len(poly) > 0:
+            ring = poly[0]
+            return QgsGeometry.fromPolylineXY(ring)
+    return None
+
+def get_external_boundaries(parcels_layer):
+    """Get boundaries between parcels and the outside world (sink)"""
+    external_boundaries = []
+    
+    dissolve_params = {
+        'INPUT': parcels_layer.source(),  # Use the source path instead of the layer object
+        'FIELD': [],  # No field for dissolving - dissolve all
+        'OUTPUT': 'memory:'
+    }
+    dissolved_result = processing.run("native:dissolve", dissolve_params)
+    dissolved_layer = dissolved_result['OUTPUT']
+    
+    if dissolved_layer.featureCount() > 0:
+        dissolved_feature = next(dissolved_layer.getFeatures())
+        dissolved_geom = dissolved_feature.geometry()
+        exterior_boundary = get_exterior_boundary(dissolved_geom)
+        
+        if exterior_boundary is not None:
+            for feature in parcels_layer.getFeatures():
+                geom = feature.geometry()
+                title = feature[TEMP_PARCEL_NAME_COL]
+                parcel_boundary = get_exterior_boundary(geom)
+                if parcel_boundary is None:
+                    continue
+                external_intersection = parcel_boundary.intersection(exterior_boundary)
+                if not external_intersection.isEmpty() and external_intersection.length() > 0:
+                    external_boundaries.append({
+                        'parcel': title,
+                        'boundary': external_intersection
+                    })
+    return external_boundaries
+
 def get_points_along_line(line_geom, interval):
     """Sample points along a line geometry at regular intervals"""
     points = []
-    
-    # Handle different geometry types
     if line_geom.isMultipart():
-        # For multipart geometries, process each part
         for part in line_geom.asGeometryCollection():
             if part.type() == QgsWkbTypes.LineGeometry:
                 length = part.length()
@@ -155,83 +201,44 @@ def get_points_along_line(line_geom, interval):
                     points.append(point.asPoint())
                     current_distance += interval
     else:
-        # For single part geometries
         length = line_geom.length()
         current_distance = 0
         while current_distance <= length:
             point = line_geom.interpolate(current_distance)
             points.append(point.asPoint())
             current_distance += interval
-    
     return points
-
-def analyze_flow_at_boundary(boundary, accum_layer, direction_layer):
-    """Analyze flow across a specific boundary"""
-    # Get sample points along the boundary
-    sample_interval = direction_layer.rasterUnitsPerPixelX()
-    points = get_points_along_line(boundary['boundary'], sample_interval)
-    
-    # Get flow values at each point
-    total_flow = 0
-    flow_direction = 0  # net flow direction (positive: 1->2, negative: 2->1)
-    
-    for point in points:
-        accum_value = accum_layer.dataProvider().identify(
-            point, QgsRaster.IdentifyFormatValue).results()[1]
-        
-        direction_value = direction_layer.dataProvider().identify(
-            point, QgsRaster.IdentifyFormatValue).results()[1]
-        
-        if accum_value is not None and direction_value is not None:
-            # Determine if flow is from parcel1 to parcel2 based on direction
-            flow_vector = get_flow_vector(direction_value)
-            boundary_vector = get_boundary_vector_for_point(point, boundary['boundary'])
-            
-            if vector_dot_product(flow_vector, boundary_vector) > 0:
-                total_flow += accum_value
-                flow_direction += 1
-            else:
-                total_flow -= accum_value
-                flow_direction -= 1
-    
-    return total_flow, flow_direction
 
 def get_flow_vector(direction):
     """Convert GRASS flow direction (1-8) to vector"""
     directions = {
-        1: (1, 0),
-        2: (1, 1),
-        3: (0, 1),
-        4: (-1, 1),
-        5: (-1, 0),
-        6: (-1, -1),
-        7: (0, -1),
-        8: (1, -1)
+        1: (1, 0),     # East
+        2: (1, 1),     # Southeast
+        3: (0, 1),     # South
+        4: (-1, 1),    # Southwest
+        5: (-1, 0),    # West
+        6: (-1, -1),   # Northwest
+        7: (0, -1),    # North
+        8: (1, -1)     # Northeast
     }
     return directions.get(int(direction) if direction is not None else 0, (0, 0))
 
 def get_boundary_vector_for_point(point, boundary_geom):
     """Get normalized boundary vector at a specific point"""
-    # Find the closest segment to the point
     min_distance = float('inf')
     best_vector = (0, 0)
-    
     if boundary_geom.isMultipart():
         geometries = boundary_geom.asGeometryCollection()
     else:
         geometries = [boundary_geom]
-    
     for geom in geometries:
         if geom.type() == QgsWkbTypes.LineGeometry:
             vertices = geom.asPolyline()
             for i in range(len(vertices) - 1):
                 start = vertices[i]
                 end = vertices[i + 1]
-                
-                # Calculate distance from point to segment
                 segment_point = closest_point_on_segment(point, start, end)
                 distance = point.distance(segment_point)
-                
                 if distance < min_distance:
                     min_distance = distance
                     dx = end.x() - start.x()
@@ -239,7 +246,6 @@ def get_boundary_vector_for_point(point, boundary_geom):
                     length = (dx**2 + dy**2)**0.5
                     if length > 0:
                         best_vector = (dx/length, dy/length)
-    
     return best_vector
 
 def closest_point_on_segment(point, start, end):
@@ -250,45 +256,135 @@ def closest_point_on_segment(point, start, end):
     y1 = start.y()
     x2 = end.x()
     y2 = end.y()
-    
-    # Calculate the projection of the point onto the line
     line_length_squared = (x2 - x1)**2 + (y2 - y1)**2
     if line_length_squared == 0:
         return start
-    
     t = max(0, min(1, ((px - x1) * (x2 - x1) + (py - y1) * (y2 - y1)) / line_length_squared))
-    
     return QgsPointXY(x1 + t * (x2 - x1), y1 + t * (y2 - y1))
 
 def vector_dot_product(v1, v2):
     """Calculate dot product of two vectors"""
     return v1[0]*v2[0] + v1[1]*v2[1]
 
-def create_flow_matrix(parcels_layer, accum_layer, direction_layer):
-    """Create flow matrix between all parcels"""
-    # Get all parcel titles
-    titles = [f[TEMP_PARCEL_NAME_COL] for f in parcels_layer.getFeatures()]
-    
-    # Initialize flow matrix
-    flow_matrix = pd.DataFrame(0, index=titles, columns=titles)
-    
-    # Get boundaries between parcels
-    boundaries = get_parcel_boundaries(parcels_layer)
-    
-    # Analyze flow across each boundary
-    for boundary in boundaries:
-        total_flow, flow_direction = analyze_flow_at_boundary(
-            boundary, accum_layer, direction_layer)
-        
-        if flow_direction > 0:
-            flow_matrix.loc[boundary['parcel1'], boundary['parcel2']] = total_flow
-        else:
-            flow_matrix.loc[boundary['parcel2'], boundary['parcel1']] = abs(total_flow)
-    
-    return flow_matrix
-### END: Samuel's GetFlow_V7 utility functions
+def get_boundary_normal_vector(point, boundary_geom, parcels_layer):
+    """Get normal vector pointing inward from boundary at point"""
+    boundary_vector = get_boundary_vector_for_point(point, boundary_geom)
+    normal1 = (-boundary_vector[1], boundary_vector[0])
+    normal2 = (boundary_vector[1], -boundary_vector[0])
+    buffer_distance = 0.0001
+    for feature in parcels_layer.getFeatures():
+        geom = feature.geometry()
+        test_point1 = QgsGeometry.fromPointXY(QgsPointXY(
+            point.x() + normal1[0] * buffer_distance, 
+            point.y() + normal1[1] * buffer_distance))
+        test_point2 = QgsGeometry.fromPointXY(QgsPointXY(
+            point.x() + normal2[0] * buffer_distance, 
+            point.y() + normal2[1] * buffer_distance))
+        if geom.contains(test_point1):
+            return normal1
+        elif geom.contains(test_point2):
+            return normal2
+    return normal1
 
-def run_getflow_v7_for_scenario_id(scenario_id):
+def analyze_flow_at_boundary(boundary, accum_layer, direction_layer):
+    """Analyze flow across a specific boundary"""
+    sample_interval = direction_layer.rasterUnitsPerPixelX()
+    points = get_points_along_line(boundary['boundary'], sample_interval)
+    flow_1_to_2 = 0
+    flow_2_to_1 = 0
+    for point in points:
+        accum_value = accum_layer.dataProvider().identify(
+            point, QgsRaster.IdentifyFormatValue).results().get(1)
+        direction_value = direction_layer.dataProvider().identify(
+            point, QgsRaster.IdentifyFormatValue).results().get(1)
+        if accum_value is not None and direction_value is not None and accum_value > 0:
+            flow_vector = get_flow_vector(direction_value)
+            boundary_vector = get_boundary_vector_for_point(point, boundary['boundary'])
+            dot_product = vector_dot_product(flow_vector, boundary_vector)
+            if dot_product > 0:
+                flow_1_to_2 += accum_value
+            elif dot_product < 0:
+                flow_2_to_1 += accum_value
+    return flow_1_to_2, flow_2_to_1
+
+def analyze_sink_flows(parcels_layer, accum_layer, direction_layer):
+    """
+    Analyze flows to/from the sink (outside any parcel) using explicit external boundaries.
+    """
+    sink_flows = {}
+    external_boundaries = get_external_boundaries(parcels_layer)
+    cell_size = direction_layer.rasterUnitsPerPixelX()
+    for ext_bound in external_boundaries:
+        parcel_id = ext_bound['parcel']
+        boundary_geom = ext_bound['boundary']
+        points = get_points_along_line(boundary_geom, cell_size)
+        outflow = 0
+        inflow = 0
+        for point in points:
+            accum_value = accum_layer.dataProvider().identify(
+                point, QgsRaster.IdentifyFormatValue).results().get(1)
+            direction_value = direction_layer.dataProvider().identify(
+                point, QgsRaster.IdentifyFormatValue).results().get(1)
+            if accum_value is None or direction_value is None or accum_value <= 0:
+                continue
+            normal = get_boundary_normal_vector(point, boundary_geom, parcels_layer)
+            flow_vector = get_flow_vector(direction_value)
+            dot_product = vector_dot_product(flow_vector, normal)
+            if dot_product > 0:
+                outflow += accum_value
+            elif dot_product < 0:
+                inflow += accum_value
+        sink_flows[parcel_id + "_to_sink"] = outflow
+        sink_flows[parcel_id + "_from_sink"] = inflow
+    return sink_flows
+
+def create_flow_matrix_with_sink(parcels_layer, accum_layer, direction_layer):
+    """Create flow matrix between all parcels including sink (outside any parcel)"""
+    titles = [f[TEMP_PARCEL_NAME_COL] for f in parcels_layer.getFeatures()]
+    all_titles = titles + ["SINK"]
+    flow_matrix = pd.DataFrame(0, index=all_titles, columns=all_titles)
+    boundaries = get_parcel_boundaries(parcels_layer)
+    for boundary in boundaries:
+        flow_1_to_2, flow_2_to_1 = analyze_flow_at_boundary(
+            boundary, accum_layer, direction_layer)
+        flow_matrix.loc[boundary['parcel1'], boundary['parcel2']] = flow_1_to_2
+        flow_matrix.loc[boundary['parcel2'], boundary['parcel1']] = flow_2_to_1
+    sink_flows = analyze_sink_flows(parcels_layer, accum_layer, direction_layer)
+    for key, flow in sink_flows.items():
+        if "_to_sink" in key:
+            parcel = key.replace("_to_sink", "")
+            flow_matrix.loc[parcel, "SINK"] = flow
+        elif "_from_sink" in key:
+            parcel = key.replace("_from_sink", "")
+            flow_matrix.loc["SINK", parcel] = flow
+    flow_matrix.loc["TOTAL_OUT", :] = flow_matrix.sum(axis=0)
+    flow_matrix.loc[:, "TOTAL_IN"] = flow_matrix.sum(axis=1)
+    return flow_matrix
+
+def create_sankey_data(flow_matrix):
+    """Create simplified data for Sankey diagram visualization"""
+    sankey_data = []
+    for source in flow_matrix.index:
+        if source in ["TOTAL_OUT", "TOTAL_IN"]:
+            continue
+        for target in flow_matrix.columns:
+            if target in ["TOTAL_OUT", "TOTAL_IN"]:
+                continue
+            flow = flow_matrix.loc[source, target]
+            if flow > 0:
+                sankey_data.append({
+                    "source": source,
+                    "target": target,
+                    "value": float(flow)
+                })
+    #import json
+    #with open(CURRENT_FOLDER_PATH + '/flow_sankey_data.json', 'w') as f:
+    #    json.dump(sankey_data, f)
+    return sankey_data
+
+### END: Samuel's GetFlow_V10 utility functions
+
+def run_getflow_v10_for_scenario_id(scenario_id):
     print(f"v7 entrypoint for '{scenario_id}', alternate construction approach...")
     # parcels_for_this_scenario = json.dumps(ParcelService.get_all(scenario_id=scenario_id))
 
@@ -306,12 +402,12 @@ def run_getflow_v7_for_scenario_id(scenario_id):
 
     print(f"LOADED PARCELS: {parcels_for_this_scenario}")
     print(f"RUNNING FOR REALSKI!")
-    return run_getflow_v7(parcels_for_this_scenario)
+    return run_getflow_v10(parcels_for_this_scenario)
 
 
-def run_getflow_v7(parcels):
+def run_getflow_v10(parcels):
     # make it fast
-    print(f"TIBSV7 RUN_GETFLOW_V7 FAKE ({type(parcels)}): {parcels}")
+    print(f"TIBSV7 RUN_GETFLOW_V10 FAKE ({type(parcels)}): {parcels}")
     sep = os.path.sep
 
     """
@@ -387,12 +483,33 @@ def run_getflow_v7(parcels):
     QgsProject.instance().addMapLayer(parcels)
     QgsProject.instance().addMapLayer(dem)
 
-    print(f"TIBSV7 layered")
+    # ----------------------------------------------------------
+    # STEP 1: Buffer the parcels to include edge pixels in the clip
+    # ----------------------------------------------------------
+    print(f"STEP 1: Buffer the parcels to include edge pixels in the clip")
+    # Determine an appropriate buffer distance; one option is to use the cell size of your DEM.
+    cell_size = dem.rasterUnitsPerPixelX()  # assuming square cells; adjust if necessary
+    buffer_distance = cell_size * 20  # Adjust multiplier as needed
 
-    # CLIP RASTER BY MASK LAYER
-    proc_params = {
+    buffer_params = {
+        'INPUT': parcel_layer,
+        'DISTANCE': buffer_distance,
+        'SEGMENTS': 5,
+        'DISSOLVE': True,
+        'OUTPUT': 'memory:'
+    }
+    buffer_result = processing.run("native:buffer", buffer_params)
+    buffered_parcels = buffer_result['OUTPUT']  # Use the layer directly
+    QgsProject.instance().addMapLayer(buffered_parcels)
+
+
+    # ----------------------------------------------------------
+    # STEP 2: Clip the DEM using the buffered parcel layer
+    # ----------------------------------------------------------
+    print(f"STEP 2: Clip the DEM using the buffered parcel layer")
+    clip_params = {
         'INPUT': dem_raster_layer,
-        'MASK': parcel_layer,
+        'MASK': buffered_parcels,  # using buffered parcels instead of original parcels
         'SOURCE_CRS': None,
         'TARGET_CRS': None,
         'TARGET_EXTENT': None,
@@ -410,15 +527,10 @@ def run_getflow_v7(parcels):
         'OUTPUT': 'TEMPORARY_OUTPUT'
     }
 
-    print(f"TIBSV7 run raster clipping...")
-
-    # Run the raster clipping algorithm
-    result = processing.run("gdal:cliprasterbymasklayer", proc_params)
-    print(f"TIBSV7 result: {type(result)}")
+    result = processing.run("gdal:cliprasterbymasklayer", clip_params)
     ClippedRaster = QgsRasterLayer(result['OUTPUT'], "ClippedRaster")
-    print(f"TIBSV7 clipped raster: {type(ClippedRaster)}")
     QgsProject.instance().addMapLayer(ClippedRaster)
-    print(f"TIBSV7 fill dem...")
+
 
     # TEST START - dump out QgsRasterLayer
     print(f"raster width: {ClippedRaster.width()}")
@@ -439,75 +551,120 @@ def run_getflow_v7(parcels):
     dump_raster_layer_to_file(ClippedRaster, "/app/pytrim_getflow_src/ClippedRasterDebug.tif")
     # TEST END - dump out QgsRasterLayer
 
-    ### FILL DEM ###
-    proc_params= {'DEM': ClippedRaster,
-                  'FILLED':'TEMPORARY_OUTPUT',
-                  'SINKS':'TEMPORARY_OUTPUT',
-                  'DZFILL':0.01}
 
-    # trying turning this off altogether...
-    if False:
-        print(f"TIBSV7 THIS NEXT LINE IS SLOW...")
-        # changed from saga to sagang
-        results = processing.run("sagang:fillsinksqmofesp",proc_params )
-        print(f"TIBSV7 PAST!")
-        FILLED_DEM = results['FILLED']
-        FILLED_DEM = QgsRasterLayer(FILLED_DEM, "FILLED_DEM")
-        QgsProject.instance().addMapLayer(FILLED_DEM)
-    else:
-        FILLED_DEM = ClippedRaster
+    # ----------------------------------------------------------
+    # STEP 3: Continue with filling depressions and watershed analysis
+    # ----------------------------------------------------------
+    print("STEP 3: Continue with filling depressions and watershed analysis")
+    #proc_params = {
+    #    'input': ClippedRaster,
+    #    'format': 0,
+    #    '-f': False,
+    #    'output': 'TEMPORARY_OUTPUT',
+    #    'direction': 'TEMPORARY_OUTPUT',
+    #    'areas': 'TEMPORARY_OUTPUT',
+    #    'GRASS_REGION_PARAMETER': None,
+    #    'GRASS_REGION_CELLSIZE_PARAMETER': 0,
+    #    'GRASS_RASTER_FORMAT_OPT': '',
+    #    'GRASS_RASTER_FORMAT_META': ''
+    #}
 
-    ### GET DIRECTION ###
+    #results = processing.run("grass7:r.fill.dir", proc_params)
 
-    proc_params = {
-        'elevation': FILLED_DEM,
-        'depression':None,
-        'flow':None,
-        'disturbed_land':None,
-        'blocking':None,
-        'threshold':100,
-        'max_slope_length':None,
-        'convergence':5,
-        'memory':300,
-        '-s':False,
+    proc_params ={'input':ClippedRaster,
+        '-k':False,
+        'mode':0,
         '-m':False,
-        '-4':False,
-        '-a':False,
-        '-b':False,
-        'accumulation':'TEMPORARY_OUTPUT',
-        'drainage':'TEMPORARY_OUTPUT',
-        'basin':'TEMPORARY_OUTPUT',
-        'stream':'TEMPORARY_OUTPUT',
-        'half_basin':'TEMPORARY_OUTPUT',
-        'length_slope':'TEMPORARY_OUTPUT',
-        'slope_steepness':'TEMPORARY_OUTPUT',
-        'tci':'TEMPORARY_OUTPUT',
-        'spi':'TEMPORARY_OUTPUT',
+        'distance':3,
+        'minimum':None,
+        'maximum':None,
+        'power':2,
+        'cells':8,
+        'output':'TEMPORARY_OUTPUT',
+        'uncertainty':'TEMPORARY_OUTPUT',
         'GRASS_REGION_PARAMETER':None,
         'GRASS_REGION_CELLSIZE_PARAMETER':0,
         'GRASS_RASTER_FORMAT_OPT':'',
-        'GRASS_RASTER_FORMAT_META':''}
+        'GRASS_RASTER_FORMAT_META':''
+    }
+
+    results =  processing.run("grass7:r.fill.stats", proc_params)
+
+    FILLED_DEM = results['output']
+    FILLED_DEM = QgsRasterLayer(FILLED_DEM, "FILLED_DEM")
+    QgsProject.instance().addMapLayer(FILLED_DEM)
+
+    proc_params = {
+        'elevation': FILLED_DEM,
+        'depression': None,
+        'flow': None,
+        'disturbed_land': None,
+        'blocking': None,
+        'threshold': 100,
+        'max_slope_length': None,
+        'convergence': 5,
+        'memory': 300,
+        '-s': False,
+        '-m': False,
+        '-4': False,
+        '-a': False,
+        '-b': False,
+        'accumulation': 'TEMPORARY_OUTPUT',
+        'drainage': 'TEMPORARY_OUTPUT',
+        'basin': 'TEMPORARY_OUTPUT',
+        'stream': 'TEMPORARY_OUTPUT',
+        'half_basin': 'TEMPORARY_OUTPUT',
+        'length_slope': 'TEMPORARY_OUTPUT',
+        'slope_steepness': 'TEMPORARY_OUTPUT',
+        'tci': 'TEMPORARY_OUTPUT',
+        'spi': 'TEMPORARY_OUTPUT',
+        'GRASS_REGION_PARAMETER': None,
+        'GRASS_REGION_CELLSIZE_PARAMETER': 0,
+        'GRASS_RASTER_FORMAT_OPT': '',
+        'GRASS_RASTER_FORMAT_META': ''
+    }
 
     results = processing.run("grass7:r.watershed", proc_params)
     STREAM = results['stream']
     STREAM = QgsRasterLayer(STREAM, "STREAM")
     QgsProject.instance().addMapLayer(STREAM)
 
-    results = processing.run("grass7:r.watershed", proc_params)
     DRAINAGE = results['drainage']
     DRAINAGE = QgsRasterLayer(DRAINAGE, "DRAINAGE")
     QgsProject.instance().addMapLayer(DRAINAGE)
 
-    results = processing.run("grass7:r.watershed", proc_params)
     ACCUMULATION = results['accumulation']
     ACCUMULATION = QgsRasterLayer(ACCUMULATION, "ACCUMULATION")
     QgsProject.instance().addMapLayer(ACCUMULATION)
 
-    # Create the flow matrix
-    flow_matrix = create_flow_matrix(parcels, ACCUMULATION, DRAINAGE)
+    # Create an absolute value version of the accumulation raster using Raster Calculator
+    abs_acc_params = {
+        'EXPRESSION': 'abs("ACCUMULATION@1")',
+        'LAYERS': [ACCUMULATION],
+        'CELLSIZE': 0,
+        'EXTENT': None,
+        'CRS': None,
+        'OUTPUT': 'TEMPORARY_OUTPUT'
+    }
 
-    # Save to CSV
+    abs_result = processing.run("qgis:rastercalculator", abs_acc_params)
+    ABS_ACCUMULATION = QgsRasterLayer(abs_result['OUTPUT'], "ABS_ACCUMULATION")
+    QgsProject.instance().addMapLayer(ABS_ACCUMULATION)
+
+
+    # ----------------------------------------------------------
+    # STEP 5: Build and export the flow matrix and Sankey data
+    # ----------------------------------------------------------
     output_path = current_folder_path + '/parcel_flow_matrix.csv'
-    flow_matrix.to_csv(output_path)
+    flow_matrix = create_flow_matrix_with_sink(parcels, ABS_ACCUMULATION, DRAINAGE)
+    # convert to fraction of row total
+    flow_matrix_frac = flow_matrix.div(flow_matrix['TOTAL_IN'], axis='rows')
+    flow_matrix_frac.to_csv(output_path)
+    # sankey_data = create_sankey_data(flow_matrix)
+
+    print("Flow matrix created successfully!")
     print(f"saved output to '{output_path}'...")
+    print(f"Matrix dimensions: {flow_matrix.shape}")
+    print(f"Total flow in system: {flow_matrix.iloc[:-2, :-2].sum().sum()}")
+    print(f"Total flow to sink: {flow_matrix.loc[:, 'SINK'].sum()}")
     return output_path
