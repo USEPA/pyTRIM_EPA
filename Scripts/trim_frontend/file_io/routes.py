@@ -5,6 +5,7 @@ import boto3
 import pandas as pd
 import traceback
 import re
+import numpy as np
 import json
 import requests as pyRequest
 from decimal import Decimal
@@ -755,7 +756,10 @@ def parse_runoff_matrix_upload():
 
             # need to make adjustments for value to equal 1 exactly
             precision = 4
-            df = df.round(decimals=precision)
+            pcls_col = df.pop('parcels').reset_index(drop=True)
+            df = np.trunc(10000 * df) / 10000
+            df = pd.concat([pcls_col, df], axis='columns')
+
             reader = df.to_dict('records')
             for row in reader:
                 row_total = []
