@@ -1,15 +1,21 @@
 import json
 import os
+import sys
 import time
 from trim_db.porting import *
 from trim_db.schema import *
 from trim_db.services import *
 from trim_db.schema.parameters.equations import find_arguments
+import argparse
 
 DEFAULT_IMPORT_RULES = \
     {
     "chemicals": [
-        "Benzo(A)Pyrene"
+        "Benzo(A)Pyrene",
+        "Divalent Mercury",
+        "Elemental Mercury",
+        "MethylMercury",
+        "2,3,7,8-TCDD"
     ],
     "media": {
         "restrict_emissions": [],
@@ -89,13 +95,12 @@ def parse_chemicals(chemical_parameters):
     ChemicalService.commit()
 
 
-def add_comp_chem_params(parlib):
-    chems = [ChemicalService.get(name=ch) for ch, pars in parlib['Chemical'].items() if
-             ch in DEFAULT_IMPORT_RULES['chemicals']]
+def add_comp_chem_params(parlib, chem):
+    ch = ChemicalService.get(name=chem)
     # Default scenario (scenario_id = 1) is where default chemical params need to be stored when they also depend on
     # compartment media type
     default_scenario = ScenarioService.get(name='Default')
-    for ch in chems:
+    if ch:
         comp_media_map = {do_replacements(clean_compartment_name(c), replacements): MEDIA_MAP.get(
             do_replacements(clean_compartment_name(c), replacements), "") for c, _ in param_lib['Compartment'].items()}
 
@@ -183,10 +188,10 @@ def add_comp_chem_params(parlib):
         ParameterService.commit()
 
 
-def check_chem_params(parlib):
-    chems = [ChemicalService.get(name=ch) for ch, pars in parlib['Chemical'].items() if ch in DEFAULT_IMPORT_RULES['chemicals']]
+def check_chem_params(parlib, chem):
+    ch = ChemicalService.get(name=chem)
     default_scenario = ScenarioService.get(name='Default')
-    for ch in chems:
+    if ch:
         missing_pars = {}
         different_pars = {}
 
@@ -220,10 +225,10 @@ def check_chem_params(parlib):
         print(different_pars)
 
 
-def add_chem_params(parlib):
-    chems = [ChemicalService.get(name=ch) for ch, pars in parlib['Chemical'].items() if ch in DEFAULT_IMPORT_RULES['chemicals']]
+def add_chem_params(parlib, chem):
+    ch = ChemicalService.get(name=chem)
     default_scenario = ScenarioService.get(name='Default')
-    for ch in chems:
+    if ch:
         missing_pars = {}
         for p, v in parlib['Chemical'][ch.name].items():
             if p in CHEMICAL_PROPS_DONT_TRANSFER:
@@ -286,7 +291,12 @@ def load_data(trim_file_root, import_rules):
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-r', '--runtype')
+    parser.add_argument('-c', '--chemical')
+    args = parser.parse_args()
     from trim_db.utils.users_roles import implement_users_roles
+
     try:
         import time
         implement_users_roles()
@@ -313,9 +323,29 @@ if __name__ == '__main__':
     print('')
     start = time.time()
     param_lib = load_data(trim_files, import_rules)
-    # add_chem_params(param_lib)
-    # check_chem_params(param_lib)
-    add_comp_chem_params(param_lib)
     end = time.time()
     print('Time to load data = ', round((end - start), 2), ' seconds')
+    print('\n==========================\n')
+
+    if args.chemical:
+        chemical = args.chemical
+        if chemical not in import_rules["chemicals"]:
+            sys.exit(f'--chemical ARGUMENT "{chemical}" NOT RECOGNIZED; Currently I can only handle {", ".join(import_rules["chemicals"])}')
+    else:
+        sys.exit(
+            f'--chemical ARGUMENT NOT Specified; You need to specify one of {", ".join(import_rules["chemicals"])}')
+    start = time.time()
+    if args.runtype:
+        if args.runtype == 'check':
+            check_chem_params(param_lib, chemical)
+        elif args.runtype == 'chem':
+            add_chem_params(param_lib, chemical)
+        elif args.runtype == 'comp':
+            add_comp_chem_params(param_lib, chemical)
+        else:
+            sys.exit(f'--runtype ARGUMENT "{args.runtype}" NOT RECOGNIZED; USE "check", "chem" or "comp"')
+    else:
+        sys.exit(f'--runtype ARGUMENT NOT SPECIFIED; USE "check", "chem" or "comp"')
+    end = time.time()
+    print('Time to process = ', round((end - start), 2), ' seconds')
     print('\n==========================\n')

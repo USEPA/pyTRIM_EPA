@@ -506,6 +506,17 @@ class Compartment(Model):
             return list(linked.values())
         return cached_links(media, same_parcel)
 
+    def return_sameparcel_linked_media_id_or_none(self, media=None):
+        comps = self.volume_element.parcel.compartments
+        for c in comps:
+            if c.id == self.id:
+                continue
+            if (media is not None) and (not c.media.isa(media)):
+                continue
+            if self.connects_to(c):
+                return c.media.id
+        return None
+
     def connects_to(self, compartment):
         if self.volume_element == compartment.volume_element:
             return True  # We're in the same "space"!
