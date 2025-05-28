@@ -316,6 +316,11 @@ def find_arguments(equation, combine_partial_args=True, drop_functions=True):
         check = element.replace('.', '').replace('_', '').replace('(', '')
         check = check.strip()
         if not check.isalnum():
+            # We need to fix sub arguments like 'chemical=chemical' where the rhs term is actually an argument.
+            if "=" in check and '"' not in check:
+                element = element.rsplit("=", 1)[1]
+            else:
+                continue
             continue
 
         if is_number(check):

@@ -1,15 +1,22 @@
 import json
 import os
+import sys
 import time
 from trim_db.porting import *
 from trim_db.schema import *
 from trim_db.services import *
 from trim_db.schema.parameters.equations import find_arguments
+import argparse
 
 DEFAULT_IMPORT_RULES = \
     {
     "chemicals": [
-        "Benzo(A)Pyrene"
+        "Benzo(A)Pyrene",
+        "Divalent Mercury",
+        "Elemental Mercury",
+        "MethylMercury",
+        "2,3,7,8-TCDD",
+        "Cadmium"
     ],
     "media": {
         "restrict_emissions": [],
@@ -45,6 +52,10 @@ chem_specific_fix_replacements = {
     " self.VolumeFraction_Solid)": " self.VolumeFraction_Solid(compartment))",
     "compartment.self.VolumeFraction_Solid": "self.VolumeFraction_Solid(compartment)",
     "self.UseInputCharacteristicDepth_0_MeansNo_ElseYes": "self.UseInputCharacteristicDepth_0_MeansNo_ElseYes(compartment)"
+}
+
+AUX_MEDIA_INTRA_MAP = {
+ 'Abiotic|Soil|Surface_Soil': ['Abiotic|Soil|Surface_Soil|Tilled_Soil', 'Abiotic|Soil|Surface_Soil|Untilled_Soil']
 }
 
 def parse_chemicals(chemical_parameters):
@@ -85,13 +96,12 @@ def parse_chemicals(chemical_parameters):
     ChemicalService.commit()
 
 
-def add_comp_chem_params(parlib):
-    chems = [ChemicalService.get(name=ch) for ch, pars in parlib['Chemical'].items() if
-             ch in DEFAULT_IMPORT_RULES['chemicals']]
+def add_comp_chem_params(parlib, chem):
+    ch = ChemicalService.get(name=chem)
     # Default scenario (scenario_id = 1) is where default chemical params need to be stored when they also depend on
     # compartment media type
     default_scenario = ScenarioService.get(name='Default')
-    for ch in chems:
+    if ch:
         comp_media_map = {do_replacements(clean_compartment_name(c), replacements): MEDIA_MAP.get(
             do_replacements(clean_compartment_name(c), replacements), "") for c, _ in param_lib['Compartment'].items()}
 
@@ -126,6 +136,14 @@ def add_comp_chem_params(parlib):
                     parts[part["value"]] = [this_media_id]
                 else:
                     parts[part["value"]].append(this_media_id)
+                # we need to correctly mapped sub media types such as Tilled and Untille Soils.
+                aux_meds = AUX_MEDIA_INTRA_MAP.get(this_media)
+                if aux_meds:
+                    if not isinstance(aux_meds, list):
+                        aux_meds = [aux_meds]
+                    for am in aux_meds:
+                        aux_media_id = str(CompartmentService.media.get(category=am).id)
+                        parts[part["value"]].append(aux_media_id)
             pc = 0
             for p, a in parts.items():
                 pc += 1
@@ -171,10 +189,10 @@ def add_comp_chem_params(parlib):
         ParameterService.commit()
 
 
-def check_chem_params(parlib):
-    chems = [ChemicalService.get(name=ch) for ch, pars in parlib['Chemical'].items() if ch in DEFAULT_IMPORT_RULES['chemicals']]
+def check_chem_params(parlib, chem):
+    ch = ChemicalService.get(name=chem)
     default_scenario = ScenarioService.get(name='Default')
-    for ch in chems:
+    if ch:
         missing_pars = {}
         different_pars = {}
 
@@ -194,7 +212,7 @@ def check_chem_params(parlib):
                     if existing_par.default_formula.equation == parlib['Chemical'][ch.name][p]['value'].replace("chemical.", "self."):
                         print(f"Formulas are the same, NO need to create new... Use the existing formula {existing_par.default_formula.equation}\n")
                     else:
-                        print(f"These are NOT the same; lib-> {parlib['Chemical'][ch.name][p]['value'].replace('chemical.', 'self.')}, existing {existing_par.default_formula.equation}\n")
+                        print(f"These are NOT the same;\n\t\t lib-> {parlib['Chemical'][ch.name][p]['value'].replace('chemical.', 'self.')},\n\t\t existing-> {existing_par.default_formula.equation}\n")
                         different_pars.setdefault(p, v)
                 else:  # it is a number
                     print(f'{p} is custom and has numeric value {v}\n')
@@ -203,15 +221,34 @@ def check_chem_params(parlib):
                         value = 1 if parlib['Chemical'][ch.name][p]['value'] else 0
                     else:
                         value = parlib['Chemical'][ch.name][p]['value']
+            elif isinstance(existing_par, CustomParameter):
+                if isinstance(parlib['Chemical'][ch.name][p]['value'], str):
+                    if existing_par.formula.equation == parlib['Chemical'][ch.name][p]['value'].replace("chemical.", "self."):
+                        print(
+                            f"Formulas are the same, NO need to create new... Use the existing formula {existing_par.formula.equation}\n")
+                    else:
+                        print(f"These are NOT the same;\n\t\t lib-> {parlib['Chemical'][ch.name][p]['value'].replace('chemical.', 'self.')},\n\t\t existing-> {existing_par.formula.equation}\nNeed to create new custom parameter with new formula")
+                else:
+                    if isinstance(parlib['Chemical'][ch.name][p]['value'], bool):
+                        value = 1 if parlib['Chemical'][ch.name][p]['value'] else 0
+                    else:
+                        value = parlib['Chemical'][ch.name][p]['value']
+                    if value == existing_par.value:
+                        print(
+                            f"Values are the same for {existing_par.definition.variable_name}, NO need to update\n")
+                    else:
+                        print(
+                            f"Values are NOT the same for {existing_par.definition.variable_name}, We need to update it!!!!\n")
+
         print(missing_pars)
         print(f'{200*"V"}\n')
         print(different_pars)
 
 
-def add_chem_params(parlib):
-    chems = [ChemicalService.get(name=ch) for ch, pars in parlib['Chemical'].items() if ch in DEFAULT_IMPORT_RULES['chemicals']]
+def add_chem_params(parlib, chem):
+    ch = ChemicalService.get(name=chem)
     default_scenario = ScenarioService.get(name='Default')
-    for ch in chems:
+    if ch:
         missing_pars = {}
         for p, v in parlib['Chemical'][ch.name].items():
             if p in CHEMICAL_PROPS_DONT_TRANSFER:
@@ -235,10 +272,23 @@ def add_chem_params(parlib):
                                                 unit=existing_par.default_unit, formula=existing_par.default_formula)
                     else:
                         print(f"These are not the same; lib-> {parlib['Chemical'][ch.name][p]['value'].replace('chemical.', 'self.')}, existing {existing_par.default_formula.equation}\n")
-                        # Create new formula, then add custom parameter with that formula id
-                        new_formula = parlib['Chemical'][ch.name][p]['value'].replace("chemical.", "self.")
-                        # obj_formula = FormulaService.create(equation=new_formula)
-                        # Create new formula arguments.
+                        this_formula = parlib['Chemical'][ch.name][p]['value'].replace('chemical.', 'self.')
+                        this_unit = parlib['Chemical'][ch.name][p]['unit']
+                        this_req = f'(self.id == {ch.id})'
+                        this_definition = [d for d in ParameterService.definitions.get_all() if d.variable_name == p][0]
+                        # Add new formula
+                        new_formula = FormulaService.create(equation=this_formula, no_commit=False)
+                        # Add new custom parameter on default scenario with new formula
+                        new_custom_par = ParameterService.create(definition=this_definition, scenario=default_scenario,
+                                                                 requirements=this_req, unit=this_unit,
+                                                                 formula_id=new_formula.id,
+                                                                 no_commit=False)
+                        # Fix self as chemical for the new formula Arguments where applies
+                        self_arr = [fa for fa in new_formula._arguments.all() if fa.name == "self"]
+                        if len(self_arr) > 0:
+                            self_arr[0].domain_id = FORMULA_ARG_DOMAINS.get("self")
+                        print(
+                            f'completed created new custom param {p} with formula {this_formula}')
                 else:  # it is a number
                     print(f'{p} is custom and has numeric value {v}\n')
                     # Create new custom parameter with numeric value
@@ -274,7 +324,12 @@ def load_data(trim_file_root, import_rules):
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-r', '--runtype')
+    parser.add_argument('-c', '--chemical')
+    args = parser.parse_args()
     from trim_db.utils.users_roles import implement_users_roles
+
     try:
         import time
         implement_users_roles()
@@ -301,9 +356,29 @@ if __name__ == '__main__':
     print('')
     start = time.time()
     param_lib = load_data(trim_files, import_rules)
-    # add_chem_params(param_lib)
-    # check_chem_params(param_lib)
-    add_comp_chem_params(param_lib)
     end = time.time()
     print('Time to load data = ', round((end - start), 2), ' seconds')
+    print('\n==========================\n')
+
+    if args.chemical:
+        chemical = args.chemical
+        if chemical not in import_rules["chemicals"]:
+            sys.exit(f'--chemical ARGUMENT "{chemical}" NOT RECOGNIZED; Currently I can only handle {", ".join(import_rules["chemicals"])}')
+    else:
+        sys.exit(
+            f'--chemical ARGUMENT NOT Specified; You need to specify one of {", ".join(import_rules["chemicals"])}')
+    start = time.time()
+    if args.runtype:
+        if args.runtype == 'check':
+            check_chem_params(param_lib, chemical)
+        elif args.runtype == 'chem':
+            add_chem_params(param_lib, chemical)
+        elif args.runtype == 'comp':
+            add_comp_chem_params(param_lib, chemical)
+        else:
+            sys.exit(f'--runtype ARGUMENT "{args.runtype}" NOT RECOGNIZED; USE "check", "chem" or "comp"')
+    else:
+        sys.exit(f'--runtype ARGUMENT NOT SPECIFIED; USE "check", "chem" or "comp"')
+    end = time.time()
+    print('Time to process = ', round((end - start), 2), ' seconds')
     print('\n==========================\n')

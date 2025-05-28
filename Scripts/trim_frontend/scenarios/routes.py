@@ -501,7 +501,7 @@ def copy_scenario():
                 if f.equation.find("compartment.id") > -1 \
                         or f.equation.find("receiver.id") > -1 \
                         or f.equation.find("sender.id") > -1:
-                    par_dict.setdefault(par.id, {"par": par, "frm": f})
+                    par_dict.setdefault(str(par.id), {"par": par, "frm": f})
             return par_dict
 
         # Add scenario properties/parameters
@@ -514,7 +514,7 @@ def copy_scenario():
                     ns_par = ParameterService.create(definition=s_par.definition, scenario=ns,
                                         requirements=f"(self.id == {ns.id})", value=s_par.value,
                                         unit=s_par.unit, formula=s_par.formula)
-                    cpar_map[s_par.id] = ns_par.id
+                    cpar_map[str(s_par.id)] = ns_par.id
                 formulas_with_comp_ids = check_for_comp_ids(formulas_with_comp_ids, s_par)
                 # ParameterService.commit()
         logger.info(f'Copied scenario parameters in {time.time() - scen_par_start_time} seconds')
@@ -532,7 +532,7 @@ def copy_scenario():
                         nc_par = ParameterService.create(definition=c_par.definition, scenario=ns,
                                             requirements=f"(self.id == {sc.id})", value=c_par.value,
                                             unit=c_par.unit, formula=c_par.formula)
-                        cpar_map[c_par.id] = nc_par.id
+                        cpar_map[str(c_par.id)] = nc_par.id
                     formulas_with_comp_ids = check_for_comp_ids(formulas_with_comp_ids, c_par)
                     # ParameterService.commit()
         logger.info(f'Copied chemical parameters in {time.time() - chem_par_start_time} seconds')
@@ -542,12 +542,14 @@ def copy_scenario():
         # check volume element parameters for hardwired ids.
         for ve in s.volume_elements:
             for vpr_name, vpr in ve.parameters.items():
-                formulas_with_comp_ids = check_for_comp_ids(formulas_with_comp_ids, vpr)
+                if isinstance(vpr, CustomParameter) and vpr.scenario.id == s.id:
+                    formulas_with_comp_ids = check_for_comp_ids(formulas_with_comp_ids, vpr)
 
         # check compartment parameters for hardwired ids.
         for cmp in s.compartments:
             for pr_name, pr in cmp.parameters.items():
-                formulas_with_comp_ids = check_for_comp_ids(formulas_with_comp_ids, pr)
+                if isinstance(pr, CustomParameter) and pr.scenario.id == s.id:
+                    formulas_with_comp_ids = check_for_comp_ids(formulas_with_comp_ids, pr)
         logger.info(f'Found static compartment ids in {len(formulas_with_comp_ids)} parameter formulas in {time.time() - chk_par_start_time} seconds')
 
         # Create new parcels
@@ -567,7 +569,7 @@ def copy_scenario():
                         nve_par = ParameterService.create(definition=ve_par.definition, scenario=ns,
                                                 requirements=f"(self.id == {nve.id})", value=ve_par.value,
                                                 unit=ve_par.unit, formula=ve_par.formula)
-                        cpar_map[ve_par.id] = nve_par.id
+                        cpar_map[str(ve_par.id)] = nve_par.id
                 # Create new compartments
                 for cmp in ve.compartments:
                     ncmp = CompartmentService.create(name=cmp.name, volume_element=nve, media=cmp.media)
@@ -602,7 +604,7 @@ def copy_scenario():
                             ncpar = ParameterService.create(definition=cpar.definition, scenario=ns,
                                                             requirements=f"(self.id == {ncmp.id})", value=cpar.value,
                                                             unit=cpar.unit, formula=cpar.formula)
-                            cpar_map[cpar.id] = ncpar.id
+                            cpar_map[str(cpar.id)] = ncpar.id
                             # ParameterService.commit()
 
                 logger.info(f"Finished copying {ve.name} for {prc.name}")
@@ -612,10 +614,11 @@ def copy_scenario():
         # Check if we have a parameter with formula that has the hardwired ids found above.
         logger.info("Fixing Formulas with Static Compartment ids ...")
         fix_par_start_time = time.time()
+
         for old_par_id in formulas_with_comp_ids:
-            new_par_id = cpar_map[old_par_id]
+            new_par_id = cpar_map[str(old_par_id)]
             # replace all old compartment ids with new compartment ids
-            old_formula = formulas_with_comp_ids[old_par_id]["frm"].equation
+            old_formula = formulas_with_comp_ids[str(old_par_id)]["frm"].equation
             # regular expression to find the id lists in the formula
             regex = re.compile("(?:(?:receiver|compartment|sender)\.id\sin\s{([\,\s\d+]+))")
             old_id_lists = regex.findall(old_formula)
@@ -647,13 +650,34 @@ def copy_scenario():
         ParameterService.commit()
 
         # Create the compartment links using the compartment id map
-        logger.info("Copying Compartment Links ...")
-        lnk_cp_start_time = time.time()
-        for lnk in CompartmentService.links.get_all():
-            if lnk.sender_id in cmp_map.keys():
-                CompartmentService.links.create(sender_id=cmp_map[lnk.sender_id], receiver_id=cmp_map[lnk.receiver_id])
-        logger.info(f'Copied compartment links in {time.time() - lnk_cp_start_time} seconds')
-        CompartmentService.commit()
+        # logger.info("Copying Compartment Links ...")
+        # lnk_cp_start_time = time.time()
+        # for lnk in CompartmentService.links.get_all():
+        #     if lnk.sender_id in cmp_map.keys():
+        #         CompartmentService.links.create(sender_id=cmp_map[lnk.sender_id], receiver_id=cmp_map[lnk.receiver_id])
+        # logger.info(f'Copied compartment links in {time.time() - lnk_cp_start_time} seconds')
+        # CompartmentService.commit()
+
+        ll = {c.standard_name: {'sender': c,
+                                'receiver': c.custom_linked_compartments,
+                                'clinks': [
+                                    CompartmentService.links.get(sender_id=c.id, receiver_id=cc.id) for cc in c.custom_linked_compartments
+                                ]
+                                } for c in s.compartments if len(c.custom_linked_compartments) > 0}
+
+        for l, ld in ll.items():
+            sender_1 = [c for c in ns.compartments if c.standard_name == l][0]
+            for r1 in ld['receiver']:
+                receiver_1 = [c for c in ns.compartments if c.standard_name == r1.standard_name][0]
+                ccl = CompartmentService.links.get(sender_id=sender_1.id, receiver_id=receiver_1.id)
+                if not ccl:
+                    print(f'CREATING A NEW LINK in SCENARIO {receiver_1.volume_element.parcel.scenario.name} with sender_id:{sender_1.id} and receiver_id {receiver_1.id}')
+                    CompartmentService.links.create(sender_id=sender_1.id, receiver_id=receiver_1.id)
+                else:
+                    print(
+                        f'A CUSTOM LINK ALREADY EXISTS in SCENARIO {receiver_1.volume_element.parcel.scenario.name} with sender_id:{sender_1.id} and receiver_id {receiver_1.id}')
+            CompartmentService.commit()
+
     except Exception as e:
         logger.error(traceback.format_exc())
         logger.error(e)
