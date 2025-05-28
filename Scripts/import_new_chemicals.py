@@ -15,7 +15,8 @@ DEFAULT_IMPORT_RULES = \
         "Divalent Mercury",
         "Elemental Mercury",
         "MethylMercury",
-        "2,3,7,8-TCDD"
+        "2,3,7,8-TCDD",
+        "Cadmium"
     ],
     "media": {
         "restrict_emissions": [],
@@ -211,7 +212,7 @@ def check_chem_params(parlib, chem):
                     if existing_par.default_formula.equation == parlib['Chemical'][ch.name][p]['value'].replace("chemical.", "self."):
                         print(f"Formulas are the same, NO need to create new... Use the existing formula {existing_par.default_formula.equation}\n")
                     else:
-                        print(f"These are NOT the same; lib-> {parlib['Chemical'][ch.name][p]['value'].replace('chemical.', 'self.')}, existing {existing_par.default_formula.equation}\n")
+                        print(f"These are NOT the same;\n\t\t lib-> {parlib['Chemical'][ch.name][p]['value'].replace('chemical.', 'self.')},\n\t\t existing-> {existing_par.default_formula.equation}\n")
                         different_pars.setdefault(p, v)
                 else:  # it is a number
                     print(f'{p} is custom and has numeric value {v}\n')
@@ -220,6 +221,25 @@ def check_chem_params(parlib, chem):
                         value = 1 if parlib['Chemical'][ch.name][p]['value'] else 0
                     else:
                         value = parlib['Chemical'][ch.name][p]['value']
+            elif isinstance(existing_par, CustomParameter):
+                if isinstance(parlib['Chemical'][ch.name][p]['value'], str):
+                    if existing_par.formula.equation == parlib['Chemical'][ch.name][p]['value'].replace("chemical.", "self."):
+                        print(
+                            f"Formulas are the same, NO need to create new... Use the existing formula {existing_par.formula.equation}\n")
+                    else:
+                        print(f"These are NOT the same;\n\t\t lib-> {parlib['Chemical'][ch.name][p]['value'].replace('chemical.', 'self.')},\n\t\t existing-> {existing_par.formula.equation}\nNeed to create new custom parameter with new formula")
+                else:
+                    if isinstance(parlib['Chemical'][ch.name][p]['value'], bool):
+                        value = 1 if parlib['Chemical'][ch.name][p]['value'] else 0
+                    else:
+                        value = parlib['Chemical'][ch.name][p]['value']
+                    if value == existing_par.value:
+                        print(
+                            f"Values are the same for {existing_par.definition.variable_name}, NO need to update\n")
+                    else:
+                        print(
+                            f"Values are NOT the same for {existing_par.definition.variable_name}, We need to update it!!!!\n")
+
         print(missing_pars)
         print(f'{200*"V"}\n')
         print(different_pars)
@@ -252,10 +272,23 @@ def add_chem_params(parlib, chem):
                                                 unit=existing_par.default_unit, formula=existing_par.default_formula)
                     else:
                         print(f"These are not the same; lib-> {parlib['Chemical'][ch.name][p]['value'].replace('chemical.', 'self.')}, existing {existing_par.default_formula.equation}\n")
-                        # Create new formula, then add custom parameter with that formula id
-                        new_formula = parlib['Chemical'][ch.name][p]['value'].replace("chemical.", "self.")
-                        # obj_formula = FormulaService.create(equation=new_formula)
-                        # Create new formula arguments.
+                        this_formula = parlib['Chemical'][ch.name][p]['value'].replace('chemical.', 'self.')
+                        this_unit = parlib['Chemical'][ch.name][p]['unit']
+                        this_req = f'(self.id == {ch.id})'
+                        this_definition = [d for d in ParameterService.definitions.get_all() if d.variable_name == p][0]
+                        # Add new formula
+                        new_formula = FormulaService.create(equation=this_formula, no_commit=False)
+                        # Add new custom parameter on default scenario with new formula
+                        new_custom_par = ParameterService.create(definition=this_definition, scenario=default_scenario,
+                                                                 requirements=this_req, unit=this_unit,
+                                                                 formula_id=new_formula.id,
+                                                                 no_commit=False)
+                        # Fix self as chemical for the new formula Arguments where applies
+                        self_arr = [fa for fa in new_formula._arguments.all() if fa.name == "self"]
+                        if len(self_arr) > 0:
+                            self_arr[0].domain_id = FORMULA_ARG_DOMAINS.get("self")
+                        print(
+                            f'completed created new custom param {p} with formula {this_formula}')
                 else:  # it is a number
                     print(f'{p} is custom and has numeric value {v}\n')
                     # Create new custom parameter with numeric value

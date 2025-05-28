@@ -318,6 +318,19 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             comp.parameters.get(par_name[field_name]).value = parcels_data[field_name]
             comp.parameters.get(par_name[field_name]).scenario_id = p.scenario_id
 
+    if field_name == "MeanDepth":
+        csw = p.get_compartment("Surface_water")
+        h_diff = (csw.height - parcels_data[field_name]).magnitude
+        # Now shift bounds of everything below the SW volume element
+        ves = [a for a in p.volume_elements]
+        for ve in ves:
+            if ve.top <= csw.volume_element.bottom:
+                print(f'new {ve.name} top = {ve.top + h_diff} and bottom = {ve.bottom + h_diff}')
+                ve.top = ve.top + h_diff
+                ve.bottom = ve.bottom + h_diff
+        # finally fix the surface water element bottom
+        csw.volume_element.bottom = -1 * parcels_data[field_name]
+
     if field_name in ['bed_density', 'organic_carbon_frac', 'bed_pH', 'bed_porosity', 'bed_thickness']:
         par_name = {'bed_density': 'BedDensity',
                     'organic_carbon_frac': "OrganicCarbonContent",
