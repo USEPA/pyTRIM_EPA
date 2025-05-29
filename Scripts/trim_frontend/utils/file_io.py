@@ -225,7 +225,7 @@ class MiscAssociatedFileDepositionOverlay(MiscAssociatedFileVariety):
                         # filter to only include thise
                         df = df.drop(df[~(df["ZFLAG"] == zflag_restriction)].index)
                     else:
-                        input_file_errors.append(f"ZFLAG issues")
+                        input_file_errors.append(f"The ZFLAG value you provided (or a default of 0 if not provided) is not in the file you uploaded. Please enter a valid value.")
 
     def perform_custom_upload_behavior(self, **kwargs):
         if "uploaded_contents" in kwargs and "metadata" in kwargs:
