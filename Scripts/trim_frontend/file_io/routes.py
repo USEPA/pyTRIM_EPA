@@ -785,10 +785,10 @@ def parse_runoff_matrix_upload():
             for header in reader.fieldnames:
                 if header == 'sink' or header == 'parcels':
                     continue
-                elif header not in parcel_names.keys():
+                elif header.lower() not in parcel_names.keys():
                     return ApiException(f"Parcel '{header}' does not exist in the scenario")
             for row in reader:
-                if row.get("parcels") not in parcel_names.keys():
+                if row.get("parcels").lower() not in parcel_names.keys():
                     return ApiException(f"Parcel '{row.get('parcels')}' does not exist in the scenario")    
             if "sink" not in reader.fieldnames:
                 return ApiException("Required header 'sink' is missing")
@@ -802,7 +802,9 @@ def parse_runoff_matrix_upload():
                     if Decimal(v) < 0: return ApiException("All values must be positive")
                     row_total.append(Decimal(v))
                 row_total = float(sum(row_total))
-                if row_total != 1 and row_total != 0: 
+                if row_total != 1 and row_total != 0:
+                    print(row)
+                    print(row_total)
                     return ApiException("Sum of runoff fractions should be 1")
 
         # submit
