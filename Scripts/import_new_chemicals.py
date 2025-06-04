@@ -16,7 +16,8 @@ DEFAULT_IMPORT_RULES = \
         "Elemental Mercury",
         "MethylMercury",
         "2,3,7,8-TCDD",
-        "Cadmium"
+        "Cadmium",
+        "Arsenic"
     ],
     "media": {
         "restrict_emissions": [],

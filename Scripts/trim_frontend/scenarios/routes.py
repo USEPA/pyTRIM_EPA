@@ -406,9 +406,12 @@ def update_scenario():
                 ret_type = "LF" if field_name.find("_litterfall_") > 0 else "AE"
                 ret_type_name = "wt_av_litterfallrate" if field_name.find("_litterfall_") > 0 else \
                     "wt_av_allowexchange" if field_name.find("_allowexchange_") > 0 else "None"
-                ret_val = meteo_wgt_avg_value_from_timeseries(param_data, ret_type)
-                if ret_type != "None":
-                    update_assumed_all_comp_fixed_params(s, comp_list, param_name, ret_val[ret_type_name])
+                # The condition below assures that we do not utilize the value from the file for Coniferous forest leaf
+                # If not set via custom parameter, it defaults to the desired value of 0.0021.
+                if not (ret_type_name == "wt_av_litterfallrate" and param_media == 'Coniferous_Leaf'):
+                    ret_val = meteo_wgt_avg_value_from_timeseries(param_data, ret_type)
+                    if ret_type != "None":
+                        update_assumed_all_comp_fixed_params(s, comp_list, param_name, ret_val[ret_type_name])
         elif field_name == "simulation_start_date" or field_name == "simulation_end_date":
             date_parts = scenario_data[field_name].split("-")
             date_obj = datetime(int(date_parts[0]), int(date_parts[1]), int(date_parts[2]))
