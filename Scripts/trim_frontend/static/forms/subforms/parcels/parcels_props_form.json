@@ -61,5 +61,13 @@
       "default": "",
       "help": "(only for land parcels) Indicate whether the parcel will be modeled with wetland characteristics (e.g., modified water percolation and mercury methylation in soil; you later will provide information on these wetland characteristics). The default selection is 'No'."
     }
+	,
+    {
+      "id": "parcels-receptor_spacing",
+      "label": "Receptor Spacing (m)",
+      "data_type": "str",
+      "default": "100",
+      "help": "Placeholder help text for Receptor Spacing"
+    }
   ]
 }

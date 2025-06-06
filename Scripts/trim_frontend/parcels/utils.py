@@ -547,6 +547,31 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                 eq = new_formula
             FormulaService.get(sender_par.formula.id).equation = new_formula
             FormulaService.commit()
+    if field_name == "receptor_spacing":
+        submitted_spacing_val = parcels_data.get("receptor_spacing")
+
+        cdv = p.get_compartment('DryVaporSource')
+        param_obj = cdv.parameters.get("ReceptorSpacing")
+
+        # first time through this is a "ParameterDefinition"; subsequent visits
+        # it is a CustomParameter....so create/update as needed
+        if type(param_obj) is ParameterDefinition:
+            param = ParameterService.get_or_create(
+                definition_id=param_obj.id,
+                scenario_id=p.scenario_id,
+                requirements=f"(self.id == {cdv.id})", # compartment id
+                value=submitted_spacing_val
+            )
+
+            ParameterService.update(param)
+        elif type(param_obj) is CustomParameter:
+            param_obj.value = submitted_spacing_val
+            ParameterService.update(param_obj)
+        else:
+            raise Exception("unexpected param_obj type...")
+
+        ParameterService.commit()
+
 
     # Update record
     ParcelService.update(p)

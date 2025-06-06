@@ -680,6 +680,7 @@
             new_parcel.feature.properties.area = parcel.data.area;
             new_parcel.feature.properties.air = parcel.data.hasAir;
             new_parcel.feature.properties.parceltype=parcel.data.parcelType
+            new_parcel.feature.properties.receptor_spacing=parcel.data.receptor_spacing;
             new_parcel.feature.properties.landuse = {'lu': parcel.data.landUse, 'list': parcel.media}; // we will need NLCD data here?
             new_parcel.feature.properties.farmfoodchain = parcel.data.hasFarmFoodChain;
             new_parcel.feature.properties.fishfoodweb = parcel.data.hasFishFoodWeb;
@@ -907,6 +908,27 @@
                                         "<option value='No'>No</option>" +
                                     "</select>" +
                                    "<label class='" + editFlag + " wetland'>" + data + "</label>"
+                        }
+                    },
+                    {
+                        data: "properties.receptor_spacing",
+                        render: function (data, type, row) {
+                            let parcel_info = [{
+                                'type': 'data',
+                                'name': 'id',
+                                'value': row.properties.parcelid,
+                            },{
+                                'type': 'data',
+                                'name': 'field',
+                                'value': 'receptor_spacing'
+                            }, {
+                                'type': 'input',
+                                'name': 'receptor_spacing',
+                                'value': data
+                            }]
+                            parcel_info = JSON.stringify(parcel_info)
+                            return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
+                                "<label class='editableCell badge badge-light'>" + data + "</label>"
                         }
                     }
                 ],
@@ -1498,6 +1520,7 @@
                 shapes.features[i].properties.farmfoodchain = e["Farm Food Chain"]
                 shapes.features[i].properties.fishfoodweb = e["Fish Food Web"]
                 shapes.features[i].properties.wetland = e["Wetland"]
+                shapes.features[i].properties.receptor_spacing = e["Receptor Spacing (m)"]
             })
         }
 
