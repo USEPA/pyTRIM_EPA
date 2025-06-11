@@ -128,7 +128,8 @@
 					</div>
 
 					<div class="col-sm">
-						<a id="aermod-receptors-download-btn" href="#" class="btn btn-secondary"><i class="fas fa-upload mr-1"></i>Download AERMOD receptors geojson</a>
+						<a id="aermod-receptors-download-geojson-btn" href="#" class="btn btn-secondary"><i class="fas fa-download mr-1"></i>Download geojson</a>
+						<a id="aermod-receptors-download-aermod-btn" href="#" class="btn btn-secondary"><i class="fas fa-download mr-1"></i>Download AERMOD input</a>
 					</div>
 				</div>
 
@@ -153,22 +154,24 @@
 <script>
 	// aermod receptor related helper functions -- START
 	function renderAermodDownloadUi(responseData) {
-		let presignedAermodUrl = responseData.presigned_urls["data.geojson"];
+		let presignedGeojsonUrl = responseData.presigned_urls["data.geojson"];
+		let presignedAermodInputUrl = responseData.presigned_urls["temp_foo.aermod"];
 
 		// update generate button label
-		$("#generate_aermod_receptors_btn").html((presignedAermodUrl === undefined ? "Generate" : "Regenerate") + " AERMOD Receptors");
+		$("#generate_aermod_receptors_btn").html((presignedGeojsonUrl === undefined ? "Generate" : "Regenerate") + " AERMOD Receptors");
 
 		// show the download URL
-		if (presignedAermodUrl != undefined) {
-			$("#aermod-receptors-download-btn").attr("href", presignedAermodUrl);
+		if (presignedGeojsonUrl != undefined) {
+			$("#aermod-receptors-download-geojson-btn").attr("href", presignedGeojsonUrl);
+			$("#aermod-receptors-download-aermod-btn").attr("href", presignedAermodInputUrl);
 			$("#aermod-receptors-current-file").show();
 		}
 
 		//plot it
-		installAermodReceptorsOntoMap(responseData, presignedAermodUrl);
+		installAermodReceptorsOntoMap(responseData, presignedGeojsonUrl);
 	}
 
-	let installAermodReceptorsOntoMap = function(responseData, presignedAermodUrl) {
+	let installAermodReceptorsOntoMap = function(responseData, presignedGeojsonUrl) {
 		let errorDisplayArea = $("#aermod-receptors-current-file .errors");
 		errorDisplayArea.empty();
 
@@ -178,10 +181,10 @@
 
         window.receptorOverlayGroup = L.layerGroup();
 
-		if (presignedAermodUrl !== undefined) {
+		if (presignedGeojsonUrl !== undefined) {
 			if (responseData.file_metadata.errors === undefined || responseData.file_metadata.errors.length == 0) {
 				// fetch the data
-				TRIM.api.hitUrl(presignedAermodUrl, function(presignedSuccess, presignedResponse) {
+				TRIM.api.hitUrl(presignedGeojsonUrl, function(presignedSuccess, presignedResponse) {
 					let overlayGridPoints = [];
 					for (let i = 0 ; i < presignedResponse.features.length; i++) {
 						let el = presignedResponse.features[i];

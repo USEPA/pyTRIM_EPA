@@ -387,6 +387,27 @@ class MiscAssociatedFileAERMODGeneratedReceptors(MiscAssociatedFileVariety):
         # return reformatted
         return json.dumps(reformatted).encode("utf-8")
 
+    def perform_custom_upload_behavior(self, **kwargs):
+        if "uploaded_contents" in kwargs and "metadata" in kwargs:
+            metadata = kwargs.get("metadata")
+            uploaded_contents = kwargs.get("uploaded_contents")
+
+            decoded = json.loads(uploaded_contents)
+
+            # todo -- Samuel is working on code to take a geojson and
+            # turn it into an AERMOD input file. Once that's done, we'll
+            # plug it into this method here and store both.
+            fake_placeholder = {
+                "name_from_file": decoded.get("name"),
+                "number_of_features": len(decoded.get("features", []))
+            }
+
+            return ({
+                "data.geojson": { "contents": uploaded_contents, "mime": self.MIME_TYPE },
+                "temp_foo.aermod": { "contents": json.dumps(fake_placeholder), "mime": "application/text" }
+            }, None)
+        else:
+            raise Exception(f"{self.__class__}.perform_custom_upload_behavior expected 'uploaded_contents' and 'metadata' in kwargs but was missing one or more of them")
 
 # non-api-specific utility function that retrieves/uploads/deletes a
 # MiscAssociatedFileVariety file. refactored from the "manage_misc_scenario_file"
@@ -429,29 +450,32 @@ def associated_file_helper(scenario_id, misc_file_type:str, operation:str, file_
     elif operation == "UPLOAD":
         try:
             if fv.has_custom_upload_behavior():
-                fpn = file_obj.stream
-                try:
-                    fpn.seek(0)
-                    uploaded_file_content = fpn.read().decode("utf-8")
+                if type(file_obj) is bytes:
+                    uploaded_file_content = file_obj
+                else:
+                    fpn = file_obj.stream
+                    try:
+                        fpn.seek(0)
+                        uploaded_file_content = fpn.read().decode("utf-8")
+                    except Exception as e:
+                        raise Exception(e)
 
-                    upload_directives, additional_metadata = fv.perform_custom_upload_behavior(uploaded_contents=uploaded_file_content, metadata=file_metadata)
-                    for upload_filename in upload_directives:
-                        uploadable_dict = upload_directives[upload_filename]
-                        uploadable_item = uploadable_dict.get("contents")
-                        uploadable_mime = uploadable_dict.get("mime", fv.get_storage_mime_type())
-                        loop_s3_file_path = f"{scenario_id}/{misc_file_type}/{upload_filename}"
+                upload_directives, additional_metadata = fv.perform_custom_upload_behavior(uploaded_contents=uploaded_file_content, metadata=file_metadata)
+                for upload_filename in upload_directives:
+                    uploadable_dict = upload_directives[upload_filename]
+                    uploadable_item = uploadable_dict.get("contents")
+                    uploadable_mime = uploadable_dict.get("mime", fv.get_storage_mime_type())
+                    loop_s3_file_path = f"{scenario_id}/{misc_file_type}/{upload_filename}"
 
-                        s3_client.put_object(
-                            Body=uploadable_item,
-                            Bucket=file_storage_bucket,
-                            Key=loop_s3_file_path,
-                            ContentType=uploadable_mime
-                        )
+                    s3_client.put_object(
+                        Body=uploadable_item,
+                        Bucket=file_storage_bucket,
+                        Key=loop_s3_file_path,
+                        ContentType=uploadable_mime
+                    )
 
-                    if additional_metadata is not None:
-                        file_metadata = file_metadata | additional_metadata
-                except Exception as e:
-                    raise Exception(e)
+                if additional_metadata is not None:
+                    file_metadata = file_metadata | additional_metadata
             else:
                 s3_file_path = f"{scenario_id}/{misc_file_type}/data{fv.get_storage_file_extension()}"
 
