@@ -151,7 +151,10 @@
 <script src="{{ url_for('static', filename='js/lib/shp.js') }}">
 </script>
 <script>
-	function renderAermodDownloadUi(presignedAermodUrl) {
+	// aermod receptor related helper functions -- START
+	function renderAermodDownloadUi(responseData) {
+		let presignedAermodUrl = responseData.presigned_urls["data.geojson"];
+
 		// update generate button label
 		$("#generate_aermod_receptors_btn").html((presignedAermodUrl === undefined ? "Generate" : "Regenerate") + " AERMOD Receptors");
 
@@ -161,9 +164,47 @@
 			$("#aermod-receptors-current-file").show();
 		}
 
-		//plot it - TODO
-		console.log("TODO - plot the grid");
+		//plot it
+		installAermodReceptorsOntoMap(responseData, presignedAermodUrl);
 	}
+
+	let installAermodReceptorsOntoMap = function(responseData, presignedAermodUrl) {
+		let errorDisplayArea = $("#aermod-receptors-current-file .errors");
+		errorDisplayArea.empty();
+
+		if (window.receptorOverlayGroup !== null) {
+			mapLayers.removeLayer(receptorOverlayGroup);
+		}
+
+        window.receptorOverlayGroup = L.layerGroup();
+
+		if (presignedAermodUrl !== undefined) {
+			if (responseData.file_metadata.errors === undefined || responseData.file_metadata.errors.length == 0) {
+				// fetch the data
+				TRIM.api.hitUrl(presignedAermodUrl, function(presignedSuccess, presignedResponse) {
+					let overlayGridPoints = [];
+					for (let i = 0 ; i < presignedResponse.features.length; i++) {
+						let el = presignedResponse.features[i];
+						let point = [ el.geometry.coordinates[1], el.geometry.coordinates[0] ];
+						overlayGridPoints.push(point);
+						let colorForDisplay = "#000000"; // black
+						var marker = L.circleMarker(point, { pmIgnore: true, radius: .2, stroke: true, color: colorForDisplay}).addTo(receptorOverlayGroup);
+					}
+
+					// receptorOverlayGroup.addTo(map); // preselects it in the layers control!
+				});
+
+				mapLayers.addOverlay(receptorOverlayGroup, "AERMOD Receptors");
+			} else {
+				// I don't think this'll ever actually happen
+				$("<h4/>").html("Errors with generated file:").appendTo(errorDisplayArea);
+				for (let i = 0 ; i < responseData.file_metadata.errors.length ; i++) {
+					$("<li/>").html(responseData.file_metadata.errors[i]).appendTo(errorDisplayArea);
+				}
+			}
+		}
+	};
+	// aermod receptor related helper functions -- END
 
 	// deposition overlay helper functions -- START
 	let addDepositionOverlayLegend = function(bucketRanges, bucketColors) {
@@ -682,8 +723,7 @@
 				} else {
 					if (success) {
 						// installDepositionOverlayOntoMap(responseData)
-						let aermodFile = responseData.presigned_urls["data.geojson"];
-						renderAermodDownloadUi(aermodFile);
+						renderAermodDownloadUi(responseData);
 					}
 				}
 			});
@@ -1084,8 +1124,7 @@
 				LoadingScreen.show('generating_aermod_receptors');
 				TRIM.api.runReceptorGeneration('{{ scenario.id }}', function(success, responseData) {
 					if (success) {
-						let aermodFile = responseData.presigned_urls["data.geojson"];
-						renderAermodDownloadUi(aermodFile);
+						renderAermodDownloadUi(responseData);
 					}
 					LoadingScreen.hide('generating_aermod_receptors');
 				});
@@ -1152,6 +1191,7 @@
 		// depositionOverlayGroup, mapLayers, depositionOverlayLegend, etc. are globals set
 		// on the window. Would be nice to not do that...
         window.depositionOverlayGroup = L.layerGroup();
+        window.receptorOverlayGroup = null; // L.layerGroup();
 
         var togglelayers = L.layerGroup([wmsNLCD2016])
 

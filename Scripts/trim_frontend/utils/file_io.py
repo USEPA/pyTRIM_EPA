@@ -364,8 +364,8 @@ class MiscAssociatedFileAERMODGeneratedReceptors(MiscAssociatedFileVariety):
         for gpd in grid_point_data:
             parcel_id = gpd.get("parcel_id")
             spacing_m = gpd.get("spacing_m")
-            lat_long_pairs = gpd.get("lat_long_pairs")
-            for pair in lat_long_pairs:
+            long_lat_pairs = gpd.get("long_lat_pairs")
+            for pair in long_lat_pairs:
                 feature = {
                     "type": "Feature",
                     "properties": {
@@ -375,8 +375,8 @@ class MiscAssociatedFileAERMODGeneratedReceptors(MiscAssociatedFileVariety):
                     "geometry": {
                         "type": "Point",
                         "coordinates": [
-                            pair[0],
-                            pair[1]
+                            pair[0],    # longitude
+                            pair[1]     # latitude
                         ]
                     }
                 }

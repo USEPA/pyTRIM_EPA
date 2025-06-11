@@ -1085,7 +1085,7 @@ def calculate_receptor_grid_points_for_parcel(pcl:Parcel):
         None if error; else a dictionary with keys:
             "scenario_id": the scenario id
             "spacing_m": spacing in meters
-            "lat_long_pairs": list of lists of floats: Points representing the grid (in EPSG:4326 / WGS84).
+            "long_lat_pairs": list of lists of floats: Points representing the grid (in EPSG:4326 / WGS84). longitude is first element, latitude is second
                                 e.g.:
                                     [
                                         [-85.41157568471587, 44.26498030459199],
@@ -1143,15 +1143,15 @@ def calculate_receptor_grid_points_for_parcel(pcl:Parcel):
         # return points_gdf.to_crs(epsg=CRS_FOR_WGS84)
         converted_points = points_gdf.to_crs(epsg=CRS_FOR_WGS84)
 
-        simple_list_of_lat_lngs = []
+        simple_list_of_longs_and_lats = []
         for row in converted_points.itertuples():
             simple_pt = [[x[0], x[1]] for x in row.geometry.coords][0]
-            simple_list_of_lat_lngs.append(simple_pt)
+            simple_list_of_longs_and_lats.append(simple_pt)
 
         return {
             "parcel_id": pcl.id,
             "spacing_m": spacing_meters,
-            "lat_long_pairs": simple_list_of_lat_lngs
+            "long_lat_pairs": simple_list_of_longs_and_lats
         }
     except Exception as e:
         print(f"ERROR calculating grid points for parcel {pcl}: {e}")
