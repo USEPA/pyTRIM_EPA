@@ -2,6 +2,9 @@ import re, json
 import numpy as np
 from copy import deepcopy
 from pprint import pprint
+import geopandas as gpd
+from shapely.geometry import Polygon, Point
+from shapely.prepared import prep
 from ..scenarios.utils import init_parameter_definitions
 from ..scenarios.defaults import get_surface_runoff
 from .defaults import SURFACE_SOIL_SPECIFIC_MEDIA_PARAMS
@@ -1067,3 +1070,89 @@ def get_watershed_area(pcl):
     # 3. get the watershed area specific to this surface water parcel
     pcl_watershed = wsa_matrix[pcl_names.index(pcl.name)]
     return pcl_watershed[0, 0]
+
+
+# adapted from Samuel's "grid_points_in_polygon_meters" method
+def calculate_receptor_grid_points_for_parcel(pcl:Parcel):
+    """
+    Calculate a rectangular grid of points inside the polygon defined by a parcel's
+    vertices and spacing custom parameter.
+
+    Parameters:
+        pcl (Parcel): parcel
+
+    Returns:
+        None if error; else a dictionary with keys:
+            "scenario_id": the scenario id
+            "spacing_m": spacing in meters
+            "lat_long_pairs": list of lists of floats: Points representing the grid (in EPSG:4326 / WGS84).
+                                e.g.:
+                                    [
+                                        [-85.41157568471587, 44.26498030459199],
+                                        .....
+                                        [-85.41157568471587, 44.26562360214414]
+                                    ]
+    """
+    try:
+
+        # EPSG:4326 is WGS84, which is what our parcel vertices are based on.
+        # Samuel's algorithm switches to 3857 for calculating the grid points
+        CRS_FOR_WGS84 = 4326
+        CRS_FOR_GRID_CALCS = 3857
+
+        def get_comp(p:Parcel, kwargs):
+            comp = p.get_compartment(**kwargs)
+
+            if kwargs.get("name") and isinstance(comp, list):
+                comp = comp[0]
+
+            return comp
+
+        cdv = get_comp(pcl, {"name":"DryVaporSource"})
+        spacing_param = cdv.parameters.get("ReceptorSpacing")
+        spacing_meters = spacing_param.default_value if type(spacing_param) is ParameterDefinition else spacing_param.value
+
+        if len(pcl.vertices) == 0:
+            print(f"WARNING - {pcl} has no defined vertices; returning empty list")
+            return None
+
+        # Load it into a GeoDataFrame so we can change coordinate systems using gdf.to_crs
+        gdf = gpd.GeoDataFrame((Polygon(pcl.vertices),), columns=['geometry'], crs=CRS_FOR_WGS84)
+        # (this dataframe is a single row with a single column; geometry contains all the points
+
+        # Project to a CRS in meters (Web Mercator here; you could also use UTM for better accuracy)
+        gdf_proj = gdf.to_crs(epsg=CRS_FOR_GRID_CALCS)
+        polygon = gdf_proj.geometry[0]
+        prep_poly = prep(polygon)
+
+        # Get bounding box in projected meters
+        min_x, min_y, max_x, max_y = polygon.bounds
+        x_coords = np.arange(min_x, max_x + spacing_meters, spacing_meters)
+        y_coords = np.arange(min_y, max_y + spacing_meters, spacing_meters)
+
+        # Generate grid
+        points_inside = []
+        for x in x_coords:
+            for y in y_coords:
+                pt = Point(x, y)
+                if prep_poly.contains(pt):
+                    points_inside.append(pt)
+
+        # Convert list of Points to GeoDataFrame in EPSG:3857, then reproject back to EPSG:4326
+        points_gdf = gpd.GeoDataFrame(geometry=points_inside, crs=f"EPSG:{CRS_FOR_GRID_CALCS}")
+        # return points_gdf.to_crs(epsg=CRS_FOR_WGS84)
+        converted_points = points_gdf.to_crs(epsg=CRS_FOR_WGS84)
+
+        simple_list_of_lat_lngs = []
+        for row in converted_points.itertuples():
+            simple_pt = [[x[0], x[1]] for x in row.geometry.coords][0]
+            simple_list_of_lat_lngs.append(simple_pt)
+
+        return {
+            "parcel_id": pcl.id,
+            "spacing_m": spacing_meters,
+            "lat_long_pairs": simple_list_of_lat_lngs
+        }
+    except Exception as e:
+        print(f"ERROR calculating grid points for parcel {pcl}: {e}")
+        return None

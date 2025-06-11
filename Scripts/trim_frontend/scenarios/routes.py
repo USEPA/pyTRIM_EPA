@@ -24,6 +24,8 @@ from trim_frontend.parcels.routes import delete_parcel_contents
 from .defaults import *
 from .forms import *
 from ..utils.logging import make_logger
+from ..utils.file_io import MiscAssociatedFileVariety, associated_file_helper
+from ..parcels.utils import calculate_receptor_grid_points_for_parcel
 from trim_core.algorithms.full_model_run import run_full_model
 # from trim_core.algorithms.GetFlow.getflow import run_getflow_v7_for_scenario_id
 # from sqlalchemy import inspect
@@ -1191,3 +1193,36 @@ def compile_mirc_parcel_data(scen, chems, conc, timestamps, logger):
             p["volume_elements"].append(ve)
         parcels.append(p)
     return parcels
+
+@scenario_api.route(
+    '/api/scenario/<int:scenario_id>/run_receptor_generation', methods=['POST']
+)
+@login_required
+def run_receptor_generation(scenario_id):
+    """
+    flow is as follows:
+    * parcels.html is the template for the url /scenario/{id}/edit#parcels-tab
+    * clicking the btn in the "Receptor Spacing" column runs a small JavaScript function defined in that html file
+    * that function calls api.runReceptorGeneration, defined in api.js. That packages some stuff up and hits
+      /api/scenario/{id}/run_receptor_generation
+    * that's this function! This blah blah
+    """
+
+    scen = ScenarioService.get(scenario_id)
+
+    all_calculations = []
+    for parcel in scen.parcels:
+        grid_points_etc = calculate_receptor_grid_points_for_parcel(parcel)
+        all_calculations.append(grid_points_etc)
+
+    fv = MiscAssociatedFileVariety.construct_file_variety("generated_aermod_receptors")
+    file_like_obj = fv.convert_grid_point_data_to_binary_geojson(all_calculations)
+
+    data_resp = {}
+    try:
+        upload_data = associated_file_helper(scenario_id, "generated_aermod_receptors", "UPLOAD", file_obj = file_like_obj, file_metadata={})
+        data_resp = upload_data
+    except Exception as e:
+        print(f"UPLOAD ERROR: {e}")
+
+    return ApiResult(data_resp)

@@ -411,6 +411,19 @@ window.TRIM = (function(trim) {
         });
     }
 
+    api.runReceptorGeneration = function(scenario_id, callback_fxn) {
+        let url = api.getUrl('scenario_api.run_receptor_generation').replace("/0/", "/" + scenario_id + "/");
+
+        let data = makeFormData([]);
+
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: data,
+            callback: callback_fxn
+        });
+    }
+
     trim.api = api;
 
     trim.store = {}
