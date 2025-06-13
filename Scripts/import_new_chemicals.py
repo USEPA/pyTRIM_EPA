@@ -174,7 +174,8 @@ def add_comp_chem_params(parlib, chem):
             this_unit = props[pr][0]['unit']
             this_req = f'(self.id == {ch.id})'
             this_scn_id = default_scenario.id
-            this_definition = [d for d in ParameterService.definitions.get_all() if d.variable_name == pr][0]
+            this_definition = [d for d in ParameterService.definitions.get_all() if d.variable_name == pr
+                               and d.domain_id == 2][0]
             # Add new formula
             new_formula = FormulaService.create(equation=this_formula, no_commit=False)
             # Add new custom parameter on default scenario with new formula
