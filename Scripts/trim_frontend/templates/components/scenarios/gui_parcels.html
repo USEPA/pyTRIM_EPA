@@ -116,7 +116,7 @@
 				<legend>AERMOD Receptors</legend>
 				<div class="row mb-1">
 					<div class="col-sm">
-						Instructions here
+						Select the Generate AERMOD Receptors button to generate grids of AERMOD receptors, using the Receptor Spacing you entered in the editable table above. Select either Download button to download a GeoJSON or AERMOD input file of the receptor grids. You can view the generated receptors in the map by turning on the display in the map’s basemap selection box. If you subsequently change receptor spacing, you must again select Generate AERMOD Receptors. If the display in the map does not refresh, select the Recalculate button at the bottom right of the page and again turn on the display in the map’s basemap selection box.
 						<p/>
 						<a id="generate_aermod_receptors_btn" style="cursor:pointer" class="btn btn-secondary">Generate AERMOD Receptors</a>
 
@@ -171,12 +171,15 @@
 		installAermodReceptorsOntoMap(responseData, presignedGeojsonUrl);
 	}
 
+	window.receptorOverlayShowing = false;
 	let installAermodReceptorsOntoMap = function(responseData, presignedGeojsonUrl) {
 		let errorDisplayArea = $("#aermod-receptors-current-file .errors");
 		errorDisplayArea.empty();
 
+		let preserveShownState = receptorOverlayShowing;
 		if (window.receptorOverlayGroup !== null) {
-			mapLayers.removeLayer(receptorOverlayGroup);
+			mapLayers.removeLayer(receptorOverlayGroup); // removes option from the layers dialog
+			receptorOverlayGroup.removeFrom(map); // removes dots from the map
 		}
 
         window.receptorOverlayGroup = L.layerGroup();
@@ -194,7 +197,14 @@
 						var marker = L.circleMarker(point, { pmIgnore: true, radius: .2, stroke: true, color: colorForDisplay}).addTo(receptorOverlayGroup);
 					}
 
-					// receptorOverlayGroup.addTo(map); // preselects it in the layers control!
+
+					receptorOverlayGroup.on("add", function() { receptorOverlayShowing = true; });
+					receptorOverlayGroup.on("remove", function() { receptorOverlayShowing = false; });
+
+					// preserve previously selected state after a refresh or regeneration
+					if (preserveShownState) {
+						receptorOverlayGroup.addTo(map); // preselects it in the layers control!
+					}
 				});
 
 				mapLayers.addOverlay(receptorOverlayGroup, "AERMOD Receptors");
