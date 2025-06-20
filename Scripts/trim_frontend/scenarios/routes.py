@@ -836,9 +836,9 @@ def run_result_scenario():
         else:
             s = ScenarioService.get(scenario_id)
             print(f"Starting Model Run ({datetime.now()}...")
-            json_n_avg, json_c_avg, output_file_n, output_file_c = run_full_model(s)
-
-            data_resp = {"mass": json_n_avg, "conc": json_c_avg, "outputMass": output_file_n, "outputConc": output_file_c}
+            json_n_avg, json_c_avg, output_file_n, output_file_c, output_file_tm = run_full_model(s)
+            data_resp = {"mass": json_n_avg, "conc": json_c_avg, "outputMass": output_file_n,
+                         "outputConc": output_file_c, "outputTM": output_file_tm}
     except Exception as e:
         print(e)
         data_resp = {"error": e}

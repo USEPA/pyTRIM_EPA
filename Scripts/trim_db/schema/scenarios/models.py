@@ -168,6 +168,7 @@ class ScenarioLoadRunProc(Model):
     run_datetime = sa.Column(sa.sql.sqltypes.DATETIME)
     result_file_nt = sa.Column(sa.String(255))
     result_file_conc = sa.Column(sa.String(255))
+    result_file_tm = sa.Column(sa.String(255))
     result_nt = sa.Column(sa.sql.sqltypes.TEXT)
     result_conc = sa.Column(sa.sql.sqltypes.TEXT)
 
