@@ -181,14 +181,15 @@ class DockerEntryPoint:
         else:
             loggy(f"Kick off run for scenario {scenario.id} ({scenario.name})...")
             try:
-                json_n_avg, json_c_avg, output_file_n, output_file_c = run_full_model(scenario)
+                json_n_avg, json_c_avg, output_file_n, output_file_c, output_file_tm = run_full_model(scenario)
                 data_resp = {
                     "mass": json_n_avg,
                     "conc": json_c_avg,
                     # "mass": json.loads(json_n_avg),
                     # "conc": json.loads(json_c_avg),
                     "outputMass": output_file_n,
-                    "outputConc": output_file_c
+                    "outputConc": output_file_c,
+                    "outputTM": output_file_tm
                 }
             except Exception as e:
                 loggy(e)
@@ -246,7 +247,7 @@ class DockerEntryPoint:
         except Exception as e:
             loggy(f"ERROR WRITING DATA TO S3: {e}")
 
-        for key_name in [ "outputMass", "outputConc" ]:
+        for key_name in [ "outputMass", "outputConc", "outputTM" ]:
             output_file = model_output.get(key_name)
             print(f"output probe '{key_name}' is '{output_file}'")
 
@@ -275,8 +276,11 @@ class DockerEntryPoint:
                             if key_name == 'outputMass':
                                 [v for v in scen.proc_status][0].result_file_nt = \
                                     f'https://{storage_bucket_name}.s3.amazonaws.com/{full_key}'
-                            else:
+                            elif key_name == 'outputConc':
                                 [v for v in scen.proc_status][0].result_file_conc = \
+                                    f'https://{storage_bucket_name}.s3.amazonaws.com/{full_key}'
+                            else:
+                                [v for v in scen.proc_status][0].result_file_tm = \
                                     f'https://{storage_bucket_name}.s3.amazonaws.com/{full_key}'
                             ScenarioService.commit()
                 except Exception as e:
