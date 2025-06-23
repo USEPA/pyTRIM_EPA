@@ -864,10 +864,11 @@ def get_result_scenario():
         run_date = [v for v in s.proc_status][0].run_datetime
         output_file_n = Path([v for v in s.proc_status][0].result_file_nt).name
         output_file_c = Path([v for v in s.proc_status][0].result_file_conc).name
+        output_file_t = Path([v for v in s.proc_status][0].result_file_tm).name
         json_n_avg = [v for v in s.proc_status][0].result_nt
         json_c_avg = [v for v in s.proc_status][0].result_conc
 
-        result_resp = json.loads(json.dumps({"mass": json.loads(json_n_avg), "conc": json.loads(json_c_avg), "final_status": fin_stat, "run_date": run_date, "outputMass": output_file_n, "outputConc": output_file_c}, indent=4, sort_keys=True, default=str))
+        result_resp = json.loads(json.dumps({"mass": json.loads(json_n_avg), "conc": json.loads(json_c_avg), "final_status": fin_stat, "run_date": run_date, "outputMass": output_file_n, "outputConc": output_file_c, "outputTM": output_file_t}, indent=4, sort_keys=True, default=str))
     except Exception as e:
         logger.info(f"Error when attempting to get results: {e}")
         result_resp = {"error": e}
