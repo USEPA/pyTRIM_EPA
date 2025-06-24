@@ -957,7 +957,7 @@ def fetch_run_results():
         "model_output": json_content
     }
 
-    for f in ["outputMass", "outputConc"]:
+    for f in ["outputMass", "outputConc", "outputTM"]:
         full_key = f"{uuid}/{f}.xlsx"
         response = s3_client.generate_presigned_url("get_object",
                                                     Params={

@@ -731,7 +731,7 @@
                             $('#btn_get_mass_results').attr("download","mass_results.xlsx")
                             $('#btn_get_conc_results').attr("href",data.outputConc)
                             $('#btn_get_conc_results').attr("download","concentration_results.xlsx")
-                            if (data.outputTM) {
+                            if (data.outputTM !== undefined) {
                                 $('#btn_get_tm_results').attr("href", data.outputTM)
                                 $('#btn_get_tm_results').attr("download", "transfer_matrix.xlsx")
                             }
