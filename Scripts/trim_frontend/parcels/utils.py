@@ -10,6 +10,7 @@ from ..scenarios.defaults import get_surface_runoff
 from .defaults import SURFACE_SOIL_SPECIFIC_MEDIA_PARAMS
 
 from flask_api import ApiResult
+from pyproj import Transformer
 
 from trim_db.schema import CustomParameter, ParameterDefinition, Parcel
 from trim_db.services import ChemicalService, CompartmentService, FormulaService, ParameterService, ParcelService, ScenarioService, VolumeElementService
@@ -552,6 +553,9 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             FormulaService.commit()
     if field_name == "receptor_spacing":
         submitted_spacing_val = parcels_data.get("receptor_spacing")
+
+        if (not str(submitted_spacing_val).isnumeric()):
+            raise Exception(f"bad input {submitted_spacing_val}")
 
         cdv = p.get_compartment('DryVaporSource')
         param_obj = cdv.parameters.get("ReceptorSpacing")
@@ -1099,6 +1103,8 @@ def calculate_receptor_grid_points_for_parcel(pcl:Parcel):
         # Samuel's algorithm switches to 3857 for calculating the grid points
         CRS_FOR_WGS84 = 4326
         CRS_FOR_GRID_CALCS = 3857
+        # note -- according to https://github.com/CityScope/CS_choiceModels/issues/4,
+        # CRS84 is also equvalent to EPSG:4326
 
         def get_comp(p:Parcel, kwargs):
             comp = p.get_compartment(**kwargs)
@@ -1156,3 +1162,46 @@ def calculate_receptor_grid_points_for_parcel(pcl:Parcel):
     except Exception as e:
         print(f"ERROR calculating grid points for parcel {pcl}: {e}")
         return None
+
+# this is an adapted version of Samuel's "geojson_to_aermod_receptors" function; minor
+# changes made to help it work within TRIM app
+def geojson_to_aermod_receptors(geojson_contents, utm_zone=None, northern_hemisphere=True):
+    """
+    Converts GeoJSON points to AERMOD receptor file format.
+
+    Parameters:
+    - geojson_contents: str containing GeoJSON
+    - utm_zone: int, UTM zone number
+    - northern_hemisphere: bool, True if northern hemisphere, False for southern
+
+    Output:
+    - AERMOD receptor file text (to be written to a file, returned to client, etc.)
+    """
+    # Set up transformer for lat/lon -> UTM
+    proj_str = f"+proj=utm +zone={utm_zone} +datum=WGS84 +units=m +no_defs"
+    if not northern_hemisphere:
+        proj_str += " +south"
+    transformer = Transformer.from_crs("EPSG:4326", proj_str, always_xy=True)
+
+    # Read GeoJSON
+    parsed_geojson = json.loads(geojson_contents)
+
+    receptors = []
+
+    # Extract coordinates
+    for feature in parsed_geojson['features']:
+        geom = feature['geometry']
+        if geom['type'] == 'Point':
+            lon, lat = geom['coordinates']
+            x, y = transformer.transform(lon, lat)
+            receptors.append((x, y))
+        else:
+            print(f"Skipping non-point geometry: {geom['type']}")
+
+    # generate output
+    aermod_format = ""
+    for idx, (x, y) in enumerate(receptors, start=1):
+        aermod_format += f"RE DISCCART {x:.2f} {y:.2f} 0.0\n"
+    aermod_format += "END\n"
+
+    return aermod_format

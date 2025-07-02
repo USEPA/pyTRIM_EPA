@@ -4,6 +4,7 @@ import jenkspy
 import pandas as pd
 import tempfile
 from .spatial import translate_position
+from ..parcels.utils import geojson_to_aermod_receptors
 
 
 TRY_ENCODINGS = [
@@ -387,6 +388,7 @@ class MiscAssociatedFileAERMODGeneratedReceptors(MiscAssociatedFileVariety):
         # return reformatted
         return json.dumps(reformatted).encode("utf-8")
 
+
     def perform_custom_upload_behavior(self, **kwargs):
         if "uploaded_contents" in kwargs and "metadata" in kwargs:
             metadata = kwargs.get("metadata")
@@ -394,17 +396,24 @@ class MiscAssociatedFileAERMODGeneratedReceptors(MiscAssociatedFileVariety):
 
             decoded = json.loads(uploaded_contents)
 
-            # todo -- Samuel is working on code to take a geojson and
-            # turn it into an AERMOD input file. Once that's done, we'll
-            # plug it into this method here and store both.
-            fake_placeholder = {
-                "name_from_file": decoded.get("name"),
-                "number_of_features": len(decoded.get("features", []))
-            }
+            # we need a UTM zone to call Samuel's aermod receptor generation code; just grab any
+            # single point from the geojson and go with that.
+            # (do we need to worry if 
+            first_feature = decoded["features"][0]
+            point_in_feature = first_feature["geometry"]["coordinates"]
+            point_longitude = point_in_feature[0]
+            point_latitude = point_in_feature[1]
+            utm_pos = translate_position(point_longitude, point_latitude, "WGS84_LONGLAT", "UTM")
+            just_zone = int(utm_pos[-1][0:-1])
+            in_northern_hemisphere = point_latitude > 0
+
+            if not in_northern_hemisphere:
+                raise Exception("southern hemisphere unsupported")
 
             return ({
                 "data.geojson": { "contents": uploaded_contents, "mime": self.MIME_TYPE },
-                "temp_foo.aermod": { "contents": json.dumps(fake_placeholder), "mime": "application/text" }
+                # "temp_foo.aermod": { "contents": json.dumps(fake_placeholder), "mime": "application/text" },
+                "aermod_receptors.txt": { "contents": geojson_to_aermod_receptors(uploaded_contents, just_zone, in_northern_hemisphere), "mime": "application/text" }
             }, None)
         else:
             raise Exception(f"{self.__class__}.perform_custom_upload_behavior expected 'uploaded_contents' and 'metadata' in kwargs but was missing one or more of them")

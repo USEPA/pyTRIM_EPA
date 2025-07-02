@@ -155,7 +155,7 @@
 	// aermod receptor related helper functions -- START
 	function renderAermodDownloadUi(responseData) {
 		let presignedGeojsonUrl = responseData.presigned_urls["data.geojson"];
-		let presignedAermodInputUrl = responseData.presigned_urls["temp_foo.aermod"];
+		let presignedAermodInputUrl = responseData.presigned_urls["aermod_receptors.txt"];
 
 		// update generate button label
 		$("#generate_aermod_receptors_btn").html((presignedGeojsonUrl === undefined ? "Generate" : "Regenerate") + " AERMOD Receptors");
