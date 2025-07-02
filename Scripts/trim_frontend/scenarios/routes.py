@@ -293,10 +293,10 @@ def update_scenario():
         if param_type == "MET":
             df_met = df_met.loc[(df_met.Hour < 25)]  # drop faulty
             metcol_dict = {'Rain': (0, 1), 'AirTemperature': (200, 373), 'HorizontalWindSpeed': (0, 100),
-                           'WindDirection': (-360, 360), 'MixingHeight': (0, 1000), 'isDay': (0, 1),
+                           'WindDirection': (-360, 360), 'mixingHeight': (0, 1000), 'isDay': (0, 1),
                            'CumulativeRain': (0, 1.6)}  # k, v represent name and min-max
             for k, v in metcol_dict.items():
-                if 'k' in df_met.columns:
+                if k in df_met.columns:
                     df_met['metcol'] = pd.to_numeric(df_met[k], errors='coerce')
                     df_met = df_met[
                         (df_met['metcol'] <= v[1]) & (df_met['metcol'] >= v[0])]  # keep rows within min max bounds
@@ -349,7 +349,7 @@ def update_scenario():
 
     try:
         scenario_data = request.form.to_dict()
-        print(scenario_data)
+        # print(scenario_data)
         if not scenario_data['id']:
             raise AssertionError("Scenario ID cannot be blank.")
         # Get the specified parcel
