@@ -207,6 +207,15 @@
                     $('#chemical')[0], TRIM.store.allChemicals.map(x => x.name), true);
             }
 
+            // button that opens the "+ Add" modal for adding new chemical...
+            // fix for https://icf.atlassian.net/jira/software/projects/PYTRIM/issues/PYTRIM-45; prevents selecting a previously added chemical (which then removed it)
+            $('#chemicals-add-btn').on('click', function(e){
+                let currentScenarioChemicalIds = new Set(TRIM.store.currentScenario.chemicals.map(x => x.id)); // what chemicals (id's only) are currently assoc. with the scenario?
+                let unusedChemicals = TRIM.store.allChemicals.filter(x => !currentScenarioChemicalIds.has(x.id));  // filter those out...
+                TRIM.forms.updateSelect($('#chemical')[0], unusedChemicals.map(x => x.name), true); // only show the unused chemicals in the add dialog
+            });
+
+            // button inside the "+ Add" modal that you click after picking a chemical...
             $('#add-chemicals-btn').on('click', function(e){
                 $("#chemicals-modal").find("button.close")[0].click()
                 LoadingScreen.show('adding_chemical');
