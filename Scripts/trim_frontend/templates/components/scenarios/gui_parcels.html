@@ -58,7 +58,7 @@
 				</div>
 
 				<div class="col-sm">
-					<a id="deposition-overlay-delete-btn" href="#" class="btn btn-secondary"><i class="fas fa-trash mr-1"></i>Delete <span id="deposition-overlay-current-filename"></a>
+					<a id="deposition-overlay-delete-btn" href="#" class="btn btn-secondary"><i class="fas fa-trash mr-1"></i>Delete <span id="deposition-overlay-current-filename"></span></a>
 				</div>
 			</div>
 
@@ -111,6 +111,30 @@
                 <table data-slot="true" data-target="mapTable" class="hover" id="mapTable"></table>
             </div>
         </div>
+		<div class="row">
+			<fieldset>
+				<legend>AERMOD Receptors</legend>
+				<div class="row mb-1">
+					<div class="col-sm">
+						Select the Generate AERMOD Receptors button to generate grids of AERMOD receptors, using the Receptor Spacing you entered in the editable table above. Select either Download button to download a GeoJSON or AERMOD input file of the receptor grids. You can view the generated receptors in the map by turning on the display in the map’s basemap selection box. If you subsequently change receptor spacing, you must again select Generate AERMOD Receptors. If the display in the map does not refresh, select the Recalculate button at the bottom right of the page and again turn on the display in the map’s basemap selection box.
+						<p/>
+						<a id="generate_aermod_receptors_btn" style="cursor:pointer" class="btn btn-secondary">Generate AERMOD Receptors</a>
+
+					</div>
+				</div>
+
+				<div class="row mb-1" id="aermod-receptors-current-file" style="display:none; margin-top: 20px">
+					<div class="errors">
+					</div>
+
+					<div class="col-sm">
+						<a id="aermod-receptors-download-geojson-btn" href="#" class="btn btn-secondary"><i class="fas fa-download mr-1"></i>Download geojson</a>
+						<a id="aermod-receptors-download-aermod-btn" href="#" class="btn btn-secondary"><i class="fas fa-download mr-1"></i>Download AERMOD input</a>
+					</div>
+				</div>
+
+			</fieldset>
+		</div>
     </section>
 </form>
 <link rel="stylesheet" href="{{url_for('static', filename='css/form_styles.css')}}"/>
@@ -128,6 +152,73 @@
 <script src="{{ url_for('static', filename='js/lib/shp.js') }}">
 </script>
 <script>
+	// aermod receptor related helper functions -- START
+	function renderAermodDownloadUi(responseData) {
+		let presignedGeojsonUrl = responseData.presigned_urls["data.geojson"];
+		let presignedAermodInputUrl = responseData.presigned_urls["aermod_receptors.txt"];
+
+		// update generate button label
+		$("#generate_aermod_receptors_btn").html((presignedGeojsonUrl === undefined ? "Generate" : "Regenerate") + " AERMOD Receptors");
+
+		// show the download URL
+		if (presignedGeojsonUrl != undefined) {
+			$("#aermod-receptors-download-geojson-btn").attr("href", presignedGeojsonUrl);
+			$("#aermod-receptors-download-aermod-btn").attr("href", presignedAermodInputUrl);
+			$("#aermod-receptors-current-file").show();
+		}
+
+		//plot it
+		installAermodReceptorsOntoMap(responseData, presignedGeojsonUrl);
+	}
+
+	window.receptorOverlayShowing = false;
+	let installAermodReceptorsOntoMap = function(responseData, presignedGeojsonUrl) {
+		let errorDisplayArea = $("#aermod-receptors-current-file .errors");
+		errorDisplayArea.empty();
+
+		let preserveShownState = receptorOverlayShowing;
+		if (window.receptorOverlayGroup !== null) {
+			mapLayers.removeLayer(receptorOverlayGroup); // removes option from the layers dialog
+			receptorOverlayGroup.removeFrom(map); // removes dots from the map
+		}
+
+        window.receptorOverlayGroup = L.layerGroup();
+
+		if (presignedGeojsonUrl !== undefined) {
+			if (responseData.file_metadata.errors === undefined || responseData.file_metadata.errors.length == 0) {
+				// fetch the data
+				TRIM.api.hitUrl(presignedGeojsonUrl, function(presignedSuccess, presignedResponse) {
+					let overlayGridPoints = [];
+					for (let i = 0 ; i < presignedResponse.features.length; i++) {
+						let el = presignedResponse.features[i];
+						let point = [ el.geometry.coordinates[1], el.geometry.coordinates[0] ];
+						overlayGridPoints.push(point);
+						let colorForDisplay = "#000000"; // black
+						var marker = L.circleMarker(point, { pmIgnore: true, radius: .2, stroke: true, color: colorForDisplay}).addTo(receptorOverlayGroup);
+					}
+
+
+					receptorOverlayGroup.on("add", function() { receptorOverlayShowing = true; });
+					receptorOverlayGroup.on("remove", function() { receptorOverlayShowing = false; });
+
+					// preserve previously selected state after a refresh or regeneration
+					if (preserveShownState) {
+						receptorOverlayGroup.addTo(map); // preselects it in the layers control!
+					}
+				});
+
+				mapLayers.addOverlay(receptorOverlayGroup, "AERMOD Receptors");
+			} else {
+				// I don't think this'll ever actually happen
+				$("<h4/>").html("Errors with generated file:").appendTo(errorDisplayArea);
+				for (let i = 0 ; i < responseData.file_metadata.errors.length ; i++) {
+					$("<li/>").html(responseData.file_metadata.errors[i]).appendTo(errorDisplayArea);
+				}
+			}
+		}
+	};
+	// aermod receptor related helper functions -- END
+
 	// deposition overlay helper functions -- START
 	let addDepositionOverlayLegend = function(bucketRanges, bucketColors) {
 		if (typeof depositionOverlayLegend != "undefined") {
@@ -626,10 +717,26 @@
 				LoadingScreen.hide('check_overlay_status');
 
 				if (!success) {
-					alert('An error occurred during upload.');
+					alert('An error occurred while fetching overlay data');
 				} else {
 					if (success) {
 						installDepositionOverlayOntoMap(responseData)
+					}
+				}
+			});
+		});
+
+		document.body.addEventListener('parcels:ready', function() {
+			LoadingScreen.show('check_aermod_receptors_file');
+			TRIM.api.checkMiscScenarioFile(TRIM.store.currentScenario.id, "generated_aermod_receptors", function(success,responseData) {
+				LoadingScreen.hide('check_aermod_receptors_file');
+
+				if (!success) {
+					alert('An error occurred while fetching aermod receptors');
+				} else {
+					if (success) {
+						// installDepositionOverlayOntoMap(responseData)
+						renderAermodDownloadUi(responseData);
 					}
 				}
 			});
@@ -680,6 +787,7 @@
             new_parcel.feature.properties.area = parcel.data.area;
             new_parcel.feature.properties.air = parcel.data.hasAir;
             new_parcel.feature.properties.parceltype=parcel.data.parcelType
+            new_parcel.feature.properties.receptor_spacing=parcel.data.receptor_spacing;
             new_parcel.feature.properties.landuse = {'lu': parcel.data.landUse, 'list': parcel.media}; // we will need NLCD data here?
             new_parcel.feature.properties.farmfoodchain = parcel.data.hasFarmFoodChain;
             new_parcel.feature.properties.fishfoodweb = parcel.data.hasFishFoodWeb;
@@ -908,6 +1016,27 @@
                                     "</select>" +
                                    "<label class='" + editFlag + " wetland'>" + data + "</label>"
                         }
+                    },
+                    {
+                        data: "properties.receptor_spacing",
+                        render: function (data, type, row) {
+                            let parcel_info = [{
+                                'type': 'data',
+                                'name': 'id',
+                                'value': row.properties.parcelid,
+                            },{
+                                'type': 'data',
+                                'name': 'field',
+                                'value': 'receptor_spacing'
+                            }, {
+                                'type': 'input',
+                                'name': 'receptor_spacing',
+                                'value': data
+                            }]
+                            parcel_info = JSON.stringify(parcel_info)
+                            return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
+                                "<label class='editableCell badge badge-light'>" + data + "</label>"
+                        }
                     }
                 ],
                 initComplete: function (settings, json) {
@@ -1000,6 +1129,32 @@
                     mapTableRedraw()
                 }
             })
+
+			// AERMOD Receptor UI setup -- start
+			$("a#generate_aermod_receptors_btn").click(function() {
+				console.log("do something!");
+
+				LoadingScreen.show('generating_aermod_receptors');
+				TRIM.api.runReceptorGeneration('{{ scenario.id }}', function(success, responseData) {
+					if (success) {
+						renderAermodDownloadUi(responseData);
+					}
+					LoadingScreen.hide('generating_aermod_receptors');
+				});
+			});
+
+			/*
+			// abandoned -- button on the column header
+			$("table[data-target='mapTable']:first th").each(function() {
+				if ($(this).text().indexOf("Receptor Spacing") != -1) {
+					let a = $("<a/>").css("cursor", "pointer").attr("id", "foo").addClass("btn btn-secondary").html("Generate AERMOD Receptors");
+					let d = $("<div/>").appendTo($(this));
+					a.appendTo(d);
+
+				}
+			});
+			*/
+			// AERMOD Receptor UI setup -- end
         }
 
         // var map = L.map('mapid', { drawControl: false }).setView([35.99, -78.90], 12);
@@ -1049,6 +1204,7 @@
 		// depositionOverlayGroup, mapLayers, depositionOverlayLegend, etc. are globals set
 		// on the window. Would be nice to not do that...
         window.depositionOverlayGroup = L.layerGroup();
+        window.receptorOverlayGroup = null; // L.layerGroup();
 
         var togglelayers = L.layerGroup([wmsNLCD2016])
 
@@ -1498,6 +1654,7 @@
                 shapes.features[i].properties.farmfoodchain = e["Farm Food Chain"]
                 shapes.features[i].properties.fishfoodweb = e["Fish Food Web"]
                 shapes.features[i].properties.wetland = e["Wetland"]
+                shapes.features[i].properties.receptor_spacing = e["Receptor Spacing (m)"]
             })
         }
 

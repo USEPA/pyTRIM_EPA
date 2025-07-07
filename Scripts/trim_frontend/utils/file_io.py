@@ -1,8 +1,10 @@
 import json, os
+import boto3
 import jenkspy
 import pandas as pd
 import tempfile
 from .spatial import translate_position
+from ..parcels.utils import geojson_to_aermod_receptors
 
 
 TRY_ENCODINGS = [
@@ -158,6 +160,8 @@ class MiscAssociatedFileVariety():
         # when/if we add another.
         if variety_name == "deposition_overlay":
             return MiscAssociatedFileDepositionOverlay(variety_name)
+        elif variety_name == "generated_aermod_receptors":
+            return MiscAssociatedFileAERMODGeneratedReceptors(variety_name)
 
         # return basic/generic variety
         return MiscAssociatedFileVariety(variety_name)
@@ -323,3 +327,228 @@ class MiscAssociatedFileDepositionOverlay(MiscAssociatedFileVariety):
 
     def get_files_to_suppress_from_download(self):
         return ["original.plt"]
+
+class MiscAssociatedFileAERMODGeneratedReceptors(MiscAssociatedFileVariety):
+    MIME_TYPE = "application/geojson"
+    STORAGE_EXTENSION = "geojson"
+
+    # we already have this data in memory, no need to open it
+    # like w/ MiscAssociatedFileDepositionOverlay custom code.
+    # this is instead of implementing
+    # perform_custom_upload_behavior for this class.
+    def convert_grid_point_data_to_binary_geojson(self, grid_point_data):
+        # PART 1: we want to make something like this:
+        """
+        {
+        "type": "FeatureCollection",
+        "name": "output_grid_points_all",
+        "crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+        "features": [
+        { "type": "Feature", "properties": { "parcel_id": 0, "spacing_m": 100 }, "geometry": { "type": "Point", "coordinates": [ -85.421154684715873, 44.234350919704234 ] } },
+        { "type": "Feature", "properties": { "parcel_id": 0, "spacing_m": 100 }, "geometry": { "type": "Point", "coordinates": [ -85.420256369431755, 44.233707280018194 ] } },
+        ...
+        ] }
+        """
+
+        reformatted = {
+            "type": "FeatureCollection",
+            "name": "trim_generated_aermod_receptors",
+            "crs": {
+                "type": "name",
+                "properties": {
+                    "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+                }
+            },
+            "features": []
+        }
+
+        for gpd in grid_point_data:
+            parcel_id = gpd.get("parcel_id")
+            spacing_m = gpd.get("spacing_m")
+            long_lat_pairs = gpd.get("long_lat_pairs")
+            for pair in long_lat_pairs:
+                feature = {
+                    "type": "Feature",
+                    "properties": {
+                        "parcel_id": parcel_id,
+                        "spacing_m": spacing_m
+                    },
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [
+                            pair[0],    # longitude
+                            pair[1]     # latitude
+                        ]
+                    }
+                }
+                reformatted["features"].append(feature)
+
+        # PART 2: we want this to be a file-like object so
+        # that we can leverage the built-in file upload code
+        # return reformatted
+        return json.dumps(reformatted).encode("utf-8")
+
+
+    def perform_custom_upload_behavior(self, **kwargs):
+        if "uploaded_contents" in kwargs and "metadata" in kwargs:
+            metadata = kwargs.get("metadata")
+            uploaded_contents = kwargs.get("uploaded_contents")
+
+            decoded = json.loads(uploaded_contents)
+
+            # we need a UTM zone to call Samuel's aermod receptor generation code; just grab any
+            # single point from the geojson and go with that.
+            # (do we need to worry if 
+            first_feature = decoded["features"][0]
+            point_in_feature = first_feature["geometry"]["coordinates"]
+            point_longitude = point_in_feature[0]
+            point_latitude = point_in_feature[1]
+            utm_pos = translate_position(point_longitude, point_latitude, "WGS84_LONGLAT", "UTM")
+            just_zone = int(utm_pos[-1][0:-1])
+            in_northern_hemisphere = point_latitude > 0
+
+            if not in_northern_hemisphere:
+                raise Exception("southern hemisphere unsupported")
+
+            return ({
+                "data.geojson": { "contents": uploaded_contents, "mime": self.MIME_TYPE },
+                # "temp_foo.aermod": { "contents": json.dumps(fake_placeholder), "mime": "application/text" },
+                "aermod_receptors.txt": { "contents": geojson_to_aermod_receptors(uploaded_contents, just_zone, in_northern_hemisphere), "mime": "application/text" }
+            }, None)
+        else:
+            raise Exception(f"{self.__class__}.perform_custom_upload_behavior expected 'uploaded_contents' and 'metadata' in kwargs but was missing one or more of them")
+
+# non-api-specific utility function that retrieves/uploads/deletes a
+# MiscAssociatedFileVariety file. refactored from the "manage_misc_scenario_file"
+# endpoint/route handler
+def associated_file_helper(scenario_id, misc_file_type:str, operation:str, file_obj = None, file_metadata=None):
+
+    print(f"ASSOCIATED FILE HELPER REFACTORIZATION: {scenario_id=}, {misc_file_type=}, {operation=}")
+    # this function leverages the MiscAssociatedFileVariety class hierarchy defined in ../utils/file_io.py; provides basic defaults as
+    # described above for "store this file on S3 and do nothing else" but can also provide custom behavior easily like preprocessing a file, setting
+    # smarter MIME/content type, etc. For instance the "deposition_overlay" misc_file_type/variety:
+    # 1. processes the uploaded file
+    # 2. stores both the original uploaded file (just in case / proof-of-concept) and the processed version
+    # 3. returns presigned url for just the processed version on a GET
+    #
+    # initially this is only used for those aermod deposition overlays on the parcels tab, but it could be used in other places going forward.
+    rv = {}
+    operation = operation.upper()
+    if operation not in ["DELETE", "CHECK", "UPLOAD"]:
+        raise Exception(f"Unsupported file op '{operation}'")
+
+    print("REFACTORED ASSOCIATED_FILE_HELPER HERE WE GO!")
+    file_storage_bucket = os.getenv("SCENARIO_MISC_FILES_BUCKET_NAME")
+
+    s3_client = boto3.client("s3")
+    s3_resource = boto3.resource("s3")
+
+    fv = MiscAssociatedFileVariety.construct_file_variety(misc_file_type)
+
+    s3_metadata_path = f"{scenario_id}/{misc_file_type}/_metadata.json"
+
+    print(f"bucket={file_storage_bucket}; metadata {s3_metadata_path}")
+
+    do_return_metadata_and_presigned_urls = False
+    if operation == "DELETE":
+        bucket = s3_resource.Bucket(file_storage_bucket)
+        bucket.objects.filter(Prefix=f"{scenario_id}/{misc_file_type}/").delete()
+        rv["delete_operation"] = True
+    elif operation == "CHECK":
+        do_return_metadata_and_presigned_urls = True
+    elif operation == "UPLOAD":
+        try:
+            if fv.has_custom_upload_behavior():
+                if type(file_obj) is bytes:
+                    uploaded_file_content = file_obj
+                else:
+                    fpn = file_obj.stream
+                    try:
+                        fpn.seek(0)
+                        uploaded_file_content = fpn.read().decode("utf-8")
+                    except Exception as e:
+                        raise Exception(e)
+
+                upload_directives, additional_metadata = fv.perform_custom_upload_behavior(uploaded_contents=uploaded_file_content, metadata=file_metadata)
+                for upload_filename in upload_directives:
+                    uploadable_dict = upload_directives[upload_filename]
+                    uploadable_item = uploadable_dict.get("contents")
+                    uploadable_mime = uploadable_dict.get("mime", fv.get_storage_mime_type())
+                    loop_s3_file_path = f"{scenario_id}/{misc_file_type}/{upload_filename}"
+
+                    s3_client.put_object(
+                        Body=uploadable_item,
+                        Bucket=file_storage_bucket,
+                        Key=loop_s3_file_path,
+                        ContentType=uploadable_mime
+                    )
+
+                if additional_metadata is not None:
+                    file_metadata = file_metadata | additional_metadata
+            else:
+                s3_file_path = f"{scenario_id}/{misc_file_type}/data{fv.get_storage_file_extension()}"
+
+                s3_client.put_object(
+                    Body=file_obj,
+                    Bucket=file_storage_bucket,
+                    Key=s3_file_path,
+                    ContentType=fv.get_storage_mime_type()
+                )
+
+            # update the metadata too - for default or custom
+            s3_client.put_object(
+                Body=json.dumps(file_metadata),
+                Bucket=file_storage_bucket,
+                Key=s3_metadata_path,
+                ContentType="application/json"
+            )
+
+            do_return_metadata_and_presigned_urls = True
+        except Exception as e:
+            raise Exception(e)
+
+    print(f"past first section; {do_return_metadata_and_presigned_urls=}")
+
+    if do_return_metadata_and_presigned_urls:
+        file_metadata = None
+        try:
+            content_object = s3_resource.Object(file_storage_bucket, s3_metadata_path)
+            file_content = content_object.get()["Body"].read().decode("utf-8")
+            file_metadata = json.loads(file_content)
+        except:
+            file_metadata = None
+        
+        if file_metadata is not None:
+            rv["file_metadata"] = file_metadata
+        else:
+            rv["file_metadata"] = None
+
+        # now make presigned urls
+        rv["presigned_urls"] = {}
+        try:
+            # get everythign in the appropriate subdir
+            response = s3_client.list_objects_v2(
+                    Bucket=file_storage_bucket,
+                    Prefix = f"{scenario_id}/{misc_file_type}/",
+                    MaxKeys=100 )
+
+            s3_files = response.get("Contents", [])
+            for f in s3_files:
+                suppressed_files = fv.get_files_to_suppress_from_download()
+
+                loop_key = f.get("Key")
+                if loop_key != s3_metadata_path:
+                    nested_path = loop_key.replace(f"{scenario_id}/{misc_file_type}/", "")
+
+                    if nested_path not in suppressed_files:
+                        data_url = s3_client.generate_presigned_url("get_object",
+                                                                    Params={
+                                                                        "Bucket": file_storage_bucket,
+                                                                        "Key": loop_key
+                                                                    },
+                                                                    ExpiresIn=600) # expires in 10 minute(s)
+                        rv["presigned_urls"][nested_path] = data_url
+        except Exception as e:
+            raise Exception(e)
+
+    return rv

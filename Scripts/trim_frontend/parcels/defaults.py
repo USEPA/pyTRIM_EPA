@@ -17,10 +17,15 @@ def serialize_parcel(pcl: Parcel):
     soil_abiotic_params = get_soil_abiotic_params(pcl)
     initial_conc = get_initial_concetrations(pcl)
 
+    cdv = get_comp(pcl, {"name":"DryVaporSource"})
+    spacing_param = cdv.parameters.get("ReceptorSpacing")
+    spacing_val = spacing_param.default_value if type(spacing_param) is ParameterDefinition else spacing_param.value
+
     s = {
         'id': pcl.id,
         'name': pcl.name,
         'description': pcl.description if pcl.description else "None",
+        'receptor_spacing': spacing_val,
         'vertices': pcl.vertices,
         'area': pcl.area.m_as('m^2'),
         'compartment_map': {ve.name: [c.name for c in ve.compartments] for ve in pcl.volume_elements},

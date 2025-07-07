@@ -2,11 +2,15 @@ import re, json
 import numpy as np
 from copy import deepcopy
 from pprint import pprint
+import geopandas as gpd
+from shapely.geometry import Polygon, Point
+from shapely.prepared import prep
 from ..scenarios.utils import init_parameter_definitions
 from ..scenarios.defaults import get_surface_runoff
 from .defaults import SURFACE_SOIL_SPECIFIC_MEDIA_PARAMS
 
 from flask_api import ApiResult
+from pyproj import Transformer
 
 from trim_db.schema import CustomParameter, ParameterDefinition, Parcel
 from trim_db.services import ChemicalService, CompartmentService, FormulaService, ParameterService, ParcelService, ScenarioService, VolumeElementService
@@ -547,6 +551,34 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                 eq = new_formula
             FormulaService.get(sender_par.formula.id).equation = new_formula
             FormulaService.commit()
+    if field_name == "receptor_spacing":
+        submitted_spacing_val = parcels_data.get("receptor_spacing")
+
+        if (not str(submitted_spacing_val).isnumeric()):
+            raise Exception(f"bad input {submitted_spacing_val}")
+
+        cdv = p.get_compartment('DryVaporSource')
+        param_obj = cdv.parameters.get("ReceptorSpacing")
+
+        # first time through this is a "ParameterDefinition"; subsequent visits
+        # it is a CustomParameter....so create/update as needed
+        if type(param_obj) is ParameterDefinition:
+            param = ParameterService.get_or_create(
+                definition_id=param_obj.id,
+                scenario_id=p.scenario_id,
+                requirements=f"(self.id == {cdv.id})", # compartment id
+                value=submitted_spacing_val
+            )
+
+            ParameterService.update(param)
+        elif type(param_obj) is CustomParameter:
+            param_obj.value = submitted_spacing_val
+            ParameterService.update(param_obj)
+        else:
+            raise Exception("unexpected param_obj type...")
+
+        ParameterService.commit()
+
 
     # Update record
     ParcelService.update(p)
@@ -1042,3 +1074,134 @@ def get_watershed_area(pcl):
     # 3. get the watershed area specific to this surface water parcel
     pcl_watershed = wsa_matrix[pcl_names.index(pcl.name)]
     return pcl_watershed[0, 0]
+
+
+# adapted from Samuel's "grid_points_in_polygon_meters" method
+def calculate_receptor_grid_points_for_parcel(pcl:Parcel):
+    """
+    Calculate a rectangular grid of points inside the polygon defined by a parcel's
+    vertices and spacing custom parameter.
+
+    Parameters:
+        pcl (Parcel): parcel
+
+    Returns:
+        None if error; else a dictionary with keys:
+            "scenario_id": the scenario id
+            "spacing_m": spacing in meters
+            "long_lat_pairs": list of lists of floats: Points representing the grid (in EPSG:4326 / WGS84). longitude is first element, latitude is second
+                                e.g.:
+                                    [
+                                        [-85.41157568471587, 44.26498030459199],
+                                        .....
+                                        [-85.41157568471587, 44.26562360214414]
+                                    ]
+    """
+    try:
+
+        # EPSG:4326 is WGS84, which is what our parcel vertices are based on.
+        # Samuel's algorithm switches to 3857 for calculating the grid points
+        CRS_FOR_WGS84 = 4326
+        CRS_FOR_GRID_CALCS = 3857
+        # note -- according to https://github.com/CityScope/CS_choiceModels/issues/4,
+        # CRS84 is also equvalent to EPSG:4326
+
+        def get_comp(p:Parcel, kwargs):
+            comp = p.get_compartment(**kwargs)
+
+            if kwargs.get("name") and isinstance(comp, list):
+                comp = comp[0]
+
+            return comp
+
+        cdv = get_comp(pcl, {"name":"DryVaporSource"})
+        spacing_param = cdv.parameters.get("ReceptorSpacing")
+        spacing_meters = spacing_param.default_value if type(spacing_param) is ParameterDefinition else spacing_param.value
+
+        if len(pcl.vertices) == 0:
+            print(f"WARNING - {pcl} has no defined vertices; returning empty list")
+            return None
+
+        # Load it into a GeoDataFrame so we can change coordinate systems using gdf.to_crs
+        gdf = gpd.GeoDataFrame((Polygon(pcl.vertices),), columns=['geometry'], crs=CRS_FOR_WGS84)
+        # (this dataframe is a single row with a single column; geometry contains all the points
+
+        # Project to a CRS in meters (Web Mercator here; you could also use UTM for better accuracy)
+        gdf_proj = gdf.to_crs(epsg=CRS_FOR_GRID_CALCS)
+        polygon = gdf_proj.geometry[0]
+        prep_poly = prep(polygon)
+
+        # Get bounding box in projected meters
+        min_x, min_y, max_x, max_y = polygon.bounds
+        x_coords = np.arange(min_x, max_x + spacing_meters, spacing_meters)
+        y_coords = np.arange(min_y, max_y + spacing_meters, spacing_meters)
+
+        # Generate grid
+        points_inside = []
+        for x in x_coords:
+            for y in y_coords:
+                pt = Point(x, y)
+                if prep_poly.contains(pt):
+                    points_inside.append(pt)
+
+        # Convert list of Points to GeoDataFrame in EPSG:3857, then reproject back to EPSG:4326
+        points_gdf = gpd.GeoDataFrame(geometry=points_inside, crs=f"EPSG:{CRS_FOR_GRID_CALCS}")
+        # return points_gdf.to_crs(epsg=CRS_FOR_WGS84)
+        converted_points = points_gdf.to_crs(epsg=CRS_FOR_WGS84)
+
+        simple_list_of_longs_and_lats = []
+        for row in converted_points.itertuples():
+            simple_pt = [[x[0], x[1]] for x in row.geometry.coords][0]
+            simple_list_of_longs_and_lats.append(simple_pt)
+
+        return {
+            "parcel_id": pcl.id,
+            "spacing_m": spacing_meters,
+            "long_lat_pairs": simple_list_of_longs_and_lats
+        }
+    except Exception as e:
+        print(f"ERROR calculating grid points for parcel {pcl}: {e}")
+        return None
+
+# this is an adapted version of Samuel's "geojson_to_aermod_receptors" function; minor
+# changes made to help it work within TRIM app
+def geojson_to_aermod_receptors(geojson_contents, utm_zone=None, northern_hemisphere=True):
+    """
+    Converts GeoJSON points to AERMOD receptor file format.
+
+    Parameters:
+    - geojson_contents: str containing GeoJSON
+    - utm_zone: int, UTM zone number
+    - northern_hemisphere: bool, True if northern hemisphere, False for southern
+
+    Output:
+    - AERMOD receptor file text (to be written to a file, returned to client, etc.)
+    """
+    # Set up transformer for lat/lon -> UTM
+    proj_str = f"+proj=utm +zone={utm_zone} +datum=WGS84 +units=m +no_defs"
+    if not northern_hemisphere:
+        proj_str += " +south"
+    transformer = Transformer.from_crs("EPSG:4326", proj_str, always_xy=True)
+
+    # Read GeoJSON
+    parsed_geojson = json.loads(geojson_contents)
+
+    receptors = []
+
+    # Extract coordinates
+    for feature in parsed_geojson['features']:
+        geom = feature['geometry']
+        if geom['type'] == 'Point':
+            lon, lat = geom['coordinates']
+            x, y = transformer.transform(lon, lat)
+            receptors.append((x, y))
+        else:
+            print(f"Skipping non-point geometry: {geom['type']}")
+
+    # generate output
+    aermod_format = ""
+    for idx, (x, y) in enumerate(receptors, start=1):
+        aermod_format += f"RE DISCCART {x:.2f} {y:.2f} 0.0\n"
+    aermod_format += "END\n"
+
+    return aermod_format
