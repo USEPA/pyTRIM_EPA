@@ -31,6 +31,38 @@
 				</div>
 			</div>
 		</fieldset>
+		<fieldset>
+			<legend>Deposition Overlay</legend>
+			<div class="row mb-1">
+				<div class="col-sm">
+					<div data-slot="true" data-target="deposition_overlay_file"></div>
+
+					<div class="row mb-1 subform">
+						<div class="col-md">
+							<div data-slot="true" data-target="deposition_overlay_upload_coordinates_system"></div>
+						</div>
+						<div class="col-md" style="opacity:0">
+							<div data-slot="true" data-target="deposition_overlay_upload_utm_zone"></div>
+						</div>
+					</div>
+
+					<div data-slot="true" data-target="deposition_overlay_zflag_restriction"></div>
+
+					<!-- <div data-slot="true" data-target="parcel_coordinates_description"></div> -->
+					<a id="deposition-overlay-upload-btn" href="#" class="btn btn-secondary"><i class="fas fa-upload mr-1"></i>Upload</a>
+				</div>
+			</div>
+
+			<div class="row mb-1" id="deposition-overlay-current-file" style="display:none; margin-top: 20px">
+				<div class="errors">
+				</div>
+
+				<div class="col-sm">
+					<a id="deposition-overlay-delete-btn" href="#" class="btn btn-secondary"><i class="fas fa-trash mr-1"></i>Delete <span id="deposition-overlay-current-filename"></span></a>
+				</div>
+			</div>
+
+		</fieldset>
         <div id="parcel_file_fields_div">
             <div class="row">
                 <div class="col-sm">
@@ -79,9 +111,34 @@
                 <table data-slot="true" data-target="mapTable" class="hover" id="mapTable"></table>
             </div>
         </div>
+		<div class="row">
+			<fieldset>
+				<legend>AERMOD Receptors</legend>
+				<div class="row mb-1">
+					<div class="col-sm">
+						Select the Generate AERMOD Receptors button to generate grids of AERMOD receptors, using the Receptor Spacing you entered in the editable table above. Select either Download button to download a GeoJSON or AERMOD input file of the receptor grids. You can view the generated receptors in the map by turning on the display in the map’s basemap selection box. If you subsequently change receptor spacing, you must again select Generate AERMOD Receptors. If the display in the map does not refresh, select the Recalculate button at the bottom right of the page and again turn on the display in the map’s basemap selection box.
+						<p/>
+						<a id="generate_aermod_receptors_btn" style="cursor:pointer" class="btn btn-secondary">Generate AERMOD Receptors</a>
+
+					</div>
+				</div>
+
+				<div class="row mb-1" id="aermod-receptors-current-file" style="display:none; margin-top: 20px">
+					<div class="errors">
+					</div>
+
+					<div class="col-sm">
+						<a id="aermod-receptors-download-geojson-btn" href="#" class="btn btn-secondary"><i class="fas fa-download mr-1"></i>Download geojson</a>
+						<a id="aermod-receptors-download-aermod-btn" href="#" class="btn btn-secondary"><i class="fas fa-download mr-1"></i>Download AERMOD input</a>
+					</div>
+				</div>
+
+			</fieldset>
+		</div>
     </section>
 </form>
 <link rel="stylesheet" href="{{url_for('static', filename='css/form_styles.css')}}"/>
+<link rel="stylesheet" href="{{url_for('static', filename='css/custom_icons.css')}}"/>
 <script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}">
 </script>
 <script src="{{ url_for('static', filename='js/lib/dataTables/jquery.dataTables.min.js') }}">
@@ -95,7 +152,310 @@
 <script src="{{ url_for('static', filename='js/lib/shp.js') }}">
 </script>
 <script>
-    var map = L.map('mapid', { drawControl: false }).setView([35.99, -78.90], 12);
+	// aermod receptor related helper functions -- START
+	function renderAermodDownloadUi(responseData) {
+		let presignedGeojsonUrl = responseData.presigned_urls["data.geojson"];
+		let presignedAermodInputUrl = responseData.presigned_urls["aermod_receptors.txt"];
+
+		// update generate button label
+		$("#generate_aermod_receptors_btn").html((presignedGeojsonUrl === undefined ? "Generate" : "Regenerate") + " AERMOD Receptors");
+
+		// show the download URL
+		if (presignedGeojsonUrl != undefined) {
+			$("#aermod-receptors-download-geojson-btn").attr("href", presignedGeojsonUrl);
+			$("#aermod-receptors-download-aermod-btn").attr("href", presignedAermodInputUrl);
+			$("#aermod-receptors-current-file").show();
+		}
+
+		//plot it
+		installAermodReceptorsOntoMap(responseData, presignedGeojsonUrl);
+	}
+
+	window.receptorOverlayShowing = false;
+	let installAermodReceptorsOntoMap = function(responseData, presignedGeojsonUrl) {
+		let errorDisplayArea = $("#aermod-receptors-current-file .errors");
+		errorDisplayArea.empty();
+
+		let preserveShownState = receptorOverlayShowing;
+		if (window.receptorOverlayGroup !== null) {
+			mapLayers.removeLayer(receptorOverlayGroup); // removes option from the layers dialog
+			receptorOverlayGroup.removeFrom(map); // removes dots from the map
+		}
+
+        window.receptorOverlayGroup = L.layerGroup();
+
+		if (presignedGeojsonUrl !== undefined) {
+			if (responseData.file_metadata.errors === undefined || responseData.file_metadata.errors.length == 0) {
+				// fetch the data
+				TRIM.api.hitUrl(presignedGeojsonUrl, function(presignedSuccess, presignedResponse) {
+					let overlayGridPoints = [];
+					for (let i = 0 ; i < presignedResponse.features.length; i++) {
+						let el = presignedResponse.features[i];
+						let point = [ el.geometry.coordinates[1], el.geometry.coordinates[0] ];
+						overlayGridPoints.push(point);
+						let colorForDisplay = "#000000"; // black
+						var marker = L.circleMarker(point, { pmIgnore: true, radius: .2, stroke: true, color: colorForDisplay}).addTo(receptorOverlayGroup);
+					}
+
+
+					receptorOverlayGroup.on("add", function() { receptorOverlayShowing = true; });
+					receptorOverlayGroup.on("remove", function() { receptorOverlayShowing = false; });
+
+					// preserve previously selected state after a refresh or regeneration
+					if (preserveShownState) {
+						receptorOverlayGroup.addTo(map); // preselects it in the layers control!
+					}
+				});
+
+				mapLayers.addOverlay(receptorOverlayGroup, "AERMOD Receptors");
+			} else {
+				// I don't think this'll ever actually happen
+				$("<h4/>").html("Errors with generated file:").appendTo(errorDisplayArea);
+				for (let i = 0 ; i < responseData.file_metadata.errors.length ; i++) {
+					$("<li/>").html(responseData.file_metadata.errors[i]).appendTo(errorDisplayArea);
+				}
+			}
+		}
+	};
+	// aermod receptor related helper functions -- END
+
+	// deposition overlay helper functions -- START
+	let addDepositionOverlayLegend = function(bucketRanges, bucketColors) {
+		if (typeof depositionOverlayLegend != "undefined") {
+			map.removeControl(depositionOverlayLegend); // removes the legend
+		}
+
+		// thx https://codepen.io/haakseth/pen/KQbjdO
+		window.depositionOverlayLegend = L.control({ position: "bottomright" });
+
+		depositionOverlayLegend.onAdd = function(map) {
+			var div = L.DomUtil.create("div", "leaflet-legend deposition-overlay");
+
+			div.innerHTML += "<h4>Total Deposition (g/m<sup>2</sup>)</h4>";
+			for (let i = quartileGradient.length - 1 ; i >= 0 ; i--) {
+				let jenksBucket = bucketRanges[i];
+				let rangeDisplay = jenksBucket.from.toExponential() + " - " + jenksBucket.to.toExponential();
+				div.innerHTML += '<i style="background: ' +
+					quartileGradient[i] +
+					'"></i><span>' + 
+					rangeDisplay +
+					'</span><br>';
+			}
+
+			return div;
+		};
+
+		depositionOverlayLegend.addTo(map);
+	};
+
+	let uninstallDepositionOverlayFromMap = function() {
+		if (typeof depositionOverlayLegend != "undefined") {
+			map.removeControl(depositionOverlayLegend); // removes the legend
+		}
+		mapLayers.removeLayer(depositionOverlayGroup); // removes from the layers menu
+		depositionOverlayGroup.removeFrom(map); // hides from the map
+		$("#deposition-overlay-current-file").hide(); // hide management ui
+	};
+
+	let installDepositionOverlayOntoMap = function(responseData) {
+		let errorDisplayArea = $("#deposition-overlay-current-file .errors");
+		errorDisplayArea.empty();
+
+		if (responseData.file_metadata != null) {
+			// show the management UI
+			$("#deposition-overlay-current-filename").html(responseData.file_metadata.original_file_name);
+			$("#deposition-overlay-current-file").show();
+
+			if (responseData.file_metadata.errors === undefined || responseData.file_metadata.errors.length == 0) {
+				// fetch the data
+				let presignedUrl = responseData.presigned_urls["processed.json"];
+
+				TRIM.api.hitUrl(presignedUrl, function(presignedSuccess, presignedResponse) {
+					// the https://stackoverflow.com/questions/10756313/javascript-jquery-map-a-range-of-numbers-to-another-range-of-numbers, with a twist
+					/*
+					function findGradientSlot (number, inMin, inMax, outMin, outMax) {
+						return Math.round((number - inMin) * (outMax - outMin) /
+							(inMax - inMin) + outMin);
+					}
+					*/
+
+					let overlayPolyPoints = [];
+					for (let i = 0 ; i < presignedResponse.row_data.length; i++) {
+						let el = presignedResponse.row_data[i];
+						let point = [ el.wgs84_lat, el.wgs84_long ];
+						overlayPolyPoints.push(point);
+						let colorForDisplay = quartileGradient[el.jenks_bucket];
+						var marker = L.circleMarker(point, { pmIgnore: true, radius: 1, stroke: true, color: colorForDisplay}).bindPopup("Total Depo == " + el.combined_deposition.toExponential()).addTo(depositionOverlayGroup);
+					}
+
+					addDepositionOverlayLegend(responseData.file_metadata.jenks_buckets, quartileGradient);
+
+					depositionOverlayGroup.on("add", function() { $(".leaflet-legend").removeClass("hidden"); });
+					depositionOverlayGroup.on("remove", function() { $(".leaflet-legend").addClass("hidden"); });
+					depositionOverlayGroup.addTo(map); // preselects it in the layers control!
+				});
+
+				mapLayers.addOverlay(depositionOverlayGroup, "Deposition");
+			} else {
+				$("<h4/>").html("Errors with uploaded file:").appendTo(errorDisplayArea);
+				for (let i = 0 ; i < responseData.file_metadata.errors.length ; i++) {
+					$("<li/>").html(responseData.file_metadata.errors[i]).appendTo(errorDisplayArea);
+				}
+			}
+		}
+	};
+	// deposition overlay helper functions -- END
+
+	var map = L.map('mapid', { drawControl: false }).setView([35.99, -78.90], 12);
+
+	// Useful links:
+	// https://colordesigner.io/gradient-generator !
+	// https://visualisingdata.com/2019/08/five-ways-to-design-for-red-green-colour-blindness/
+	let quartileGradient = [ "#D8C56C", "#C55B6C", "#A03C8E", "#7D1F4B" ]; // low->high
+
+	// START -- dots on vertices
+
+	// dot is the leaflet internal id
+	// parcel is object containing the TRIM parcel id and the leaflet internal id
+	// e.g.:
+	// { leafletDotIdOne: { trimParcelId: A, leafletPolygonId: B }, leafletDotIdTwo: { trimParcelId: foo, leafletPolygonId: bar } }
+	let dotToParcel = {};
+
+	let addParcelAssociation = function(elementId, storageStructure, storageKey, associationType) {
+		if (associationType === undefined) {
+			associationType = "oneToOne";
+		}
+
+		if (associationType == "oneToMany") {
+			if (!(storageKey in storageStructure)) {
+				storageStructure[storageKey] = [];
+			}
+			if (!(elementId in storageStructure[storageKey])) {
+				storageStructure[storageKey].push(elementId);
+			}
+		} else if (associationType == "oneToOne") {
+			storageStructure[storageKey] = elementId;
+		}
+	};
+
+	let clearParcelAssociations = function(parcelId) {
+		for (let dotId in dotToParcel) {
+			if (dotToParcel[dotId] == parcelId) {
+				delete dotToParcel[dotId];
+			}
+		}
+	};
+
+	map.on('layerremove', function(e) {
+		if (e.layer.feature !== undefined) { // a parcel polygon was just deleted by the user...
+			// console.log("parcel remove: '" + e.layer.feature.properties.name + "' (leafletid==" + L.stamp(e.layer) + ", TRIM parcelid==" + e.layer.feature.properties.parcelid + ")");
+			clearParcelAssociations(e.layer.feature.properties.parcelid);
+
+			let relatedStampId = L.stamp(e.layer);
+			map.eachLayer(function(probe) {
+				if (probe.dotMarkerData !== undefined &&
+					probe.dotMarkerData.type == "VertexDotMarkers" &&
+					(probe.dotMarkerData.properties.relatedParcelId == e.layer.feature.properties.parcelid ||
+						probe.dotMarkerData.properties.relatedLeafletId == relatedStampId)) {
+					map.removeLayer(probe);
+					return;
+				}
+			});
+		} else {
+			let deletedId = L.stamp(e.layer);
+			if (deletedId in dotToParcel) {
+				// user clicked on an individual dot making up a parcel, not the middle of the parcel...let's delete the
+				// underlying parcel...
+
+				// console.log("dot '" + deletedId + "' removed: that's parcel " + dotToParcel[deletedId]);
+
+				map.eachLayer(function(probe) {
+					if (probe.feature !== undefined &&
+						probe.feature.type == "Feature" &&
+						(probe.feature.properties.parcelid == dotToParcel[deletedId].trimParcelId ||
+							L.stamp(probe) == dotToParcel[deletedId].leafletPolygonId)) {
+						window.deleteParcelFromServer({"properties": { "parcelid": probe.feature.properties.parcelid } });
+						map.removeLayer(probe);
+						return;
+					}
+				});
+			}
+		}
+	});
+
+	let mapDotColor = "#3388ff";
+
+	// case 1 -- fires on initial load, NOT when drawing a parcel on-the-fly
+	map.on('layeradd', function(e) {
+		if (e.layer.feature !== undefined) { // a parcel polygon was just added...doesn't fire for e.g. dotMarkers
+			// see also e.layer._leaflet_id
+			// console.log("layer add: '" + e.layer.feature.properties.name + "' (leafletid==" + L.stamp(e.layer) + ", TRIM parcelid==" + e.layer.feature.properties.parcelid + ")");
+
+			// add arbitrary something to the layer?
+			// e.layer.feature.properties.leafletLayerId = "hello-" + L.stamp(e.layer) + "-world";
+
+			let parcelDefinition = TRIM.store.currentScenario.parcels.find((element) => element.id == e.layer.feature.properties.parcelid);
+			if (parcelDefinition !== undefined) {
+				let dotMarkers = [];
+				for (let i = 0 ; i < parcelDefinition.vertices.length - 1 ; i++) {
+					let vertex = parcelDefinition.vertices[i];
+					// reverse lat/long; leaflet expects different order than we use in TRIM
+					let dotMarker = L.circleMarker([vertex[1], vertex[0]], { radius: 3, stroke: true, color: mapDotColor});
+					dotMarkers.push(dotMarker);
+
+					// note that these dots are currently "behind" the lines; that's ok since they're the same color.
+					// If we wanted a different color, look into:
+					// https://gis.stackexchange.com/questions/137061/changing-layer-order-in-leaflet
+					// basically we could call bringToFront on each marker - not doing it as long as colors are same.
+
+					// track this for later; need it during deletions
+					addParcelAssociation({
+						"trimParcelId": e.layer.feature.properties.parcelid,
+						"leafletPolygonId": L.stamp(e.layer)
+					}, dotToParcel, L.stamp(dotMarker));
+				}
+
+				let lg = L.layerGroup(dotMarkers).addTo(map);
+
+				// We need to be able to delete this group when the underlying parcel is deleted, otherwise we'll
+				// have some random dots still left on the map.
+				// could either store "lg" somewhere to access later...
+				// ...or we can just put some data onto the leaflet object in relatedParcelId, and look it up during a delete.
+				// that's what we'll do.
+				let dotMarkerData = lg.dotMarkerData = lg.dotMarkerData || {};
+				dotMarkerData.type = "VertexDotMarkers";
+				dotMarkerData.properties = dotMarkerData.properties || {};
+				lg.dotMarkerData.properties.relatedParcelId = e.layer.feature.properties.parcelid;
+				lg.dotMarkerData.properties.relatedLeafletId = L.stamp(e.layer);
+			}
+		}
+	});
+
+	// case 2 -- fires when drawing a parcel on-the-fly. We don't have an entry in currentScenario.parcels so all we can use is
+	// the internal leaflet id we get by calling L.stamp
+	map.on('pm:create', ({layer})=>{
+		let dotMarkers = [];
+		for (let i = 0 ; i < layer._latlngs[0].length ; i++) {
+			let dotMarker = L.circleMarker(layer._latlngs[0][i], { radius: 3, stroke: true, color: mapDotColor});
+			dotMarkers.push(dotMarker);
+
+			// track here as well
+			addParcelAssociation({
+				"trimParcelId": null,
+				"leafletPolygonId": L.stamp(layer)
+			}, dotToParcel, L.stamp(dotMarker));
+		}
+
+		let lg = L.layerGroup(dotMarkers).addTo(map);
+
+		let dotMarkerData = lg.dotMarkerData = lg.dotMarkerData || {};
+		dotMarkerData.type = "VertexDotMarkers";
+		dotMarkerData.properties = dotMarkerData.properties || {};
+		lg.dotMarkerData.properties.relatedParcelId = null; // no entry in currentScenario.parcels...
+		lg.dotMarkerData.properties.relatedLeafletId = L.stamp(layer);
+	});
+	// FINISH -- dots on vertices
+
     var observer = new MutationObserver(function(mutations) {
         map.invalidateSize(true)
     });
@@ -123,6 +483,8 @@
         var parcelsReadyEvent = document.createEvent('Event');
         parcelsReadyEvent.initEvent('parcels:ready', true, true);
         TRIM.refreshParcels = function(force) {
+			// console.log("refreshing parcels (" + force + ")...");
+
             force = force || false;
             if (TRIM.store.currentScenario.parcels && !force) {
                 document.body.dispatchEvent(parcelsReadyEvent);
@@ -164,11 +526,17 @@
 
 		function onUploadCoordinateSystemChanged() {
 			let parcelGui = $("#parcels-gui");
-			let coordsSystem = parcelGui.find("#upload_coordinates_system");
-			let utmZone = parcelGui.find("#upload_utm_zone");
 
-			// show/hide the div containing the UTM zone widget
-			utmZone.parents("div[class='col-md']").css("opacity", (coordsSystem.val() == "UTM" ? 1 : 0));
+			let uploadPrefixes = ["",						// parcel upload
+									"deposition_overlay_"];	// depo overlay upload
+
+			for (let i = 0 ; i < uploadPrefixes.length ; i++) {
+				let prefix = uploadPrefixes[i];
+				let coordsSystem = parcelGui.find("#" + prefix + "upload_coordinates_system");
+				let utmZone = parcelGui.find("#" + prefix + "upload_utm_zone");
+				// show/hide the div containing the UTM zone widget
+				utmZone.parents("div[class='col-md']").css("opacity", (coordsSystem.val() == "UTM" ? 1 : 0));
+			}
 		}
 
 		// zones are 1A-60Z with no I/O. case/whitespace insensitive.
@@ -187,7 +555,15 @@
 			let utmZone = parcelGui.find("#upload_utm_zone");
 			let parcelUploader = parcelGui.find("#upload-btn");
 
+			let depoOverlayFile = parcelGui.find("#deposition_overlay_file");
+			let depoOverlayCoordsSystem = parcelGui.find("#deposition_overlay_upload_coordinates_system");
+			let depoOverlayUtmZone = parcelGui.find("#deposition_overlay_upload_utm_zone");
+			let depoOverlayZFlagRestriction = parcelGui.find("#deposition_overlay_zflag_restriction");
+			let overlayUploader = parcelGui.find("#deposition-overlay-upload-btn");
+			let overlayDeleter = parcelGui.find("#deposition-overlay-delete-btn");
+
 			coordsSystem.on('change', onUploadCoordinateSystemChanged);
+			depoOverlayCoordsSystem.on('change', onUploadCoordinateSystemChanged);
 			onUploadCoordinateSystemChanged();
 
 			parcelUploader.on('click', function() {
@@ -233,19 +609,92 @@
                         console.log(responseData)
                         console.log(c)
 					} else {
-						/*
 						// TODO - can we use this data to just redraw the map/table w/o a full page reload? probably!
-						console.log("WORKED:");
-						console.log(responseData);
-						for (let i = 0 ; i < responseData.parcels.length ; i++) {
-							let new_parcel = responseData.parcels[i];
-							console.log("NEW PARCEL: " + JSON.stringify(new_parcel));
-						}
-						*/
+						// console.log("WORKED:");
+						// console.log(responseData);
+						// for (let i = 0 ; i < responseData.parcels.length ; i++) {
+							// let new_parcel = responseData.parcels[i];
+							// console.log("NEW PARCEL: " + JSON.stringify(new_parcel));
+						// }
 						console.log("reload...");
 						window.location.reload();
 					}
 				});
+				return false;
+			});
+
+			overlayDeleter.on('click', function() {
+				LoadingScreen.show('delete_depo_overlay_plt');
+				TRIM.api.deleteMiscScenarioFile(TRIM.store.currentScenario.id, "deposition_overlay", function(success,responseData,c) {
+					if (!success) {
+						alert('An error occurred during deletion.');
+					} else {
+						uninstallDepositionOverlayFromMap();
+					}
+					LoadingScreen.hide('delete_depo_overlay_plt');
+				});
+
+				return false;
+			});
+
+			overlayUploader.on('click', function() {
+				let overlayFileData = depoOverlayFile.prop('files')[0];
+
+				if (overlayFileData == undefined) {
+					alert('Please select a file to upload.');
+					return false;
+				} else if (depoOverlayCoordsSystem.val() == "UTM") {
+					if (!isValidUtmZone(depoOverlayUtmZone.val())) {
+						alert('Please enter a valid UTM zone (e.g. 16T, 32A, etc.).');
+						return false;
+					}
+				}
+
+				// if we made it here, we're good to submit to server
+				let fieldData = [depoOverlayFile.get(0)];
+
+				fieldData.push({
+					"type": "input",
+					"name": "scenario_id",
+					"value": TRIM.store.currentScenario.id
+				});
+
+				fieldData.push({
+					"type": "input",
+					"name": "misc_file_type",
+					"value": "deposition_overlay"
+				});
+
+				fieldData.push({
+					"type": "input",
+					"name": "coord_system",
+					"value": depoOverlayCoordsSystem.val()
+				});
+
+				fieldData.push({
+					"type": "input",
+					"name": "utm_zone",
+					"value": depoOverlayCoordsSystem.val() == "UTM" ? depoOverlayUtmZone.val() : "n/a"
+				});
+
+				fieldData.push({
+					"type": "input",
+					"name": "zflag_restriction",
+					"value": depoOverlayZFlagRestriction.val()
+				});
+
+				LoadingScreen.show('upload_depo_overlay_plt');
+				TRIM.api.uploadMiscScenarioFile(fieldData, function(success,responseData,c) {
+					uninstallDepositionOverlayFromMap();
+					LoadingScreen.hide('upload_depo_overlay_plt');
+
+					if (!success) {
+						alert('An error occurred during upload.');
+					} else {
+						installDepositionOverlayOntoMap(responseData)
+					}
+				});
+
 				return false;
 			});
 		}
@@ -262,10 +711,52 @@
 
         document.body.addEventListener('parcels:ready', drawAllParcels);
 
+		document.body.addEventListener('parcels:ready', function() {
+			LoadingScreen.show('check_overlay_status');
+			TRIM.api.checkMiscScenarioFile(TRIM.store.currentScenario.id, "deposition_overlay", function(success,responseData) {
+				LoadingScreen.hide('check_overlay_status');
+
+				if (!success) {
+					alert('An error occurred while fetching overlay data');
+				} else {
+					if (success) {
+						installDepositionOverlayOntoMap(responseData)
+					}
+				}
+			});
+		});
+
+		document.body.addEventListener('parcels:ready', function() {
+			LoadingScreen.show('check_aermod_receptors_file');
+			TRIM.api.checkMiscScenarioFile(TRIM.store.currentScenario.id, "generated_aermod_receptors", function(success,responseData) {
+				LoadingScreen.hide('check_aermod_receptors_file');
+
+				if (!success) {
+					alert('An error occurred while fetching aermod receptors');
+				} else {
+					if (success) {
+						// installDepositionOverlayOntoMap(responseData)
+						renderAermodDownloadUi(responseData);
+					}
+				}
+			});
+		});
+
+
         function retrieveSavedParcels() {
             parcels.clearLayers();
             shapes = parcels.toGeoJSON();
             var scenarioParcels = TRIM.store.currentScenario.parcels;
+
+			/*
+			console.log("!!!SCENARIO PARCELS ARE:");
+			console.log(scenarioParcels);
+			for (let i = 0 ; i < scenarioParcels.length ; i++) {
+				let p = scenarioParcels[i];
+				console.log("   EXISTING PARCEL: [" + p.id + "]: '" + p.name + "'");
+			}
+			*/
+
             var standardMedia = TRIM.store.currentScenario.standardMedia;
             if (scenarioParcels.length > 0) {
                 let lat_means = []
@@ -296,12 +787,21 @@
             new_parcel.feature.properties.area = parcel.data.area;
             new_parcel.feature.properties.air = parcel.data.hasAir;
             new_parcel.feature.properties.parceltype=parcel.data.parcelType
+            new_parcel.feature.properties.receptor_spacing=parcel.data.receptor_spacing;
             new_parcel.feature.properties.landuse = {'lu': parcel.data.landUse, 'list': parcel.media}; // we will need NLCD data here?
             new_parcel.feature.properties.farmfoodchain = parcel.data.hasFarmFoodChain;
             new_parcel.feature.properties.fishfoodweb = parcel.data.hasFishFoodWeb;
             new_parcel.feature.properties.wetland = parcel.data.hasWetland;
-            parcels.addLayer(new_parcel).addTo(map)
-            new_parcel.bindTooltip(new_parcel.feature.properties.name, {permanent: false}).addTo(map);
+
+
+            let x = parcels.addLayer(new_parcel).addTo(map)
+            let y = new_parcel.bindTooltip(new_parcel.feature.properties.name, {permanent: false}).addTo(map);
+
+			// console.log("LISTENING FOR SNAPS ON: " + new_parcel._tooltip._content);
+			// this only fires when an existing parcel snaps. 
+			// e.g. during a resize
+			// y.on('pm:snap', function(e) { console.log("DEBUGME snap edit"); });
+
             shapes = parcels.toGeoJSON()
         }
 
@@ -321,6 +821,7 @@
                 scrollX: true,
                 scrollY: 500,
                 bAutoWidth: false,
+                ordering: false,
                 fnCreatedRow: function (row, data, index) {
                     $(row).find("td.rightBorder").addClass("freeze-column")
                 },
@@ -357,7 +858,7 @@
                     {
                         data: "properties.area",
                         render: function (data, type, row) {
-                            return "<label>" + (data/1E6).toFixed(2) + "</label>"
+                            return "<label>" + (data/1E6).toFixed(5) + "</label>"
                         }
                     },
                     {
@@ -515,6 +1016,27 @@
                                     "</select>" +
                                    "<label class='" + editFlag + " wetland'>" + data + "</label>"
                         }
+                    },
+                    {
+                        data: "properties.receptor_spacing",
+                        render: function (data, type, row) {
+                            let parcel_info = [{
+                                'type': 'data',
+                                'name': 'id',
+                                'value': row.properties.parcelid,
+                            },{
+                                'type': 'data',
+                                'name': 'field',
+                                'value': 'receptor_spacing'
+                            }, {
+                                'type': 'input',
+                                'name': 'receptor_spacing',
+                                'value': data
+                            }]
+                            parcel_info = JSON.stringify(parcel_info)
+                            return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
+                                "<label class='editableCell badge badge-light'>" + data + "</label>"
+                        }
                     }
                 ],
                 initComplete: function (settings, json) {
@@ -607,6 +1129,32 @@
                     mapTableRedraw()
                 }
             })
+
+			// AERMOD Receptor UI setup -- start
+			$("a#generate_aermod_receptors_btn").click(function() {
+				console.log("do something!");
+
+				LoadingScreen.show('generating_aermod_receptors');
+				TRIM.api.runReceptorGeneration('{{ scenario.id }}', function(success, responseData) {
+					if (success) {
+						renderAermodDownloadUi(responseData);
+					}
+					LoadingScreen.hide('generating_aermod_receptors');
+				});
+			});
+
+			/*
+			// abandoned -- button on the column header
+			$("table[data-target='mapTable']:first th").each(function() {
+				if ($(this).text().indexOf("Receptor Spacing") != -1) {
+					let a = $("<a/>").css("cursor", "pointer").attr("id", "foo").addClass("btn btn-secondary").html("Generate AERMOD Receptors");
+					let d = $("<div/>").appendTo($(this));
+					a.appendTo(d);
+
+				}
+			});
+			*/
+			// AERMOD Receptor UI setup -- end
         }
 
         // var map = L.map('mapid', { drawControl: false }).setView([35.99, -78.90], 12);
@@ -653,12 +1201,18 @@
             format: 'image/png'
         });
 
+		// depositionOverlayGroup, mapLayers, depositionOverlayLegend, etc. are globals set
+		// on the window. Would be nice to not do that...
+        window.depositionOverlayGroup = L.layerGroup();
+        window.receptorOverlayGroup = null; // L.layerGroup();
+
         var togglelayers = L.layerGroup([wmsNLCD2016])
 
         var overlayMaps= {
             "NLCD" : togglelayers,
             "Flowline - Large Scale" : wmsFlowLine,
-            "HUC12 Boundaries" : wmsHUC12
+            "HUC12 Boundaries" : wmsHUC12,
+			// "Deposition": depositionOverlayGroup
         }
         var baseMaps = {
             "Streets Basemap" : StreetBM,
@@ -666,7 +1220,7 @@
             "Imagery" : Esri_WorldImagery,
         }
 
-        L.control.layers(baseMaps,overlayMaps).addTo(map);
+        window.mapLayers = L.control.layers(baseMaps,overlayMaps).addTo(map);
 
         map.pm.addControls({
             position: 'topleft',
@@ -678,18 +1232,186 @@
             dragMode: false,
             cutPolygon : false,
             rotateMode : false,
-            editMode  : false
+            editMode  : false,
         });
 
+		// proof of concept -- add a red dot near Duke
+		// var barMarker = L.circleMarker([35.997895, -78.922519], { radius: 3, stroke: true, color: "red"}).bindPopup('BAR!').addTo(map);
+
+		conditionalSnapSettings = {
+			"vertices": true,
+			"segments": false
+		};
+
+		window.getSmartSnapSetting = function(typeOfSnap) {
+			if (typeOfSnap == "vertices" || typeOfSnap == "segments") {
+				return conditionalSnapSettings[typeOfSnap];
+			} else {
+				console.log("getSmartSnapSetting doesn't work with '" + typeOfSnap + "'");
+			}
+		};
+
+		window.smartSnapEnableOrDisable = function(typeOfSnap, enableOrDisable) {
+			if (typeOfSnap == "vertices" || typeOfSnap == "segments") {
+				conditionalSnapSettings[typeOfSnap] = enableOrDisable;
+
+				if (typeOfSnap == "vertices") {
+					map.pm.setGlobalOptions({ snapVertex: enableOrDisable });
+				} else if (typeOfSnap == "segments") {
+					map.pm.setGlobalOptions({ snapSegment: enableOrDisable });
+				}
+
+				let bothSnapsDisabled = conditionalSnapSettings["vertices"] == false && conditionalSnapSettings["segments"] == false;
+				map.pm.setGlobalOptions({ snappable: !bothSnapsDisabled });
+			} else {
+				console.log("smartSnapEnableOrDisable doesn't work with '" + typeOfSnap + "'");
+			}
+		};
+
+		let customSnapControls = [
+			{ "name": "ToggleSnapToVertices", "thing": "vertices" },
+			{ "name": "ToggleSnapToSegments", "thing": "segments" },
+		];
+
+		for (let i = 0 ; i < customSnapControls.length ; i++) {
+			let snapThing = customSnapControls[i].thing;
+			map.pm.Toolbar.createCustomControl({
+				name: customSnapControls[i].name,
+				block: "custom", // draw,edit,custom,options
+				title: "Snap to " + snapThing,
+				onClick: function(evt, btn) { smartSnapEnableOrDisable(snapThing, !this.toggleStatus); },
+				disableOtherButtons: false, disableByOtherButtons: false,
+				className: "trim-custom-icon-" + snapThing,
+			});
+
+			// I can't find a way to programmatically select these, so do it with jquery...
+			if (conditionalSnapSettings[snapThing] === true) {
+				$("div.button-container[title='Snap to " + snapThing + "'] a div").click();
+			}
+		}
+
+		map.on('pm:drawstart', function(e) {
+		  var layer = e.workingLayer;
+
+		/*
+		// not used anymore; was used when we had implemented "disable snap to segments after first vertex placed". That's
+		// since been abandoned in favor of providing controls to let users toggle vertex/segment snapping manually.
+		  layer.on('pm:vertexadded', function(e) {
+			// e includes the new vertex, it's marker
+			// the index in the coordinates array
+			// the working layer and shape
+
+			  // map.pm.setGlobalOptions({ snapSegment: false });
+		  });
+		*/
+
+		  /*
+		  layer.on('pm:snap', function(e) {
+			  if (e.layerInteractedWith.feature !== undefined) {
+				  console.log("DEBUGME DRAWING snap (to " + e.layerInteractedWith.feature.properties.name + ")!");
+			  } else {
+				  console.log("DEBUGME DRAWING snap (to myself)!");
+			  }
+			  // console.log(e);
+		  });
+		  */
+		});
+
         map.pm.enableDraw(
-            'Polygon',{ snappable: true, allowSelfIntersection : false
-        });
+            'Polygon', {
+				snappable: true,
+				snapSegment: getSmartSnapSetting("segments"),
+				snapVertex: getSmartSnapSetting("vertices"),
+				allowSelfIntersection : false
+			}
+		);
+
+		// experimental function -- can we check/warn about gaps/overlap? The snap changes help
+		/*
+		window.checkVerticesDebug = function(parcelName) {
+			console.log("checkVerticesDebug '" + parcelName + "'");
+			let p = null;
+			let otherParcels = [];
+			for (let i = 0 ; i < TRIM.store.currentScenario.parcels.length ; i++) {
+				if (TRIM.store.currentScenario.parcels[i].name == parcelName) {
+					p = TRIM.store.currentScenario.parcels[i];
+			    } else {
+					otherParcels.push(TRIM.store.currentScenario.parcels[i]);
+			    }
+		    }
+
+			if (p != null) {
+				console.log("check: " + JSON.stringify(p.vertices));
+				for (let i = 0 ; i < p.vertices.length - 1 ; i++) {
+					let v = p.vertices[i];
+
+					if (i == 0) {
+						let lastV = p.vertices[p.vertices.length - 1];
+						if (v[0] == lastV[0] && v[1] == lastV[1]) {
+							console.log("polygon looks closed...");
+						} else {
+							console.log("polygon looks not closed!");
+						}
+					}
+
+					console.log("consider point [" + i + "]: " + v);
+					let matchFound = false;
+					for (let otherParcelIdx = 0 ; !matchFound && otherParcelIdx < otherParcels.length ; otherParcelIdx++) {
+						let otherP = otherParcels[otherParcelIdx];
+						console.log("  compare against vertices of '" + otherP.name + "'...");
+
+						for (let k = 0 ; !matchFound && k < otherP.vertices.length - 1 ; k++) {
+							let otherV = otherP.vertices[k];
+							console.log("    compare against vertex [" + k + "]: " + otherV);
+							if (v[0] == otherV[0] && v[1] == otherV[1]) {
+								console.log("EXACT VERTEX MATCH!!!!!!");
+								matchFound = true;
+							}
+						}
+					}
+
+					if (!matchFound) {
+						console.log("no vertex match found; now let's try lines...");
+						for (let otherParcelIdx = 0 ; !matchFound && otherParcelIdx < otherParcels.length ; otherParcelIdx++) {
+							let otherP = otherParcels[otherParcelIdx];
+							console.log("  compare against lines of '" + otherP.name + "'...");
+
+							for (let k = 0 ; !matchFound && k < otherP.vertices.length - 1 ; k++) {
+								let otherStartVertex = otherP.vertices[k];
+								let otherEndVertex = otherP.vertices[k+1];
+								console.log("    compare against line [" + k + "]: " + otherStartVertex + " -> " + otherEndVertex);
+								let pt = turf.point(v);
+								let line = turf.lineString([otherStartVertex, otherEndVertex]);
+								let isPointOnLine = turf.booleanPointOnLine( pt, line, { epsilon: 5e-8 });
+
+								if (isPointOnLine) {
+									console.log("SEGMENT MATCH!!!!!!");
+									matchFound = true;
+								} else {
+									if (turf.booleanPointOnLine( pt, line, { epsilon: 0.25 })) {
+										console.log("SECOND LEVEL CHECK MATCH!");
+									}
+								}
+							}
+						}
+					}
+
+					if (!matchFound) {
+						console.log("STILL NO MATCH AFTER CHECKING LINES...");
+					}
+				}
+			} else {
+				console.log("couldnt find it...");
+			}
+		};
+		*/
 
         // CREATING A NEW PARCEL //
         var shapes = L.geoJSON()
 
         map.on('pm:create', ({layer})=>{
-            newLayer(layer)
+			map.pm.setGlobalOptions({ snapSegment: getSmartSnapSetting("segments") });
+			newLayer(layer);
         });
 
         // Map and Parcel Table Functions
@@ -783,10 +1505,24 @@
           }), file);
         }
 
+		// parcelObj must contain at a minimum "properties.parcelid"; if pulling from geojson it will have more.
+		// making this global so that it's callable from elsewhere on the page w/o a major rewrite (kludgey)
+		window.deleteParcelFromServer = function(parcelObj) {
+			// console.log("DELETING: " + JSON.stringify(parcelObj));
+            LoadingScreen.show('delete_parcel');
+            TRIM.api.deleteParcels(TRIM.store.currentScenario.id, parcelObj).on('load', function(){
+                TRIM.refreshParcels();
+                requires_reload = true;
+                LoadingScreen.hide('delete_parcel');
+            })
+            mapTableRedraw()
+		};
+
         // REMOVE A PARCEL//
         map.on('pm:remove', ({layer})=>{
             // LoadingScreen.show('deleting_parcel');
             parcels.removeLayer(layer._leaflet_id)
+			/*
             shapes = parcels.toGeoJSON()
             LoadingScreen.show('delete_parcel');
             TRIM.api.deleteParcels(TRIM.store.currentScenario.id, layer.toGeoJSON()).on('load', function(){
@@ -795,7 +1531,41 @@
                 LoadingScreen.hide('delete_parcel');
             })
             mapTableRedraw()
+			*/
+
+			deleteParcelFromServer(layer.toGeoJSON());
         });
+
+		// see https://geoman.io/docs/leaflet/modes/edit-mode
+		/*
+		map.on('pm:intersect', e => { console.log("DEBUGME intersect!"); });
+		map.on('pm:edit', e => { console.log("DEBUGME edit!"); });
+		map.on('pm:update', e => { console.log("DEBUGME update!"); });
+		map.on('pm:enable', e => { console.log("DEBUGME enable!"); });
+		map.on('pm:disable', e => { console.log("DEBUGME disable!"); });
+		map.on('pm:vertexadded', e => { console.log("DEBUGME vertexadded!"); });
+		map.on('pm:vertexremoved', e => { console.log("DEBUGME vertexremoved!"); });
+		map.on('pm:vertexclick', e => { console.log("DEBUGME vertexclick!"); });
+		map.on('pm:markerdragstart', e => { console.log("DEBUGME markerdragstart!"); });
+		map.on('pm:markerdrag', e => { console.log("DEBUGME markerdrag!"); });
+		map.on('pm:markerdragend', e => { console.log("DEBUGME markerdragend!"); });
+		map.on('pm:layerreset', e => { console.log("DEBUGME layerreset!"); });
+		map.on('pm:snapdrag', e => { console.log("DEBUGME snapdrag!"); });
+		map.on('pm:snap', e => { console.log("DEBUGME snapme!"); });
+		map.on('pm:unsnap', e => { console.log("DEBUGME unsnap!"); });
+		map.on('pm:centerplaced', e => { console.log("DEBUGME centerplaced!"); });
+		map.on('pm:change', e => { console.log("DEBUGME change!"); });
+		map.on('pm:cancel', e => { console.log("DEBUGME cancel!"); });
+
+		// fires when  you enter drawing mode; NOT when you place first vertex!
+		// map.on('pm:drawstart', e => { console.log("DEBUGME drawstart!"); });
+
+		// fires when you place last vertex, cancel drawing, etc.
+		map.on('pm:drawend', e => { console.log("DEBUGME drawend!"); });
+
+		// fires when layer actually creates
+		map.on('pm:create', e => { console.log("DEBUGME create!"); });
+		*/
 
         L.easyButton('<span class = DownArrowBar style = "font-size: 1.5em;">&DownArrowBar;</span>', function(btn, map){
             saveToFile(shapes, "Test")
@@ -884,6 +1654,7 @@
                 shapes.features[i].properties.farmfoodchain = e["Farm Food Chain"]
                 shapes.features[i].properties.fishfoodweb = e["Fish Food Web"]
                 shapes.features[i].properties.wetland = e["Wetland"]
+                shapes.features[i].properties.receptor_spacing = e["Receptor Spacing (m)"]
             })
         }
 
@@ -984,5 +1755,25 @@
                 });
             });
         }
+
+
+		/*
+		// LAT, LNG
+		a = [44.282225, -85.37830428060558];
+		b =[44.282225, -85.341451];
+		c = [44.262225, -85.352451];
+
+		var fooMarker = L.circleMarker(a, { pmIgnore: true, radius: 10, stroke: true, color: "green"}).bindPopup('FOO!').addTo(aermodTestOverlay);
+		var barMarker = L.circleMarker(b, { pmIgnore: true, radius: 10, stroke: true, color: "red"}).bindPopup('BAR!').addTo(aermodTestOverlay);
+		var bazMarker = L.circleMarker(c, { pmIgnore: true, radius: 10, stroke: true, color: "purple"}).bindPopup('BAZ!').addTo(aermodTestOverlay);
+
+		var polyTest = L.polygon([a,b,c], { pmIgnore: true, color: "orange"}).addTo(aermodTestOverlay);
+
+		aermodTestOverlay.addTo(map); // preselects it in the layers control!
+		*/
+
+		// delete fooMarker.pm; // makes it undeletable...
+		// delete barMarker.pm; // makes it undeletable...
+		// pmIgnore: true makes it undeletable and unsnappable, great!
     });
 </script>

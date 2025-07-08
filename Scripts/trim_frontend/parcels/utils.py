@@ -2,11 +2,15 @@ import re, json
 import numpy as np
 from copy import deepcopy
 from pprint import pprint
+import geopandas as gpd
+from shapely.geometry import Polygon, Point
+from shapely.prepared import prep
 from ..scenarios.utils import init_parameter_definitions
 from ..scenarios.defaults import get_surface_runoff
 from .defaults import SURFACE_SOIL_SPECIFIC_MEDIA_PARAMS
 
 from flask_api import ApiResult
+from pyproj import Transformer
 
 from trim_db.schema import CustomParameter, ParameterDefinition, Parcel
 from trim_db.services import ChemicalService, CompartmentService, FormulaService, ParameterService, ParcelService, ScenarioService, VolumeElementService
@@ -318,6 +322,19 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             comp.parameters.get(par_name[field_name]).value = parcels_data[field_name]
             comp.parameters.get(par_name[field_name]).scenario_id = p.scenario_id
 
+    if field_name == "MeanDepth":
+        csw = p.get_compartment("Surface_water")
+        h_diff = (csw.height - parcels_data[field_name]).magnitude
+        # Now shift bounds of everything below the SW volume element
+        ves = [a for a in p.volume_elements]
+        for ve in ves:
+            if ve.top <= csw.volume_element.bottom:
+                print(f'new {ve.name} top = {ve.top + h_diff} and bottom = {ve.bottom + h_diff}')
+                ve.top = ve.top + h_diff
+                ve.bottom = ve.bottom + h_diff
+        # finally fix the surface water element bottom
+        csw.volume_element.bottom = -1 * parcels_data[field_name]
+
     if field_name in ['bed_density', 'organic_carbon_frac', 'bed_pH', 'bed_porosity', 'bed_thickness']:
         par_name = {'bed_density': 'BedDensity',
                     'organic_carbon_frac': "OrganicCarbonContent",
@@ -438,6 +455,39 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                 print(new_formula)
             FormulaService.get(src_par.formula.id).equation = new_formula
             FormulaService.commit()
+    if field_name == "initial concentration":
+        ic_comp = [c for c in p.compartments if c.name == parcels_data["compartment_name"]][0]
+        ic_par = [par for parn, par in ic_comp.parameters.items() if parn == "initialConcentration"]
+        chem = ChemicalService.get(name=parcels_data["chemical_name"])
+        if len(ic_par) > 0:
+            unit = "g / m^3" if ic_comp.media.id in [2, 5, 7, 56, 55, 8, 9] else "g / kg" if ic_comp.media.id in [23, 24, 27, 28, 29, 31, 32, 33, 37, 39, 41, 43, 44, 45, 46, 47, 48, 49, 50, 51] else "g / L" if ic_comp.media.id in [10, 4] else ""
+            ic_par = get_or_create_custom_param(
+                ic_par[0],
+                {"requirements": f"(self.id == {ic_comp.id})", "scenario_id": p.scenario.id, "unit": unit},
+                new_formula=True
+            )
+
+            eq = ic_par.formula.equation
+            # We have the chemical in the formula
+            if f'chemical.id == {str(chem.id)}' in eq:
+                formula_parts = eq.split(f"if chemical.id == {chem.id}")
+                formula_part = formula_parts[0]
+                if "else" in formula_part:
+                    arr = formula_part.split("else")[:-1]
+                    formula_part = "else".join(arr + [f' {parcels_data["initial_concentration_value"]} '])
+                else:
+                    formula_part = f'{parcels_data["initial_concentration_value"]} '
+                formula_parts[0] = formula_part
+                new_formula = f"if chemical.id == {chem.id}".join(formula_parts)
+                print(new_formula)
+            # We do not have the chemical in the formula. We need to add it...
+            else:
+                eq_arr = eq.split("else")
+                eq_arr.insert(-2, f' {parcels_data["initial_concentration_value"]} if chemical.id == {chem.id} ')
+                new_formula = "else".join(eq_arr)
+                print(new_formula)
+            FormulaService.get(ic_par.formula.id).equation = new_formula
+            FormulaService.commit()
     if field_name == "runoff_matrix_value":
         scn = ScenarioService.get(id=p.scenario.id)
         sender_parcel_name = parcels_data["sender"].replace("ro_", "")
@@ -501,6 +551,34 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                 eq = new_formula
             FormulaService.get(sender_par.formula.id).equation = new_formula
             FormulaService.commit()
+    if field_name == "receptor_spacing":
+        submitted_spacing_val = parcels_data.get("receptor_spacing")
+
+        if (not str(submitted_spacing_val).isnumeric()):
+            raise Exception(f"bad input {submitted_spacing_val}")
+
+        cdv = p.get_compartment('DryVaporSource')
+        param_obj = cdv.parameters.get("ReceptorSpacing")
+
+        # first time through this is a "ParameterDefinition"; subsequent visits
+        # it is a CustomParameter....so create/update as needed
+        if type(param_obj) is ParameterDefinition:
+            param = ParameterService.get_or_create(
+                definition_id=param_obj.id,
+                scenario_id=p.scenario_id,
+                requirements=f"(self.id == {cdv.id})", # compartment id
+                value=submitted_spacing_val
+            )
+
+            ParameterService.update(param)
+        elif type(param_obj) is CustomParameter:
+            param_obj.value = submitted_spacing_val
+            ParameterService.update(param_obj)
+        else:
+            raise Exception("unexpected param_obj type...")
+
+        ParameterService.commit()
+
 
     # Update record
     ParcelService.update(p)
@@ -568,10 +646,15 @@ def initialize_parcel_contents(new_parcel, vol_elem_defaults=None):
                                                      top=ve["top"],
                                                      bottom=ve["bottom"])
         for c_name, c in ve["Compartments"].items():
+            print(f'creating {c_name} for volume element {ve_name}')
             # Create standard compartments linking them to default volume elements and media for each compartment
-            nc = new_parcel.get_compartment(c_name)
-            if not nc:
-                this_media = CompartmentService.media.get(name = c["media_name"])
+            # nc = new_parcel.get_compartment(c_name) # This won't work because the compartment names are not unique,
+            # get_compartment gets the first compartment with that name and ignores volume_element type.
+            # we need a list meeting both compartment name and volume_element name conditions.
+            nc = [c for c in new_parcel.compartments if c.name == c_name and c.volume_element.name == nve.name]
+            # if not nc:
+            if len(nc) == 0:
+                this_media = CompartmentService.media.get(name=c["media_name"])
                 nc = CompartmentService.get_or_create(name=c_name,
                                                       volume_element=nve,
                                                       media=this_media)
@@ -590,7 +673,7 @@ def initialize_compartment_custom_parameters(nc):
         add_compartment_custom_parameters(nc, "TotalErosionRate", ter_val, "kg/m^2/day")
         # add Total Runoff Rate
         # using Groundwater seepage fraction and precipitation to calculate runoff
-        trr_val = (1 - nc.GroundwaterSeepageFraction) * (nc.volume_element.parcel.scenario.Rain).magnitude
+        trr_val = (nc.PrecipitationRunoffFraction) * (nc.volume_element.parcel.scenario.Rain).magnitude
         add_compartment_custom_parameters(nc, "TotalRunoffRate", trr_val, "m^3/m^2/day")
 
     if nc.media.isa("Flora"):
@@ -991,3 +1074,134 @@ def get_watershed_area(pcl):
     # 3. get the watershed area specific to this surface water parcel
     pcl_watershed = wsa_matrix[pcl_names.index(pcl.name)]
     return pcl_watershed[0, 0]
+
+
+# adapted from Samuel's "grid_points_in_polygon_meters" method
+def calculate_receptor_grid_points_for_parcel(pcl:Parcel):
+    """
+    Calculate a rectangular grid of points inside the polygon defined by a parcel's
+    vertices and spacing custom parameter.
+
+    Parameters:
+        pcl (Parcel): parcel
+
+    Returns:
+        None if error; else a dictionary with keys:
+            "scenario_id": the scenario id
+            "spacing_m": spacing in meters
+            "long_lat_pairs": list of lists of floats: Points representing the grid (in EPSG:4326 / WGS84). longitude is first element, latitude is second
+                                e.g.:
+                                    [
+                                        [-85.41157568471587, 44.26498030459199],
+                                        .....
+                                        [-85.41157568471587, 44.26562360214414]
+                                    ]
+    """
+    try:
+
+        # EPSG:4326 is WGS84, which is what our parcel vertices are based on.
+        # Samuel's algorithm switches to 3857 for calculating the grid points
+        CRS_FOR_WGS84 = 4326
+        CRS_FOR_GRID_CALCS = 3857
+        # note -- according to https://github.com/CityScope/CS_choiceModels/issues/4,
+        # CRS84 is also equvalent to EPSG:4326
+
+        def get_comp(p:Parcel, kwargs):
+            comp = p.get_compartment(**kwargs)
+
+            if kwargs.get("name") and isinstance(comp, list):
+                comp = comp[0]
+
+            return comp
+
+        cdv = get_comp(pcl, {"name":"DryVaporSource"})
+        spacing_param = cdv.parameters.get("ReceptorSpacing")
+        spacing_meters = spacing_param.default_value if type(spacing_param) is ParameterDefinition else spacing_param.value
+
+        if len(pcl.vertices) == 0:
+            print(f"WARNING - {pcl} has no defined vertices; returning empty list")
+            return None
+
+        # Load it into a GeoDataFrame so we can change coordinate systems using gdf.to_crs
+        gdf = gpd.GeoDataFrame((Polygon(pcl.vertices),), columns=['geometry'], crs=CRS_FOR_WGS84)
+        # (this dataframe is a single row with a single column; geometry contains all the points
+
+        # Project to a CRS in meters (Web Mercator here; you could also use UTM for better accuracy)
+        gdf_proj = gdf.to_crs(epsg=CRS_FOR_GRID_CALCS)
+        polygon = gdf_proj.geometry[0]
+        prep_poly = prep(polygon)
+
+        # Get bounding box in projected meters
+        min_x, min_y, max_x, max_y = polygon.bounds
+        x_coords = np.arange(min_x, max_x + spacing_meters, spacing_meters)
+        y_coords = np.arange(min_y, max_y + spacing_meters, spacing_meters)
+
+        # Generate grid
+        points_inside = []
+        for x in x_coords:
+            for y in y_coords:
+                pt = Point(x, y)
+                if prep_poly.contains(pt):
+                    points_inside.append(pt)
+
+        # Convert list of Points to GeoDataFrame in EPSG:3857, then reproject back to EPSG:4326
+        points_gdf = gpd.GeoDataFrame(geometry=points_inside, crs=f"EPSG:{CRS_FOR_GRID_CALCS}")
+        # return points_gdf.to_crs(epsg=CRS_FOR_WGS84)
+        converted_points = points_gdf.to_crs(epsg=CRS_FOR_WGS84)
+
+        simple_list_of_longs_and_lats = []
+        for row in converted_points.itertuples():
+            simple_pt = [[x[0], x[1]] for x in row.geometry.coords][0]
+            simple_list_of_longs_and_lats.append(simple_pt)
+
+        return {
+            "parcel_id": pcl.id,
+            "spacing_m": spacing_meters,
+            "long_lat_pairs": simple_list_of_longs_and_lats
+        }
+    except Exception as e:
+        print(f"ERROR calculating grid points for parcel {pcl}: {e}")
+        return None
+
+# this is an adapted version of Samuel's "geojson_to_aermod_receptors" function; minor
+# changes made to help it work within TRIM app
+def geojson_to_aermod_receptors(geojson_contents, utm_zone=None, northern_hemisphere=True):
+    """
+    Converts GeoJSON points to AERMOD receptor file format.
+
+    Parameters:
+    - geojson_contents: str containing GeoJSON
+    - utm_zone: int, UTM zone number
+    - northern_hemisphere: bool, True if northern hemisphere, False for southern
+
+    Output:
+    - AERMOD receptor file text (to be written to a file, returned to client, etc.)
+    """
+    # Set up transformer for lat/lon -> UTM
+    proj_str = f"+proj=utm +zone={utm_zone} +datum=WGS84 +units=m +no_defs"
+    if not northern_hemisphere:
+        proj_str += " +south"
+    transformer = Transformer.from_crs("EPSG:4326", proj_str, always_xy=True)
+
+    # Read GeoJSON
+    parsed_geojson = json.loads(geojson_contents)
+
+    receptors = []
+
+    # Extract coordinates
+    for feature in parsed_geojson['features']:
+        geom = feature['geometry']
+        if geom['type'] == 'Point':
+            lon, lat = geom['coordinates']
+            x, y = transformer.transform(lon, lat)
+            receptors.append((x, y))
+        else:
+            print(f"Skipping non-point geometry: {geom['type']}")
+
+    # generate output
+    aermod_format = ""
+    for idx, (x, y) in enumerate(receptors, start=1):
+        aermod_format += f"RE DISCCART {x:.2f} {y:.2f} 0.0\n"
+    aermod_format += "END\n"
+
+    return aermod_format

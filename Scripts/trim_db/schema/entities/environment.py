@@ -267,10 +267,10 @@ class VolumeElement(Model):
         else:
             z_side = top_a - bottom_b
 
-        if intersection.area > 0:
-            # Both vertical AND horizontal overlap!
-            # The interface is actually an area?
-            return (z_side * intersection.area) * ureg('m^3')
+        # if intersection.area > 0:
+        #     # Both vertical AND horizontal overlap!
+        #     # The interface is actually an area?
+        #     return (z_side * intersection.area) * ureg('m^3')
 
         # Else, only vertical overlap
         xy_side = intersection.length  # Is this arc units?
@@ -505,6 +505,17 @@ class Compartment(Model):
                     linked[c.id] = c
             return list(linked.values())
         return cached_links(media, same_parcel)
+
+    def return_sameparcel_linked_media_id_or_none(self, media=None):
+        comps = self.volume_element.parcel.compartments
+        for c in comps:
+            if c.id == self.id:
+                continue
+            if (media is not None) and (not c.media.isa(media)):
+                continue
+            if self.connects_to(c):
+                return c.media.id
+        return None
 
     def connects_to(self, compartment):
         if self.volume_element == compartment.volume_element:

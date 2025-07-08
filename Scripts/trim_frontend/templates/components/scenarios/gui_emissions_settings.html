@@ -85,7 +85,7 @@
     </section>
 </form>
 <style>
-    tr.level0 td:first-child, tr.level0 td:nth-child(2), tr.level0 td:nth-child(3){
+    tr.level0 td:first-child, tr.level0 td:nth-child(2), tr.level0 td:nth-child(3) {
         background-color: lightgray;
     }
     tr.level1 td:nth-child(2), tr.level1 td:nth-child(3){
@@ -93,6 +93,9 @@
     }
     tr.level2 td:nth-child(3) {
         background-color: #818181;
+    }
+    tr.level0 td:last-child, tr.level1 td:last-child, tr.level2 td:last-child{
+        background-color: white;
     }
 
 </style>
@@ -183,7 +186,7 @@
                     $("#emissions-settings-gui").find("span.stateInfo")[current_index].innerHTML = spec
                     $(initialize_compartment_map(spec)).insertAfter($($("#emissions-settings-gui").find("table.compMap")[current_index]).find("thead"))
 
-                    let dd_menu = $($("#emissions-settings-gui").find("table.compMap")[current_index]).prev("div.dropdown").find("div.dropdown-menu")
+                    let dd_menu = $($("#emissions-settings-gui").find("table.compMap")[current_index]).prevAll("div.dropdown:first").find("div.dropdown-menu")
                     populate_comp_dd(dd_menu);
                     populate_values($($("#emissions-settings-gui").find("table.compMap")[current_index]))
                     }
@@ -204,6 +207,15 @@
                     $('#chemical')[0], TRIM.store.allChemicals.map(x => x.name), true);
             }
 
+            // button that opens the "+ Add" modal for adding new chemical...
+            // fix for https://icf.atlassian.net/jira/software/projects/PYTRIM/issues/PYTRIM-45; prevents selecting a previously added chemical (which then removed it)
+            $('#chemicals-add-btn').on('click', function(e){
+                let currentScenarioChemicalIds = new Set(TRIM.store.currentScenario.chemicals.map(x => x.id)); // what chemicals (id's only) are currently assoc. with the scenario?
+                let unusedChemicals = TRIM.store.allChemicals.filter(x => !currentScenarioChemicalIds.has(x.id));  // filter those out...
+                TRIM.forms.updateSelect($('#chemical')[0], unusedChemicals.map(x => x.name), true); // only show the unused chemicals in the add dialog
+            });
+
+            // button inside the "+ Add" modal that you click after picking a chemical...
             $('#add-chemicals-btn').on('click', function(e){
                 $("#chemicals-modal").find("button.close")[0].click()
                 LoadingScreen.show('adding_chemical');
@@ -219,7 +231,7 @@
                     $("#emissions-settings-gui").find("span.chemInfo")[current_index].innerHTML = chem
                     $("#emissions-settings-gui").find("span.stateInfo")[current_index].innerHTML = spec
                     $(initialize_compartment_map(spec)).insertAfter($($("#emissions-settings-gui").find("table.compMap")[current_index]).find("thead"))
-                    let dd_menu = $($("#emissions-settings-gui").find("table.compMap")[current_index]).prev("div.dropdown").find("div.dropdown-menu")
+                    let dd_menu = $($("#emissions-settings-gui").find("table.compMap")[current_index]).prevAll("div.dropdown:first").find("div.dropdown-menu")
                     populate_comp_dd(dd_menu);
                     populate_values($($("#emissions-settings-gui").find("table.compMap")[current_index]))
                 })
@@ -680,7 +692,7 @@
             })
             $("a.dropdown-item.comp-item").on("click",function (e){
                 e.preventDefault()
-                let this_table = $(this).closest("div.dropdown").next("table.compMap")
+                let this_table = $(this).closest("div.dropdown").nextAll("table.compMap:first")
                 let this_dd_btn = $(this).closest("div.dropdown").find("button.btn_show_emission_comp")
                 $('button.comp_hide_all').trigger('click');
                 let only_comps = $(this_table).find("tr.colps.level2").filter((i,tr) => $(tr).find("td.comp").text() == $(this).text());
@@ -688,7 +700,7 @@
                 $(only_comps).show()
                 $(this_dd_btn).text($(this).text())
 
-                $(only_comps).prev("tr.level1").show()
+                $(only_comps).each((i, e)=>{$(e).prevAll("tr.level1:first").show()})
             })
         }
     });

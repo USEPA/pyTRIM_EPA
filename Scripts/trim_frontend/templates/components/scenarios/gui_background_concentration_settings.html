@@ -27,6 +27,7 @@
                                                     ) }}">Click here</a> to download the template for creating a CSV file containing initial concentrations.
                                                 </small>
                                             </div>
+                                            <div data-slot="true" data-target="concentration_upload_button"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -50,6 +51,7 @@
                                                     <th>Volume Element</th>
                                                     <th>Compartment</th>
                                                     <th>Initial Concentration</th>
+                                                    <th>Unit</th>
                                                 </tr>
                                             </thead>
                                         </table>
@@ -99,6 +101,7 @@
                 });
                 return;
             }
+            $(form).find("a[id*=_concentration_upload_button]").addClass("disabled")
         }
 
         function updateBackgroundConcentrations() {
@@ -119,12 +122,14 @@
 
             TRIM.store.currentScenario.chemicals.map(x => x.name).forEach((sc, i) => {
                 window.TRIM.functions.addTabToFieldList(fieldset[0], sc)
+                let current_index = ($("#background-conc-gui").find("span.chemInfo")).length-1
 
                 $("#background-conc-gui").find("span.chemInfo")[i+1].innerHTML = sc
                 $(initialize_compartment_map()).insertAfter($($("#background-conc-gui").find("table.compMap")[i+1]).find("thead"))
 
-                let dd_menu = $($("#background-conc-gui").find("table.compMap")[i+1]).prev("div.dropdown").find("div.dropdown-menu")
+                let dd_menu = $($("#background-conc-gui").find("table.compMap")[i+1]).prevAll("div.dropdown:first").find("div.dropdown-menu")
                 populate_comp_dd(dd_menu);
+                populate_values($($("#background-conc-gui").find("table.compMap")[current_index]))
             })
 
             $('tr.colps').on('click', function() {
@@ -170,10 +175,10 @@
             $('button.comp_show_nz').on('click', function(e) {
                 e.preventDefault()
                 let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap");
-                $('button.comp_hide_all').trigger('click');
-                let non_zeros = $(this_table).find("tr.colps.level2").filter((i,e) => $(e).find("td.ems").text() > 0);
+                $(this).closest("div[role=tabpanel]").find('button.comp_hide_all').trigger('click');
+                let non_zeros = $(this_table).find("tr.colps.level2").filter((i,e) => $(e).find("td.ic").text() > 0);
                 $(non_zeros).show()
-                $(non_zeros).prev("tr.level1").show()
+                $(non_zeros).each((i, e)=> $(e).prevAll("tr.level1:first").show())
                 $(this).closest("div").find("button.btn_show_comp").text("Show Compartment")
             });
 
@@ -204,6 +209,76 @@
 
             }
 
+            $('a[id*=_concentration_upload_button]').click(function (){
+                let me = $(this);
+                let data = $(me).parent("div.form-group").parent("div.form-group").find('input[type="file"]').attr("data-filedata");
+                let my_data = JSON.parse(data);
+
+                // Validate file contents here
+                let expected_fields = ['Parcel Name', 'Compartment Name', 'Background Concentration Value', 'Unit']
+                let expected_parcel_names = TRIM.store.currentScenario.parcels.map(e=>e.name)
+
+                let has_all_required_fields = expected_fields.map(e=>my_data.fields.indexOf(e) > -1).every(e=>e);
+                let has_correct_parcel_names = my_data.file_data.map(e=>expected_parcel_names.indexOf(e["Parcel Name"]) > -1).every(e=>e)
+
+                if (!has_all_required_fields) {
+                    alert("File does  not have the required standard column names. Please use the provided template.")
+                    return
+                }
+                if (!has_correct_parcel_names) {
+                    alert("Some parcel names provided in the file cannot be found in scenario. Please check parcel names!")
+                    return
+                }
+                let chem_name = $(me).closest("div.tab-pane").data("tab-name")
+                let background_conc_info = [{
+                    'type': 'data',
+                    'name': 'field',
+                    'value': "initial concentration file upload"
+                },{
+                    'type': 'data',
+                    'name': 'scenario_id',
+                    'value': TRIM.store.currentScenario.id
+                },{
+                    'type': 'data',
+                    'name': 'chemical_name',
+                    'value': chem_name
+                },{
+                    'type': 'input',
+                    'name': 'file_data',
+                    'value': JSON.stringify(my_data["file_data"])
+                }]
+                LoadingScreen.show("BC_upload")
+                TRIM.api.uploadBackgroundConcFile(background_conc_info).on('load', function() {
+                    let src_data = {};
+                    try {
+                        if (this.responseJSON.success === false) {
+                            alert(this.responseJSON.message)
+                        } else {
+                            src_data = JSON.parse(this.responseText);
+                        }
+                    } catch (error) {
+                        console.error("An error occurred:", error.message)
+                    }
+                    finally {
+                        function populate_values(cmap, bc_data) {
+                            bc_data.forEach(function(p,i){
+                                let pcl_find_str = "td[data-pcl-name='" + p["Parcel Name"] + "']"
+                                let ve_find_str = "td[data-ve-name='" + p["Volume Element Name"] + "']"
+                                let comp_find_str = "td[data-comp-name='" + p["Compartment Name"] + "']"
+                                let ic_cell = $(cmap).find(pcl_find_str).next(ve_find_str).next(comp_find_str).next("td.ic")
+                                let ic_val =  Number(p["Background Concentration Value"]).toExponential()
+                                $(ic_cell).find("input").val(ic_val)
+                                $(ic_cell).find("label.editableCell").text(ic_val)
+                            })
+                        }
+                        let cmap = me.closest("div.tab-pane").find("table.compMap")
+                        console.log(src_data)
+                        populate_values(cmap, src_data.background_conc_file_data);
+                        LoadingScreen.hide("BC_upload");
+                    }
+                });
+            })
+
             $('label.editableCell').click(function () {
                 $(this).siblings("input").show()
                 $(this).siblings("input").focus()
@@ -216,26 +291,43 @@
                 }
                 
                 ErrorValidation.isPositiveValue(this);
-                let parcel_name = $(this).closest("tr.level2")
+                let parcels = TRIM.store.currentScenario.parcels
+                let parcel_name = $($(this).closest("tr.level2").find("td")[0]).attr("data-pcl-name")
+                let parcel_id = parcels.filter(e => e.name == parcel_name)[0].id
+                let compartment_name = $($(this).closest("tr.level2").find("td")[2]).attr("data-comp-name")
+                let ve_name = $($(this).closest("tr.level2").find("td")[1]).attr("data-ve-name")
+                let chem_name = $(this).closest("div.tab-pane").data("tab-name").split(" (")[0]
                 let parcel_info = [{
                     'type': 'data',
-                    'name': 'id',
-                    'value': "parcel_name"
+                    'name': 'field',
+                    'value': "initial concentration"
                 },{
                     'type': 'data',
-                    'name': 'chemical',
-                    'value': "chemical_name"
+                    'name': 'id',
+                    'value': parcel_id
+                },{
+                    'type': 'data',
+                    'name': 'chemical_name',
+                    'value': chem_name
+                },{
+                    'type': 'data',
+                    'name': 'compartment_name',
+                    'value': compartment_name
                 },{
                     'type': 'input',
-                    'name': 'compartment_name',
-                    'value': $(this).val()
+                    'name': 'initial_concentration_value',
+                    'value': ''
+                },{
+                    'type': 'data',
+                    'name': 've_name',
+                    'value': ve_name
                 }]
                 if (parcel_info) {
-                    submit_emission_value(this, parcel_info);
+                    submit_initial_concentration_value(this, parcel_info);
                 }
             })
 
-            function submit_emission_value(elem, parcel_info) {
+            function submit_initial_concentration_value(elem, parcel_info) {
                 if (elementIsValid($(elem).parent())){
                     let data = $(elem).val() == "" ? 0 : $(elem).val()
                     let $label = $(elem).next("label.editableCell")
@@ -243,34 +335,108 @@
                     $label.show().text(data)
 
                     parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                    // TRIM.api.updateParcel(parcel_info)
+                    TRIM.api.updateParcel(TRIM.store.currentScenario.id, parcel_info)
                 } else {
                     return
                 }
             }
 
             console.log('populated background concentrations form!')
+            Enable_Background_Concentration_file_upload()
             LoadingScreen.hide('background_concentrations_loading');
         };
 
-        function initialize_compartment_map(spec) {
+        function Enable_Background_Concentration_file_upload() {
+            var gui = $('#background-conc-gui');
+            var fileFields = gui.find('[type="file"]');
+            fileFields.change(function(e) {
+                let me = $(this);
+                let my_upload_button = me.closest("div.form-group").parent("div.form-group").find("a.btn");
+                let loadingRequest = 'load_' + this.id;
+                LoadingScreen.show(loadingRequest);
+
+                me.removeAttr('data-filedata');
+                TRIM.api.parseFiles(this).on('load', function() {
+                    try {
+                        var data = JSON.parse(this.responseText);
+                        if (data.files[me.attr('name')]) {
+                            var myData = data.files[me.attr('name')];
+                            var filedata = data.files[me.attr('name')]['file_data'];
+                            me.attr(
+                                'data-filedata',
+                                JSON.stringify(myData)
+                            );
+                            let this_chem =  me.closest("div.tab-pane").data("tab-name")
+                            scenario_data = {
+                                'type': 'input',
+                                'name': 'scenario_id',
+                                'value': TRIM.store.currentScenario.id
+                            },
+                            chem_data = {
+                                'type': 'input',
+                                'name': 'chemical',
+                                'value': this_chem
+                            }
+                            if (!Array.isArray(filedata)) {
+                                filedata = [filedata];
+                            }
+                            filedata.push(scenario_data)
+                            filedata.push(chem_data)
+                        }
+                    }
+                    finally {
+                        LoadingScreen.hide(loadingRequest);
+                        my_upload_button.removeClass("disabled")
+                    }
+                });
+            });
+        }
+
+        function initialize_compartment_map() {
             var map_html = "<tbody>"
-            let exclude = spec == "Particulate" ? "VaporSource" : "ParticleSource"
+            let exclude = ["WetVaporSource", "DryVaporSource", "WetParticleSource", "DryParticleSource", "Degradation_Reaction_Sink", "Degradation_Reaction_Sink_Air", "Flush_Rate_Sink"]
             TRIM.store.currentScenario.parcels.forEach( function(e,i){
-                map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>" + e.name + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
+                map_html = map_html + "<tr data-depth='0' class='level0 colps'><td data-pcl-name='" + e.name + "'>" + e.name + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td><td></td></tr>"
                 for (ve in e.compartment_map) {
-                    if (ve.indexOf(exclude) == -1) {
-                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td>" + ve + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td></tr>"
+                    if (exclude.indexOf(ve) == -1) {
+                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td data-pcl-name='" + e.name + "'></td><td data-ve-name='" + ve + "'>" + ve + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
                     }
                     for (comp in e.compartment_map[ve]) {
-                        if (e.compartment_map[ve][comp].indexOf(exclude) == -1){
-                            map_html = map_html + "<tr data-depth='2' class='level2 colps'><td></td><td></td><td class='comp'>" + e.compartment_map[ve][comp] + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='editableCell badge badge-light'>0</label></td></tr>"
+                        if (exclude.indexOf(e.compartment_map[ve][comp]) == -1){
+                            map_html = map_html + "<tr data-depth='2' class='level2 colps'><td data-pcl-name='" + e.name + "'><td data-ve-name='" + ve + "'><td class='comp' data-comp-name='" + e.compartment_map[ve][comp] + "'>" + e.compartment_map[ve][comp]+ "</td><td class='ic'><input class='editableCell' style='width: 50px; display:none'/><label class='editableCell badge badge-light'>0</label></td><td class='ic_unit'></td></tr>"
                         }
                     }
                 }
             })
             map_html += "</tbody>"
             return map_html
+        }
+
+        function populate_values(cmap) {
+            let this_chem = $(cmap).closest("div.tab-pane").data("tab-name")
+            let parcels = TRIM.store.currentScenario.parcels;
+            parcels.forEach(function(p,i){
+                Object.keys(p.initialConcentrations).forEach(function(chem,j) {
+                    if (chem == this_chem) {
+                        let ves = Object.keys(p.initialConcentrations[chem])
+                        ves.forEach(function(ve,k) {
+                            let comps = Object.keys(p.initialConcentrations[chem][ve])
+                            comps.filter(cc => cc !== "Degradation_Reaction_Sink" ).forEach(function(comp,l){
+                                let pcl_find_str = "td[data-pcl-name='" + p.name + "']"
+                                let ve_find_str = "td[data-ve-name='" + ve + "']"
+                                let comp_find_str = "td[data-comp-name='" + comp + "']"
+                                let ic_cell = $(cmap).find(pcl_find_str).next(ve_find_str).next(comp_find_str).next("td.ic")
+                                let ic_val =  Number(p.initialConcentrations[chem][ve][comp]['ic']).toExponential()
+                                let ic_unit_cell = $(cmap).find(pcl_find_str).next(ve_find_str).next(comp_find_str).next("td.ic").next("td.ic_unit")
+                                let ic_unit = p.initialConcentrations[chem][ve][comp]['unit']
+                                $(ic_cell).find("input").val(ic_val)
+                                $(ic_cell).find("label.editableCell").text(ic_val)
+                                $(ic_unit_cell).text(ic_unit)
+                            })
+                        })
+                    }
+                })
+            })
         }
 
         function populate_comp_dd(dd_menu){
@@ -289,7 +455,7 @@
             })
             $("a.dropdown-item.comp-item").on("click",function (e){
                 e.preventDefault()
-                let this_table = $(this).closest("div.dropdown").next("table.compMap")
+                let this_table = $(this).closest("div.dropdown").nextAll("table.compMap:first")
                 let this_dd_btn = $(this).closest("div.dropdown").find("button.btn_show_comp")
                 $('button.comp_hide_all').trigger('click');
                 let only_comps = $(this_table).find("tr.colps.level2").filter((i,tr) => $(tr).find("td.comp").text() == $(this).text());
@@ -297,7 +463,7 @@
                 $(only_comps).show()
                 $(this_dd_btn).text($(this).text())
 
-                $(only_comps).prev("tr.level1").show()
+                $(only_comps).each((i,e)=> $(e).prevAll("tr.level1:first").show())
             })
         }
     });

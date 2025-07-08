@@ -54,6 +54,7 @@ def as_function(equation, with_caching=True, **default_kwargs):
     equation = equation.replace('math.log', 'safe_log')
     equation = equation.replace('math.log10', 'safe_log10')
     equation = equation.replace('math.sqrt', 'safe_sqrt')
+    equation = equation.replace(' min(', ' safe_min(')
 
     def fix_non_callables(eq, evaluator):
         args = evaluated_args(eq, evaluator)
@@ -315,6 +316,11 @@ def find_arguments(equation, combine_partial_args=True, drop_functions=True):
         check = element.replace('.', '').replace('_', '').replace('(', '')
         check = check.strip()
         if not check.isalnum():
+            # We need to fix sub arguments like 'chemical=chemical' where the rhs term is actually an argument.
+            if "=" in check and '"' not in check:
+                element = element.rsplit("=", 1)[1]
+            else:
+                continue
             continue
 
         if is_number(check):

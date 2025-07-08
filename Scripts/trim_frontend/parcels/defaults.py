@@ -15,18 +15,25 @@ def serialize_parcel(pcl: Parcel):
     water_params = get_water_params(pcl, general_params['parcelType'])
     source_params = get_source_params(pcl)
     soil_abiotic_params = get_soil_abiotic_params(pcl)
+    initial_conc = get_initial_concetrations(pcl)
+
+    cdv = get_comp(pcl, {"name":"DryVaporSource"})
+    spacing_param = cdv.parameters.get("ReceptorSpacing")
+    spacing_val = spacing_param.default_value if type(spacing_param) is ParameterDefinition else spacing_param.value
 
     s = {
         'id': pcl.id,
         'name': pcl.name,
         'description': pcl.description if pcl.description else "None",
+        'receptor_spacing': spacing_val,
         'vertices': pcl.vertices,
         'area': pcl.area.m_as('m^2'),
         'compartment_map': {ve.name: [c.name for c in ve.compartments] for ve in pcl.volume_elements},
         **general_params,
         **water_params,
         **source_params,
-        **soil_abiotic_params
+        **soil_abiotic_params,
+        **initial_conc
     }
 
     comp_local_cache.clear()
@@ -345,7 +352,7 @@ def get_water_params(pcl, parcel_type):
 
         try:
             seepage_vol_rate_to_gw = (
-                precipitation_rate
+                precipitation_rate * 365
                 * precip_seepage_frac_to_gw
                 * runoff_watershed_area
             )
@@ -378,9 +385,12 @@ def get_water_params(pcl, parcel_type):
         # get watershed are for water parcel
         sw_total_watershed_area = get_watershed_area(pcl)
 
+        all_soil_comps = []
         connected_soil_comps = []
         for this_parcel in pcl.scenario.parcels:
             soil_comp = get_comp(this_parcel, {"name":"Soil_Surface"})
+            if soil_comp:
+                all_soil_comps.append(soil_comp)
             if soil_comp and soil_comp.connects_to(sw):
                 connected_soil_comps.append(soil_comp)
         # sum up watershed area of connected Soil parcels.
@@ -390,38 +400,40 @@ def get_water_params(pcl, parcel_type):
             #         * this_soil_comp.FractionofAreaAvailableforRunoff
             # ).magnitude
             # sw_total_watershed_area += this_watershed_area
-            this_watershed_area = get_watershed_area(this_soil_comp.volume_element.parcel)
+            this_parcel_area = this_soil_comp.volume_element.parcel.area.magnitude  # get_watershed_area(this_soil_comp.volume_element.parcel)
             # we need to calculate runoff to this surface_water body using the watershed area above
-            comp_link = this_soil_comp.get_links(sw)
-            if len(comp_link) > 0:
-                tps = comp_link[0].transport_processes(chemical=ch)
-                runoff_tps = [t for t in tps if t.name.startswith("Runoff from Surface Soil to Surface Water")]
-                if len(runoff_tps) > 0:
-                    runoff_tps = runoff_tps[0]
-                    precip_runoff = runoff_tps.eval(sender=this_soil_comp, receiver=sw, chemical=ch)
-                    this_precip_runoff_frac_to_sw = (precip_runoff / precipitation_rate).magnitude
-                else:
-                    # This handles exception for Run-off when there is no link between compartments.
-                    print(f"No runoff transport from {this_soil_comp.standard_name} to {sw.standard_name}. "
-                          f"They are not next to each other. Check Runoff Matrix!")
-                    this_precip_runoff_frac_to_sw = 0
+            # comp_link = this_soil_comp.get_links(sw)
+            # if len(comp_link) > 0:
+            #     tps = comp_link[0].transport_processes(chemical=ch)
+            #     runoff_tps = [t for t in tps if t.name.startswith("Runoff from Surface Soil to Surface Water")]
+            #     if len(runoff_tps) > 0:
+            #         runoff_tps = runoff_tps[0]
+            #         precip_runoff = runoff_tps.eval(sender=this_soil_comp, receiver=sw, chemical=ch)
+            #         this_precip_runoff_frac_to_sw = (precip_runoff / precipitation_rate).magnitude
+            #     else:
+            #         # This handles exception for Run-off when there is no link between compartments.
+            #         print(f"No runoff transport from {this_soil_comp.standard_name} to {sw.standard_name}. "
+            #               f"They are not next to each other. Check Runoff Matrix!")
+            #         this_precip_runoff_frac_to_sw = 0
+            # WE DO NOT NEED TO CALCULATE RUNOFF IT IS FROM RUNOFF MATRIX
+            this_precip_runoff_frac_to_sw = this_soil_comp.FractionOfTotalRunoff(sw)
             total_runoff_vol_rate_to_this_sw += (
-                    precipitation_rate
+                    precipitation_rate * 365
                     * this_precip_runoff_frac_to_sw
-                    * this_watershed_area
+                    * this_parcel_area
             )
             # total_runoff_vol_rate_to_this_sw = 0 if not total_runoff_vol_rate_to_this_sw else total_runoff_vol_rate_to_this_sw
             this_seepage_frac_to_gw = this_soil_comp.GroundwaterSeepageFraction
             total_seepage_vol_rate_to_gw += (
-                    precipitation_rate
+                    precipitation_rate * 365
                     * this_seepage_frac_to_gw
-                    * this_watershed_area
+                    * this_parcel_area
             )
             this_total_erosion_rate = this_soil_comp.TotalErosionRate.magnitude
             sed_soil_erosion_to_sw += (
                 this_total_erosion_rate
                 * this_precip_runoff_frac_to_sw
-                * this_watershed_area
+                * this_parcel_area
             )
 
         def get_correct_param(par_name, par_obj):
@@ -432,39 +444,70 @@ def get_water_params(pcl, parcel_type):
         wc_external_inflow = 0
         precipitation_vol_rate_to_sw = 0  # 4.8E6
 
+        def get_weighted_avg(wgt, val):
+            total_wgt = 0
+            sum_weighted_val = 0
+            for i, w in enumerate(wgt):
+                total_wgt += w
+                sum_weighted_val += w * val[i]
+            return sum_weighted_val/total_wgt
+
         try:
             precipitation_vol_rate_to_sw = (
-                    precipitation_rate
+                    precipitation_rate * 365
                     * pcl.area).magnitude
-        except Exception as e:
-            print(e)
+        except Exception as ex:
+            print(f'Problem Calculating Precipitation Volumetric Rate to Surface Water:\n {ex}')
 
         try:
             evaporation_vol_rate = get_correct_param("waterEvaporationRate", sw_pars) * pcl.area.magnitude
-        except Exception:
+        except Exception as ex:
             evaporation_vol_rate = None
+            print(f'Problem Calculating Water Column Evaporation Volumetric Rate:\n {ex}')
         # evaporation_vol_rate = 3.3E6
 
         try:
+            # wc_discharge_vol_rate = float('{:.5f}'.format(
+            #     total_runoff_vol_rate_to_this_sw
+            #     + total_seepage_vol_rate_to_gw
+            #     + wc_external_inflow
+            #     + precipitation_vol_rate_to_sw
+            #     - evaporation_vol_rate
+            # ))
+            # print(wc_discharge_vol_rate)
+            # wc_discharge_vol_rate = 0 if wc_discharge_vol_rate else wc_discharge_vol_rate
+
+            pcl_area = [c.volume_element.parcel.area.magnitude for c in all_soil_comps]
+            pcl_runoff_frac = [c.PrecipitationRunoffFraction for c in all_soil_comps]
+            pcl_seepage_frac = [c.GroundwaterSeepageFraction for c in all_soil_comps]
+            wgt_ave_runoff = get_weighted_avg(pcl_area, pcl_runoff_frac)
+            wgt_ave_seepage = get_weighted_avg(pcl_area, pcl_seepage_frac)
             wc_discharge_vol_rate = float('{:.5f}'.format(
-                total_runoff_vol_rate_to_this_sw
-                + total_seepage_vol_rate_to_gw
+                (pcl.scenario.Rain.magnitude * pcl.area.magnitude * 365)
+                + (sw_total_watershed_area * pcl.scenario.Rain.magnitude * 365 * wgt_ave_runoff)
+                + (sw_total_watershed_area * pcl.scenario.Rain.magnitude * 365 * wgt_ave_seepage)
                 + wc_external_inflow
-                + precipitation_vol_rate_to_sw
                 - evaporation_vol_rate
             ))
-            wc_discharge_vol_rate = 0 if wc_discharge_vol_rate else wc_discharge_vol_rate
-        except Exception:
+            # print(f'runoff term is  {(sw_total_watershed_area * pcl.scenario.Rain.magnitude * 365 * wgt_ave_runoff)}\n'
+            #       f'seepage term is {(sw_total_watershed_area * pcl.scenario.Rain.magnitude * 365 * wgt_ave_seepage)}\n'
+            #       f'inflow term is {wc_external_inflow}\n'
+            #       f'evaporation term is {evaporation_vol_rate}\n'
+            #       f'Discharge vol rate is {wc_discharge_vol_rate}')
+        except Exception as ex:
             wc_discharge_vol_rate = None
+            print(f'Problem Calculating Water Column Discharge Volumetric Rate:\n {ex}')
+
         # wc_discharge_vol_rate = 6.2E6
         
         try:
             wc_sed_discharge_rate = (
                 get_correct_param("SuspendedSedimentConcentration", sw_pars)
-                * wc_discharge_vol_rate
+                * (wc_discharge_vol_rate/365)
             )
-        except Exception:
+        except Exception as ex:
             wc_sed_discharge_rate = None
+            print(f'Problem Calculating Sediment Discharge Rate:\n {ex}')
         # wc_sed_discharge_rate = 3.13E5
 
         try:
@@ -473,8 +516,18 @@ def get_water_params(pcl, parcel_type):
                 + sed_soil_erosion_to_sw
                 - wc_sed_discharge_rate
             ) / (get_correct_param("BedDensity", sed_pars) * pcl.area.magnitude)
-        except Exception:
+            burial_par = sed_pars.get("SedimentBurialRateToHaveZeroNetDeposition")
+            if isinstance(burial_par, ParameterDefinition):
+                ParameterService.create(definition=burial_par, scenario=pcl.scenario,
+                                        requirements=f"(self.id == {sed.id})", value=sed_burial_vol_rate,
+                                        unit=burial_par.default_unit)
+                ParameterService.commit()
+            elif isinstance(burial_par, CustomParameter) and burial_par.value != sed_burial_vol_rate:
+                burial_par.value = sed_burial_vol_rate
+                ParameterService.commit()
+        except Exception as ex:
             sed_burial_vol_rate = None
+            print(f'Problem Calculating Sediment Burial Rate:\n {ex}')
         # sed_burial_vol_rate = get_correct_param("SedimentBurialRateToHaveZeroNetDeposition", sed_pars)  # 2.4992e-5
 
         try:
@@ -482,8 +535,9 @@ def get_water_params(pcl, parcel_type):
                 get_correct_param("SedimentDepositionVelocity", sw_pars)
                 * get_correct_param("SuspendedSedimentConcentration", sw_pars)
             ) / get_correct_param("BedDensity", sed_pars)
-        except Exception:
+        except Exception as ex:
             sed_deposition_vol_rate = None
+            print(f'Problem Calculating Sediment Deposition Volumetric Rate:\n {ex}')
         # sed_deposition_vol_rate = get_correct_param("SedimentDepositionRate", sw_pars)  # 3.8462e-5
 
         try:
@@ -491,8 +545,18 @@ def get_water_params(pcl, parcel_type):
                 sed_deposition_vol_rate
                 - sed_burial_vol_rate
             ) / (1 - get_correct_param("Porosity", sed_pars))
-        except Exception:
+            resus_par = sed_pars.get("SedimentResuspensionVelocity")
+            if isinstance(resus_par, ParameterDefinition):
+                ParameterService.create(definition=resus_par, scenario=pcl.scenario,
+                                        requirements=f"(self.id == {sed.id})", value=sed_resuspension_vel,
+                                        unit=resus_par.default_unit)
+                ParameterService.commit()
+            elif isinstance(resus_par, CustomParameter) and resus_par.value != sed_resuspension_vel:
+                resus_par.value = sed_resuspension_vel
+                ParameterService.commit()
+        except Exception as ex:
             sed_resuspension_vel = None
+            print(f'Problem Calculating Sediment Resuspension Velocity:\n {ex}')
         # sed_resuspension_vel = get_correct_param("SedimentResuspensionVelocity", sed_pars)  # 6.2480e-5
 
         sw_params = {
@@ -531,6 +595,23 @@ def get_water_params(pcl, parcel_type):
         }
     water_params['surface_water'] = sw_params
     return water_params
+
+
+def get_initial_concetrations(pcl):
+    chem_objs = {c for c in pcl.scenario.chemicals}
+    chems = {c.name: {} for c in pcl.scenario.chemicals}
+    initial_conc = {"initialConcentrations": chems}
+    for chem in chem_objs:
+        for comp in pcl.compartments:
+            unit = "g / m^3" if comp.media.id in [2, 5, 7, 56, 55, 8, 9] else "g / kg" if comp.media.id in [23, 24, 27, 28, 29, 31, 32, 33, 37, 39, 41, 43, 44, 45, 46, 47, 48, 49, 50, 51] else "g / L" if comp.media.id in [10, 4] else ""
+            spd = initial_conc["initialConcentrations"][chem.name].get(comp.volume_element.name)
+            # Ultimately we need to use initialConcentrationConverted but we need to solve the unit incomaptibility issue.
+            if spd:
+                spd.setdefault(comp.name, {'ic': comp.initialConcentration(chem).magnitude, 'unit': unit})
+            else:
+                initial_conc["initialConcentrations"][chem.name].setdefault(comp.volume_element.name, {
+                    comp.name: {'ic': comp.initialConcentration(chem).magnitude, 'unit': unit}})
+    return initial_conc
 
 
 def get_source_params(pcl):
@@ -899,6 +980,10 @@ Water_Parcel_VolElem_defaults = {
                 'name': 'Degradation_Reaction_Sink',
                 'media_name': 'Degradation_Reaction'
             },
+            'Burial_Sink': {
+                'name': 'Burial_Sink',
+                'media_name': 'Burial'
+            }
         }
     }
 }

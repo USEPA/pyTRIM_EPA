@@ -922,11 +922,26 @@
         }
 
         function calculate_flush_rate(data, parcel_name){
-            let parcels = TRIM.store.currentScenario.parcels;
-            let wc_discharge_vol_rate = Number(data.find(e=>e.Property == "Water Column Discharge Volumetric Rate")[parcel_name])
-            let wc_depth = Number(data.find(e=>e.Property == "Water Column Depth")[parcel_name])
-            let area = Number(parcels.find(e => e.name == parcel_name).area)
-            let res = wc_discharge_vol_rate/(area * wc_depth)
+            let P = TRIM.store.currentScenario.parcels.filter(e=>e.name==parcel_name)[0];
+            let precip_rate = P.precip_rate * 365;
+            let evapo_rate = P.surface_water.wc_props.evaporation_rate;
+            let watershed_area = P.surface_water.wc_props.connected_watershed_area;
+            let lake_depth = P.surface_water.wc_props.mean_depth;
+            let external_inflow = Number(data.find(e=>e.Property == "Water Column External Water Inflow from Other Water Bodies")[parcel_name])
+            let area = P.area;
+            let wgt_ave_runoff_frac = TRIM.store.currentScenario.parcels.filter(e=>e.runoff_fraction!=null).map(e=>
+                e.runoff_fraction*e.area).reduce((a,e)=>a+e, 0)/
+                TRIM.store.currentScenario.parcels.filter(e=>e.runoff_fraction!=null).map(e=>e.area).reduce((a,e)=>a+e, 0)
+            let wgt_ave_seepage_frac = TRIM.store.currentScenario.parcels.filter(e=>e.seepage_frac!=null).map(e=>
+                e.seepage_frac*e.area).reduce((a,e)=>a+e, 0)/
+                TRIM.store.currentScenario.parcels.filter(e=>e.seepage_frac!=null).map(e=>e.area).reduce((a,e)=>a+e, 0)
+            let res = ((area * precip_rate) + (watershed_area * precip_rate * wgt_ave_runoff_frac) +
+                (watershed_area * precip_rate * wgt_ave_seepage_frac) + (external_inflow) - (area * evapo_rate)) /
+                (area * lake_depth)
+            // let parcels = TRIM.store.currentScenario.parcels;
+            // let wc_discharge_vol_rate = Number(data.find(e=>e.Property == "Water Column Discharge Volumetric Rate")[parcel_name])
+            // let wc_depth = Number(data.find(e=>e.Property == "Water Column Depth")[parcel_name])
+            // let res = wc_discharge_vol_rate/(area * wc_depth)
             return Number.parseFloat(res).toExponential(5)
         }
 

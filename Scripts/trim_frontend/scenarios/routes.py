@@ -24,7 +24,10 @@ from trim_frontend.parcels.routes import delete_parcel_contents
 from .defaults import *
 from .forms import *
 from ..utils.logging import make_logger
+from ..utils.file_io import MiscAssociatedFileVariety, associated_file_helper
+from ..parcels.utils import calculate_receptor_grid_points_for_parcel
 from trim_core.algorithms.full_model_run import run_full_model
+# from trim_core.algorithms.GetFlow.getflow import run_getflow_v7_for_scenario_id
 # from sqlalchemy import inspect
 
 import traceback
@@ -365,15 +368,18 @@ def update_scenario():
             #     if cp.definition.variable_name == "erosionRateCalcSource":
             #         cp.value = ercs
             ParameterService.commit()
+        elif field_name == "name":  # Scenario Name
+            s.name = scenario_data["name"]
+            ParameterService.commit()
+        elif field_name == "description":  # Scenario Description
+            s.description = scenario_data["description"]
+            ParameterService.commit()
         elif field_name.startswith("meteo_"):  # Data from the meteorology tab
             if "_interception_" in field_name:
                 param_media = param_map["meteo"].get(field_name)[0]
                 param_name = param_map["meteo"].get(field_name)[1]
                 comp_list = [c for c in s.compartments if c.media.isa(param_media)]
                 for c in comp_list:
-                    # TODO Why is this not working???
-                    # c.parameters.get(param_name).value = scenario_data[field_name]
-                    # CompartmentService.update(c)
                     update_custom_param(s, c, param_name, scenario_data[field_name], create_if_dne=True)
             else:
                 param_name = param_map["meteo"].get(field_name)
@@ -402,9 +408,12 @@ def update_scenario():
                 ret_type = "LF" if field_name.find("_litterfall_") > 0 else "AE"
                 ret_type_name = "wt_av_litterfallrate" if field_name.find("_litterfall_") > 0 else \
                     "wt_av_allowexchange" if field_name.find("_allowexchange_") > 0 else "None"
-                ret_val = meteo_wgt_avg_value_from_timeseries(param_data, ret_type)
-                if ret_type != "None":
-                    update_assumed_all_comp_fixed_params(s, comp_list, param_name, ret_val[ret_type_name])
+                # The condition below assures that we do not utilize the value from the file for Coniferous forest leaf
+                # If not set via custom parameter, it defaults to the desired value of 0.0021.
+                if not (ret_type_name == "wt_av_litterfallrate" and param_media == 'Coniferous_Leaf'):
+                    ret_val = meteo_wgt_avg_value_from_timeseries(param_data, ret_type)
+                    if ret_type != "None":
+                        update_assumed_all_comp_fixed_params(s, comp_list, param_name, ret_val[ret_type_name])
         elif field_name == "simulation_start_date" or field_name == "simulation_end_date":
             date_parts = scenario_data[field_name].split("-")
             date_obj = datetime(int(date_parts[0]), int(date_parts[1]), int(date_parts[2]))
@@ -497,7 +506,7 @@ def copy_scenario():
                 if f.equation.find("compartment.id") > -1 \
                         or f.equation.find("receiver.id") > -1 \
                         or f.equation.find("sender.id") > -1:
-                    par_dict.setdefault(par.id, {"par": par, "frm": f})
+                    par_dict.setdefault(str(par.id), {"par": par, "frm": f})
             return par_dict
 
         # Add scenario properties/parameters
@@ -510,7 +519,7 @@ def copy_scenario():
                     ns_par = ParameterService.create(definition=s_par.definition, scenario=ns,
                                         requirements=f"(self.id == {ns.id})", value=s_par.value,
                                         unit=s_par.unit, formula=s_par.formula)
-                    cpar_map[s_par.id] = ns_par.id
+                    cpar_map[str(s_par.id)] = ns_par.id
                 formulas_with_comp_ids = check_for_comp_ids(formulas_with_comp_ids, s_par)
                 # ParameterService.commit()
         logger.info(f'Copied scenario parameters in {time.time() - scen_par_start_time} seconds')
@@ -528,7 +537,7 @@ def copy_scenario():
                         nc_par = ParameterService.create(definition=c_par.definition, scenario=ns,
                                             requirements=f"(self.id == {sc.id})", value=c_par.value,
                                             unit=c_par.unit, formula=c_par.formula)
-                        cpar_map[c_par.id] = nc_par.id
+                        cpar_map[str(c_par.id)] = nc_par.id
                     formulas_with_comp_ids = check_for_comp_ids(formulas_with_comp_ids, c_par)
                     # ParameterService.commit()
         logger.info(f'Copied chemical parameters in {time.time() - chem_par_start_time} seconds')
@@ -538,12 +547,14 @@ def copy_scenario():
         # check volume element parameters for hardwired ids.
         for ve in s.volume_elements:
             for vpr_name, vpr in ve.parameters.items():
-                formulas_with_comp_ids = check_for_comp_ids(formulas_with_comp_ids, vpr)
+                if isinstance(vpr, CustomParameter) and vpr.scenario.id == s.id:
+                    formulas_with_comp_ids = check_for_comp_ids(formulas_with_comp_ids, vpr)
 
         # check compartment parameters for hardwired ids.
         for cmp in s.compartments:
             for pr_name, pr in cmp.parameters.items():
-                formulas_with_comp_ids = check_for_comp_ids(formulas_with_comp_ids, pr)
+                if isinstance(pr, CustomParameter) and pr.scenario.id == s.id:
+                    formulas_with_comp_ids = check_for_comp_ids(formulas_with_comp_ids, pr)
         logger.info(f'Found static compartment ids in {len(formulas_with_comp_ids)} parameter formulas in {time.time() - chk_par_start_time} seconds')
 
         # Create new parcels
@@ -563,7 +574,7 @@ def copy_scenario():
                         nve_par = ParameterService.create(definition=ve_par.definition, scenario=ns,
                                                 requirements=f"(self.id == {nve.id})", value=ve_par.value,
                                                 unit=ve_par.unit, formula=ve_par.formula)
-                        cpar_map[ve_par.id] = nve_par.id
+                        cpar_map[str(ve_par.id)] = nve_par.id
                 # Create new compartments
                 for cmp in ve.compartments:
                     ncmp = CompartmentService.create(name=cmp.name, volume_element=nve, media=cmp.media)
@@ -598,7 +609,7 @@ def copy_scenario():
                             ncpar = ParameterService.create(definition=cpar.definition, scenario=ns,
                                                             requirements=f"(self.id == {ncmp.id})", value=cpar.value,
                                                             unit=cpar.unit, formula=cpar.formula)
-                            cpar_map[cpar.id] = ncpar.id
+                            cpar_map[str(cpar.id)] = ncpar.id
                             # ParameterService.commit()
 
                 logger.info(f"Finished copying {ve.name} for {prc.name}")
@@ -608,10 +619,11 @@ def copy_scenario():
         # Check if we have a parameter with formula that has the hardwired ids found above.
         logger.info("Fixing Formulas with Static Compartment ids ...")
         fix_par_start_time = time.time()
+
         for old_par_id in formulas_with_comp_ids:
-            new_par_id = cpar_map[old_par_id]
+            new_par_id = cpar_map[str(old_par_id)]
             # replace all old compartment ids with new compartment ids
-            old_formula = formulas_with_comp_ids[old_par_id]["frm"].equation
+            old_formula = formulas_with_comp_ids[str(old_par_id)]["frm"].equation
             # regular expression to find the id lists in the formula
             regex = re.compile("(?:(?:receiver|compartment|sender)\.id\sin\s{([\,\s\d+]+))")
             old_id_lists = regex.findall(old_formula)
@@ -643,13 +655,34 @@ def copy_scenario():
         ParameterService.commit()
 
         # Create the compartment links using the compartment id map
-        logger.info("Copying Compartment Links ...")
-        lnk_cp_start_time = time.time()
-        for lnk in CompartmentService.links.get_all():
-            if lnk.sender_id in cmp_map.keys():
-                CompartmentService.links.create(sender_id=cmp_map[lnk.sender_id], receiver_id=cmp_map[lnk.receiver_id])
-        logger.info(f'Copied compartment links in {time.time() - lnk_cp_start_time} seconds')
-        CompartmentService.commit()
+        # logger.info("Copying Compartment Links ...")
+        # lnk_cp_start_time = time.time()
+        # for lnk in CompartmentService.links.get_all():
+        #     if lnk.sender_id in cmp_map.keys():
+        #         CompartmentService.links.create(sender_id=cmp_map[lnk.sender_id], receiver_id=cmp_map[lnk.receiver_id])
+        # logger.info(f'Copied compartment links in {time.time() - lnk_cp_start_time} seconds')
+        # CompartmentService.commit()
+
+        ll = {c.standard_name: {'sender': c,
+                                'receiver': c.custom_linked_compartments,
+                                'clinks': [
+                                    CompartmentService.links.get(sender_id=c.id, receiver_id=cc.id) for cc in c.custom_linked_compartments
+                                ]
+                                } for c in s.compartments if len(c.custom_linked_compartments) > 0}
+
+        for l, ld in ll.items():
+            sender_1 = [c for c in ns.compartments if c.standard_name == l][0]
+            for r1 in ld['receiver']:
+                receiver_1 = [c for c in ns.compartments if c.standard_name == r1.standard_name][0]
+                ccl = CompartmentService.links.get(sender_id=sender_1.id, receiver_id=receiver_1.id)
+                if not ccl:
+                    print(f'CREATING A NEW LINK in SCENARIO {receiver_1.volume_element.parcel.scenario.name} with sender_id:{sender_1.id} and receiver_id {receiver_1.id}')
+                    CompartmentService.links.create(sender_id=sender_1.id, receiver_id=receiver_1.id)
+                else:
+                    print(
+                        f'A CUSTOM LINK ALREADY EXISTS in SCENARIO {receiver_1.volume_element.parcel.scenario.name} with sender_id:{sender_1.id} and receiver_id {receiver_1.id}')
+            CompartmentService.commit()
+
     except Exception as e:
         logger.error(traceback.format_exc())
         logger.error(e)
@@ -790,9 +823,9 @@ def run_result_scenario():
     try:
         # in dev/prod, we execute an AWS StepFunction to run the model via Docker/ECS. Locally,
         # we just run the model directly.
-        if trim_env_profile in [ "dev", "prod" ]:
+        if trim_env_profile in [ "dev", "devgetflow", "prod" ]:
             sfn_client = boto3.client("stepfunctions")
-            state_machine_arn = os.environ.get("TRIM_DOCKERIZED_STATEMACHINE_ARN")
+            state_machine_arn = os.environ.get("TRIM_DOCKERIZED_RUNMODEL_STATEMACHINE_ARN")
 
             if state_machine_arn is not None:
                 resp = sfn_client.start_execution(
@@ -939,6 +972,98 @@ def fetch_run_results():
 
     return ApiResult(resp)
 
+@scenario_api.route(
+    '/api/scenario/<int:scenario_id>/run_getflow', methods=['POST']
+)
+@login_required
+def run_getflow(scenario_id):
+    """
+    flow is as follows:
+    * gui_surface_runoff.html is the template for the url /scenario/{id}/edit?default_runoff_matrix_file=#surface_runoff-tab
+    * clicking "Run GetFlow" btn runs a small JavaScript function defined in that html file
+    * that function calls api.runGetFlow, defined in api.js. That packages some stuff up and hits
+      /api/scenario/{id}/run_getflow
+    * that's this function! This now kicks off a Step Function and returns the execution arn or whatever
+    """
+    trim_env_profile = os.environ.get("TRIM_ENV_PROFILE", "").lower()
+
+    print(f"TOM in run_getflow within routes.py, env==[{trim_env_profile}]...")
+    print(f"scenario id is [{scenario_id}] / {type(scenario_id)}")
+    print(f"data is ?!?!!?")
+
+    s = ScenarioService.get(scenario_id)
+    if not s:
+        raise ApiException("Unknown Scenario")
+
+    print(f"scenario: {s}")
+
+    print(f"Starting/Kicking Off GetFlow Run ({datetime.now()}...")
+    try:
+        # unlike runmodel, here we use ECS even when running locally. (getting a working qgis
+        # install is non-trivial, but if you wanted to run local you'd need to do that, then
+        # modify this section of code to do something like "run_result_scenario".
+        if True or trim_env_profile in [ "dev", "devgetflow", "prod" ]:
+            sfn_client = boto3.client("stepfunctions")
+            state_machine_arn = os.environ.get("TRIM_DOCKERIZED_GETFLOW_STATEMACHINE_ARN")
+
+            print(f"arn is '{state_machine_arn}'")
+
+            if state_machine_arn is not None:
+                resp = sfn_client.start_execution(
+                    stateMachineArn=state_machine_arn,
+                    input=json.dumps({ "scenarioId": str(scenario_id), "generateFakeResults": "false" })
+                )
+                data_resp = { "executionArn": resp["executionArn"] }
+                # data_resp = { "to": "do" }
+            else:
+                data_resp = { "error": "Missing required envrionment variable to run getflow" }
+
+            print(f"Back (Kicked Off) ({datetime.now()}...")
+        else:
+            data_resp = {"not": "implemented!"}
+    except Exception as e:
+        print(e)
+        data_resp = {"error": repr(e)}
+
+    return ApiResult(data_resp)
+
+@scenario_api.route(
+    '/api/stepfxn_check', methods=['POST']
+)
+@login_required
+def check_stepfunction_status():
+    print(f"checking stepfxn status...")
+    print(request.form.to_dict())
+
+    execution_arn = request.form.to_dict().get("arn")
+
+    if execution_arn is None:
+        data_resp = {"error": "no execution arn supplied"}
+    else:
+        try:
+            sfn_client = boto3.client("stepfunctions")
+            resp = sfn_client.describe_execution(
+                executionArn=execution_arn
+            )
+            data_resp = {
+                "status": resp.get("status")
+            }
+
+            if resp.get("status", "").upper() == "SUCCEEDED":
+                data_resp["output"] = {}
+
+                stepfxn_output = resp.get("output")
+                print(f"RAW OUTPUT: {stepfxn_output}")
+                parsed = json.loads(stepfxn_output)
+                for key in parsed:
+                    data_resp["output"][key] = parsed[key]
+
+
+
+        except Exception as e:
+            data_resp = {"error": str(e) }
+
+    return ApiResult(data_resp)
 
 @scenario_api.route('/api/scenario/<int:scenario_id>/export/mirc', methods=['GET'])
 # TODO: Need some way for MIRC *app* to authenticate?
@@ -1068,3 +1193,36 @@ def compile_mirc_parcel_data(scen, chems, conc, timestamps, logger):
             p["volume_elements"].append(ve)
         parcels.append(p)
     return parcels
+
+@scenario_api.route(
+    '/api/scenario/<int:scenario_id>/run_receptor_generation', methods=['POST']
+)
+@login_required
+def run_receptor_generation(scenario_id):
+    """
+    flow is as follows:
+    * parcels.html is the template for the url /scenario/{id}/edit#parcels-tab
+    * clicking the btn in the "Receptor Spacing" column runs a small JavaScript function defined in that html file
+    * that function calls api.runReceptorGeneration, defined in api.js. That packages some stuff up and hits
+      /api/scenario/{id}/run_receptor_generation
+    * that's this function! This blah blah
+    """
+
+    scen = ScenarioService.get(scenario_id)
+
+    all_calculations = []
+    for parcel in scen.parcels:
+        grid_points_etc = calculate_receptor_grid_points_for_parcel(parcel)
+        all_calculations.append(grid_points_etc)
+
+    fv = MiscAssociatedFileVariety.construct_file_variety("generated_aermod_receptors")
+    file_like_obj = fv.convert_grid_point_data_to_binary_geojson(all_calculations)
+
+    data_resp = {}
+    try:
+        upload_data = associated_file_helper(scenario_id, "generated_aermod_receptors", "UPLOAD", file_obj = file_like_obj, file_metadata={})
+        data_resp = upload_data
+    except Exception as e:
+        print(f"UPLOAD ERROR: {e}")
+
+    return ApiResult(data_resp)

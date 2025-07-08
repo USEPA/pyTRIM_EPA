@@ -16,7 +16,10 @@
 !.elasticbeanstalk/*.global.yml
 
 iac/output/*
+dev.json
 __pycache__
 .DS_Store
 
 unsynced/
+!/dev.json
+/.idea/

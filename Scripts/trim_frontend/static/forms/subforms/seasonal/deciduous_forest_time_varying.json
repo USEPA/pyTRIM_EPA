@@ -1,0 +1,6 @@
+{
+    "title": "Deciduous Forest",
+    "inherits": "subforms/seasonal/seasonal_time_varying_input_form.json",
+    "fields": [
+    ]
+}

@@ -1,0 +1,152 @@
+// TRIM.FaTE scenario spatial layout
+// Volume elements and primary abiotic compartments
+
+// TNC0
+// Recreation of Tier 1 Thresholds
+
+// Generated:  5/16/2023 4:22:48 PM
+// Coordinates: UTM Zone 14, WGS1984 Ellipsoid
+
+start_volume_element_file
+version 1
+
+start_points
+// PointID x y
+p1 600875 4540125
+p2 600875 4539875
+p3 601125 4539875
+p4 601125 4540000
+p5 601125 4540125
+p6 601500 4540186.71
+p7 601500 4540000
+p8 601500 4539813.29
+p9 602000 4540268.99
+p10 602000 4540000
+p11 602000 4539997.7
+p12 602000 4539731.01
+p13 603000 4540433.54
+p14 603000 4540000
+p15 603000 4539997.7
+p16 603000 4539566.46
+p17 606000 4540927.22
+p18 606000 4540000
+p19 606000 4539997.7
+p20 606000 4539072.78
+p21 611000 4541750
+p22 611000 4540000
+p23 611000 4539997.7
+p24 611000 4538250
+p25 601700 4540219.62
+p26 601700 4540000
+end_points
+
+start_parcels
+// parcel_name, #points, pointIDs
+Source 5 p1 p2 p3 p4 p5
+N1 4 p5 p4 p7 p6
+N6 4 p6 p7 p26 p25
+N7 4 p25 p26 p10 p9
+N3 4 p9 p10 p14 p13
+N4 4 p13 p14 p18 p17
+N5 4 p17 p18 p22 p21
+S1 4 p4 p3 p8 p7
+Pond 4 p7 p8 p16 p14
+S4 4 p14 p16 p20 p18
+S5 4 p18 p20 p24 p22
+end_parcels
+
+start_volume_elements
+// name, parcel, primary abiotic, bottom, top
+
+// ----------------------------------------------------------------------------
+// Air
+// ----------------------------------------------------------------------------
+
+Air_Source Source "Air" 0 800
+UpperAir_Source Source "Air" 800 10000 // source-containing parcel
+Air_N1 N1 "Air" 0 800
+Air_N6 N6 "Air" 0 800
+Air_N7 N7 "Air" 0 800
+Air_N3 N3 "Air" 0 800
+Air_N4 N4 "Air" 0 800
+Air_N5 N5 "Air" 0 800
+Air_S1 S1 "Air" 0 800
+Air_Pond Pond "Air" 0 800
+Air_S4 S4 "Air" 0 800
+Air_S5 S5 "Air" 0 800
+
+// ----------------------------------------------------------------------------
+// Water
+// ----------------------------------------------------------------------------
+
+SW_Pond Pond "Surface water" -3.18 0
+Sed_Pond Pond "Sediment" -3.23 -3.18
+
+// ----------------------------------------------------------------------------
+// Land
+// ----------------------------------------------------------------------------
+
+
+// Parcel: Source // Land use: untilled soil
+SurfSoil_Source Source "Soil - Surface" -0.01 0
+RootSoil_Source Source "Soil - Root Zone" -0.8 -0.01
+VadoseSoil_Source Source "Soil - Vadose Zone" -2.2 -0.8
+GW_Source Source "Groundwater" -5.2 -2.2
+
+// Parcel: N1 // Land use: grass
+SurfSoil_N1 N1 "Soil - Surface" -0.01 0
+RootSoil_N1 N1 "Soil - Root Zone" -0.8 -0.01
+VadoseSoil_N1 N1 "Soil - Vadose Zone" -2.2 -0.8
+GW_N1 N1 "Groundwater" -5.2 -2.2
+
+// Parcel: N6 // Land use: tilled soil
+SurfSoil_N6 N6 "Soil - Surface" -0.2 0
+RootSoil_N6 N6 "Soil - Root Zone" -0.8 -0.2
+VadoseSoil_N6 N6 "Soil - Vadose Zone" -2.2 -0.8
+GW_N6 N6 "Groundwater" -5.2 -2.2
+
+// Parcel: N7 // Land use: grass
+SurfSoil_N7 N7 "Soil - Surface" -0.01 0
+RootSoil_N7 N7 "Soil - Root Zone" -0.8 -0.01
+VadoseSoil_N7 N7 "Soil - Vadose Zone" -2.2 -0.8
+GW_N7 N7 "Groundwater" -5.2 -2.2
+
+// Parcel: N3 // Land use: grass
+SurfSoil_N3 N3 "Soil - Surface" -0.01 0
+RootSoil_N3 N3 "Soil - Root Zone" -0.8 -0.01
+VadoseSoil_N3 N3 "Soil - Vadose Zone" -2.2 -0.8
+GW_N3 N3 "Groundwater" -5.2 -2.2
+
+// Parcel: N4 // Land use: coniferous forest
+SurfSoil_N4 N4 "Soil - Surface" -0.01 0
+RootSoil_N4 N4 "Soil - Root Zone" -0.8 -0.01
+VadoseSoil_N4 N4 "Soil - Vadose Zone" -2.2 -0.8
+GW_N4 N4 "Groundwater" -5.2 -2.2
+
+// Parcel: N5 // Land use: coniferous forest
+SurfSoil_N5 N5 "Soil - Surface" -0.01 0
+RootSoil_N5 N5 "Soil - Root Zone" -0.8 -0.01
+VadoseSoil_N5 N5 "Soil - Vadose Zone" -2.2 -0.8
+GW_N5 N5 "Groundwater" -5.2 -2.2
+
+// Parcel: S1 // Land use: grass
+SurfSoil_S1 S1 "Soil - Surface" -0.01 0
+RootSoil_S1 S1 "Soil - Root Zone" -0.8 -0.01
+VadoseSoil_S1 S1 "Soil - Vadose Zone" -2.2 -0.8
+GW_S1 S1 "Groundwater" -5.2 -2.2
+
+// Parcel: S4 // Land use: coniferous forest
+SurfSoil_S4 S4 "Soil - Surface" -0.01 0
+RootSoil_S4 S4 "Soil - Root Zone" -0.8 -0.01
+VadoseSoil_S4 S4 "Soil - Vadose Zone" -2.2 -0.8
+GW_S4 S4 "Groundwater" -5.2 -2.2
+
+// Parcel: S5 // Land use: coniferous forest
+SurfSoil_S5 S5 "Soil - Surface" -0.01 0
+RootSoil_S5 S5 "Soil - Root Zone" -0.8 -0.01
+VadoseSoil_S5 S5 "Soil - Vadose Zone" -2.2 -0.8
+GW_S5 S5 "Groundwater" -5.2 -2.2
+
+end_volume_elements
+
+end_volume_element_file
