@@ -1233,10 +1233,12 @@ def run_receptor_generation(scenario_id):
 )
 @login_required
 def get_chemical_properties(scenario_id):
+    logger = make_logger('chemical_properties')
+    logger.info("Pulling chemical properties...")
+
     chem_properties = {}
     chemical_domain = 2
     scenario_defaults_id = 1
-    print("Pulling chemical properties...")
 
     try:
         scen = ScenarioService.get(scenario_id)
@@ -1244,7 +1246,7 @@ def get_chemical_properties(scenario_id):
             domain_id=chemical_domain
         )
         for chem in scen.chemicals:
-            chem_properties[chem.name] = {"scenario": {}, "comp": {}}
+            chem_properties[chem.name] = {"Scenario": {}, "Compartment": {}}
 
             for chem_definition in chem_definitions:
                 for i in chem_definition.instances:

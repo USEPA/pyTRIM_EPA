@@ -23,9 +23,9 @@
         <div class="row mb-1">
             <div class="col-sm">
                 <h3> Chemical Properties </h3>
-                <button class="comp_show_all btn btn-warning">Show All</button>
-                <button class="comp_hide_all btn btn-warning">Hide All</button>
-                <button class="comp_show_nz btn btn-outline-success">Show Non-Zero</button>
+                <button class="chem_show_all btn btn-warning">Show All</button>
+                <button class="chem_hide_all btn btn-warning">Hide All</button>
+                <button class="chem_show_nz btn btn-outline-success">Show Non-Zero</button>
                 <table class="chemMap" style="border-collapse: collapse" cellpadding="6">
                     <thead>
                         <tr>
@@ -132,6 +132,13 @@
                 $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "down"))
                 $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "down"))
             });
+            $('button.chem_show_all').on('click', function(e) {
+                e.preventDefault()
+                let this_table =$(this).closest("div[role=tabpanel]").find("table.chemMap")
+                $(this_table).find("tr.colps").show();
+                $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "down"))
+                $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "down"))
+            });
             $('button.comp_show_all').on('click', function(e) {
                 e.preventDefault()
                 let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap")
@@ -143,6 +150,13 @@
 
             $('button.scenario_hide_all').on('click', function(e) {
                 let this_table =$(this).closest("div[role=tabpanel]").find("table.scenarioMap")
+                $(this_table).find("tr.colps:not([data-depth='0'])").hide();
+                $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "up"))
+                $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "up"))
+            });
+            $('button.chem_hide_all').on('click', function(e) {
+                e.preventDefault()
+                let this_table =$(this).closest("div[role=tabpanel]").find("table.chemMap")
                 $(this_table).find("tr.colps:not([data-depth='0'])").hide();
                 $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "up"))
                 $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "up"))
@@ -165,8 +179,18 @@
                 $(non_zeros).prev("tr.level1").show()
                 $(this).closest("div").find("button.btn_show_comp").text("Show Compartment")
             });
+            $('button.chem_show_nz').on('click', function(e) {
+                e.preventDefault()
+                let this_table =$(this).closest("div[role=tabpanel]").find("table.chemMap");
+                $('button.chem_hide_all').trigger('click');
+                let non_zeros = $(this_table).find("tr.colps.level2").filter((i,e) => $(e).find("td.ems").text() > 0);
+                $(non_zeros).show()
+                $(non_zeros).prev("tr.level1").show()
+            });
 
             $(document).ready(function() {
+                $('button.scenario_hide_all').trigger('click');
+                $('button.chem_hide_all').trigger('click');
                 $('button.comp_hide_all').trigger('click');
             });
 
@@ -233,6 +257,7 @@
                 }
             }
 
+            $("[data-toggle=popover]").popover();
             console.log('populated property summary form!')
             LoadingScreen.hide('property_summary_loading');
         }
@@ -396,18 +421,52 @@
             // catch {}
             if (type == "general") {
                 for (const [entity_key, entity_value] of Object.entries(map)) {
-                map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>" + entity_key + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td></tr>"
+                    map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>"
+                        + entity_key +
+                        "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td></tr>"
+
                     for (const [property_key, property_value] of Object.entries(entity_value)) {
-                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td class='comp'>" + property_key + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted'>"+ property_value +"</label></td><td></td></tr>"
+                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td class='comp'>" 
+                            + property_key + 
+                            "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted'>"
+                            + property_value +
+                            "</label></td><td></td></tr>"
                     }
                 }
             } else if (type == "env" || type == "chem"){
+                let prop_style = "style='max-width:20rem;text-wrap: wrap;'";
+                let prop_value_style = "style='max-width:10rem;text-wrap: no-wrap;overflow:hidden;'";
+                let prop_unit_style = "style='max-width:10rem;text-wrap: wrap;'";
+
                 for (const [entity_key, entity_value] of Object.entries(map)) {
-                    map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>" + entity_key + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td><td></td><td></td></tr>"
+                    map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>"
+                        + entity_key +
+                        "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td><td></td><td></td></tr>"
+
                     for (const [cat_key, cat_value] of Object.entries(entity_value)) {
-                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td class='comp'>" + cat_key + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
+                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td class='comp'>"
+                            + cat_key +
+                            "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
+
                         for (const [property_key, property_value] of Object.entries(cat_value)) {
-                            map_html = map_html + "<tr data-depth='2' class='level2 colps'><td></td><td></td><td class='comp'>" + property_key + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted'>" + property_value.value + "</label></td><td>" + (property_value.unit || '') + "</td></tr>"
+                            let prop_value = property_value.value;
+                            if (prop_value?.length > 18) { // turn into a link with a popup
+                                let title = property_key;
+                                let note = property_value.value;
+                                prop_value = `
+                                    <a href="javascript:void(0);" data-toggle="popover" data-html="true" data-trigger="focus" data-original-title="${title}" data-content="${note}">
+                                        ${property_value.value}
+                                    </a>
+                                `;
+                            }
+
+                            map_html = map_html + `<tr data-depth='2' class='level2 colps'><td></td><td></td><td class='comp' ${prop_style}>`
+                                + property_key +
+                                `</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted' ${prop_value_style}>`
+                                + prop_value +
+                                `</label></td><td ${prop_unit_style}>`
+                                + (property_value.unit || '') +
+                                "</td></tr>"
                         }
                     }
                 }
