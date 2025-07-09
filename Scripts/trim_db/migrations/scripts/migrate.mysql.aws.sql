@@ -1,11 +1,9 @@
--- Drop Database if it exists
-DROP DATABASE IF EXISTS `pytrim`;
--- DROP DATABASE IF EXISTS `ebdb`;
--- Create the Database
-CREATE DATABASE `pytrim`;
--- CREATE DATABASE `ebdb`;
-USE `pytrim`;
--- USE `ebdb`;
+-- V2
+-- -- Drop Database if it exists
+-- DROP DATABASE IF EXISTS `pytrimv2`;
+-- -- Create the Database
+-- CREATE DATABASE `pytrimv2`;
+USE `pytrimv2`;
 
 -- Creating dummy User/Role ORM
 CREATE TABLE `alembic_version` (
@@ -134,6 +132,16 @@ CREATE TABLE `scenario` (
     FOREIGN KEY(`creator_id`) REFERENCES user (`id`)
 );
 
+-- CREATE TABLE `team` (
+--     `scenario_id` INTEGER NOT NULL, 
+--     `member_id` INTEGER NOT NULL, 
+--     `id` INTEGER NOT NULL AUTO_INCREMENT, 
+--     PRIMARY KEY (`id`), 
+--     FOREIGN KEY(`member_id`) REFERENCES user (`id`), 
+--     FOREIGN KEY(`scenario_id`) REFERENCES scenario (`id`), 
+--     UNIQUE (`scenario_id`, `member_id`)
+-- );
+
 CREATE TABLE `custom_parameter` (
     `definition_id` INTEGER NOT NULL, 
     `scenario_id` INTEGER NOT NULL, 
@@ -207,7 +215,7 @@ CREATE TABLE `scenario_load_run_proc` (
     `result_file_nt` VARCHAR(255),
     `result_file_conc` VARCHAR(255),
     `result_nt` MEDIUMTEXT,
-    `result_conc` MEDIUMTEXT,
+    `result_conc` MEDIUMTEXT, 
     `scenario_id` INTEGER NOT NULL,
     PRIMARY KEY (`id`), 
     FOREIGN KEY(`scenario_id`) REFERENCES `scenario` (`id`)

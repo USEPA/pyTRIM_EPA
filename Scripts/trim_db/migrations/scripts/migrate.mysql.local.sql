@@ -1,3 +1,4 @@
+-- V2
 -- Drop Database if it exists
 DROP DATABASE IF EXISTS `pytrim`;
 -- DROP DATABASE IF EXISTS `ebdb`;
@@ -133,6 +134,16 @@ CREATE TABLE `scenario` (
     PRIMARY KEY (`id`), 
     FOREIGN KEY(`creator_id`) REFERENCES user (`id`)
 );
+
+-- CREATE TABLE `team` (
+--     `scenario_id` INTEGER NOT NULL, 
+--     `member_id` INTEGER NOT NULL, 
+--     `id` INTEGER NOT NULL AUTO_INCREMENT, 
+--     PRIMARY KEY (`id`), 
+--     FOREIGN KEY(`member_id`) REFERENCES user (`id`), 
+--     FOREIGN KEY(`scenario_id`) REFERENCES scenario (`id`), 
+--     UNIQUE (`scenario_id`, `member_id`)
+-- );
 
 CREATE TABLE `custom_parameter` (
     `definition_id` INTEGER NOT NULL, 

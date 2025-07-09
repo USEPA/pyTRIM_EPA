@@ -125,6 +125,15 @@ def upgrade():
     sa.ForeignKeyConstraint(['creator_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
+    # op.create_table('team',
+    # sa.Column('scenario_id', sa.Integer(), nullable=False),
+    # sa.Column('member_id', sa.Integer(), nullable=False),
+    # sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    # sa.ForeignKeyConstraint(['member_id'], ['user.id'], ),
+    # sa.ForeignKeyConstraint(['scenario_id'], ['scenario.id'], ),
+    # sa.PrimaryKeyConstraint('id'),
+    # sa.UniqueConstraint('scenario_id', 'member_id')
+    # )
     op.create_table('custom_parameter',
     sa.Column('definition_id', sa.Integer(), nullable=False),
     sa.Column('scenario_id', sa.Integer(), nullable=False),
@@ -193,6 +202,7 @@ def downgrade():
     op.drop_table('scenario_chemicals')
     op.drop_table('parcel')
     op.drop_table('custom_parameter')
+    # op.drop_table('team')
     op.drop_table('scenario')
     op.drop_table('roles_users')
     op.drop_table('parameter_definition')

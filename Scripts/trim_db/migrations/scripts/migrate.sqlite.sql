@@ -125,6 +125,16 @@ CREATE TABLE scenario (
     FOREIGN KEY(creator_id) REFERENCES user (id)
 );
 
+-- CREATE TABLE team (
+--     scenario_id INTEGER NOT NULL, 
+--     member_id INTEGER NOT NULL, 
+--     id INTEGER NOT NULL, 
+--     PRIMARY KEY (id), 
+--     FOREIGN KEY(member_id) REFERENCES user (id), 
+--     FOREIGN KEY(scenario_id) REFERENCES scenario (id), 
+--     UNIQUE (scenario_id, member_id)
+-- );
+
 CREATE TABLE custom_parameter (
     definition_id INTEGER NOT NULL, 
     scenario_id INTEGER NOT NULL, 
@@ -205,4 +215,3 @@ CREATE TABLE scenario_load_run_proc (
 );
 
 INSERT INTO alembic_version (version_num) VALUES ('12f3b3bc93f9');
-
