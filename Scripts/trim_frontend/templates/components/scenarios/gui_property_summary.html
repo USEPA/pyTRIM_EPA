@@ -30,7 +30,8 @@
                     <thead>
                         <tr>
                             <th>Chemical</th>
-                            <th>Property Name</th>
+                            <th>Entity</th>
+                            <th>Property</th>
                             <th>Property Value</th>
                             <th>Property Unit</th>
                         </tr>
@@ -75,11 +76,14 @@
             console.log('property summary form visible')
             LoadingScreen.show('property_summary_loading');
             TRIM.refreshParcels();
+            TRIM.api.getChemicalProperties('{{ scenario.id }}').on('load', function () {
+                TRIM.store.currentScenario.chemical_properties = this.responseJSON
+            });
             document.body.addEventListener('parcels:ready', updateSummaryFields());
         });
 
         function updateSummaryFields() {
-            if (!TRIM.store.currentScenario.parcels) {
+            if (!TRIM.store.currentScenario.parcels || !TRIM.store.currentScenario.chemical_properties) {
                 // Parcels haven't loaded yet; wait a bit and try again
                 setTimeout(function() { updateSummaryFields(); }, 1000);
                 return;
@@ -266,8 +270,8 @@
                     "precipitation rate": scenario.parcels[0].precip_rate
                 }
             }
-            let chem_map = {}
-            Object.keys(scenario.parcels[0].sources).forEach(e=>chem_map[e]={})
+            let chem_map = TRIM.store.currentScenario.chemical_properties;
+            // Object.keys(scenario.parcels[0].sources).forEach(e=>chem_map[e]={})
 
             let env_map = {}
 
@@ -390,20 +394,20 @@
             //     scenario_map["Scenario"] = Object.assign({}, scenario_map["Scenario"], scenario['seasonal_dynamics'])
             // }
             // catch {}
-            if (type != "env") {
+            if (type == "general") {
                 for (const [entity_key, entity_value] of Object.entries(map)) {
                 map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>" + entity_key + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td></tr>"
                     for (const [property_key, property_value] of Object.entries(entity_value)) {
                         map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td class='comp'>" + property_key + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted'>"+ property_value +"</label></td><td></td></tr>"
                     }
                 }
-            } else {
+            } else if (type == "env" || type == "chem"){
                 for (const [entity_key, entity_value] of Object.entries(map)) {
                     map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>" + entity_key + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td><td></td><td></td></tr>"
                     for (const [cat_key, cat_value] of Object.entries(entity_value)) {
                         map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td class='comp'>" + cat_key + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
                         for (const [property_key, property_value] of Object.entries(cat_value)) {
-                            map_html = map_html + "<tr data-depth='2' class='level2 colps'><td></td><td></td><td class='comp'>" + property_key + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted'>" + property_value.value + "</label></td><td>" + property_value.unit + "</td></tr>"
+                            map_html = map_html + "<tr data-depth='2' class='level2 colps'><td></td><td></td><td class='comp'>" + property_key + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted'>" + property_value.value + "</label></td><td>" + (property_value.unit || '') + "</td></tr>"
                         }
                     }
                 }

@@ -1226,3 +1226,50 @@ def run_receptor_generation(scenario_id):
         print(f"UPLOAD ERROR: {e}")
 
     return ApiResult(data_resp)
+
+
+@scenario_api.route(
+    "/api/scenario/<int:scenario_id>/chemical_properties", methods=["GET"]
+)
+@login_required
+def get_chemical_properties(scenario_id):
+    chem_properties = {}
+    chemical_domain = 2
+    scenario_defaults_id = 1
+    print("Pulling chemical properties...")
+
+    try:
+        scen = ScenarioService.get(scenario_id)
+        chem_definitions = ParameterService.definitions.get_all(
+            domain_id=chemical_domain
+        )
+        for chem in scen.chemicals:
+            chem_properties[chem.name] = {"scenario": {}, "comp": {}}
+
+            for chem_definition in chem_definitions:
+                for i in chem_definition.instances:
+                    if not i.requirements == f"(self.id == {chem.id})":
+                        continue
+
+                    property_type = None
+                    if i.scenario_id == scenario_defaults_id:
+                        property_type = "Scenario"
+                    elif i.scenario_id == scenario_id:
+                        property_type = "Compartment"
+
+                    if property_type == "Scenario" and i.formula:
+                        continue
+                    elif property_type:
+                        if property_type == "Scenario":
+                            value = i.value or chem_definition.default_value
+                        else:
+                            value = i.formula.equation if i.formula else None
+
+                        chem_properties[chem.name][property_type][chem_definition.full_name] = {
+                            "name": chem_definition.full_name,
+                            "value": value,
+                            "unit": i.unit or chem_definition.default_unit,
+                        }
+    except Exception as e:
+        print(e)
+    return ApiResult(chem_properties)
