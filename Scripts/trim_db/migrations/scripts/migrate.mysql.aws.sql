@@ -221,5 +221,15 @@ CREATE TABLE `scenario_load_run_proc` (
     FOREIGN KEY(`scenario_id`) REFERENCES `scenario` (`id`)
 );
 
+CREATE TABLE `api_key` (
+    `active` BOOLEAN NOT NULL, 
+    `value` VARCHAR(255) NOT NULL, 
+    `user_id` INTEGER NOT NULL, 
+    `id` INTEGER NOT NULL AUTO_INCREMENT, 
+    PRIMARY KEY (`id`), 
+    FOREIGN KEY(`user_id`) REFERENCES `user` (`id`)
+    UNIQUE (`value`)
+);
+
 INSERT INTO `alembic_version` (`version_num`) VALUES ('12f3b3bc93f9');
 
