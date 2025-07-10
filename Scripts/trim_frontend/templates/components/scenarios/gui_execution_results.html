@@ -19,6 +19,33 @@
                         </div>
                     </div>
                 </div>
+
+				<script language="JavaScript">
+					function displayModelDebugging(msgs) {
+						let debugZone = $("#model_progress_debug_zone textarea").empty();
+						if (msgs !== undefined) {
+							for (let i = 0 ; i < msgs.length ; i++) {
+								let textToDisplay = typeof(msgs[i]) == "object" && "message" in msgs[i] ? msgs[i].message : msgs[i];
+								// $("<div/>").text(textToDisplay).appendTo(debugZone);
+								debugZone.html(debugZone.html() + textToDisplay + "\n");
+							}
+							debugZone.scrollTop(debugZone[0].scrollHeight - debugZone.height());
+						} else {
+							debugZone.html("No debug info retrieved");
+						}
+					}
+				</script>
+				{% if current_user.email.lower().endswith("@icf.com") %}
+                <div class="row mb-1" style="border: 1px solid">
+                    <div class="col-sm">
+                        <div class="mt-3" id="model_progress_debug_zone">
+							<div><b>Model run debug output will appear here.</b></div>
+							<div><b>This info only appears for @icf.com accounts.</b></div>
+							<textarea rows=15 cols=103></textarea>
+						</div>
+					</div>
+				</div>
+				{% endif %}
             </div>
         </div>
         <div class="row mb-1 mt-1">
@@ -666,6 +693,8 @@
 
                         if (true || numAttempts < 30) {
                             TRIM.api.checkExecutionCompletion(executionArn, function(success, data) {
+								displayModelDebugging(data.debug_messages);
+
                                 // pass it along to the actual callback...
                                 if ("sfn_output" in data && data.sfn_output !== false) {
                                     callback(success, data);

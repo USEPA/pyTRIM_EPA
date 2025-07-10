@@ -906,6 +906,101 @@ def reset_poll_model_run_scenario():
     ScenarioService.commit()
     return "success"
 
+def get_complete_logs_from_group_and_stream(log_group, log_stream):
+    logs_client = boto3.client("logs")
+
+    # retrieve logs from CloudWatch.
+    # note this does NOT do anything smart with pagination -- just returns everything in one shot
+    # nice future enhancement might be to return a subset of this that we've deemed fit for public consumption; that could then
+    # be something we display to all users, not just internal ICF'ers
+
+    # also note - the pagination on this call is truly strange. According to the docs, you only know that pagination on the response
+    # from get_log_events is done if the "nextXToken" in the response is equivalent to the "nextToken" passed in in your request. (the next/prev
+    # tokens that are returned are never null).
+    #
+    # In my tests I was seeing things like:
+    # 1. make first call, get all the logs
+    # 2. make second call with the "nextToken" from call 1 (have to, as programatically I don't know that's the end). This returns empty array - but a non-matching end token
+    # 3. make third call with "nextToken" from call 2 (since they didn't match). Again, empty array, but this time they match and I can stop.
+    #
+    # Adding a sanity check just in case, to break after some number of attempts
+
+    sanity = 0
+    rv = []
+    next_token = None
+    while True:
+        if sanity > 10:
+            break
+
+        params = {
+            "logGroupName": log_group,
+            "logStreamName": log_stream,
+            "startFromHead": True,
+        }
+
+        if next_token is not None:
+            params["nextToken"] = next_token
+
+        print(f"CALL ITERATION {sanity} w/ params {params}...")
+
+        logs_response = logs_client.get_log_events(**params)
+        log_events = logs_response["events"]
+
+        for e in log_events:
+            rv.append({
+                "timestamp": e["timestamp"],
+                "message": e["message"]
+            })
+
+        if next_token is not None and logs_response["nextForwardToken"] == next_token:
+            print(f"safe to break; got same token we passed in...")
+            break
+        else:
+            print(f"need to keep going...")
+            next_token = logs_response["nextForwardToken"]
+
+        sanity += 1
+
+    return rv
+
+def fetch_output_for_step_function_execution(execution_arn):
+    # build boto3 clients we need
+    sfn_client = boto3.client("stepfunctions")
+    ecs_client = boto3.client("ecs")
+
+    try:
+        # get the details of the execution...
+        exec_hist_response = sfn_client.get_execution_history(executionArn=execution_arn)
+
+        # get the specific event relating to kickoff of the Docker container... 
+        ecs_task_event = next((e for e in exec_hist_response["events"] if e.get("type") == "TaskSubmitted" and e.get("taskSubmittedEventDetails", {}).get("resourceType") == "ecs"), None)
+        # re-parse the details/output, included as a JSON string in the boto3 reply... 
+        output = json.loads(ecs_task_event.get("taskSubmittedEventDetails", {}).get("output", "{}"))
+
+        # get the ECS task id
+        tasks = output.get("Tasks", [])
+
+        task = tasks[0] if len(tasks) > 0 else None
+        task_arn = task.get("TaskArn")
+        task_key = task_arn.split("/")[-1]
+
+        taskdef_arn = task.get("TaskDefinitionArn")
+        def_resp = ecs_client.describe_task_definition(
+            taskDefinition=taskdef_arn,
+            include=[ 'TAGS', ]
+        )
+
+        # construct log group/stream relating to this execution
+        log_group=def_resp["taskDefinition"]["containerDefinitions"][0]["logConfiguration"]["options"]["awslogs-group"]
+        log_stream=f"ecs/{def_resp['taskDefinition']['containerDefinitions'][0]['name']}/{task_key}"
+
+        print(f"let's use {log_group=} / {log_stream=}...")
+
+        return get_complete_logs_from_group_and_stream(log_group, log_stream)
+    except Exception as e:
+        return [ f"Error fetching logs: {e}" ]
+
+
 @scenario_api.route('/api/scenario/check_execution_completion/', methods=['POST'])
 @login_required
 def check_execution_completion():
@@ -917,18 +1012,22 @@ def check_execution_completion():
 
     sfn_client = boto3.client("stepfunctions")
 
+    debug_messages = fetch_output_for_step_function_execution(execution_arn) if current_user.email.lower().endswith("@icf.com") else [ "debug output disabled for external users" ]
+
     desc_resp = sfn_client.describe_execution(executionArn=execution_arn)
     if desc_resp["status"] == "SUCCEEDED":
         resp = {
             "success": True,
-            "sfn_output": json.loads(desc_resp["output"])
+            "sfn_output": json.loads(desc_resp["output"]),
+            "debug_messages": debug_messages
         }
     else:
         # success should still be True b/c we didn't fail; we're just not done yet...
         # calling client will just wait and retry.
         resp = {
             "success": True,
-            "sfn_output": False
+            "sfn_output": False,
+            "debug_messages": debug_messages
         }
 
     return ApiResult(resp)

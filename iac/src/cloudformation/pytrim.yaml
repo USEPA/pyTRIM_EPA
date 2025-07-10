@@ -798,6 +798,15 @@ Resources:
                 Resource: "*"
                 # Resource is like: arn:aws:states:us-east-1:426714360284:execution:DockerStateMachineWrapperModelRun-6igLbCu7FQcL:70e6b149-0e1d-4f43-b689-bdeda0d30f96 but I can't get wildcards working, so for now allow all.
               - Effect: "Allow"
+                Action: "states:GetExecutionHistory"
+                Resource: "*"
+              - Effect: "Allow"
+                Action: "ecs:DescribeTaskDefinition"
+                Resource: "*"
+              - Effect: "Allow"
+                Action: "logs:GetLogEvents"
+                Resource: "*"
+              - Effect: "Allow"
                 Action: "s3:*"
                 Resource:
                   - !GetAtt ModelRunOutputStorageBucket.Arn
