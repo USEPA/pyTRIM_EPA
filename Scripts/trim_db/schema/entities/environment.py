@@ -28,7 +28,7 @@ class Parcel(Model):
         sa.Integer(), sa.ForeignKey('scenario.id'), nullable=False
     )
     scenario = sa.orm.relationship(
-        'Scenario', backref=sa.orm.backref('parcels', lazy='dynamic')
+        'Scenario', backref=sa.orm.backref('parcels', lazy='selectin')
     )
 
     # Store as a string, but make a property to access as an array
@@ -157,7 +157,7 @@ class VolumeElement(Model):
         sa.Integer(), sa.ForeignKey('parcel.id'), nullable=False
     )
     parcel = sa.orm.relationship(
-        'Parcel', backref=sa.orm.backref('volume_elements', lazy='dynamic')
+        'Parcel', backref=sa.orm.backref('volume_elements', lazy='selectin')
     )
 
     top = sa.Column(sa.Float(), nullable=False)
@@ -248,15 +248,29 @@ class VolumeElement(Model):
 
         intersection = polygon_a.intersection(polygon_b)
 
-        if self.parcel.id == volume_element.parcel.id:
-            # Total horizontal overlap; same parcel
-            return self.parcel.area
+        # if self.parcel.id == volume_element.parcel.id:
+        #     # Total horizontal overlap; same parcel
+        #     return self.parcel.area
 
         top_a = self.top
         top_b = volume_element.top
 
         bottom_a = self.bottom
         bottom_b = volume_element.bottom
+
+        # OK This bit is tricky... We look for an interface between two volumes so if they have the same parent parcel
+        # we still need to check if the top or bottom of these volumes touch or overlap. BUT!!!! we also want
+        # pseudosource volume elements to be in touch with all volume elements to be able to transfer the chemicals.
+        # In that case we do not have to check bottom and top of those volume elements and checking if they are in the
+        # same parcel will be enough. -Berk (06-12-2025)
+        if (self.parcel.id == volume_element.parcel.id):
+            # volume elements overlap and top/bottom contact
+            if ((top_a == bottom_b) or (bottom_a == top_b)):
+                # Total horizontal overlap; same parcel
+                return self.parcel.area
+            # if we are dealing with a source
+            if self.name in ["DryParticleSource", "WetParticleSource", "DryVaporSource", "WetVaporSource"]:
+                return self.parcel.area
 
         if top_a < bottom_b or top_b < bottom_a:
             # No vertical overlap
@@ -428,14 +442,14 @@ class Compartment(Model):
         sa.Integer(), sa.ForeignKey('volume_element.id'), nullable=False
     )
     volume_element = sa.orm.relationship(
-        'VolumeElement', backref=sa.orm.backref('compartments', lazy='dynamic')
+        'VolumeElement', backref=sa.orm.backref('compartments', lazy='selectin')
     )
 
     media_id = sa.Column(
         sa.Integer(), sa.ForeignKey('media.id'), nullable=False
     )
     media = sa.orm.relationship(
-        'Media', backref=sa.orm.backref('compartments', lazy='dynamic')
+        'Media', backref=sa.orm.backref('compartments', lazy='selectin')
     )
 
     @property

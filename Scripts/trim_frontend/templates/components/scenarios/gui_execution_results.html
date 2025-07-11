@@ -26,6 +26,9 @@
                 <div>
                     <a id="btn_get_mass_results" class="btn btn-warning" style="display: none" href="_top">Download Mass Results</a>
                     <a id="btn_get_conc_results" class="btn btn-warning" style="display: none" href="_top">Download Concentration Results</a>
+                    {% if current_user.has_role('tester') %}
+                        <a id="btn_get_tm_results" class="btn btn-warning" style="display: none" href="_top">Download Transfer Matrix</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -325,6 +328,9 @@
                 $('#empty_searchable_dd').hide()
                 $('#btn_get_mass_results').show()
                 $('#btn_get_conc_results').show()
+                if ($('#btn_get_tm_results').length > 0) {
+                    $('#btn_get_tm_results').show()
+                }
                 $('#div_visuals').show()
 
                 add_dynamic_props()
@@ -342,13 +348,23 @@
                 $('#lb_perc_vis').text("(100%)")
                 let m_file = TRIM.store.latestRunInfo.run_results.mass_results_file
                 let c_file = TRIM.store.latestRunInfo.run_results.conc_results_file
+                let t_file = TRIM.store.latestRunInfo.run_results.tm_results_file
                 let fpath = "{{ url_for('static', filename='.output') }}"
                 let m_filepath =  m_file.includes(".s3.amazonaws.com") ? m_file : fpath + "/" + m_file
                 let c_filepath =  c_file.includes(".s3.amazonaws.com") ? c_file : fpath + "/" + c_file
+                let t_filepath = ""
+                if (t_file !== undefined) {
+                    t_filepath =  t_file.includes(".s3.amazonaws.com") ? t_file : fpath + "/" + t_file
+                }
+
                 $('#btn_get_mass_results').attr("href",m_filepath)
                 $('#btn_get_mass_results').attr("download","mass_results.xlsx")
                 $('#btn_get_conc_results').attr("href",c_filepath)
                 $('#btn_get_conc_results').attr("download","concentration_results.xlsx")
+                if ($('#btn_get_tm_results').length > 0) {
+                    $('#btn_get_tm_results').attr("href", t_filepath)
+                    $('#btn_get_tm_results').attr("download", "transfer_matrix.xlsx")
+                }
                 initialize_components()
                 $('#btn_visualize').prop('disabled', false)
             }
@@ -481,6 +497,9 @@
                 $('#lb_perc_vis').text("(0%)")
                 $('#btn_get_mass_results').css("display","none")
                 $('#btn_get_conc_results').css("display","none")
+                if ($('#btn_get_tm_results').length > 0) {
+                    $('#btn_get_tm_results').css("display", "none")
+                }
                 $('#btn_visualize').prop('disabled', true)
                 $('#plt_type').find('button.dropdown-toggle').text("Plot Type")
                 $('#plt_comp').find('button.dropdown-toggle').text("Compartment")
@@ -553,20 +572,32 @@
                         result_data["c_results"] = "{" + c_results.trimStart().trimEnd() + "}"
                         result_data["m_file"] = JSON.parse(JSON.stringify(this.responseJSON.outputMass))
                         result_data["c_file"] = JSON.parse(JSON.stringify(this.responseJSON.outputConc))
+                        let fpath = "{{ url_for('static', filename='.output') }}"
+                        let t_filepath = ""
+                        if (this.responseJSON.outputTM) {
+                            result_data["t_file"] = JSON.parse(JSON.stringify(this.responseJSON.outputTM))
+                            TRIM.store.latestRunInfo.run_results.tm_results_file = result_data["t_file"]
+                            t_filepath = result_data["t_file"].includes(".s3.amazonaws.com") ? result_data["t_file"] : fpath + "/" + result_data["t_file"]
+                        }
                         result_data["Last_run"] = JSON.parse(JSON.stringify(this.responseJSON.run_date))
                         let id_sting = "_id" + scenario_info[0]["value"]
                         TRIM.store.latestRunInfo.run_results.mass_results = result_data["m_results"]
                         TRIM.store.latestRunInfo.run_results.conc_results = result_data["c_results"]
                         TRIM.store.latestRunInfo.run_results.mass_results_file = result_data["m_file"]
                         TRIM.store.latestRunInfo.run_results.conc_results_file = result_data["c_file"]
+
                         TRIM.store.latestRunInfo.lastest_run_date = result_data["Last_run"]
-                        let fpath = "{{ url_for('static', filename='.output') }}"
                         let m_filepath = result_data["m_file"].includes(".s3.amazonaws.com") ? result_data["m_file"] : fpath + "/" + result_data["m_file"]
                         let c_filepath = result_data["c_file"].includes(".s3.amazonaws.com") ? result_data["c_file"] : fpath + "/" + result_data["c_file"]
+
                         $('#btn_get_mass_results').attr("href",m_filepath)
                         $('#btn_get_mass_results').attr("download","mass_results.xlsx")
                         $('#btn_get_conc_results').attr("href",c_filepath)
                         $('#btn_get_conc_results').attr("download","concentration_results.xlsx")
+                        if ($('#btn_get_tm_results').length > 0) {
+                            $('#btn_get_tm_results').attr("href", t_filepath)
+                            $('#btn_get_tm_results').attr("download", "transfer_matrix.xlsx")
+                        }
                         return result_data
                     })
                     return results_data
@@ -700,6 +731,10 @@
                             $('#btn_get_mass_results').attr("download","mass_results.xlsx")
                             $('#btn_get_conc_results').attr("href",data.outputConc)
                             $('#btn_get_conc_results').attr("download","concentration_results.xlsx")
+                            if (data.outputTM !== undefined) {
+                                $('#btn_get_tm_results').attr("href", data.outputTM)
+                                $('#btn_get_tm_results').attr("download", "transfer_matrix.xlsx")
+                            }
                             setChecked("p#cb_proc_trm", "on")
                             setChecked("p#cb_proc_ode", "on")
                             setChecked("p#cb_proc_out", "on")

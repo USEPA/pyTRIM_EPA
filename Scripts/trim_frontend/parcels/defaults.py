@@ -1,16 +1,19 @@
 from trim_db.schema import Parcel
 from trim_db.schema.utils.serialize import register_serializer
 from trim_db.schema.parameters.models import ParameterDefinition, CustomParameter
+from trim_db.schema.entities.models import VolumeElement, Compartment, Media
+from trim_db.schema.scenarios.models import Scenario
 from trim_db.services import *
 from trim_frontend.scenarios.defaults import EROSION_TABLE_KWARGS
 import pint
+from sqlalchemy.orm import selectinload, joinedload
 
 comp_local_cache = {}
 
 @register_serializer(Parcel)
 def serialize_parcel(pcl: Parcel):
     init_comp_cache(pcl)
-    
+
     general_params = get_general_params(pcl)
     water_params = get_water_params(pcl, general_params['parcelType'])
     source_params = get_source_params(pcl)
@@ -84,6 +87,7 @@ def get_comp(pcl, kwargs):
 
 
 def get_general_params(pcl):
+    pcl = get_eager_parcel(pcl)
     air = False
     water = False
     land = False
@@ -250,6 +254,7 @@ def get_parcel_comp_params(pcl, comps, params):
 
 
 def get_soil_abiotic_params(pcl, run_old=True):
+    pcl = get_eager_parcel(pcl)
     comps = ["Soil_Surface", "Soil_Root_Zone", "Soil_Vadose_Zone", "Groundwater"]
     if not run_old:
          params = ["pH", "FractionSand", "OrganicCarbonContent", "rho", "Porosity", "VolumeFraction_Vapor",
@@ -313,9 +318,18 @@ def get_soil_abiotic_params(pcl, run_old=True):
 
     return {"soil_params": soil_abiotic_params}
 
+def get_eager_parcel(pcl):
+    # Attempting to Eager load parcel
+    epcl = (ParameterService.db.session.query(Parcel)
+           .filter(Parcel.id == pcl.id)
+           .options(selectinload(Parcel.scenario).selectinload(Scenario._chemicals),
+                    selectinload(Parcel.volume_elements).selectinload(VolumeElement.compartments)
+                    .joinedload(Compartment.media)).first())
+    return epcl
 
 def get_water_params(pcl, parcel_type):
     from .utils import get_watershed_area
+    pcl = get_eager_parcel(pcl)
     precipitation_rate = pcl.scenario.Rain.magnitude
     if precipitation_rate is None:
         precipitation_rate = 0  # 0.0041
@@ -598,6 +612,7 @@ def get_water_params(pcl, parcel_type):
 
 
 def get_initial_concetrations(pcl):
+    pcl = get_eager_parcel(pcl)
     chem_objs = {c for c in pcl.scenario.chemicals}
     chems = {c.name: {} for c in pcl.scenario.chemicals}
     initial_conc = {"initialConcentrations": chems}
@@ -615,6 +630,7 @@ def get_initial_concetrations(pcl):
 
 
 def get_source_params(pcl):
+    pcl = get_eager_parcel(pcl)
     chem_objs = {c for c in pcl.scenario.chemicals}
     # source_comps = [c for c in comp_local_cache["all"] if c.media.isa("Source")]
     source_comps = [c for c in pcl.compartments]

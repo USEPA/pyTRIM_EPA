@@ -295,10 +295,10 @@ def update_scenario():
         if param_type == "MET":
             df_met = df_met.loc[(df_met.Hour < 25)]  # drop faulty
             metcol_dict = {'Rain': (0, 1), 'AirTemperature': (200, 373), 'HorizontalWindSpeed': (0, 100),
-                           'WindDirection': (-360, 360), 'MixingHeight': (0, 1000), 'isDay': (0, 1),
+                           'WindDirection': (-360, 360), 'mixingHeight': (0, 1000), 'isDay': (0, 1),
                            'CumulativeRain': (0, 1.6)}  # k, v represent name and min-max
             for k, v in metcol_dict.items():
-                if 'k' in df_met.columns:
+                if k in df_met.columns:
                     df_met['metcol'] = pd.to_numeric(df_met[k], errors='coerce')
                     df_met = df_met[
                         (df_met['metcol'] <= v[1]) & (df_met['metcol'] >= v[0])]  # keep rows within min max bounds
@@ -351,7 +351,7 @@ def update_scenario():
 
     try:
         scenario_data = request.form.to_dict()
-        print(scenario_data)
+        # print(scenario_data)
         if not scenario_data['id']:
             raise AssertionError("Scenario ID cannot be blank.")
         # Get the specified parcel
@@ -838,9 +838,9 @@ def run_result_scenario():
         else:
             s = ScenarioService.get(scenario_id)
             print(f"Starting Model Run ({datetime.now()}...")
-            json_n_avg, json_c_avg, output_file_n, output_file_c = run_full_model(s)
-
-            data_resp = {"mass": json_n_avg, "conc": json_c_avg, "outputMass": output_file_n, "outputConc": output_file_c}
+            json_n_avg, json_c_avg, output_file_n, output_file_c, output_file_tm = run_full_model(s)
+            data_resp = {"mass": json_n_avg, "conc": json_c_avg, "outputMass": output_file_n,
+                         "outputConc": output_file_c, "outputTM": output_file_tm}
     except Exception as e:
         print(e)
         data_resp = {"error": e}
@@ -866,10 +866,11 @@ def get_result_scenario():
         run_date = [v for v in s.proc_status][0].run_datetime
         output_file_n = Path([v for v in s.proc_status][0].result_file_nt).name
         output_file_c = Path([v for v in s.proc_status][0].result_file_conc).name
+        output_file_t = Path([v for v in s.proc_status][0].result_file_tm).name
         json_n_avg = [v for v in s.proc_status][0].result_nt
         json_c_avg = [v for v in s.proc_status][0].result_conc
 
-        result_resp = json.loads(json.dumps({"mass": json.loads(json_n_avg), "conc": json.loads(json_c_avg), "final_status": fin_stat, "run_date": run_date, "outputMass": output_file_n, "outputConc": output_file_c}, indent=4, sort_keys=True, default=str))
+        result_resp = json.loads(json.dumps({"mass": json.loads(json_n_avg), "conc": json.loads(json_c_avg), "final_status": fin_stat, "run_date": run_date, "outputMass": output_file_n, "outputConc": output_file_c, "outputTM": output_file_t}, indent=4, sort_keys=True, default=str))
     except Exception as e:
         logger.info(f"Error when attempting to get results: {e}")
         result_resp = {"error": e}
@@ -958,7 +959,7 @@ def fetch_run_results():
         "model_output": json_content
     }
 
-    for f in ["outputMass", "outputConc"]:
+    for f in ["outputMass", "outputConc", "outputTM"]:
         full_key = f"{uuid}/{f}.xlsx"
         response = s3_client.generate_presigned_url("get_object",
                                                     Params={

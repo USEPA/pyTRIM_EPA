@@ -17,7 +17,36 @@ DEFAULT_IMPORT_RULES = \
         "MethylMercury",
         "2,3,7,8-TCDD",
         "Cadmium",
-        "Arsenic"
+        "Arsenic",
+        "1,2,3,4,6,7,8,9-OCDD",
+        "1,2,3,4,6,7,8,9-OCDF",
+        "1,2,3,4,6,7,8-HpCDD",
+        "1,2,3,4,6,7,8-HpCDF",
+        "1,2,3,4,7,8,9-HpCDF",
+        "1,2,3,4,7,8-HxCDD",
+        "1,2,3,4,7,8-HxCDF"
+        "1,2,3,6,7,8-HxCDD",
+        "1,2,3,6,7,8-HxCDF",
+        "1,2,3,7,8,9-HxCDD",
+        "1,2,3,7,8,9-HxCDF",
+        "1,2,3,7,8-PeCDD",
+        "1,2,3,7,8-PeCDF",
+        "2,3,4,6,7,8-HxCDF",
+        "2,3,4,7,8-PeCDF",
+        "2,3,7,8-TCDF",
+        "2-Methylnaphthalene"
+        "7,12-Dimethylbenz(a)anthracene",
+        "Acenaphthene",
+        "Acenaphthylene",
+        "Benz(a)anthracene",
+        "Benzo(b)fluoranthene",
+        "Benzo(g,h,i)perylene",
+        "Benzo(k)fluoranthene",
+        "Chrysene",
+        "Dibenz(a,h)anthracene",
+        "Fluoranthene",
+        "Fluorene",
+        "Indeno(1,2,3-cd)pyrene"
     ],
     "media": {
         "restrict_emissions": [],
@@ -174,7 +203,8 @@ def add_comp_chem_params(parlib, chem):
             this_unit = props[pr][0]['unit']
             this_req = f'(self.id == {ch.id})'
             this_scn_id = default_scenario.id
-            this_definition = [d for d in ParameterService.definitions.get_all() if d.variable_name == pr][0]
+            this_definition = [d for d in ParameterService.definitions.get_all() if d.variable_name == pr
+                               and d.domain_id == 2][0]
             # Add new formula
             new_formula = FormulaService.create(equation=this_formula, no_commit=False)
             # Add new custom parameter on default scenario with new formula
