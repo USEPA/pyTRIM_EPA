@@ -35,6 +35,7 @@ Flask-Principal==0.4.0
 Flask-Security==3.0.0
 Flask-SQLAlchemy==3.0.5
 Flask-WTF==1.0.1
+geopandas==1.0.1
 greenlet==2.0.2
 h11==0.14.0
 httpcore==0.17.3
