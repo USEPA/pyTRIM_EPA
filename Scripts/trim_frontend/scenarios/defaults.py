@@ -26,6 +26,8 @@ def get_met_data(scen):
         ambient_air_temp = None
 
     mixing_height = scen.mixingHeight
+    if mixing_height:
+        mixing_height = mixing_height.magnitude
     if not mixing_height:
         air_comps = [
             c for c in scen.get_compartment(media='Air')

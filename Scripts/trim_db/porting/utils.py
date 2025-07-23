@@ -15,7 +15,9 @@ __all__ = [
     'UNIT_SUFFIXES',
     'split_unit_suffix',
     'clean_equation',
-    'transform_coordinates_to_decimal'
+    'transform_coordinates_to_decimal',
+    'do_replacements',
+    'GLOBAL_REPLACE'
 ]
 
 MET_DATA_MAP = {
@@ -780,6 +782,11 @@ def clean_equation(equation, object_type=None):
         cleaned = cleaned.replace(f'{brackets[0]} ', brackets[0])
         cleaned = cleaned.replace(f' {brackets[1]}', brackets[1])
 
+    # the above introduces a problem for min(
+    # this should fix it
+    if "min (" in cleaned:
+        cleaned = cleaned.replace("min (", "min(")
+
     for agg_expression in AGGREGATE_FUNCTIONS:
         if f'volumeelement{agg_expression.lower()}' in cleaned.lower():
             cleaned = convert_property_aggregates(cleaned, agg_expression)
@@ -971,8 +978,8 @@ def convert_ternary(expression):
     if_false_val = f'{parts[(colon + 1):len(parts)].strip()}'
 
     return (
-        f'{convert_ternary(if_true_val)} if {condition}'
-        f' else {convert_ternary(if_false_val)}'
+        f'({convert_ternary(if_true_val)}) if {condition}'
+        f' else ({convert_ternary(if_false_val)})'
     )
 
 
@@ -1069,25 +1076,25 @@ def hacky_equation_cleaning(val, object_type):
 
     # These are steady state meteorology hacks
     # to account for rain being static rather than time-dependent value
-    # TODO MAYBE DO THIS DIFFERENTLY? Is this just for Foundries? Scenario-specific stuff shouldn't go here!
-    if (
-        (
-            "sender.AllowExchange_forOther" in val
-            or "receiver.AllowExchange_forOther" in val
-        )
-        and "ParticleVolumetricWetDepositionRate" in val
-    ):
-        val = val.replace("sender.AllowExchange_forOther", "0.02359582829896095")
-        val = val.replace("receiver.AllowExchange_forOther", "0.02359582829896095")
-    if (
-        (
-            "sender.AllowExchange_forOther" in val
-            or "receiver.AllowExchange_forOther" in val
-        )
-        and "ParticleVolumetricDRYDepositionRate" in val
-    ):
-        val = val.replace("sender.AllowExchange_forOther", "0.3262149134948966")
-        val = val.replace("receiver.AllowExchange_forOther", "0.3262149134948966")
+    # Below was specific to foundries. IGNORE.
+    # if (
+    #     (
+    #         "sender.AllowExchange_forOther" in val
+    #         or "receiver.AllowExchange_forOther" in val
+    #     )
+    #     and "ParticleVolumetricWetDepositionRate" in val
+    # ):
+    #     val = val.replace("sender.AllowExchange_forOther", "0.02359582829896095")
+    #     val = val.replace("receiver.AllowExchange_forOther", "0.02359582829896095")
+    # if (
+    #     (
+    #         "sender.AllowExchange_forOther" in val
+    #         or "receiver.AllowExchange_forOther" in val
+    #     )
+    #     and "ParticleVolumetricDRYDepositionRate" in val
+    # ):
+    #     val = val.replace("sender.AllowExchange_forOther", "0.3262149134948966")
+    #     val = val.replace("receiver.AllowExchange_forOther", "0.3262149134948966")
 
     return val
 

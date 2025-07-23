@@ -1,9 +1,11 @@
 import csv
 import io
 import os
+import boto3
 import pandas as pd
 import traceback
 import re
+import numpy as np
 import json
 import requests as pyRequest
 from decimal import Decimal
@@ -19,12 +21,12 @@ from trim_db.services.entities import ParcelService
 from trim_frontend import api
 from ..parcels.utils import delete_parcel_contents, get_canonical_land_use_type, get_canonical_parcel_type, get_ve_defaults_for_parcel_type, handle_parcel_update, initialize_parcel_contents
 from ..utils.data_structures import calculate_list_depth
-from ..utils.file_io import csv_to_df
+from ..utils.file_io import csv_to_df, MiscAssociatedFileVariety, associated_file_helper
 from ..utils.forms import assemble_json_form
 from ..utils.logging import make_logger
 from ..utils.spatial import determine_location, determine_nearest_neighbor_distance, ensure_closed_polygon, is_utm_zone_valid, translate_coordinates, translate_position
 from shapely.geometry import Polygon
-
+from pint import UnitRegistry
 
 file_api = Blueprint('file_api', __name__)
 api.use_api_errors(file_api)
@@ -261,6 +263,94 @@ def parse_aermod():
     return ApiResult({'aermod_result': res_json})
 
 
+@file_api.route('/api/backgroundConc_file', methods=['POST'])
+@login_required
+def upload_background_conc():
+    data = json.loads(request.form["file_data"])
+    scenario_id = request.form["scenario_id"]
+    chem_name = request.form["chemical_name"]
+    scenario = ScenarioService.get(id=scenario_id)
+    chem = ChemicalService.get(name=chem_name)
+    ureg = UnitRegistry()
+    # First check if there are any existing CustomParameters
+    custom_pars = [c.parameters.get("initialConcentration") for c in scenario.compartments if not isinstance(c.parameters.get("initialConcentration"), ParameterDefinition)]
+    # We are going to reset all existing custom background conc values and start clean for file uploads. We do not want
+    # to mistakenly keep existing values and have piece-meal addition of values from earlier uploads or manual entries.
+    try:
+        for cp in custom_pars:
+            ParameterService.delete(cp, False)
+    except Exception as e:
+        print(f"problem deleting existing custom parameters: {e}")
+    try:
+        for ii, d in enumerate(data):
+            print(d)
+            val = d["Background Concentration Value"]
+            # Check parcel
+            parcel = [p for p in scenario.parcels if p.name == d["Parcel Name"]]
+            if len(parcel) == 0:
+                return ApiException(f"Parcel {d['Parcel Name']} does not exist for scenario {scenario.name}"
+                                    f"... Upload aborted...")
+            else:
+                parcel = parcel[0]
+            # Check compartment
+            comp_id = [c.id for c in parcel.compartments if c.name == d["Compartment Name"]]
+            if len(comp_id) == 0:
+                return ApiException(f"compartment {d['Compartment Name']} does not exist for parcel {parcel.name}"
+                                    f"... Upload aborted...")
+            else:
+                comp_id = comp_id[0]
+
+            comp = CompartmentService.get(id=comp_id)
+
+            data[ii].setdefault("Volume Element Name", comp.volume_element.name)
+
+            bc_par = [par for parn, par in comp.parameters.items() if parn == "initialConcentration"]
+            if len(bc_par) > 0:
+                bc_par = bc_par[0]
+                bc_par = get_or_create_custom_param(
+                    bc_par,
+                    {"requirements": f"(self.id == {comp_id})", "scenario_id": scenario.id},
+                    new_formula=True
+                )
+
+                # check the unit and see if we can convert to default if we have one that is different from default unit
+                input_unit = d['Unit']
+                default_unit = "g / m^3" if comp.media.id in [2, 5, 7, 56, 55, 8, 9] else "g / kg" if comp.media.id in [23, 24, 27, 28, 29, 31, 32, 33, 37, 39, 41, 43, 44, 45, 46, 47, 48, 49, 50, 51] else "g / L" if comp.media.id in [10, 4] else ""
+                try:
+                    input_val = float(val) * ureg(input_unit)
+                    conv_val = input_val.to(default_unit)
+                    print(f'input {input_val} -> default_unit {conv_val}')
+                    val = conv_val.magnitude
+                except Exception as e:
+                    return ApiException(f'Problem converting the provided unit {input_unit} '
+                                        f'to default unit of {default_unit}\n{e}')
+
+                eq = bc_par.formula.equation
+                print(f'old eq is {eq}')
+                # We have the chemical in the formula
+                if f'chemical.id == {str(chem.id)}' in eq:
+                    formula_parts = eq.split(f"if chemical.id == {chem.id}")
+                    formula_part = formula_parts[0]
+                    if "else" in formula_part:
+                        arr = formula_part.split("else")[:-1]
+                        formula_part = "else".join(arr + [f' {val} '])
+                    else:
+                        formula_part = f'{val} '
+                    formula_parts[0] = formula_part
+                    new_formula = f"if chemical.id == {chem.id}".join(formula_parts)
+                    print(new_formula)
+                # We do not have the chemical in the formula. We need to add it...
+                else:
+                    eq_arr = eq.split("else")
+                    eq_arr.insert(-2, f' {val} if chemical.id == {chem.id} ')
+                    new_formula = "else".join(eq_arr)
+                    print(new_formula)
+                FormulaService.get(bc_par.formula.id).equation = new_formula
+                FormulaService.commit()
+    except Exception as e:
+        print(e)
+    return ApiResult({'background_conc_file_data': data})
+
 @file_api.route('/api/parcel_file', methods=['POST'])
 @login_required
 def parse_parcel_upload():
@@ -411,6 +501,85 @@ def parse_parcel_upload():
         return ApiResult(return_data)
 
 
+
+@file_api.route('/api/misc_scen_file', methods=['GET', 'POST', 'DELETE'])
+@login_required
+def manage_misc_scenario_file():
+    # this is a generic endpoint for handling storage (upload/deletion/retrieval) on S3 of miscellaneous files
+    # associated with a scenario. Pass in a 'misc_file_type'==x and you'll get:
+    # a file /{scenarioId}/x/data* and /{scenarioId}/x/_metadata.json in the appropriate
+    # S3 bucket. the json file is metadata; it will contain any other fields you passed in at upload time, as well as
+    # some standard fields like the original file name, etc.
+
+    # this function handles API-oriented I/O; the actual storage/retrieval from 
+    # S3 is farmed out to associated_file_helper, so that the same logic can be
+    # used in a non-API context.
+
+    # initially modeled after parse_parcel_upload
+
+    errors = []
+    return_data = {}
+
+    scenario_id = None
+    if request.method == "POST":
+        scenario_id = request.form["scenario_id"]
+        misc_file_type = request.form["misc_file_type"]
+        # upload file to S3...
+    else:
+        scenario_id = request.args.get("scenario_id")
+        misc_file_type = request.args.get("misc_file_type")
+        # check S3 for existing file...or delete it...
+
+    if scenario_id is None:
+        errors.append("No scenario id supplied")
+
+    if misc_file_type is None:
+        errors.append("No filetype supplied")
+
+    if len(errors) == 0:
+        if request.method == "GET":
+            try:
+                helper_rv = associated_file_helper(scenario_id, misc_file_type, "CHECK")
+            except Exception as e:
+                print(f"GET ERROR: {e}")
+                errors.append(f"Error fetching file: {e}")
+        elif request.method == "POST":
+            ignore = ["scenario_id", "misc_file_type", "csrf_token"]
+            submitted_metadata = { x[0]: x[1] for x in request.form.items() if x[0] not in ignore }
+
+            files = request.files
+
+            if not files:
+                errors.append("No file was uploaded")
+
+            if len(errors) == 0:
+                try:
+                    file_obj = None
+                    for _, loop_file_obj in files.items():
+                        file_obj = loop_file_obj
+                        original_name = secure_filename(loop_file_obj.filename)
+                        submitted_metadata["original_file_name"] = original_name
+                        break
+
+                    helper_rv = associated_file_helper(scenario_id, misc_file_type, "UPLOAD", file_obj=file_obj, file_metadata=submitted_metadata)
+                except Exception as e:
+                    print(f"POST ERROR: {e}")
+                    errors.append(f"Error uploading file: {e}")
+        elif request.method == "DELETE":
+            try:
+                helper_rv = associated_file_helper(scenario_id, misc_file_type, "DELETE")
+                return_data["message"] = "file(s) deleted"
+            except Exception as e:
+                print(f"DELETE ERROR: {e}")
+                errors.append(f"Error deleting file: {e}")
+
+    if len(errors) > 0:
+        raise ApiException("; ".join(errors))
+    else:
+        return_data |= helper_rv
+        return ApiResult(return_data)
+
+
 def get_parcel_row_csv(row, coord_system, utm_zone):
     has_farm_food_chain = row.get("FarmFoodChain", "").upper() == "YES"
     has_wetland = row.get("Wetland", "").upper() == "YES"
@@ -471,7 +640,7 @@ def get_parcel_row_geojson(row):
 def parse_runoff_matrix_upload():
     scenario_id = request.form["scenario_id"]
     parcels = ParcelService.get_all(scenario_id=int(scenario_id))
-    parcel_names = {p.name : p for p in parcels}
+    parcel_names = {p.name.lower() : p for p in parcels}
 
     files = request.files
     presigned_url = request.form.get("presigned_url")
@@ -485,16 +654,33 @@ def parse_runoff_matrix_upload():
             df = pd.read_csv(csv_data, delimiter=',')
             df.rename(columns={ df.columns[0]: 'parcels' }, inplace = True)
 
-            # getflow does not include sink
-            if 'sink' not in df.columns:
-                df['sink'] = df.sum(axis=1, numeric_only=True)
-                for idx, row in df.iterrows():
-                    if row['sink'] > 1.0 or row['sink'] <= 0.0:
-                        df.loc[idx, 'sink'] = 0
-                    else:
-                        df.loc[idx, 'sink'] = 1 - df.loc[idx, 'sink']
+            # clean up extra rows/columns
+            total_out_mask = df[df.columns[0]] != 'TOTAL_OUT'
+            sink_mask = df[df.columns[0]] != 'SINK'
+            df = df[total_out_mask & sink_mask]
+            df.drop('TOTAL_IN', axis='columns', inplace=True)
+            df.columns = df.columns.str.lower()
+
+            # need to make adjustments for value to equal 1 exactly
+            precision = 4
+            pcls_col = df.pop('parcels').reset_index(drop=True)
+            df = np.trunc(10000 * df) / 10000
+            df = pd.concat([pcls_col, df], axis='columns')
 
             reader = df.to_dict('records')
+            for row in reader:
+                row_total = []
+                for k, v in row.items():
+                    if k == "parcels": continue
+                    row_total.append(Decimal(v))
+                row_total = float(sum(row_total))
+                if row_total == 0: continue
+                elif row_total != 1:
+                    row_diff = round(Decimal(1.0000) - Decimal(row_total), precision)
+                    for k, v in row.items():
+                        if k == "parcels" or k == 'sink' or v == 0: continue
+                        row[k] = round(row_diff + Decimal(v), precision)
+                        break
         else:
             fpn = [f.stream for n, f in files.items()][0]
             fpn.seek(0)
@@ -506,32 +692,33 @@ def parse_runoff_matrix_upload():
             for header in reader.fieldnames:
                 if header == 'sink' or header == 'parcels':
                     continue
-                elif header not in parcel_names.keys():
+                elif header.lower() not in parcel_names.keys():
                     return ApiException(f"Parcel '{header}' does not exist in the scenario")
             for row in reader:
-                if row.get("parcels") not in parcel_names.keys():
+                if row.get("parcels").lower() not in parcel_names.keys():
                     return ApiException(f"Parcel '{row.get('parcels')}' does not exist in the scenario")    
             if "sink" not in reader.fieldnames:
                 return ApiException("Required header 'sink' is missing")
             
-        # verify values are valid
-        if files:
+            # verify values are valid
             reader = csv.DictReader(io.StringIO(lines))
-        for row in reader:
-            row_total = []
-            for k, v in row.items():
-                if k == "parcels": continue
-                if Decimal(v) < 0: return ApiException("All values must be positive")
-                row_total.append(Decimal(v))
-            row_total = float(sum(row_total))
-            if row_total != 1 and row_total != 0: 
-                return ApiException("Sum of runoff fractions should be 1")
+            for row in reader:
+                row_total = []
+                for k, v in row.items():
+                    if k == "parcels": continue
+                    if Decimal(v) < 0: return ApiException("All values must be positive")
+                    row_total.append(Decimal(v))
+                row_total = float(sum(row_total))
+                if row_total != 1 and row_total != 0:
+                    print(row)
+                    print(row_total)
+                    return ApiException("Sum of runoff fractions should be 1")
 
         # submit
         if files:
             reader = csv.DictReader(io.StringIO(lines))
         for row in reader:
-            sender_pcl = parcel_names[row.get("parcels")]
+            sender_pcl = parcel_names[row.get("parcels").lower()]
             if sender_pcl.name in request.form["water_parcels"]:
                 continue
             del row["parcels"]

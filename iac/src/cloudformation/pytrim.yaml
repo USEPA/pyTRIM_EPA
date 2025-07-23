@@ -536,6 +536,20 @@ Resources:
       BucketName: !Sub '${EnvironmentName}-getflow-storage-bucket'
       AccessControl: Private
 
+  ScenarioMiscFileBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${EnvironmentName}-scenario-miscfiles-bucket'
+      AccessControl: Private
+      CorsConfiguration:
+        CorsRules:
+          - AllowedHeaders:
+              - '*'
+            AllowedMethods:
+              - GET
+            AllowedOrigins:
+              - '*'
+
   ## BASIC VPC CONFIGURATION
   Vpc:
     Type: 'AWS::EC2::VPC'
@@ -719,7 +733,7 @@ Resources:
             
   ## BastionSecurityGroup
   
-  # TODO - do I need this?
+  # TODO - needed?
   BastionSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
@@ -735,10 +749,8 @@ Resources:
             
   ## IAM
 
-  # TODO - more restrictive role permissions...
-                
   # this is the role the script running within the Docker container runs as...
-  # TODO CURRENLTY NOT IN USE?!?!
+  # TODO NOT IN USE?!
   DockerRuntimeAssumedRole:
     Type: AWS::IAM::Role
     Properties:
@@ -751,10 +763,8 @@ Resources:
                 - 'ecs-tasks.amazonaws.com'
             Action:
               - 'sts:AssumeRole'
-      # in IAM console, search for the managed policy to find the arn for it
       ManagedPolicyArns:
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/AWSStepFunctionsFullAccess" # needed for token access
-        # TODO - will need database access?
         
   # role the web tier runs as - used e.g. for making AWS SDK calls
   WebTierInstanceProfileRole:
@@ -770,7 +780,6 @@ Resources:
                 - 'ec2.amazonaws.com'
             Action:
               - 'sts:AssumeRole'
-      # in IAM console, search for the managed policy to find the arn for it
       ManagedPolicyArns:
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/AWSElasticBeanstalkWebTier"
       Policies:
@@ -787,7 +796,16 @@ Resources:
               - Effect: "Allow"
                 Action: "states:DescribeExecution"
                 Resource: "*"
-                # Resource is like: arn:aws:states:us-east-1:426714360284:execution:DockerStateMachineWrapperModelRun-6igLbCu7FQcL:70e6b149-0e1d-4f43-b689-bdeda0d30f96 but I can't get wildcards working with that, so for now just allow on all. Just describe so low-risk.
+                # Resource is like: arn:aws:states:us-east-1:426714360284:execution:DockerStateMachineWrapperModelRun-6igLbCu7FQcL:70e6b149-0e1d-4f43-b689-bdeda0d30f96 but I can't get wildcards working, so for now allow all.
+              - Effect: "Allow"
+                Action: "states:GetExecutionHistory"
+                Resource: "*"
+              - Effect: "Allow"
+                Action: "ecs:DescribeTaskDefinition"
+                Resource: "*"
+              - Effect: "Allow"
+                Action: "logs:GetLogEvents"
+                Resource: "*"
               - Effect: "Allow"
                 Action: "s3:*"
                 Resource:
@@ -811,6 +829,18 @@ Resources:
                       - !Sub "${AWS::Partition}"
                       - ':s3:::'
                       - !Ref GetFlowOutputStorageBucket
+                      - '/*'
+              - Effect: "Allow"
+                Action: "s3:*"
+                Resource:
+                  - !GetAtt ScenarioMiscFileBucket.Arn
+                  - !Join
+                    - ''
+                    -
+                      - 'arn:'
+                      - !Sub "${AWS::Partition}"
+                      - ':s3:::'
+                      - !Ref ScenarioMiscFileBucket
                       - '/*'
       Path: /
 
@@ -839,7 +869,6 @@ Resources:
             Condition:
               StringEquals:
                 'sts:ExternalId': elasticbeanstalk
-      # in IAM console, search for the managed policy to find the arn for it
       ManagedPolicyArns:
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/AutoScalingFullAccess"
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/ElasticLoadBalancingFullAccess"
@@ -847,26 +876,8 @@ Resources:
 
   ## BASTION
 
-  # see https://aws-ia.github.io/cfn-ps-linux-bastion/#_deployment_options
-  #
-  # BASTION AMI OS? (Amazon-Linux2-HVM)
-  # ROOT VOLUME SIZE (10)
-  # BASTION HOST NAME (LinuxBastion)
-  # BASTION TENANCY (default)
-  # BASTION BANNER (false)
-  # BANNER TEXT ("")
-  # TCP FORWARDING (false)
-  # X11 FORWARDING (false)
-  # QUICK START S3 BUCKTE NAME (aws-quickstart)
-  # quickstart s3 prefix (quickstart-linux-bastion/)
-  # QS bucket region (us-east-1)
-
-  # how can we embed one template:
-  # https://aws-quickstart.s3.amazonaws.com/quickstart-linux-bastion/templates/linux-bastion.template
-  # inside this one?
   BastionJumpbox:
     Type: 'AWS::CloudFormation::Stack'
-    # DeletionPolicy: Retain
     Properties:
       # TemplateURL: 'https://aws-quickstart.s3.amazonaws.com/quickstart-linux-bastion/templates/linux-bastion.template'
       TemplateURL: 'https://aws-ia-us-east-1.s3.us-east-1.amazonaws.com/cfn-ps-linux-bastion/templates/linux-bastion-entrypoint-existing-vpc.template.yaml'
@@ -940,7 +951,6 @@ Resources:
       ManagedPolicyArns:
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/AWSStepFunctionsFullAccess"
         # - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonS3FullAccess"
-        # TODO - will need database access? network access for getting outside the dcker container?
       Policies:
         - PolicyName: root
           PolicyDocument:
@@ -973,9 +983,21 @@ Resources:
                       - ':s3:::'
                       - !Ref GetFlowOutputStorageBucket
                       - '/*'
+              - Effect: "Allow"
+                Action: "s3:*"
+                Resource:
+                  - !GetAtt ScenarioMiscFileBucket.Arn
+                  - !Join
+                    - ''
+                    -
+                      - 'arn:'
+                      - !Sub "${AWS::Partition}"
+                      - ':s3:::'
+                      - !Ref ScenarioMiscFileBucket
+                      - '/*'
     
   # this is the role the step function assumes when running...
-  # TODO CURRENTLY NOT IN USE?!?!?!
+  # TODO NOT IN USE?!?!?!
   StepFunctionAssumedRole:
     Type: AWS::IAM::Role
     Properties:
@@ -988,7 +1010,6 @@ Resources:
                 - 'states.amazonaws.com'
             Action:
               - 'sts:AssumeRole'
-      # in IAM console, search for the managed policy to find the arn for it
       ManagedPolicyArns:
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/AdministratorAccess"
         - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonECS_FullAccess"
@@ -1036,7 +1057,6 @@ Resources:
             - Name: STORAGE_BUCKET_NAME
               Value: !Ref ModelRunOutputStorageBucket
             - Name: RDS_HOSTNAME
-              # Value: pytrim-dev-stalk-mysql.c4kmy933ys6z.us-east-1.rds.amazonaws.com
               Value: !GetAtt DatabaseInstance.Endpoint.Address
             - Name: RDS_PORT
               Value: !GetAtt DatabaseInstance.Endpoint.Port
@@ -1061,22 +1081,9 @@ Resources:
               HostPort: 80
               Protocol: "tcp"
               AppProtocol: "http"
-          #Secrets: 
-            #- Secret
-      #EphemeralStorage: 
-        #EphemeralStorage
       ExecutionRoleArn: !GetAtt DockerTaskExecutionRole.Arn
-      # Family: "pytrim_runmodel_taskdef_family"
       Family: !Sub '${EnvironmentName}-runmodel_taskdef_family'
-      #InferenceAccelerators: 
-        #- InferenceAccelerator
-      # IpcMode: String
       NetworkMode: "awsvpc"
-      # PidMode: String
-      # PlacementConstraints: 
-        #- TaskDefinitionPlacementConstraint
-      # ProxyConfiguration: 
-        # ProxyConfiguration
       RequiresCompatibilities: 
         - "FARGATE"
       RuntimePlatform: 
@@ -1086,8 +1093,6 @@ Resources:
         - Key: Name
           Value: !Sub '${EnvironmentName}-runmodel-taskdef'
       TaskRoleArn: !GetAtt DockerTaskTaskRole.Arn
-      # Volumes: 
-        # - Volume
 
   DockerTaskDefGetFlow:
     Type: 'AWS::ECS::TaskDefinition'
@@ -1108,6 +1113,8 @@ Resources:
           Environment:
             - Name: STORAGE_BUCKET_NAME
               Value: !Ref GetFlowOutputStorageBucket
+            - Name: SCENARIO_MISC_FILES_BUCKET_NAME
+              Value: !Ref ScenarioMiscFileBucket
             - Name: RDS_HOSTNAME
               Value: !GetAtt DatabaseInstance.Endpoint.Address
             - Name: RDS_PORT
@@ -1133,22 +1140,9 @@ Resources:
               HostPort: 80
               Protocol: "tcp"
               AppProtocol: "http"
-          #Secrets: 
-            #- Secret
-      #EphemeralStorage: 
-        #EphemeralStorage
       ExecutionRoleArn: !GetAtt DockerTaskExecutionRole.Arn
-      # Family: "pytrim_getflow_taskdef_family"
       Family: !Sub '${EnvironmentName}-getflow_taskdef_family'
-      #InferenceAccelerators: 
-        #- InferenceAccelerator
-      # IpcMode: String
       NetworkMode: "awsvpc"
-      # PidMode: String
-      # PlacementConstraints: 
-        #- TaskDefinitionPlacementConstraint
-      # ProxyConfiguration: 
-        # ProxyConfiguration
       RequiresCompatibilities: 
         - "FARGATE"
       RuntimePlatform: 
@@ -1158,8 +1152,6 @@ Resources:
         - Key: Name
           Value: !Sub '${EnvironmentName}-getflow-taskdef'
       TaskRoleArn: !GetAtt DockerTaskTaskRole.Arn
-      # Volumes: 
-        # - Volume
           
   StateMachineSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
@@ -1454,6 +1446,10 @@ Resources:
           Namespace: 'aws:elasticbeanstalk:application:environment'
           OptionName: TRIM_ENV_PROFILE
           Value: !Ref ShortEnvironmentProfile
+        -
+          Namespace: 'aws:elasticbeanstalk:application:environment'
+          OptionName: SCENARIO_MISC_FILES_BUCKET_NAME
+          Value: !Ref ScenarioMiscFileBucket
         -
           Namespace: 'aws:elasticbeanstalk:application:environment'
           OptionName: TRIM_DOCKERIZED_RUNMODEL_STATEMACHINE_ARN

@@ -105,7 +105,7 @@
             if (parcels.length > 0) {
                  parcels.forEach(function(e,i) {
                     let a_param = default_data["a"]
-                    let area_in_sq_mile = (e.area/1E6).toFixed(2) / 2.58998811
+                    let area_in_sq_mile = (e.area/1E6).toFixed(5) / 2.58998811
                     if (area_in_sq_mile <= 0.1) {
                         a_param = 2.1
                     } else if (area_in_sq_mile > 0.1 && area_in_sq_mile <= 1) {
@@ -152,14 +152,14 @@
                         data1.push({
                             "parcelid": e.id,
                             "Surface Parcel": e.name,
-                            "Area": (e.area/1E6).toFixed(2),
+                            "Area": (e.area/1E6).toFixed(5),
                             "Land Use": e.landUse,
                             "Total Effective Erosion Rate": ter1
                         });
                         data2.push({
                             "parcelid": e.id,
                             "Surface Parcel": e.name,
-                            "Area": (e.area/1E6).toFixed(2),
+                            "Area": (e.area/1E6).toFixed(5),
                             "Land Use": e.landUse,
                             "A": get_param(e[pre2+"unit_soil_loss"], default_data["A"]),
                             "a": a_param2,
@@ -170,7 +170,7 @@
                         data3.push({
                             "parcelid": e.id,
                             "Surface Parcel": e.name,
-                            "Area": (e.area/1E6).toFixed(2),
+                            "Area": (e.area/1E6).toFixed(5),
                             "Land Use": e.landUse,
                             "R": r3,
                             "K": k3,
@@ -1007,6 +1007,18 @@
             }
         }
 
+        function convert_us_ton_to_kg(val) {
+            return val * 907.183
+        }
+
+        function convert_acre_to_meter_square(val) {
+            return val *  2.47105E-04
+        }
+
+        function convert_per_year_to_per_day(val) {
+            return val / 365
+        }
+
         function calculate_ER_USLE(row, firstLoad = false) {
             if ( ["Water", "Impervious"].indexOf(row["Land Use"]) == -1 ) {
                 let ER = row["Total Effective Erosion Rate"];
@@ -1017,9 +1029,9 @@
                 else if (firstLoad) {
                     ER = scientific(row.R * row.K * calculate_LS(row) * row.C * row.P)
                 } else {
-                    ER = scientific(row.R * row.K * row.LS * row.C * row.P)
+                    ER = scientific(row.R * row.K * row.LS * row.C * row.P )
                 }
-                return ER
+                return convert_per_year_to_per_day(convert_us_ton_to_kg((convert_acre_to_meter_square(ER))))
             } else {
                 return scientific(0)
             }

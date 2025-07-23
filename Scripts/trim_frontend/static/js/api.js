@@ -184,6 +184,18 @@ window.TRIM = (function(trim) {
         });
     };
 
+    api.uploadBackgroundConcFile = function(fields) {
+        var url = api.getUrl('file_api.upload_background_conc');
+
+        var data = makeFormData(fields);
+
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: data
+        });
+    };
+
     api.uploadParcelFile = function(fields, callbackFxn) {
         var url = api.getUrl('file_api.parse_parcel');
         var data = makeFormData(fields);
@@ -192,6 +204,51 @@ window.TRIM = (function(trim) {
             method: 'POST',
             url: url,
             data: data,
+            callback: callbackFxn
+        });
+    };
+
+    api.hitUrl = function(url, callbackFxn) {
+        return AJAX.call({
+            method: 'GET',
+            url: url,
+            callback: callbackFxn
+        });
+	};
+
+    api.uploadMiscScenarioFile = function(fields, callbackFxn) {
+        var url = api.getUrl('file_api.manage_misc_scen_file');
+        var data = makeFormData(fields);
+
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: data,
+            callback: callbackFxn
+        });
+    };
+
+    api.deleteMiscScenarioFile = function(scenario_id, misc_file_type, callbackFxn) {
+        var url = api.getUrl('file_api.manage_misc_scen_file');
+		url += "?scenario_id=" + scenario_id + "&misc_file_type=" + misc_file_type;
+        var data = makeFormData([]);
+
+        return AJAX.call({
+            method: 'DELETE',
+            url: url,
+            data: data,
+            callback: callbackFxn
+        });
+    };
+
+    api.checkMiscScenarioFile = function(scenario_id, misc_file_type, callbackFxn) {
+        var url = api.getUrl('file_api.manage_misc_scen_file');
+		url += "?scenario_id=" + scenario_id + "&misc_file_type=" + misc_file_type;
+
+        return AJAX.call({
+            method: 'GET',
+            url: url,
+            // data: data,
             callback: callbackFxn
         });
     };
@@ -351,6 +408,19 @@ window.TRIM = (function(trim) {
             url: url,
             data: data,
 			callback: callback_fxn
+        });
+    }
+
+    api.runReceptorGeneration = function(scenario_id, callback_fxn) {
+        let url = api.getUrl('scenario_api.run_receptor_generation').replace("/0/", "/" + scenario_id + "/");
+
+        let data = makeFormData([]);
+
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: data,
+            callback: callback_fxn
         });
     }
 

@@ -29,7 +29,7 @@ ARG PYTRIM_BUILD_PLATFORM="linux/amd64"
 
 # FROM python:3.11-alpine as builder
 # FROM --platform=linux/amd64 python:3.11-alpine AS builder
-FROM --platform=${PYTRIM_BUILD_PLATFORM} python:3.11-alpine AS builder
+FROM --platform=${PYTRIM_BUILD_PLATFORM} python:3.11-alpine
 
 # Install all the python libraries we need to run...Alpine lacks a compiler toolchain for building some things we need, like pandas.
 RUN apk add --no-cache gcc python3-dev musl-dev alpine-sdk
@@ -39,14 +39,22 @@ RUN apk add --no-cache gcc python3-dev musl-dev alpine-sdk
 
 # START - some Python packages can't install/build via pip without some extra work.
 # (pyproj)
-RUN apk add proj proj-dev
-RUN apk add proj-util
-
-# (shapely)
-RUN apk add geos geos-dev
+RUN apk add --no-cache \
+    proj \
+    proj-data \
+    proj-util \
+    geos \
+    geos-dev \
+    g++ \
+    libgcc \
+    libstdc++ \
+    libffi-dev \
+    py3-pip
 
 # END - some Python packages..
 
+# Set env vars for pyproj in final image
+ENV PROJ_LIB=/usr/share/proj
 
 # OPTION 1 - Now build a fresh container, copying across the compiled pieces
 # install Python packages
@@ -75,17 +83,17 @@ RUN python3 -m pip install --upgrade pip
 RUN python3 -m pip install cython
 RUN python3 -m pip install -r /tmp/requirements.txt
 
-FROM python:3.11-alpine
+# FROM python:3.11-alpine
 # FROM --platform=linux/amd64 python:3.11-alpine
-FROM --platform=${PYTRIM_BUILD_PLATFORM} python:3.11-alpine
-COPY --from=builder /usr/local/lib/python3.11 /usr/local/lib/python3.11
+# FROM --platform=${PYTRIM_BUILD_PLATFORM} python:3.11-alpine
+# COPY --from=builder /usr/local/lib/python3.11 /usr/local/lib/python3.11
 
 # was getting errors around libstc++ when doing "import pandas";
 # this fixed it? https://github.com/bitwalker/alpine-erlang/issues/13. Similarly got errors about geos, libproj, etc.
-RUN apk update
-RUN apk --no-cache --update add libgcc libstdc++
-RUN apk --no-cache --update add geos-dev
-RUN apk --no-cache --update add proj
+# RUN apk update
+# RUN apk --no-cache --update add libgcc libstdc++
+# RUN apk --no-cache --update add geos-dev
+# RUN apk --no-cache --update add proj
 
 # copy Trim source code in
 COPY temp/ /tmp/pytrim_src/
