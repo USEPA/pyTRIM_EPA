@@ -44,12 +44,14 @@
                                         <form action="{{ url_for('scenario_api.copy_scenario') }}" id="copy-scenario-form" method="POST">
                                             <input name="user_id" value="{{logged_in_user.id}}" type=hidden>
                                             <input name="scenario_id" value="{{scenario.id}}" type=hidden>
+                                            <input name="scenario_name" value="{{scenario.name}}" type=hidden>
                                             <button type="submit" class="btn btn-outline-primary m-1">
                                             Copy
                                             {{ scenario_form.csrf_token }}</button>
                                         </form>
                                         <form action="{{ url_for('scenario_api.delete_scenario') }}" id="delete-scenario-form" method="POST">
                                             <input name="scenario_id" value="{{scenario.id}}" type=hidden>
+                                            <input name="scenario_name" value="{{scenario.name}}" type=hidden>
                                             <button type="submit" class="btn btn-outline-primary m-1">
                                             Delete
                                             {{ scenario_form.csrf_token }}</button>
@@ -109,7 +111,15 @@
                 $('#create-scenario-form [type="submit"]').click();
             });
             
-            $("#copy-scenario-form, #delete-scenario-form").on("submit", function(){
+            $("#copy-scenario-form, #delete-scenario-form").on("submit", function(e){
+                let scenario_name = $(e.target).find('input[name="scenario_name"]').val();
+                let opt = (e.target.id == 'copy-scenario-form') ? "copy" : "delete";
+                let msg = `Are you sure you want to ${opt} scenario ${scenario_name}?`
+                if (!confirm(msg)) {
+                    e.preventDefault();
+                    return;
+                }
+
                 var loadingRequest = 'load_' + this.id;
                 LoadingScreen.show(loadingRequest);
             })
