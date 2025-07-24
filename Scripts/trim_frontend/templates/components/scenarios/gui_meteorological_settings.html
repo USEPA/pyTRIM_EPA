@@ -309,6 +309,9 @@
                 console.log(param_info);
                 let resp = TRIM.api.updateScenario(param_info).on('load',function(){
                     let val_resp = this.responseJSON
+                    if (val_resp?.success === false) {
+                        return;
+                    }
                     if (val_resp) {
                         let val = val_resp[Object.keys(val_resp)[0]]
                         let lb_static_val = $(elem).closest('div.form-group').find("label.wt_avg_val")

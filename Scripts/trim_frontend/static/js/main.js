@@ -99,6 +99,8 @@ function update_data_store_callback(rsp, el, this_parcel_info, this_param_store_
 // An ajax handler
 window.AJAX = (function(ajax) {
 
+    ajax.alertErrs = true;
+
     ajax.call = function(opts) {
 
         var method = opts.method || 'GET';
@@ -124,7 +126,10 @@ window.AJAX = (function(ajax) {
 		  } 
           else if (request.readyState === 4 && request.status >= 400) {
             if (callback !== undefined) { callback(false, parsedResponseData); }
-            else { console.log(parsedResponseData) }
+            else {
+                if (this.alertErrs) { alert(parsedResponseData?.message); }
+                console.log(parsedResponseData);
+            }
           }
           else if (request.readyState === 4) {
 		    if (callback !== undefined) { callback(false, "could not fetch the data"); }

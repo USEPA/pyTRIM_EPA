@@ -295,6 +295,8 @@
                 let mat_table = $(this_row).closest("table");
                 let col_headers = $(mat_table).find("thead > tr > th > div > span").map((i,e) => e.innerHTML);
 
+                let errs = [];
+
                 $(mat_table).find("tbody > tr").each(function(){
                     let row_header = $(this).find("td > strong").text()
                     let row_name = row_header.replaceAll(" ","").replaceAll("WaterColumn","Fish").replace("BenthicCarnivore", "FishBenthicCarnivore").replace("BenthicOmnivore", "FishBenthicOmnivore")
@@ -323,8 +325,8 @@
                     let is_valid_row = elementIsValid(this);
                     if (is_valid_row){
                         LoadingScreen.show('submit_diet'); // since this can take a moment
-                        TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', ()=>{
-                            LoadingScreen.hide('submit_diet'); 
+                        TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', (rsp)=>{
+                            LoadingScreen.hide('submit_diet');
                         });
                     }
                 })
