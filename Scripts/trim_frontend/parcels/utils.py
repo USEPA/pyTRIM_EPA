@@ -493,7 +493,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         sender_parcel_name = parcels_data["sender"].replace("ro_", "")
         receivers = parcels_data["receiver"].split(",")
         values = parcels_data["ro_value"].split(",")
-        sp = scn.parcels.where(Parcel.name == sender_parcel_name).first()
+        sp = [sp for sp in scn.parcels if sp.name == sender_parcel_name][0]
         sender_comp = sp.get_compartment("Soil_Surface")
         sender_par = [sender_comp.parameters.get("FractionOfTotalRunoff")]
         if len(sender_par) > 0:
@@ -512,7 +512,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                     if isinstance(receiver_comp, list):
                         receiver_comp = receiver_comp[0]
                 else:
-                    rp = scn.parcels.where(Parcel.name == receiver_name).first()
+                    rp = [rp for rp in scn.parcels if rp.name == receiver_name][0]
                     receiver_comp = rp.get_compartment("Soil_Surface")
                     if not receiver_comp: # try for water parcels
                         receiver_comp = rp.get_compartment("Surface_water")
