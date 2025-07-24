@@ -124,6 +124,7 @@ window.AJAX = (function(ajax) {
 		  } 
           else if (request.readyState === 4 && request.status >= 400) {
             if (callback !== undefined) { callback(false, parsedResponseData); }
+            else { console.log(parsedResponseData) }
           }
           else if (request.readyState === 4) {
 		    if (callback !== undefined) { callback(false, "could not fetch the data"); }

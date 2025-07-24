@@ -95,11 +95,15 @@ api.use_api_errors(scenario_api)
 @login_required
 def get_scenario(id):
     logger = make_logger('scenario_api_get')
-    s = ScenarioService.get(id)
-    start_time = time.time()
-    s = s.as_serializable()
-    init_erosion_default_params()
-    logger.info(f"Acquired scenario in {time.time() - start_time} seconds")
+    try:
+        s = ScenarioService.get(id)
+        start_time = time.time()
+        s = s.as_serializable()
+        init_erosion_default_params()
+        logger.info(f"Acquired scenario in {time.time() - start_time} seconds")
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        return ApiException(repr(e))
     return ApiResult({'scenario': s})
 
 
@@ -110,7 +114,7 @@ def get_scenario(id):
 def get_scenario_chemicals(scenario_id):
     s = ScenarioService.get(scenario_id)
     if not s:
-        raise ApiException("Unknown Scenario")
+        return ApiException("Unknown Scenario")
     chems = [c.as_serializable() for c in s.chemicals]
     return ApiResult({
         'chemicals': chems
@@ -126,7 +130,7 @@ def get_scenario_met_data(scenario_id):
     try:
         met = get_met_data(s)
     except Exception as e:
-        print(e)
+        logger.info(e)
         met = {}
     logger.info(f"Acquired meteorology in {time.time() - start_time} seconds")
     return ApiResult({'meteorology': met})
@@ -147,10 +151,14 @@ def get_scenario_seasonal_dynamics(scenario_id):
 @login_required
 def get_scenario_runoff_matrix(scenario_id):
     logger = make_logger('scenario_runoff_matrix_api_get')
-    s = ScenarioService.get(scenario_id)
-    start_time = time.time()
-    runoff_matrix = get_surface_runoff(s)
-    logger.info(f"Acquired runoff matrix in {time.time() - start_time} seconds")
+    try:
+        s = ScenarioService.get(scenario_id)
+        start_time = time.time()
+        runoff_matrix = get_surface_runoff(s)
+        logger.info(f"Acquired runoff matrix in {time.time() - start_time} seconds")
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        return ApiException(repr(e))
     return ApiResult({'runoff_matrix': runoff_matrix})
 
 
@@ -162,19 +170,24 @@ def get_scenario_runoff_matrix(scenario_id):
 def get_parameters(scenario_id):
     s = ScenarioService.get(scenario_id)
     if not s:
-        raise ApiException("Unknown Scenario")
+        return ApiException("Unknown Scenario")
 
-    params = request.args.getlist('parameter')
-    s_params = dict(s.parameters)
-    r = {}
-    for x in params:
-        param = s_params.get(x)
-        if param is not None:
-            db.session.add(param)
-            param = param.as_serializable()
-        r[x] = param
+    logger = make_logger('scenario_parameter_get')
+    try:
+        params = request.args.getlist('parameter')
+        s_params = dict(s.parameters)
+        r = {}
+        for x in params:
+            param = s_params.get(x)
+            if param is not None:
+                db.session.add(param)
+                param = param.as_serializable()
+            r[x] = param
 
-    ScenarioService.commit() # required because of session update
+        ScenarioService.commit() # required because of session update
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        return ApiException(repr(e))
     return ApiResult({'parameters': r})
 
 
@@ -182,10 +195,14 @@ def get_parameters(scenario_id):
 @login_required
 def get_last_results(scenario_id):
     logger = make_logger('scenario_last_results_api_get')
-    s = ScenarioService.get(scenario_id)
-    start_time = time.time()
-    latest_run_info = get_latest_run_info(s)
-    logger.info(f"Acquired scenario results in {time.time() - start_time} seconds")
+    try:
+        s = ScenarioService.get(scenario_id)
+        start_time = time.time()
+        latest_run_info = get_latest_run_info(s)
+        logger.info(f"Acquired scenario results in {time.time() - start_time} seconds")
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        return ApiException(repr(e))
     return ApiResult({'latest_run_info': latest_run_info})
 
 
@@ -439,6 +456,7 @@ def update_scenario():
 
     except Exception as e:
         logger.error(traceback.format_exc())
+        return ApiException(repr(e))
     ScenarioService.update(s)
     if ret_val:
         return ApiResult(ret_val)
@@ -806,6 +824,7 @@ def clear_old_result():
     except Exception as e:
         print([v for v in scn.proc_status][0])
         print(f'problem deleting {e}')
+        return ApiException(f"Problem deleting {repr(e)}")
     print(f"Model Result deleted for {scn.name}")
     ScenarioService.commit()
     return ApiResult(data_resp)
@@ -1093,7 +1112,7 @@ def run_getflow(scenario_id):
 
     s = ScenarioService.get(scenario_id)
     if not s:
-        raise ApiException("Unknown Scenario")
+        return ApiException("Unknown Scenario")
 
     print(f"scenario: {s}")
 
@@ -1171,7 +1190,7 @@ def check_stepfunction_status():
 def export_for_mirc(scenario_id):
     scen = ScenarioService.get(scenario_id)
     if not scen:
-        raise ApiException("Unknown Scenario")
+        return ApiException("Unknown Scenario")
 
     logger = make_logger('mirc_exporter')
     logger.info(f"Compiling required MIRC data for scenario {scen.name}...")
