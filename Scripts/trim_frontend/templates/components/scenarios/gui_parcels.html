@@ -710,10 +710,12 @@
         }
 
         document.body.addEventListener('parcels:ready', function() {
-            // FIXME occasionally errors out (order issue?) and causes default values to appear
-            // only tested with meteo page... shouldn't trigger unless on parcels page? At the moment always runs
-            try { drawAllParcels(); }
-            catch (err) { console.log(err); }
+            // TODO keep an eye on this
+            try { 
+                drawAllParcels(); }
+            catch (err) {
+                console.log(TRIM.store.currentScenario.parcels, err);
+            }
         });
 
 		document.body.addEventListener('parcels:ready', function() {

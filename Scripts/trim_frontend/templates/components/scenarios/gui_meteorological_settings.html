@@ -307,9 +307,11 @@
             }
             if (elementIsValid($(elem).parent())){
                 console.log(param_info);
-                let resp = TRIM.api.updateScenario(param_info).on('load',function(){
+                LoadingScreen.show("meteo_update_value")
+                let resp = TRIM.api.updateScenario(param_info).on('load',function(rsp){
                     let val_resp = this.responseJSON
                     if (val_resp?.success === false) {
+                        LoadingScreen.hide("meteo_update_value");
                         return;
                     }
                     if (val_resp) {
@@ -322,6 +324,12 @@
                             $(elem).closest('div.form-group').append(lb_static_val)
                         }
                     }
+
+                    // not great, but it's an easy way to keep TRIM.store up to date
+                    TRIM.api.getMeteorology(TRIM.store.currentScenario).on('load', function () {
+                        TRIM.store.currentScenario.meteorology = this.responseJSON.meteorology;
+                        LoadingScreen.hide("meteo_update_value");
+                    });
                 })
             } else {
                 return
