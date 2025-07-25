@@ -99,7 +99,7 @@ function update_data_store_callback(rsp, el, this_parcel_info, this_param_store_
 // An ajax handler
 window.AJAX = (function(ajax) {
 
-    ajax.alertErrs = true;
+    ajax.alertErrs = false;
 
     ajax.call = function(opts) {
 
