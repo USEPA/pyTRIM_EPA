@@ -15,35 +15,15 @@ def serialize_parcel(pcl: Parcel):
     init_comp_cache(pcl)
     pcl = get_eager_parcel(pcl)
 
-
-    from time import time
-    st = time()
-
     general_params = get_general_params(pcl)
-    print(f"general params {time() - st}")
-    st = time()
-
     water_params = get_water_params(pcl, general_params['parcelType'])
-    print(f"water_params {time() - st}")
-    st = time()
-
     source_params = get_source_params(pcl)
-    print(f"source_params {time() - st}")
-    st = time()
-
     soil_abiotic_params = get_soil_abiotic_params(pcl)
-    print(f"soil_abiotic_params {time() - st}")
-    st = time()
-
     initial_conc = get_initial_concetrations(pcl)
-    print(f"initial_conc {time() - st}")
-    st = time()
 
     cdv = get_comp(pcl, {"name":"DryVaporSource"})
     spacing_param = cdv.parameters.get("ReceptorSpacing")
     spacing_val = spacing_param.default_value if type(spacing_param) is ParameterDefinition else spacing_param.value
-
-    print(f"spacing params {time() - st}\n\n")
 
     s = {
         'id': pcl.id,
