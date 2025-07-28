@@ -709,7 +709,14 @@
             DREW_MAP = true;
         }
 
-        document.body.addEventListener('parcels:ready', drawAllParcels);
+        document.body.addEventListener('parcels:ready', function() {
+            // TODO keep an eye on this
+            try { 
+                drawAllParcels(); }
+            catch (err) {
+                console.log(TRIM.store.currentScenario.parcels, err);
+            }
+        });
 
 		document.body.addEventListener('parcels:ready', function() {
 			LoadingScreen.show('check_overlay_status');

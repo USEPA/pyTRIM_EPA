@@ -13,6 +13,7 @@ comp_local_cache = {}
 @register_serializer(Parcel)
 def serialize_parcel(pcl: Parcel):
     init_comp_cache(pcl)
+    pcl = get_eager_parcel(pcl)
 
     general_params = get_general_params(pcl)
     water_params = get_water_params(pcl, general_params['parcelType'])
@@ -87,7 +88,6 @@ def get_comp(pcl, kwargs):
 
 
 def get_general_params(pcl):
-    pcl = get_eager_parcel(pcl)
     air = False
     water = False
     land = False
@@ -133,8 +133,7 @@ def get_general_params(pcl):
     if groundwater_height:
         groundwater_height = groundwater_height.volume_element.height.m_as('m')
 
-    # for comp in comp_local_cache["all"]:
-    for comp in pcl.compartments:
+    for comp in comp_local_cache["all"]:
         # Check parcel type
         if comp.media.isa('Air', or_child=False):
             air = True
@@ -254,7 +253,6 @@ def get_parcel_comp_params(pcl, comps, params):
 
 
 def get_soil_abiotic_params(pcl, run_old=True):
-    pcl = get_eager_parcel(pcl)
     comps = ["Soil_Surface", "Soil_Root_Zone", "Soil_Vadose_Zone", "Groundwater"]
     if not run_old:
          params = ["pH", "FractionSand", "OrganicCarbonContent", "rho", "Porosity", "VolumeFraction_Vapor",
@@ -329,7 +327,6 @@ def get_eager_parcel(pcl):
 
 def get_water_params(pcl, parcel_type):
     from .utils import get_watershed_area
-    pcl = get_eager_parcel(pcl)
     precipitation_rate = pcl.scenario.Rain.magnitude
     if precipitation_rate is None:
         precipitation_rate = 0  # 0.0041
@@ -612,7 +609,6 @@ def get_water_params(pcl, parcel_type):
 
 
 def get_initial_concetrations(pcl):
-    pcl = get_eager_parcel(pcl)
     chem_objs = {c for c in pcl.scenario.chemicals}
     chems = {c.name: {} for c in pcl.scenario.chemicals}
     initial_conc = {"initialConcentrations": chems}
@@ -630,29 +626,24 @@ def get_initial_concetrations(pcl):
 
 
 def get_source_params(pcl):
-    pcl = get_eager_parcel(pcl)
-    chem_objs = {c for c in pcl.scenario.chemicals}
-    # source_comps = [c for c in comp_local_cache["all"] if c.media.isa("Source")]
-    source_comps = [c for c in pcl.compartments]
     chems = {c.name: {} for c in pcl.scenario.chemicals}
+    source_comps = [c for c in pcl.compartments]
     source_params = {"sources": chems}
+
     for comp in source_comps:
-        for chem in chem_objs:
-            try:
-                # source_params["sources"][chem.name][comp.volume_element.name] = {comp.name: comp.surfaceDepositionRate(chemical=chem).magnitude}
-                spd = source_params["sources"][chem.name].get(comp.volume_element.name)
-                if spd:
-                    spd.setdefault(comp.name, comp.surfaceDepositionRate(chemical=chem).magnitude)
-                else:
-                    source_params["sources"][chem.name].setdefault(comp.volume_element.name, {comp.name: comp.surfaceDepositionRate(chemical=chem).magnitude})
-            except AttributeError:
-                # source_params["sources"][chem.name][comp.volume_element.name] = {comp.name: comp.surfaceDepositionRate(chemical=chem)}
-                spd = source_params["sources"][chem.name].get(comp.volume_element.name)
-                if spd:
-                    spd.setdefault(comp.name, comp.surfaceDepositionRate(chemical=chem))
-                else:
-                    source_params["sources"][chem.name].setdefault(comp.volume_element.name, {
-                        comp.name: comp.surfaceDepositionRate(chemical=chem)})
+        ve_name = comp.volume_element.name
+        for chem in pcl.scenario.chemicals:
+            deposition_rate = comp.surfaceDepositionRate(chemical=chem) # very slow!
+            chem_source = source_params["sources"][chem.name]
+            spd = chem_source.get(ve_name)
+
+            if hasattr(deposition_rate, 'magnitude'):
+                deposition_rate = deposition_rate.magnitude
+
+            if spd:
+                spd.setdefault(comp.name, deposition_rate)
+            else:
+                chem_source.setdefault(ve_name, {comp.name: deposition_rate})
     return source_params
 
 

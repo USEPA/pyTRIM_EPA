@@ -46,6 +46,12 @@
 </form>
 <script>
     onDomLoad(function() {
+        // DEBUG
+        let email = '{{ current_user.email.lower() }}';
+        if (email.endsWith('@icf.com')) {
+            AJAX.alertErrs = true;
+        }
+
         var form = document.getElementById('scenario-info-gui');
 
         form.addEventListener('form:visible', function() {
