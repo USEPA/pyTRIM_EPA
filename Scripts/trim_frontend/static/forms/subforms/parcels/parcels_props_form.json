@@ -67,7 +67,7 @@
       "label": "Receptor Spacing (m)",
       "data_type": "str",
       "default": "100",
-      "help": "Enter the receptor spacing for each parcel. The receptors are not a TRIM feature, but they can be used offline in AERMOD modeling."
+      "help": "Enter the receptor spacing for each parcel. The receptors are not a TRIM feature, but they can be used offline in AERMOD modeling. The default spacing is 100 m (professional judgment). Each parcel should have at least 1 receptor, parcels larger than about 0.004 square km should have at least 2 receptors, and the spacing is not recommended to be larger than 1,000 m."
     }
   ]
 }
