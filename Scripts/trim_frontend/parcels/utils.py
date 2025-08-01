@@ -658,6 +658,11 @@ def initialize_parcel_contents(new_parcel, vol_elem_defaults=None):
                 nc = CompartmentService.get_or_create(name=c_name,
                                                       volume_element=nve,
                                                       media=this_media)
+            else:
+                if len(nc) > 1:
+                    print(f"More than one compartment found!\n\t{nc}")
+                nc = nc[0]
+
             initialize_compartment_custom_parameters(nc)
     ParameterService.commit()
 
