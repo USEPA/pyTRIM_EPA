@@ -60,6 +60,35 @@ class ParameterService(GenericService):
     class definitions(GenericService):
         __model__ = ParameterDefinition
 
+    @classmethod
+    def get_own_custom_parameters(cls, entity):
+        s_id = entity.current_scenario().id  # Scenario id
+
+        dm_ids = [d.id for d in entity.domains]  # Relevant domain ids
+
+        return cls.db.session.query(CustomParameter).join(
+            ParameterDefinition, ParameterDefinition.id == CustomParameter.definition_id
+        ).join(
+            ParameterDomain, ParameterDomain.id == ParameterDefinition.domain_id
+        ).filter(
+            CustomParameter.scenario_id == s_id,
+            ParameterDomain.id.in_(dm_ids),
+            CustomParameter.requirements == f'(self.id == {entity.id})'
+        ).all()
+
+    @classmethod
+    def get_custom_parameters_by_name(cls, name, scenario_id=None):
+        query = cls.db.session.query(CustomParameter).join(
+            ParameterDefinition, ParameterDefinition.id == CustomParameter.definition_id
+        ).filter(
+            ParameterDefinition.variable_name == name
+        )
+
+        if scenario_id is not None:
+            query = query.filter(CustomParameter.scenario_id == scenario_id)
+
+        return query.all()
+
 
 class classproperty:
     def __init__(self, f):
