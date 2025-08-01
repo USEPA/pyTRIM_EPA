@@ -648,21 +648,14 @@ def initialize_parcel_contents(new_parcel, vol_elem_defaults=None):
         for c_name, c in ve["Compartments"].items():
             print(f'creating {c_name} for volume element {ve_name}')
             # Create standard compartments linking them to default volume elements and media for each compartment
-            # nc = new_parcel.get_compartment(c_name) # This won't work because the compartment names are not unique,
-            # get_compartment gets the first compartment with that name and ignores volume_element type.
-            # we need a list meeting both compartment name and volume_element name conditions.
-            nc = [c for c in new_parcel.compartments if c.name == c_name and c.volume_element.name == nve.name]
-            # if not nc:
-            if len(nc) == 0:
+            # nc = new_parcel.get_compartment(c_name) # This won't work because the compartment names are not unique
+            nc = nve.get_compartment(c_name)
+            if not nc:
                 this_media = CompartmentService.media.get(name=c["media_name"])
                 nc = CompartmentService.get_or_create(name=c_name,
                                                       volume_element=nve,
                                                       media=this_media)
-            else:
-                if len(nc) > 1:
-                    print(f"More than one compartment found!\n\t{nc}")
-                nc = nc[0]
-
+            print('- initializing params')
             initialize_compartment_custom_parameters(nc)
     ParameterService.commit()
 
@@ -672,7 +665,7 @@ def initialize_parcel_contents(new_parcel, vol_elem_defaults=None):
 def initialize_compartment_custom_parameters(nc):
     # Add in custom parameters for new compartments using the self.id = <id of new compartment>
     this_parcel = nc.volume_element.parcel
-    if nc.name == "Soil_Surface":
+    if nc.media.isa('Surface_Soil'):
         # Default Total Erosion Rate
         ter_val = calc_default_erosion_rate_sdr(this_parcel)
         add_compartment_custom_parameters(nc, "TotalErosionRate", ter_val, "kg/m^2/day")
@@ -717,7 +710,7 @@ def initialize_compartment_custom_parameters(nc):
             water_c_val = get_default_value_from_json_form(f"Abiotic_{nc.media.name}", 'VolumeFraction_Liquid')
             add_compartment_custom_parameters(nc, 'VolumeFraction_Liquid', water_c_val, None)
 
-    # elif nc.name == "Surface_water" or nc.name == "Sediment":
+    # elif nc.media.isa('Surface_Water') or nc.media.isa("Sediment"):
 
 
 def add_compartment_custom_parameters(nc, par_name, par_val, par_unit):
@@ -796,7 +789,13 @@ def get_land_use(pcl):
     return land_use
 
 
+PARAMS_WITH_COMPARTMENT_ID_IN_FORMULA = [
+    "MethylationRate", "DemethylationRate", "ReductionRate"
+]
+
+
 def delete_parcel_contents(del_parcel):
+    print('deleting parcel compartments')
     for c in del_parcel.compartments:
         # Delete Links
         comp_id = c.id
@@ -807,31 +806,28 @@ def delete_parcel_contents(del_parcel):
             CompartmentService.links.delete(lnk_r)
         for lnk_s in ls:
             CompartmentService.links.delete(lnk_s)
+
         # Delete Custom Parameters
-
-        # THIS IS A TERRIBLE WAY TO DELETE A CUSTOM PARAMETER!!! self.id may be for a different domain
-        #  and it will be deleted!!!
-        # custom_params = ParameterService.get_all(requirements=f'(self.id == {comp_id})')
-        # for cp in custom_params:
-        #     ParameterService.delete(cp, False)
-
-        # This is much better!
-        custom_params = [cp for _, cp in c.parameters.items() if isinstance(cp, CustomParameter)]
-        for cp in custom_params:
+        for cp in ParameterService.get_own_custom_parameters(c):
             ParameterService.delete(cp, False)
 
         # Delete Compartments
+        # print(f'- delete compartment {c}')
         CompartmentService.delete(c, False)
+
         # Delete compartment id from formulas with custom values for give compartment (from legacy Trim)
-        formulas = ["MethylationRate", "DemethylationRate", "ReductionRate"]
-        for t in formulas:
-            ins = ParameterService.definitions.get(variable_name=t).instances
-            par = [i for i in ins if i.scenario.id == scenario_id]
+        # print(f'-- remove compartment from custom formulas')
+        for var_name in PARAMS_WITH_COMPARTMENT_ID_IN_FORMULA:
+            par = ParameterService.get_custom_parameters_by_name(
+                var_name, scenario_id=scenario_id
+            )
             if not par:
                 continue
             par = par[0]
             eq = par.formula.equation
             del_id = c.id
+            if del_id not in eq:
+                continue
             eq_parts = eq.split('compartment.id in {')
             for i, p in enumerate(eq_parts):
                 if i == 0:
@@ -850,8 +846,11 @@ def delete_parcel_contents(del_parcel):
             new_eq = 'compartment.id in {'.join(eq_parts)
             ParameterService.get(par.id).formula.equation = new_eq
             ParameterService.commit()
+
     # Delete Volume Elements
+    print('deleting parcel volume elements')
     for ve in del_parcel.volume_elements:
+        # print(f'- delete volume element {ve}')
         VolumeElementService.delete(ve, False)
 
 
