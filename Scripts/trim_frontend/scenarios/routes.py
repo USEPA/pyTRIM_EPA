@@ -181,7 +181,8 @@ def get_parameters(scenario_id):
         for x in params:
             param = s_params.get(x)
             if param is not None:
-                db.session.add(param)
+                if param not in db.session:
+                    db.session.merge(param)
                 param = param.as_serializable()
             r[x] = param
 
@@ -906,12 +907,14 @@ def get_result_scenario():
 @login_required
 def poll_model_run_scenario(id):
     s = ScenarioService.get(id)
-    if [v for v in s.proc_status][0].is_run_error:
-        run_status = "err"
-        run_percent = "err"
-    else:
-        run_status, run_percent = [v for v in s.proc_status][0].run_step
-    return ApiResult({'status': run_status, 'percent': run_percent})
+    if s.has_process_hist:
+        if [v for v in s.proc_status][0].is_run_error:
+            run_status = "err"
+            run_percent = "err"
+        else:
+            run_status, run_percent = [v for v in s.proc_status][0].run_step
+        return ApiResult({'status': run_status, 'percent': run_percent})
+    return ApiResult({'status': "tm", 'percent': "0"})
 
 
 @scenario_api.route('/api/scenario/poll/', methods=['POST'])
