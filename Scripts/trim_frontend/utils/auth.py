@@ -1,3 +1,4 @@
+import os
 from flask_security import SQLAlchemyUserDatastore
 from flask_security.utils import hash_password
 
@@ -9,7 +10,7 @@ def define_superusers(app, security):
         app.logger.warning('No default superuser specified')
     else:
         default_superuser_pwd = os.getenv('DEFAULT_SUPERUSER_PWD', '@dm1nUs3r')
-        u = security.datastore.get_user(name)
+        u = security.datastore.get_user(default_superuser)
         pwd = hash_password(default_superuser_pwd)
         if not u:
             security.datastore.create_user(
