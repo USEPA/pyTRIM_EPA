@@ -263,11 +263,13 @@
                 "Scenario": {
                     "name": scenario['name'],
                     "description": scenario['description'],
-                    "precipitation rate": scenario.parcels[0].precip_rate
+                    "precipitation rate": scenario.parcels[0]?.precip_rate
                 }
             }
             let chem_map = {}
-            Object.keys(scenario.parcels[0].sources).forEach(e=>chem_map[e]={})
+            if (scenario.parcels.length > 0) {
+                Object.keys(scenario.parcels[0].sources).forEach(e=>chem_map[e]={})
+            }
 
             let env_map = {}
 
