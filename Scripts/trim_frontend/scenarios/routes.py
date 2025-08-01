@@ -817,15 +817,16 @@ def clear_old_result():
         raise AssertionError("Scenario ID cannot be blank.")
     scenario_id = int(exec_data['scenario_id'])
     scn = ScenarioService.get(scenario_id)
-    print(f"Clearing Last Model Run for {scn.name} {[v for v in scn.proc_status][0].run_datetime}...")
+
     data_resp = {"success": "success"}
     try:
         if len(scn.proc_status.all()) > 0:
+            print(f"Clearing Last Model Run for {scn.name} {[v for v in scn.proc_status][0].run_datetime}...")
             scn.proc_status.delete()
     except Exception as e:
-        print([v for v in scn.proc_status][0])
         print(f'problem deleting {e}')
         return ApiException(f"Problem deleting {repr(e)}")
+    
     print(f"Model Result deleted for {scn.name}")
     ScenarioService.commit()
     return ApiResult(data_resp)
@@ -1246,19 +1247,21 @@ def run_receptor_generation(scenario_id):
 
     scen = ScenarioService.get(scenario_id)
 
-    all_calculations = []
-    for parcel in scen.parcels:
-        grid_points_etc = calculate_receptor_grid_points_for_parcel(parcel)
-        all_calculations.append(grid_points_etc)
-
-    fv = MiscAssociatedFileVariety.construct_file_variety("generated_aermod_receptors")
-    file_like_obj = fv.convert_grid_point_data_to_binary_geojson(all_calculations)
-
-    data_resp = {}
     try:
+        all_calculations = []
+        for parcel in scen.parcels:
+            grid_points_etc = calculate_receptor_grid_points_for_parcel(parcel)
+            all_calculations.append(grid_points_etc)
+
+        fv = MiscAssociatedFileVariety.construct_file_variety("generated_aermod_receptors")
+        file_like_obj = fv.convert_grid_point_data_to_binary_geojson(all_calculations)
+
+        data_resp = {}
+        
         upload_data = associated_file_helper(scenario_id, "generated_aermod_receptors", "UPLOAD", file_obj = file_like_obj, file_metadata={})
         data_resp = upload_data
     except Exception as e:
-        print(f"UPLOAD ERROR: {e}")
+        traceback.print_exc()
+        return ApiException(repr(e))
 
     return ApiResult(data_resp)
