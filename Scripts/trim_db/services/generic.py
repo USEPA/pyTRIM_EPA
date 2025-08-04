@@ -187,8 +187,11 @@ class GenericService(metaclass=ServiceMetaClass):
     @classmethod
     def get_or_create(cls, model_id=None, no_commit=False, **kwargs):
         check_unique = kwargs.pop('check_unique', False)
+        create_kwargs = kwargs.pop('create_kwargs', None)
         model = cls.get(model_id=model_id, **kwargs)
         if model is None:
+            if create_kwargs:
+                kwargs.update(create_kwargs)
             model = cls.create(
                 no_commit=no_commit, check_unique=check_unique, **kwargs
             )

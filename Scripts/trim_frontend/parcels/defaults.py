@@ -1,19 +1,17 @@
 from trim_db.schema import Parcel
 from trim_db.schema.utils.serialize import register_serializer
 from trim_db.schema.parameters.models import ParameterDefinition, CustomParameter
-from trim_db.schema.entities.models import VolumeElement, Compartment, Media
-from trim_db.schema.scenarios.models import Scenario
 from trim_db.services import *
 from trim_frontend.scenarios.defaults import EROSION_TABLE_KWARGS
 import pint
-from sqlalchemy.orm import selectinload, joinedload
 
 comp_local_cache = {}
 
 @register_serializer(Parcel)
 def serialize_parcel(pcl: Parcel):
     init_comp_cache(pcl)
-    pcl = get_eager_parcel(pcl)
+
+    pcl = ParcelService.load_related_models(pcl)
 
     general_params = get_general_params(pcl)
     water_params = get_water_params(pcl, general_params['parcelType'])
@@ -23,7 +21,7 @@ def serialize_parcel(pcl: Parcel):
 
     cdv = get_comp(pcl, {"name":"DryVaporSource"})
     spacing_param = cdv.parameters.get("ReceptorSpacing")
-    spacing_val = spacing_param.default_value if type(spacing_param) is ParameterDefinition else spacing_param.value
+    spacing_val = spacing_param.value
 
     s = {
         'id': pcl.id,
@@ -315,15 +313,6 @@ def get_soil_abiotic_params(pcl, run_old=True):
             soil_abiotic_params[comp] = params
 
     return {"soil_params": soil_abiotic_params}
-
-def get_eager_parcel(pcl):
-    # Attempting to Eager load parcel
-    epcl = (ParameterService.db.session.query(Parcel)
-           .filter(Parcel.id == pcl.id)
-           .options(selectinload(Parcel.scenario).selectinload(Scenario._chemicals),
-                    selectinload(Parcel.volume_elements).selectinload(VolumeElement.compartments)
-                    .joinedload(Compartment.media)).first())
-    return epcl
 
 def get_water_params(pcl, parcel_type):
     from .utils import get_watershed_area

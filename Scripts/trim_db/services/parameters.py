@@ -61,22 +61,6 @@ class ParameterService(GenericService):
         __model__ = ParameterDefinition
 
     @classmethod
-    def get_own_custom_parameters(cls, entity):
-        s_id = entity.current_scenario().id  # Scenario id
-
-        dm_ids = [d.id for d in entity.domains]  # Relevant domain ids
-
-        return cls.db.session.query(CustomParameter).join(
-            ParameterDefinition, ParameterDefinition.id == CustomParameter.definition_id
-        ).join(
-            ParameterDomain, ParameterDomain.id == ParameterDefinition.domain_id
-        ).filter(
-            CustomParameter.scenario_id == s_id,
-            ParameterDomain.id.in_(dm_ids),
-            CustomParameter.requirements == f'(self.id == {entity.id})'
-        ).all()
-
-    @classmethod
     def get_custom_parameters_by_name(cls, name, scenario_id=None):
         query = cls.db.session.query(CustomParameter).join(
             ParameterDefinition, ParameterDefinition.id == CustomParameter.definition_id
@@ -88,6 +72,46 @@ class ParameterService(GenericService):
             query = query.filter(CustomParameter.scenario_id == scenario_id)
 
         return query.all()
+
+    def __init__(self, model, *args, **kwargs):
+        if not hasattr(model, '__parameterized__'):
+            raise TypeError(f'{model.__qualname__} is not a parameterized model')
+        self.__instance = model
+
+    def get_own_parameter_definitions(self):
+        entity = self.__instance
+
+        dm_ids = [d.id for d in entity.domains]  # Relevant domain ids
+
+        return ParameterService.db.session.query(ParameterDefinition).join(
+            ParameterDomain, ParameterDomain.id == ParameterDefinition.domain_id
+        ).filter(
+            ParameterDomain.id.in_(dm_ids)
+        ).all()
+
+    def get_own_custom_parameters(self, scenario=None):
+        entity = self.__instance
+
+        # Get the current Scenario id
+        if scenario is None:
+            if isinstance(entity, Scenario):
+                s_id = entity.id
+            else:
+                s_id = entity.current_scenario().id
+        else:
+            s_id = scenario.id
+
+        dm_ids = [d.id for d in entity.domains]  # Relevant domain ids
+
+        return ParameterService.db.session.query(CustomParameter).join(
+            ParameterDefinition, ParameterDefinition.id == CustomParameter.definition_id
+        ).join(
+            ParameterDomain, ParameterDomain.id == ParameterDefinition.domain_id
+        ).filter(
+            CustomParameter.scenario_id == s_id,
+            ParameterDomain.id.in_(dm_ids),
+            CustomParameter.requirements == f'(self.id == {entity.id})'
+        ).all()
 
 
 class classproperty:
@@ -444,32 +468,14 @@ def parameterize(cls, default_scenario=None):
             # return custom implementations of each definition,
             # or the definition itself
             # if no specific version applies
-            p = {}
-            got_custom = {}
-            s_id = _get_current_scenario(entity).id
-            for d in sorted(
-                # Sort to make sure sub-domains override parents
-                entity.domains,
-                key=lambda x: len(str(x.requirements or ''))
-            ):
-                for pd in d.parameter_definitions:
-                    if pd.name not in got_custom:
-                        # If a higher domain had a custom parameter
-                        # for this entity, don't overwrite it with
-                        # the default for this subdomain;
-                        # only custom parameters should overwrite
-                        # custom parameters
-                        p[pd.name] = pd
-                    for cp in pd.instances:
-                        # FIXME need to either correct the chem param definitions 
-                        # or init custom params for each new scenario.
-                        # at the moment chemicals take custom params from the Foundries/Default scenario
-                        if cp.scenario_id != s_id and entity.__tablename__ != 'chemical':
-                            continue
-                        if cp.validate(entity):
-                            got_custom[pd.name] = True
-                            p[pd.name] = cp
-                            break
+            scenario = _get_current_scenario(entity)
+            pds = ParameterService(entity).get_own_parameter_definitions()
+            cps = ParameterService(entity).get_own_custom_parameters(scenario=scenario)
+            # Sort to make sure sub-domains override parents
+            pds = list(sorted(pds, key=lambda x: len(str(x.domain.requirements or ''))))
+            cps = list(sorted(cps, key=lambda x: len(str(x.definition.domain.requirements or ''))))
+            p = {pd.name: pd for pd in pds}
+            p.update({cp.definition.name: cp for cp in cps})
             return p
 
     # A class that allows you to get/set parameter definitions
@@ -788,14 +794,16 @@ def parameterize(cls, default_scenario=None):
             return val
         return wrapped
 
+    NO_CUSTOM_GET = ['domains', 'parameters', 'current_scenario', '__parameterized__']
+
     # A method to get the VALUE of a parameter
     @CacheManager.with_caching(f'entity_param::{cls_name}')
     def get_parameter(
         entity, name, strict_units=False, default=NoneParameter.instance()
     ):
         # print(f'ENTITY IS {entity} name is {name} class_name {cls_name}')
-        if name.startswith('_') or name in ['parameters']:
-            raise AttributeError()
+        if name.startswith('_') or name in NO_CUSTOM_GET:
+            raise AttributeError(name)
 
         # This method of accessing parameters exists for legacy reasons,
         # so it only needs to work for code like "Entity().param_name".
@@ -834,5 +842,8 @@ def parameterize(cls, default_scenario=None):
 
     # Override getattr
     setattr(cls, '__getattr__', get_parameter)
+
+    # Override getattr
+    setattr(cls, '__parameterized__', True)
 
     return cls
