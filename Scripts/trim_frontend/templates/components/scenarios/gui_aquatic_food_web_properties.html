@@ -285,7 +285,12 @@
                 let data = $(elem).val() == "" ? 0 : $(elem).val()
                 parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
                 LoadingScreen.show('submit_mass'); // since this can take a moment
-                TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', ()=>{
+                TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', (rsp)=>{
+                    LoadingScreen.hide('submit_mass');
+                    if (rsp?.target?.responseJSON?.message !== 'success') {
+                        console.log(rsp.target.responseJSON);
+                        return;
+                    }
                     let col_idx = $(elem).closest('td').index();
                     let pcl_name = $(elem).closest('table').find('th').eq(col_idx).text();
                     let pcl = getParcelByKey('name', pcl_name);
@@ -300,8 +305,6 @@
                     else if (param_type == "Weight") {
                         pcl.aquatic_bw[param_name] = parcel_info[2].value;
                     }
-                    
-                    LoadingScreen.hide('submit_mass');
                 });
             }
 

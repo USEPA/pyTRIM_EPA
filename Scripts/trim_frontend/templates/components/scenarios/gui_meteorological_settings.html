@@ -316,8 +316,8 @@
                 LoadingScreen.show("meteo_update_value")
                 let resp = TRIM.api.updateScenario(param_info).on('load',function(rsp){
                     let val_resp = this.responseJSON
+                    LoadingScreen.hide("meteo_update_value");
                     if (val_resp?.success === false) {
-                        LoadingScreen.hide("meteo_update_value");
                         return;
                     }
                     if (val_resp) {
@@ -331,7 +331,6 @@
                         }
                     }
                     // not great, but it's an easy way to keep TRIM.store up to date
-                    LoadingScreen.hide("meteo_update_value");
                     LoadingScreen.show('met_info_loading');
                     delete TRIM.store.currentScenario.meteorology // FIXME
                     populateMetForm();

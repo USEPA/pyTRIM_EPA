@@ -291,8 +291,8 @@
                 LoadingScreen.show('loading_results');
                 let resp = TRIM.api.updateScenario(param_info).on('load',function(){
                     let val_resp = this.responseJSON
+                    LoadingScreen.hide('loading_results');
                     if (val_resp?.success === false) {
-                        LoadingScreen.hide('loading_results');
                         return;
                     }
                     else if (val_resp) {
