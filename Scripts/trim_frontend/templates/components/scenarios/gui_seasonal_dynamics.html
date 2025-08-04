@@ -305,12 +305,9 @@
                             $(elem).closest('div.form-group').append(lb_static_val)
                         }
                     }
-
-                    // not great, but it's an easy way to keep TRIM.store up to date
-                    TRIM.api.getSeasonalDynamics(TRIM.store.currentScenario).on('load', function () {
-                        TRIM.store.currentScenario.seasonal_dynamics = this.responseJSON.seasonal_dynamics;
-                        LoadingScreen.hide('loading_results');
-                    });
+                    LoadingScreen.show('seasonal_info_loading');
+                    delete TRIM.store.currentScenario.seasonal_dynamics // FIXME
+                    updateSeasonalData();
                 })
             } else {
                 return

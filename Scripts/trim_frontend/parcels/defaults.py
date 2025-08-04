@@ -13,7 +13,7 @@ comp_local_cache = {}
 @register_serializer(Parcel)
 def serialize_parcel(pcl: Parcel):
     init_comp_cache(pcl)
-    pcl = get_eager_parcel(pcl)
+    #pcl = get_eager_parcel(pcl)
 
     general_params = get_general_params(pcl)
     water_params = get_water_params(pcl, general_params['parcelType'])

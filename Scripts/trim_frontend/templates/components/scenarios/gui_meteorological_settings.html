@@ -134,11 +134,17 @@
 
         form.addEventListener('form:visible', function() {
             LoadingScreen.show('met_info_loading');
-            console.log('met form visible')
-            populateMetForm();
+            console.log('met form visible');
+            TRIM.refreshParcels();
+            document.body.addEventListener('parcels:ready', populateMetForm());
         });
 
         function populateMetForm() {
+            if (!TRIM.store.currentScenario.parcels) {
+                // Parcels haven't loaded yet; wait a bit and try again
+                setTimeout(function() { populateMetForm(); }, 1000);
+                return;
+            }
             if ($(form).filter(':not(.form-loaded)').length) {
                 // Form hasn't loaded yet; wait a bit and try again
                 setTimeout(function() { populateMetForm(); }, 1000);
@@ -324,12 +330,11 @@
                             $(elem).closest('div.form-group').append(lb_static_val)
                         }
                     }
-
                     // not great, but it's an easy way to keep TRIM.store up to date
-                    TRIM.api.getMeteorology(TRIM.store.currentScenario).on('load', function () {
-                        TRIM.store.currentScenario.meteorology = this.responseJSON.meteorology;
-                        LoadingScreen.hide("meteo_update_value");
-                    });
+                    LoadingScreen.hide("meteo_update_value");
+                    LoadingScreen.show('met_info_loading');
+                    delete TRIM.store.currentScenario.meteorology // FIXME
+                    populateMetForm();
                 })
             } else {
                 return
@@ -482,13 +487,5 @@
                 daytimeIndicator.removeAttr('disabled');
             });
         }
-
-        form.addEventListener('form:visible', function() {
-            if (!TRIM.store.currentScenario.parcels) {
-                LoadingScreen.show('met_parcels_loading');
-            }
-            TRIM.refreshParcels();
-            LoadingScreen.hide('met_parcels_loading');
-        });
     });
 </script>

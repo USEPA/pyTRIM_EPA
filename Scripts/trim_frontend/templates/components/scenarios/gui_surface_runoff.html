@@ -265,6 +265,12 @@
                                 $(e).siblings("label").removeClass("modified")
                             })
                         }
+                        else {
+                            // FIXME
+                            LoadingScreen.show('surface_runoff_loading');
+                            delete TRIM.store.currentScenario.runoff_matrix;
+                            updateRunoffData();
+                        }
                     })
                 } else {
                     return
