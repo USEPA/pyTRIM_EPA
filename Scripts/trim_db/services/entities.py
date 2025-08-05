@@ -16,6 +16,8 @@ __all__ = [
 class ChemicalService(GenericService):
     __model__ = parameterize(
         Chemical,
+        # at the moment chemicals take custom params from the Foundries/Default scenario
+        globalize_custom_parameters=True,
         default_scenario=lambda x: x._scenarios[0]
     )
 

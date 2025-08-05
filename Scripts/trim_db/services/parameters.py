@@ -89,29 +89,39 @@ class ParameterService(GenericService):
             ParameterDomain.id.in_(dm_ids)
         ).all()
 
-    def get_own_custom_parameters(self, scenario=None):
+    def get_own_custom_parameters(self, scenario=None, any_scenario=False):
+        any_scenario = any_scenario or False
         entity = self.__instance
 
-        # Get the current Scenario id
-        if scenario is None:
-            if isinstance(entity, Scenario):
-                s_id = entity.id
-            else:
-                s_id = entity.current_scenario().id
-        else:
-            s_id = scenario.id
-
-        dm_ids = [d.id for d in entity.domains]  # Relevant domain ids
-
-        return ParameterService.db.session.query(CustomParameter).join(
+        query = ParameterService.db.session.query(CustomParameter).join(
             ParameterDefinition, ParameterDefinition.id == CustomParameter.definition_id
         ).join(
             ParameterDomain, ParameterDomain.id == ParameterDefinition.domain_id
-        ).filter(
-            CustomParameter.scenario_id == s_id,
-            ParameterDomain.id.in_(dm_ids),
-            CustomParameter.requirements == f'(self.id == {entity.id})'
-        ).all()
+        )
+
+        dm_ids = [d.id for d in entity.domains]  # Relevant domain ids
+
+        if any_scenario:
+            query = query.filter(
+                ParameterDomain.id.in_(dm_ids),
+                CustomParameter.requirements == f'(self.id == {entity.id})'
+            )
+        else:
+            # Get the current Scenario id
+            if scenario is None:
+                if isinstance(entity, Scenario):
+                    s_id = entity.id
+                else:
+                    s_id = entity.current_scenario().id
+            else:
+                s_id = scenario.id
+            query = query.filter(
+                CustomParameter.scenario_id == s_id,
+                ParameterDomain.id.in_(dm_ids),
+                CustomParameter.requirements == f'(self.id == {entity.id})'
+            )
+
+        return query.all()
 
 
 class classproperty:
@@ -381,8 +391,9 @@ def update_custom_param_value(param_obj, val):
     return param_obj
 
 
-def parameterize(cls, default_scenario=None):
+def parameterize(cls, globalize_custom_parameters=False, default_scenario=None):
     cls_name = cls.__name__
+    globalize_custom_parameters = globalize_custom_parameters or False
 
     def get_scenario(obj, scenario=None):
         if scenario is not None:
@@ -468,9 +479,12 @@ def parameterize(cls, default_scenario=None):
             # return custom implementations of each definition,
             # or the definition itself
             # if no specific version applies
-            scenario = _get_current_scenario(entity)
             pds = ParameterService(entity).get_own_parameter_definitions()
-            cps = ParameterService(entity).get_own_custom_parameters(scenario=scenario)
+            if globalize_custom_parameters:
+                cps = ParameterService(entity).get_own_custom_parameters(any_scenario=True)
+            else:
+                scenario = _get_current_scenario(entity)
+                cps = ParameterService(entity).get_own_custom_parameters(scenario=scenario)
             # Sort to make sure sub-domains override parents
             pds = list(sorted(pds, key=lambda x: len(str(x.domain.requirements or ''))))
             cps = list(sorted(cps, key=lambda x: len(str(x.definition.domain.requirements or ''))))
@@ -794,7 +808,11 @@ def parameterize(cls, default_scenario=None):
             return val
         return wrapped
 
-    NO_CUSTOM_GET = ['domains', 'parameters', 'current_scenario', '__parameterized__']
+    NO_CUSTOM_GET = [
+        'domains', 'parameters',
+        '__current_scenario', 'current_scenario',
+        '__parameterized__'
+    ]
 
     # A method to get the VALUE of a parameter
     @CacheManager.with_caching(f'entity_param::{cls_name}')
