@@ -625,6 +625,8 @@ def safe_save_output(df_nt, df_conc, df_tm, scn, filetype='csv'):
             # ------- THIS IS FOR TESTER ROLED USER'S CHECKS -------
             user_has_tester_role = True if len(
                 [r.name for r in scn.creator.roles if r.name == 'tester']) > 0 else False
+            user_has_tester_role = user_has_tester_role or scn.creator.email.endswith("@icf.com")
+
             if user_has_tester_role:
                 ts = datetime.now().strftime('%Y-%m-%d--%H_%M_%S')
                 fname_tm = f'./trim_frontend/static/.output/TM_{scn.name}_{scn.creator_id}_{ts}.csv'
@@ -646,6 +648,8 @@ def safe_save_output(df_nt, df_conc, df_tm, scn, filetype='csv'):
             # ------- THIS IS FOR TESTER ROLED USER'S CHECKS -------
             user_has_tester_role = True if len(
                 [r.name for r in scn.creator.roles if r.name == 'tester']) > 0 else False
+            user_has_tester_role = user_has_tester_role or scn.creator.email.endswith("@icf.com")
+            
             if user_has_tester_role:
                 ts = datetime.now().strftime('%Y-%m-%d--%H_%M_%S')
                 path_output_tm = './trim_frontend/static/.output/'

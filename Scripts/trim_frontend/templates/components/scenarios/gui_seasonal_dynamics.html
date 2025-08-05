@@ -291,8 +291,8 @@
                 LoadingScreen.show('loading_results');
                 let resp = TRIM.api.updateScenario(param_info).on('load',function(){
                     let val_resp = this.responseJSON
+                    LoadingScreen.hide('loading_results');
                     if (val_resp?.success === false) {
-                        LoadingScreen.hide('loading_results');
                         return;
                     }
                     else if (val_resp) {
@@ -305,12 +305,9 @@
                             $(elem).closest('div.form-group').append(lb_static_val)
                         }
                     }
-
-                    // not great, but it's an easy way to keep TRIM.store up to date
-                    TRIM.api.getSeasonalDynamics(TRIM.store.currentScenario).on('load', function () {
-                        TRIM.store.currentScenario.seasonal_dynamics = this.responseJSON.seasonal_dynamics;
-                        LoadingScreen.hide('loading_results');
-                    });
+                    LoadingScreen.show('seasonal_info_loading');
+                    delete TRIM.store.currentScenario.seasonal_dynamics // FIXME
+                    updateSeasonalData();
                 })
             } else {
                 return

@@ -4,8 +4,6 @@ from ..utils.caching import CacheManager
 from ..utils.serialize import register_serializer
 from .equations import *
 from .utils import *
-from sqlalchemy.orm.exc import DetachedInstanceError
-from sqlalchemy.exc import StatementError
 
 __all__ = [
     'ParameterDomain', 'ParameterDefinition', 'CustomParameter',
@@ -329,15 +327,11 @@ class ParameterDefinition(Model):
 
 @register_serializer(ParameterDefinition)
 def serialize_parameter_definition(pd: ParameterDefinition):
-    try:
-        formula = pd.default_formula.equation if pd.default_formula else None
-    except (DetachedInstanceError, StatementError):
-        formula = None
     s = {
         'name': pd.variable_name,
         'value': pd.default_value,
         'unit': pd.default_unit,
-        'formula': formula
+        'formula': pd.default_formula.equation if pd.default_formula else None
     }
     return s
 
@@ -420,16 +414,10 @@ class CustomParameter(Model):
 
 @register_serializer(CustomParameter)
 def serialize_custom_parameter(cp: CustomParameter):
-    try:
-        formula = cp.formula.equation if cp.formula else None
-        name = cp.definition.variable_name if cp.definition else None
-    except (DetachedInstanceError, StatementError):
-        formula = None
-        name = None
     s = {
-        'name': name,
+        'name': cp.definition.variable_name if cp.definition else None,
         'value': cp.value,
         'unit': cp.unit,
-        'formula': formula
+        'formula': cp.formula.equation if cp.formula else None
     }
     return s
