@@ -330,10 +330,20 @@
                             $(elem).closest('div.form-group').append(lb_static_val)
                         }
                     }
-                    // not great, but it's an easy way to keep TRIM.store up to date
-                    LoadingScreen.show('met_info_loading');
-                    delete TRIM.store.currentScenario.meteorology // FIXME
-                    populateMetForm();
+                    else {
+                        delete TRIM.store.currentScenario.meteorology;
+                        /*
+                        let meteo_store = TRIM.store.currentScenario.meteorology;
+                        property_name = param_info[2].name.replace("meteo_", "");
+                        if (meteo_store.hasOwnProperty(property_name)) {
+                            meteo_store[property_name] = param_info[2].value;
+                        }
+                        else if (property_name.substring('interception') && property_name.substring('static') ) {
+                            meteo_store = TRIM.store.currentScenario.meteorology.wet_dep_interception;
+                            property_name = "wet_dep_" + property_name;
+                            property_name = property_name.replace("fractions", "frac")
+                        }*/
+                    }
                 })
             } else {
                 return
