@@ -28,11 +28,11 @@ if os.getenv('TEST_DB_SERVERLESS'):
         db = DataBase(db_path, model_base=Model)
     else:
         import urllib.parse
-        USERNAME = "root"
-        PASSWORD = urllib.parse.quote_plus(os.getenv('MYSQLPASSWORD'))
-        HOST = "localhost"
-        PORT = "3306"
-        DBNAME = "pytrim"
+        USERNAME = os.getenv('MYSQL_USERNAME', 'root')
+        PASSWORD = urllib.parse.quote_plus(os.getenv('MYSQL_PASSWORD', ''))
+        HOST = os.getenv('MYSQL_HOSTNAME', 'localhost')
+        PORT = os.getenv('MYSQL_PORT', '3306')
+        DBNAME = os.getenv('MYSQL_DB_NAME', 'pytrim')
         print(f'-- Connecting to local MYSQL db')
         db_uri = f'mysql+pymysql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}'
         db = DataBase(db_uri, model_base=Model)
