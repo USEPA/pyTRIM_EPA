@@ -6,16 +6,20 @@ import geopandas as gpd
 from shapely.geometry import Polygon, Point
 from shapely.prepared import prep
 from ..scenarios.utils import init_parameter_definitions
-from ..scenarios.defaults import get_surface_runoff
 from .defaults import SURFACE_SOIL_SPECIFIC_MEDIA_PARAMS
 
 from flask_api import ApiResult
 from pyproj import Transformer
 
 from trim_db.schema import CustomParameter, ParameterDefinition, Parcel
-from trim_db.services import ChemicalService, CompartmentService, FormulaService, ParameterService, ParcelService, ScenarioService, VolumeElementService
+from trim_db.services import ChemicalService, CompartmentService, FormulaService, \
+    ParameterService, ParcelService, ScenarioService, VolumeElementService
 from trim_db.services.parameters import get_or_create_custom_param, update_custom_param_value
-from .defaults import Air_Parcel_VolElem_defaults, Aquatic_Biota_SW_Compartment_defaults, Aquatic_Biota_Sed_Compartment_defaults, Farm_Biota_SurfSoil_Compartment_defaults, LAND_USE_TYPES, AQUATIC_DIET, Land_Parcel_VolElem_defaults, Water_Parcel_VolElem_defaults, Wet_Dry_Source_VolElem_defaults
+from .defaults import get_watershed_area, \
+     Air_Parcel_VolElem_defaults, Aquatic_Biota_SW_Compartment_defaults, \
+     Aquatic_Biota_Sed_Compartment_defaults, Farm_Biota_SurfSoil_Compartment_defaults, \
+     LAND_USE_TYPES, AQUATIC_DIET, Land_Parcel_VolElem_defaults, Water_Parcel_VolElem_defaults, \
+     Wet_Dry_Source_VolElem_defaults
 from .forms import ScenarioParcelsForm
 from ..scenarios.forms import ScenarioAbioticPropertiesForm
 from ..utils.logging import make_logger
@@ -1073,53 +1077,6 @@ def create_new_parameter_defs_for_domain(comp_name):
     med_par_defs = [pd for pd in ParameterService.definitions.get_all() if pd.domain_id == domain_id]
     # TODO Complete this for affinity
     pass
-
-
-def compute_watershed_areas(runoff_matrix, area_parcels):
-    # function to compute watershed areas by markov chain estimation. Only works if lakes runoff 100% to themselves.
-    # Land parcel do not have watersheds and will tend to zero but lake parcel watersheds will be accurate.
-    # runoff_matrix is a square nxn matrix that must not include sinks and must include lakes in both rows and columns.
-    # Lakes must run off 100% to themselves. n is a large number like 200 or 300 that will enable the markov chain to
-    # reach steady state. area_parcels is a single matrix with areas of all parcels in the same order as the rows/cols
-    # of the runoff_matrix.
-    # Note: the transpose is required because of the arrangement of the matrix such that row are senders and cols are
-    # receivers. When multiplying by area matrix to estimate watershed, the rows must be receivers, so transpose.
-    m = np.matrix(runoff_matrix)  # convert to np matrix
-
-    # raise M to a large number (markov chain estimation of probabilities of endpoint of flow)
-    m_n = np.linalg.matrix_power(m, 500)
-
-    m_n_t = m_n.T  # transpose of M_n so that it can be multiplied as a dot product with
-
-    runoff_areas = m_n_t @ area_parcels  # this is the dot product
-
-    return runoff_areas
-
-
-def get_watershed_area(pcl):
-    # Compute watershed area using Markoff chain approach
-    # 1. get runoff fractions matrix (rom) and parcel areas as vector (pav)
-    ro_array = get_surface_runoff(pcl.scenario)
-    pa_dict = {pp.name: pp.area.magnitude for pp in pcl.scenario.parcels}
-    rom = []
-    pav = []
-    pcl_names = []
-    for p, ro_dict in ro_array.items():
-        pav.append([pa_dict[p]])
-        pcl_names.append(p)
-        m_row = []
-        for pp, ro in ro_dict.items():
-            if pp == 'sink':
-                continue
-            m_row.append(ro)
-        rom.append(m_row)
-    pav = np.array(pav)
-    rom = np.array(rom)
-    # 2. Compute watershed area matrix
-    wsa_matrix = compute_watershed_areas(rom, pav)
-    # 3. get the watershed area specific to this surface water parcel
-    pcl_watershed = wsa_matrix[pcl_names.index(pcl.name)]
-    return pcl_watershed[0, 0]
 
 
 # adapted from Samuel's "grid_points_in_polygon_meters" method

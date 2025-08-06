@@ -1,3 +1,4 @@
+from sqlalchemy import or_
 from ..schema.scenarios.models import Scenario
 from ..schema.parameters.models import *
 from ..schema.parameters.utils import as_quantity, NoneParameter
@@ -78,18 +79,26 @@ class ParameterService(GenericService):
             raise TypeError(f'{model.__qualname__} is not a parameterized model')
         self.__instance = model
 
-    def get_own_parameter_definitions(self):
+    def get_own_parameter_definitions(self, name=None):
         entity = self.__instance
 
         dm_ids = [d.id for d in entity.domains]  # Relevant domain ids
 
-        return ParameterService.db.session.query(ParameterDefinition).join(
+        query = ParameterService.db.session.query(ParameterDefinition).join(
             ParameterDomain, ParameterDomain.id == ParameterDefinition.domain_id
         ).filter(
             ParameterDomain.id.in_(dm_ids)
-        ).all()
+        )
 
-    def get_own_custom_parameters(self, scenario=None, any_scenario=False):
+        if name is not None:
+            query = query.filter(or_(
+                ParameterDefinition.full_name == name,
+                ParameterDefinition.variable_name == name
+            ))
+
+        return query.all()
+
+    def get_own_custom_parameters(self, scenario=None, any_scenario=False, name=None):
         any_scenario = any_scenario or False
         entity = self.__instance
 
@@ -120,6 +129,12 @@ class ParameterService(GenericService):
                 ParameterDomain.id.in_(dm_ids),
                 CustomParameter.requirements == f'(self.id == {entity.id})'
             )
+
+        if name is not None:
+            query = query.filter(or_(
+                ParameterDefinition.full_name == name,
+                ParameterDefinition.variable_name == name
+            ))
 
         return query.all()
 
@@ -391,6 +406,70 @@ def update_custom_param_value(param_obj, val):
     return param_obj
 
 
+def convert_unit(val, unit, strict=False):
+    if not hasattr(val, 'dimensionality'):
+        val = as_quantity(val, unit)
+    else:
+        if not strict and unit:
+            val = val.magnitude
+        try:
+            val = as_quantity(val, unit)
+        except Exception:
+            print(val)
+            print(unit)
+            raise
+    return val
+
+
+def partial_formula(
+    formula, default_kwargs, unit, strict_units=False
+):
+    def wrapped(*args, **kwargs):
+        opts = dict(default_kwargs)
+        opts.update(kwargs)
+        val = formula.eval(*args, **opts)
+        val = convert_unit(val, unit, strict=strict_units)
+        # val = CallableQuantity(val)
+        return val
+    return wrapped
+
+
+def evaluate_parameter(
+    param, entity, scenario=None,
+    strict_units=False, default=None,
+    **kwargs
+):
+    if (
+        isinstance(param, ParameterDefinition)
+        or isinstance(param, CustomParameter)
+    ):
+        unit = param.unit or ''
+        q = param.quantity
+        if isinstance(q, Formula):
+            arguments = {}
+            if 'self.' in q.equation:
+                arguments['self'] = entity
+            if 'environment.' in q.equation:
+                if scenario is not None:
+                    arguments['environment'] = scenario
+                else:
+                    arguments['environment'] = entity.current_scenario()
+            arguments.update(kwargs)
+            try:
+                val = q.eval(**arguments)
+            except TypeError as e:
+                if 'Missing argument' in str(e):
+                    return partial_formula(
+                        q, arguments, unit, strict_units=strict_units
+                    )
+                raise
+        else:
+            val = q
+        val = convert_unit(val, unit, strict=strict_units)
+        # val = CallableQuantity(val)
+        return val
+    return default
+
 def parameterize(cls, globalize_custom_parameters=False, default_scenario=None):
     cls_name = cls.__name__
     globalize_custom_parameters = globalize_custom_parameters or False
@@ -438,6 +517,7 @@ def parameterize(cls, globalize_custom_parameters=False, default_scenario=None):
 
     # Define the function for getting the domains
     # of an entity with this class
+    @CacheManager.with_caching(f'entity_domains')
     def get_domains(entity_cls, entity=None):
         if entity is None:
             entity = entity_cls
@@ -782,32 +862,6 @@ def parameterize(cls, globalize_custom_parameters=False, default_scenario=None):
     # of an entity with this class
     setattr(cls, 'parameters', classproperty(get_manager))
 
-    def convert_unit(val, unit, strict=False):
-        if not hasattr(val, 'dimensionality'):
-            val = as_quantity(val, unit)
-        else:
-            if not strict and unit:
-                val = val.magnitude
-            try:
-                val = as_quantity(val, unit)
-            except Exception:
-                print(val)
-                print(unit)
-                raise
-        return val
-
-    def partial_formula(
-        formula, default_kwargs, unit, strict_units=False
-    ):
-        def wrapped(*args, **kwargs):
-            opts = dict(default_kwargs)
-            opts.update(kwargs)
-            val = formula.eval(*args, **opts)
-            val = convert_unit(val, unit, strict=strict_units)
-            # val = CallableQuantity(val)
-            return val
-        return wrapped
-
     NO_CUSTOM_GET = [
         'domains', 'parameters',
         '__current_scenario', 'current_scenario',
@@ -827,36 +881,13 @@ def parameterize(cls, globalize_custom_parameters=False, default_scenario=None):
         # so it only needs to work for code like "Entity().param_name".
         # Calling "Entity.param_name" is NOT supported
         param = entity.parameters.get(name, default)
-        if (
-            isinstance(param, ParameterDefinition)
-            or isinstance(param, CustomParameter)
-        ):
-            if isinstance(param, CustomParameter):
-                unit = param.unit or ''
-            else:
-                unit = param.default_unit or ''
 
-            q = param.quantity
-            if isinstance(q, Formula):
-                arguments = {}
-                if 'self.' in q.equation:
-                    arguments['self'] = entity
-                if 'environment.' in q.equation:
-                    arguments['environment'] = _get_current_scenario(entity)
-                try:
-                    val = q.eval(**arguments)
-                except TypeError as e:
-                    if 'Missing argument' in str(e):
-                        return partial_formula(
-                            q, arguments, unit, strict_units=strict_units
-                        )
-                    raise
-            else:
-                val = q
-            val = convert_unit(val, unit, strict=strict_units)
-            # val = CallableQuantity(val)
-            return val
-        return default
+        return evaluate_parameter(
+            param,
+            entity=entity,
+            strict_units=strict_units,
+            default=default
+        )
 
     # Override getattr
     setattr(cls, '__getattr__', get_parameter)

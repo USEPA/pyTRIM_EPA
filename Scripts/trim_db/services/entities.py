@@ -1,3 +1,4 @@
+from sqlalchemy import or_
 from sqlalchemy.orm import selectinload, joinedload
 from ..schema.scenarios.models import Scenario
 from ..schema.entities.models import *
@@ -25,25 +26,6 @@ class ChemicalService(GenericService):
 class ParcelService(GenericService):
     __model__ = Parcel
 
-    @classmethod
-    def load_related_models(cls, model_or_id):
-        if isinstance(model_or_id, Parcel):
-            model_id = model_or_id.id
-        elif isinstance(model_or_id, int):
-            model_id = model_or_id
-        else:
-            raise TypeError(f'`model_id` must be of type Parcel or int, not {type(model_or_id)}')
-        # Parcel with related properties eagerly loaded
-        return cls.db.session.query(Parcel).filter(
-            Parcel.id == model_id
-        ).options(
-            selectinload(
-                Parcel.scenario
-            ).selectinload(Scenario._chemicals),
-            selectinload(
-                Parcel.volume_elements
-            ).selectinload(VolumeElement.compartments).joinedload(Compartment.media)
-        ).first()
 
 class VolumeElementService(GenericService):
     __model__ = parameterize(
