@@ -295,6 +295,10 @@ class ParameterDefinition(Model):
         return self.default_value
 
     @property
+    def unit(self):
+        return self.default_unit
+
+    @property
     def quantity(self):
         return self.default_quantity
 
