@@ -36,6 +36,7 @@ class Parcel(Model):
 
     _utm_polygon = None
     _polygon = None
+    _area = None
 
     @property
     def vertices(self):
@@ -53,6 +54,7 @@ class Parcel(Model):
             self._vertices = value
         self._utm_polygon = None
         self._polygon = None
+        self._area = None
 
     @property
     def utm_vertices(self):
@@ -93,7 +95,9 @@ class Parcel(Model):
     @property
     def area(self):
         # CAREFUL: we assume dimensions are in meters ...
-        return self.polygon().area * ureg('m^2')
+        if self._area is None:
+            self._area = self.polygon().area * ureg('m^2')
+        return self._area
 
     def get_volume_element(self, name):
         for ve in self.volume_elements:
