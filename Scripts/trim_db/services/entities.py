@@ -1,3 +1,6 @@
+from sqlalchemy import or_
+from sqlalchemy.orm import selectinload, joinedload
+from ..schema.scenarios.models import Scenario
 from ..schema.entities.models import *
 from ..schema.entities.environment import DummyLink
 from ..schema.utils.caching import CacheManager
@@ -14,6 +17,8 @@ __all__ = [
 class ChemicalService(GenericService):
     __model__ = parameterize(
         Chemical,
+        # at the moment chemicals take custom params from the Foundries/Default scenario
+        globalize_custom_parameters=True,
         default_scenario=lambda x: x._scenarios[0]
     )
 

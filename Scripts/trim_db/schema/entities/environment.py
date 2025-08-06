@@ -28,7 +28,7 @@ class Parcel(Model):
         sa.Integer(), sa.ForeignKey('scenario.id'), nullable=False
     )
     scenario = sa.orm.relationship(
-        'Scenario', backref=sa.orm.backref('parcels', lazy='dynamic')
+        'Scenario', backref=sa.orm.backref('parcels', lazy='selectin')
     )
 
     # Store as a string, but make a property to access as an array
@@ -36,6 +36,7 @@ class Parcel(Model):
 
     _utm_polygon = None
     _polygon = None
+    _area = None
 
     @property
     def vertices(self):
@@ -53,6 +54,7 @@ class Parcel(Model):
             self._vertices = value
         self._utm_polygon = None
         self._polygon = None
+        self._area = None
 
     @property
     def utm_vertices(self):
@@ -93,7 +95,9 @@ class Parcel(Model):
     @property
     def area(self):
         # CAREFUL: we assume dimensions are in meters ...
-        return self.polygon().area * ureg('m^2')
+        if self._area is None:
+            self._area = self.polygon().area * ureg('m^2')
+        return self._area
 
     def get_volume_element(self, name):
         for ve in self.volume_elements:
@@ -103,11 +107,10 @@ class Parcel(Model):
 
     @property
     def compartments(self):
-        comps = []
-        for ve in self.volume_elements:
-            for c in ve.compartments:
-                comps.append(c)
-        return list(sorted(comps, key=lambda x: x.name))
+        return list(sorted(
+            (c for ve in self.volume_elements for c in ve.compartments),
+            key=lambda x: x.name
+        ))
 
     def get_compartment(self, name=None, media=None):
         if media is None:
@@ -157,7 +160,7 @@ class VolumeElement(Model):
         sa.Integer(), sa.ForeignKey('parcel.id'), nullable=False
     )
     parcel = sa.orm.relationship(
-        'Parcel', backref=sa.orm.backref('volume_elements', lazy='dynamic')
+        'Parcel', backref=sa.orm.backref('volume_elements', lazy='selectin')
     )
 
     top = sa.Column(sa.Float(), nullable=False)
@@ -409,6 +412,10 @@ class Media(Model):
         elif isinstance(name_or_media, Media):
             if name_or_media.id == self.id:
                 return True
+        elif isinstance(name_or_media, list):
+            for check in name_or_media:
+                if self.isa(check):
+                    return True
         else:
             raise TypeError
 
@@ -442,14 +449,14 @@ class Compartment(Model):
         sa.Integer(), sa.ForeignKey('volume_element.id'), nullable=False
     )
     volume_element = sa.orm.relationship(
-        'VolumeElement', backref=sa.orm.backref('compartments', lazy='dynamic')
+        'VolumeElement', backref=sa.orm.backref('compartments', lazy='selectin')
     )
 
     media_id = sa.Column(
         sa.Integer(), sa.ForeignKey('media.id'), nullable=False
     )
     media = sa.orm.relationship(
-        'Media', backref=sa.orm.backref('compartments', lazy='dynamic')
+        'Media', backref=sa.orm.backref('compartments', lazy='selectin')
     )
 
     @property
