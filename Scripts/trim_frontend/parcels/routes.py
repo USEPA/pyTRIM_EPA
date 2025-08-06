@@ -47,7 +47,7 @@ def create_parcel(scenario_id):
         p.scenario_id = scenario_id
         p.vertices = json.loads(parcels_data['geom'])
 
-        # Save the scenario
+        # Save the parcel
         ParcelService.commit()
         # Add default compartments, media and parameters
         initialize_parcel_contents(p)
@@ -56,7 +56,7 @@ def create_parcel(scenario_id):
         logger.error(traceback.format_exc())
         return ApiException(repr(e))
 
-    return ApiResult({'scenario': p.as_serializable(), 'media': media})
+    return ApiResult({'parcel': p.as_serializable(), 'media': media})
 
 
 @parcels_api.route(
