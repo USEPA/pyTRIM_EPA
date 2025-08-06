@@ -83,9 +83,6 @@ def get_general_params(pcl):
     #         erosion_table_params[default_param.full_name] =  custom_param.unit
 
     surface_soil_height = None
-    root_soil_height = pcl.get_compartment("Soil_Root_Zone")
-    vadose_soil_height = pcl.get_compartment("Soil_Vadose_Zone")
-    groundwater_height = pcl.get_compartment("Groundwater")
 
     diet_by_media = {}
     biomass_by_media = {}
@@ -94,12 +91,15 @@ def get_general_params(pcl):
     land_use = 'Grasses/Herbs'
 
     # FIXME verify this is okay
+    root_soil_height = pcl.get_compartment(media="Root_Zone")
     if root_soil_height:
-        root_soil_height = root_soil_height.volume_element.height.m_as('m')
+        root_soil_height = root_soil_height[0].volume_element.height.m_as('m')
+    vadose_soil_height = pcl.get_compartment(media="Vadose_Zone")
     if vadose_soil_height:
-        vadose_soil_height = vadose_soil_height.volume_element.height.m_as('m')
+        vadose_soil_height = vadose_soil_height[0].volume_element.height.m_as('m')
+    groundwater_height = pcl.get_compartment(media="Groundwater")
     if groundwater_height:
-        groundwater_height = groundwater_height.volume_element.height.m_as('m')
+        groundwater_height = groundwater_height[0].volume_element.height.m_as('m')
 
     for comp in pcl.compartments:
         # Check parcel type
@@ -214,7 +214,7 @@ def get_general_params(pcl):
 
 
 def get_soil_abiotic_params(pcl):
-    comps = ["Soil_Surface", "Soil_Root_Zone", "Soil_Vadose_Zone", "Groundwater"]
+    comp_names = ["Soil_Surface", "Soil_Root_Zone", "Soil_Vadose_Zone", "Groundwater"]
 
     general_params = ['pH', 'FractionSand', 'OrganicCarbonContent', 'rho']
     gw_params = ['Porosity']
@@ -227,12 +227,12 @@ def get_soil_abiotic_params(pcl):
 
     def get_magnitude(comp, param):
         val = comp.parameters.get(param)
-        if val:
+        if val is not None:
             return val.value
 
     soil_abiotic_params = {}
 
-    for name in comps:
+    for name in comp_names:
         comp = pcl.get_compartment(name)
         if not comp:
             continue
@@ -240,17 +240,17 @@ def get_soil_abiotic_params(pcl):
             k: get_magnitude(comp, k) for k in general_params
         }
         if name == 'Groundwater':
-            soil_abiotic_params[name].update({
-                k: get_magnitude(comp, k) for k in gw_params
-            })
+            soil_abiotic_params[name].update([
+                (k, get_magnitude(comp, k)) for k in gw_params
+            ])
         elif 'Soil_' in name:
-            soil_abiotic_params[name].update({
-                k: get_magnitude(comp, k) for k in soil_params
-            })
+            soil_abiotic_params[name].update([
+                (k, get_magnitude(comp, k)) for k in soil_params
+            ])
             if name == 'Soil_Surface':
-                soil_abiotic_params[name].update({
-                    k: get_magnitude(comp, k) for k in surf_params
-                })
+                soil_abiotic_params[name].update([
+                    (k, get_magnitude(comp, k)) for k in surf_params
+                ])
 
     return {"soil_params": soil_abiotic_params}
 
@@ -258,7 +258,7 @@ def get_soil_abiotic_params(pcl):
 def get_watershed_area(pcl):
     # Compute watershed area using Markoff chain approach
     # 1. get runoff fractions matrix (rom) and parcel areas as vector (pav)
-    ro_array = ScenarioService.get_surface_runoff(pcl.scenario)
+    ro_array = ScenarioService(pcl.scenario).get_surface_runoff()
 
     pa_dict = {pp.name: pp.area.magnitude for pp in pcl.scenario.parcels}
     rom = []
@@ -303,10 +303,20 @@ def compute_watershed_areas(runoff_matrix, area_parcels):
     return runoff_areas
 
 
+def get_correct_param(par_name, par_obj):
+    if par_name in par_obj:
+        return par_obj[par_name].value
+    return None
+
+
+def is_significantly_different(a, b):
+    return abs(a - b) > 0.000_000_000_1
+
+
 def get_water_params(pcl, parcel_type):
     # TODO This is not right. We need params for all chemicals. How to show this in frontend???
-    ch = ChemicalService.get(id=32)
-    ch.current_scenario(pcl.scenario)
+    # ch = ChemicalService.get(id=32)
+    # ch.current_scenario(pcl.scenario)
 
     runoff_watershed_area = 0  # 1e3
     runoff_fraction = None  # 0.001
@@ -323,10 +333,8 @@ def get_water_params(pcl, parcel_type):
     # water on land parcels and not water parcels as they are related to watersheds that only exists on land.
 
     comp_surfaceSoil = pcl.get_compartment(media="Surface_Soil")
-
     if len(comp_surfaceSoil) > 0:
         comp_surfaceSoil = comp_surfaceSoil[0]
-
         runoff_watershed_area = (
             comp_surfaceSoil.area
             * comp_surfaceSoil.FractionofAreaAvailableforRunoff
@@ -421,11 +429,6 @@ def get_water_params(pcl, parcel_type):
                 * this_parcel_area
             )
 
-        def get_correct_param(par_name, par_obj):
-            if par_name in par_obj:
-                return par_obj[par_name].value
-            return None
-
         precipitation_vol_rate_to_sw = 0  # 4.8E6
         wc_external_inflow = 0
 
@@ -508,9 +511,10 @@ def get_water_params(pcl, parcel_type):
                                         requirements=f"(self.id == {sed.id})", value=sed_burial_vol_rate,
                                         unit=burial_par.default_unit)
                 ParameterService.commit()
-            elif isinstance(burial_par, CustomParameter) and burial_par.value != sed_burial_vol_rate:
-                burial_par.value = sed_burial_vol_rate
-                ParameterService.commit()
+            elif isinstance(burial_par, CustomParameter):
+                if is_significantly_different(burial_par.value, sed_burial_vol_rate):
+                    burial_par.value = sed_burial_vol_rate
+                    ParameterService.commit()
         except Exception as ex:
             sed_burial_vol_rate = None
             print(f'Problem Calculating Sediment Burial Rate:\n {ex}')
@@ -537,9 +541,10 @@ def get_water_params(pcl, parcel_type):
                                         requirements=f"(self.id == {sed.id})", value=sed_resuspension_vel,
                                         unit=resus_par.default_unit)
                 ParameterService.commit()
-            elif isinstance(resus_par, CustomParameter) and resus_par.value != sed_resuspension_vel:
-                resus_par.value = sed_resuspension_vel
-                ParameterService.commit()
+            elif isinstance(resus_par, CustomParameter):
+                if is_significantly_different(resus_par.value, sed_resuspension_vel):
+                    resus_par.value = sed_resuspension_vel
+                    ParameterService.commit()
         except Exception as ex:
             sed_resuspension_vel = None
             print(f'Problem Calculating Sediment Resuspension Velocity:\n {ex}')

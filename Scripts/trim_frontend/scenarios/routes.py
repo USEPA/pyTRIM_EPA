@@ -155,7 +155,7 @@ def get_scenario_runoff_matrix(scenario_id):
     try:
         s = ScenarioService.get(scenario_id)
         start_time = time.time()
-        runoff_matrix = ScenarioService.get_surface_runoff(s)
+        runoff_matrix = ScenarioService(s).get_surface_runoff()
         logger.info(f"Acquired runoff matrix in {time.time() - start_time} seconds")
     except Exception as e:
         logger.error(traceback.format_exc())

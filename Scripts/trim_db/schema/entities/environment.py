@@ -107,11 +107,10 @@ class Parcel(Model):
 
     @property
     def compartments(self):
-        comps = []
-        for ve in self.volume_elements:
-            for c in ve.compartments:
-                comps.append(c)
-        return list(sorted(comps, key=lambda x: x.name))
+        return list(sorted(
+            (c for ve in self.volume_elements for c in ve.compartments),
+            key=lambda x: x.name
+        ))
 
     def get_compartment(self, name=None, media=None):
         if media is None:
@@ -413,6 +412,10 @@ class Media(Model):
         elif isinstance(name_or_media, Media):
             if name_or_media.id == self.id:
                 return True
+        elif isinstance(name_or_media, list):
+            for check in name_or_media:
+                if self.isa(check):
+                    return True
         else:
             raise TypeError
 
