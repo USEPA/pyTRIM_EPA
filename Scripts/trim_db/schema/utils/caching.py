@@ -86,6 +86,11 @@ class CacheManager:
         cls._CACHERS.get(key, {}).clear()
 
     @classmethod
+    def clear_all(cls):
+        for k in cls._CACHERS:
+            cls.clear_cache(k)
+
+    @classmethod
     def without_caching(cls, f):
         @wraps(f)
         def wrapped(*args, **kwargs):

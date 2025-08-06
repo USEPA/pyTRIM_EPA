@@ -50,11 +50,6 @@ class FormulaService(GenericService):
 class ParameterService(GenericService):
     __model__ = CustomParameter
 
-    @classmethod
-    def commit(cls):
-        super().commit()
-        CacheManager.clear_cache(f'entity_param_dicts')
-
     class domains(GenericService):
         __model__ = ParameterDomain
 

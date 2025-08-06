@@ -87,8 +87,7 @@ class GenericService(metaclass=ServiceMetaClass):
     @classmethod
     def commit(cls):
         # cls.clear_cache()
-        for k in CacheManager._CACHERS:
-            CacheManager.clear_cache(k)
+        CacheManager.clear_all()
         try:
             cls.db.session.commit()
         except Exception as e:
