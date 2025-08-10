@@ -240,8 +240,16 @@ class VolumeElement(Model):
 
         raise AssertionError('Unknown function!')
 
+    # TODO eventually remove this
     # CAREFUL: we assume dimensions are in meters ...
     def interface_with(self, volume_element):
+        import warnings
+        warnings.warn(
+            f"{self.__getattribute__('interface_with')} should be accessed by compartment",
+            DeprecationWarning,
+            stacklevel=2
+        )
+        
         polygon_a = self.parcel.polygon()
         polygon_b = volume_element.parcel.polygon()
 
@@ -542,7 +550,7 @@ class Compartment(Model):
         if self.volume_element == compartment.volume_element:
             return True  # We're in the same "space"!
 
-        elif self.volume_element.interface_with(compartment.volume_element) > 0:
+        elif self.interface_with(compartment) > 0:
             return True  # Our "spaces" touch!
 
         elif compartment in self.custom_linked_compartments:
@@ -551,11 +559,71 @@ class Compartment(Model):
         # To bad, we just didn't connect
         return False
 
+    # CAREFUL: we assume dimensions are in meters ...
+    def interface_with(self, compartment):
+        sender_ve = self.volume_element
+        receiver_ve = compartment.volume_element
+
+        polygon_a = sender_ve.parcel.polygon()
+        polygon_b = receiver_ve.parcel.polygon()
+
+        if not polygon_a.intersects(polygon_b):
+            # Not horizontally contiguous
+            return 0 * ureg('m^2')
+
+        intersection = polygon_a.intersection(polygon_b)
+
+        # if sender_ve.parcel.id == receiver_ve.parcel.id:
+        #     # Total horizontal overlap; same parcel
+        #     return sender_ve.parcel.area
+
+        top_a = sender_ve.top
+        top_b = receiver_ve.top
+
+        bottom_a = sender_ve.bottom
+        bottom_b = receiver_ve.bottom
+
+        # OK This bit is tricky... We look for an interface between two volumes so if they have the same parent parcel
+        # we still need to check if the top or bottom of these volumes touch or overlap. BUT!!!! we also want
+        # pseudosource volume elements to be in touch with all volume elements to be able to transfer the chemicals.
+        # In that case we do not have to check bottom and top of those volume elements and checking if they are in the
+        # same parcel will be enough. -Berk (06-12-2025)
+        if (sender_ve.parcel.id == receiver_ve.parcel.id):
+            # volume elements overlap and top/bottom contact
+            if ((top_a == bottom_b) or (bottom_a == top_b)):
+                # Total horizontal overlap; same parcel
+                return sender_ve.parcel.area
+            # if we are dealing with a source
+            if sender_ve.name in ["DryParticleSource", "WetParticleSource", "DryVaporSource", "WetVaporSource"]:
+                return sender_ve.parcel.area
+            # new for sediment burial sink 
+            if self.standard_name == 'Sediment in Sed_Pond' and compartment.standard_name == 'Burial_Sink in Sed_Pond':
+                return sender_ve.parcel.area
+
+        if top_a < bottom_b or top_b < bottom_a:
+            # No vertical overlap
+            return 0 * ureg('m^2')
+
+        if top_a > top_b:
+            z_side = top_b - bottom_a
+        else:
+            z_side = top_a - bottom_b
+
+        # if intersection.area > 0:
+        #     # Both vertical AND horizontal overlap!
+        #     # The interface is actually an area?
+        #     return (z_side * intersection.area) * ureg('m^3')
+
+        # Else, only vertical overlap
+        xy_side = intersection.length  # Is this arc units?
+
+        return (z_side * xy_side) * ureg('m^2')
+
     def is_next_to(self, compartment):
         if self.volume_element == compartment.volume_element:
             return False  # We're actually in the same "space" ...
 
-        if self.volume_element.interface_with(compartment.volume_element) > 0:
+        if self.interface_with(compartment) > 0:
             return True  # Our "spaces" touch!
 
         return False
