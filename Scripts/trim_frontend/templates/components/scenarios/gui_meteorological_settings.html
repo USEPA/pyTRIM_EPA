@@ -329,6 +329,16 @@
                             let lb_static_val = `<label class=wt_avg_val>Time-weighted average from file: ${val}</label>`
                             $(elem).closest('div.form-group').append(lb_static_val)
                         }
+                        if (param_info[1].value == "meteo_precipitation_field_name_rate_TS") {
+                            var diff = calculateDateDistance(
+                                TRIM.store.currentScenario.meteorology.start_date, 
+                                TRIM.store.currentScenario.meteorology.end_date,
+                                ['days']
+                            );
+                            var days = parseInt(diff[0].split(' ')[0]);
+                            var annualVal = days / 365.2425 * val;
+                            $('#precipitation_average_annual').val(annualVal);
+                        }
                     }
                     else {
                         delete TRIM.store.currentScenario.meteorology;
@@ -412,6 +422,9 @@
                             updateFields(me.closest('section'));
                         }
                     }
+                    catch (err) {
+                        alert(err);
+                    }
                     finally {
                         LoadingScreen.hide(loadingRequest);
                     }
@@ -458,6 +471,12 @@
                 });
                 sel.attr('data-meteo',JSON.stringify(this_sel_data))
 
+                // Annual precipitation
+                if (selected_val === 'Rain') { // assumes dates are in order
+                    TRIM.store.currentScenario.meteorology.start_date = this_sel_data[0].Date;
+                    TRIM.store.currentScenario.meteorology.end_date = this_sel_data[this_sel_data.length-1].Date;
+                }
+                
                 submit_meteo_value(sel)
             })
 
@@ -466,19 +485,17 @@
             var precipVaries = $('#precipitation_time_varying');
             var annualPrecip = $('#precipitation_average_annual');
 
-            var startDate = $('#start_date');
-            var endDate = $('#end_date');
             staticPrecip.add(precipVaries).change(function() {
                 staticCum.val('');
                 annualPrecip.val('');
 
-                var start = startDate.val();
-                var end = endDate.val();
-                if (!start || !end) {
+                let sim_start = Date.parse(TRIM.store.currentScenario.simulation_start_date);
+                let sim_end = Date.parse(TRIM.store.currentScenario.simulation_end_date);
+                if (!sim_start || !sim_end) {
                     return;
                 }
 
-                var diff = calculateDateDistance(start, end, ['days']);
+                var diff = calculateDateDistance(sim_start, sim_end, ['days']);
                 var days = parseInt(diff[0].split(' ')[0]);
 
                 var staticVal = days * staticPrecip.val()

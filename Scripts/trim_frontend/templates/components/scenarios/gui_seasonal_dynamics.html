@@ -378,6 +378,9 @@
                             updateFields(me);
                         }
                     }
+                    catch (err) {
+                        alert(err);
+                    }
                     finally {
                         LoadingScreen.hide(loadingRequest);
                     }
