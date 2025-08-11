@@ -232,7 +232,7 @@ class FormulaArgument(Model):
         sa.Integer(), sa.ForeignKey('formula.id'), nullable=False
     )
     formula = sa.orm.relationship(
-        'Formula', backref=sa.orm.backref('_arguments', lazy='selectin')
+        'Formula', backref=sa.orm.backref('_arguments')
     )
 
     name = sa.Column(sa.String(60), nullable=False)
@@ -279,7 +279,7 @@ class ParameterDefinition(Model):
     )
     domain = sa.orm.relationship(
         'ParameterDomain',
-        backref=sa.orm.backref('parameter_definitions', lazy='selectin')
+        backref=sa.orm.backref('parameter_definitions')
     )
 
     default_value = sa.Column(sa.Float())
@@ -355,7 +355,7 @@ class CustomParameter(Model):
     # scenario = sa.orm.relationship('Scenario')
 
     scenario = sa.orm.relationship(
-        'Scenario', backref=sa.orm.backref('custom_params', lazy='selectin')
+        'Scenario', backref=sa.orm.backref('custom_params')
     )
 
     @property

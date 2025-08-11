@@ -28,7 +28,7 @@ class Parcel(Model):
         sa.Integer(), sa.ForeignKey('scenario.id'), nullable=False
     )
     scenario = sa.orm.relationship(
-        'Scenario', backref=sa.orm.backref('parcels', lazy='selectin')
+        'Scenario', backref=sa.orm.backref('parcels')
     )
 
     # Store as a string, but make a property to access as an array
@@ -160,7 +160,7 @@ class VolumeElement(Model):
         sa.Integer(), sa.ForeignKey('parcel.id'), nullable=False
     )
     parcel = sa.orm.relationship(
-        'Parcel', backref=sa.orm.backref('volume_elements', lazy='selectin')
+        'Parcel', backref=sa.orm.backref('volume_elements')
     )
 
     top = sa.Column(sa.Float(), nullable=False)
@@ -449,14 +449,14 @@ class Compartment(Model):
         sa.Integer(), sa.ForeignKey('volume_element.id'), nullable=False
     )
     volume_element = sa.orm.relationship(
-        'VolumeElement', backref=sa.orm.backref('compartments', lazy='selectin')
+        'VolumeElement', backref=sa.orm.backref('compartments')
     )
 
     media_id = sa.Column(
         sa.Integer(), sa.ForeignKey('media.id'), nullable=False
     )
     media = sa.orm.relationship(
-        'Media', backref=sa.orm.backref('compartments', lazy='selectin')
+        'Media', backref=sa.orm.backref('compartments')
     )
 
     @property
