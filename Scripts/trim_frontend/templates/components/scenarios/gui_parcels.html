@@ -374,8 +374,8 @@
 						probe.feature.type == "Feature" &&
 						(probe.feature.properties.parcelid == dotToParcel[deletedId].trimParcelId ||
 							L.stamp(probe) == dotToParcel[deletedId].leafletPolygonId)) {
-						window.deleteParcelFromServer({"properties": { "parcelid": probe.feature.properties.parcelid } });
 						map.removeLayer(probe);
+						window.deleteParcelFromServer({"properties": { "parcelid": probe.feature.properties.parcelid } });
 						return;
 					}
 				});
@@ -1523,11 +1523,12 @@
 			// console.log("DELETING: " + JSON.stringify(parcelObj));
             LoadingScreen.show('delete_parcel');
             TRIM.api.deleteParcels(TRIM.store.currentScenario.id, parcelObj).on('load', function(){
-                TRIM.refreshParcels();
-                requires_reload = true;
-                LoadingScreen.hide('delete_parcel');
+				TRIM.refreshParcels();
+				requires_reload = true;
+				shapes = parcels.toGeoJSON()
+				mapTableRedraw()
+				LoadingScreen.hide('delete_parcel');
             })
-            mapTableRedraw()
 		};
 
         // REMOVE A PARCEL//
@@ -1535,7 +1536,6 @@
             // LoadingScreen.show('deleting_parcel');
             parcels.removeLayer(layer._leaflet_id)
 			/*
-            shapes = parcels.toGeoJSON()
             LoadingScreen.show('delete_parcel');
             TRIM.api.deleteParcels(TRIM.store.currentScenario.id, layer.toGeoJSON()).on('load', function(){
                 TRIM.refreshParcels();
