@@ -355,7 +355,7 @@ class CustomParameter(Model):
     # scenario = sa.orm.relationship('Scenario')
 
     scenario = sa.orm.relationship(
-        'Scenario', backref=sa.orm.backref('custom_params')
+        'Scenario', backref=sa.orm.backref('custom_params', lazy='dynamic')
     )
 
     @property
