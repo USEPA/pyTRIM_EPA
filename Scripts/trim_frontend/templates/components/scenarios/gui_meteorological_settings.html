@@ -330,11 +330,10 @@
                             $(elem).closest('div.form-group').append(lb_static_val)
                         }
                         if (param_info[1].value == "meteo_precipitation_field_name_rate_TS") {
-                            var diff = calculateDateDistance(
-                                TRIM.store.currentScenario.meteorology.start_date, 
-                                TRIM.store.currentScenario.meteorology.end_date,
-                                ['days']
-                            );
+                            let scenario = TRIM.store.currentScenario;
+                            let sim_start = Date.parse(scenario["simulation_start_date"])
+                            let sim_end = Date.parse(scenario["simulation_end_date"])
+                            var diff = calculateDateDistance(sim_start, sim_end, ['days']);
                             var days = parseInt(diff[0].split(' ')[0]);
                             var annualVal = days / 365.2425 * val;
                             $('#precipitation_average_annual').val(annualVal);
@@ -471,12 +470,6 @@
                 });
                 sel.attr('data-meteo',JSON.stringify(this_sel_data))
 
-                // Annual precipitation
-                if (selected_val === 'Rain') { // assumes dates are in order
-                    TRIM.store.currentScenario.meteorology.start_date = this_sel_data[0].Date;
-                    TRIM.store.currentScenario.meteorology.end_date = this_sel_data[this_sel_data.length-1].Date;
-                }
-                
                 submit_meteo_value(sel)
             })
 
