@@ -19,10 +19,11 @@ from trim_db.services import ScenarioService, ChemicalService, \
     ParameterService, FormulaService
 from trim_db.services.parameters import get_or_create_custom_param
 from trim_frontend import api, db
-from trim_frontend.scenarios.utils import init_first_time_default_param_values, init_erosion_default_params
 from trim_frontend.parcels.routes import delete_parcel_contents
 from .defaults import *
 from .forms import *
+from .utils import init_first_time_default_param_values, init_erosion_default_params, \
+    compile_mirc_parcel_data
 from ..utils.logging import make_logger
 from ..utils.file_io import MiscAssociatedFileVariety, associated_file_helper
 from ..parcels.utils import calculate_receptor_grid_points_for_parcel
@@ -95,11 +96,15 @@ api.use_api_errors(scenario_api)
 @login_required
 def get_scenario(id):
     logger = make_logger('scenario_api_get')
-    s = ScenarioService.get(id)
-    start_time = time.time()
-    s = s.as_serializable()
-    init_erosion_default_params()
-    logger.info(f"Acquired scenario in {time.time() - start_time} seconds")
+    try:
+        s = ScenarioService.get(id)
+        start_time = time.time()
+        s = s.as_serializable()
+        init_erosion_default_params()
+        logger.info(f"Acquired scenario in {time.time() - start_time} seconds")
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        return ApiException(repr(e))
     return ApiResult({'scenario': s})
 
 
@@ -110,7 +115,7 @@ def get_scenario(id):
 def get_scenario_chemicals(scenario_id):
     s = ScenarioService.get(scenario_id)
     if not s:
-        raise ApiException("Unknown Scenario")
+        return ApiException("Unknown Scenario")
     chems = [c.as_serializable() for c in s.chemicals]
     return ApiResult({
         'chemicals': chems
@@ -126,7 +131,7 @@ def get_scenario_met_data(scenario_id):
     try:
         met = get_met_data(s)
     except Exception as e:
-        print(e)
+        logger.info(e)
         met = {}
     logger.info(f"Acquired meteorology in {time.time() - start_time} seconds")
     return ApiResult({'meteorology': met})
@@ -147,10 +152,14 @@ def get_scenario_seasonal_dynamics(scenario_id):
 @login_required
 def get_scenario_runoff_matrix(scenario_id):
     logger = make_logger('scenario_runoff_matrix_api_get')
-    s = ScenarioService.get(scenario_id)
-    start_time = time.time()
-    runoff_matrix = get_surface_runoff(s)
-    logger.info(f"Acquired runoff matrix in {time.time() - start_time} seconds")
+    try:
+        s = ScenarioService.get(scenario_id)
+        start_time = time.time()
+        runoff_matrix = ScenarioService(s).get_surface_runoff()
+        logger.info(f"Acquired runoff matrix in {time.time() - start_time} seconds")
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        return ApiException(repr(e))
     return ApiResult({'runoff_matrix': runoff_matrix})
 
 
@@ -162,19 +171,25 @@ def get_scenario_runoff_matrix(scenario_id):
 def get_parameters(scenario_id):
     s = ScenarioService.get(scenario_id)
     if not s:
-        raise ApiException("Unknown Scenario")
+        return ApiException("Unknown Scenario")
 
-    params = request.args.getlist('parameter')
-    s_params = dict(s.parameters)
-    r = {}
-    for x in params:
-        param = s_params.get(x)
-        if param is not None:
-            db.session.add(param)
-            param = param.as_serializable()
-        r[x] = param
+    logger = make_logger('scenario_parameter_get')
+    try:
+        params = request.args.getlist('parameter')
+        s_params = dict(s.parameters)
+        r = {}
+        for x in params:
+            param = s_params.get(x)
+            if param is not None:
+                if param not in db.session:
+                    db.session.merge(param)
+                param = param.as_serializable()
+            r[x] = param
 
-    ScenarioService.commit() # required because of session update
+        ScenarioService.commit() # required because of session update
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        return ApiException(repr(e))
     return ApiResult({'parameters': r})
 
 
@@ -182,10 +197,14 @@ def get_parameters(scenario_id):
 @login_required
 def get_last_results(scenario_id):
     logger = make_logger('scenario_last_results_api_get')
-    s = ScenarioService.get(scenario_id)
-    start_time = time.time()
-    latest_run_info = get_latest_run_info(s)
-    logger.info(f"Acquired scenario results in {time.time() - start_time} seconds")
+    try:
+        s = ScenarioService.get(scenario_id)
+        start_time = time.time()
+        latest_run_info = get_latest_run_info(s)
+        logger.info(f"Acquired scenario results in {time.time() - start_time} seconds")
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        return ApiException(repr(e))
     return ApiResult({'latest_run_info': latest_run_info})
 
 
@@ -295,10 +314,10 @@ def update_scenario():
         if param_type == "MET":
             df_met = df_met.loc[(df_met.Hour < 25)]  # drop faulty
             metcol_dict = {'Rain': (0, 1), 'AirTemperature': (200, 373), 'HorizontalWindSpeed': (0, 100),
-                           'WindDirection': (-360, 360), 'MixingHeight': (0, 1000), 'isDay': (0, 1),
+                           'WindDirection': (-360, 360), 'mixingHeight': (0, 1000), 'isDay': (0, 1),
                            'CumulativeRain': (0, 1.6)}  # k, v represent name and min-max
             for k, v in metcol_dict.items():
-                if 'k' in df_met.columns:
+                if k in df_met.columns:
                     df_met['metcol'] = pd.to_numeric(df_met[k], errors='coerce')
                     df_met = df_met[
                         (df_met['metcol'] <= v[1]) & (df_met['metcol'] >= v[0])]  # keep rows within min max bounds
@@ -351,7 +370,7 @@ def update_scenario():
 
     try:
         scenario_data = request.form.to_dict()
-        print(scenario_data)
+        # print(scenario_data)
         if not scenario_data['id']:
             raise AssertionError("Scenario ID cannot be blank.")
         # Get the specified parcel
@@ -439,6 +458,7 @@ def update_scenario():
 
     except Exception as e:
         logger.error(traceback.format_exc())
+        return ApiException(repr(e))
     ScenarioService.update(s)
     if ret_val:
         return ApiResult(ret_val)
@@ -798,14 +818,16 @@ def clear_old_result():
         raise AssertionError("Scenario ID cannot be blank.")
     scenario_id = int(exec_data['scenario_id'])
     scn = ScenarioService.get(scenario_id)
-    print(f"Clearing Last Model Run for {scn.name} {[v for v in scn.proc_status][0].run_datetime}...")
+
     data_resp = {"success": "success"}
     try:
         if len(scn.proc_status.all()) > 0:
+            print(f"Clearing Last Model Run for {scn.name} {[v for v in scn.proc_status][0].run_datetime}...")
             scn.proc_status.delete()
     except Exception as e:
-        print([v for v in scn.proc_status][0])
         print(f'problem deleting {e}')
+        return ApiException(f"Problem deleting {repr(e)}")
+    
     print(f"Model Result deleted for {scn.name}")
     ScenarioService.commit()
     return ApiResult(data_resp)
@@ -838,9 +860,9 @@ def run_result_scenario():
         else:
             s = ScenarioService.get(scenario_id)
             print(f"Starting Model Run ({datetime.now()}...")
-            json_n_avg, json_c_avg, output_file_n, output_file_c = run_full_model(s)
-
-            data_resp = {"mass": json_n_avg, "conc": json_c_avg, "outputMass": output_file_n, "outputConc": output_file_c}
+            json_n_avg, json_c_avg, output_file_n, output_file_c, output_file_tm = run_full_model(s)
+            data_resp = {"mass": json_n_avg, "conc": json_c_avg, "outputMass": output_file_n,
+                         "outputConc": output_file_c, "outputTM": output_file_tm}
     except Exception as e:
         print(e)
         data_resp = {"error": e}
@@ -866,10 +888,11 @@ def get_result_scenario():
         run_date = [v for v in s.proc_status][0].run_datetime
         output_file_n = Path([v for v in s.proc_status][0].result_file_nt).name
         output_file_c = Path([v for v in s.proc_status][0].result_file_conc).name
+        output_file_t = Path([v for v in s.proc_status][0].result_file_tm).name
         json_n_avg = [v for v in s.proc_status][0].result_nt
         json_c_avg = [v for v in s.proc_status][0].result_conc
 
-        result_resp = json.loads(json.dumps({"mass": json.loads(json_n_avg), "conc": json.loads(json_c_avg), "final_status": fin_stat, "run_date": run_date, "outputMass": output_file_n, "outputConc": output_file_c}, indent=4, sort_keys=True, default=str))
+        result_resp = json.loads(json.dumps({"mass": json.loads(json_n_avg), "conc": json.loads(json_c_avg), "final_status": fin_stat, "run_date": run_date, "outputMass": output_file_n, "outputConc": output_file_c, "outputTM": output_file_t}, indent=4, sort_keys=True, default=str))
     except Exception as e:
         logger.info(f"Error when attempting to get results: {e}")
         result_resp = {"error": e}
@@ -884,12 +907,14 @@ def get_result_scenario():
 @login_required
 def poll_model_run_scenario(id):
     s = ScenarioService.get(id)
-    if [v for v in s.proc_status][0].is_run_error:
-        run_status = "err"
-        run_percent = "err"
-    else:
-        run_status, run_percent = [v for v in s.proc_status][0].run_step
-    return ApiResult({'status': run_status, 'percent': run_percent})
+    if s.has_process_hist:
+        if [v for v in s.proc_status][0].is_run_error:
+            run_status = "err"
+            run_percent = "err"
+        else:
+            run_status, run_percent = [v for v in s.proc_status][0].run_step
+        return ApiResult({'status': run_status, 'percent': run_percent})
+    return ApiResult({'status': "tm", 'percent': "0"})
 
 
 @scenario_api.route('/api/scenario/poll/', methods=['POST'])
@@ -908,6 +933,101 @@ def reset_poll_model_run_scenario():
     ScenarioService.commit()
     return "success"
 
+def get_complete_logs_from_group_and_stream(log_group, log_stream):
+    logs_client = boto3.client("logs")
+
+    # retrieve logs from CloudWatch.
+    # note this does NOT do anything smart with pagination -- just returns everything in one shot
+    # nice future enhancement might be to return a subset of this that we've deemed fit for public consumption; that could then
+    # be something we display to all users, not just internal ICF'ers
+
+    # also note - the pagination on this call is truly strange. According to the docs, you only know that pagination on the response
+    # from get_log_events is done if the "nextXToken" in the response is equivalent to the "nextToken" passed in in your request. (the next/prev
+    # tokens that are returned are never null).
+    #
+    # In my tests I was seeing things like:
+    # 1. make first call, get all the logs
+    # 2. make second call with the "nextToken" from call 1 (have to, as programatically I don't know that's the end). This returns empty array - but a non-matching end token
+    # 3. make third call with "nextToken" from call 2 (since they didn't match). Again, empty array, but this time they match and I can stop.
+    #
+    # Adding a sanity check just in case, to break after some number of attempts
+
+    sanity = 0
+    rv = []
+    next_token = None
+    while True:
+        if sanity > 10:
+            break
+
+        params = {
+            "logGroupName": log_group,
+            "logStreamName": log_stream,
+            "startFromHead": True,
+        }
+
+        if next_token is not None:
+            params["nextToken"] = next_token
+
+        print(f"CALL ITERATION {sanity} w/ params {params}...")
+
+        logs_response = logs_client.get_log_events(**params)
+        log_events = logs_response["events"]
+
+        for e in log_events:
+            rv.append({
+                "timestamp": e["timestamp"],
+                "message": e["message"]
+            })
+
+        if next_token is not None and logs_response["nextForwardToken"] == next_token:
+            print(f"safe to break; got same token we passed in...")
+            break
+        else:
+            print(f"need to keep going...")
+            next_token = logs_response["nextForwardToken"]
+
+        sanity += 1
+
+    return rv
+
+def fetch_output_for_step_function_execution(execution_arn):
+    # build boto3 clients we need
+    sfn_client = boto3.client("stepfunctions")
+    ecs_client = boto3.client("ecs")
+
+    try:
+        # get the details of the execution...
+        exec_hist_response = sfn_client.get_execution_history(executionArn=execution_arn)
+
+        # get the specific event relating to kickoff of the Docker container... 
+        ecs_task_event = next((e for e in exec_hist_response["events"] if e.get("type") == "TaskSubmitted" and e.get("taskSubmittedEventDetails", {}).get("resourceType") == "ecs"), None)
+        # re-parse the details/output, included as a JSON string in the boto3 reply... 
+        output = json.loads(ecs_task_event.get("taskSubmittedEventDetails", {}).get("output", "{}"))
+
+        # get the ECS task id
+        tasks = output.get("Tasks", [])
+
+        task = tasks[0] if len(tasks) > 0 else None
+        task_arn = task.get("TaskArn")
+        task_key = task_arn.split("/")[-1]
+
+        taskdef_arn = task.get("TaskDefinitionArn")
+        def_resp = ecs_client.describe_task_definition(
+            taskDefinition=taskdef_arn,
+            include=[ 'TAGS', ]
+        )
+
+        # construct log group/stream relating to this execution
+        log_group=def_resp["taskDefinition"]["containerDefinitions"][0]["logConfiguration"]["options"]["awslogs-group"]
+        log_stream=f"ecs/{def_resp['taskDefinition']['containerDefinitions'][0]['name']}/{task_key}"
+
+        print(f"let's use {log_group=} / {log_stream=}...")
+
+        return get_complete_logs_from_group_and_stream(log_group, log_stream)
+    except Exception as e:
+        return [ f"Error fetching logs: {e}" ]
+
+
 @scenario_api.route('/api/scenario/check_execution_completion/', methods=['POST'])
 @login_required
 def check_execution_completion():
@@ -919,18 +1039,22 @@ def check_execution_completion():
 
     sfn_client = boto3.client("stepfunctions")
 
+    debug_messages = fetch_output_for_step_function_execution(execution_arn) if current_user.email.lower().endswith("@icf.com") else [ "debug output disabled for external users" ]
+
     desc_resp = sfn_client.describe_execution(executionArn=execution_arn)
     if desc_resp["status"] == "SUCCEEDED":
         resp = {
             "success": True,
-            "sfn_output": json.loads(desc_resp["output"])
+            "sfn_output": json.loads(desc_resp["output"]),
+            "debug_messages": debug_messages
         }
     else:
         # success should still be True b/c we didn't fail; we're just not done yet...
         # calling client will just wait and retry.
         resp = {
             "success": True,
-            "sfn_output": False
+            "sfn_output": False,
+            "debug_messages": debug_messages
         }
 
     return ApiResult(resp)
@@ -958,7 +1082,7 @@ def fetch_run_results():
         "model_output": json_content
     }
 
-    for f in ["outputMass", "outputConc"]:
+    for f in ["outputMass", "outputConc", "outputTM"]:
         full_key = f"{uuid}/{f}.xlsx"
         response = s3_client.generate_presigned_url("get_object",
                                                     Params={
@@ -993,7 +1117,7 @@ def run_getflow(scenario_id):
 
     s = ScenarioService.get(scenario_id)
     if not s:
-        raise ApiException("Unknown Scenario")
+        return ApiException("Unknown Scenario")
 
     print(f"scenario: {s}")
 
@@ -1071,7 +1195,7 @@ def check_stepfunction_status():
 def export_for_mirc(scenario_id):
     scen = ScenarioService.get(scenario_id)
     if not scen:
-        raise ApiException("Unknown Scenario")
+        return ApiException("Unknown Scenario")
 
     logger = make_logger('mirc_exporter')
     logger.info(f"Compiling required MIRC data for scenario {scen.name}...")
@@ -1103,96 +1227,12 @@ def export_for_mirc(scenario_id):
     except Exception as e:
         logger.error(e)
         traceback.print_exc()
-        trim_data = {"error": "No valid data found"}
+        trim_data = {"message": "No valid data found"}
 
     return ApiResult({
         'trim_data': trim_data
     })
 
-def compile_mirc_parcel_data(scen, chems, conc, timestamps, logger):
-    logger.info(f"Compiling parcel data for...")
-    parcels = []
-    for parcel in scen.parcels:
-        logger.info(f"{parcel.name}")
-        p = {
-            "name": parcel.name,
-            "vertices": parcel.vertices,
-            "volume_elements": [],
-        }
-        for volume_element in parcel.volume_elements:
-            ve = {
-                "name": volume_element.name,
-                "compartments": [],
-            }
-            for compartment in volume_element.compartments:
-                c = {
-                    "name": compartment.name,
-                    "properties": {},
-                }
-
-                # properties not relevant for a given compartment can be skipped
-                for chem_name in chems.keys():
-                    props = {}
-                    filtered_key = f'{chem_name}_{compartment.standard_name}'
-                    filtered_conc = list(conc[filtered_key].values())
-                    filtered_conc_units = list(conc[filtered_key+"_units"].values())
-
-                    # constants
-                    if "air" in c["name"].lower():
-                        props["rho_a"] = {
-                            "value": compartment.rho.magnitude,
-                            "unit": str(compartment.rho.units), # "g/cm^3"
-                        }
-
-                    chem_kd = chems[chem_name].Kd(compartment=compartment)
-                    props["Kd"] = {
-                        "value": chem_kd.magnitude,
-                        "unit": str(chem_kd.units), # "L/kg"
-                    }
-
-                    chem_fmd = chems[chem_name].FractionMass_Dissolved(compartment=compartment)
-                    if chem_fmd:
-                        if isinstance(chem_fmd, pint.Quantity):
-                            props["FMD"] = chem_fmd.magnitude
-                        else:
-                            props["FMD"] = chem_fmd
-    
-                    chem_fv = chems[chem_name].FractionMass_Vapor(compartment=compartment)
-                    if chem_fv:
-                        if isinstance(chem_fv, pint.Quantity):
-                            props["Fv"] = chem_fv.magnitude
-                        else:
-                            props["Fv"] = chem_fv
-
-
-                    # timestamp values
-                    props["C"] = {}  # concentration
-
-                    chem_wet = chems[chem_name].ParticleVolumetricWetDepositionRate(compartment=compartment)
-                    props["Drwp"] = {}  # deposition rate wet particle
-
-                    chem_dry = chems[chem_name].ParticleVolumetricDRYDepositionRate(compartment=compartment)
-                    props["Drdp"] = {}  # deposition rate dry particle
-                    for i, timestamp in enumerate(timestamps):
-                        if isinstance(filtered_conc_units[0], str):
-                            props["C"][timestamp] = {
-                                "value": filtered_conc[i],
-                                "unit": filtered_conc_units[i] # "ug/g"
-                            }
-                        props["Drwp"][timestamp] = {
-                            "value": chem_wet.magnitude,
-                            "unit": str(chem_wet.units) # "g/day/m^2"
-                        }
-                        props["Drdp"][timestamp] = {
-                            "value": chem_dry.magnitude,
-                            "unit": str(chem_dry.units) # "g/day/m^2"
-                        }
-
-                    c["properties"][chem_name] = props
-                ve["compartments"].append(c)
-            p["volume_elements"].append(ve)
-        parcels.append(p)
-    return parcels
 
 @scenario_api.route(
     '/api/scenario/<int:scenario_id>/run_receptor_generation', methods=['POST']
@@ -1210,20 +1250,22 @@ def run_receptor_generation(scenario_id):
 
     scen = ScenarioService.get(scenario_id)
 
-    all_calculations = []
-    for parcel in scen.parcels:
-        grid_points_etc = calculate_receptor_grid_points_for_parcel(parcel)
-        all_calculations.append(grid_points_etc)
-
-    fv = MiscAssociatedFileVariety.construct_file_variety("generated_aermod_receptors")
-    file_like_obj = fv.convert_grid_point_data_to_binary_geojson(all_calculations)
-
-    data_resp = {}
     try:
+        all_calculations = []
+        for parcel in scen.parcels:
+            grid_points_etc = calculate_receptor_grid_points_for_parcel(parcel)
+            all_calculations.append(grid_points_etc)
+
+        fv = MiscAssociatedFileVariety.construct_file_variety("generated_aermod_receptors")
+        file_like_obj = fv.convert_grid_point_data_to_binary_geojson(all_calculations)
+
+        data_resp = {}
+        
         upload_data = associated_file_helper(scenario_id, "generated_aermod_receptors", "UPLOAD", file_obj = file_like_obj, file_metadata={})
         data_resp = upload_data
     except Exception as e:
-        print(f"UPLOAD ERROR: {e}")
+        traceback.print_exc()
+        return ApiException(repr(e))
 
     return ApiResult(data_resp)
 

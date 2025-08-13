@@ -28,11 +28,11 @@ if os.getenv('TEST_DB_SERVERLESS'):
         db = DataBase(db_path, model_base=Model)
     else:
         import urllib.parse
-        USERNAME = "root"
-        PASSWORD = urllib.parse.quote_plus(os.getenv('MYSQLPASSWORD'))
-        HOST = "localhost"
-        PORT = "3306"
-        DBNAME = "pytrim"
+        USERNAME = os.getenv('MYSQL_USERNAME', 'root')
+        PASSWORD = urllib.parse.quote_plus(os.getenv('MYSQL_PASSWORD', ''))
+        HOST = os.getenv('MYSQL_HOSTNAME', 'localhost')
+        PORT = os.getenv('MYSQL_PORT', '3306')
+        DBNAME = os.getenv('MYSQL_DB_NAME', 'pytrim')
         print(f'-- Connecting to local MYSQL db')
         db_uri = f'mysql+pymysql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}'
         db = DataBase(db_uri, model_base=Model)
@@ -87,8 +87,7 @@ class GenericService(metaclass=ServiceMetaClass):
     @classmethod
     def commit(cls):
         # cls.clear_cache()
-        for k in CacheManager._CACHERS:
-            CacheManager.clear_cache(k)
+        CacheManager.clear_all()
         try:
             cls.db.session.commit()
         except Exception as e:
@@ -187,8 +186,11 @@ class GenericService(metaclass=ServiceMetaClass):
     @classmethod
     def get_or_create(cls, model_id=None, no_commit=False, **kwargs):
         check_unique = kwargs.pop('check_unique', False)
+        create_kwargs = kwargs.pop('create_kwargs', None)
         model = cls.get(model_id=model_id, **kwargs)
         if model is None:
+            if create_kwargs:
+                kwargs.update(create_kwargs)
             model = cls.create(
                 no_commit=no_commit, check_unique=check_unique, **kwargs
             )

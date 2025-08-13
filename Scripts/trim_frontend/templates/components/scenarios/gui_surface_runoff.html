@@ -264,7 +264,19 @@
                                 $(e).siblings("label").text(old_vals[i])
                                 $(e).siblings("label").removeClass("modified")
                             })
-                            alert(msg)
+                        }
+                        else {
+                            let row = $(elem_list[0]).closest("tr");
+                            let headers = row.closest('table').find('th');
+                            let matrix = TRIM.store.currentScenario.runoff_matrix;
+                            let sender = parcel_info[2].value.replace("ro_", "");
+                            $(row).find('td').each((i, o)=>{
+                                let val = $(o).text();
+                                if (!isNaN(Number(val))) {
+                                    let col = headers.eq(i).text();
+                                    matrix[sender][col] = standardize_val(val);
+                                }
+                            });
                         }
                     })
                 } else {

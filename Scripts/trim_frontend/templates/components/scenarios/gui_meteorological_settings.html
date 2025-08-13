@@ -134,11 +134,17 @@
 
         form.addEventListener('form:visible', function() {
             LoadingScreen.show('met_info_loading');
-            console.log('met form visible')
-            populateMetForm();
+            console.log('met form visible');
+            TRIM.refreshParcels();
+            document.body.addEventListener('parcels:ready', populateMetForm());
         });
 
         function populateMetForm() {
+            if (!TRIM.store.currentScenario.parcels) {
+                // Parcels haven't loaded yet; wait a bit and try again
+                setTimeout(function() { populateMetForm(); }, 1000);
+                return;
+            }
             if ($(form).filter(':not(.form-loaded)').length) {
                 // Form hasn't loaded yet; wait a bit and try again
                 setTimeout(function() { populateMetForm(); }, 1000);
@@ -307,8 +313,13 @@
             }
             if (elementIsValid($(elem).parent())){
                 console.log(param_info);
-                let resp = TRIM.api.updateScenario(param_info).on('load',function(){
+                LoadingScreen.show("meteo_update_value")
+                let resp = TRIM.api.updateScenario(param_info).on('load',function(rsp){
                     let val_resp = this.responseJSON
+                    LoadingScreen.hide("meteo_update_value");
+                    if (val_resp?.success === false) {
+                        return;
+                    }
                     if (val_resp) {
                         let val = val_resp[Object.keys(val_resp)[0]]
                         let lb_static_val = $(elem).closest('div.form-group').find("label.wt_avg_val")
@@ -318,6 +329,20 @@
                             let lb_static_val = `<label class=wt_avg_val>Time-weighted average from file: ${val}</label>`
                             $(elem).closest('div.form-group').append(lb_static_val)
                         }
+                    }
+                    else {
+                        delete TRIM.store.currentScenario.meteorology;
+                        /*
+                        let meteo_store = TRIM.store.currentScenario.meteorology;
+                        property_name = param_info[2].name.replace("meteo_", "");
+                        if (meteo_store.hasOwnProperty(property_name)) {
+                            meteo_store[property_name] = param_info[2].value;
+                        }
+                        else if (property_name.substring('interception') && property_name.substring('static') ) {
+                            meteo_store = TRIM.store.currentScenario.meteorology.wet_dep_interception;
+                            property_name = "wet_dep_" + property_name;
+                            property_name = property_name.replace("fractions", "frac")
+                        }*/
                     }
                 })
             } else {
@@ -471,13 +496,5 @@
                 daytimeIndicator.removeAttr('disabled');
             });
         }
-
-        form.addEventListener('form:visible', function() {
-            if (!TRIM.store.currentScenario.parcels) {
-                LoadingScreen.show('met_parcels_loading');
-            }
-            TRIM.refreshParcels();
-            LoadingScreen.hide('met_parcels_loading');
-        });
     });
 </script>

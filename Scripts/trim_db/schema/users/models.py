@@ -5,7 +5,7 @@ from ..utils.mixins import ActiveFlagMixin
 
 
 __all__ = [
-    'RoleMixin', 'UserMixin',
+    'RoleMixin', 'UserMixin', 'ApiKey',
     'roles_users'
 ]
 
@@ -93,3 +93,20 @@ class UserMixin(ActiveFlagMixin):
 
     def __repr__(self):
         return f"{self.__class__.__qualname__}({self.email})"
+
+
+class ApiKey(Model):
+    value = sa.Column(sa.Unicode(255), unique=True, nullable=False)
+    active = sa.Column(sa.Boolean(), nullable=False, default=True)
+
+    user_id = sa.Column(
+        sa.Integer(), sa.ForeignKey('user.id'), nullable=False
+    )
+    user = sa.orm.relationship(
+        'User', backref=sa.orm.backref(
+            f'api_keys', cascade='all, delete-orphan'
+        )
+    )
+
+    def __repr__(self):
+        return f"{self.__class__.__qualname__}({self.user})"

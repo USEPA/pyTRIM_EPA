@@ -3,6 +3,8 @@ import types
 from datetime import datetime
 from decimal import Decimal
 from numbers import Number
+from sqlalchemy.orm.exc import DetachedInstanceError
+from sqlalchemy.exc import StatementError
 
 __all__ = [
     'serialize', 'jsonify',
@@ -13,16 +15,6 @@ __all__ = [
 SERIALIZER_ATTR = '__custom_serializer'
 
 
-def serialize(val):
-    # Rather than spinning our own recursive serializer,
-    # let the json module do it for us ...
-    return json.loads(jsonify(val))
-
-
-def jsonify(val):
-    return json.dumps(val, default=_to_serializable)
-
-
 def serializer(func=None, *args, **kwargs):
     """
     Mark this function as a serializer which can be used by _to_serializable
@@ -31,10 +23,57 @@ def serializer(func=None, *args, **kwargs):
         if not hasattr(f, SERIALIZER_ATTR):
             setattr(f, SERIALIZER_ATTR, True)
         return staticmethod(f)
-    if func:
-        return decorator(func)
-    else:
-        return decorator
+
+    return decorator(func) if func else decorator
+
+
+def safe_serialize(val):
+    from sqlalchemy.orm import object_session
+    session = object_session(val)
+    if session and session.is_active is False:
+        print(f"SESSION IS NOT ACTIVE!!! ROLLING BACK for {val}")
+        session.rollback()
+    try:
+        return serialize(val)
+    except Exception as e:
+        return f"<serialization error: {e}>"
+
+
+def serialize(val):
+    # Rather than spinning our own recursive serializer,
+    # let the json module do it for us ...
+    try:
+        return json.loads(jsonify(val))
+    except (DetachedInstanceError, StatementError) as e:
+        return f"<DB access error: {e}>"
+    except Exception as e:
+        return f"<general error: {e}>"
+
+
+def jsonify(val):
+    return json.dumps(val, default=_to_serializable)
+
+
+def _to_serializable(val):
+    """Used by default."""
+    serializer = _get_attr_with_attr(val, SERIALIZER_ATTR)
+    try:
+        if serializer:
+            return serializer(val)
+    except (DetachedInstanceError, StatementError):
+        return f"<unloaded or detached: {val}>"
+    except Exception as e:
+        return f"<error serializing {val}: {e}>"
+
+    if isinstance(val, Decimal):
+        return float(val)  # Sadly, decimals don't convert automatically
+    elif isinstance(val, Number):
+        return val
+    elif isinstance(val, datetime):
+        return val.isoformat() + "Z"
+    elif isinstance(val, types.FunctionType):
+        return None
+    return str(val)
 
 
 def register_serializer(
@@ -48,7 +87,7 @@ def register_serializer(
         sf = serializer(f)
         setattr(cls, f.__name__, sf)
         cls.as_serializable = (
-            lambda s: serialize(s) if auto_recursive else f(s)
+            lambda s: safe_serialize(s) if auto_recursive else f(s)
         )
 
         # Additionally, if this is a model class, add some custom
@@ -56,17 +95,14 @@ def register_serializer(
         # models directly
         if hasattr(cls, 'query_class'):
             cls.query_class.all_serialized = (
-                lambda s: serialize(s.all())
+                lambda s: safe_serialize(s.all())
             )
             cls.query_class.get_serialized = (
-                lambda s, pk: serialize(s.get(pk))
+                lambda s, pk: safe_serialize(s.get(pk))
             )
 
         return f
-    if func:
-        return decorator(func)
-    else:
-        return decorator
+    return decorator(func) if func else decorator
 
 
 def _get_attr_with_attr(obj, attr_name):
@@ -100,21 +136,5 @@ def _get_attr_with_attr(obj, attr_name):
                 return attr
         except Exception:
             continue
-
     return None
 
-
-def _to_serializable(val):
-    """Used by default."""
-    serializer = _get_attr_with_attr(val, SERIALIZER_ATTR)
-    if serializer:
-        return serializer(val)
-    elif isinstance(val, Decimal):
-        return float(val)  # Sadly, decimals don't convert automatically
-    elif isinstance(val, Number):
-        return val
-    elif isinstance(val, datetime):
-        return val.isoformat() + "Z"
-    elif isinstance(val, types.FunctionType):
-        return None
-    return str(val)

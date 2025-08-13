@@ -288,11 +288,14 @@
         function submit_seasonal_dyn_value(elem) {
             let param_info = get_form_data(elem)
             if (elementIsValid($(elem).parent())){
-                console.log(param_info)
                 LoadingScreen.show('loading_results');
                 let resp = TRIM.api.updateScenario(param_info).on('load',function(){
                     let val_resp = this.responseJSON
-                    if (val_resp) {
+                    LoadingScreen.hide('loading_results');
+                    if (val_resp?.success === false) {
+                        return;
+                    }
+                    else if (val_resp) {
                         let val = val_resp[Object.keys(val_resp)[0]]
                         let lb_static_val = $(elem).closest('div.form-group').find("label.wt_avg_val")
                         if (lb_static_val.length > 0) {
@@ -302,7 +305,7 @@
                             $(elem).closest('div.form-group').append(lb_static_val)
                         }
                     }
-                    LoadingScreen.hide('loading_results');
+                    delete TRIM.store.currentScenario.seasonal_dynamics;
                 })
             } else {
                 return

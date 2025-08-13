@@ -242,50 +242,69 @@
                     sort_order= sort_order == "desc" ? "asc" : "desc"
                 });
             }
+            else { // Table redraw gets called twice, so these get attached twice
+                $('label.editableCell').click(function () {
+                    $(this).siblings("input").show()
+                    $(this).siblings("select").show()
+                    $(this).prev("input").focus()
+                    $(this).prev("select").focus()
+                    $(this).hide();
+                });
 
-            $('label.editableCell').click(function () {
-                $(this).siblings("input").show()
-                $(this).siblings("select").show()
-                $(this).prev("input").focus()
-                $(this).prev("select").focus()
-                $(this).hide();
-            });
-
-            $('input.editableCell,select.editableCell').blur(function () {     
-                let focusTblId = $(this).closest(`table`).attr('id');
-                let focusTblClass = $(this).closest(`table`).attr('class');
-                if (!focusTblId?.includes("Aquatic") && !focusTblClass?.includes("diet")) {
-                    return;
-                }
-                
-                // NOTE -- by putting this here, will run check against
-                // all cells in every table 
-                if (!ErrorValidation.isPositiveValue(this)) {
-                    return;
-                }
-
-                let parcel_info = $(this).data('parcelinfo');
-                if (parcel_info) {
-                    submit_aquatic_table(this, parcel_info);
-                }
-                else { 
-                    if (ErrorValidation.rowTotalIsValid(this)) {
-                        submit_diet_tables(this);
+                $('input.editableCell, select.editableCell').blur(function () {     
+                    let focusTblId = $(this).closest(`table`).attr('id');
+                    let focusTblClass = $(this).closest(`table`).attr('class');
+                    if (!focusTblId?.includes("Aquatic") && !focusTblClass?.includes("diet")) {
+                        return;
                     }
-                }
+                    
+                    // NOTE -- by putting this here, will run check against
+                    // all cells in every table 
+                    if (!ErrorValidation.isPositiveValue(this)) {
+                        return;
+                    }
 
-                let data = $(this).val() == "" ? 0 : $(this).val();
-                let $label = $(this).next("label.editableCell");
-                $label.siblings("input").hide();
-                $label.show().text(data);
-            })
+                    let parcel_info = $(this).data('parcelinfo');
+                    if (parcel_info) {
+                        submit_aquatic_table(this, parcel_info);
+                    }
+                    else { 
+                        if (ErrorValidation.rowTotalIsValid(this)) {
+                            submit_diet_tables(this);
+                        }
+                    }
+
+                    let data = $(this).val() == "" ? 0 : $(this).val();
+                    let $label = $(this).next("label.editableCell");
+                    $label.siblings("input").hide();
+                    $label.show().text(data);
+                })
+            }
 
             function submit_aquatic_table(elem, parcel_info) {
                 let data = $(elem).val() == "" ? 0 : $(elem).val()
                 parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
                 LoadingScreen.show('submit_mass'); // since this can take a moment
-                TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', ()=>{
+                TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', (rsp)=>{
                     LoadingScreen.hide('submit_mass');
+                    if (rsp?.target?.responseJSON?.message !== 'success') {
+                        console.log(rsp.target.responseJSON);
+                        return;
+                    }
+                    let col_idx = $(elem).closest('td').index();
+                    let pcl_name = $(elem).closest('table').find('th').eq(col_idx).text();
+                    let pcl = getParcelByKey('name', pcl_name);
+
+                    let param_name = parcel_info[1].value.match(/[A-Z][a-z]+/g);
+                    let param_type = param_name.pop();
+                    param_name = param_name.join("_");
+
+                    if (param_type == "Biomass") {
+                        pcl.aquatic_biomass[param_name] = parcel_info[2].value;
+                    }
+                    else if (param_type == "Weight") {
+                        pcl.aquatic_bw[param_name] = parcel_info[2].value;
+                    }
                 });
             }
 
@@ -294,6 +313,8 @@
                 let this_row = $(elem).closest("tr");
                 let mat_table = $(this_row).closest("table");
                 let col_headers = $(mat_table).find("thead > tr > th > div > span").map((i,e) => e.innerHTML);
+
+                let trim_store_update = {};
 
                 $(mat_table).find("tbody > tr").each(function(){
                     let row_header = $(this).find("td > strong").text()
@@ -307,6 +328,8 @@
                                 'name': 'field',
                                 'value': row_name
                             }]
+                    trim_store_update[row_header.replaceAll(" ", "_")] = []
+
                     $(this).find("td").each(function (i,e){
                         if ($(e).find("strong").length == 0) {
                             let col_name = "FractionDiet" + col_headers[i-1].replaceAll(" ","").replaceAll("WaterColumn","Fish").replace("BenthicCarnivore", "FishBenthicCarnivore").replace("BenthicOmnivore", "FishBenthicOmnivore")
@@ -317,14 +340,22 @@
                                 'value': diet_fraction_val
                             }
                             parcel_info.push(cell_form_data)
+                            trim_store_update[row_header.replaceAll(" ", "_")].push(cell_form_data);
                         }
                     })
                     // Push change to DB
                     let is_valid_row = elementIsValid(this);
                     if (is_valid_row){
                         LoadingScreen.show('submit_diet'); // since this can take a moment
-                        TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', ()=>{
-                            LoadingScreen.hide('submit_diet'); 
+                        TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', (rsp)=>{
+                            let pcl_id = $(mat_table).data("parcelid");
+                            let pcl = getParcelByKey('id', pcl_id).aquatic_diet_fractions;
+                            for (const [key, values] of Object.entries(trim_store_update)) {
+                                for (let val of values) {
+                                    pcl[key][val.name] = val.value;
+                                }
+                            }
+                            LoadingScreen.hide('submit_diet');
                         });
                     }
                 })

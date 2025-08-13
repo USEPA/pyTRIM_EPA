@@ -292,12 +292,11 @@
                 "Scenario": {
                     "name": scenario['name'],
                     "description": scenario['description'],
-                    "precipitation rate": scenario.parcels[0].precip_rate
+                    "precipitation rate": scenario.parcels[0]?.precip_rate
                 }
             }
-            let chem_map = TRIM.store.currentScenario.chemical_properties;
-            // Object.keys(scenario.parcels[0].sources).forEach(e=>chem_map[e]={})
 
+            let chem_map = TRIM.store.currentScenario.chemical_properties;
             let env_map = {}
 
             for (const [prc_ind, entity_name] of Object.entries(scenario.parcels)){

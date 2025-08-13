@@ -709,7 +709,14 @@
             DREW_MAP = true;
         }
 
-        document.body.addEventListener('parcels:ready', drawAllParcels);
+        document.body.addEventListener('parcels:ready', function() {
+            // TODO keep an eye on this
+            try { 
+                drawAllParcels(); }
+            catch (err) {
+                console.log(TRIM.store.currentScenario.parcels, err);
+            }
+        });
 
 		document.body.addEventListener('parcels:ready', function() {
 			LoadingScreen.show('check_overlay_status');
@@ -1470,21 +1477,26 @@
             parcel.feature.properties.wetland = "No";
             map.closePopup();
             LoadingScreen.show('create_parcel');
+            parcels.addLayer(parcel);
+            parcel.bindTooltip(parcel.feature.properties.name, {permanent: false}).addTo(map);
+            shapes = parcels.toGeoJSON()
+            mapTableRedraw()
             // WRITE TO DATABASE
             // TRIM.api.createParcels('{{ scenario.id }}', shapes.features.reverse()[0])
             TRIM.api.createParcels('{{ scenario.id }}', parcel.toGeoJSON()).on('load', function() {
                 let resp = JSON.parse(this.responseText)
                 if (resp) {
-                    let new_parcel = resp
-                    parcel.feature.properties.parcelid = new_parcel["scenario"]["id"]
-                    parcel.feature.properties.area = new_parcel["scenario"]["area"]
-                    parcel.feature.properties.air = new_parcel["scenario"]["hasAir"]
-                    parcel.feature.properties.parceltype = new_parcel["scenario"]["parcelType"]
-                    parcel.feature.properties.landuse = {'lu': new_parcel["scenario"]["landUse"], 'list': new_parcel.media}
-                    parcel.feature.properties.farmfoodchain = new_parcel["scenario"]["hasFarmFoodChain"]
-                    parcel.feature.properties.fishfoodweb = new_parcel["scenario"]["hasFishFoodWeb"]
-                    parcel.feature.properties.wetland = new_parcel["scenario"]["hasWetland"]
-
+                    let new_parcel = resp['parcel']
+                    parcel.feature.properties.parcelid = new_parcel["id"]
+                    parcel.feature.properties.area = new_parcel["area"]
+                    parcel.feature.properties.air = new_parcel["hasAir"]
+                    parcel.feature.properties.parceltype = new_parcel["parcelType"]
+                    parcel.feature.properties.landuse = {'lu': new_parcel["landUse"], 'list': resp.media}
+                    parcel.feature.properties.farmfoodchain = new_parcel["hasFarmFoodChain"]
+                    parcel.feature.properties.fishfoodweb = new_parcel["hasFishFoodWeb"]
+                    parcel.feature.properties.wetland = new_parcel["hasWetland"]
+                    parcel.feature.properties.wetland = new_parcel["hasWetland"]
+                    parcel.feature.properties.receptor_spacing = new_parcel["receptor_spacing"];
                     parcels.addLayer(parcel);
                     parcel.bindTooltip(parcel.feature.properties.name, {permanent: false}).addTo(map);
                     shapes = parcels.toGeoJSON()
