@@ -1,4 +1,4 @@
-import os
+import os, sys
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
@@ -8,15 +8,13 @@ from alembic import context
 
 
 def import_base_model():
-    import os
-    import sys
-    root = os.path.realpath(
-        os.path.join(os.path.dirname(__file__), '..')
-    )
-    sys.path.insert(0, root)
-    from ..schema import Model
+    trim_scripts = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', '..'))
+    sys.path.append(trim_scripts)  
+    
+    from trim_db.schema import Model
     if 'user' not in Model.metadata.tables:
-        from ..local import *  # Loads user/role tables
+        from trim_db.utils.users_roles import implement_users_roles  # Loads user/role tables
+        implement_users_roles()
     return Model.metadata
 
 
@@ -26,7 +24,7 @@ config = context.config
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
-# fileConfig(config.config_file_name)
+fileConfig(config.config_file_name, disable_existing_loggers=False)
 
 # add your model's MetaData object here
 # for 'autogenerate' support

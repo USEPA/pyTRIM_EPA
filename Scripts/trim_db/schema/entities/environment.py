@@ -240,68 +240,6 @@ class VolumeElement(Model):
 
         raise AssertionError('Unknown function!')
 
-    # TODO eventually remove this
-    # CAREFUL: we assume dimensions are in meters ...
-    def interface_with(self, volume_element):
-        import warnings
-        warnings.warn(
-            f"{self.__getattribute__('interface_with')} should be accessed by compartment",
-            DeprecationWarning,
-            stacklevel=2
-        )
-        
-        polygon_a = self.parcel.polygon()
-        polygon_b = volume_element.parcel.polygon()
-
-        if not polygon_a.intersects(polygon_b):
-            # Not horizontally contiguous
-            return 0 * ureg('m^2')
-
-        intersection = polygon_a.intersection(polygon_b)
-
-        # if self.parcel.id == volume_element.parcel.id:
-        #     # Total horizontal overlap; same parcel
-        #     return self.parcel.area
-
-        top_a = self.top
-        top_b = volume_element.top
-
-        bottom_a = self.bottom
-        bottom_b = volume_element.bottom
-
-        # OK This bit is tricky... We look for an interface between two volumes so if they have the same parent parcel
-        # we still need to check if the top or bottom of these volumes touch or overlap. BUT!!!! we also want
-        # pseudosource volume elements to be in touch with all volume elements to be able to transfer the chemicals.
-        # In that case we do not have to check bottom and top of those volume elements and checking if they are in the
-        # same parcel will be enough. -Berk (06-12-2025)
-        if (self.parcel.id == volume_element.parcel.id):
-            # volume elements overlap and top/bottom contact
-            if ((top_a == bottom_b) or (bottom_a == top_b)):
-                # Total horizontal overlap; same parcel
-                return self.parcel.area
-            # if we are dealing with a source
-            if self.name in ["DryParticleSource", "WetParticleSource", "DryVaporSource", "WetVaporSource"]:
-                return self.parcel.area
-
-        if top_a < bottom_b or top_b < bottom_a:
-            # No vertical overlap
-            return 0 * ureg('m^2')
-
-        if top_a > top_b:
-            z_side = top_b - bottom_a
-        else:
-            z_side = top_a - bottom_b
-
-        # if intersection.area > 0:
-        #     # Both vertical AND horizontal overlap!
-        #     # The interface is actually an area?
-        #     return (z_side * intersection.area) * ureg('m^3')
-
-        # Else, only vertical overlap
-        xy_side = intersection.length  # Is this arc units?
-
-        return (z_side * xy_side) * ureg('m^2')
-
     def midpoint_distance(self, volume_element):
         if isinstance(volume_element, Compartment):
             volume_element = volume_element.volume_element

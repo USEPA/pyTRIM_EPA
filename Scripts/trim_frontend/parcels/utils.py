@@ -1030,9 +1030,9 @@ def create_base_land_compartments(parcels_data, p, land_use):
 
 
 def init_tillage_default_params(till_media_name):
-    media_id = [m.id for m in CompartmentService.media.get_all() if m.name == till_media_name][0]
+    #media_id = [m.id for m in CompartmentService.media.get_all() if m.name == till_media_name][0]
     domain_id = [d.id for d in ParameterService.domains.get_all()
-                 if d.requirements == f'self.media_id == {media_id}'][0]
+                 if d.requirements == f'self.media.isa("{till_media_name}")'][0]
     new_pd_kwargs = SURFACE_SOIL_SPECIFIC_MEDIA_PARAMS
     for i, pd in enumerate(new_pd_kwargs):
         for k, v in pd.items():

@@ -230,7 +230,7 @@ CREATE TABLE `api_key` (
     `user_id` INTEGER NOT NULL, 
     `id` INTEGER NOT NULL AUTO_INCREMENT, 
     PRIMARY KEY (`id`), 
-    FOREIGN KEY(`user_id`) REFERENCES `user` (`id`)
+    FOREIGN KEY(`user_id`) REFERENCES `user` (`id`),
     UNIQUE (`value`)
 );
 
