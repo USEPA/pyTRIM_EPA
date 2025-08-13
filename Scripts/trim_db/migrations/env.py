@@ -38,6 +38,14 @@ target_metadata = import_base_model()
 # ... etc.
 
 
+def update_db_url():
+    url = config.get_main_option("sqlalchemy.url")
+    if '{}' in url:
+        from trim_frontend.config import db_uri
+        return db_uri
+    return url
+
+
 def run_migrations_offline():
     """Run migrations in 'offline' mode.
 
@@ -50,25 +58,8 @@ def run_migrations_offline():
     script output.
 
     """
-    if 'RDS_DB_NAME' in os.environ:
-        db_user = os.environ['RDS_USERNAME']
-        db_pass = os.environ['RDS_PASSWORD']
-        db_host = os.environ['RDS_HOSTNAME']
-        db_port = os.environ['RDS_PORT']
-        db_name = os.environ['RDS_DB_NAME']
-    else:
-        import urllib.parse
-        db_user = "root"
-        db_pass = urllib.parse.quote_plus(os.getenv('MYSQLPASSWORD'))
-        db_host = "localhost"
-        db_port = "3306"
-        db_name = "pytrim"
-
-    url = config.get_main_option("sqlalchemy.url")
-    # add values to those {} in connection string in alembic.ini
-    url = url.format(db_user, db_pass, db_host, db_port, db_name)
     context.configure(
-        url=url, target_metadata=target_metadata, literal_binds=True
+        url=update_db_url(), target_metadata=target_metadata, literal_binds=True
     )
 
     with context.begin_transaction():
@@ -80,7 +71,6 @@ def run_migrations_online():
 
     In this scenario we need to create an Engine
     and associate a connection with the context.
-
     """
     def process_revision_directives(context, revision, directives):
         if config.cmd_opts.autogenerate:
@@ -90,6 +80,7 @@ def run_migrations_online():
 
     connectable = engine_from_config(
         config.get_section(config.config_ini_section),
+        url=update_db_url(),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
