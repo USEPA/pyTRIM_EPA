@@ -922,6 +922,21 @@ def create_base_land_compartments(parcels_data, p, land_use):
     ve_surfsoil = VolumeElementService.get(name="SurfSoil", parcel_id=p.id)
     c_surfsoil = CompartmentService.get(name="Soil_Surface", volume_element_id=ve_surfsoil.id)
 
+    def calculate_surfsoil_thickness(bottom=None): # probably negative
+        if not bottom:
+            bottom = Land_Parcel_VolElem_defaults['SurfSoil']['bottom']
+        thickness_before = ve_surfsoil.height.magnitude
+        ve_surfsoil.bottom = ve_surfsoil.top + bottom
+        thickness_now = abs(ve_surfsoil.bottom -ve_surfsoil.top)
+        delta_thickness = thickness_now - thickness_before
+
+        for soil_comp in ["Soil_Root_Zone", "Soil_Vadose_Zone", "Groundwater", "DryVaporSource", "WetVaporSource",
+                          "DryParticleSource", "WetParticleSource"]:
+            soil_ve = p.get_compartment(soil_comp).volume_element
+            soil_ve.top = (-1 * delta_thickness) + soil_ve.top
+            soil_ve.bottom = (-1 * delta_thickness) + soil_ve.bottom
+            print(f"New top/bottom for {soil_comp}:\ntop: {soil_ve.top} bottom: {soil_ve.bottom}")
+
     custom_param_erosion = c_surfsoil.parameters.get("TotalErosionRate")
     custom_param_erosion = get_or_create_custom_param(custom_param_erosion, {
         "scenario_id": p.scenario_id,
@@ -959,70 +974,76 @@ def create_base_land_compartments(parcels_data, p, land_use):
     # Create the base compartments for the new land use/ land cover
     new_comps = []
     if parcels_data['landUse'] == 'Tilled Soil':
-        c_surfsoil.media_id = [m.id for m in CompartmentService.media.get_all() if m.name == "Tilled_Soil"][0]
+        c_surfsoil.media_id = CompartmentService.media.get(name='Tilled_Soil').id
         init_tillage_default_params('Tilled_Soil')
         update_tillage_formula_media('Tilled_Soil')
         c_surfsoil.soilTillage = 1
-        thickness_before = c_surfsoil.volume_element.height.magnitude
-        c_surfsoil.volume_element.bottom = c_surfsoil.volume_element.top - 0.20
-        thickness_now = abs(c_surfsoil.volume_element.bottom - c_surfsoil.volume_element.top)
-        delta_thickness = thickness_now - thickness_before
-        for soil_comp in ["Soil_Root_Zone", "Soil_Vadose_Zone", "Groundwater", "DryVaporSource", "WetVaporSource",
-                          "DryParticleSource", "WetParticleSource"]:
-            p.get_compartment(soil_comp).volume_element.top = \
-                (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.top
-            p.get_compartment(soil_comp).volume_element.bottom = \
-                (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.bottom
-            print(f"New top/bottom for {soil_comp}:\ntop: {p.get_compartment(soil_comp).volume_element.top}"
-                  f" bottom: {p.get_compartment(soil_comp).volume_element.bottom}")
+        calculate_surfsoil_thickness(-0.2)
+
     elif parcels_data['landUse'] == 'Untilled Soil':
-        c_surfsoil.media_id = [m.id for m in CompartmentService.media.get_all() if m.name == "Untilled_Soil"][0]
+        c_surfsoil.media_id = CompartmentService.media.get(name='Untilled_Soil').id
         init_tillage_default_params('Untilled_Soil')
         update_tillage_formula_media('Untilled_Soil')
         c_surfsoil.soilTillage = 0
-        thickness_before = c_surfsoil.volume_element.height.magnitude
-        c_surfsoil.volume_element.bottom = c_surfsoil.volume_element.top - 0.01
-        thickness_now = abs(c_surfsoil.volume_element.bottom - c_surfsoil.volume_element.top)
-        delta_thickness = thickness_now - thickness_before
-        for soil_comp in ["Soil_Root_Zone", "Soil_Vadose_Zone", "Groundwater", "DryVaporSource", "WetVaporSource",
-                          "DryParticleSource", "WetParticleSource"]:
-            p.get_compartment(soil_comp).volume_element.top = \
-                (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.top
-            p.get_compartment(soil_comp).volume_element.bottom = \
-                (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.bottom
-            print(f"New top/bottom for {soil_comp}:\ntop: {p.get_compartment(soil_comp).volume_element.top}"
-                  f" bottom: {p.get_compartment(soil_comp).volume_element.bottom}")
+        calculate_surfsoil_thickness()
+
     elif parcels_data['landUse'] == 'Impervious':
-        c_surfsoil.media_id = [m.id for m in CompartmentService.media.get_all() if m.name == "Impervious"][0]
+        c_surfsoil.media_id = CompartmentService.media.get(name='Impervious').id
         custom_param_erosion.value = 0
+        calculate_surfsoil_thickness()
+
     elif parcels_data['landUse'] == 'Coniferous Forest':
-        new_comps.append(CompartmentService.create(name="Leaf_Coniferous_Forest", volume_element=ve_surfsoil,
-                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Coniferous_Leaf')][0]))
-        new_comps.append(CompartmentService.create(name="Leaf_Particle_Coniferous_Forest", volume_element=ve_surfsoil,
-                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Coniferous_Leaf_Particle')][0]))
+        new_comps += [
+            CompartmentService.create(
+                name="Leaf_Coniferous_Forest", volume_element=ve_surfsoil, media=CompartmentService.media.get(name="Coniferous_Leaf"),
+            ),
+            CompartmentService.create(
+                name="Leaf_Particle_Coniferous_Forest", volume_element=ve_surfsoil, media=CompartmentService.media.get(name="Coniferous_Leaf_Particle"),
+            )]
+        calculate_surfsoil_thickness()
+
     elif parcels_data['landUse'] == 'Deciduous Forest':
-        new_comps.append(CompartmentService.create(name="Leaf_Deciduous_Forest", volume_element=ve_surfsoil,
-                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Deciduous_Leaf')][0]))
-        new_comps.append(CompartmentService.create(name="Leaf_Particle_Deciduous_Forest", volume_element=ve_surfsoil,
-                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Deciduous_Leaf_Particle')][0]))
+        new_comps += [
+            CompartmentService.create(
+                name="Leaf_Deciduous_Forest", volume_element=ve_surfsoil, media=CompartmentService.media.get(name="Deciduous_Leaf"),
+            ),
+            CompartmentService.create(
+                name="Leaf_Particle_Deciduous_Forest", volume_element=ve_surfsoil, media=CompartmentService.media.get(name="Deciduous_Leaf_Particle"),
+            )]
+        calculate_surfsoil_thickness()
+
     elif parcels_data['landUse'] == 'Grasses/Herbs':
-        new_comps.append(CompartmentService.create(name="Leaf_Grasses_Herbs", volume_element=ve_surfsoil,
-                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Grass_Leaf')][0]))
-        new_comps.append(CompartmentService.create(name="Leaf_Particle_Grasses_Herbs", volume_element=ve_surfsoil,
-                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Grass_Leaf_Particle')][0]))
-        new_comps.append(CompartmentService.create(name="Stem_Grasses_Herbs", volume_element=ve_surfsoil,
-                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Grass_Stem')][0]))
-        new_comps.append(CompartmentService.create(name="Root_Grasses_Herbs", volume_element=ve_surfsoil,
-                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Grass_Root')][0]))
+        new_comps += [
+            CompartmentService.create(
+                name="Leaf_Grasses_Herbs", volume_element=ve_surfsoil, media=CompartmentService.media.get(name="Grass_Leaf"),
+            ),
+            CompartmentService.create(
+                name="Leaf_Particle_Grasses_Herbs", volume_element=ve_surfsoil, media=CompartmentService.media.get(name="Grass_Leaf_Particle"),
+            ),
+            CompartmentService.create(
+                name="Stem_Grasses_Herbs", volume_element=ve_surfsoil, media=CompartmentService.media.get(name="Grass_Stem"),
+            ),
+            CompartmentService.create(
+                name="Root_Grasses_Herbs", volume_element=ve_surfsoil, media=CompartmentService.media.get(name="Grass_Root"),
+            )]
+        calculate_surfsoil_thickness()
+        
     elif parcels_data['landUse'] == 'Agriculture (General)':
-        new_comps.append(CompartmentService.create(name="Leaf_Agriculture", volume_element=ve_surfsoil,
-                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Agriculture_Leaf')][0]))
-        new_comps.append(CompartmentService.create(name="Leaf_Particle_Agriculture", volume_element=ve_surfsoil,
-                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Agriculture_Leaf_Particle')][0]))
-        new_comps.append(CompartmentService.create(name="Stem_Agriculture", volume_element=ve_surfsoil,
-                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Agriculture_Stem')][0]))
-        new_comps.append(CompartmentService.create(name="Root_Agriculture", volume_element=ve_surfsoil,
-                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Agriculture_Root')][0]))
+        new_comps += [
+            CompartmentService.create(
+                name="Leaf_Agriculture", volume_element=ve_surfsoil, media=CompartmentService.media.get(name="Agriculture_Leaf"),
+            ),
+            CompartmentService.create(
+                name="Leaf_Particle_Agriculture", volume_element=ve_surfsoil, media=CompartmentService.media.get(name="Agriculture_Leaf_Particle"),
+            ),
+            CompartmentService.create(
+                name="Stem_Agriculture", volume_element=ve_surfsoil, media=CompartmentService.media.get(name="Agriculture_Stem"),
+            ),
+            CompartmentService.create(
+                name="Root_Agriculture", volume_element=ve_surfsoil, media=CompartmentService.media.get(name="Agriculture_Root"),
+            )]
+        calculate_surfsoil_thickness(-0.2)
+
     CompartmentService.update(c_surfsoil)
     for nc in new_comps:
         initialize_compartment_custom_parameters(nc)

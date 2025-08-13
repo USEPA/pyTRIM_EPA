@@ -18,6 +18,14 @@ def import_base_model():
     return Model.metadata
 
 
+def update_db_url():
+    url = config.get_main_option("sqlalchemy.url")
+    if '{}' in url:
+        from trim_frontend.config import db_uri
+        return db_uri
+    return url
+
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
@@ -36,16 +44,6 @@ target_metadata = import_base_model()
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
-
-
-def update_db_url():
-    url = config.get_main_option("sqlalchemy.url")
-    if '{}' in url:
-        from trim_frontend.config import db_uri
-        return db_uri
-    return url
-
-
 def run_migrations_offline():
     """Run migrations in 'offline' mode.
 
