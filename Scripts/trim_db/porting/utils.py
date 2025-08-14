@@ -486,8 +486,8 @@ GLOBAL_REPLACE = {
     'TheLink.FractionSpecificcompartmentDiet': '1',
     'theLink.': 'link.',
     'TheLink.': 'link.',
-    'TheLink.InterfacialArea': 'sender.volume_element.interface_with(receiver.volume_element)',  # noqa
-    'Thelink.InterfacialArea': 'sender.volume_element.interface_with(receiver.volume_element)',  # noqa
+    'TheLink.InterfacialArea': 'sender.interface_with(receiver)',  # noqa
+    'Thelink.InterfacialArea': 'sender.interface_with(receiver)',  # noqa
     'TheLink.RechargeRate': 'sender.RechargeRate',
     'Thelink.RechargeRate': 'sender.RechargeRate',
 

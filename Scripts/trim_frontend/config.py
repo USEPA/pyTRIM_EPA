@@ -30,6 +30,10 @@ else:
         DBNAME = "pytrim"
     db_uri = f'mysql+pymysql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}'
 
+if not os.getenv('SQLALCHEMY_DATABASE_URI'):
+    os.environ['SQLALCHEMY_DATABASE_URI'] = db_uri
+
+
 class AppConfig:
     # Template config
     TEMPLATES_AUTO_RELOAD = True
@@ -41,6 +45,10 @@ class AppConfig:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ECHO = False
     SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI')
+    SQLALCHEMY_POOL_RECYCLE = 200
+    SQLALCHEMY_POOL_SIZE = 10
+    SQLALCHEMY_POOL_USE_LIFO = True
+    SQLALCHEMY_POOL_PRE_PING = True
 
     # Migrations config
     MIGRATIONS_PATH = os.path.join(root, 'trim_db', 'migrations')
@@ -85,21 +93,12 @@ class ProdConfig(AppConfig):
     SECRET_KEY = os.getenv('SECRET_KEY', '')
     SECURITY_PASSWORD_SALT = os.getenv('SECURITY_PASSWORD_SALT', '')
 
-    SQLALCHEMY_POOL_RECYCLE = 200
-    SQLALCHEMY_POOL_SIZE = 10
-    SQLALCHEMY_POOL_USE_LIFO = True
-    SQLALCHEMY_POOL_PRE_PING = True
-
 
 class DevConfig(AppConfig):
     SECRET_KEY = 'dcf917c34aec178987494a853bffa479'
     SECURITY_PASSWORD_SALT = ''
     SQLALCHEMY_DATABASE_URI = db_uri
-    SQLALCHEMY_ECHO = False
-    SQLALCHEMY_POOL_RECYCLE = 200
-    SQLALCHEMY_POOL_SIZE = 10
-    SQLALCHEMY_POOL_USE_LIFO = True
-    SQLALCHEMY_POOL_PRE_PING = True
+    # SQLALCHEMY_ECHO = True
 
 
 class TestConfig(DevConfig):

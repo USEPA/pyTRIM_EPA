@@ -264,9 +264,9 @@ def update_scenario():
         return custom_params
 
     def update_custom_param(scen, comp, par_name, par_val, create_if_dne = False):
-        par_list = [p for p in scen.custom_params if
+        par_list = [p for p in scen.custom_params.all() if
                     p.definition.variable_name == par_name and f'self.id == {comp.id}' in p.requirements]
-        
+
         if not par_list and create_if_dne:
             par_list.append(create_new_custom_param_meteo(scen, comp, par_name))
 
@@ -383,9 +383,6 @@ def update_scenario():
             default_ercs = ParameterService.definitions.get(full_name="erosionRateCalcSource")
             ercs_cp = ParameterService.get_or_create(definition=default_ercs, scenario_id=s.id)
             ercs_cp.value = ercs
-            # for cp in s.custom_params:
-            #     if cp.definition.variable_name == "erosionRateCalcSource":
-            #         cp.value = ercs
             ParameterService.commit()
         elif field_name == "name":  # Scenario Name
             s.name = scenario_data["name"]
