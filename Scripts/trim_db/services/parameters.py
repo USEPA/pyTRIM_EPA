@@ -56,6 +56,16 @@ class ParameterService(GenericService):
     class definitions(GenericService):
         __model__ = ParameterDefinition
 
+        @classmethod
+        def get_all_for_domain(cls, domain):
+            if isinstance(domain, int):
+                return cls.get_all(domain_id=domain)
+            elif isinstance(domain, ParameterDomain):
+                return cls.get_all(domain_id=domain.id)
+            elif isinstance(domain, str):
+                domain = ParameterService.domains.get(name=domain)
+                return cls.get_all(domain_id=domain.id)
+
     @classmethod
     def get_custom_parameters_by_name(cls, name, scenario_id=None):
         query = cls.db.session.query(CustomParameter).join(
@@ -840,6 +850,11 @@ def parameterize(cls, globalize_custom_parameters=False, default_scenario=None):
 
         def items(self):
             return self._params.items()
+
+        def evaluate(self, param, **kwargs):
+            if self.entity == cls:
+                raise TypeError('Cannot Evaluate Parameters at the Class Level')
+            return evaluate_parameter(param, self.entity, **kwargs)
 
         def __repr__(self):
             return f'{{{", ".join([str(x) for x in self.keys()])}}}'

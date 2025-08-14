@@ -3,6 +3,7 @@ import os
 import re
 import time
 import pint
+import types
 from datetime import datetime
 from pathlib import Path
 
@@ -807,6 +808,7 @@ def delete_scenario():
 
     return redirect(request.referrer)
 
+
 @scenario_api.route('/api/scenario/clearresult/', methods=['POST'])
 @login_required
 def clear_old_result():
@@ -828,6 +830,7 @@ def clear_old_result():
     print(f"Model Result deleted for {scn.name}")
     ScenarioService.commit()
     return ApiResult(data_resp)
+
 
 @scenario_api.route('/api/scenario/run/', methods=['POST', 'GET'])
 @login_required
@@ -930,6 +933,7 @@ def reset_poll_model_run_scenario():
     ScenarioService.commit()
     return "success"
 
+
 def get_complete_logs_from_group_and_stream(log_group, log_stream):
     logs_client = boto3.client("logs")
 
@@ -986,6 +990,7 @@ def get_complete_logs_from_group_and_stream(log_group, log_stream):
         sanity += 1
 
     return rv
+
 
 def fetch_output_for_step_function_execution(execution_arn):
     # build boto3 clients we need
@@ -1056,6 +1061,7 @@ def check_execution_completion():
 
     return ApiResult(resp)
 
+
 # downloads the output from a model run and creates presigned url's for the xlsx files
 @scenario_api.route('/api/scenario/fetch_run_results/', methods=['POST'])
 @login_required
@@ -1092,6 +1098,7 @@ def fetch_run_results():
 
 
     return ApiResult(resp)
+
 
 @scenario_api.route(
     '/api/scenario/<int:scenario_id>/run_getflow', methods=['POST']
@@ -1148,6 +1155,7 @@ def run_getflow(scenario_id):
 
     return ApiResult(data_resp)
 
+
 @scenario_api.route(
     '/api/stepfxn_check', methods=['POST']
 )
@@ -1185,6 +1193,7 @@ def check_stepfunction_status():
             data_resp = {"error": str(e) }
 
     return ApiResult(data_resp)
+
 
 @scenario_api.route('/api/scenario/<int:scenario_id>/export/mirc', methods=['GET'])
 # TODO: Need some way for MIRC *app* to authenticate?
@@ -1275,42 +1284,61 @@ def get_chemical_properties(scenario_id):
     logger = make_logger('chemical_properties')
     logger.info("Pulling chemical properties...")
 
+    scen = ScenarioService.get(scenario_id)
+    # comps = scen.compartments
+
     chem_properties = {}
-    chemical_domain = 2
-    scenario_defaults_id = 1
+
+    def add_prop(chem_name, scope, prop_name, value):
+        if chem_name not in chem_properties:
+            chem_properties[chem_name] = {}
+        if scope not in chem_properties[chem_name]:
+            chem_properties[chem_name][scope] = {}
+
+        v = None
+        u = None
+        if isinstance(value, pint.Quantity):
+            v = value.magnitude
+            u = param.unit
+        else:
+            v = value
+        if isinstance(v, float):
+            # Round value
+            if v < 1:
+                v = float(f'{v:.12f}')
+            else:
+                v = float(f'{v:.4f}')
+
+        chem_properties[chem_name][scope][prop_name] = {
+            "name": prop_name,
+            "value": v,
+            "unit": u
+        }
 
     try:
-        scen = ScenarioService.get(scenario_id)
-        chem_definitions = ParameterService.definitions.get_all(
-            domain_id=chemical_domain
-        )
         for chem in scen.chemicals:
-            chem_properties[chem.name] = {"Scenario": {}, "Compartment": {}}
-
-            for chem_definition in chem_definitions:
-                for i in chem_definition.instances:
-                    if not i.requirements == f"(self.id == {chem.id})":
-                        continue
-
-                    property_type = None
-                    if i.scenario_id == scenario_defaults_id:
-                        property_type = "Scenario"
-                    elif i.scenario_id == scenario_id:
-                        property_type = "Compartment"
-
-                    if property_type == "Scenario" and i.formula:
-                        continue
-                    elif property_type:
-                        if property_type == "Scenario":
-                            value = i.value or chem_definition.default_value
-                        else:
-                            value = i.formula.equation if i.formula else None
-
-                        chem_properties[chem.name][property_type][chem_definition.full_name] = {
-                            "name": chem_definition.full_name,
-                            "value": value,
-                            "unit": i.unit or chem_definition.default_unit,
-                        }
+            # print('\n========================================')
+            # print(chem)
+            # print('----------------------------------')
+            for param_name, param in chem.parameters.items():
+                # print(param_name)
+                val = chem.parameters.evaluate(param)
+                scope = None
+                if not isinstance(val, types.FunctionType):
+                    # print('\t>', val)
+                    add_prop(chem.name, 'Scenario', param_name, val)
+                else:
+                    # TRYING TO EVALUATE THESE BY COMPARTMENT IS BROKEN??
+                    # - SOME SORT OF THREADING ISSUE WITH DB
+                    # c = comps[0]
+                    # try:
+                    #     val = chem.parameters.evaluate(param, compartment=c)
+                    #     print('\t>', val)
+                    #     # add_prop(chem.name, f'Compartment - {c.standard_name}', param_name, val)
+                    # except Exception as e:
+                    #     print('\t-', e)
+                    val = param.formula.equation if param.formula else None
+                    add_prop(chem.name, 'Compartment', param_name, val)
     except Exception as e:
         print(e)
     return ApiResult(chem_properties)
