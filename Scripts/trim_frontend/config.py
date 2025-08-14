@@ -30,6 +30,10 @@ else:
         DBNAME = "pytrim"
     db_uri = f'mysql+pymysql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}'
 
+if not os.getenv('SQLALCHEMY_DATABASE_URI'):
+    os.environ['SQLALCHEMY_DATABASE_URI'] = db_uri
+
+
 class AppConfig:
     # Template config
     TEMPLATES_AUTO_RELOAD = True

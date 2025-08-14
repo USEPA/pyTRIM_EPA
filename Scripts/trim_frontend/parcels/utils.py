@@ -922,11 +922,11 @@ def create_base_land_compartments(parcels_data, p, land_use):
     ve_surfsoil = VolumeElementService.get(name="SurfSoil", parcel_id=p.id)
     c_surfsoil = CompartmentService.get(name="Soil_Surface", volume_element_id=ve_surfsoil.id)
 
-    def calculate_surfsoil_thickness(bottom=None): # probably negative
+    def calculate_surfsoil_thickness(bottom=None):
         if not bottom:
             bottom = Land_Parcel_VolElem_defaults['SurfSoil']['bottom']
         thickness_before = ve_surfsoil.height.magnitude
-        ve_surfsoil.bottom = ve_surfsoil.top + bottom
+        ve_surfsoil.bottom = ve_surfsoil.top + bottom # bottom should probably be negative
         thickness_now = abs(ve_surfsoil.bottom -ve_surfsoil.top)
         delta_thickness = thickness_now - thickness_before
 

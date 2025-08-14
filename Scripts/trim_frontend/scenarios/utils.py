@@ -1,3 +1,4 @@
+import pint
 from trim_db.services import *
 from .defaults import EROSION_TABLE_KWARGS
 
