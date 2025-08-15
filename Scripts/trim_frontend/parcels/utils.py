@@ -157,7 +157,8 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                 media=CompartmentService.media.get(name="Farm"),
             )
         else:
-            CompartmentService.delete(surfsoil_ve.get_compartment("Farm"))
+            if surfsoil_ve.get_compartment("Farm"):
+                CompartmentService.delete(surfsoil_ve.get_compartment("Farm"))
 
     elif field_name == "hasFishFoodWeb":
         biotic_ve = deepcopy(Water_Parcel_VolElem_defaults)
@@ -893,7 +894,6 @@ def create_base_land_compartments(parcels_data, p, land_use):
         # Revert Soil_surface compartment to default media (Surface_Soil [id = 7])
         c_surfsoil.media = CompartmentService.media.get(name="Surface_Soil")  # Surface Soil
         CompartmentService.update(c_surfsoil)
-
         # if switching from Impervious, calculate Total erosion rate
         if land_use == 'Impervious':
             custom_param_erosion.value = calc_default_erosion_rate_sdr(p)
@@ -1035,7 +1035,7 @@ def update_tillage_formula_media(till_media_name):
         nf = f.equation
         for ids in fv:
             nf = nf.replace(f'media.id in {{{ids[0]}}}', f'media.id in {{{ids[1]}}}')
-        print(f'old formula: {f.equation}\nnew formula: {nf}\n')
+        # print(f'old formula: {f.equation}\nnew formula: {nf}\n')
         f.equation = nf
     FormulaService.commit()
 

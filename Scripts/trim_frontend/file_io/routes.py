@@ -488,7 +488,7 @@ def parse_parcel_upload():
 
             print(f"\tDONE FOR LINE {line_num}")
         except Exception as e:
-            errors.append(f"Error processing CSV line {line_num}: {e}")
+            errors.append(f"Error processing line {line_num}: {e}")
             print(f'{60*"*"}\nLINE {line_num}\n{full_stack()}')
 
         line_num += 1
