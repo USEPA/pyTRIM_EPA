@@ -87,7 +87,7 @@ class GenericService(metaclass=ServiceMetaClass):
     @classmethod
     def commit(cls):
         # cls.clear_cache()
-        CacheManager.clear_all()
+        CacheManager.clear()
         try:
             cls.db.session.commit()
         except Exception as e:
@@ -220,8 +220,7 @@ class GenericService(metaclass=ServiceMetaClass):
 
     @classmethod
     def delete(cls, model_or_id, no_commit=False):
-        for k in CacheManager._CACHERS:
-            CacheManager.clear_cache(k)
+        CacheManager.clear()
         if isinstance(model_or_id, int):
             model = cls.get(model_or_id)
         elif isinstance(model_or_id, cls.__model__):

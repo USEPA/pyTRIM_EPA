@@ -870,7 +870,7 @@ def parameterize(cls, globalize_custom_parameters=False, default_scenario=None):
     ):
         # print(f'ENTITY IS {entity} name is {name} class_name {cls_name}')
         if name.startswith('_') or name in NO_CUSTOM_GET:
-            raise AttributeError(name)
+            return entity.__getattribute__(name)
 
         # This method of accessing parameters exists for legacy reasons,
         # so it only needs to work for code like "Entity().param_name".
@@ -887,7 +887,7 @@ def parameterize(cls, globalize_custom_parameters=False, default_scenario=None):
     # Override getattr
     setattr(cls, '__getattr__', get_parameter)
 
-    # Override getattr
+    # Mark this model as parameterized
     setattr(cls, '__parameterized__', True)
 
     return cls
