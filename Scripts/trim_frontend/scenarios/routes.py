@@ -1329,7 +1329,14 @@ def get_chemical_properties(scenario_id):
                 opts[k] = serialize_value(val, param)
 
     def get_by_compartment(param_name, param, chem, fn=None):
-        for comp in comps[:1]:
+        for comp in comps:
+            scope = f'Compartment [{comp.media.name}]'
+            if (
+                chem.name in chem_properties
+                and scope in chem_properties[chem.name]
+                and param_name in chem_properties[chem.name][scope]
+            ):
+                continue
             try:
                 if fn is None:
                     comp_fn = comp.parameters.evaluate(param_name)
@@ -1345,7 +1352,7 @@ def get_chemical_properties(scenario_id):
                     val = fn(comp)
                 # print('\t>', val)
                 add_prop(
-                    chem.name, 'Compartment', param_name, param, val,
+                    chem.name, scope, param_name, param, val,
                     {comp.standard_name: val}
                 )
             except Exception as e:
