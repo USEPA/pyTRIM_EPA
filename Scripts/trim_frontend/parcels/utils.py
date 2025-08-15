@@ -137,8 +137,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
     elif field_name == "landUse":
         if parcels_data['landUse'] == land_use:
             return
-        if parcels_data['landUse'] in ['Coniferous Forest', 'Deciduous Forest', 'Agriculture (General)',
-                                       'Grasses/Herbs', 'Tilled Soil', 'Untilled Soil', 'Impervious']:
+        if parcels_data['landUse'] in LAND_USE_TYPES:
             print(f'NEW LAND USE DETECTED {land_use} >> {parcels_data["landUse"]}')
             create_base_land_compartments(parcels_data, p, land_use)
 
@@ -893,6 +892,8 @@ def create_base_land_compartments(parcels_data, p, land_use):
     if land_use in ['Tilled Soil', 'Untilled Soil', 'Impervious']:
         # Revert Soil_surface compartment to default media (Surface_Soil [id = 7])
         c_surfsoil.media = CompartmentService.media.get(name="Surface_Soil")  # Surface Soil
+        CompartmentService.update(c_surfsoil)
+
         # if switching from Impervious, calculate Total erosion rate
         if land_use == 'Impervious':
             custom_param_erosion.value = calc_default_erosion_rate_sdr(p)

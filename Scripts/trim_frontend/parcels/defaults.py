@@ -88,7 +88,7 @@ def get_general_params(pcl):
     biomass_by_media = {}
     bw_by_media = {}
 
-    land_use = 'Grasses/Herbs'
+    land_use = None
 
     # FIXME verify this is okay
     root_soil_height = pcl.get_compartment(media="Root_Zone")
