@@ -11,7 +11,7 @@ def set_param_default_val(kwargs, val):
                 param.default_value = val
                 ParameterService.definitions.update(param)
     except Exception as e:
-        print(e)
+        print('error setting param:', e)
 
 
 def init_first_time_default_param_values():

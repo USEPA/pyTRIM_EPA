@@ -85,9 +85,10 @@ class GenericService(metaclass=ServiceMetaClass):
     auto_commit = True
 
     @classmethod
-    def commit(cls):
-        # cls.clear_cache()
-        CacheManager.clear()
+    def commit(cls, preserve_cache=False):
+        if not preserve_cache:
+            # cls.clear_cache()
+            CacheManager.clear()
         try:
             cls.db.session.commit()
         except Exception as e:

@@ -420,8 +420,8 @@ def convert_unit(val, unit, strict=False):
         try:
             val = as_quantity(val, unit)
         except Exception:
-            print(val)
-            print(unit)
+            # print('unit error (v) -', val)
+            # print('unit error (u) -', unit)
             raise
     return val
 
@@ -854,6 +854,8 @@ def parameterize(cls, globalize_custom_parameters=False, default_scenario=None):
         def evaluate(self, param, **kwargs):
             if self.entity == cls:
                 raise TypeError('Cannot Evaluate Parameters at the Class Level')
+            if isinstance(param, str):
+                param = self.get(param)
             return evaluate_parameter(param, self.entity, **kwargs)
 
         def __repr__(self):

@@ -489,7 +489,7 @@
                                 `</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted' ${prop_value_style}>`
                                 + (prop_value == null ? '-' : prop_value) +
                                 `</label></td><td ${prop_unit_style}>`
-                                + (property_value.unit || '') +
+                                + (property_value.unit || '').replace(/\[.*?\]/g, '') +
                                 "</td></tr>"
                         }
                     }

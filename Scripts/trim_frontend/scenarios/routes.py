@@ -291,7 +291,7 @@ def update_scenario():
                 c_p.value = par_val
                 ParameterService.update(c_p)
             except AttributeError as e:
-                print(e)
+                print('update assumed all comp fixed params error:', e)
         ParameterService.commit()
 
     def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
@@ -864,10 +864,10 @@ def run_result_scenario():
             data_resp = {"mass": json_n_avg, "conc": json_c_avg, "outputMass": output_file_n,
                          "outputConc": output_file_c, "outputTM": output_file_tm}
     except Exception as e:
-        print(e)
+        print('scenario run error:', e)
         data_resp = {"error": e}
 
-    print(f"Model Run Finished ({datetime.now()}...")
+    print(f"Model Run Finished ({datetime.now()}) ...")
 
     return ApiResult(data_resp)
 
@@ -1150,7 +1150,7 @@ def run_getflow(scenario_id):
         else:
             data_resp = {"not": "implemented!"}
     except Exception as e:
-        print(e)
+        print('getflow kickoff exception:', e)
         data_resp = {"error": repr(e)}
 
     return ApiResult(data_resp)
@@ -1277,7 +1277,7 @@ def run_receptor_generation(scenario_id):
 
 
 @scenario_api.route(
-    "/api/scenario/<int:scenario_id>/chemical_properties", methods=["GET"]
+    "/api/scenario/<int:scenario_id>/chemical/properties", methods=["GET"]
 )
 @login_required
 def get_chemical_properties(scenario_id):
@@ -1285,16 +1285,11 @@ def get_chemical_properties(scenario_id):
     logger.info("Pulling chemical properties...")
 
     scen = ScenarioService.get(scenario_id)
-    # comps = scen.compartments
+    comps = scen.compartments
 
     chem_properties = {}
 
-    def add_prop(chem_name, scope, prop_name, value):
-        if chem_name not in chem_properties:
-            chem_properties[chem_name] = {}
-        if scope not in chem_properties[chem_name]:
-            chem_properties[chem_name][scope] = {}
-
+    def serialize_value(value, param):
         v = None
         u = None
         if isinstance(value, pint.Quantity):
@@ -1309,11 +1304,65 @@ def get_chemical_properties(scenario_id):
             else:
                 v = float(f'{v:.4f}')
 
-        chem_properties[chem_name][scope][prop_name] = {
-            "name": prop_name,
+        return {
             "value": v,
             "unit": u
         }
+
+    def add_prop(chem_name, scope, prop_name, param, value, restriction=None):
+        if chem_name not in chem_properties:
+            chem_properties[chem_name] = {}
+        if scope not in chem_properties[chem_name]:
+            chem_properties[chem_name][scope] = {}
+
+        if prop_name not in chem_properties[chem_name][scope]:
+            chem_properties[chem_name][scope][prop_name] = {
+                "name": prop_name,
+                **serialize_value(value, param)
+            }
+
+        if restriction is not None:
+            if 'options' not in chem_properties[chem_name][scope][prop_name]:
+                chem_properties[chem_name][scope][prop_name]['options'] = {}
+            opts = chem_properties[chem_name][scope][prop_name]['options']
+            for k, val in restriction.items():
+                opts[k] = serialize_value(val, param)
+
+    def get_by_compartment(param_name, param, chem, fn=None):
+        for comp in comps[:1]:
+            try:
+                if fn is None:
+                    comp_fn = comp.parameters.evaluate(param_name)
+                    if isinstance(comp_fn, types.FunctionType):
+                        try:
+                            val = comp_fn(chem)
+                        except Exception as e:
+                            # print('\t-', e)
+                            continue
+                    else:
+                        val = comp_fn
+                else:
+                    val = fn(comp)
+                # print('\t>', val)
+                add_prop(
+                    chem.name, 'Compartment', param_name, param, val,
+                    {comp.standard_name: val}
+                )
+            except Exception as e:
+                # print('\t-', e)
+                pass
+
+    def is_recursive(param):
+        if param.formula is None:
+            return False
+        eq = param.formula.equation
+        if f'self.{param_name}(' in eq:
+            return True
+        if f'self.{param_name}.' in eq:
+            return True
+        if f'self.{param_name} ' in eq:
+            return True
+        return False
 
     try:
         for chem in scen.chemicals:
@@ -1321,24 +1370,33 @@ def get_chemical_properties(scenario_id):
             # print(chem)
             # print('----------------------------------')
             for param_name, param in chem.parameters.items():
-                # print(param_name)
+                # print('~', param_name)
+                if is_recursive(param):
+                    logger.error(
+                        f'Chemical Parameter "{param_name}" is recursively defined!'
+                    )
+                    if param_name == 'initialConcentration':
+                        logger.warning(f'Using compartment "{param_name}" instead ...')
+                        get_by_compartment(param_name, param, chem)
+                    else:
+                        logger.warning(f'Skipping parameter "{param_name}" ...')
+                    continue
+
                 val = chem.parameters.evaluate(param)
                 scope = None
                 if not isinstance(val, types.FunctionType):
                     # print('\t>', val)
-                    add_prop(chem.name, 'Scenario', param_name, val)
+                    add_prop(chem.name, 'Scenario', param_name, param, val)
                 else:
-                    # TRYING TO EVALUATE THESE BY COMPARTMENT IS BROKEN??
-                    # - SOME SORT OF THREADING ISSUE WITH DB
-                    # c = comps[0]
-                    # try:
-                    #     val = chem.parameters.evaluate(param, compartment=c)
-                    #     print('\t>', val)
-                    #     # add_prop(chem.name, f'Compartment - {c.standard_name}', param_name, val)
-                    # except Exception as e:
-                    #     print('\t-', e)
-                    val = param.formula.equation if param.formula else None
-                    add_prop(chem.name, 'Compartment', param_name, val)
+                    try:
+                        val = val()
+                        # print('\t>', val)
+                        add_prop(chem.name, 'Scenario', param_name, param, val)
+                        continue
+                    except Exception as e:
+                        # print('\t-', e)
+                        pass
+                    get_by_compartment(param_name, param, chem, fn=val)
     except Exception as e:
-        print(e)
+        import traceback; traceback.print_exc()
     return ApiResult(chem_properties)
