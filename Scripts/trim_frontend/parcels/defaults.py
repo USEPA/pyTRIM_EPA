@@ -924,6 +924,7 @@ Land_Parcel_VolElem_defaults = {
     }
 }
 
+# these defaults are set when land use == tilled or untilled
 Farm_Biota_SurfSoil_Compartment_defaults = {
     'Compartments': {
         'Soil_Surface': {

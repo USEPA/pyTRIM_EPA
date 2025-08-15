@@ -135,43 +135,30 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             initialize_parcel_contents(p, water_and_air_parcel_vol_elem_defaults)
 
     elif field_name == "landUse":
+        if parcels_data['landUse'] == land_use:
+            return
         if parcels_data['landUse'] in ['Coniferous Forest', 'Deciduous Forest', 'Agriculture (General)',
                                        'Grasses/Herbs', 'Tilled Soil', 'Untilled Soil', 'Impervious']:
-            # COMPARTMENT CHANGE
-            if not parcels_data['landUse'] == land_use:
-                print(f'NEW LAND USE DETECTED {land_use} >> {parcels_data["landUse"]}')
-                create_base_land_compartments(parcels_data, p, land_use)
-        if parcels_data['landUse'] not in ['Tilled Soil', 'Untilled Soil']:
-            ve = p.get_volume_element("SurfSoil")
-            if ve:
-                if ve.get_compartment("Farm"):
-                    cmp = ve.get_compartment("Farm")
-                    CompartmentService.delete(cmp, False)
+            print(f'NEW LAND USE DETECTED {land_use} >> {parcels_data["landUse"]}')
+            create_base_land_compartments(parcels_data, p, land_use)
+
+        surfsoil_ve = p.get_volume_element("SurfSoil")
+        if surfsoil_ve and surfsoil_ve.get_compartment("Farm"): # FFC should reset back to 'No' on change
+            CompartmentService.delete(surfsoil_ve.get_compartment("Farm"))
+                
         if parcels_data['landUse'] in ['Impervious']:
-            ve = p.get_volume_element("SurfSoil")
-            if ve:
-                if ve.get_compartment("Wetland"):
-                    cmp = ve.get_compartment("Wetland")
-                    CompartmentService.delete(cmp, False)
+            if surfsoil_ve and surfsoil_ve.get_compartment("Wetland"):
+                CompartmentService.delete(surfsoil_ve.get_compartment("Wetland"))
 
     elif field_name == "hasFarmFoodChain":
-        biotic_ve = deepcopy(Land_Parcel_VolElem_defaults)
-        biotic_ve["SurfSoil"]["Compartments"] = deepcopy(Farm_Biota_SurfSoil_Compartment_defaults["Compartments"])
+        surfsoil_ve = p.get_volume_element("SurfSoil")
         if parcels_data[field_name] == "Yes":
-            surfsoil = p.get_volume_element("SurfSoil")
-            if surfsoil:
-                initialize_parcel_contents(p, biotic_ve)
-            else:
-                raise ValueError("Cannot create or get Farm Compartment")
+            CompartmentService.create(
+                name="Farm", volume_element=surfsoil_ve,
+                media=CompartmentService.media.get(name="Farm"),
+            )
         else:
-            for vek, vev in biotic_ve.items():
-                ve = p.get_volume_element(vek)
-                if ve:
-                    for k, v in biotic_ve[vek]["Compartments"].items():
-                        cmp = ve.get_compartment(v["name"])
-                        if cmp:
-                            logger.info(f"Deleted {cmp.name}")
-                            CompartmentService.delete(cmp, False)
+            CompartmentService.delete(surfsoil_ve.get_compartment("Farm"))
 
     elif field_name == "hasFishFoodWeb":
         biotic_ve = deepcopy(Water_Parcel_VolElem_defaults)
