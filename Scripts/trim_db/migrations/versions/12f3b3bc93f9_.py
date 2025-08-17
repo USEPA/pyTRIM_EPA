@@ -27,7 +27,7 @@ def upgrade():
     sa.UniqueConstraint('cas_number')
     )
     op.create_table('formula',
-    sa.Column('equation', sa.String(), nullable=False),
+    sa.Column('equation', sa.String(10000), nullable=False),
     sa.Column('description', sa.String(length=240), nullable=True),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.PrimaryKeyConstraint('id')
@@ -36,7 +36,7 @@ def upgrade():
     sa.Column('name', sa.String(length=240), nullable=False),
     sa.Column('algorithm_id', sa.Integer(), nullable=False),
     sa.Column('category', sa.String(length=240), nullable=False),
-    sa.Column('requirements', sa.String(), nullable=True),
+    sa.Column('requirements', sa.String(10000), nullable=True),
     sa.Column('output_chemical_id', sa.Integer(), nullable=True),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.ForeignKeyConstraint(['output_chemical_id'], ['chemical.id'], ),
@@ -50,14 +50,14 @@ def upgrade():
     sa.Column('can_emit', sa.Boolean(), nullable=False),
     sa.Column('can_absorb', sa.Boolean(), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.ForeignKeyConstraint(['parent_id'], ['media.id'], ),
     sa.PrimaryKeyConstraint('id'),
+    sa.ForeignKeyConstraint(['parent_id'], ['media.id'], ),
     sa.UniqueConstraint('name')
     )
     op.create_table('parameter_domain',
     sa.Column('name', sa.String(length=120), nullable=False),
     sa.Column('entity_type', sa.String(length=120), nullable=False),
-    sa.Column('requirements', sa.String(), nullable=True),
+    sa.Column('requirements', sa.String(500), nullable=True),
     sa.Column('description', sa.String(length=240), nullable=True),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.PrimaryKeyConstraint('id'),
@@ -92,9 +92,10 @@ def upgrade():
     sa.Column('name', sa.String(length=60), nullable=False),
     sa.Column('domain_id', sa.Integer(), nullable=True),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.PrimaryKeyConstraint('id'),
     sa.ForeignKeyConstraint(['domain_id'], ['parameter_domain.id'], ),
     sa.ForeignKeyConstraint(['formula_id'], ['formula.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.UniqueConstraint('formula_id', 'name'),
     )
     op.create_table('parameter_definition',
     sa.Column('variable_name', sa.String(length=60), nullable=False),
@@ -105,9 +106,9 @@ def upgrade():
     sa.Column('default_unit', sa.String(length=60), nullable=True),
     sa.Column('default_formula_id', sa.Integer(), nullable=True),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.PrimaryKeyConstraint('id'),
     sa.ForeignKeyConstraint(['default_formula_id'], ['formula.id'], ),
     sa.ForeignKeyConstraint(['domain_id'], ['parameter_domain.id'], ),
-    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('roles_users',
     sa.Column('user_id', sa.Integer(), nullable=True),
@@ -122,38 +123,29 @@ def upgrade():
     sa.Column('description', sa.String(length=255), nullable=True),
     sa.Column('creator_id', sa.Integer(), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.PrimaryKeyConstraint('id'),
     sa.ForeignKeyConstraint(['creator_id'], ['user.id'], ),
-    sa.PrimaryKeyConstraint('id')
     )
-    # op.create_table('team',
-    # sa.Column('scenario_id', sa.Integer(), nullable=False),
-    # sa.Column('member_id', sa.Integer(), nullable=False),
-    # sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    # sa.ForeignKeyConstraint(['member_id'], ['user.id'], ),
-    # sa.ForeignKeyConstraint(['scenario_id'], ['scenario.id'], ),
-    # sa.PrimaryKeyConstraint('id'),
-    # sa.UniqueConstraint('scenario_id', 'member_id')
-    # )
     op.create_table('custom_parameter',
     sa.Column('definition_id', sa.Integer(), nullable=False),
     sa.Column('scenario_id', sa.Integer(), nullable=False),
-    sa.Column('requirements', sa.String(), nullable=True),
-    sa.Column('value', sa.Float(), nullable=True),
-    sa.Column('unit', sa.String(length=60), nullable=True),
+    sa.Column('requirements', sa.String(10000), nullable=True),
+    sa.Column('value', sa.Double(), nullable=True),
+    sa.Column('unit', sa.String(length=150), nullable=True),
     sa.Column('formula_id', sa.Integer(), nullable=True),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.PrimaryKeyConstraint('id'),
     sa.ForeignKeyConstraint(['definition_id'], ['parameter_definition.id'], ),
     sa.ForeignKeyConstraint(['formula_id'], ['formula.id'], ),
     sa.ForeignKeyConstraint(['scenario_id'], ['scenario.id'], ),
-    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('parcel',
     sa.Column('name', sa.String(length=120), nullable=False),
     sa.Column('scenario_id', sa.Integer(), nullable=False),
     sa.Column('vertices', sa.JSON(), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.ForeignKeyConstraint(['scenario_id'], ['scenario.id'], ),
     sa.PrimaryKeyConstraint('id'),
+    sa.ForeignKeyConstraint(['scenario_id'], ['scenario.id'], ),
     sa.UniqueConstraint('scenario_id', 'name')
     )
     op.create_table('scenario_chemicals',
@@ -169,8 +161,8 @@ def upgrade():
     sa.Column('top', sa.Float(), nullable=False),
     sa.Column('bottom', sa.Float(), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.ForeignKeyConstraint(['parcel_id'], ['parcel.id'], ),
     sa.PrimaryKeyConstraint('id'),
+    sa.ForeignKeyConstraint(['parcel_id'], ['parcel.id'], ),
     sa.UniqueConstraint('parcel_id', 'name')
     )
     op.create_table('compartment',
@@ -178,27 +170,41 @@ def upgrade():
     sa.Column('volume_element_id', sa.Integer(), nullable=False),
     sa.Column('media_id', sa.Integer(), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.PrimaryKeyConstraint('id'),
     sa.ForeignKeyConstraint(['media_id'], ['media.id'], ),
     sa.ForeignKeyConstraint(['volume_element_id'], ['volume_element.id'], ),
-    sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('volume_element_id', 'name')
     )
     op.create_table('compartment_link',
     sa.Column('sender_id', sa.Integer(), nullable=False),
     sa.Column('receiver_id', sa.Integer(), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.PrimaryKeyConstraint('id'),
     sa.ForeignKeyConstraint(['receiver_id'], ['compartment.id'], ),
     sa.ForeignKeyConstraint(['sender_id'], ['compartment.id'], ),
-    sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('sender_id', 'receiver_id')
+    )
+    op.create_table('scenario_load_run_proc',
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('load_status', sa.String(length=140), nullable=True),
+    sa.Column('run_status', sa.String(length=140), nullable=True),
+    sa.Column('run_datetime', sa.DateTime(), nullable=True),
+    sa.Column('result_file_nt', sa.String(length=255), nullable=True),
+    sa.Column('result_file_conc', sa.String(length=255), nullable=True),
+    sa.Column('result_file_tm', sa.String(length=255), nullable=True),
+    sa.Column('result_nt', sa.Text(), nullable=True),
+    sa.Column('result_conc', sa.Text(), nullable=True),
+    sa.Column('scenario_id', sa.Integer(), nullable=False),
+    sa.PrimaryKeyConstraint('id'),
+    sa.ForeignKeyConstraint(['scenario_id'], ['scenario.id'], ),
     )
     op.create_table('api_key',
     sa.Column('active', sa.Boolean(), nullable=False),
     sa.Column('value', sa.Unicode(length=255), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id'),
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.UniqueConstraint('value')
     )
     # ### end Alembic commands ###
@@ -207,6 +213,8 @@ def upgrade():
 def downgrade():
     # ### commands auto generated by Alembic - please adjust! ###
     op.drop_table('api_key')
+    op.drop_table('scenario_load_run_proc')
+    op.drop_table('compartment_link')
     op.drop_table('compartment')
     op.drop_table('volume_element')
     op.drop_table('scenario_chemicals')
@@ -221,6 +229,7 @@ def downgrade():
     op.drop_table('role')
     op.drop_table('parameter_domain')
     op.drop_table('media')
+    op.drop_table('transport_process')
     op.drop_table('formula')
     op.drop_table('chemical')
     # ### end Alembic commands ###

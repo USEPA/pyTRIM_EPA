@@ -37,8 +37,8 @@ CREATE TABLE `transport_process` (
     `output_chemical_id` INTEGER, 
     `id` INTEGER NOT NULL AUTO_INCREMENT, 
     PRIMARY KEY (`id`), 
-    FOREIGN KEY(`output_chemical_id`) REFERENCES chemical (`id`), 
-    FOREIGN KEY(`algorithm_id`) REFERENCES formula (`id`), 
+    FOREIGN KEY(`output_chemical_id`) REFERENCES `chemical` (`id`), 
+    FOREIGN KEY(`algorithm_id`) REFERENCES `formula` (`id`), 
     UNIQUE (`name`)
 );
 
@@ -105,13 +105,13 @@ CREATE TABLE `parameter_definition` (
     `full_name` VARCHAR(120) NOT NULL, 
     `description` VARCHAR(240), 
     `domain_id` INTEGER NOT NULL, 
-    `default_value` DECIMAL(60,15), 
+    `default_value` DOUBLE, 
     `default_unit` VARCHAR(150), 
     `default_formula_id` INTEGER, 
     `id` INTEGER NOT NULL AUTO_INCREMENT, 
     PRIMARY KEY (`id`), 
     FOREIGN KEY(`default_formula_id`) REFERENCES `formula` (`id`), 
-    FOREIGN KEY(`domain_id`) REFERENCES parameter_domain (`id`)
+    FOREIGN KEY(`domain_id`) REFERENCES `parameter_domain` (`id`)
 );
 
 CREATE TABLE `roles_users` (
@@ -132,28 +132,18 @@ CREATE TABLE `scenario` (
     FOREIGN KEY(`creator_id`) REFERENCES user (`id`)
 );
 
--- CREATE TABLE `team` (
---     `scenario_id` INTEGER NOT NULL, 
---     `member_id` INTEGER NOT NULL, 
---     `id` INTEGER NOT NULL AUTO_INCREMENT, 
---     PRIMARY KEY (`id`), 
---     FOREIGN KEY(`member_id`) REFERENCES user (`id`), 
---     FOREIGN KEY(`scenario_id`) REFERENCES scenario (`id`), 
---     UNIQUE (`scenario_id`, `member_id`)
--- );
-
 CREATE TABLE `custom_parameter` (
     `definition_id` INTEGER NOT NULL, 
     `scenario_id` INTEGER NOT NULL, 
     `requirements` VARCHAR(10000), 
-    `value` DECIMAL(60,15), 
+    `value` DOUBLE, 
     `unit` VARCHAR(150), 
     `formula_id` INTEGER, 
     `id` INTEGER NOT NULL AUTO_INCREMENT, 
     PRIMARY KEY (`id`), 
     FOREIGN KEY(`definition_id`) REFERENCES `parameter_definition` (`id`), 
-    FOREIGN KEY(`formula_id`) REFERENCES formula (`id`), 
-    FOREIGN KEY(`scenario_id`) REFERENCES scenario (`id`)
+    FOREIGN KEY(`formula_id`) REFERENCES `formula` (`id`), 
+    FOREIGN KEY(`scenario_id`) REFERENCES `scenario` (`id`)
 );
 
 CREATE TABLE `parcel` (
@@ -163,15 +153,15 @@ CREATE TABLE `parcel` (
     `vertices` JSON NOT NULL,
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     PRIMARY KEY (`id`),
-    FOREIGN KEY(`scenario_id`) REFERENCES scenario (`id`),
+    FOREIGN KEY(`scenario_id`) REFERENCES `scenario` (`id`),
     UNIQUE (`scenario_id`, `name`)
 );
 
 CREATE TABLE `scenario_chemicals` (
     `scenario_id` INTEGER, 
     `chemical_id` INTEGER, 
-    FOREIGN KEY(`chemical_id`) REFERENCES chemical (`id`), 
-    FOREIGN KEY(`scenario_id`) REFERENCES scenario (`id`), 
+    FOREIGN KEY(`chemical_id`) REFERENCES `chemical` (`id`), 
+    FOREIGN KEY(`scenario_id`) REFERENCES `scenario` (`id`), 
     UNIQUE (`scenario_id`, `chemical_id`)
 );
 
@@ -192,7 +182,7 @@ CREATE TABLE `compartment` (
     `media_id` INTEGER NOT NULL, 
     `id` INTEGER NOT NULL AUTO_INCREMENT, 
     PRIMARY KEY (`id`), 
-    FOREIGN KEY(`media_id`) REFERENCES media (`id`), 
+    FOREIGN KEY(`media_id`) REFERENCES `media` (`id`), 
     FOREIGN KEY(`volume_element_id`) REFERENCES `volume_element` (`id`), 
     UNIQUE (`volume_element_id`, `name`)
 );
@@ -214,8 +204,9 @@ CREATE TABLE `scenario_load_run_proc` (
     `run_datetime` DATETIME,
     `result_file_nt` VARCHAR(255),
     `result_file_conc` VARCHAR(255),
+    `result_file_tm` VARCHAR(255),
     `result_nt` MEDIUMTEXT,
-    `result_conc` MEDIUMTEXT, 
+    `result_conc` MEDIUMTEXT,
     `scenario_id` INTEGER NOT NULL,
     PRIMARY KEY (`id`), 
     FOREIGN KEY(`scenario_id`) REFERENCES `scenario` (`id`)
@@ -227,9 +218,8 @@ CREATE TABLE `api_key` (
     `user_id` INTEGER NOT NULL, 
     `id` INTEGER NOT NULL AUTO_INCREMENT, 
     PRIMARY KEY (`id`), 
-    FOREIGN KEY(`user_id`) REFERENCES `user` (`id`)
+    FOREIGN KEY(`user_id`) REFERENCES `user` (`id`),
     UNIQUE (`value`)
 );
 
 INSERT INTO `alembic_version` (`version_num`) VALUES ('12f3b3bc93f9');
-
