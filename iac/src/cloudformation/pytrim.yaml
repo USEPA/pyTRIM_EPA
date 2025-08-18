@@ -1041,9 +1041,13 @@ Resources:
       # Cpu: "8192"
       # Memory: "32768"
       
-      # 8 vCPU / 60 GB RAM. Works, took about 19 minutes.
-      Cpu: "8192"
-      Memory: "61440"
+      # 8 vCPU / 60 GB RAM. Crashes with too many chemicals
+      # Cpu: "8192"
+      # Memory: "61440"
+
+      # 16 vCPU / 72 GB RAM
+      Cpu: "16384"
+      Memory: "73728"
       ContainerDefinitions: 
         - Image: !Join
           - ':'
