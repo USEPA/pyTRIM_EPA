@@ -88,18 +88,21 @@ def get_general_params(pcl):
     biomass_by_media = {}
     bw_by_media = {}
 
-    land_use = 'Grasses/Herbs'
+    land_use = None
 
     # FIXME verify this is okay
     root_soil_height = pcl.get_compartment(media="Root_Zone")
     if root_soil_height:
         root_soil_height = root_soil_height[0].volume_element.height.m_as('m')
+        root_soil_height = round(root_soil_height, 4)
     vadose_soil_height = pcl.get_compartment(media="Vadose_Zone")
     if vadose_soil_height:
         vadose_soil_height = vadose_soil_height[0].volume_element.height.m_as('m')
+        vadose_soil_height = round(vadose_soil_height, 4)
     groundwater_height = pcl.get_compartment(media="Groundwater")
     if groundwater_height:
         groundwater_height = groundwater_height[0].volume_element.height.m_as('m')
+        groundwater_height = round(groundwater_height, 4)
 
     for comp in pcl.compartments:
         # Check parcel type
@@ -197,7 +200,7 @@ def get_general_params(pcl):
         'hasWater': 'Yes' if water else 'No',
         'hasFishFoodWeb': 'Yes' if fish_food_web else 'No',
 
-        'surfaceSoilThickness': surface_soil_height,
+        'surfaceSoilThickness': surface_soil_height,  
         'rootSoilThickness': root_soil_height,
         'vadoseSoilThickness': vadose_soil_height,
         "groundwaterZoneThickness": groundwater_height,
@@ -839,6 +842,7 @@ Land_Parcel_VolElem_defaults = {
         'name': 'SurfSoil',
         'top': 0,
         'bottom': -0.01,
+        'layers': ["Soil_Root_Zone", "Soil_Vadose_Zone", "Groundwater", "DryVaporSource", "WetVaporSource", "DryParticleSource", "WetParticleSource"],
         'Compartments': {
             'Soil_Surface': {
                 'name': 'Soil_Surface',
@@ -874,6 +878,7 @@ Land_Parcel_VolElem_defaults = {
         'name': 'RootSoil',
         'top': -0.01,
         'bottom': -0.8,
+        'layers': ["Soil_Vadose_Zone", "Groundwater", "DryVaporSource", "WetVaporSource", "DryParticleSource", "WetParticleSource"],
         'Compartments': {
             'Soil_Root_Zone': {
                 'name': 'Soil_Root_Zone',
@@ -889,6 +894,7 @@ Land_Parcel_VolElem_defaults = {
         'name': 'VadoseSoil',
         'top': -0.8,
         'bottom': -2.2,
+        'layers': ["Groundwater", "DryVaporSource", "WetVaporSource", "DryParticleSource", "WetParticleSource"],
         'Compartments': {
             'Soil_Vadose_Zone': {
                 'name': 'Soil_Vadose_Zone',
@@ -904,6 +910,7 @@ Land_Parcel_VolElem_defaults = {
         'name': 'GW',
         'top': -2.2,
         'bottom': -5.2,
+        'layers': ["DryVaporSource", "WetVaporSource", "DryParticleSource", "WetParticleSource"],
         'Compartments': {
             'Groundwater': {
                 'name': 'Groundwater',
@@ -917,6 +924,7 @@ Land_Parcel_VolElem_defaults = {
     }
 }
 
+# these defaults are set when land use == tilled or untilled
 Farm_Biota_SurfSoil_Compartment_defaults = {
     'Compartments': {
         'Soil_Surface': {
