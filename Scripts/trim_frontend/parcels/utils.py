@@ -304,6 +304,20 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         par_name = misc_water_params[field_name]
         comp = p.get_compartment("Surface_water")
         par = comp.parameters.get(par_name)
+
+        if field_name == "mean_depth":
+            csw = p.get_compartment("Surface_water")
+            h_diff = (csw.height.magnitude - float(parcels_data[field_name]))
+            # Now shift bounds of everything below the SW volume element
+            ves = [a for a in p.volume_elements]
+            for ve in ves:
+                if ve.top <= csw.volume_element.bottom:
+                    print(f'new {ve.name} top = {ve.top + h_diff} and bottom = {ve.bottom + h_diff}')
+                    ve.top = ve.top + h_diff
+                    ve.bottom = ve.bottom + h_diff
+            # finally fix the surface water element bottom
+            csw.volume_element.bottom = -1 * float(parcels_data[field_name])
+
         if par:
             par = get_or_create_custom_param(
                 par,
@@ -320,24 +334,26 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             comp.parameters.get(par_name).value = parcels_data[field_name]
             comp.parameters.get(par_name).scenario_id = p.scenario_id
 
-    elif field_name == "MeanDepth":
-        csw = p.get_compartment("Surface_water")
-        h_diff = (csw.height - parcels_data[field_name]).magnitude
-        # Now shift bounds of everything below the SW volume element
-        ves = [a for a in p.volume_elements]
-        for ve in ves:
-            if ve.top <= csw.volume_element.bottom:
-                print(f'new {ve.name} top = {ve.top + h_diff} and bottom = {ve.bottom + h_diff}')
-                ve.top = ve.top + h_diff
-                ve.bottom = ve.bottom + h_diff
-        # finally fix the surface water element bottom
-        csw.volume_element.bottom = -1 * parcels_data[field_name]
-
     elif field_name in bed_params:
         par_name = bed_params[field_name]
         comp = p.get_compartment("Sediment")
         par = comp.parameters.get(par_name)
-        if par:
+        if field_name == "bed_thickness":
+            sed_ve = comp.volume_element
+            thickness_before = sed_ve.height
+            sed_ve.bottom = sed_ve.top - float(parcels_data[field_name])
+            thickness_now = sed_ve.height
+
+            # shift everything below the sediment volume element
+            delta_thickness = thickness_now.magnitude - thickness_before.magnitude
+            ves = [a for a in p.volume_elements]
+            for ve in ves:
+                if ve.top <= sed_ve.bottom:
+                    print(f'new {ve.name} top = {ve.top - delta_thickness} and bottom = {ve.bottom - delta_thickness}')
+                    ve.top = ve.top - delta_thickness
+                    ve.bottom = ve.bottom - delta_thickness
+
+        elif par:
             par = get_or_create_custom_param(
                 par,
                 {

@@ -580,7 +580,7 @@ def get_water_params(pcl, parcel_type):
                 'organic_carbon_frac': get_correct_param("OrganicCarbonContent", sed_pars),
                 'bed_pH': get_correct_param("pH", sed_pars),
                 'bed_porosity': get_correct_param("Porosity", sed_pars),
-                'bed_thickness': sed.volume_element.top - sed.volume_element.bottom,
+                'bed_thickness': round(sed.volume_element.top - sed.volume_element.bottom, 4),
                 'sed_burial_vol_rate': sed_burial_vol_rate,
                 'sed_deposition_vol_rate': sed_deposition_vol_rate,
                 'sed_resuspension_vel': sed_resuspension_vel,
