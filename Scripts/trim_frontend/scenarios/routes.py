@@ -1309,11 +1309,16 @@ def get_chemical_properties(scenario_id):
             "unit": u
         }
 
-    def add_prop(chem_name, scope, prop_name, param, value, restriction=None):
+    def get_prop_name(param):
+        return param.variable_name
+
+    def add_prop(chem_name, scope, param, value, restriction=None):
         if chem_name not in chem_properties:
             chem_properties[chem_name] = {}
         if scope not in chem_properties[chem_name]:
             chem_properties[chem_name][scope] = {}
+
+        prop_name = get_prop_name(param)
 
         if prop_name not in chem_properties[chem_name][scope]:
             chem_properties[chem_name][scope][prop_name] = {
@@ -1328,18 +1333,21 @@ def get_chemical_properties(scenario_id):
             for k, val in restriction.items():
                 opts[k] = serialize_value(val, param)
 
-    def get_by_compartment(param_name, param, chem, fn=None):
+    def get_by_compartment(param, chem, fn=None):
+        prop_name = get_prop_name(param)
+        var_name = param.variable_name
+        chem_name = chem.name
         for comp in comps:
             scope = f'Compartment [{comp.media.name}]'
             if (
-                chem.name in chem_properties
-                and scope in chem_properties[chem.name]
-                and param_name in chem_properties[chem.name][scope]
+                chem_name in chem_properties
+                and scope in chem_properties[chem_name]
+                and prop_name in chem_properties[chem_name][scope]
             ):
                 continue
             try:
                 if fn is None:
-                    comp_fn = comp.parameters.evaluate(param_name)
+                    comp_fn = comp.parameters.evaluate(var_name)
                     if isinstance(comp_fn, types.FunctionType):
                         try:
                             val = comp_fn(chem)
@@ -1352,8 +1360,8 @@ def get_chemical_properties(scenario_id):
                     val = fn(comp)
                 # print('\t>', val)
                 add_prop(
-                    chem.name, scope, param_name, param, val,
-                    {comp.standard_name: val}
+                    chem_name, scope, param, val,
+                    restriction={comp.standard_name: val}
                 )
             except Exception as e:
                 # print('\t-', e)
@@ -1363,11 +1371,11 @@ def get_chemical_properties(scenario_id):
         if param.formula is None:
             return False
         eq = param.formula.equation
-        if f'self.{param_name}(' in eq:
+        if f'self.{param.variable_name}(' in eq:
             return True
-        if f'self.{param_name}.' in eq:
+        if f'self.{param.variable_name}.' in eq:
             return True
-        if f'self.{param_name} ' in eq:
+        if f'self.{param.variable_name} ' in eq:
             return True
         return False
 
@@ -1376,6 +1384,7 @@ def get_chemical_properties(scenario_id):
             # print('\n========================================')
             # print(chem)
             # print('----------------------------------')
+            chem_name = chem.name
             for param_name, param in chem.parameters.items():
                 # print('~', param_name)
                 if is_recursive(param):
@@ -1383,8 +1392,10 @@ def get_chemical_properties(scenario_id):
                         f'Chemical Parameter "{param_name}" is recursively defined!'
                     )
                     if param_name == 'initialConcentration':
-                        logger.warning(f'Using compartment "{param_name}" instead ...')
-                        get_by_compartment(param_name, param, chem)
+                        # DISABLED FOR NOW - SEE BELOW
+                        # logger.warning(f'Using compartment "{param_name}" instead ...')
+                        # get_by_compartment(param, chem)
+                        pass
                     else:
                         logger.warning(f'Skipping parameter "{param_name}" ...')
                     continue
@@ -1393,17 +1404,19 @@ def get_chemical_properties(scenario_id):
                 scope = None
                 if not isinstance(val, types.FunctionType):
                     # print('\t>', val)
-                    add_prop(chem.name, 'Scenario', param_name, param, val)
+                    add_prop(chem_name, 'Scenario', param, val)
                 else:
                     try:
                         val = val()
                         # print('\t>', val)
-                        add_prop(chem.name, 'Scenario', param_name, param, val)
+                        add_prop(chem_name, 'Scenario', param, val)
                         continue
                     except Exception as e:
                         # print('\t-', e)
                         pass
-                    get_by_compartment(param_name, param, chem, fn=val)
+                    # DISABLED FOR NOW - MAYBE LATER?
+                    # - we want to figure out a way to display the formulas (too?)
+                    # get_by_compartment(param, chem, fn=val)
     except Exception as e:
         import traceback; traceback.print_exc()
     return ApiResult(chem_properties)

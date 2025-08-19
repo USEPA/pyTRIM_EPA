@@ -371,8 +371,16 @@ class CustomParameter(Model):
         return self.definition.domain_id
 
     @property
+    def full_name(self):
+        return self.definition.full_name
+
+    @property
     def variable_name(self):
         return self.definition.variable_name
+
+    @property
+    def name(self):
+        return self.definition.name
 
     requirements = sa.Column(sa.String())
 
