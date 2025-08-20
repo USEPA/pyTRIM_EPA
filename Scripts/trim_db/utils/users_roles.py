@@ -8,10 +8,10 @@ def implement_users_roles():
     """
     try:
         from trim_db.schema.utils.base import Model
-        from trim_db.schema.users.models import RoleMixin, UserMixin
+        from trim_db.schema.users.models import RoleMixin, UserMixin, ApiKey
     except Exception:
         from schema.utils.base import Model
-        from schema.users.models import RoleMixin, UserMixin
+        from schema.users.models import RoleMixin, UserMixin, ApiKey
     print("-- Creating dummy User/Role ORM")
 
     class Role(RoleMixin, Model):
@@ -20,4 +20,5 @@ def implement_users_roles():
     class User(UserMixin, Model):
         pass
 
+    ApiKey()
     return Role, User

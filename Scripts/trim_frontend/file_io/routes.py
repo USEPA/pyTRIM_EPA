@@ -123,7 +123,7 @@ def parse_aermod():
         lines = fpn.read().decode("utf-8")
         lines = lines.split("\r\n")
     except Exception as e:
-        print(e)
+        print('parse airmod lines error:', e)
 
     row_ind = 0
     for line in lines:
@@ -167,7 +167,7 @@ def parse_aermod():
         df_aermod['newY'] = df_aermod.apply(
             lambda z: translate_position(float(z.X), float(z.Y), 'UTM', 'WGS84_LONGLAT', utm_zone=utm_zone)[1], axis=1)
     except Exception as e:
-        print(e)
+        print('parse airmod newX/newY error:', e)
 
     try:
         # add parcel location to each receptor in aermod file
@@ -216,7 +216,7 @@ def parse_aermod():
                                                                    'WetSource': v["WET DEPO"]}
                     for k, v in aermod_result_json.items()}
     except Exception as e:
-        print(e)
+        print('parse airmod res_json error:', e)
 
     source_comps = ["DryVaporSource", "WetVaporSource"] if this_spec == "Vapor" \
         else ["DryParticleSource", "WetParticleSource"]
@@ -258,7 +258,7 @@ def parse_aermod():
                         FormulaService.get(src_par.formula.id).equation = new_formula
                 FormulaService.commit()
     except Exception as e:
-        print(e)
+        print('parse airmod formulas error:', e)
 
     return ApiResult({'aermod_result': res_json})
 
@@ -283,7 +283,7 @@ def upload_background_conc():
         print(f"problem deleting existing custom parameters: {e}")
     try:
         for ii, d in enumerate(data):
-            print(d)
+            print('d:', d)
             val = d["Background Concentration Value"]
             # Check parcel
             parcel = [p for p in scenario.parcels if p.name == d["Parcel Name"]]
@@ -348,7 +348,7 @@ def upload_background_conc():
                 FormulaService.get(bc_par.formula.id).equation = new_formula
                 FormulaService.commit()
     except Exception as e:
-        print(e)
+        print('background conc load error:', e)
     return ApiResult({'background_conc_file_data': data})
 
 @file_api.route('/api/parcel_file', methods=['POST'])
@@ -488,7 +488,7 @@ def parse_parcel_upload():
 
             print(f"\tDONE FOR LINE {line_num}")
         except Exception as e:
-            errors.append(f"Error processing CSV line {line_num}: {e}")
+            errors.append(f"Error processing line {line_num}: {e}")
             print(f'{60*"*"}\nLINE {line_num}\n{full_stack()}')
 
         line_num += 1

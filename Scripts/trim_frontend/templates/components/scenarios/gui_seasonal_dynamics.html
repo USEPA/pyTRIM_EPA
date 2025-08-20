@@ -305,9 +305,7 @@
                             $(elem).closest('div.form-group').append(lb_static_val)
                         }
                     }
-                    LoadingScreen.show('seasonal_info_loading');
-                    delete TRIM.store.currentScenario.seasonal_dynamics // FIXME
-                    updateSeasonalData();
+                    delete TRIM.store.currentScenario.seasonal_dynamics;
                 })
             } else {
                 return
@@ -379,6 +377,9 @@
                         if (ErrorValidation.tsFileHasDateColumn(me.closest("div").siblings("label"),  filedata)) {
                             updateFields(me);
                         }
+                    }
+                    catch (err) {
+                        alert(err);
                     }
                     finally {
                         LoadingScreen.hide(loadingRequest);

@@ -109,8 +109,8 @@ def print_scenario_compartment_info(scenario):
         print('c2.parameters =', c2.parameters)
 
         print(
-            '\nc1.volume_element.interface_with(c2.volume_element) =',
-            c1.volume_element.interface_with(c2.volume_element)
+            '\nc1.interface_with(c2) =',
+            c1.interface_with(c2)
         )
         print('c1.connects_to(c2) =', c1.connects_to(c2))
 

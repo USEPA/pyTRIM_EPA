@@ -1,4 +1,4 @@
-import os
+import os, sys
 from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
@@ -8,16 +8,22 @@ from alembic import context
 
 
 def import_base_model():
-    import os
-    import sys
-    root = os.path.realpath(
-        os.path.join(os.path.dirname(__file__), '..')
-    )
-    sys.path.insert(0, root)
-    from ..schema import Model
+    trim_scripts = os.path.realpath(os.path.join(os.path.dirname(__file__), '..', '..'))
+    sys.path.append(trim_scripts)  
+    
+    from trim_db.schema import Model
     if 'user' not in Model.metadata.tables:
-        from ..local import *  # Loads user/role tables
+        from trim_db.utils.users_roles import implement_users_roles  # Loads user/role tables
+        implement_users_roles()
     return Model.metadata
+
+
+def update_db_url():
+    url = config.get_main_option("sqlalchemy.url")
+    if '{}' in url:
+        from trim_frontend.config import db_uri
+        return db_uri
+    return url
 
 
 # this is the Alembic Config object, which provides
@@ -26,7 +32,7 @@ config = context.config
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
-# fileConfig(config.config_file_name)
+fileConfig(config.config_file_name, disable_existing_loggers=False)
 
 # add your model's MetaData object here
 # for 'autogenerate' support
@@ -38,8 +44,6 @@ target_metadata = import_base_model()
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
-
-
 def run_migrations_offline():
     """Run migrations in 'offline' mode.
 
@@ -52,25 +56,8 @@ def run_migrations_offline():
     script output.
 
     """
-    if 'RDS_DB_NAME' in os.environ:
-        db_user = os.environ['RDS_USERNAME']
-        db_pass = os.environ['RDS_PASSWORD']
-        db_host = os.environ['RDS_HOSTNAME']
-        db_port = os.environ['RDS_PORT']
-        db_name = os.environ['RDS_DB_NAME']
-    else:
-        import urllib.parse
-        db_user = "root"
-        db_pass = urllib.parse.quote_plus(os.getenv('MYSQLPASSWORD'))
-        db_host = "localhost"
-        db_port = "3306"
-        db_name = "pytrim"
-
-    url = config.get_main_option("sqlalchemy.url")
-    # add values to those {} in connection string in alembic.ini
-    url = url.format(db_user, db_pass, db_host, db_port, db_name)
     context.configure(
-        url=url, target_metadata=target_metadata, literal_binds=True
+        url=update_db_url(), target_metadata=target_metadata, literal_binds=True
     )
 
     with context.begin_transaction():
@@ -82,7 +69,6 @@ def run_migrations_online():
 
     In this scenario we need to create an Engine
     and associate a connection with the context.
-
     """
     def process_revision_directives(context, revision, directives):
         if config.cmd_opts.autogenerate:
@@ -92,6 +78,7 @@ def run_migrations_online():
 
     connectable = engine_from_config(
         config.get_section(config.config_ini_section),
+        url=update_db_url(),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )

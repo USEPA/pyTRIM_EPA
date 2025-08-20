@@ -576,7 +576,7 @@ def parse_compartment_props(
             else:
                 continue
 
-        requirements = f'self.media_id == {media.id}'
+        requirements = f'self.media.isa("{media.name}")'
         domain_name = f'Compartment [{media.name}]'
 
         base_id = (
