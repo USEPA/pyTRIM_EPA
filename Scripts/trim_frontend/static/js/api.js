@@ -424,6 +424,14 @@ window.TRIM = (function(trim) {
         });
     }
 
+    api.getChemicalProperties = function(scenario_id) {
+        let url = TRIM.api.getUrl('scenario_api.get_chemical_properties').replace('/0', '/' + scenario_id);
+        return AJAX.call({
+            method: 'GET',
+            url: url
+        });
+    }
+
     trim.api = api;
 
     trim.store = {}

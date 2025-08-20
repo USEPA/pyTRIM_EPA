@@ -82,7 +82,7 @@ class CacheManager:
                 # This is important when unhandled exceptions occur and uncleared stale
                 # objects in cash prevent scenario load.
                 if isinstance(ans, sqlalchemy.orm.exc.DetachedInstanceError):
-                    CacheManager.clear(ck)
+                    CacheManager.clear()
                     return f(*args, **kwargs)
                 if isinstance(ans, Exception):
                     # print(f"key {k} created but this exception occurred: {ans}")

@@ -356,7 +356,7 @@ def get_water_params(pcl, parcel_type):
                 * runoff_watershed_area
             )
         except Exception as e:
-            print(e)
+            print('error calculating seepage_vol_rate_to_gw:', e)
 
     water_params = {
         'precip_rate': precipitation_rate,

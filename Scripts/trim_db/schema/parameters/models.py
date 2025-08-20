@@ -299,6 +299,10 @@ class ParameterDefinition(Model):
         return self.default_unit
 
     @property
+    def formula(self):
+        return self.default_formula
+
+    @property
     def quantity(self):
         return self.default_quantity
 
@@ -366,6 +370,18 @@ class CustomParameter(Model):
     def domain_id(self):
         return self.definition.domain_id
 
+    @property
+    def full_name(self):
+        return self.definition.full_name
+
+    @property
+    def variable_name(self):
+        return self.definition.variable_name
+
+    @property
+    def name(self):
+        return self.definition.name
+
     requirements = sa.Column(sa.String())
 
     def validate(self, entity):
@@ -419,7 +435,7 @@ class CustomParameter(Model):
 @register_serializer(CustomParameter)
 def serialize_custom_parameter(cp: CustomParameter):
     s = {
-        'name': cp.definition.variable_name if cp.definition else None,
+        'name': cp.variable_name,
         'value': cp.value,
         'unit': cp.unit,
         'formula': cp.formula.equation if cp.formula else None
