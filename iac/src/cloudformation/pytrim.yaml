@@ -507,8 +507,10 @@ Parameters:
     ConstraintDescription: must be a valid RDS instance type for this region.
   DatabaseMySQLEngineVersion:
     Description: version number to use; see DescribeDBEngineVersions for up-to-date values
+    # e.g.
+    # aws rds describe-db-engine-versions --engine "mysql" | jq -r '.DBEngineVersions[].EngineVersion'
     Type: String
-    Default: "8.0.35"
+    Default: "8.0.43"
   DatabaseMasterAccountUsername:
     Description: master user name
     Type: String

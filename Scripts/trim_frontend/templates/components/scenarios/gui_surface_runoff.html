@@ -315,7 +315,9 @@
             }
 
             let matrixFile = $(form).find("#default_runoff_matrix_file");
+
             let fieldData = [matrixFile.get(0)];
+
             fieldData.push({
                 "type": "input",
                 "name": "scenario_id",
@@ -382,7 +384,8 @@
 						clearInterval(keepCheckingId);
 						getflowStatusArea.html("Run complete!&nbsp;&nbsp;");
 						getflowStatusArea.css("background-color", "lime");
-						$("<a/>").attr("href", data.output.presigned_url).html("Download results").appendTo(getflowStatusArea);
+						$("<a/>").attr("href", data.output.presigned_urls[1]).html("Download results").appendTo(getflowStatusArea);
+
                         toggleBtnState(false);
 
                         // import getflow generated matrix
@@ -391,7 +394,7 @@
                             let fieldData = [{
                                 "type": "input",
                                 "name": "presigned_url",
-                                "value": data.output.presigned_url
+                                "value": data.output.presigned_urls[1]
                             }]; 
                             fieldData.push({
                                 "type": "input",
