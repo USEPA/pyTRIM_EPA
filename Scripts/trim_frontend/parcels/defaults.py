@@ -495,7 +495,7 @@ def get_water_params(pcl, parcel_type):
         try:
             wc_sed_discharge_rate = (
                 get_correct_param("SuspendedSedimentConcentration", sw_pars)
-                * (wc_discharge_vol_rate/365)
+                * (wc_discharge_vol_rate)
             )
         except Exception as ex:
             wc_sed_discharge_rate = None
