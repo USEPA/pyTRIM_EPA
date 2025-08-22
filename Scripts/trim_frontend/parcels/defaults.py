@@ -5,26 +5,15 @@ from trim_db.schema.parameters.models import ParameterDefinition, CustomParamete
 from trim_db.services import *
 from trim_frontend.scenarios.defaults import EROSION_TABLE_KWARGS
 import pint
-# import time
 
 
 @register_serializer(Parcel)
 def serialize_parcel(pcl: Parcel):
-    # st = time.time()
     general_params = get_general_params(pcl)
-    # print(f'>> get_general_params {pcl} in {time.time() - st} s')
-    # st = time.time()
     water_params = get_water_params(pcl, general_params['parcelType'])
-    # print(f'>> get_water_params in {time.time() - st} s')
-    # st = time.time()
     source_params = get_source_params(pcl)
-    # print(f'>> get_source_params in {time.time() - st} s')
-    # st = time.time()
     soil_abiotic_params = get_soil_abiotic_params(pcl)
-    # print(f'>> get_soil_abiotic_params in {time.time() - st} s')
-    # st = time.time()
     initial_conc = get_initial_concetrations(pcl)
-    # print(f'>> get_initial_concetrations in {time.time() - st} s')
 
     try:
         cdv = pcl.get_compartment("DryVaporSource")
