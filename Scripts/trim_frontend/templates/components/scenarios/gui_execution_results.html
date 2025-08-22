@@ -562,6 +562,152 @@
                 })
             })
 
+            function get_result_data(scenario_head){
+                console.log('Loading result data ...')
+                let scenario_info = [{
+                    'type': 'data',
+                    'name': 'scenario_id',
+                    'value': scenario_head.id
+                },{
+                    'type': 'data',
+                    'name': 'scenario_name',
+                    'value': scenario_head.name
+                }]
+                let results_data = TRIM.api.getResults(scenario_info).on('load',function(){
+                    let result_data = {}
+                    let m_results = JSON.parse(JSON.stringify(this.responseJSON.mass))
+                    result_data["m_results"] = "{" + m_results.trimStart().trimEnd() + "}"
+                    let c_results = JSON.parse(JSON.stringify(this.responseJSON.conc))
+                    result_data["c_results"] = "{" + c_results.trimStart().trimEnd() + "}"
+                    result_data["m_file"] = JSON.parse(JSON.stringify(this.responseJSON.outputMass))
+                    result_data["c_file"] = JSON.parse(JSON.stringify(this.responseJSON.outputConc))
+                    let fpath = "{{ url_for('static', filename='.output') }}"
+                    let t_filepath = ""
+                    if (this.responseJSON.outputTM) {
+                        result_data["t_file"] = JSON.parse(JSON.stringify(this.responseJSON.outputTM))
+                        TRIM.store.latestRunInfo.run_results.tm_results_file = result_data["t_file"]
+                        t_filepath = result_data["t_file"].includes(".s3.amazonaws.com") ? result_data["t_file"] : fpath + "/" + result_data["t_file"]
+                    }
+                    result_data["Last_run"] = JSON.parse(JSON.stringify(this.responseJSON.run_date))
+                    let id_sting = "_id" + scenario_info[0]["value"]
+                    TRIM.store.latestRunInfo.run_results.mass_results = result_data["m_results"]
+                    TRIM.store.latestRunInfo.run_results.conc_results = result_data["c_results"]
+                    TRIM.store.latestRunInfo.run_results.mass_results_file = result_data["m_file"]
+                    TRIM.store.latestRunInfo.run_results.conc_results_file = result_data["c_file"]
+
+                    TRIM.store.latestRunInfo.lastest_run_date = result_data["Last_run"]
+                    let m_filepath = result_data["m_file"].includes(".s3.amazonaws.com") ? result_data["m_file"] : fpath + "/" + result_data["m_file"]
+                    let c_filepath = result_data["c_file"].includes(".s3.amazonaws.com") ? result_data["c_file"] : fpath + "/" + result_data["c_file"]
+
+                    $('#btn_get_mass_results').attr("href",m_filepath)
+                    $('#btn_get_mass_results').attr("download","mass_results.xlsx")
+                    $('#btn_get_conc_results').attr("href",c_filepath)
+                    $('#btn_get_conc_results').attr("download","concentration_results.xlsx")
+                    if ($('#btn_get_tm_results').length > 0) {
+                        $('#btn_get_tm_results').attr("href", t_filepath)
+                        $('#btn_get_tm_results').attr("download", "transfer_matrix.xlsx")
+                    }
+                    return result_data
+                })
+                return results_data
+            }
+
+            const wait = function (ms = 1000) {
+                return new Promise(resolve => {
+                    setTimeout(resolve, ms);
+                });
+            };
+
+            const statusValidator = status => (status !== 'fin' && status !== 'err');
+
+            const pollModelResults = async function (
+                fn, fnCondition, result, ms, deployment_type, skipLoadingResults
+            ) {
+                const scenario_head = TRIM.store.currentScenario;
+                await fn();
+                while (fnCondition(result)) {
+                    await wait(ms);
+                    TRIM.api.poll(scenario_head.id).on('load', function() {
+                        // ignore the responses if a scenario is already run and we are running it again but the container takes long time to initiate
+                        let status = (result == 'new' && this.responseJSON.status == 'fin') ? 'new' : this.responseJSON.status
+                        result = status;
+                        let percent = this.responseJSON.percent
+                        if (status == "ode") {
+                            setChecked("p#cb_proc_trm", "on")
+                            setChecked("p#cb_proc_ode", "run")
+                            $('#lb_perc_trm').text("(100%)")
+                            $('#lb_perc_ode').text("(" + percent + "%)")
+                        } else if (status == "csv") {
+                            setChecked("p#cb_proc_trm", "on")
+                            setChecked("p#cb_proc_ode", "on")
+                            $('#lb_perc_ode').text("(100%)")
+                            setChecked("p#cb_proc_out", "run")
+                            $('#lb_perc_out').text("(" + percent + "%)")
+                        } else if (status == "fin") {
+                            setChecked("p#cb_proc_trm", "on")
+                            setChecked("p#cb_proc_ode", "on")
+                            setChecked("p#cb_proc_out", "on")
+                            setChecked("p#cb_proc_vis", "run")
+                            $('#btn_get_mass_results').show()
+                            $('#btn_get_conc_results').show()
+                            $('#btn_visualize').prop('disabled', false)
+                            $('#lb_perc_ode').text("(100%)")
+                            $('#lb_perc_out').text("(100%)")
+                            $('#lb_perc_trm').text("(100%)")
+                            if (skipLoadingResults !== true) {
+                                let result_data = get_result_data(scenario_head)
+                            }
+                        } else if (status == "tm") {
+                            setChecked("p#cb_proc_trm", "run")
+                            $('#lb_perc_trm').text("(" + percent + "%)")
+                        } else if (status == "err") {
+                            setChecked('p#cb_proc_trm', "err")
+                            setChecked('p#cb_proc_ode', "err")
+                            setChecked('p#cb_proc_out', "err")
+                            setChecked('p#cb_proc_vis', "err")
+                            // $('p#cb_proc_vis').find("span").hide()
+                            // $('p#cb_proc_vis').find("i.fas").show().css('color','red')
+                            $("#model_err_msg").remove()
+                            $("#btn_execute_model").parent().append(
+                                "<p style='color:red;' id='model_err_msg'>Model ran into an error and stopped running.</p>"
+                            )
+                        }
+                    })
+                    if (deployment_type == 'prod') {
+                        break
+                    }
+                }
+
+                if (result == "err") {
+                    setChecked("p#cb_proc_trm", "err")
+                    setChecked("p#cb_proc_ode", "err")
+                    setChecked("p#cb_proc_out", "err")
+                    setChecked("p#cb_proc_vis", "err")
+                    return result;
+                }
+                if (deployment_type == 'local') {
+                    const loadResults = (attemptNum) => {
+                        if (attemptNum == undefined) {
+                            attemptNum = 0;
+                        }
+                        try {
+                            initialize_components();
+                        }
+                        catch (err) {
+                            if (attemptNum < 10) {
+                                setTimeout(() => loadResults(attemptNum + 1), ms)
+                            }
+                        }
+                        $($('#plt_type').find('a.dropdown-item')[0]).trigger('click')
+                        $('#btn_visualize').prop('disabled', false).trigger('click')
+                        setChecked("p#cb_proc_vis", "on")
+                        $('#lb_perc_vis').text("(100%)")
+                    };
+                    setTimeout(loadResults, ms);
+                }
+                return result;
+            };
+
             function run_model(scenario_head) {
                 let scenario_info = [{
                         'type': 'data',
@@ -575,6 +721,7 @@
 
                 $('p#cb_proc_trm').find("span").show()
                 $('p#cb_proc_trm').find("i.fas").css('display','none')
+
                 function exec_model_run(){
                     var resp = TRIM.api.runModel(scenario_info).on('load',function(){
                         resp = this.responseJSON
@@ -583,141 +730,14 @@
                     return resp
                 }
 
-                function get_result_data(scenario_head){
-                    let scenario_info = [{
-                        'type': 'data',
-                        'name': 'scenario_id',
-                        'value': scenario_head.id
-                    },{
-                        'type': 'data',
-                        'name': 'scenario_name',
-                        'value': scenario_head.name
-                    }]
-                    let results_data = TRIM.api.getResults(scenario_info).on('load',function(){
-                        let result_data = {}
-                        let m_results = JSON.parse(JSON.stringify(this.responseJSON.mass))
-                        result_data["m_results"] = "{" + m_results.trimStart().trimEnd() + "}"
-                        let c_results = JSON.parse(JSON.stringify(this.responseJSON.conc))
-                        result_data["c_results"] = "{" + c_results.trimStart().trimEnd() + "}"
-                        result_data["m_file"] = JSON.parse(JSON.stringify(this.responseJSON.outputMass))
-                        result_data["c_file"] = JSON.parse(JSON.stringify(this.responseJSON.outputConc))
-                        let fpath = "{{ url_for('static', filename='.output') }}"
-                        let t_filepath = ""
-                        if (this.responseJSON.outputTM) {
-                            result_data["t_file"] = JSON.parse(JSON.stringify(this.responseJSON.outputTM))
-                            TRIM.store.latestRunInfo.run_results.tm_results_file = result_data["t_file"]
-                            t_filepath = result_data["t_file"].includes(".s3.amazonaws.com") ? result_data["t_file"] : fpath + "/" + result_data["t_file"]
-                        }
-                        result_data["Last_run"] = JSON.parse(JSON.stringify(this.responseJSON.run_date))
-                        let id_sting = "_id" + scenario_info[0]["value"]
-                        TRIM.store.latestRunInfo.run_results.mass_results = result_data["m_results"]
-                        TRIM.store.latestRunInfo.run_results.conc_results = result_data["c_results"]
-                        TRIM.store.latestRunInfo.run_results.mass_results_file = result_data["m_file"]
-                        TRIM.store.latestRunInfo.run_results.conc_results_file = result_data["c_file"]
-
-                        TRIM.store.latestRunInfo.lastest_run_date = result_data["Last_run"]
-                        let m_filepath = result_data["m_file"].includes(".s3.amazonaws.com") ? result_data["m_file"] : fpath + "/" + result_data["m_file"]
-                        let c_filepath = result_data["c_file"].includes(".s3.amazonaws.com") ? result_data["c_file"] : fpath + "/" + result_data["c_file"]
-
-                        $('#btn_get_mass_results').attr("href",m_filepath)
-                        $('#btn_get_mass_results').attr("download","mass_results.xlsx")
-                        $('#btn_get_conc_results').attr("href",c_filepath)
-                        $('#btn_get_conc_results').attr("download","concentration_results.xlsx")
-                        if ($('#btn_get_tm_results').length > 0) {
-                            $('#btn_get_tm_results').attr("href", t_filepath)
-                            $('#btn_get_tm_results').attr("download", "transfer_matrix.xlsx")
-                        }
-                        return result_data
-                    })
-                    return results_data
-                }
-
                 // let result = ''
-                const poll = async function (fn, fnCondition, result, ms, deployment_type) {
-                    await fn();
-                    while (fnCondition(result)) {
-                        await wait(ms);
-                        TRIM.api.poll(scenario_head.id).on('load', function() {
-                            // ignore the responses if a scenario is already run and we are running it again but the container takes long time to initiate
-                            let status = (result == 'new' && this.responseJSON.status == 'fin') ? 'new' : this.responseJSON.status
-                            result = status;
-                            let percent = this.responseJSON.percent
-                            if (status == "ode") {
-                                setChecked("p#cb_proc_trm", "on")
-                                setChecked("p#cb_proc_ode", "run")
-                                $('#lb_perc_trm').text("(100%)")
-                                $('#lb_perc_ode').text("(" + percent + "%)")
-                            } else if (status == "csv") {
-                                setChecked("p#cb_proc_trm", "on")
-                                setChecked("p#cb_proc_ode", "on")
-                                $('#lb_perc_ode').text("(100%)")
-                                setChecked("p#cb_proc_out", "run")
-                                $('#lb_perc_out').text("(" + percent + "%)")
-                            } else if (status == "fin") {
-                                setChecked("p#cb_proc_trm", "on")
-                                setChecked("p#cb_proc_ode", "on")
-                                setChecked("p#cb_proc_out", "on")
-                                setChecked("p#cb_proc_vis", "run")
-                                $('#btn_get_mass_results').show()
-                                $('#btn_get_conc_results').show()
-                                $('#btn_visualize').prop('disabled', false)
-                                $('#lb_perc_ode').text("(100%)")
-                                $('#lb_perc_out').text("(100%)")
-                                $('#lb_perc_trm').text("(100%)")
-                                let result_data = get_result_data(scenario_head)
-                            } else if (status == "tm") {
-                                setChecked("p#cb_proc_trm", "run")
-                                $('#lb_perc_trm').text("(" + percent + "%)")
-                            } else if (status == "err") {
-                                setChecked('p#cb_proc_trm', "err")
-                                setChecked('p#cb_proc_ode', "err")
-                                setChecked('p#cb_proc_out', "err")
-                                setChecked('p#cb_proc_vis', "err")
-                                // $('p#cb_proc_vis').find("span").hide()
-                                // $('p#cb_proc_vis').find("i.fas").show().css('color','red')
-                                $("#model_err_msg").remove()
-                                $("#btn_execute_model").parent().append(
-                                    "<p style='color:red;' id='model_err_msg'>Model ran into an error and stopped running.</p>"
-                                )
-                            }
-                        })
-                        if (deployment_type == 'prod') {
-                            break
-                        }
-                    }
-
-                    if (result == "err") {
-                        setChecked("p#cb_proc_trm", "err")
-                        setChecked("p#cb_proc_ode", "err")
-                        setChecked("p#cb_proc_out", "err")
-                        setChecked("p#cb_proc_vis", "err")
-                        return result;
-                    }
-                    if (deployment_type == 'local') {
-                        setTimeout(function(){
-                            initialize_components()
-                            $($('#plt_type').find('a.dropdown-item')[0]).trigger('click')
-                            $('#btn_visualize').prop('disabled', false).trigger('click')
-                            setChecked("p#cb_proc_vis", "on")
-                            $('#lb_perc_vis').text("(100%)")
-                        }, ms)
-                    }
-                    return result;
-                };
-
-                const wait = function (ms = 1000) {
-                    return new Promise(resolve => {
-                        setTimeout(resolve, ms);
-                    });
-                };
 
                 console.log("TRIM_ENV_PROFILE == '" + TRIM.trim_env_profile + "'");
 
                 if (TRIM.trim_env_profile == "local") {
                     // run the model locally
                     let fetchResults = () => exec_model_run();
-                    let validate = status => (status !== 'fin' && status !== 'err');
-                    poll(fetchResults, validate, '', 5000, 'local');
+                    pollModelResults(fetchResults, statusValidator, '', 5000, 'local');
                 } else {
                     // run the model via AWS StepFunction / Docker on ECS
                     var poller = function(executionArn, callback, numAttempts) {
@@ -737,9 +757,8 @@
                                             poller(executionArn, callback, numAttempts + 1);
                                         }, 30000); // sleep for 30 seconds
                                     }
-                                    let validate = status => (status !== 'fin' && status !== 'err');
                                     let this_result = (numAttempts < 3) ? 'new' : ''
-                                    poll(dev_poll, validate, this_result, 1000, 'prod');
+                                    pollModelResults(dev_poll, statusValidator, this_result, 1000, 'prod');
                                 }
                             });
                         } else {
@@ -803,7 +822,13 @@
                 $('#btn_visualize').trigger('click')
             }
             console.log('populated model run form!')
-            LoadingScreen.hide('model_run_loading');
+
+            console.log('Checking for in-progress model run ...')
+            pollModelResults(
+                () => wait(1), statusValidator, '', 1000, TRIM.trim_env_profile, true
+            );
+
+            setTimeout(() => LoadingScreen.hide('model_run_loading'), 1500);
         }
 
         function draw_ts_chart() {
