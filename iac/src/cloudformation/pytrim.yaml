@@ -1119,8 +1119,6 @@ Resources:
           Environment:
             - Name: STORAGE_BUCKET_NAME
               Value: !Ref GetFlowOutputStorageBucket
-            - Name: SCENARIO_MISC_FILES_BUCKET_NAME
-              Value: !Ref ScenarioMiscFileBucket
             - Name: RDS_HOSTNAME
               Value: !GetAtt DatabaseInstance.Endpoint.Address
             - Name: RDS_PORT
