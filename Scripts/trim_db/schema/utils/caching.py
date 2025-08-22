@@ -1,3 +1,4 @@
+import threading
 from functools import wraps, partial
 from uuid import uuid4
 
@@ -17,14 +18,38 @@ class CacheManager:
         ]
         return '&'.join([x for x in key_args if x])
 
-    class Cacher(dict):
-        # def __init__(self, base_key, *args, **kwargs):
-        #     super().__init__(*args, **kwargs)
-        #     self.__base_key__ = base_key
+    class Cacher:
+        def __init__(self):
+            self._inner_cache = {}
 
-        def wrap(self, f):
+        @property
+        def _threaded_cache(self):
+            t = threading.get_ident()
+            if t not in self._inner_cache:
+                self._inner_cache[t] = {}
+            return self._inner_cache[t]
+
+        def has(self, key):
+            return key in self._threaded_cache
+
+        def get(self, key):
+            if key in self._threaded_cache:
+                return self._threaded_cache[key]
+            raise KeyError(key)
+
+        def set(self, key, value):
+            self._threaded_cache[key] = value
+
+        def clear(self, thread_name=None):
+            if thread_name is not None:
+                if thread_name in self._inner_cache:
+                    self._inner_cache.pop(thread_name)
+            else:
+                self._inner_cache = {}
+
+        def cached(self, f):
             @wraps(f)
-            def cached(*args, **kwargs):
+            def wrapped(*args, **kwargs):
                 print_this = False
                 # if 'AirTemperature' in args:
                 #     print_this = True
@@ -35,12 +60,8 @@ class CacheManager:
 
                 k = CacheManager.cache_key(*args, **kwargs)
 
-                if not CacheManager.DISABLED_REQUESTS and k in self:
-                    # print(
-                    #     f'Cached for "{self.__base_key__}"'
-                    #     f' and {k}: {self[k]}'
-                    # )
-                    ans = self[k]
+                if not CacheManager.DISABLED_REQUESTS and self.has(k):
+                    ans = self.get(k)
                     if print_this:
                         print(f'Existing Cache "{k}" -> {ans}\n')
                     if isinstance(ans, Exception):
@@ -54,26 +75,21 @@ class CacheManager:
                     ans = e
 
                 if not CacheManager.DISABLED_REQUESTS:
-                    # print(
-                    #     f'Caching: {ans} for "{self.__base_key__}"'
-                    #     f' and {k}'
-                    # )
-                    self[k] = ans
+                    self.set(k, ans)
                     if print_this:
                         print(f'New Cache "{k}" -> {ans}\n')
                 # We need to clear cache if any object is stale and in detached state.
                 # This is important when unhandled exceptions occur and uncleared stale
                 # objects in cash prevent scenario load.
                 if isinstance(ans, sqlalchemy.orm.exc.DetachedInstanceError):
-                    for ck in CacheManager._CACHERS:
-                        CacheManager.clear_cache(ck)
+                    CacheManager.clear()
                     return f(*args, **kwargs)
                 if isinstance(ans, Exception):
                     # print(f"key {k} created but this exception occurred: {ans}")
                     raise ans
                 return ans
 
-            return cached
+            return wrapped
 
     @classmethod
     def subcache(cls, key):
@@ -81,14 +97,17 @@ class CacheManager:
         return cls._CACHERS.setdefault(key, cls.Cacher())
 
     @classmethod
-    def clear_cache(cls, key):
+    def clear_cache(cls, key, all_threads=False):
         # print(f"CHACHERS ARE {cls._CACHERS}")
-        cls._CACHERS.get(key, {}).clear()
+        t = None
+        if not all_threads:
+            t = threading.get_ident()
+        cls._CACHERS.get(key, {}).clear(thread_name=t)
 
     @classmethod
-    def clear_all(cls):
+    def clear(cls, all_threads=False):
         for k in cls._CACHERS:
-            cls.clear_cache(k)
+            cls.clear_cache(k, all_threads=all_threads)
 
     @classmethod
     def without_caching(cls, f):
@@ -109,6 +128,6 @@ class CacheManager:
             if base_key is None:
                 base_key = str(f)
             # print(f"BASE KEY IS {base_key}")
-            return CacheManager.subcache(base_key).wrap(f)
+            return CacheManager.subcache(base_key).cached(f)
 
         return partial(decorated, base_key)

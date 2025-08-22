@@ -135,43 +135,30 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             initialize_parcel_contents(p, water_and_air_parcel_vol_elem_defaults)
 
     elif field_name == "landUse":
-        if parcels_data['landUse'] in ['Coniferous Forest', 'Deciduous Forest', 'Agriculture (General)',
-                                       'Grasses/Herbs', 'Tilled Soil', 'Untilled Soil', 'Impervious']:
-            # COMPARTMENT CHANGE
-            if not parcels_data['landUse'] == land_use:
-                print(f'NEW LAND USE DETECTED {land_use} >> {parcels_data["landUse"]}')
-                create_base_land_compartments(parcels_data, p, land_use)
-        if parcels_data['landUse'] not in ['Tilled Soil', 'Untilled Soil']:
-            ve = p.get_volume_element("SurfSoil")
-            if ve:
-                if ve.get_compartment("Farm"):
-                    cmp = ve.get_compartment("Farm")
-                    CompartmentService.delete(cmp, False)
+        if parcels_data['landUse'] == land_use:
+            return
+        if parcels_data['landUse'] in LAND_USE_TYPES:
+            print(f'NEW LAND USE DETECTED {land_use} >> {parcels_data["landUse"]}')
+            create_base_land_compartments(parcels_data, p, land_use)
+
+        surfsoil_ve = p.get_volume_element("SurfSoil")
+        if surfsoil_ve and surfsoil_ve.get_compartment("Farm"): # FFC should reset back to 'No' on change
+            CompartmentService.delete(surfsoil_ve.get_compartment("Farm"))
+                
         if parcels_data['landUse'] in ['Impervious']:
-            ve = p.get_volume_element("SurfSoil")
-            if ve:
-                if ve.get_compartment("Wetland"):
-                    cmp = ve.get_compartment("Wetland")
-                    CompartmentService.delete(cmp, False)
+            if surfsoil_ve and surfsoil_ve.get_compartment("Wetland"):
+                CompartmentService.delete(surfsoil_ve.get_compartment("Wetland"))
 
     elif field_name == "hasFarmFoodChain":
-        biotic_ve = deepcopy(Land_Parcel_VolElem_defaults)
-        biotic_ve["SurfSoil"]["Compartments"] = deepcopy(Farm_Biota_SurfSoil_Compartment_defaults["Compartments"])
+        surfsoil_ve = p.get_volume_element("SurfSoil")
         if parcels_data[field_name] == "Yes":
-            surfsoil = p.get_volume_element("SurfSoil")
-            if surfsoil:
-                initialize_parcel_contents(p, biotic_ve)
-            else:
-                raise ValueError("Cannot create or get Farm Compartment")
+            CompartmentService.create(
+                name="Farm", volume_element=surfsoil_ve,
+                media=CompartmentService.media.get(name="Farm"),
+            )
         else:
-            for vek, vev in biotic_ve.items():
-                ve = p.get_volume_element(vek)
-                if ve:
-                    for k, v in biotic_ve[vek]["Compartments"].items():
-                        cmp = ve.get_compartment(v["name"])
-                        if cmp:
-                            logger.info(f"Deleted {cmp.name}")
-                            CompartmentService.delete(cmp, False)
+            if surfsoil_ve.get_compartment("Farm"):
+                CompartmentService.delete(surfsoil_ve.get_compartment("Farm"))
 
     elif field_name == "hasFishFoodWeb":
         biotic_ve = deepcopy(Water_Parcel_VolElem_defaults)
@@ -244,57 +231,17 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                 co.volume_element.top = parcels_data['airHeight']
 
     elif field_name == "surfaceSoilThickness":
-        thickness_before = p.get_compartment("Soil_Surface").volume_element.height.magnitude
-        p.get_compartment("Soil_Surface").volume_element.bottom = \
-            p.get_compartment("Soil_Surface").volume_element.top + \
-            (-1 * float(parcels_data['surfaceSoilThickness']))
-        thickness_now = p.get_compartment("Soil_Surface").volume_element.height.magnitude
-        delta_thickness = thickness_now - thickness_before
-        for soil_comp in ["Soil_Root_Zone", "Soil_Vadose_Zone", "Groundwater", "DryVaporSource", "WetVaporSource",
-                          "DryParticleSource", "WetParticleSource"]:
-            p.get_compartment(soil_comp).volume_element.top = \
-                (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.top
-            p.get_compartment(soil_comp).volume_element.bottom = \
-                (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.bottom
+        update_soil_thickness(p, "Soil_Surface", 'SurfSoil', parcels_data['surfaceSoilThickness'])
+
     elif field_name == "rootSoilThickness":
-        thickness_before = p.get_compartment("Soil_Root_Zone").volume_element.height
-        p.get_compartment("Soil_Root_Zone").volume_element.bottom = \
-            p.get_compartment("Soil_Root_Zone").volume_element.top + \
-            (-1 * float(parcels_data['rootSoilThickness']))
-        thickness_now = p.get_compartment("Soil_Root_Zone").volume_element.height
-        delta_thickness = thickness_now.magnitude - thickness_before.magnitude
-        for soil_comp in ["Soil_Vadose_Zone", "Groundwater", "DryVaporSource", "WetVaporSource",
-                          "DryParticleSource", "WetParticleSource"]:
-            p.get_compartment(soil_comp).volume_element.top = \
-                (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.top
-            p.get_compartment(soil_comp).volume_element.bottom = \
-                (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.bottom
+        update_soil_thickness(p, "Soil_Root_Zone", 'RootSoil', parcels_data['rootSoilThickness'])
+
     elif field_name == "vadoseSoilThickness":
-        thickness_before = p.get_compartment("Soil_Vadose_Zone").volume_element.height
-        p.get_compartment("Soil_Vadose_Zone").volume_element.bottom = \
-            p.get_compartment("Soil_Vadose_Zone").volume_element.top + \
-            (-1 * float(parcels_data['vadoseSoilThickness']))
-        thickness_now = p.get_compartment("Soil_Vadose_Zone").volume_element.height
-        delta_thickness = thickness_now.magnitude - thickness_before.magnitude
-        for soil_comp in ["Groundwater", "DryVaporSource", "WetVaporSource",
-                          "DryParticleSource", "WetParticleSource"]:
-            p.get_compartment(soil_comp).volume_element.top = \
-                (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.top
-            p.get_compartment(soil_comp).volume_element.bottom = \
-                (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.bottom
+        update_soil_thickness(p, "Soil_Vadose_Zone", 'VadoseSoil', parcels_data['vadoseSoilThickness'])
+        
     elif field_name == "groundwaterZoneSoilThick":
-        thickness_before = p.get_compartment("Groundwater").volume_element.height
-        p.get_compartment("Groundwater").volume_element.bottom = \
-            p.get_compartment("Groundwater").volume_element.top + \
-            (-1 * float(parcels_data['groundwaterZoneSoilThick']))
-        thickness_now = p.get_compartment("Groundwater").volume_element.height
-        delta_thickness = thickness_now.magnitude - thickness_before.magnitude
-        for soil_comp in ["DryVaporSource", "WetVaporSource",
-                          "DryParticleSource", "WetParticleSource"]:
-            p.get_compartment(soil_comp).volume_element.top = \
-                (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.top
-            p.get_compartment(soil_comp).volume_element.bottom = \
-                (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.bottom
+        update_soil_thickness(p, "Groundwater", 'GW', parcels_data['groundwaterZoneSoilThick'])
+
     elif field_name == "tillage":
         for c in p.compartments:
             if c.name == 'Soil_Surface':
@@ -357,6 +304,20 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         par_name = misc_water_params[field_name]
         comp = p.get_compartment("Surface_water")
         par = comp.parameters.get(par_name)
+
+        if field_name == "mean_depth":
+            csw = p.get_compartment("Surface_water")
+            h_diff = (csw.height.magnitude - float(parcels_data[field_name]))
+            # Now shift bounds of everything below the SW volume element
+            ves = [a for a in p.volume_elements]
+            for ve in ves:
+                if ve.top <= csw.volume_element.bottom:
+                    print(f'new {ve.name} top = {ve.top + h_diff} and bottom = {ve.bottom + h_diff}')
+                    ve.top = ve.top + h_diff
+                    ve.bottom = ve.bottom + h_diff
+            # finally fix the surface water element bottom
+            csw.volume_element.bottom = -1 * float(parcels_data[field_name])
+
         if par:
             par = get_or_create_custom_param(
                 par,
@@ -373,24 +334,26 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             comp.parameters.get(par_name).value = parcels_data[field_name]
             comp.parameters.get(par_name).scenario_id = p.scenario_id
 
-    elif field_name == "MeanDepth":
-        csw = p.get_compartment("Surface_water")
-        h_diff = (csw.height - parcels_data[field_name]).magnitude
-        # Now shift bounds of everything below the SW volume element
-        ves = [a for a in p.volume_elements]
-        for ve in ves:
-            if ve.top <= csw.volume_element.bottom:
-                print(f'new {ve.name} top = {ve.top + h_diff} and bottom = {ve.bottom + h_diff}')
-                ve.top = ve.top + h_diff
-                ve.bottom = ve.bottom + h_diff
-        # finally fix the surface water element bottom
-        csw.volume_element.bottom = -1 * parcels_data[field_name]
-
     elif field_name in bed_params:
         par_name = bed_params[field_name]
         comp = p.get_compartment("Sediment")
         par = comp.parameters.get(par_name)
-        if par:
+        if field_name == "bed_thickness":
+            sed_ve = comp.volume_element
+            thickness_before = sed_ve.height
+            sed_ve.bottom = sed_ve.top - float(parcels_data[field_name])
+            thickness_now = sed_ve.height
+
+            # shift everything below the sediment volume element
+            delta_thickness = thickness_now.magnitude - thickness_before.magnitude
+            ves = [a for a in p.volume_elements]
+            for ve in ves:
+                if ve.top <= sed_ve.bottom:
+                    print(f'new {ve.name} top = {ve.top - delta_thickness} and bottom = {ve.bottom - delta_thickness}')
+                    ve.top = ve.top - delta_thickness
+                    ve.bottom = ve.bottom - delta_thickness
+
+        elif par:
             par = get_or_create_custom_param(
                 par,
                 {
@@ -918,24 +881,22 @@ def get_default_value_from_json_form(form_name, parameter_name):
     return def_val
 
 
+def update_soil_thickness(p, comp_name, layer_name, thickness):
+    soil_ve = p.get_compartment(comp_name).volume_element
+
+    thickness_before = soil_ve.height
+    soil_ve.bottom = soil_ve.top + (-1 * float(thickness))
+    thickness_now = soil_ve.height
+    delta_thickness = thickness_now.magnitude - thickness_before.magnitude
+    for layer in Land_Parcel_VolElem_defaults[layer_name]['layers']:
+        soil_ve = p.get_compartment(layer).volume_element
+        soil_ve.top = (-1 * delta_thickness) + soil_ve.top
+        soil_ve.bottom = (-1 * delta_thickness) + soil_ve.bottom
+
+
 def create_base_land_compartments(parcels_data, p, land_use):
     ve_surfsoil = VolumeElementService.get(name="SurfSoil", parcel_id=p.id)
     c_surfsoil = CompartmentService.get(name="Soil_Surface", volume_element_id=ve_surfsoil.id)
-
-    def calculate_surfsoil_thickness(bottom=None):
-        if not bottom:
-            bottom = Land_Parcel_VolElem_defaults['SurfSoil']['bottom']
-        thickness_before = ve_surfsoil.height.magnitude
-        ve_surfsoil.bottom = ve_surfsoil.top + bottom # bottom should probably be negative
-        thickness_now = abs(ve_surfsoil.bottom -ve_surfsoil.top)
-        delta_thickness = thickness_now - thickness_before
-
-        for soil_comp in ["Soil_Root_Zone", "Soil_Vadose_Zone", "Groundwater", "DryVaporSource", "WetVaporSource",
-                          "DryParticleSource", "WetParticleSource"]:
-            soil_ve = p.get_compartment(soil_comp).volume_element
-            soil_ve.top = (-1 * delta_thickness) + soil_ve.top
-            soil_ve.bottom = (-1 * delta_thickness) + soil_ve.bottom
-            print(f"New top/bottom for {soil_comp}:\ntop: {soil_ve.top} bottom: {soil_ve.bottom}")
 
     custom_param_erosion = c_surfsoil.parameters.get("TotalErosionRate")
     custom_param_erosion = get_or_create_custom_param(custom_param_erosion, {
@@ -948,6 +909,7 @@ def create_base_land_compartments(parcels_data, p, land_use):
     if land_use in ['Tilled Soil', 'Untilled Soil', 'Impervious']:
         # Revert Soil_surface compartment to default media (Surface_Soil [id = 7])
         c_surfsoil.media = CompartmentService.media.get(name="Surface_Soil")  # Surface Soil
+        CompartmentService.update(c_surfsoil)
         # if switching from Impervious, calculate Total erosion rate
         if land_use == 'Impervious':
             custom_param_erosion.value = calc_default_erosion_rate_sdr(p)
@@ -978,19 +940,16 @@ def create_base_land_compartments(parcels_data, p, land_use):
         init_tillage_default_params('Tilled_Soil')
         update_tillage_formula_media('Tilled_Soil')
         c_surfsoil.soilTillage = 1
-        calculate_surfsoil_thickness(-0.2)
 
     elif parcels_data['landUse'] == 'Untilled Soil':
         c_surfsoil.media_id = CompartmentService.media.get(name='Untilled_Soil').id
         init_tillage_default_params('Untilled_Soil')
         update_tillage_formula_media('Untilled_Soil')
         c_surfsoil.soilTillage = 0
-        calculate_surfsoil_thickness()
 
     elif parcels_data['landUse'] == 'Impervious':
         c_surfsoil.media_id = CompartmentService.media.get(name='Impervious').id
         custom_param_erosion.value = 0
-        calculate_surfsoil_thickness()
 
     elif parcels_data['landUse'] == 'Coniferous Forest':
         new_comps += [
@@ -1000,7 +959,6 @@ def create_base_land_compartments(parcels_data, p, land_use):
             CompartmentService.create(
                 name="Leaf_Particle_Coniferous_Forest", volume_element=ve_surfsoil, media=CompartmentService.media.get(name="Coniferous_Leaf_Particle"),
             )]
-        calculate_surfsoil_thickness()
 
     elif parcels_data['landUse'] == 'Deciduous Forest':
         new_comps += [
@@ -1010,7 +968,6 @@ def create_base_land_compartments(parcels_data, p, land_use):
             CompartmentService.create(
                 name="Leaf_Particle_Deciduous_Forest", volume_element=ve_surfsoil, media=CompartmentService.media.get(name="Deciduous_Leaf_Particle"),
             )]
-        calculate_surfsoil_thickness()
 
     elif parcels_data['landUse'] == 'Grasses/Herbs':
         new_comps += [
@@ -1026,7 +983,6 @@ def create_base_land_compartments(parcels_data, p, land_use):
             CompartmentService.create(
                 name="Root_Grasses_Herbs", volume_element=ve_surfsoil, media=CompartmentService.media.get(name="Grass_Root"),
             )]
-        calculate_surfsoil_thickness()
         
     elif parcels_data['landUse'] == 'Agriculture (General)':
         new_comps += [
@@ -1042,8 +998,15 @@ def create_base_land_compartments(parcels_data, p, land_use):
             CompartmentService.create(
                 name="Root_Agriculture", volume_element=ve_surfsoil, media=CompartmentService.media.get(name="Agriculture_Root"),
             )]
-        calculate_surfsoil_thickness(-0.2)
 
+    # layers and thickness
+    surfsoil_thickness = (-1 * Land_Parcel_VolElem_defaults['SurfSoil']['bottom'])
+    if parcels_data['landUse'] in ['Tilled Soil', 'Agriculture (General)']:
+        surfsoil_thickness = 0.2
+    rootsoil_thickness = round(0.8 - surfsoil_thickness, 2)
+    update_soil_thickness(p, 'Soil_Surface', 'SurfSoil', surfsoil_thickness)
+    update_soil_thickness(p, 'Soil_Root_Zone', 'RootSoil', rootsoil_thickness)
+    
     CompartmentService.update(c_surfsoil)
     for nc in new_comps:
         initialize_compartment_custom_parameters(nc)
@@ -1088,7 +1051,7 @@ def update_tillage_formula_media(till_media_name):
         nf = f.equation
         for ids in fv:
             nf = nf.replace(f'media.id in {{{ids[0]}}}', f'media.id in {{{ids[1]}}}')
-        print(f'old formula: {f.equation}\nnew formula: {nf}\n')
+        # print(f'old formula: {f.equation}\nnew formula: {nf}\n')
         f.equation = nf
     FormulaService.commit()
 

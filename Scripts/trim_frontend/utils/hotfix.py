@@ -32,6 +32,10 @@ def patch_flask(app):
     patch_wtforms_sqlalchemy()
     add_help_text_to_forms()
 
-    @app.before_request
-    def clear_old_cache():
-        CacheManager.clear_all()
+    @app.after_request
+    def clean_up_cache(response):
+        try:
+            CacheManager.clear()
+        except Exception:
+            print('WARNING: UNABLE TO CLEAR CACHE')
+        return response

@@ -61,8 +61,10 @@ def _to_serializable(val):
         if serializer:
             return serializer(val)
     except (DetachedInstanceError, StatementError):
+        import traceback; traceback.print_exc()
         return f"<unloaded or detached: {val}>"
     except Exception as e:
+        import traceback; traceback.print_exc()
         return f"<error serializing {val}: {e}>"
 
     if isinstance(val, Decimal):
