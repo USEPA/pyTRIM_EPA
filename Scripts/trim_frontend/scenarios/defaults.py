@@ -165,8 +165,11 @@ def get_latest_run_info(scen):
                 "mass_results": f'{{{json.loads(json.dumps(json.loads(proc_info.result_nt), indent=4, sort_keys=True,default=str))}}}',
                 "mass_results_file": proc_info.result_file_nt if ".s3.amazonaws.com" in proc_info.result_file_nt else Path(proc_info.result_file_nt).name,
                 "conc_results": f'{{{json.loads(json.dumps(json.loads(proc_info.result_conc), indent=4, sort_keys=True, default=str))}}}',
-                "conc_results_file": proc_info.result_file_conc if ".s3.amazonaws.com" in proc_info.result_file_conc else Path(proc_info.result_file_conc).name
+                "conc_results_file": proc_info.result_file_conc if ".s3.amazonaws.com" in proc_info.result_file_conc else Path(proc_info.result_file_conc).name,
             }
+            if hasattr(proc_info, 'result_file_tm'):
+                run_info["run_results"]["tm_results_file"] = proc_info.result_file_tm if ".s3.amazonaws.com" in proc_info.result_file_tm else Path(proc_info.result_file_tm).name
+
     return run_info
 
 

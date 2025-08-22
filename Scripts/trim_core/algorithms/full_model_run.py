@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import numpy as np
 import json
+import time
 from scipy.integrate import odeint
 from trim_db.schema import *
 from trim_db.schema.parameters.equations import evaluated_args, \
@@ -114,7 +115,7 @@ def make_transition_matrix(scenario):
         for chem_idx, chem in enumerate(chem_list):
             this_perc = i_perc * chem_idx
             [v for v in scenario.proc_status][0].run_status = f'run tm {this_perc}'
-            ScenarioService.commit()
+            ScenarioService.commit(preserve_cache=True)
             # if chem.name != 'Elemental Mercury':
             #     continue
             print('\n' + '==' * 28)
@@ -122,10 +123,10 @@ def make_transition_matrix(scenario):
             print('==' * 28)
 
             for x, sender in enumerate(comp_list):
-                comp_perc = int(this_perc + ((i_perc * x) / n_comp))
-                if (x % 50) == 0:
+                if (x % 100) == 0:
+                    comp_perc = int(this_perc + ((i_perc * x) / n_comp))
                     [v for v in scenario.proc_status][0].run_status = f'run tm {comp_perc}'
-                    ScenarioService.commit()
+                    ScenarioService.commit(preserve_cache=True)
                 tm_x = int(chem_idx * n_comp + x)
 
                 index_names[tm_x] = chem.name + '_' + sender.standard_name
@@ -531,77 +532,82 @@ def check_alg_values(scenario, chemical, alg, sender, receiver):
 
 
 def run_full_model(scn):
-    # get transition matrix and source matrix
-    # if none exist create new one
-    if scn.has_process_hist:
-        [v for v in scn.proc_status][0].run_status = 'run tm 0'
-        [v for v in scn.proc_status][0].run_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    else:
-        try:
-            new_proc = ScenarioLoadRunProc(scenario=scn, load_status='load 100', run_status='run null null',
-                                           run_datetime=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-            [scn.proc_status][0].add(new_proc)
-        except Exception as e:
-            print(e)
-    ScenarioService.commit()
-    scn = ScenarioService.get(id=scn.id)
+    st = time.time()
     try:
-        (tm, df_tm, sm, df_sm, df_vmu, df_n0) = make_transition_matrix(scn)
-    except Exception as e:
-        print(full_stack())
-        return model_err(scn, f"ERRORED WHILE MAKING TRANSITION MATRIX: {e}", 'err tm 0')
-
-    # get result
-    [v for v in scn.proc_status][0].run_status = 'run ode 0'
-    ScenarioService.commit()
-    scn = ScenarioService.get(id=scn.id)
-    try:
-        (nt, df_nt) = ode_sim(tm, sm, df_sm, df_n0, scn)
-        [v for v in scn.proc_status][0].run_status = 'run ode 50'
+        # get transition matrix and source matrix
+        # if none exist create new one
+        if scn.has_process_hist:
+            [v for v in scn.proc_status][0].run_status = 'run tm 0'
+            [v for v in scn.proc_status][0].run_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        else:
+            try:
+                new_proc = ScenarioLoadRunProc(scenario=scn, load_status='load 100', run_status='run null null',
+                                               run_datetime=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+                [scn.proc_status][0].add(new_proc)
+            except Exception as e:
+                print(e)
         ScenarioService.commit()
-        # make concentration output
-        df_conc = compute_concentration(df_nt, df_vmu)
-    except Exception as e:
-        print(full_stack())
-        return model_err(scn, f"ERRORED WHILE MAKING CONCENTRATION OUTPUT: {e}", 'err ode 0')
+        scn = ScenarioService.get(id=scn.id)
+        try:
+            (tm, df_tm, sm, df_sm, df_vmu, df_n0) = make_transition_matrix(scn)
+        except Exception as e:
+            print(full_stack())
+            return model_err(scn, f"ERRORED WHILE MAKING TRANSITION MATRIX: {e}", 'err tm 0')
 
-    # compute annual average mass and conc time series
-    inputs = {
-        'simulation_start_date': scn.sim_begin_end_time[0],  # scn.simulationBeginDate,
-        'simulation_end_date': scn.sim_begin_end_time[1]  # scn.simulationEndDate
-    }
-    try:
-        dfn_avg, dfc_avg = gen_avg(df_nt, df_conc, inputs)
-        json_n_avg = dfn_avg.to_json(orient='columns')[1:-1].replace('},{', '} {')
-        json_c_avg = dfc_avg.to_json(orient='columns')[1:-1].replace('},{', '} {')
-    except Exception as e:
-        return model_err(scn, f"ERRORED WHILE COMPUTING AVERAGES: {e}", 'err ode 0')
+        # get result
+        [v for v in scn.proc_status][0].run_status = 'run ode 0'
+        ScenarioService.commit()
+        scn = ScenarioService.get(id=scn.id)
+        try:
+            (nt, df_nt) = ode_sim(tm, sm, df_sm, df_n0, scn)
+            [v for v in scn.proc_status][0].run_status = 'run ode 50'
+            ScenarioService.commit()
+            # make concentration output
+            df_conc = compute_concentration(df_nt, df_vmu)
+        except Exception as e:
+            print(full_stack())
+            return model_err(scn, f"ERRORED WHILE MAKING CONCENTRATION OUTPUT: {e}", 'err ode 0')
 
-    outfile_nt, outfile_conc = "", ""
+        # compute annual average mass and conc time series
+        inputs = {
+            'simulation_start_date': scn.sim_begin_end_time[0],  # scn.simulationBeginDate,
+            'simulation_end_date': scn.sim_begin_end_time[1]  # scn.simulationEndDate
+        }
+        try:
+            dfn_avg, dfc_avg = gen_avg(df_nt, df_conc, inputs)
+            json_n_avg = dfn_avg.to_json(orient='columns')[1:-1].replace('},{', '} {')
+            json_c_avg = dfc_avg.to_json(orient='columns')[1:-1].replace('},{', '} {')
+        except Exception as e:
+            return model_err(scn, f"ERRORED WHILE COMPUTING AVERAGES: {e}", 'err ode 0')
 
-    # Output components as csv
-    # df_tm.to_csv("Transfer_Matrix_test.csv")
-    # df_sm.to_csv("Source_Matrix_test.csv")
-    # df_nt.to_csv("Result_Matrix_test.csv")
-    # df_conc.to_csv("Concentration_Result_Matrix_test.csv")
+        outfile_nt, outfile_conc = "", ""
 
-    [v for v in scn.proc_status][0].run_status = 'run csv 0'
-    ScenarioService.commit()
-    scn = ScenarioService.get(id=scn.id)
-    try:
-        outfile_nt, outfile_conc, outfile_tm = safe_save_output(dfn_avg, dfc_avg, df_tm, scn, filetype='excel')
-        # safe_save_output(df_nt, df_conc, scn, filetype='excel')
-        [v for v in scn.proc_status][0].result_file_nt = outfile_nt
-        [v for v in scn.proc_status][0].result_file_conc = outfile_conc
-        [v for v in scn.proc_status][0].result_file_tm = outfile_tm
-        [v for v in scn.proc_status][0].run_status = 'run fin 100'
-        [v for v in scn.proc_status][0].result_nt = json.dumps(json_n_avg, default=str)
-        [v for v in scn.proc_status][0].result_conc = json.dumps(json_c_avg, default=str)
-    except Exception as e:
-        return model_err(scn, f"ERRORED WHILE MAKING CSV: {e}", 'err csv 0')
-    ScenarioService.commit()
+        # Output components as csv
+        # df_tm.to_csv("Transfer_Matrix_test.csv")
+        # df_sm.to_csv("Source_Matrix_test.csv")
+        # df_nt.to_csv("Result_Matrix_test.csv")
+        # df_conc.to_csv("Concentration_Result_Matrix_test.csv")
 
-    return json_n_avg, json_c_avg, outfile_nt, outfile_conc, outfile_tm
+        [v for v in scn.proc_status][0].run_status = 'run csv 0'
+        ScenarioService.commit()
+        scn = ScenarioService.get(id=scn.id)
+        try:
+            outfile_nt, outfile_conc, outfile_tm = safe_save_output(dfn_avg, dfc_avg, df_tm, scn, filetype='excel')
+            # safe_save_output(df_nt, df_conc, scn, filetype='excel')
+            [v for v in scn.proc_status][0].result_file_nt = outfile_nt
+            [v for v in scn.proc_status][0].result_file_conc = outfile_conc
+            [v for v in scn.proc_status][0].result_file_tm = outfile_tm
+            [v for v in scn.proc_status][0].run_status = 'run fin 100'
+            [v for v in scn.proc_status][0].result_nt = json.dumps(json_n_avg, default=str)
+            [v for v in scn.proc_status][0].result_conc = json.dumps(json_c_avg, default=str)
+        except Exception as e:
+            return model_err(scn, f"ERRORED WHILE MAKING CSV: {e}", 'err csv 0')
+        ScenarioService.commit()
+
+        return json_n_avg, json_c_avg, outfile_nt, outfile_conc, outfile_tm
+    finally:
+        et = time.time()
+        print(f'Ran model in {(et - st) / 60:.4f} min')
 
 
 def model_err(scn, err_msg, status):

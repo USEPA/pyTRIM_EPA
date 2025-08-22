@@ -221,10 +221,10 @@
         let default_sed_data = {
             'Sediment Bed Thickness':{
                 'short_name':'bed_thickness',
-                'is_editable': false,
+                'is_editable': true,
                 'default_value': 0.05,
                 'unit': 'm',
-                'helpText': 'Enter the average thickness of the water body sediment bed (i.e., the unburied sediment). Valid values are > 0. There is no recommended default value or typical source of site-specific values.'
+                'helpText': 'Enter the average thickness of the water body sediment bed (i.e., the unburied sediment). Valid values are > 0. The default value of 0.05 is from Table 3 of McKone et al. 2001 (Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models). There is no typical source of site-specific values. See the TRIM User Guide Appendix for full reference information.'
             },
             'Sediment Bed Density':{
                 'short_name':'bed_density',
@@ -922,20 +922,21 @@
             return myRows
         }
 
-        function calculate_flush_rate(data, parcel_name){
-            let P = TRIM.store.currentScenario.parcels.filter(e=>e.name==parcel_name)[0];
+        function calculate_flush_rate(data, parcel_name) {
+            let pcls = TRIM.store.currentScenario.parcels;
+            let P = pcls.filter(e=>e.name==parcel_name)[0];
+
             let precip_rate = P.precip_rate * 365;
             let evapo_rate = P.surface_water.wc_props.evaporation_rate;
             let watershed_area = P.surface_water.wc_props.connected_watershed_area;
             let lake_depth = P.surface_water.wc_props.mean_depth;
             let external_inflow = Number(data.find(e=>e.Property == "Water Column External Water Inflow from Other Water Bodies")[parcel_name])
             let area = P.area;
-            let wgt_ave_runoff_frac = TRIM.store.currentScenario.parcels.filter(e=>e.runoff_fraction!=null).map(e=>
-                e.runoff_fraction*e.area).reduce((a,e)=>a+e, 0)/
-                TRIM.store.currentScenario.parcels.filter(e=>e.runoff_fraction!=null).map(e=>e.area).reduce((a,e)=>a+e, 0)
-            let wgt_ave_seepage_frac = TRIM.store.currentScenario.parcels.filter(e=>e.seepage_frac!=null).map(e=>
+            let wgt_ave_runoff_frac = pcls.filter(e=>e.runoff_fraction!=null).map(e=>e.runoff_fraction*e.area).reduce((a,e)=>a+e, 0)/
+                pcls.filter(e=>e.runoff_fraction!=null).map(e=>e.area).reduce((a,e)=>a+e, 0)
+            let wgt_ave_seepage_frac = pcls.filter(e=>e.seepage_frac!=null).map(e=>
                 e.seepage_frac*e.area).reduce((a,e)=>a+e, 0)/
-                TRIM.store.currentScenario.parcels.filter(e=>e.seepage_frac!=null).map(e=>e.area).reduce((a,e)=>a+e, 0)
+                pcls.filter(e=>e.seepage_frac!=null).map(e=>e.area).reduce((a,e)=>a+e, 0)
             let res = ((area * precip_rate) + (watershed_area * precip_rate * wgt_ave_runoff_frac) +
                 (watershed_area * precip_rate * wgt_ave_seepage_frac) + (external_inflow) - (area * evapo_rate)) /
                 (area * lake_depth)

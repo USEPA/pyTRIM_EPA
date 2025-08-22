@@ -3,6 +3,7 @@ import os
 import re
 import time
 import pint
+import types
 from datetime import datetime
 from pathlib import Path
 
@@ -290,7 +291,7 @@ def update_scenario():
                 c_p.value = par_val
                 ParameterService.update(c_p)
             except AttributeError as e:
-                print(e)
+                print('update assumed all comp fixed params error:', e)
         ParameterService.commit()
 
     def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
@@ -807,6 +808,7 @@ def delete_scenario():
 
     return redirect(request.referrer)
 
+
 @scenario_api.route('/api/scenario/clearresult/', methods=['POST'])
 @login_required
 def clear_old_result():
@@ -828,6 +830,7 @@ def clear_old_result():
     print(f"Model Result deleted for {scn.name}")
     ScenarioService.commit()
     return ApiResult(data_resp)
+
 
 @scenario_api.route('/api/scenario/run/', methods=['POST', 'GET'])
 @login_required
@@ -861,10 +864,10 @@ def run_result_scenario():
             data_resp = {"mass": json_n_avg, "conc": json_c_avg, "outputMass": output_file_n,
                          "outputConc": output_file_c, "outputTM": output_file_tm}
     except Exception as e:
-        print(e)
+        print('scenario run error:', e)
         data_resp = {"error": e}
 
-    print(f"Model Run Finished ({datetime.now()}...")
+    print(f"Model Run Finished ({datetime.now()}) ...")
 
     return ApiResult(data_resp)
 
@@ -930,6 +933,7 @@ def reset_poll_model_run_scenario():
     ScenarioService.commit()
     return "success"
 
+
 def get_complete_logs_from_group_and_stream(log_group, log_stream):
     logs_client = boto3.client("logs")
 
@@ -986,6 +990,7 @@ def get_complete_logs_from_group_and_stream(log_group, log_stream):
         sanity += 1
 
     return rv
+
 
 def fetch_output_for_step_function_execution(execution_arn):
     # build boto3 clients we need
@@ -1056,6 +1061,7 @@ def check_execution_completion():
 
     return ApiResult(resp)
 
+
 # downloads the output from a model run and creates presigned url's for the xlsx files
 @scenario_api.route('/api/scenario/fetch_run_results/', methods=['POST'])
 @login_required
@@ -1092,6 +1098,7 @@ def fetch_run_results():
 
 
     return ApiResult(resp)
+
 
 @scenario_api.route(
     '/api/scenario/<int:scenario_id>/run_getflow', methods=['POST']
@@ -1143,10 +1150,11 @@ def run_getflow(scenario_id):
         else:
             data_resp = {"not": "implemented!"}
     except Exception as e:
-        print(e)
+        print('getflow kickoff exception:', e)
         data_resp = {"error": repr(e)}
 
     return ApiResult(data_resp)
+
 
 @scenario_api.route(
     '/api/stepfxn_check', methods=['POST']
@@ -1185,6 +1193,7 @@ def check_stepfunction_status():
             data_resp = {"error": str(e) }
 
     return ApiResult(data_resp)
+
 
 @scenario_api.route('/api/scenario/<int:scenario_id>/export/mirc', methods=['GET'])
 # TODO: Need some way for MIRC *app* to authenticate?
@@ -1265,3 +1274,149 @@ def run_receptor_generation(scenario_id):
         return ApiException(repr(e))
 
     return ApiResult(data_resp)
+
+
+@scenario_api.route(
+    "/api/scenario/<int:scenario_id>/chemical/properties", methods=["GET"]
+)
+@login_required
+def get_chemical_properties(scenario_id):
+    logger = make_logger('chemical_properties')
+    logger.info("Pulling chemical properties...")
+
+    scen = ScenarioService.get(scenario_id)
+    comps = scen.compartments
+
+    chem_properties = {}
+
+    def serialize_value(value, param):
+        v = None
+        u = None
+        if isinstance(value, pint.Quantity):
+            v = value.magnitude
+            u = param.unit
+        else:
+            v = value
+        if isinstance(v, float):
+            # Round value
+            if v < 1:
+                v = float(f'{v:.12f}')
+            else:
+                v = float(f'{v:.4f}')
+
+        return {
+            "value": v,
+            "unit": u
+        }
+
+    def get_prop_name(param):
+        return param.variable_name
+
+    def add_prop(chem_name, scope, param, value, restriction=None):
+        if chem_name not in chem_properties:
+            chem_properties[chem_name] = {}
+        if scope not in chem_properties[chem_name]:
+            chem_properties[chem_name][scope] = {}
+
+        prop_name = get_prop_name(param)
+
+        if prop_name not in chem_properties[chem_name][scope]:
+            chem_properties[chem_name][scope][prop_name] = {
+                "name": prop_name,
+                **serialize_value(value, param)
+            }
+
+        if restriction is not None:
+            if 'options' not in chem_properties[chem_name][scope][prop_name]:
+                chem_properties[chem_name][scope][prop_name]['options'] = {}
+            opts = chem_properties[chem_name][scope][prop_name]['options']
+            for k, val in restriction.items():
+                opts[k] = serialize_value(val, param)
+
+    def get_by_compartment(param, chem, fn=None):
+        prop_name = get_prop_name(param)
+        var_name = param.variable_name
+        chem_name = chem.name
+        for comp in comps:
+            scope = f'Compartment [{comp.media.name}]'
+            if (
+                chem_name in chem_properties
+                and scope in chem_properties[chem_name]
+                and prop_name in chem_properties[chem_name][scope]
+            ):
+                continue
+            try:
+                if fn is None:
+                    comp_fn = comp.parameters.evaluate(var_name)
+                    if isinstance(comp_fn, types.FunctionType):
+                        try:
+                            val = comp_fn(chem)
+                        except Exception as e:
+                            # print('\t-', e)
+                            continue
+                    else:
+                        val = comp_fn
+                else:
+                    val = fn(comp)
+                # print('\t>', val)
+                add_prop(
+                    chem_name, scope, param, val,
+                    restriction={comp.standard_name: val}
+                )
+            except Exception as e:
+                # print('\t-', e)
+                pass
+
+    def is_recursive(param):
+        if param.formula is None:
+            return False
+        eq = param.formula.equation
+        if f'self.{param.variable_name}(' in eq:
+            return True
+        if f'self.{param.variable_name}.' in eq:
+            return True
+        if f'self.{param.variable_name} ' in eq:
+            return True
+        return False
+
+    try:
+        for chem in scen.chemicals:
+            # print('\n========================================')
+            # print(chem)
+            # print('----------------------------------')
+            chem_name = chem.name
+            for param_name, param in chem.parameters.items():
+                # print('~', param_name)
+                if is_recursive(param):
+                    logger.error(
+                        f'Chemical Parameter "{param_name}" is recursively defined!'
+                    )
+                    if param_name == 'initialConcentration':
+                        # DISABLED FOR NOW - SEE BELOW
+                        # logger.warning(f'Using compartment "{param_name}" instead ...')
+                        # get_by_compartment(param, chem)
+                        pass
+                    else:
+                        logger.warning(f'Skipping parameter "{param_name}" ...')
+                    continue
+
+                val = chem.parameters.evaluate(param)
+                scope = None
+                if not isinstance(val, types.FunctionType):
+                    # print('\t>', val)
+                    add_prop(chem_name, 'Scenario', param, val)
+                else:
+                    try:
+                        val = val()
+                        # print('\t>', val)
+                        add_prop(chem_name, 'Scenario', param, val)
+                        continue
+                    except Exception as e:
+                        # print('\t-', e)
+                        pass
+                    # DISABLED FOR NOW - MAYBE LATER?
+                    # - we want to figure out a way to display the formulas (too?)
+                    # get_by_compartment(param, chem, fn=val)
+    except Exception as e:
+        import traceback; traceback.print_exc()
+    return ApiResult(chem_properties)

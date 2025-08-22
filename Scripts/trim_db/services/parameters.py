@@ -56,6 +56,16 @@ class ParameterService(GenericService):
     class definitions(GenericService):
         __model__ = ParameterDefinition
 
+        @classmethod
+        def get_all_for_domain(cls, domain):
+            if isinstance(domain, int):
+                return cls.get_all(domain_id=domain)
+            elif isinstance(domain, ParameterDomain):
+                return cls.get_all(domain_id=domain.id)
+            elif isinstance(domain, str):
+                domain = ParameterService.domains.get(name=domain)
+                return cls.get_all(domain_id=domain.id)
+
     @classmethod
     def get_custom_parameters_by_name(cls, name, scenario_id=None):
         query = cls.db.session.query(CustomParameter).join(
@@ -410,8 +420,8 @@ def convert_unit(val, unit, strict=False):
         try:
             val = as_quantity(val, unit)
         except Exception:
-            print(val)
-            print(unit)
+            # print('unit error (v) -', val)
+            # print('unit error (u) -', unit)
             raise
     return val
 
@@ -841,6 +851,13 @@ def parameterize(cls, globalize_custom_parameters=False, default_scenario=None):
         def items(self):
             return self._params.items()
 
+        def evaluate(self, param, **kwargs):
+            if self.entity == cls:
+                raise TypeError('Cannot Evaluate Parameters at the Class Level')
+            if isinstance(param, str):
+                param = self.get(param)
+            return evaluate_parameter(param, self.entity, **kwargs)
+
         def __repr__(self):
             return f'{{{", ".join([str(x) for x in self.keys()])}}}'
 
@@ -870,7 +887,7 @@ def parameterize(cls, globalize_custom_parameters=False, default_scenario=None):
     ):
         # print(f'ENTITY IS {entity} name is {name} class_name {cls_name}')
         if name.startswith('_') or name in NO_CUSTOM_GET:
-            raise AttributeError(name)
+            return entity.__getattribute__(name)
 
         # This method of accessing parameters exists for legacy reasons,
         # so it only needs to work for code like "Entity().param_name".
@@ -887,7 +904,7 @@ def parameterize(cls, globalize_custom_parameters=False, default_scenario=None):
     # Override getattr
     setattr(cls, '__getattr__', get_parameter)
 
-    # Override getattr
+    # Mark this model as parameterized
     setattr(cls, '__parameterized__', True)
 
     return cls

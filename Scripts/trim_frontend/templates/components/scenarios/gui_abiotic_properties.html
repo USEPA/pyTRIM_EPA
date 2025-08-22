@@ -696,9 +696,17 @@
                     if (f == cell) {
                         parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data;
                     }
-                    let param_store_key = ""
                     TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', (rsp)=>{
-                        // update_data_store_callback(rsp, cell, parcel_info, param_store_key, data, old_data)
+                        if (rsp.target.status === 200) {
+                            let field = parcel_info[2];
+                            let pcl = getParcelByKey('id', parcel_info[0].value);
+                            if (field.name == "EvapotranspirationFractions")
+                                pcl.evapotrans_frac = Number(field.value);
+                            else if (field.name == "GroundwaterSeepageFractions")
+                                pcl.seepage_frac = Number(field.value);
+                            else if (field.name == "RunoffFractions")
+                                pcl.runoff_fraction = Number(field.value);
+                        }
                         LoadingScreen.hide(ls_info);
                     })
                     table_data = get_Data_from_table(`#${focusTblId}`);
