@@ -1116,7 +1116,6 @@ Resources:
           Cpu: 0
           DisableNetworking: false
 
-          # dummy commit - SCENARIO_MISC_FILES_BUCKET_NAME should still be in this file
           Environment:
             - Name: STORAGE_BUCKET_NAME
               Value: !Ref GetFlowOutputStorageBucket
