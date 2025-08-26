@@ -646,7 +646,7 @@ def parse_runoff_matrix_upload():
     presigned_url = request.form.get("presigned_url")
     if not files and not presigned_url:
         return ApiException("No files were uploaded")
-    
+
     try:
         if presigned_url: # getflow generated matrix
             # START - validate the presigned_url
@@ -784,8 +784,8 @@ def parse_runoff_matrix_upload():
             
             row_receivers_all = [f"ro_{k}" for k in row.keys()]
             row_vals_all = [(vi, f"{float(Decimal(v))}") for vi, v in enumerate(row.values())]
-            row_receivers = [row_receivers_all[vi] for vi, v in row_vals_all if float(Decimal(v)) > 0]
-            row_vals = [row_vals_all[vi][1] for vi, v in row_vals_all if float(Decimal(v)) > 0]
+            row_receivers = [row_receivers_all[vi] for vi, v in row_vals_all]
+            row_vals = [row_vals_all[vi][1] for vi, v in row_vals_all]
             if len(row_vals) > 0:
                 payload = {
                     "id": sender_pcl.id,
