@@ -26,7 +26,7 @@ def get_scenario_surface_runoff(scen):
             soil_comps.append(c)
         elif c.media.isa('Surface_Water'):
             water_comps.append(c)
-        elif (c.media.isa("Advection") & (not c.media.isa("Flush$"))):
+        elif (c.media.isa("Advection") and not c.media.isa("Flush$")):
             sink_comps.append(c)
     runoffs = {}
     for sender in soil_comps + water_comps:

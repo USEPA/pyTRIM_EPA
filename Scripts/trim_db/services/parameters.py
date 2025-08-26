@@ -103,8 +103,7 @@ class ParameterService(GenericService):
 
         return query.all()
 
-    def get_own_custom_parameters(self, scenario=None, any_scenario=False, name=None):
-        any_scenario = any_scenario or False
+    def get_own_custom_parameters(self, name=None, scenario=None, any_scenario=False):
         entity = self.__instance
 
         query = ParameterService.db.session.query(CustomParameter).join(
@@ -115,25 +114,29 @@ class ParameterService(GenericService):
 
         dm_ids = [d.id for d in entity.domains]  # Relevant domain ids
 
-        if any_scenario:
+        if isinstance(entity, Scenario):
             query = query.filter(
-                ParameterDomain.id.in_(dm_ids),
-                CustomParameter.requirements == f'(self.id == {entity.id})'
+                CustomParameter.scenario_id == entity.id,
+                ParameterDomain.id.in_(dm_ids)
             )
+
         else:
-            # Get the current Scenario id
-            if scenario is None:
-                if isinstance(entity, Scenario):
-                    s_id = entity.id
-                else:
-                    s_id = entity.current_scenario().id
+            if (any_scenario or False):
+                query = query.filter(
+                    ParameterDomain.id.in_(dm_ids),
+                    CustomParameter.requirements == f'(self.id == {entity.id})'
+                )
             else:
-                s_id = scenario.id
-            query = query.filter(
-                CustomParameter.scenario_id == s_id,
-                ParameterDomain.id.in_(dm_ids),
-                CustomParameter.requirements == f'(self.id == {entity.id})'
-            )
+                # Get the current Scenario id
+                if scenario is None:
+                    s_id = entity.current_scenario().id
+                else:
+                    s_id = scenario.id
+                query = query.filter(
+                    CustomParameter.scenario_id == s_id,
+                    ParameterDomain.id.in_(dm_ids),
+                    CustomParameter.requirements == f'(self.id == {entity.id})'
+                )
 
         if name is not None:
             query = query.filter(or_(
