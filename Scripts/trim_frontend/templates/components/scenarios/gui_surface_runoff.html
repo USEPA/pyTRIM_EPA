@@ -184,7 +184,7 @@
                                 matrix_row_sum += parseFloat($(this_input).val());
                         }
                     )
-                    $(row_sink).val(Math.max(1-matrix_row_sum, 0));
+                    $(row_sink).val(Math.max(1-matrix_row_sum, 0).toPrecision(4));
                     $(row_sink).parent().find('label').addClass('modified');
                 }
 
