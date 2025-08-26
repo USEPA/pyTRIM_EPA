@@ -494,7 +494,7 @@
                 var staticVal = days * staticPrecip.val()
                 staticCum.val(staticVal);
                 if (!precipVaries.prop('checked')) {
-                    var annualVal = days / 365.2425 * staticPrecip.val()
+                    var annualVal = 365 * staticPrecip.val()
                     annualPrecip.val(annualVal);
                 }
             });
