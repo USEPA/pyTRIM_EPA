@@ -15,9 +15,12 @@ def serialize_parcel(pcl: Parcel):
     soil_abiotic_params = get_soil_abiotic_params(pcl)
     initial_conc = get_initial_concetrations(pcl)
 
-    cdv = pcl.get_compartment("DryVaporSource")
-    spacing_param = cdv.parameters.get("ReceptorSpacing")
-    spacing_val = spacing_param.value
+    try:
+        cdv = pcl.get_compartment("DryVaporSource")
+        spacing_param = cdv.parameters.get("ReceptorSpacing")
+        spacing_val = spacing_param.value
+    except Exception:
+        spacing_val = None
 
     s = {
         'id': pcl.id,
@@ -609,25 +612,23 @@ def get_initial_concetrations(pcl):
 
 
 def get_source_params(pcl):
-    chems = {c.name: {} for c in pcl.scenario.chemicals}
-    source_comps = [c for c in pcl.compartments]
-    source_params = {"sources": chems}
-
-    for comp in source_comps:
-        ve_name = comp.volume_element.name
-        for chem in pcl.scenario.chemicals:
-            deposition_rate = comp.surfaceDepositionRate(chemical=chem) # very slow!
-            chem_source = source_params["sources"][chem.name]
-            spd = chem_source.get(ve_name)
-
-            if hasattr(deposition_rate, 'magnitude'):
-                deposition_rate = deposition_rate.magnitude
-
-            if spd:
-                spd.setdefault(comp.name, deposition_rate)
-            else:
-                chem_source.setdefault(ve_name, {comp.name: deposition_rate})
-    return source_params
+    source_params = {}
+    for chem in pcl.scenario.chemicals:
+        chem_name = chem.name
+        if chem_name not in source_params:
+            source_params[chem_name] = {}
+        for ve in pcl.volume_elements:
+            ve_name = ve.name
+            if ve_name not in source_params[chem_name]:
+                source_params[chem_name][ve_name] = {}
+            for comp in ve.compartments:
+                deposition_rate = comp.surfaceDepositionRate(chemical=chem)  # slow ...
+                try:
+                    deposition_rate = deposition_rate.magnitude
+                except Exception:
+                    pass
+                source_params[chem_name][ve_name][comp.name] = deposition_rate
+    return {'sources': source_params}
 
 
 def get_fish_params(comp):
@@ -637,7 +638,7 @@ def get_fish_params(comp):
     }
     biomass_by_media = safe_get_val(comp, 'BiomassPerArea', None)
     bw_by_media = safe_get_val(comp, 'BW', None)
-    
+
     fish_params = {
         'aquatic_diet_fractions': diet_by_media,
         'aquatic_biomass': biomass_by_media,
