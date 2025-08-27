@@ -198,22 +198,73 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
 
     elif field_name == "description":
         p.description = parcels_data['description']
+
     elif field_name == 'totalErosionRate':
+        val = float(parcels_data['totalErosionRate'])
         for c in p.compartments:
             if c.media.isa('Surface_Soil'):
-                par = c.parameters.get('TotalErosionRate')
-                par.value = parcels_data['totalErosionRate']
-    elif ("erosion1" in field_name or "erosion2" in field_name or "erosion3" in field_name): # unique structure
-        param = ParameterService.definitions.get(full_name=field_name)
-        param = ParameterService.get_or_create(
-            definition_id=param.id,
-            scenario_id=p.scenario_id,
-            requirements=f"(self.id == {p.id})", # parcel id
-        )
-        # storing in unit since value is decimal only
-        param.unit = parcels_data[field_name]
-        ParameterService.update(param)
+                ter = c.parameters.get('TotalErosionRate')
+                if val == 0:
+                    if isinstance(ter, CustomParameter):
+                        ParameterService.delete(ter, no_commit=True)
+                else:
+                    par = get_or_create_custom_param(
+                        ter,
+                        {"requirements": f"(self.id == {c.id})", "scenario_id": p.scenario_id},
+                    )
+                    update_custom_param_value(par, val)
         ParameterService.commit()
+
+    elif ("erosion1-" in field_name or "erosion2-" in field_name or "erosion3-" in field_name): # HACKY
+        option_num = int(field_name.split('-')[0].replace('erosion', ''))
+
+        # Delete all erosionN- params for other options,
+        # and only store one active parameter at a time
+        for param in list(p.scenario.parameters.values()):
+            if not isinstance(param, CustomParameter):
+                continue
+            if not param.requirements == f'(self.id == {p.id})':
+                continue
+            if not(
+                param.variable_name.startswith('erosion1-')
+                or param.variable_name.startswith('erosion2-')
+                or param.variable_name.startswith('erosion3-')
+            ):
+                continue
+            if (
+                not param.variable_name.startswith(f'erosion{option_num}-')
+                or param.variable_name.endswith('-active')
+            ):
+                ParameterService.delete(param, no_commit=True)
+
+        # Create/update the specified parameter
+        param_def = ParameterService.definitions.get_or_create(
+            variable_name=field_name,
+            full_name=field_name,
+            domain=ParameterService.domains.get(name='Scenario')
+        )
+        param = ParameterService.get_or_create(
+            definition_id=param_def.id,
+            scenario_id=p.scenario_id,
+            requirements=f'(self.id == {p.id})', # parcel id
+        )
+        param.value = parcels_data[field_name]
+        ParameterService.update(param)
+
+        # Create/update the specified parameter active flag
+        param_def = ParameterService.definitions.get_or_create(
+            variable_name=f'{field_name}-active',
+            full_name=f'{field_name}-active',
+            domain=ParameterService.domains.get(name='Scenario')
+        )
+        param = ParameterService.get_or_create(
+            definition_id=param_def.id,
+            scenario_id=p.scenario_id,
+            requirements=f'(self.id == {p.id})', # parcel id
+        )
+        param.value = 1
+        ParameterService.update(param)
+
     elif field_name in air_params:
         par_name = air_params[field_name]
         # the below part was generating error due to missing par for dustLoad, dustDensity etc...
@@ -635,7 +686,7 @@ def initialize_parcel_contents(new_parcel, vol_elem_defaults=None):
         nve.top = ve['top']
         nve.bottom = ve['bottom']
         for c_name, c in ve["Compartments"].items():
-            print(f'creating {c_name} for volume element {ve_name}')
+            # print(f'creating {c_name} for volume element {ve_name}')
             # Create standard compartments linking them to default volume elements and media for each compartment
             # nc = new_parcel.get_compartment(c_name) # This won't work because the compartment names are not unique
             nc = CompartmentService.get_or_create(
@@ -842,6 +893,21 @@ def delete_parcel_contents(del_parcel):
         # Delete Compartments
         # print(f'- delete compartment {c}')
         CompartmentService.delete(c)
+
+    # Delete associated HACKY params at the scenario level
+    print('deleting erosion-table parameters')
+    for param in list(del_parcel.scenario.parameters.values()):
+        if not isinstance(param, CustomParameter):
+            continue
+        if not param.requirements == f'(self.id == {del_parcel.id})':
+            continue
+        if not(
+            param.variable_name.startswith('erosion1-')
+            or param.variable_name.startswith('erosion2-')
+            or param.variable_name.startswith('erosion3-')
+        ):
+            continue
+        ParameterService.delete(param, no_commit=True)
 
     # Delete Volume Elements
     print('deleting parcel volume elements')
