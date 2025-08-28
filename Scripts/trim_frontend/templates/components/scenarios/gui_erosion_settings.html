@@ -186,7 +186,7 @@
                         currentDataByPcl[pclName][dataFieldName] = pclData[inputFieldName];
                     }
 
-                    updateErosionData(tbl, currentData);
+                    updateAllErosionData(activeTbl, currentData, dataFieldName);
                 }
             }
 
@@ -254,9 +254,9 @@
             usdaBtn.on('click', (e) => getUsdaSoilData());
 
             function getUsdaSoilData() {
-                usdaBtn.append("<span class='lds-dual-ring'>");
+                usdaBtn.append("<span class='lds-dual-ring mx-2'>");
                 usdaBtn.prop('disabled', true);
-                Trim.api.getSoilData('notill').on('load', function() {
+                TRIM.api.getSoilData('notill').on('load', function() {
                     updateUsdaSoilData(JSON.parse(this.responseText));
                     usdaBtn.find('.lds-dual-ring').remove();
                     usdaBtn.attr('disabled', false);
@@ -265,7 +265,7 @@
 
             function updateUsdaSoilData(soilData) {
                 usdaBtn.data('soil', soilData);
-                const tbl = $('erosionTable_opt3');
+                const tbl = $('#erosionTable_opt3');
 
                 // Load the current data and format by parcel
                 const currentData = parseErosionData(tbl);
@@ -275,7 +275,7 @@
 
                 const targetFieldMappers = { // to extract the correct value from the USDA data
                     R: (data) => data.R,
-                    K: (data) => scientific(data.kwfact['0']),
+                    K: (data) => data.kwfact['0'],
                     S: (data) => data.slope_r['0'].toFixed(2),
                     L: (data) => data.slopelenusle_r['0'].toFixed(2)
                 };
@@ -297,10 +297,10 @@
                     }
                 }
 
-                updateErosionData(tbl, currentData);
-
-                // Update the saved total effective erosion rates
-                saveErosionRates(tbl);
+                // tell the update function that field 'S' triggered this
+                // -- that will cascade updates that will catch R, K, and L,
+                // since they're all in calculations that depend on S
+                updateAllErosionData(tbl, currentData, 'S', ['R', 'K', 'L']);
             }
 
             LoadingScreen.hide('erosion_settings_init');
@@ -374,26 +374,198 @@
 
             renderErosionData();
 
-            // TODO ?
-
             LoadingScreen.hide('erosion_settings_refresh');
         };
 
-        function standardizeVal(val, defaultVal) {
-            let ret = defaultVal;
-            if (val !== undefined) {
-                try {
-                    ret = JSON.parse(val).value;
-                    if (ret === undefined) {
-                        ret = JSON.parse(val);
+        function getParcelErosionData(parcels) {
+
+            function standardizeVal(val) {
+                let ret = val;
+                if (typeof(ret) == typeof('')) {
+                    try {
+                        ret = JSON.parse(ret);
+                        ret = ret.value || ret;
+                    }
+                    catch (err) {
+                        // console.log(err);
                     }
                 }
-                catch (err) {
-                    console.log(err)
-                    ret = defaultVal;
-                }
+                return ret;
             }
-            return ret;
+
+            function getForOpt(pcl, optionNum, param, defaultVal) {
+                const paramName = `erosion${optionNum}-${param}`;
+                if (Object.keys(pcl).indexOf(paramName) > -1) {
+                    return standardizeVal(pcl[paramName]);
+                }
+                return defaultVal;
+            }
+
+            const data1 = [];
+            const data2 = [];
+            const data3 = [];
+            for (const pcl of parcels) {
+                if (pcl.landUse === "Impervious" || pcl.landUse === "N/A") {
+                    continue;
+                }
+
+                const baseData = {
+                    parcel_id: pcl.id,
+                    'Surface Parcel': pcl.name,
+                    'Area': pcl.area / 1E6,
+                    'Land Use': pcl.landUse
+                };
+
+                ////////////////////////
+                // Data for Option 1
+                ////////////////////////
+
+                // Calculate "Total Effective Erosion Rate"
+                const ter1 = getForOpt(
+                    pcl, 1, 'total_effective_erosion_rate', pcl.totalErosionRate || 0
+                );
+
+                // Add option 1 data
+                data1.push({
+                    ...baseData,
+                    'Total Effective Erosion Rate': ter1,
+                    active: {
+                        'Total Effective Erosion Rate': 1
+                    }
+                });
+
+                ////////////////////////
+                // Data for Option 2
+                ////////////////////////
+
+                // Calculate "A"
+                const AVal2 = getForOpt(
+                    pcl, 2, 'unit_soil_loss', DEFAULT_VALS.A
+                );
+
+                // Calculate "a"
+                const areaInSqMile = (pcl.area / 1E6).toFixed(5) / 2.58998811;
+                const aVal = (
+                    areaInSqMile <= 0.1 ? 2.1 : (
+                        areaInSqMile <= 1 ? 1.9 : (
+                            areaInSqMile <= 10 ? 1.4 : (
+                                areaInSqMile <= 100 ? 1.2 : 0.6
+                            )
+                        )
+                    )
+                );
+                const aVal2 = getForOpt(pcl, 2, 'empirical_intercept_coefficient', aVal);
+
+                // Calculate "b"
+                const bVal2 = getForOpt(pcl, 2, 'empirical_slope_coefficient', DEFAULT_VALS.b);
+
+                // Calculate "SD"
+                const SDVal2 = getForOpt(
+                    pcl, 2, 'sediment_delivery_ratio', VAL_FUNCS.SD(aVal2, bVal2, pcl.area)
+                );
+
+                // Calculate "Total Effective Erosion Rate"
+                const ter2 = ['Water','Impervious'].indexOf(pcl.landUse) > -1 ? 0 : (
+                    getForOpt(pcl, 2, 'total_effective_erosion_rate', VAL_FUNCS.ER(AVal2, SDVal2))
+                );
+
+                // Get active erosion field
+                const activeField2 = pcl['erosion2-active'] || null;
+
+                // Add option 2 data
+                data2.push({
+                    ...baseData,
+                    A: AVal2,
+                    a: aVal2,
+                    b: bVal2,
+                    SD: SDVal2,
+                    'Total Effective Erosion Rate': ter2,
+                    active: calculateActiveValues(2, activeField2)
+                });
+
+                ////////////////////////
+                // Data for Option 3
+                ////////////////////////
+
+                // Calculate "R"
+                const RVal = getForOpt(pcl, 3, 'rainfall_erosivity_index', DEFAULT_VALS.R);
+
+                // Calculate "K"
+                const KVal = getForOpt(pcl, 3, 'erodibility_index', DEFAULT_VALS.K);
+
+                // Calculate "S"
+                const SVal = getForOpt(pcl, 3, 'slope_gradient');
+
+                // Calculate "L"
+                const LVal = getForOpt(pcl, 3, 'slope_length');
+
+                // Calculate "LS"
+                const LSVal = getForOpt(
+                    pcl, 3, 'topographical_length-slope_factor',
+                    (LVal == undefined || SVal == undefined) ? DEFAULT_VALS.LS : VAL_FUNCS.LS(LVal, SVal)
+                );
+
+                // Calculate "C"
+                const CFactor = (
+                    ['Agriculture (General)', 'Tilled Soil'].indexOf(pcl.landUse) > -1 ? 0.5 : (
+                        pcl.landUse === 'Soil' ? 1.0 : (
+                            pcl.landUse === 'Impervious' ? 0 : 0.1
+                        )
+                    )
+                );
+                const CVal = getForOpt(pcl, 3, 'cover_management_factor', CFactor);
+
+                // Calculate "P"
+                const PVal = getForOpt(pcl, 3, 'supporting_practices_factor', DEFAULT_VALS.P);
+
+                // Calculate "A"
+                const AVal3 = getForOpt(
+                    pcl, 3, 'unit_soil_loss', VAL_FUNCS.A(RVal, KVal, LSVal, CVal, PVal)
+                );
+
+                // Calculate "a"
+                const aVal3 = getForOpt(pcl, 3, 'empirical_intercept_coefficient', aVal);
+
+                // Calculate "b"
+                const bVal3 = getForOpt(pcl, 3, 'empirical_slope_coefficient', DEFAULT_VALS.b);
+
+                // Calculate "SD"
+                const SDVal3 = getForOpt(
+                    pcl, 3, 'sediment_delivery_ratio', VAL_FUNCS.SD(aVal3, bVal3, pcl.area)
+                );
+
+                // Calculate "Total Effective Erosion Rate"
+                const ter3 = ['Water','Impervious'].indexOf(pcl.landUse) > -1 ? 0 : (
+                    getForOpt(pcl, 3, 'total_effective_erosion_rate', VAL_FUNCS.ER(AVal3, SDVal3))
+                );
+
+                // Get active erosion field
+                const activeField3 = pcl['erosion3-active'] || null;
+
+                // Add option 3 data
+                data3.push({
+                    ...baseData,
+                    R: RVal,
+                    K: KVal,
+                    S: SVal,
+                    L: LVal,
+                    LS: LSVal,
+                    C: CVal,
+                    P: PVal,
+                    A: AVal3,
+                    a: aVal3,
+                    b: bVal3,
+                    SD: SDVal3,
+                    'Total Effective Erosion Rate': ter3,
+                    active: calculateActiveValues(3, activeField3)
+                });
+            }
+
+            return {
+                opt1: data1,
+                opt2: data2,
+                opt3: data3
+            }
         }
 
         function renderErosionData() {
@@ -681,6 +853,13 @@
                         }
                     }
                 ]
+            };
+            // Add names to colDefs for easy access later;
+            // doing it now makes sure col.name == col.data w/o retyping it each time
+            for (const k in tblColDefs) {
+                for (const colDef of tblColDefs[k]) {
+                    colDef.name = colDef.name || colDef.data;
+                }
             }
 
             function globalDrawCallback(tbl) {
@@ -712,21 +891,17 @@
                     const optionNum = tbl[0].id.split('_opt').pop();
                     rowData.active = calculateActiveValues(optionNum, fieldName);
                     // Check if the new value is valid
-                    ErrorValidation.isPositiveValue(me[0]);
-                    if (elementIsValid(me.parent())) {
+                    if (validateField(tbl, fieldName, me[0])) {
                         // If valid, recalculate the row ER ...
                         recalculateErosionRate(optionNum, rowData, fieldName);
                         // ... then submit to the DB
-                        const paramName = me.data('param-name');
-                        const valPostData = {id: rowData.parcel_id};
-                        valPostData[paramName] = myVal
-                        TRIM.api.updateParameter('parcel', valPostData);
+                        updateDB(rowData, fieldName, optionNum);
                     }
                     // Always save total erosion
                     saveErosionRates(tbl);
                     // Redraw the table
                     myRow.data(rowData);
-                    dt.draw(true);
+                    dt.draw(false);
                 });
             }
 
@@ -754,6 +929,24 @@
                     }
                 });
             }
+        }
+
+        function validateField(tbl, fieldName, rowIndexOrInput) {
+            function getInputEl(rowIndex) {
+                const dt = tbl.DataTable();
+                return $(dt.cell(rowIndex, fieldName + ':name').node()).find('input')[0];
+            }
+
+            const el = typeof(rowIndexOrInput) == 'number' ? getInputEl(rowIndexOrInput) : rowIndexOrInput;
+            if (el === undefined) {
+                return false;
+            }
+
+            ErrorValidation.isValidNumber(el);
+            if (elementIsValid(el.parentElement)) {
+                ErrorValidation.isPositiveValue(el);
+            }
+            return elementIsValid(el.parentElement);
         }
 
         function calculateActiveValues(optionNum, fromField) {
@@ -799,19 +992,19 @@
             return active;
         }
 
-        function recalculateErosionRate(optionNum, data, fromField) {
-            function updateDB(fieldName) {
-                const paramName = `erosion${optionNum}-` + ABBR_TO_PARAM[fieldName];
-                const valPostData = {id: data.parcel_id};
-                valPostData[paramName] = data[fieldName]
-                TRIM.api.updateParameter('parcel', valPostData);
-            }
+        function updateDB(data, fieldName, optionNum) {
+            const paramName = `erosion${optionNum}-` + ABBR_TO_PARAM[fieldName];
+            const valPostData = {id: data.parcel_id};
+            valPostData[paramName] = data[fieldName]
+            TRIM.api.updateParameter('parcel', valPostData);
+        }
 
+        function recalculateErosionRate(optionNum, data, fromField) {
             function recalculateSD() {
                 console.log('auto-recalculating SD')
                 const sd = VAL_FUNCS.SD(data.a, data.b, data.Area);
                 data.SD = isNaN(sd) ? undefined : sd;
-                updateDB('SD');
+                updateDB(data, 'SD', optionNum);
                 recalculateER();
             }
 
@@ -819,7 +1012,7 @@
                 console.log('auto-recalculating LS')
                 const ls = VAL_FUNCS.LS(data.L, data.S);
                 data.LS = isNaN(ls) ? undefined : ls;
-                updateDB('LS');
+                updateDB(data, 'LS', optionNum);
                 recalculateA();
             }
 
@@ -827,7 +1020,7 @@
                 console.log('auto-recalculating A')
                 const a = VAL_FUNCS.A(data.R, data.K, data.LS, data.C, data.P);
                 data.A = isNaN(a) ? undefined : a;
-                updateDB('A');
+                updateDB(data, 'A', optionNum);
                 recalculateER();
             }
 
@@ -841,7 +1034,7 @@
                     const er = VAL_FUNCS.ER(data.A, data.SD);
                     data[fieldName] = isNaN(er) ? undefined : er;
                 }
-                updateDB(fieldName);
+                updateDB(data, fieldName, optionNum);
             }
 
             if (optionNum == 2) {
@@ -868,207 +1061,45 @@
             }
         }
 
-        function getParcelErosionData(parcels) {
+        function updateAllErosionData(tbl, data, fromField, alsoSaveFields) {
+            const optionNum = tbl[0].id.split('_opt').pop();
+            for (let i = 0; i < data.length; i++) {
+                const rowData = data[i];
+                rowData.active = calculateActiveValues(optionNum, fromField);
 
-            function getForOpt(pcl, optionNum, param) {
-                return pcl[`erosion${optionNum}-${param}`];
-            }
-
-            const data1 = [];
-            const data2 = [];
-            const data3 = [];
-            for (const pcl of parcels) {
-                if (pcl.landUse === "Impervious" || pcl.landUse === "N/A") {
-                    continue;
+                if (validateField(tbl, fromField, i)) {
+                    // If valid, recalculate the row ER ...
+                    recalculateErosionRate(optionNum, rowData, fromField);
+                    // ... then submit to the DB
+                    updateDB(rowData, fromField, optionNum);
                 }
-
-                const baseData = {
-                    parcel_id: pcl.id,
-                    'Surface Parcel': pcl.name,
-                    'Area': pcl.area / 1E6,
-                    'Land Use': pcl.landUse
-                };
-
-                ////////////////////////
-                // Data for Option 1
-                ////////////////////////
-
-                // Calculate "Total Effective Erosion Rate"
-                const ter1 = standardizeVal(
-                    getForOpt(pcl, 1, 'total_effective_erosion_rate'),
-                    pcl.totalErosionRate || 0
-                );
-
-                // Add option 1 data
-                data1.push({
-                    ...baseData,
-                    'Total Effective Erosion Rate': ter1,
-                    active: {
-                        'Total Effective Erosion Rate': 1
+                if (alsoSaveFields !== undefined) {
+                    for (fieldName of alsoSaveFields) {
+                        if (validateField(tbl, fieldName, i)) {
+                            // If valid, submit to the DB
+                            updateDB(rowData, fieldName, optionNum);
+                        }
                     }
-                });
-
-                ////////////////////////
-                // Data for Option 2
-                ////////////////////////
-
-                // Calculate "A"
-                const AVal2 = standardizeVal(
-                    getForOpt(pcl, 2, 'unit_soil_loss'),
-                    DEFAULT_VALS.A
-                );
-
-                // Calculate "a"
-                const areaInSqMile = (pcl.area / 1E6).toFixed(5) / 2.58998811;
-                const aVal = (
-                    areaInSqMile <= 0.1 ? 2.1 : (
-                        areaInSqMile <= 1 ? 1.9 : (
-                            areaInSqMile <= 10 ? 1.4 : (
-                                areaInSqMile <= 100 ? 1.2 : 0.6
-                            )
-                        )
-                    )
-                );
-                const aVal2 = standardizeVal(getForOpt(pcl, 2, 'empirical_intercept_coefficient'), aVal);
-
-                // Calculate "b"
-                const bVal2 = standardizeVal(getForOpt(pcl, 2, 'empirical_slope_coefficient'), DEFAULT_VALS.b);
-
-                // Calculate "SD"
-                const SDVal2 = standardizeVal(
-                    getForOpt(pcl, 2, 'sediment_delivery_ratio'),
-                    VAL_FUNCS.SD(aVal2, bVal2, pcl.area)
-                );
-
-                // Calculate "Total Effective Erosion Rate"
-                const ter2 = ['Water','Impervious'].indexOf(pcl.landUse) > -1 ? 0 : (
-                    standardizeVal(
-                        getForOpt(pcl, 2, 'total_effective_erosion_rate'),
-                        VAL_FUNCS.ER(AVal2, SDVal2)
-                    )
-                );
-
-                // Get active erosion field
-                const activeField2 = pcl['erosion2-active'] || null;
-
-                // Add option 2 data
-                data2.push({
-                    ...baseData,
-                    A: AVal2,
-                    a: aVal2,
-                    b: bVal2,
-                    SD: SDVal2,
-                    'Total Effective Erosion Rate': ter2,
-                    active: calculateActiveValues(2, activeField2)
-                });
-
-                ////////////////////////
-                // Data for Option 3
-                ////////////////////////
-
-                // Calculate "R"
-                const RVal = standardizeVal(getForOpt(pcl, 3, 'rainfall_erosivity_index'), DEFAULT_VALS.R);
-
-                // Calculate "K"
-                const KVal = standardizeVal(getForOpt(pcl, 3, 'erodibility_index'), DEFAULT_VALS.K);
-
-                // Calculate "S"
-                const SVal = standardizeVal(getForOpt(pcl, 3, 'slope_gradient'));
-
-                // Calculate "L"
-                const LVal = standardizeVal(getForOpt(pcl, 3, 'slope_length'));
-
-                // Calculate "LS"
-                const LSVal = standardizeVal(
-                    getForOpt(pcl, 3, 'topographical_length-slope_factor'),
-                    (LVal == undefined || SVal == undefined) ? DEFAULT_VALS.LS : VAL_FUNCS.LS(LVal, SVal)
-                );
-
-                // Calculate "C"
-                const CFactor = (
-                    ['Agriculture (General)', 'Tilled Soil'].indexOf(pcl.landUse) > -1 ? 0.5 : (
-                        pcl.landUse === 'Soil' ? 1.0 : (
-                            pcl.landUse === 'Impervious' ? 0 : 0.1
-                        )
-                    )
-                );
-                const CVal = standardizeVal(getForOpt(pcl, 3, 'cover_management_factor'), CFactor);
-
-                // Calculate "P"
-                const PVal = standardizeVal(getForOpt(pcl, 3, 'supporting_practices_factor'), DEFAULT_VALS.P);
-
-                // Calculate "A"
-                const AVal3 = standardizeVal(
-                    getForOpt(pcl, 3, 'unit_soil_loss'),
-                    VAL_FUNCS.A(RVal, KVal, LSVal, CVal, PVal)
-                );
-
-                // Calculate "a"
-                const aVal3 = standardizeVal(getForOpt(pcl, 3, 'empirical_intercept_coefficient'), aVal);
-
-                // Calculate "b"
-                const bVal3 = standardizeVal(getForOpt(pcl, 3, 'empirical_slope_coefficient'), DEFAULT_VALS.b);
-
-                // Calculate "SD"
-                const SDVal3 = standardizeVal(
-                    getForOpt(pcl, 3, 'sediment_delivery_ratio'),
-                    VAL_FUNCS.SD(aVal3, bVal3, pcl.area)
-                );
-
-                // Calculate "Total Effective Erosion Rate"
-                const ter3 = ['Water','Impervious'].indexOf(pcl.landUse) > -1 ? 0 : (
-                    standardizeVal(
-                        getForOpt(pcl, 3, 'total_effective_erosion_rate'),
-                        VAL_FUNCS.ER(AVal3, SDVal3)
-                    )
-                );
-
-                // Get active erosion field
-                const activeField3 = pcl['erosion3-active'] || null;
-
-                // Add option 3 data
-                data3.push({
-                    ...baseData,
-                    R: RVal,
-                    K: KVal,
-                    S: SVal,
-                    L: LVal,
-                    LS: LSVal,
-                    C: CVal,
-                    P: PVal,
-                    A: AVal3,
-                    a: aVal3,
-                    b: bVal3,
-                    SD: SDVal3,
-                    'Total Effective Erosion Rate': ter3,
-                    active: calculateActiveValues(3, activeField3)
-                });
+                }
             }
 
-            return {
-                opt1: data1,
-                opt2: data2,
-                opt3: data3
-            }
-        }
-
-        function updateErosionData(tbl, data) {
-            const dt = $(tbl).DataTable();
+            const dt = tbl.DataTable();
             dt.rows().remove();
-            dt.rows.add(data).draw();
+            dt.rows.add(data).draw(false);
+
+            // Update the saved total effective erosion rates
+            saveErosionRates(tbl);
         }
 
         function saveErosionRates(tbl) { // updates the saved totalErosionRate
             LoadingScreen.show('saving_erosion_rates');
             const updates = [];
-            for (const rowData of parseErosionData(tbl)) {
+            const data = parseErosionData(tbl);
+            for (let i = 0; i < data.length; i++) {
+                const rowData = data[i];
                 const effectiveErosionRate = rowData[fieldAbbrToName.ER];
-                if (!isNumber(effectiveErosionRate.toString())) {
-                    // mark the error and move on
-                    const tr = tbl.find(`tr[data-parcel-id="${rowData.parcel_id}"]`);
-                    ErrorValidation.isValidNumber(
-                        tr.find('input[data-param-name$="-total_effective_erosion_rate"')
-                    );
+                if (!validateField(tbl, fieldAbbrToName.ER, i)) {
+                    // mark the error (done by validateField) and move on
                     continue;
                 }
                 const update = TRIM.api.updateParameter('parcel', { // post update to API
