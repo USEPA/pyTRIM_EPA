@@ -1,5 +1,5 @@
 import numpy as np
-from trim_db.schema import Parcel
+from trim_db.schema import ureg, Parcel
 from trim_db.schema.utils.serialize import register_serializer
 from trim_db.schema.parameters.models import ParameterDefinition, CustomParameter
 from trim_db.services import *
@@ -1108,14 +1108,6 @@ SURFACE_SOIL_SPECIFIC_MEDIA_PARAMS = [
         'default_formula_id': 2485
     },
     {
-        'variable_name': 'unitSoilLoss',
-        'full_name': 'unitSoilLoss',
-        'domain_id': None,
-        'default_value': 0.00036,
-        'default_unit': 'kg/m^2/day',
-        'default_formula_id': None
-    },
-    {
         'variable_name': 'sedimentDeliveryRatioSlopeCoef',
         'full_name': 'sedimentDeliveryRatioSlopeCoef',
         'domain_id': None,
@@ -1138,4 +1130,11 @@ EROSION_TABLE_PARAM_MAP = {
     'empirical_slope_coefficient': 'b',
     'sediment_delivery_ratio': 'SD',
     'total_effective_erosion_rate': 'Total Effective Erosion Rate'
+}
+
+EROSION_DEFAULTS = {
+    'R': 300 * ureg('((100 * ft * US_ton) / acre) / year'),
+    'K': 0.36 * ureg('(ton / acre) / ((100 * ft * US_ton) / acre)'),
+    'LS': 1.5,
+    'P': 1
 }

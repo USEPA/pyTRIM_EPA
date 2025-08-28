@@ -30,14 +30,6 @@
             ["erosionRateCalcSource", 1, null]
         ],
         "compartment_extra_params": [
-            ["unitSoilLoss", 0.00036, "kg/m^2/day", "Compartment [Surface_Soil]"],
-            ["sedimentDeliveryRatioSlopeCoef", 0.125, null, "Compartment [Surface_Soil]"],
-            ["soilTillage", 0, null, null],
-            ["waterEvaporationRate", 0.7, "m[water]/year", "Compartment [Surface_Water]"],
-            ["BedDensity", 2600, "kg[sediment particles]/m^3[sediment particles]", "Compartment [Sediment]"],
-            ["ExternalSedimentInflow", 0, "kg[sediment particles]/day", "Compartment [Surface_Water]"],
-            ["RechargeRate", 0.000142, "(m^3[water]/m^2[interface])/day", "Compartment [Groundwater]"],
-            ["DiffusiveExchangeCoefficient", 0.000225, "m^2/day", "Compartment [Surface_Water]"],
             ["Density", 0.0012, "g/cm^3", "Compartment [Air]"],
             ["unitSoilLoss", 0.00036, "kg/m^2/day", "Compartment [Surface_Soil]"],
             ["sedimentDeliveryRatioSlopeCoef", 0.125, null, "Compartment [Surface_Soil]"],

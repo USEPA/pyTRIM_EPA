@@ -311,18 +311,16 @@
         }
 
         const DEFAULT_VALS = {
-            A: 1.73E-03, // Only used for Option 2
-            b: 0.125,
             R: 300,
             K: 0.36,
             LS: 1.5,
-            P: 1
+            P: 1,
+            b: 0.125
         };
 
         const VAL_FUNCS = {
             SD: (a, b, area) => {
-                area = area * 1E6; // adjust units ?? THIS MAY BE WRONG
-                return a * (area ** (-b))
+                return a * (area ** (-b));
             },
             LS: (L, S) => {
                 if (L == undefined || S == undefined) {
@@ -337,7 +335,7 @@
                     / 365 // 1/y to 1/d
                     * 2.47105E-04 // acre to m^2
                     * 907.183 // US ton to kg
-                )
+                );
             },
             ER: (A, SD) => {
                 return A * SD;
@@ -438,9 +436,19 @@
                 // Data for Option 2
                 ////////////////////////
 
+                // Get "C"-factor
+                const CFactor = (
+                    ['Agriculture (General)', 'Tilled Soil'].indexOf(pcl.landUse) > -1 ? 0.5 : (
+                        pcl.landUse === 'Soil' ? 1.0 : (
+                            pcl.landUse === 'Impervious' ? 0 : 0.1
+                        )
+                    )
+                );
+
                 // Calculate "A"
                 const AVal2 = getForOpt(
-                    pcl, 2, 'unit_soil_loss', DEFAULT_VALS.A
+                    pcl, 2, 'unit_soil_loss',
+                    VAL_FUNCS.A(DEFAULT_VALS.R, DEFAULT_VALS.K, DEFAULT_VALS.LS, CFactor, DEFAULT_VALS.P)
                 );
 
                 // Calculate "a"
@@ -506,13 +514,6 @@
                 );
 
                 // Calculate "C"
-                const CFactor = (
-                    ['Agriculture (General)', 'Tilled Soil'].indexOf(pcl.landUse) > -1 ? 0.5 : (
-                        pcl.landUse === 'Soil' ? 1.0 : (
-                            pcl.landUse === 'Impervious' ? 0 : 0.1
-                        )
-                    )
-                );
                 const CVal = getForOpt(pcl, 3, 'cover_management_factor', CFactor);
 
                 // Calculate "P"

@@ -11,7 +11,7 @@ from .defaults import SURFACE_SOIL_SPECIFIC_MEDIA_PARAMS
 from flask_api import ApiResult
 from pyproj import Transformer
 
-from trim_db.schema import CustomParameter, ParameterDefinition, Parcel
+from trim_db.schema import ureg, CustomParameter, ParameterDefinition, Parcel
 from trim_db.services import ChemicalService, CompartmentService, FormulaService, \
     ParameterService, ParcelService, ScenarioService, VolumeElementService
 from trim_db.services.parameters import get_or_create_custom_param, update_custom_param_value
@@ -19,7 +19,7 @@ from .defaults import get_watershed_area, \
      Air_Parcel_VolElem_defaults, Aquatic_Biota_SW_Compartment_defaults, \
      Aquatic_Biota_Sed_Compartment_defaults, Farm_Biota_SurfSoil_Compartment_defaults, \
      LAND_USE_TYPES, AQUATIC_DIET, Land_Parcel_VolElem_defaults, Water_Parcel_VolElem_defaults, \
-     Wet_Dry_Source_VolElem_defaults
+     Wet_Dry_Source_VolElem_defaults, EROSION_DEFAULTS
 from .forms import ScenarioParcelsForm
 from ..scenarios.forms import ScenarioAbioticPropertiesForm
 from ..utils.logging import make_logger
@@ -788,7 +788,26 @@ def calc_default_erosion_rate_sdr(pcl):
     for c in pcl.compartments:
         if not c.media.isa("Surface_Soil"):
             continue
-        unit_soil_loss = c.parameters["unitSoilLoss"].default_value
+
+        land_use = get_land_use(pcl)
+        if land_use in ['Agriculture (General)', 'Tilled Soil']:
+            cover_management_factor = 0.5
+        elif land_use == 'Soil':
+            cover_management_factor = 1.0
+        elif land_use == 'Impervious':
+            cover_management_factor = 0
+        else:
+            cover_management_factor = 0.1
+
+        unit_soil_loss = (
+            EROSION_DEFAULTS['R']
+            * EROSION_DEFAULTS['K']
+            * EROSION_DEFAULTS['LS']
+            * cover_management_factor
+            * EROSION_DEFAULTS['P']
+        ).to('(kg / m^2) / day')
+        print('A =', unit_soil_loss)
+
         area_in_sq_mile = pcl.area.to('mile^2').magnitude
         if area_in_sq_mile <= 0.1:
             intercept_coef = 2.1
@@ -800,8 +819,15 @@ def calc_default_erosion_rate_sdr(pcl):
             intercept_coef = 1.2
         else:
             intercept_coef = 0.6
+
+        intercept_coef = intercept_coef
+
         slope_coef = c.parameters["sedimentDeliveryRatioSlopeCoef"].default_value
-        sed_delivery_ratio = intercept_coef * (pcl.area ** (-1 * slope_coef))
+        sed_delivery_ratio = intercept_coef * (pcl.area.magnitude ** (-1 * slope_coef))
+
+        print('SD =', sed_delivery_ratio)
+        print('ER =', unit_soil_loss * sed_delivery_ratio)
+
         return (unit_soil_loss * sed_delivery_ratio).magnitude
 
 
