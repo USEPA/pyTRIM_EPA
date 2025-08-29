@@ -216,7 +216,6 @@ def update_scenario():
     ret_val = ''
 
     def create_new_custom_param_meteo(scen, comp, par_name):
-        print(f"\n{par_name}\n")
         default_param = ParameterService.definitions.get_all(variable_name=par_name)
         
         if par_name == "AirTemperature":
@@ -412,6 +411,25 @@ def update_scenario():
                     else:
                         param_value = list(ret_val.values())[0]
                     update_custom_param(s, s, param_name, param_value, create_if_dne=True)
+
+            # unless modified, the AverageVerticalVelocity default value is calculated as (0.2 * precip)
+            if "_precipitation_" in field_name:
+                comp_names = ["Soil_Surface", "Soil_Root_Zone", "Soil_Vadose_Zone"]
+                for pcl in s.parcels:
+                    for name in comp_names:
+                        comp = pcl.get_compartment(name)
+                        if not comp: continue
+                        avg_vertical_velocity = comp.parameters.get('AverageVerticalVelocity')
+                        if isinstance(avg_vertical_velocity, ParameterDefinition):
+                            val = round(0.2 * s.Rain.magnitude, 5)
+                            get_or_create_custom_param(
+                                avg_vertical_velocity,
+                                {
+                                    "requirements": f"(self.id == {comp.id})",
+                                    "scenario_id": s.id,
+                                    "value": val,
+                                },
+                            )
 
         elif field_name.startswith("seasonal_"):  # Data from the seasonal dynamics tab
             param_media = param_map["seasonal"].get(field_name)[0]
