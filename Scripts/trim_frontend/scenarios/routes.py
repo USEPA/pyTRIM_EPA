@@ -263,7 +263,35 @@ def update_scenario():
         ParameterService.commit()
         return custom_params
 
+    def update_avg_vertical_velocity(scen):
+        # unless modified, the AverageVerticalVelocity default value is calculated as (0.2 * precip)
+        for comp in scen.compartments:
+            if comp.name in ["Soil_Surface", "Soil_Root_Zone", "Soil_Vadose_Zone"]:
+                avg_vertical_velocity = comp.parameters.get('AverageVerticalVelocity')
+                if isinstance(avg_vertical_velocity, ParameterDefinition):
+                    val = round(0.2 * scen.Rain.magnitude, 5)
+                    get_or_create_custom_param(
+                        avg_vertical_velocity,
+                        {
+                            "requirements": f"(self.id == {comp.id})",
+                            "scenario_id": scen.id,
+                            "value": val,
+                        },
+                    )
+
+    def update_mixing_height(scen, mixing_height):
+        # mixingHeight is just the height of the air volume elements
+        for comp in scen.get_compartment(media='Air'):
+            if comp.name == "Air":
+                comp.volume_element.top = float(mixing_height)
+            elif comp.name == "UpperAir":
+                comp.volume_element.bottom = float(mixing_height)
+
     def update_custom_param(scen, comp, par_name, par_val, create_if_dne = False):
+        if par_name == 'mixingHeight':
+            update_mixing_height(scen, par_val)
+            return
+
         par_list = [p for p in scen.custom_params.all() if
                     p.definition.variable_name == par_name and f'self.id == {comp.id}' in p.requirements]
 
@@ -314,7 +342,7 @@ def update_scenario():
         if param_type == "MET":
             df_met = df_met.loc[(df_met.Hour < 25)]  # drop faulty
             metcol_dict = {'Rain': (0, 1), 'AirTemperature': (200, 373), 'HorizontalWindSpeed': (0, 100),
-                           'WindDirection': (-360, 360), 'mixingHeight': (0, 1000), 'isDay': (0, 1),
+                           'WindDirection': (-360, 360), 'mixingHeight': (0, 10000), 'isDay': (0, 1),
                            'CumulativeRain': (0, 1.6)}  # k, v represent name and min-max
             for k, v in metcol_dict.items():
                 if k in df_met.columns:
@@ -412,24 +440,8 @@ def update_scenario():
                         param_value = list(ret_val.values())[0]
                     update_custom_param(s, s, param_name, param_value, create_if_dne=True)
 
-            # unless modified, the AverageVerticalVelocity default value is calculated as (0.2 * precip)
             if "_precipitation_" in field_name:
-                comp_names = ["Soil_Surface", "Soil_Root_Zone", "Soil_Vadose_Zone"]
-                for pcl in s.parcels:
-                    for name in comp_names:
-                        comp = pcl.get_compartment(name)
-                        if not comp: continue
-                        avg_vertical_velocity = comp.parameters.get('AverageVerticalVelocity')
-                        if isinstance(avg_vertical_velocity, ParameterDefinition):
-                            val = round(0.2 * s.Rain.magnitude, 5)
-                            get_or_create_custom_param(
-                                avg_vertical_velocity,
-                                {
-                                    "requirements": f"(self.id == {comp.id})",
-                                    "scenario_id": s.id,
-                                    "value": val,
-                                },
-                            )
+                update_avg_vertical_velocity(s)
 
         elif field_name.startswith("seasonal_"):  # Data from the seasonal dynamics tab
             param_media = param_map["seasonal"].get(field_name)[0]

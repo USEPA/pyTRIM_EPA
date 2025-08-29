@@ -224,11 +224,6 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         )
         update_custom_param_value(par, parcels_data[field_name])
         ParameterService.commit()
-    # Note that 0 is the fixed datum for volume element boundary locations
-    elif field_name == "airHeight":
-        for co in p.compartments:
-            if co.name == "Air":
-                co.volume_element.top = parcels_data['airHeight']
 
     elif field_name == "surfaceSoilThickness":
         update_soil_thickness(p, "Soil_Surface", 'SurfSoil', parcels_data['surfaceSoilThickness'])

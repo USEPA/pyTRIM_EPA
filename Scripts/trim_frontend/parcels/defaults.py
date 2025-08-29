@@ -792,7 +792,7 @@ Wet_Dry_Source_VolElem_defaults = {
 Air_Parcel_VolElem_defaults = {
     'Air': {
         'name': 'Air',
-        'top': 800,
+        'top': 226,
         'bottom': 0,
         'Compartments': {
             'Air': {
@@ -807,8 +807,8 @@ Air_Parcel_VolElem_defaults = {
     },
     'UpperAir': {
         'name': 'UpperAir',
-        'top': 1000,
-        'bottom': 800,
+        'top': 10000,
+        'bottom': 226,
         'Compartments': {
             'UpperAir': {
                 'name': 'Air',
