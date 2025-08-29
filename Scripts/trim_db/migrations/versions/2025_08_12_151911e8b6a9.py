@@ -11,6 +11,7 @@ Create Date: 2025-08-12 08:34:21.909681
 
 from alembic import op
 import sqlalchemy as sa
+from trim_db.migrations.utils import has_results
 
 # revision identifiers, used by Alembic.
 revision = "151911e8b6a9"
@@ -36,19 +37,20 @@ def upgrade():
     # updates self.media_id == {media.id} to self.media.isa({media.name})
     # this is to include subdomains e.g. the surface soil domain is retrieved when working with tilled soil
     # must update trim_db/porting/scenarios.py and init_tillage_default_params as well
-    conn = op.get_bind()
-    for param_domain in conn.execute(sa.text("SELECT * FROM parameter_domain WHERE requirements IS NOT NULL")):
-        media_id = param_domain.requirements.split(" == ")[1]
-        media = conn.execute(
-            sa.text(f'SELECT * FROM media WHERE id = :media_id'),
-            ({'media_id': int(media_id)}),
-        ).first()
+    if not has_results("SELECT * FROM parameter_domain WHERE requirements LIKE '%self.media.isa%';"):
+        conn = op.get_bind()
+        for param_domain in conn.execute(sa.text("SELECT * FROM parameter_domain WHERE requirements IS NOT NULL")):
+            media_id = param_domain.requirements.split(" == ")[1]
+            media = conn.execute(
+                sa.text(f'SELECT * FROM media WHERE id = :media_id'),
+                ({'media_id': int(media_id)}),
+            ).first()
 
-        new_req = f'self.media.isa("{media.name}")'
-        conn.execute(
-            sa.text("UPDATE parameter_domain SET requirements = :requirement WHERE id = :id"),
-            ({'requirement': new_req, 'id': param_domain.id}),
-        )
+            new_req = f'self.media.isa("{media.name}")'
+            conn.execute(
+                sa.text("UPDATE parameter_domain SET requirements = :requirement WHERE id = :id"),
+                ({'requirement': new_req, 'id': param_domain.id}),
+            )
 
 
 def downgrade():

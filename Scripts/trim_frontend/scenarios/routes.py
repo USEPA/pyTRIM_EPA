@@ -268,8 +268,8 @@ def update_scenario():
         for comp in scen.compartments:
             if comp.name in ["Soil_Surface", "Soil_Root_Zone", "Soil_Vadose_Zone"]:
                 avg_vertical_velocity = comp.parameters.get('AverageVerticalVelocity')
+                val = round(0.2 * scen.Rain.magnitude, 5)
                 if isinstance(avg_vertical_velocity, ParameterDefinition):
-                    val = round(0.2 * scen.Rain.magnitude, 5)
                     get_or_create_custom_param(
                         avg_vertical_velocity,
                         {
@@ -278,6 +278,10 @@ def update_scenario():
                             "value": val,
                         },
                     )
+                # User hasn't submitted a value, so still use formula
+                elif isinstance(avg_vertical_velocity, CustomParameter) and avg_vertical_velocity.formula:
+                    avg_vertical_velocity.value = val
+                    ParameterService.commit()
 
     def update_mixing_height(scen, mixing_height):
         # mixingHeight is just the height of the air volume elements

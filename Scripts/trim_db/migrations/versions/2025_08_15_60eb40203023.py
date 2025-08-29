@@ -1,6 +1,5 @@
 """
 Farm media
-mixingHeight
 AverageVerticalVelocity
 
 Revision ID: 60eb40203023
@@ -10,6 +9,7 @@ Create Date: 2025-08-15 13:38:00.664906
 """
 from alembic import op
 import sqlalchemy as sa
+from trim_db.migrations.utils import has_results
 
 
 # revision identifiers, used by Alembic.
@@ -24,17 +24,23 @@ def upgrade():
         "UPDATE media SET parent_id = 34 WHERE name='Farm'"
     )
 
-    # default value of Rain = 0.0041 * 0.2
+    # AverageVerticalVelocity = 0.2 * precip
+    # where default value of Rain = 0.0041
+    if not has_results("SELECT * FROM formula WHERE equation = '0.2 * environment.Rain' AND description= 'default AverageVerticalVelocity'"):
+        op.execute(
+            "INSERT INTO formula (equation, description) VALUES ('0.2 * environment.Rain', 'default AverageVerticalVelocity');"
+        )
     op.execute(
-        "UPDATE parameter_definition SET default_value = 0.00082 WHERE variable_name = 'AverageVerticalVelocity';"
+        """
+        UPDATE parameter_definition
+        SET default_value = 0.00082,
+        default_formula_id = (
+            SELECT id FROM formula
+            WHERE equation = '0.2 * environment.Rain' AND description= 'default AverageVerticalVelocity'
+        ) WHERE variable_name = 'AverageVerticalVelocity';
+        """
     )
 
-    #op.execute(
-    #    """
-    #    INSERT INTO parameter_definition (variable_name, full_name, domain_id, default_unit, default_value)
-    #    VALUES ('mixingHeight', 'mixingHeight', 1, 'm', 226);
-    #    """
-    #)
 
 
 def downgrade():
@@ -43,7 +49,11 @@ def downgrade():
     )
 
     op.execute(
-        "UPDATE parameter_definition SET default_value = 0.0006 WHERE variable_name = 'AverageVerticalVelocity';"
+        "UPDATE parameter_definition SET default_value = 0.0006, default_formula_id = NULL WHERE variable_name = 'AverageVerticalVelocity';"
+    )
+
+    op.execute(
+        "DELETE FROM formula WHERE equation = '0.2 * environment.Rain' AND description= 'default AverageVerticalVelocity';"
     )
 
     #op.execute(

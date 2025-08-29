@@ -403,6 +403,12 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             {"requirements": f"(self.id == {this_comp.id})", "scenario_id": p.scenario_id},
         )
         update_custom_param_value(this_par, float(parcels_data[field_name]))
+
+        # we no longer want to use a formula for auto calculating this
+        if field_name == 'AverageVerticalVelocity' and this_par.formula:
+            this_par.formula = None
+            ParameterService.commit()
+
     elif field_name == "emission":
         src_comp = [c for c in p.compartments if c.name == parcels_data["compartment_name"]][0]
         src_par = [par for parn, par in src_comp.parameters.items() if parn == "surfaceDepositionRate"]
