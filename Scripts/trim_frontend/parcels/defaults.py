@@ -15,9 +15,12 @@ def serialize_parcel(pcl: Parcel):
     soil_abiotic_params = get_soil_abiotic_params(pcl)
     initial_conc = get_initial_concetrations(pcl)
 
-    cdv = pcl.get_compartment("DryVaporSource")
-    spacing_param = cdv.parameters.get("ReceptorSpacing")
-    spacing_val = spacing_param.value
+    try:
+        cdv = pcl.get_compartment("DryVaporSource")
+        spacing_param = cdv.parameters.get("ReceptorSpacing")
+        spacing_val = spacing_param.value
+    except Exception:
+        spacing_val = None
 
     s = {
         'id': pcl.id,
@@ -306,6 +309,20 @@ def compute_watershed_areas(runoff_matrix, area_parcels):
     return runoff_areas
 
 
+def calculate_avg_precipitation_runoff_fraction(all_soil_comps, fraction_name):
+    # Example
+    # get the fraction of precipitation that contributes to overland runoff 
+    # summation (area of parcel * runoff_fraction of parcel) / (summation (area of parcels))
+    numerator = 0
+    denominator = 0
+    for soil_comp in all_soil_comps:
+        pcl_area = soil_comp.volume_element.parcel.area.magnitude
+        pcl_runoff_fraction = getattr(soil_comp, fraction_name)
+        numerator += (pcl_area * pcl_runoff_fraction)
+        denominator += pcl_area
+    return numerator / denominator
+
+
 def get_correct_param(par_name, par_obj):
     if par_name in par_obj:
         return par_obj[par_name].value
@@ -317,10 +334,6 @@ def is_significantly_different(a, b):
 
 
 def get_water_params(pcl, parcel_type):
-    # TODO This is not right. We need params for all chemicals. How to show this in frontend???
-    # ch = ChemicalService.get(id=32)
-    # ch.current_scenario(pcl.scenario)
-
     runoff_watershed_area = 0  # 1e3
     runoff_fraction = None  # 0.001
     precip_seepage_frac_to_gw = None
@@ -344,9 +357,7 @@ def get_water_params(pcl, parcel_type):
         ).magnitude
 
         precip_seepage_frac_to_gw = comp_surfaceSoil.GroundwaterSeepageFraction  # 1 - runoff_fraction
-
         runoff_fraction = comp_surfaceSoil.PrecipitationRunoffFraction  # 1 - precip_seepage_frac_to_gw
-
         evapotranspiration_fraction = comp_surfaceSoil.EvapotranspirationFraction
 
         try:
@@ -380,7 +391,7 @@ def get_water_params(pcl, parcel_type):
         total_runoff_vol_rate_to_this_sw = 0
         total_seepage_vol_rate_to_gw = 0
 
-        # get watershed are for water parcel
+        # get watershed area for water parcel
         sw_total_watershed_area = get_watershed_area(pcl)
 
         all_soil_comps = []
@@ -389,6 +400,11 @@ def get_water_params(pcl, parcel_type):
             all_soil_comps.append(soil_comp)
             if soil_comp.connects_to(sw):
                 connected_soil_comps.append(soil_comp)
+
+        # weighted average of precipitation fractions
+        avg_precip_runoff_frac = calculate_avg_precipitation_runoff_fraction(all_soil_comps, 'PrecipitationRunoffFraction')
+        avg_precip_seepage_frac = calculate_avg_precipitation_runoff_fraction(all_soil_comps, 'GroundwaterSeepageFraction')
+        
         # sum up watershed area of connected Soil parcels.
         for this_soil_comp in connected_soil_comps:
             # this_watershed_area = (
@@ -396,7 +412,6 @@ def get_water_params(pcl, parcel_type):
             #         * this_soil_comp.FractionofAreaAvailableforRunoff
             # ).magnitude
             # sw_total_watershed_area += this_watershed_area
-            this_parcel_area = this_soil_comp.volume_element.parcel.area.magnitude  # get_watershed_area(this_soil_comp.volume_element.parcel)
             # we need to calculate runoff to this surface_water body using the watershed area above
             # comp_link = this_soil_comp.get_links(sw)
             # if len(comp_link) > 0:
@@ -411,26 +426,23 @@ def get_water_params(pcl, parcel_type):
             #         print(f"No runoff transport from {this_soil_comp.standard_name} to {sw.standard_name}. "
             #               f"They are not next to each other. Check Runoff Matrix!")
             #         this_precip_runoff_frac_to_sw = 0
-            # WE DO NOT NEED TO CALCULATE RUNOFF IT IS FROM RUNOFF MATRIX
-            this_precip_runoff_frac_to_sw = this_soil_comp.FractionOfTotalRunoff(sw)
-            total_runoff_vol_rate_to_this_sw += (
-                    precipitation_rate * 365
-                    * this_precip_runoff_frac_to_sw
-                    * this_parcel_area
-            )
-            # total_runoff_vol_rate_to_this_sw = 0 if not total_runoff_vol_rate_to_this_sw else total_runoff_vol_rate_to_this_sw
-            this_seepage_frac_to_gw = this_soil_comp.GroundwaterSeepageFraction
-            total_seepage_vol_rate_to_gw += (
-                    precipitation_rate * 365
-                    * this_seepage_frac_to_gw
-                    * this_parcel_area
-            )
-            this_total_erosion_rate = this_soil_comp.TotalErosionRate.magnitude
+
             sed_soil_erosion_to_sw += (
-                this_total_erosion_rate
-                * this_precip_runoff_frac_to_sw
-                * this_parcel_area
+                this_soil_comp.TotalErosionRate.magnitude
+                * this_soil_comp.FractionOfTotalRunoff(sw) # surface runoff matrix
+                * this_soil_comp.volume_element.parcel.area.magnitude
             )
+
+        total_runoff_vol_rate_to_this_sw = (
+                precipitation_rate * 365
+                * avg_precip_runoff_frac
+                * sw_total_watershed_area
+        )
+        total_seepage_vol_rate_to_gw = (
+                precipitation_rate * 365
+                * avg_precip_seepage_frac
+                * sw_total_watershed_area
+        )
 
         precipitation_vol_rate_to_sw = 0  # 4.8E6
         wc_external_inflow = 0
@@ -449,43 +461,14 @@ def get_water_params(pcl, parcel_type):
             print(f'Problem Calculating Water Column Evaporation Volumetric Rate:\n {ex}')
         # evaporation_vol_rate = 3.3E6
 
-        def get_weighted_avg(wgt, val):
-            total_wgt = 0
-            sum_weighted_val = 0
-            for i, w in enumerate(wgt):
-                total_wgt += w
-                sum_weighted_val += w * val[i]
-            return sum_weighted_val/total_wgt
-
         try:
-            # wc_discharge_vol_rate = float('{:.5f}'.format(
-            #     total_runoff_vol_rate_to_this_sw
-            #     + total_seepage_vol_rate_to_gw
-            #     + wc_external_inflow
-            #     + precipitation_vol_rate_to_sw
-            #     - evaporation_vol_rate
-            # ))
-            # print(wc_discharge_vol_rate)
-            # wc_discharge_vol_rate = 0 if wc_discharge_vol_rate else wc_discharge_vol_rate
-
-            pcl_area = [c.volume_element.parcel.area.magnitude for c in all_soil_comps]
-            pcl_runoff_frac = [c.PrecipitationRunoffFraction for c in all_soil_comps]
-            pcl_seepage_frac = [c.GroundwaterSeepageFraction for c in all_soil_comps]
-
-            wgt_ave_runoff = get_weighted_avg(pcl_area, pcl_runoff_frac)
-            wgt_ave_seepage = get_weighted_avg(pcl_area, pcl_seepage_frac)
             wc_discharge_vol_rate = float('{:.5f}'.format(
-                (precipitation_rate * pcl.area.magnitude * 365)
-                + (sw_total_watershed_area * precipitation_rate * 365 * wgt_ave_runoff)
-                + (sw_total_watershed_area * precipitation_rate * 365 * wgt_ave_seepage)
+                total_runoff_vol_rate_to_this_sw
+                + total_seepage_vol_rate_to_gw
                 + wc_external_inflow
-                - evaporation_vol_rate
+                + precipitation_vol_rate_to_sw
+                 - evaporation_vol_rate
             ))
-            # print(f'runoff term is  {(sw_total_watershed_area * precipitation_rate * 365 * wgt_ave_runoff)}\n'
-            #       f'seepage term is {(sw_total_watershed_area * precipitation_rate * 365 * wgt_ave_seepage)}\n'
-            #       f'inflow term is {wc_external_inflow}\n'
-            #       f'evaporation term is {evaporation_vol_rate}\n'
-            #       f'Discharge vol rate is {wc_discharge_vol_rate}')
         except Exception as ex:
             wc_discharge_vol_rate = None
             print(f'Problem Calculating Water Column Discharge Volumetric Rate:\n {ex}')
@@ -495,7 +478,7 @@ def get_water_params(pcl, parcel_type):
         try:
             wc_sed_discharge_rate = (
                 get_correct_param("SuspendedSedimentConcentration", sw_pars)
-                * (wc_discharge_vol_rate/365)
+                * (wc_discharge_vol_rate)
             )
         except Exception as ex:
             wc_sed_discharge_rate = None
@@ -609,25 +592,23 @@ def get_initial_concetrations(pcl):
 
 
 def get_source_params(pcl):
-    chems = {c.name: {} for c in pcl.scenario.chemicals}
-    source_comps = [c for c in pcl.compartments]
-    source_params = {"sources": chems}
-
-    for comp in source_comps:
-        ve_name = comp.volume_element.name
-        for chem in pcl.scenario.chemicals:
-            deposition_rate = comp.surfaceDepositionRate(chemical=chem) # very slow!
-            chem_source = source_params["sources"][chem.name]
-            spd = chem_source.get(ve_name)
-
-            if hasattr(deposition_rate, 'magnitude'):
-                deposition_rate = deposition_rate.magnitude
-
-            if spd:
-                spd.setdefault(comp.name, deposition_rate)
-            else:
-                chem_source.setdefault(ve_name, {comp.name: deposition_rate})
-    return source_params
+    source_params = {}
+    for chem in pcl.scenario.chemicals:
+        chem_name = chem.name
+        if chem_name not in source_params:
+            source_params[chem_name] = {}
+        for ve in pcl.volume_elements:
+            ve_name = ve.name
+            if ve_name not in source_params[chem_name]:
+                source_params[chem_name][ve_name] = {}
+            for comp in ve.compartments:
+                deposition_rate = comp.surfaceDepositionRate(chemical=chem)  # slow ...
+                try:
+                    deposition_rate = deposition_rate.magnitude
+                except Exception:
+                    pass
+                source_params[chem_name][ve_name][comp.name] = deposition_rate
+    return {'sources': source_params}
 
 
 def get_fish_params(comp):
@@ -637,7 +618,7 @@ def get_fish_params(comp):
     }
     biomass_by_media = safe_get_val(comp, 'BiomassPerArea', None)
     bw_by_media = safe_get_val(comp, 'BW', None)
-    
+
     fish_params = {
         'aquatic_diet_fractions': diet_by_media,
         'aquatic_biomass': biomass_by_media,

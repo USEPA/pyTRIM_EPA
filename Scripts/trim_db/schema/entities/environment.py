@@ -20,6 +20,35 @@ __all__ = [
 GLOBAL_WILDCARD = "$"
 
 
+class UtmTransformer:
+    # Initializes default UTM Transformer settings
+    # so we don't have to do this every time we need a transformer
+    from_crs = CRS.from_epsg(4326)
+    to_crs = CRS.from_wkt(  # CAREFUL: we assume ellipsoid is WGS84 ..
+        'PROJCS['
+        '"WGS_1984_UTM_Zone_16N",'
+        'GEOGCS['
+        '"GCS_WGS_1984",'
+        'DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]],'
+        'PRIMEM["Greenwich",0.0],'
+        'UNIT["Degree",0.0174532925199433]'
+        '],'
+        'PROJECTION["Transverse_Mercator"],'
+        'PARAMETER["False_Easting",500000.0],'
+        'PARAMETER["False_Northing",0.0],'
+        'PARAMETER["Central_Meridian",-87.0],'
+        'PARAMETER["Scale_Factor",0.9996],'
+        'PARAMETER["Latitude_Of_Origin",0.0],'
+        'UNIT["Meter",1.0]'
+        ']'
+    )
+    transformer = Transformer.from_crs(from_crs, to_crs)
+
+    @classmethod
+    def transform(cls, *args, **kwargs):
+        return cls.transformer.transform(*args, **kwargs)
+
+
 class Parcel(Model):
     name = sa.Column(sa.String(120), nullable=False)
     description = sa.Column(sa.String(250), nullable=True)
@@ -58,29 +87,7 @@ class Parcel(Model):
 
     @property
     def utm_vertices(self):
-        # CAREFUL: we assume ellipsoid is WGS84 ..
-        proj = (
-            'PROJCS['
-            '"WGS_1984_UTM_Zone_16N",'
-            'GEOGCS['
-            '"GCS_WGS_1984",'
-            'DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]],'
-            'PRIMEM["Greenwich",0.0],'
-            'UNIT["Degree",0.0174532925199433]'
-            '],'
-            'PROJECTION["Transverse_Mercator"],'
-            'PARAMETER["False_Easting",500000.0],'
-            'PARAMETER["False_Northing",0.0],'
-            'PARAMETER["Central_Meridian",-87.0],'
-            'PARAMETER["Scale_Factor",0.9996],'
-            'PARAMETER["Latitude_Of_Origin",0.0],'
-            'UNIT["Meter",1.0]'
-            ']'
-        )
-        from_crs = CRS.from_epsg(4326)
-        to_crs = CRS.from_wkt(proj)
-        transformer = Transformer.from_crs(from_crs, to_crs)
-        utm_vert = [transformer.transform(pt[1], pt[0]) for pt in self.vertices]
+        utm_vert = [UtmTransformer.transform(pt[1], pt[0]) for pt in self.vertices]
         return utm_vert
 
     def polygon(self, utm=True):
@@ -336,23 +343,21 @@ class Media(Model):
 
     def isa(self, name_or_media, or_child=True):
         if isinstance(name_or_media, str):
-            # check wildcard in the beginning
+            if (
+                name_or_media == self.name
+                or name_or_media == self.category
+            ):
+                return True
             if name_or_media.startswith(GLOBAL_WILDCARD):
                 if (
-                        self.name.endswith(name_or_media[1:])
-                        or self.category.endswith(name_or_media[1:])
+                    self.name.endswith(name_or_media[1:])
+                    or self.category.endswith(name_or_media[1:])
                 ):
                     return True
-            if name_or_media.endswith(GLOBAL_WILDCARD):
+            elif name_or_media.endswith(GLOBAL_WILDCARD):
                 if (
-                        self.name.startswith(name_or_media[:-1])
-                        or self.category.startswith(name_or_media[:-1])
-                ):
-                    return True
-            else:
-                if (
-                    name_or_media == self.name
-                    or name_or_media == self.category
+                    self.name.startswith(name_or_media[:-1])
+                    or self.category.startswith(name_or_media[:-1])
                 ):
                     return True
         elif isinstance(name_or_media, Media):
