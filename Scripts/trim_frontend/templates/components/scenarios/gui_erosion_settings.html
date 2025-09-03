@@ -333,7 +333,7 @@
                 return (
                     (R * K * LS * C * P)
                     / 365 // 1/y to 1/d
-                    * 2.47105E-04 // acre to m^2
+                    * 2.47105E-04 // 1/acre to 1/m^2
                     * 907.183 // US ton to kg
                 );
             },
@@ -473,15 +473,16 @@
                 );
 
                 // Calculate "Total Effective Erosion Rate"
-                const ter2 = ['Water','Impervious'].indexOf(pcl.landUse) > -1 ? 0 : (
-                    getForOpt(pcl, 2, 'total_effective_erosion_rate', VAL_FUNCS.ER(AVal2, SDVal2))
-                );
+                const ter2 = ['Water','Impervious'].indexOf(pcl.landUse) > -1 ? 0 : (getForOpt(
+                    pcl, 2, 'total_effective_erosion_rate',
+                    pcl.totalErosionRate == undefined ? VAL_FUNCS.ER(AVal2, SDVal2) : pcl.totalErosionRate || 0
+                ));
 
                 // Get active erosion field
                 const activeField2 = pcl['erosion2-active'] || null;
 
                 // Add option 2 data
-                data2.push({
+                const pclOpt2Data = {
                     ...baseData,
                     A: AVal2,
                     a: aVal2,
@@ -489,7 +490,11 @@
                     SD: SDVal2,
                     'Total Effective Erosion Rate': ter2,
                     active: calculateActiveValues(2, activeField2)
-                });
+                };
+                // check if displayed values are correct and update NaNs if not
+                // (can get unsynced if an equation is partially filled in -- e.g., a=# but b=NaN)
+                recalculateErosionRate(2, pclOpt2Data, activeField2, false);
+                data2.push(pclOpt2Data);
 
                 ////////////////////////
                 // Data for Option 3
@@ -536,15 +541,16 @@
                 );
 
                 // Calculate "Total Effective Erosion Rate"
-                const ter3 = ['Water','Impervious'].indexOf(pcl.landUse) > -1 ? 0 : (
-                    getForOpt(pcl, 3, 'total_effective_erosion_rate', VAL_FUNCS.ER(AVal3, SDVal3))
-                );
+                const ter3 = ['Water','Impervious'].indexOf(pcl.landUse) > -1 ? 0 : (getForOpt(
+                    pcl, 3, 'total_effective_erosion_rate',
+                    pcl.totalErosionRate == undefined ? VAL_FUNCS.ER(AVal3, SDVal3) : pcl.totalErosionRate || 0
+                ));
 
                 // Get active erosion field
                 const activeField3 = pcl['erosion3-active'] || null;
 
                 // Add option 3 data
-                data3.push({
+                const pclOpt3Data = {
                     ...baseData,
                     R: RVal,
                     K: KVal,
@@ -559,7 +565,11 @@
                     SD: SDVal3,
                     'Total Effective Erosion Rate': ter3,
                     active: calculateActiveValues(3, activeField3)
-                });
+                };
+                // check if displayed values are correct and update NaNs if not
+                // (can get unsynced if an equation is partially filled in -- e.g., S=# but L=NaN)
+                recalculateErosionRate(3, pclOpt3Data, activeField3, false);
+                data3.push(pclOpt3Data);
             }
 
             return {
@@ -577,7 +587,12 @@
             function makeEditableCell(fieldName, paramName, inputType, row, renderer) {
                 let data = row[fieldName];
                 if (data == undefined || data.toString().trim() == '') {
-                    data = NaN;
+                    if (fieldName == 'Total Effective Erosion Rate') {
+                        data = 0;
+                    }
+                    else {
+                        data = NaN;
+                    }
                 }
                 const td = $('<td />');
                 const step = inputType == 'number' ? 'step="any"' : '';
@@ -599,7 +614,7 @@
                     lbl.css({
                         color: 'gray',
                         'text-decoration': 'line-through'
-                    })
+                    });
                 }
                 return td;
             }
@@ -706,7 +721,6 @@
                             return td.html();
                         }
                     }
-
                 ],
                 opt3: [
                     {
@@ -904,6 +918,13 @@
                     myRow.data(rowData);
                     dt.draw(false);
                 });
+
+                if (tbl[0].getBoundingClientRect().height < 500) {
+                    tbl.closest('.dataTables_scrollBody')[0].style.height = null;
+                }
+                else {
+                    tbl.closest('.dataTables_scrollBody')[0].style.height = '500px';
+                }
             }
 
             const tbls = $('table[id^="erosionTable_opt"]');
@@ -993,19 +1014,22 @@
             return active;
         }
 
-        function updateDB(data, fieldName, optionNum) {
+        function updateDB(data, fieldName, optionNum, markActive) {
             const paramName = `erosion${optionNum}-` + ABBR_TO_PARAM[fieldName];
             const valPostData = {id: data.parcel_id};
-            valPostData[paramName] = data[fieldName]
+            valPostData[paramName] = data[fieldName] == null ? '' : data[fieldName];
+            valPostData['is_active'] = markActive == undefined ? true : markActive === true;
             TRIM.api.updateParameter('parcel', valPostData);
         }
 
-        function recalculateErosionRate(optionNum, data, fromField) {
+        function recalculateErosionRate(optionNum, data, fromField, saveData) {
             function recalculateSD() {
                 console.log('auto-recalculating SD')
                 const sd = VAL_FUNCS.SD(data.a, data.b, data.Area);
                 data.SD = isNaN(sd) ? undefined : sd;
-                updateDB(data, 'SD', optionNum);
+                if (saveData !== false) {
+                    updateDB(data, 'SD', optionNum, false);
+                }
                 recalculateER();
             }
 
@@ -1013,7 +1037,9 @@
                 console.log('auto-recalculating LS')
                 const ls = VAL_FUNCS.LS(data.L, data.S);
                 data.LS = isNaN(ls) ? undefined : ls;
-                updateDB(data, 'LS', optionNum);
+                if (saveData !== false) {
+                    updateDB(data, 'LS', optionNum, false);
+                }
                 recalculateA();
             }
 
@@ -1021,7 +1047,9 @@
                 console.log('auto-recalculating A')
                 const a = VAL_FUNCS.A(data.R, data.K, data.LS, data.C, data.P);
                 data.A = isNaN(a) ? undefined : a;
-                updateDB(data, 'A', optionNum);
+                if (saveData !== false) {
+                    updateDB(data, 'A', optionNum, false);
+                }
                 recalculateER();
             }
 
@@ -1035,7 +1063,9 @@
                     const er = VAL_FUNCS.ER(data.A, data.SD);
                     data[fieldName] = isNaN(er) ? undefined : er;
                 }
-                updateDB(data, fieldName, optionNum);
+                if (saveData !== false) {
+                    updateDB(data, fieldName, optionNum, false);
+                }
             }
 
             if (optionNum == 2) {
@@ -1105,7 +1135,7 @@
                 }
                 const update = TRIM.api.updateParameter('parcel', { // post update to API
                     id: rowData.parcel_id,
-                    totalErosionRate: effectiveErosionRate
+                    totalErosionRate: effectiveErosionRate == undefined ? 0 : effectiveErosionRate
                 });
                 updates.push(update);
             }

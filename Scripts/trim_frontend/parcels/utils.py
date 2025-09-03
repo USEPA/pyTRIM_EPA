@@ -204,15 +204,11 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         for c in p.compartments:
             if c.media.isa('Surface_Soil'):
                 ter = c.parameters.get('TotalErosionRate')
-                if val == 0:
-                    if isinstance(ter, CustomParameter):
-                        ParameterService.delete(ter, no_commit=True)
-                else:
-                    par = get_or_create_custom_param(
-                        ter,
-                        {"requirements": f"(self.id == {c.id})", "scenario_id": p.scenario_id},
-                    )
-                    update_custom_param_value(par, val)
+                par = get_or_create_custom_param(
+                    ter,
+                    {"requirements": f"(self.id == {c.id})", "scenario_id": p.scenario_id},
+                )
+                update_custom_param_value(par, val)
         ParameterService.commit()
 
     elif ("erosion1-" in field_name or "erosion2-" in field_name or "erosion3-" in field_name): # HACKY
@@ -223,17 +219,17 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         for param in list(p.scenario.parameters.values()):
             if not isinstance(param, CustomParameter):
                 continue
-            if not param.requirements == f'(self.id == {p.id})':
-                continue
             if not(
                 param.variable_name.startswith('erosion1-')
                 or param.variable_name.startswith('erosion2-')
                 or param.variable_name.startswith('erosion3-')
             ):
                 continue
+            if not param.requirements == f'(self.id == {p.id})':
+                continue
             if (
-                not param.variable_name.startswith(f'erosion{option_num}-')
-                or param.variable_name.endswith('-active')
+                param.variable_name.endswith('-active')
+                or not param.variable_name.startswith(f'erosion{option_num}-')
             ):
                 ParameterService.delete(param, no_commit=True)
 
@@ -248,22 +244,30 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             scenario_id=p.scenario_id,
             requirements=f'(self.id == {p.id})', # parcel id
         )
-        param.value = parcels_data[field_name]
-        ParameterService.update(param)
+        val = parcels_data[field_name]
+        has_value = (str(val) == '0' or (val or ''))
+        if has_value:
+            # has value; update the param
+            param.value = parcels_data[field_name]
+            ParameterService.update(param)
+        else:
+            # no value; delete the param
+            ParameterService.delete(param)
 
-        # Create/update the specified parameter active flag
-        param_def = ParameterService.definitions.get_or_create(
-            variable_name=f'{field_name}-active',
-            full_name=f'{field_name}-active',
-            domain=ParameterService.domains.get(name='Scenario')
-        )
-        param = ParameterService.get_or_create(
-            definition_id=param_def.id,
-            scenario_id=p.scenario_id,
-            requirements=f'(self.id == {p.id})', # parcel id
-        )
-        param.value = 1
-        ParameterService.update(param)
+        if has_value and (str(parcels_data.get('is_active')).lower() == 'true'):
+            # Create/update the specified parameter active flag
+            param_def = ParameterService.definitions.get_or_create(
+                variable_name=f'{field_name}-active',
+                full_name=f'{field_name}-active',
+                domain=ParameterService.domains.get(name='Scenario')
+            )
+            param = ParameterService.get_or_create(
+                definition_id=param_def.id,
+                scenario_id=p.scenario_id,
+                requirements=f'(self.id == {p.id})', # parcel id
+            )
+            param.value = 1
+            ParameterService.update(param)
 
     elif field_name in air_params:
         par_name = air_params[field_name]

@@ -82,7 +82,7 @@ def get_general_params(pcl):
             erosion_table_params[
                 param.variable_name.split('-')[0] + '-active'
             ] = EROSION_TABLE_PARAM_MAP.get(
-                param.variable_name.split('-', 1)[1].rsplit('-')[0]
+                param.variable_name.split('-', 1)[1].rsplit('-', 1)[0]
             )
         else:
             erosion_table_params[param.variable_name] =  param.value
