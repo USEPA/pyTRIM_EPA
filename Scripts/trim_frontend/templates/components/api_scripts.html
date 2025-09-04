@@ -7,7 +7,7 @@ window.TRIM = (function(trim) {
     var urls = {
         'chemicals_api.get_chemicals': '{{ url_for("chemicals_api.get_chemicals") }}',
         'scenario_api.get_scenario': '{{ url_for("scenario_api.get_scenario", id=0) }}',
-        'scenario_api.update_scenario': '{{ url_for("scenario_api.update_scenario") }}',
+        'scenario_api.update_scenario': '{{ url_for("scenario_api.update_scenario", scenario_id=0) }}',
         'scenario_api.copy_scenario': '{{ url_for("scenario_api.copy_scenario") }}',
         'scenario_api.delete_scenario': '{{ url_for("scenario_api.delete_scenario") }}',
         'scenario_api.export_for_mirc': '{{ url_for("scenario_api.export_for_mirc", scenario_id=0) }}',

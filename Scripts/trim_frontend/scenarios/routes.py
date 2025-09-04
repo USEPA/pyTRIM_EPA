@@ -18,13 +18,11 @@ from trim_db.schema import ScenarioLoadRunProc, \
 from trim_db.services import ScenarioService, ChemicalService, \
     ParcelService, CompartmentService, VolumeElementService, \
     ParameterService, FormulaService
-from trim_db.services.parameters import get_or_create_custom_param
 from trim_frontend import api, db
 from trim_frontend.parcels.routes import delete_parcel_contents
 from .defaults import *
 from .forms import *
-from .utils import init_first_time_default_param_values, init_erosion_default_params, \
-    compile_mirc_parcel_data
+from .utils import *
 from ..utils.logging import make_logger
 from ..utils.file_io import MiscAssociatedFileVariety, associated_file_helper
 from ..parcels.utils import calculate_receptor_grid_points_for_parcel
@@ -101,7 +99,6 @@ def get_scenario(id):
         s = ScenarioService.get(id)
         start_time = time.time()
         s = s.as_serializable()
-        init_erosion_default_params()
         logger.info(f"Acquired scenario in {time.time() - start_time} seconds")
     except Exception as e:
         logger.error(traceback.format_exc())
@@ -209,257 +206,30 @@ def get_last_results(scenario_id):
     return ApiResult({'latest_run_info': latest_run_info})
 
 
-@scenario_api.route('/api/scenario/update', methods=['POST'])
+@scenario_api.route('/api/scenario/<int:scenario_id>/update', methods=['POST'])
 @login_required
-def update_scenario():
+def update_scenario(scenario_id):
     logger = make_logger('scenario_api_update')
-    ret_val = ''
-
-    def create_new_custom_param_meteo(scen, comp, par_name):
-        print(f"\n{par_name}\n")
-        default_param = ParameterService.definitions.get_all(variable_name=par_name)
-        
-        if par_name == "AirTemperature":
-            default_param = ParameterService.definitions.get(variable_name=par_name, default_unit="K")
-        elif par_name == "WetDepInterceptionFraction_UserSupplied":
-            default_param = ParameterService.definitions.get_all(variable_name=par_name, 
-                                                                 domain=ParameterService.domains.get(name="Compartment"))
-            default_param = default_param[0]
-        elif len(default_param) > 1: 
-            print(f"\tTried to create new custom parameter but multiple defaults found!\n{default_param}")
-            default_param = default_param[0]
-        else:
-            default_param = default_param[0]
-
-        return get_or_create_custom_param(
-            default_param,
-            {"requirements": f"(self.id == {comp.id})", "scenario_id": scen.id},
-        )
-
-    def create_litterfallrate_custom_param(scen, comps, par_name):
-        # FIXME shouldn't use this eventually, maybe just create for all media?
-        # step 1 grab the right compartments by media name, using a hardcoded map
-        comp_media = [
-            "Leaf_Grasses_Herbs", # Grass
-            "Leaf_Deciduous_Forest" # Deciduous forest
-        ]
-        filtered_comps = [c for c in comps if c.name in comp_media]
-        if not filtered_comps:
-            filtered_comps = comps
-
-        # step 2 grab the correct default param
-        default_param = ParameterService.definitions.get(variable_name=par_name, 
-                                                            domain=ParameterService.domains.get(name="Compartment"))
-        
-        # step 3 create new custom param for each of the identified compartments (per parcel)
-        custom_params = []
-        for comp in filtered_comps:
-            custom_params.append(
-                get_or_create_custom_param(
-                    default_param,
-                    {"requirements": f"(self.id == {comp.id})", "scenario_id": scen.id},
-                    no_commit=True
-                )
-            )
-        ParameterService.commit()
-        return custom_params
-
-    def update_custom_param(scen, comp, par_name, par_val, create_if_dne = False):
-        par_list = [p for p in scen.custom_params.all() if
-                    p.definition.variable_name == par_name and f'self.id == {comp.id}' in p.requirements]
-
-        if not par_list and create_if_dne:
-            par_list.append(create_new_custom_param_meteo(scen, comp, par_name))
-
-        for c_p in par_list:
-            c_p.value = par_val
-            ParameterService.update(c_p)
-        ParameterService.commit()
-
-    def update_assumed_all_comp_fixed_params(scen, comps, par_name, par_val):
-        # media_name = comp.media.name
-        # c_par_list = [c.parameters.get(par_name) for c in scen.compartments if c.media.isa(media_name)]
-        ParameterService.commit() # for some reason gets open instance errors otherwise
-        c_par_list = set(c.parameters.get(par_name) for c in comps if c.parameters.get(par_name))
-        c_par_list = [par for par in c_par_list if isinstance(par, CustomParameter)]
-
-        if not c_par_list:
-            c_par_list = create_litterfallrate_custom_param(scen, comps, par_name)
-
-        for c_p in c_par_list:
-            try:                
-                c_p.value = par_val
-                ParameterService.update(c_p)
-            except AttributeError as e:
-                print('update assumed all comp fixed params error:', e)
-        ParameterService.commit()
-
-    def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
-        import pandas as pd
-        from numpy import timedelta64
-
-        par_dat = json.loads(par_dat)
-        df_met = pd.DataFrame.from_dict(par_dat, orient='columns')
-
-        df_met['dlist'] = df_met['Date'].str.split('/')  # split date column into list
-        df_met = df_met[df_met.dlist.str.len() == 3]  # drop rows that have less than three elements
-        df_met[['Month', 'Day', 'Year']] = df_met.Date.str.split("/", expand=True)
-        df_met['Month'] = pd.to_numeric(df_met['Month'], errors='coerce')
-        df_met['Day'] = pd.to_numeric(df_met['Day'], errors='coerce')
-        df_met['Year'] = pd.to_numeric(df_met['Year'], errors='coerce')
-        hour_col_name = 'xHour' if param_type == "MET" else 'Hour'
-        df_met['Hour'] = pd.to_numeric(df_met[hour_col_name], errors='coerce')
-        df_met = df_met.loc[
-            (df_met.Month < 13) & (df_met.Day < 32) & (df_met.Year < 2100)]  # drop faulty
-
-        if param_type == "MET":
-            df_met = df_met.loc[(df_met.Hour < 25)]  # drop faulty
-            metcol_dict = {'Rain': (0, 1), 'AirTemperature': (200, 373), 'HorizontalWindSpeed': (0, 100),
-                           'WindDirection': (-360, 360), 'mixingHeight': (0, 1000), 'isDay': (0, 1),
-                           'CumulativeRain': (0, 1.6)}  # k, v represent name and min-max
-            for k, v in metcol_dict.items():
-                if k in df_met.columns:
-                    df_met['metcol'] = pd.to_numeric(df_met[k], errors='coerce')
-                    df_met = df_met[
-                        (df_met['metcol'] <= v[1]) & (df_met['metcol'] >= v[0])]  # keep rows within min max bounds
-
-            df_met['DT'] = list(pd.to_datetime(df_met[['Year', 'Month', 'Day', 'Hour']], errors='coerce'))
-        else:
-            # Ignored hour resolution.
-            df_met['DT'] = list(pd.to_datetime(df_met[['Year', 'Month', 'Day']], errors='coerce'))
-
-        df_met.sort_values(by='DT', inplace=True)
-        df_met['date_delta'] = (df_met['DT'] - df_met['DT'].min()) / timedelta64(1, 'D')
-        df_met['time_delta'] = df_met['date_delta'].diff()
-        # shift up the column 1 so that applicability of met condition is aligned to duration
-        df_met['time_delta'] = df_met['time_delta'].shift(-1)
-
-        # Clean up non sequential dates
-        df_met['DT_Check'] = df_met.DT >= (df_met.DT.shift())
-        df_met = df_met[df_met['DT_Check']]
-
-        # Get time-weighted averages
-        met_dict = {}
-        if param_type == "MET":
-            for k, v in metcol_dict.items():
-                if k in df_met.columns:
-                    df_met['metcol'] = pd.to_numeric(df_met[k], errors='coerce')
-                    df_met['prod'] = df_met['metcol'] * df_met['time_delta']
-                    wt_ave = df_met['prod'].sum() / df_met['time_delta'].sum()
-                    met_dict['wt_av_' + k] = wt_ave
-
-            if 'Rain' in df_met.columns:
-                df_met['Rain'] = pd.to_numeric(df_met['Rain'], errors='coerce')
-                df_met['is_Rain'] = [1 if x > 0 else 0 for x in df_met['Rain']]
-                df_met['RainTime'] = df_met['is_Rain'] * df_met['time_delta']
-                rain_frac_time = df_met['RainTime'].sum() / df_met['time_delta'].sum()
-                met_dict['frac_time_rain'] = rain_frac_time
-        if param_type == "AE":
-            # process AE.
-            df_met['ae'] = pd.to_numeric(df_met['AllowExchange'], errors='coerce')
-            df_met['prod_ae'] = df_met['ae'] * df_met['time_delta']
-            wt_ave = df_met['prod_ae'].sum() / df_met['time_delta'].sum()
-            met_dict['wt_av_allowexchange'] = wt_ave
-        elif param_type == "LF":
-            # process LF
-            df_met['lf'] = pd.to_numeric(df_met['LitterfallRate'], errors='coerce')
-            df_met['prod_lf'] = df_met['lf'] * df_met['time_delta']
-            wt_ave = df_met['prod_lf'].sum() / df_met['time_delta'].sum()
-            met_dict['wt_av_litterfallrate'] = wt_ave
-
-        return met_dict
 
     try:
+        # Get the specified scenario
+        s = ScenarioService.get(int(scenario_id))
         scenario_data = request.form.to_dict()
-        # print(scenario_data)
-        if not scenario_data['id']:
-            raise AssertionError("Scenario ID cannot be blank.")
-        # Get the specified parcel
-        s = ScenarioService.get(int(scenario_data['id']))
+        # print(f"updating with {scenario_data}")
 
-        # Update the specified property
-        field_name = scenario_data["field"]
-        if field_name == "erosionRateCalcSource":  # Data from erosion tab
-            ercs = scenario_data["erosionRateCalcSource"]
-            default_ercs = ParameterService.definitions.get(full_name="erosionRateCalcSource")
-            ercs_cp = ParameterService.get_or_create(definition=default_ercs, scenario_id=s.id)
-            ercs_cp.value = ercs
-            ParameterService.commit()
-        elif field_name == "name":  # Scenario Name
-            s.name = scenario_data["name"]
-            ParameterService.commit()
-        elif field_name == "description":  # Scenario Description
-            s.description = scenario_data["description"]
-            ParameterService.commit()
-        elif field_name.startswith("meteo_"):  # Data from the meteorology tab
-            if "_interception_" in field_name:
-                param_media = param_map["meteo"].get(field_name)[0]
-                param_name = param_map["meteo"].get(field_name)[1]
-                comp_list = [c for c in s.compartments if c.media.isa(param_media)]
-                for c in comp_list:
-                    update_custom_param(s, c, param_name, scenario_data[field_name], create_if_dne=True)
-            else:
-                param_name = param_map["meteo"].get(field_name)
-                param_data = scenario_data[field_name]
-                if "_static_" in field_name:
-                    update_custom_param(s, s, param_name, param_data, create_if_dne=True)
-                elif field_name.endswith("_TS"):
-                    ret_val = meteo_wgt_avg_value_from_timeseries(param_data, "MET")
-                    if isinstance(ret_val, dict) and "wt_av_Rain" in ret_val.keys():
-                        param_value = ret_val["wt_av_Rain"]
-                    elif isinstance(ret_val, dict) and "wt_av_CumulativeRain" in ret_val.keys():
-                        param_value = ret_val["wt_av_CumulativeRain"]
-                    else:
-                        param_value = list(ret_val.values())[0]
-                    update_custom_param(s, s, param_name, param_value, create_if_dne=True)
+        rv = None
+        try:
+            rv = handle_scenario_update(s, scenario_data)
+        except Exception as e:
+            print(f"exception while updating scenario {s} with {scenario_data}:\n")
+            print(traceback.format_exc())
+            return ApiException(repr(e))
 
-        elif field_name.startswith("seasonal_"):  # Data from the seasonal dynamics tab
-            param_media = param_map["seasonal"].get(field_name)[0]
-            param_name = param_map["seasonal"].get(field_name)[1]
-            param_data = scenario_data[field_name]
-            comp_list = [c for c in s.compartments if c.media.isa(param_media)]
-            if "_static_" in field_name:
-                # update_custom_param(s, comp_list[0], param_name, param_data)
-                update_assumed_all_comp_fixed_params(s, comp_list, param_name, param_data)
-            elif field_name.endswith("_TS"):
-                ret_type = "LF" if field_name.find("_litterfall_") > 0 else "AE"
-                ret_type_name = "wt_av_litterfallrate" if field_name.find("_litterfall_") > 0 else \
-                    "wt_av_allowexchange" if field_name.find("_allowexchange_") > 0 else "None"
-                # The condition below assures that we do not utilize the value from the file for Coniferous forest leaf
-                # If not set via custom parameter, it defaults to the desired value of 0.0021.
-                if not (ret_type_name == "wt_av_litterfallrate" and param_media == 'Coniferous_Leaf'):
-                    ret_val = meteo_wgt_avg_value_from_timeseries(param_data, ret_type)
-                    if ret_type != "None":
-                        update_assumed_all_comp_fixed_params(s, comp_list, param_name, ret_val[ret_type_name])
-        elif field_name == "simulation_start_date" or field_name == "simulation_end_date":
-            date_parts = scenario_data[field_name].split("-")
-            date_obj = datetime(int(date_parts[0]), int(date_parts[1]), int(date_parts[2]))
-            ts_date = time.mktime(date_obj.timetuple())
-            par_name = "simulationBeginDateTime" if field_name == "simulation_start_date" else "simulationEndDateTime"
-            par_list = {par_k: par for par_k, par in s.parameters.items() if par_k == par_name}
-            this_param = par_list.get(par_name)
-            if this_param is None:
-                s.parameters.add(par_name, value=ts_date)
-            elif this_param.__tablename__ != "custom_parameter":
-                ParameterService.create(definition_id=this_param.id, scenario_id=s.id,
-                                        requirements=f"(self.id == {s.id})", value=ts_date)
-            else:
-                this_param.value = ts_date
-                ParameterService.update(this_param)
-            ParameterService.commit()
-        elif field_name == "chemical": # emission settings, add/remove chemicals from a scenario
-            new_chem = ChemicalService.get(name=scenario_data["chemical"])
-            if new_chem in s.chemicals:
-                s.chemicals.remove(new_chem)
-            else:
-                s.chemicals.append(new_chem)
-
+        if rv is not None:
+            return ApiResult(rv)
     except Exception as e:
         logger.error(traceback.format_exc())
         return ApiException(repr(e))
-    ScenarioService.update(s)
-    if ret_val:
-        return ApiResult(ret_val)
     return "success"
 
 

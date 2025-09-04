@@ -2,6 +2,8 @@
 window.TRIM = (function(trim) {
     var api = trim.api || {};
 
+    var internalStore = trim.store || {};
+
     api.getScenario = function(id) {
         var url = api.getUrl('scenario_api.get_scenario').replace('/0', '/' + id);
         return AJAX.call({
@@ -10,9 +12,10 @@ window.TRIM = (function(trim) {
         });
     }
 
-     api.updateScenario = function(scenario) {
-        var url = api.getUrl('scenario_api.update_scenario');
+    api.updateScenario = function(scenario) {
         var data = makeFormData(scenario);
+        var id = data.get('id');
+        var url = api.getUrl('scenario_api.update_scenario').replace('/0', '/' + id);
         return AJAX.call({
             method: 'POST',
             url: url,
@@ -432,9 +435,85 @@ window.TRIM = (function(trim) {
         });
     }
 
-    trim.api = api;
+    api.updateParameter = (entityType, opts) => {
+        if (internalStore.currentScenario == undefined) {
+            throw new Error('Cannot Call `TRIM.api.updateParameter()` Before Loading a Scenario')
+        }
+        if (entityType === 'scenario') {
+            // Update local store
+            for (const field in opts) {
+                if (field === 'id') {
+                    continue;
+                }
+                internalStore.currentScenario[field] = opts[field];
+            }
+            // Update backend
+            const postData = [
+                {
+                    'type': 'data',
+                    'name': 'id',
+                    'value': internalStore.currentScenario.id
+                }
+            ];
+            for (const field in opts) {
+                postData.push({
+                    'type': 'data',
+                    'name': 'field',
+                    'value': field
+                });
+                postData.push({
+                    'type': 'input',
+                    'name': field,
+                    'value': opts[field]
+                });
+            }
+            return api.updateScenario(postData);
+        }
+        else if (entityType === 'parcel') {
+            let parcelId = opts.id;
+            // Update local store
+            for (const pcl of internalStore.currentScenario.parcels) {
+                if (pcl.id != parcelId) {
+                    continue;
+                }
+                for (const field in opts) {
+                    if (field === 'id') {
+                        continue;
+                    }
+                    pcl[field] = opts[field];
+                }
+                break;
+            }
+            // Update backend
+            const postData = [
+                {
+                    'type': 'data',
+                    'name': 'id',
+                    'value': parcelId
+                }
+            ];
+            for (const field in opts) {
+                if (field === 'id') {
+                    continue;
+                }
+                postData.push({
+                    'type': 'data',
+                    'name': 'field',
+                    'value': field
+                });
+                postData.push({
+                    'type': 'input',
+                    'name': field,
+                    'value': opts[field]
+                });
+            }
+            return api.updateParcel(internalStore.currentScenario.id, postData);
+        }
+        throw new Error('Unsupported Entity Type for `TRIM.api.updateParameter()`')
+    }
 
-    trim.store = {}
+    trim.api = api;
+    trim.store = internalStore;
 
     return trim;
 })(window.TRIM || {});

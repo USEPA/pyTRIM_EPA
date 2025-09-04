@@ -76,6 +76,8 @@
     <script src="{{ url_for('static', filename='js/lib/dataTables/dataTables.bootstrap4.min.js') }}">
     </script>
 
+    {% include 'components/csrf_scripts.html' %}
+
     {% include 'components/api_scripts.html' %}
 
     {% block scripts %}{% endblock %}

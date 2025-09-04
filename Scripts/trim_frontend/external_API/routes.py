@@ -354,12 +354,12 @@ class UsleRData:
             stdout, stderr = p.communicate()
             if stderr:
                 logger.error(stderr.strip().decode('utf-8'))
+            return json.loads(stdout.strip().decode('utf-8'))
         except Exception as e:
             logger.error(e)
-            
-        os.remove(parcels_fp)
-        r_usle_result = json.loads(stdout.strip().decode('utf-8'))
-        return r_usle_result
+            return {}
+        finally:
+            os.remove(parcels_fp)
 
     def insert_rusle_into_soil_data(self, rusle, soil):
         # unpack string
