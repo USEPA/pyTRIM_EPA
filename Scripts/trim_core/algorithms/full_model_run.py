@@ -112,14 +112,10 @@ def make_transition_matrix(scenario):
             print('==' * 28)
 
             for x, sender in enumerate(comp_list):
-                spst = time.time()
-                udst = time.time()
                 if (x % 100) == 0:
                     comp_perc = int(this_perc + ((i_perc * x) / n_comp))
                     scenario.latest_proc_status.run_status = f'run tm {comp_perc}'
                     ScenarioService.commit(preserve_cache=True)
-                udet = time.time()
-                sdst = time.time()
                 tm_x = int(chem_idx * n_comp + x)
 
                 index_names[tm_x] = chem.name + '_' + sender.standard_name
@@ -131,9 +127,7 @@ def make_transition_matrix(scenario):
                 except Exception as e:
                     print(f'{"*" * 20} Problem with getting Surface Deposition Rate for compartment={sender.name}, '
                           f'chemical={chem} {"*" * 20}\nException is {e}')
-                sdet = time.time()
 
-                icst = time.time()
                 try:
                     ic = sender.initialConcentration(chem)
                     if not pd.isna(ic):
@@ -148,9 +142,7 @@ def make_transition_matrix(scenario):
                 except Exception as e_ic:
                     print(f'{"*" * 20} Problem with getting initial concentration for compartment={sender.name}, '
                           f'chemical={chem} {"*" * 20}\nException is {e_ic}')
-                icet = time.time()
 
-                vmust = time.time()
                 try:
                     if sender.Volume:  # if sending compartment has volume (m3)
                         vol = sender.Volume.magnitude
@@ -212,17 +204,12 @@ def make_transition_matrix(scenario):
                     denom = "mass"
                     vmu_tup = (sender.name, vol, mass, cou, cof, denom)
                     vmu.append(vmu_tup)
-                vmuet = time.time()
 
-                cest = time.time()
                 # Some media just don't send anything
                 if not sender.media.can_emit:
                     continue
-                ceet = time.time()
 
-                spet = time.time()
                 for y, receiver in enumerate(comp_list):
-                    rlst = time.time()
                     # Some media just don't receive anything
                     if not receiver.media.can_absorb:
                         continue
@@ -230,11 +217,9 @@ def make_transition_matrix(scenario):
                     # print(sender.standard_name, '>', receiver.standard_name)
 
                     links = sender.get_links(receiver)
-                    rlet = time.time()
                     if not links:
                         continue
 
-                    st = time.time()
                     tm_y = int(chem_idx * n_comp + y)
 
                     print_vals = []
@@ -245,18 +230,10 @@ def make_transition_matrix(scenario):
                         f' {x + 1}/{n_comp}, {y + 1}/{n_comp})'
                     )
                     # print_vals.append(links)
-                    print_vals.append(f'\t\t ~ got sender props in {spet - spst} s')
-                    print_vals.append(f'\t\t\t - db update in {udet - udst} s')
-                    print_vals.append(f'\t\t\t - surf dep in {sdet - sdst} s')
-                    print_vals.append(f'\t\t\t - init conc in {icet - icst} s')
-                    print_vals.append(f'\t\t\t - vmu vals in {vmuet - vmust} s')
-                    print_vals.append(f'\t\t\t - can emit in {ceet - cest} s')
-                    print_vals.append(f'\t\t ~ got receiver links in {rlet - rlst} s')
 
                     for link in links:
                         # print(link)
                         for transport_proc in link.transport_processes(chem):
-                            tpst = time.time()
                             # print('\t', transport_proc.name)
                             check_alg = False
                             transfer_factor = np.nan
@@ -333,8 +310,6 @@ def make_transition_matrix(scenario):
                                         receiver.standard_name
                                     )
                                 ])
-                            tpet = time.time()
-                            print_vals.append(f'\t\t ~ evaluated TP in {tpet - tpst} s')
 
                     if len(print_vals) > 1:
                         for ln in print_vals:
