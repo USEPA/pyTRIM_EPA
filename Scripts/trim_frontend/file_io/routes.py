@@ -718,26 +718,30 @@ def parse_runoff_matrix_upload():
 
             reader = df.to_dict('records')
             row_counter = 1
+            precision = 4
             for row in reader:
                 row_total = []
                 for k, v in row.items():
                     if k == "parcels": continue
-                    rounded_val = round(v, 4)
-                    # print(f"\trow [{row_counter}] '{k}': {rounded_val}")
+                    rounded_val = round(v, precision)
+                    # print(f"\trow [{row_counter}] '{k}': {v} -> {rounded_val}")
                     # row_total.append(Decimal(v))
                     row_total.append(rounded_val)
                 # row_total = float(sum(row_total))
-                row_total = round(sum(row_total), 2)
+                row_total = round(sum(row_total), precision)
+                # print(f"\t{row_total=}")
                 if row_total == 0: continue
 
-                """
                 elif row_total != 1:
                     row_diff = round(Decimal(1.0000) - Decimal(row_total), precision)
                     for k, v in row.items():
                         if k == "parcels" or k == 'sink' or v == 0: continue
-                        row[k] = round(row_diff + Decimal(v), precision)
+                        before = v
+                        after = round(row_diff + Decimal(v), precision)
+                        df.at[row_counter-1, k] = after
+                        row[k] = after
                         break
-                """
+
                 # print(f"ROW {row_counter} TOTAL {row_total}")
                 row_counter += 1
         else:
