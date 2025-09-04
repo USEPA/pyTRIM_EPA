@@ -1,6 +1,7 @@
 
 def init_routes(app):
     from ..base.routes import base
+    from ..users.routes import auth
     from ..errors.handlers import errors
     from ..file_io.routes import file_api
     from ..external_API.routes import external_api_soil, external_api_r
@@ -10,6 +11,7 @@ def init_routes(app):
 
     app.register_blueprint(base)
     app.register_blueprint(errors)
+    app.register_blueprint(auth)
     app.register_blueprint(file_api)
     app.register_blueprint(scenario)
     app.register_blueprint(scenario_api)
