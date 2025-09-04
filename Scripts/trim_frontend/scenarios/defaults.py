@@ -6,6 +6,10 @@ from trim_db.services import ParameterService
 @register_serializer(Scenario)
 def serialize_scenario(scen: Scenario):
     start_time, end_time = scen.sim_begin_end_time
+    try:
+        erosion_source = scen.erosionRateCalcSource
+    except Exception:
+        erosion_source = 1
     s = {
         'id': scen.id,
         'name': scen.name,
@@ -13,7 +17,8 @@ def serialize_scenario(scen: Scenario):
         'simulation_start_date': start_time,
         'simulation_end_date': end_time,
         'has_chemicals': len(list(scen.chemicals)) > 0,
-        'has_parcels': len(list(scen.parcels)) > 0
+        'has_parcels': len(list(scen.parcels)) > 0,
+        'erosionRateSource': erosion_source
     }
     return s
    
@@ -218,108 +223,3 @@ param_map = {
         'seasonal_agriculture_allowexchange_field_name_TS': ['Agriculture_Leaf', 'AllowExchange_Dynamic'],
     }
 }
-
-EROSION_TABLE_KWARGS = [
-        # table 1
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion1-total_effective_erosion_rate",
-            "domain_id": 1,
-        },
-
-        # table 2
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion2-unit_soil_loss",
-            "domain_id": 1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion2-empirical_intercept_coefficient",
-            "domain_id": 1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion2-empirical_slope_coefficient",
-            "domain_id": 1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion2-sediment_delivery_ratio",
-            "domain_id": 1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion2-total_effective_erosion_rate",
-            "domain_id": 1,
-        },
-
-        # table 3
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-rainfall_erosivity_index",
-            "domain_id": 1,
-            "default_value": 300,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-erodibility_index",
-            "domain_id": 1,
-            "default_value": 3.6e-1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-slope_gradient",
-            "domain_id": 1,
-            "default_value": 1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-slope_length",
-            "domain_id": 1,
-            "default_value": 1.5,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-topographical_length-slope_factor",
-            "domain_id": 1,
-            "default_value": 1.5,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-cover_management_factor",
-            "domain_id": 1,
-            "default_value": 0.1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-supporting_practices_factor",
-            "domain_id": 1,
-            "default_value": 1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-unit_soil_loss",
-            "domain_id": 1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-empirical_intercept_coefficient",
-            "domain_id": 1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-empirical_slope_coefficient",
-            "domain_id": 1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-sediment_delivery_ratio",
-            "domain_id": 1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-total_effective_erosion_rate",
-            "domain_id": 1,
-        },
-    ]

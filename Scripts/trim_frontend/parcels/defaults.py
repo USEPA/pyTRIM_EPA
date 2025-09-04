@@ -1,9 +1,8 @@
 import numpy as np
-from trim_db.schema import Parcel
+from trim_db.schema import ureg, Parcel
 from trim_db.schema.utils.serialize import register_serializer
 from trim_db.schema.parameters.models import ParameterDefinition, CustomParameter
 from trim_db.services import *
-from trim_frontend.scenarios.defaults import EROSION_TABLE_KWARGS
 import pint
 
 
@@ -62,28 +61,31 @@ def get_general_params(pcl):
     dust_load = None
     dust_density = None
     fraction_organic_matter_on_particulates = None
+    erosion_source = 1
     total_erosion_rate = None
     is_tilled = False
 
+    # HACKY
     erosion_table_params = {}
-
-    # FIXME -- the commented-out code below will never do anything,
-    # because these params are defined by EROSION_TABLE_KWARGS as Scenario-domain parameters,
-    # and thus will never have Parcel-domain custom parameters -- which don't exist in any event,
-    # as Parcel models are not parameterized!!
-
-    # default_erosion = [
-    #     ParameterService.definitions.get(full_name=kwargs["full_name"])
-    #     for kwargs in EROSION_TABLE_KWARGS
-    # ]
-    # for default_param in default_erosion:
-    #     custom_param = ParameterService.get(
-    #         scenario_id=pcl.scenario_id,
-    #         requirements=f"(self.id == {pcl.id})",
-    #         definition_id=default_param.id,
-    #     )
-    #     if custom_param and custom_param.unit:
-    #         erosion_table_params[default_param.full_name] =  custom_param.unit
+    for param in list(pcl.scenario.parameters.values()):
+        if not isinstance(param, CustomParameter):
+            continue
+        if not param.requirements == f'(self.id == {pcl.id})':
+            continue
+        if not(
+            param.variable_name.startswith('erosion1-')
+            or param.variable_name.startswith('erosion2-')
+            or param.variable_name.startswith('erosion3-')
+        ):
+            continue
+        if param.variable_name.endswith('-active'):
+            erosion_table_params[
+                param.variable_name.split('-')[0] + '-active'
+            ] = EROSION_TABLE_PARAM_MAP.get(
+                param.variable_name.split('-', 1)[1].rsplit('-', 1)[0]
+            )
+        else:
+            erosion_table_params[param.variable_name] =  param.value
 
     surface_soil_height = None
 
@@ -1106,14 +1108,6 @@ SURFACE_SOIL_SPECIFIC_MEDIA_PARAMS = [
         'default_formula_id': 2485
     },
     {
-        'variable_name': 'unitSoilLoss',
-        'full_name': 'unitSoilLoss',
-        'domain_id': None,
-        'default_value': 0.00036,
-        'default_unit': 'kg/m^2/day',
-        'default_formula_id': None
-    },
-    {
         'variable_name': 'sedimentDeliveryRatioSlopeCoef',
         'full_name': 'sedimentDeliveryRatioSlopeCoef',
         'domain_id': None,
@@ -1122,3 +1116,25 @@ SURFACE_SOIL_SPECIFIC_MEDIA_PARAMS = [
         'default_formula_id': None
     }
 ]
+
+EROSION_TABLE_PARAM_MAP = {
+    'rainfall_erosivity_index': 'R',
+    'erodibility_index': 'K',
+    'slope_gradient': 'S',
+    'slope_length': 'L',
+    'topographical_length-slope_factor': 'LS',
+    'cover_management_factor': 'C',
+    'supporting_practices_factor': 'P',
+    'unit_soil_loss': 'A',
+    'empirical_intercept_coefficient': 'a',
+    'empirical_slope_coefficient': 'b',
+    'sediment_delivery_ratio': 'SD',
+    'total_effective_erosion_rate': 'Total Effective Erosion Rate'
+}
+
+EROSION_DEFAULTS = {
+    'R': 300 * ureg('((100 * ft * US_ton) / acre) / year'),
+    'K': 0.36 * ureg('(ton / acre) / ((100 * ft * US_ton) / acre)'),
+    'LS': 1.5,
+    'P': 1
+}

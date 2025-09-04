@@ -1,0 +1,69 @@
+
+{% if current_user.is_authenticated %}
+
+<script type="text/javascript">
+
+window.CSRFManager = (function(manager) {
+    var globalCSRF = undefined;
+
+    manager.check = (formData) => {
+        var data = new FormData();
+        data.set('csrf_token', formData.get('csrf_token') || globalCSRF);
+
+        var reset = $.Deferred();
+        $.ajax({
+            url: "{{ url_for('auth.check_token') }}",
+            type: 'POST',
+            data: data,
+            contentType: false,
+            processData: false
+        })
+        .done(function() {
+            reset.resolve();
+        })
+        .fail(function() {
+            manager.refresh(formData)
+                .done(function(data) {
+                    reset.resolve();
+                })
+                .fail(function() {
+                    reset.resolve();
+                });
+        });
+
+        return reset.promise();
+    }
+
+    manager.refresh = (formData) => {
+        var refresh =  $.ajax({
+            url: "{{ url_for('auth.get_token') }}",
+            type: 'GET',
+            contentType: false,
+            processData: false
+        }).done(function(data) {
+            globalCSRF = data.token;
+            $.ajaxSetup({
+                beforeSend: function(xhr, settings) {
+                    if (
+                        !/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type)
+                        && !this.crossDomain
+                    ) {
+                        xhr.setRequestHeader("X-CSRFToken", globalCSRF);
+                    }
+                }
+            });
+            if (formData !== undefined && formData instanceof FormData) {
+                formData.set('csrf_token', globalCSRF);
+            }
+        });
+
+        return refresh;
+    };
+
+    return manager;
+})(window.CSRFManager || {});
+
+
+</script>
+
+{% endif %}
