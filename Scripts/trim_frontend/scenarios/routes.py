@@ -590,9 +590,10 @@ def clear_old_result():
 
     data_resp = {"success": "success"}
     try:
-        if len(scn.proc_status.all()) > 0:
-            print(f"Clearing Last Model Run for {scn.name} {[v for v in scn.proc_status][0].run_datetime}...")
-            scn.proc_status.delete()
+        if scn.has_process_hist:
+            print(f"Clearing Last Model Run for {scn.name} {scn.proc_status.all()[-1].run_datetime}...")
+            scn.proc_status.remove(scn.latest_proc_status)
+            ScenarioService.commit()
     except Exception as e:
         print(f'problem deleting {e}')
         return ApiException(f"Problem deleting {repr(e)}")
@@ -654,13 +655,13 @@ def get_result_scenario():
 
     try:
         logger.info(f'Getting Model Run Results for scenario {s.name}...')
-        fin_stat = [v for v in s.proc_status][0].run_status
-        run_date = [v for v in s.proc_status][0].run_datetime
-        output_file_n = Path([v for v in s.proc_status][0].result_file_nt).name
-        output_file_c = Path([v for v in s.proc_status][0].result_file_conc).name
-        output_file_t = Path([v for v in s.proc_status][0].result_file_tm).name
-        json_n_avg = [v for v in s.proc_status][0].result_nt
-        json_c_avg = [v for v in s.proc_status][0].result_conc
+        fin_stat = s.latest_proc_status.run_status
+        run_date = s.latest_proc_status.run_datetime
+        output_file_n = Path(s.latest_proc_status.result_file_nt).name
+        output_file_c = Path(s.latest_proc_status.result_file_conc).name
+        output_file_t = Path(s.latest_proc_status.result_file_tm).name
+        json_n_avg = s.latest_proc_status.result_nt
+        json_c_avg = s.latest_proc_status.result_conc
 
         result_resp = json.loads(json.dumps({"mass": json.loads(json_n_avg), "conc": json.loads(json_c_avg), "final_status": fin_stat, "run_date": run_date, "outputMass": output_file_n, "outputConc": output_file_c, "outputTM": output_file_t}, indent=4, sort_keys=True, default=str))
     except Exception as e:
@@ -678,11 +679,11 @@ def get_result_scenario():
 def poll_model_run_scenario(id):
     s = ScenarioService.get(id)
     if s.has_process_hist:
-        if [v for v in s.proc_status][0].is_run_error:
+        if s.latest_proc_status.is_run_error:
             run_status = "err"
             run_percent = "err"
         else:
-            run_status, run_percent = [v for v in s.proc_status][0].run_step
+            run_status, run_percent = s.latest_proc_status.run_step
         return ApiResult({'status': run_status, 'percent': run_percent})
     return ApiResult({'status': "tm", 'percent': "0"})
 
@@ -696,10 +697,10 @@ def reset_poll_model_run_scenario():
     scenario_id = int(scenario_data['scenario_id'])
     s = ScenarioService.get(scenario_id)
     if s.has_process_hist:
-        [v for v in s.proc_status][0].run_status = 'run null null'
+        s.latest_proc_status.run_status = 'run null null'
     else:
         new_proc = ScenarioLoadRunProc(scenario=s, load_status='load 100', run_status='run null null')
-        [s.proc_status][0].add(new_proc)
+        s.proc_status.add(new_proc)
     ScenarioService.commit()
     return "success"
 
@@ -976,12 +977,12 @@ def export_for_mirc(scenario_id):
     logger = make_logger('mirc_exporter')
     logger.info(f"Compiling required MIRC data for scenario {scen.name}...")
     try:
-        latest_model_run = [v for v in scen.proc_status if not v.is_run_error]
+        latest_model_run = [v for v in scen.proc_status.all() if not v.is_run_error]
         if len(latest_model_run) == 0:
             return ApiResult({
                 'trim_data': {"message": "No valid data found"}
             })
-        latest_model_run = latest_model_run[0]
+        latest_model_run = latest_model_run[-1]
 
         mass = json.loads(latest_model_run.result_nt)
         mass = json.loads("{"+mass+"}")

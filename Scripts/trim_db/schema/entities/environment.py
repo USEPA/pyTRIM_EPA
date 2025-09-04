@@ -539,7 +539,7 @@ class Compartment(Model):
             # if we are dealing with a source
             if sender_ve.name in ["DryParticleSource", "WetParticleSource", "DryVaporSource", "WetVaporSource"]:
                 return sender_ve.parcel.area
-            # new for sediment burial sink 
+            # new for sediment burial sink
             if self.standard_name == 'Sediment in Sed_Pond' and compartment.standard_name == 'Burial_Sink in Sed_Pond':
                 return sender_ve.parcel.area
 

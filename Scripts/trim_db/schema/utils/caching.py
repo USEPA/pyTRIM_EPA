@@ -19,7 +19,9 @@ class CacheManager:
         return '&'.join([x for x in key_args if x])
 
     class Cacher:
-        def __init__(self):
+        def __init__(self, base_key, keymaker=None):
+            self._base_key = base_key
+            self._keymaker = keymaker if keymaker is not None else CacheManager.cache_key
             self._inner_cache = {}
 
         @property
@@ -58,9 +60,9 @@ class CacheManager:
                     # print(f'{90*"^"}\n{35*" "} CACHE DISABLED!!!! {35*" "}\n{90*"^"}\n')
                     return f(*args, **kwargs)
 
-                k = CacheManager.cache_key(*args, **kwargs)
+                k = self._keymaker(*args, **kwargs)
 
-                if not CacheManager.DISABLED_REQUESTS and self.has(k):
+                if self.has(k):
                     ans = self.get(k)
                     if print_this:
                         print(f'Existing Cache "{k}" -> {ans}\n')
@@ -74,10 +76,9 @@ class CacheManager:
                 except Exception as e:
                     ans = e
 
-                if not CacheManager.DISABLED_REQUESTS:
-                    self.set(k, ans)
-                    if print_this:
-                        print(f'New Cache "{k}" -> {ans}\n')
+                self.set(k, ans)
+                if print_this:
+                    print(f'New Cache "{k}" -> {ans}\n')
                 # We need to clear cache if any object is stale and in detached state.
                 # This is important when unhandled exceptions occur and uncleared stale
                 # objects in cash prevent scenario load.
@@ -92,9 +93,9 @@ class CacheManager:
             return wrapped
 
     @classmethod
-    def subcache(cls, key):
+    def subcache(cls, key, keymaker=None):
         # print(f'Making sub-cache with {key} -> {cls._CACHERS.get(key)}"')
-        return cls._CACHERS.setdefault(key, cls.Cacher())
+        return cls._CACHERS.setdefault(key, cls.Cacher(key, keymaker=keymaker))
 
     @classmethod
     def clear_cache(cls, key, all_threads=False):
@@ -123,11 +124,11 @@ class CacheManager:
         return wrapped
 
     @classmethod
-    def with_caching(cls, base_key=None):
+    def with_caching(cls, base_key=None, keymaker=None):
         def decorated(base_key, f):
             if base_key is None:
                 base_key = str(f)
             # print(f"BASE KEY IS {base_key}")
-            return CacheManager.subcache(base_key).cached(f)
+            return CacheManager.subcache(base_key, keymaker=keymaker).cached(f)
 
         return partial(decorated, base_key)
