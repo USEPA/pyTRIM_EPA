@@ -1,6 +1,7 @@
 """
 Farm media
 AverageVerticalVelocity
+TransferFractionToSoilConiferousLeaf
 Aquatic food web
 
 Revision ID: 60eb40203023
@@ -39,6 +40,16 @@ def upgrade():
             SELECT id FROM formula
             WHERE equation = '0.2 * environment.Rain' AND description= 'default AverageVerticalVelocity'
         ) WHERE variable_name = 'AverageVerticalVelocity';
+        """
+    )
+
+    # Update to TransferFractionToSoilConiferousLeaf
+    op.execute(
+        """
+        UPDATE formula SET equation = '(self.volume_element.agg("sum" , "AllowExchange_forAir" , compartment_media="$Leaf") * (self.volume_element.parcel.area * 2 * self.volume_element.agg("sum" , "LeafAreaIndex" , compartment_media="$Leaf") * self.volume_element.agg("sum" , "TotalCuticularConductance" , chemical=chemical , compartment_media="$Leaf")) + (self.volume_element.parcel.area * self.volume_element.agg("sum" , "LeafAreaIndex" , compartment_media="$Leaf") * (self.volume_element.agg("sum" , "isDay_forAir" , compartment_media="$Leaf") * self.volume_element.agg("sum" , "TotalStomatalConductance" , chemical=chemical , compartment_media="$Leaf"))))'
+        WHERE id IN (
+            SELECT default_formula_id FROM parameter_definition WHERE variable_name = 'TransferFractionToSoilConiferousLeaf'
+        );
         """
     )
 
@@ -96,9 +107,17 @@ def downgrade():
     op.execute(
         "UPDATE parameter_definition SET default_value = 0.0006, default_formula_id = NULL WHERE variable_name = 'AverageVerticalVelocity';"
     )
-
     op.execute(
         "DELETE FROM formula WHERE equation = '0.2 * environment.Rain' AND description= 'default AverageVerticalVelocity';"
+    )
+
+    op.execute(
+        """
+        UPDATE formula SET equation = '(self.volume_element.agg("sum" , "AllowExchange_forAir" , compartment_media="$Leaf") * (self.volume_element.parcel.area * 2 * self.volume_element.agg("sum" , "LeafAreaIndex" , compartment_media="$Leaf") * self.volume_element.agg("sum" , "TotalCuticularConductance" , chemical=chemical , compartment_media="$Leaf")) + (self.volume_element.parcel.area * 2 * self.volume_element.agg("sum" , "LeafAreaIndex" , compartment_media="$Leaf") * (self.volume_element.agg("sum" , "isDay_forAir" , compartment_media="$Leaf") * self.volume_element.agg("sum" , "TotalStomatalConductance" , chemical=chemical , compartment_media="$Leaf"))))'
+        WHERE id IN (
+            SELECT default_formula_id FROM parameter_definition WHERE variable_name = 'TransferFractionToSoilConiferousLeaf'
+        );
+        """
     )
 
     op.execute(
