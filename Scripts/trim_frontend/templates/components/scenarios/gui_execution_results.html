@@ -7,6 +7,12 @@
                 <div class="row mb-1">
                     <div class="col-sm">
                         <button id="btn_execute_model" class="comp_show_all btn btn-warning">Run Model</button>
+                        <span id="export-help" title="Run the model to export results">
+                            <a id="MIRC-export" href="#" class="btn btn-primary disabled-link">
+                                <i class="fa fa-file-download"></i>&nbsp;
+                                Export Run Results for MIRC
+                            </a>
+                        </span>
                     </div>
                 </div>
                 <div class="row mb-1">
@@ -163,6 +169,12 @@
     </section>
 </form>
 <style>
+    .disabled-link {
+        pointer-events: none;
+        cursor: default;
+        opacity: 0.6;
+    }
+
     .dropdown-menu {
         max-height: 20rem;
         overflow-y: auto;
@@ -333,6 +345,21 @@
                     $('#div_ve_pill').css("display",'none')
                 }
             })
+
+            function load_scenario_export() {
+                LoadingScreen.show("export_mirc");
+                TRIM.api.exportScenarioForMirc(TRIM.store.currentScenario.id).on('load', (rsp) => {
+                    LoadingScreen.hide("export_mirc");
+                    let responseJSON = JSON.stringify(rsp.target.responseJSON);
+                    let jsonData = 'data:application/json;charset=utf-8,' + encodeURIComponent(responseJSON);
+                    let filename = TRIM.store.currentScenario.name + "_MIRC Export_" + moment(new Date()).format('YYYY_MM_DD-HH_MM') + ".json";
+                    $("#MIRC-export").attr("download", filename);
+                    $("#MIRC-export").attr("href", jsonData);
+                    $("#MIRC-export").attr("target", "_blank");
+                    // Optionally, trigger download automatically:
+                    // $("#MIRC-export")[0].click();
+                });
+            }
 
             function initialize_components() {
                 let dt = JSON.parse(TRIM.store.latestRunInfo.run_results.mass_results)
@@ -651,12 +678,15 @@
                             $('#btn_get_mass_results').show()
                             $('#btn_get_conc_results').show()
                             $('#btn_visualize').prop('disabled', false)
+                            $('#MIRC-export').removeClass('disabled-link')
+                            $('#export-help').removeAttr('title')
                             $('#lb_perc_ode').text("(100%)")
                             $('#lb_perc_out').text("(100%)")
                             $('#lb_perc_trm').text("(100%)")
                             if (skipLoadingResults !== true) {
                                 let result_data = get_result_data(scenario_head)
                             }
+                            load_scenario_export()
                         } else if (status == "tm") {
                             setChecked("p#cb_proc_trm", "run")
                             $('#lb_perc_trm').text("(" + percent + "%)")
