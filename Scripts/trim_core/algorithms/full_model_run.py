@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import json
 import time
+from pandas.api.types import is_numeric_dtype
 from scipy.integrate import odeint
 from trim_db.schema import *
 from trim_db.schema.parameters.equations import evaluated_args, \
@@ -144,39 +145,32 @@ def make_transition_matrix(scenario):
                           f'chemical={chem} {"*" * 20}\nException is {e_ic}')
 
                 try:
-                    if sender.Volume:  # if sending compartment has volume (m3)
-                        vol = sender.Volume.magnitude
+                    # if sending compartment has volume (m3)
+                    vol = sender.Volume
+                    if not pd.isna(vol) and vol:
+                        vol = vol.magnitude
                     else:
                         vol = np.nan
 
-                    if sender.TotalMass:  # if sending compartment has mass (kg)
-                        mass = sender.TotalMass.magnitude
+                    # if sending compartment has mass (kg)
+                    mass = sender.TotalMass
+                    if not pd.isna(mass) and mass:
+                        mass = mass.magnitude
                     else:
                         mass = np.nan
 
                     # if sending compartment has concentration output factor
-                    if sender.concentrationOutputFactor:
-                        try:
-                            cof = sender.concentrationOutputFactor.magnitude
-                        except AttributeError:
-                            cof = sender.concentrationOutputFactor
-
-                        try:
-                            cou = str(sender.concentrationOutputFactor.units)
-                        except AttributeError:
-                            cou = np.nan
-
-                        if not cof:
-                            cof = np.nan
-                        if not cou:
-                            cou = ""
+                    cof = sender.concentrationOutputFactor
+                    cou = ''
+                    if not pd.isna(cof) and cof:
+                        if hasattr(cof, 'dimensionality'):
+                            cou = str(cof.units)
+                            cof = cof.magnitude
+                    elif sender.media.isa("Root_Zone") or sender.media.isa("Surface_Soil"):
+                        cof = chem.concentrationOutputFactor(sender)
+                        cou = "g / g"
                     else:
-                        if sender.media.isa("Root_Zone") or sender.media.isa("Surface_Soil"):
-                            cof = chem.concentrationOutputFactor(sender)
-                            cou = "g / g"
-                        else:
-                            cof = np.nan
-                            cou = ""
+                        cof = np.nan
 
                     denom = "mass"  # default denom is mass
                     if sender.media.isa("Abiotic"):
@@ -248,10 +242,8 @@ def make_transition_matrix(scenario):
                                 check_alg = True
                                 print(f'{"#"*100}\n{ex}\n{"#"*100}\n')
                             # print('\t\ttf =', transfer_factor)
-                            try:
+                            if hasattr(transfer_factor, 'dimensionality'):
                                 transfer_factor = transfer_factor.magnitude
-                            except Exception:
-                                pass
                             print_vals.append(
                                 f'\t\t- "{transport_proc.name}"'
                                 f' = {transfer_factor}'
@@ -425,56 +417,46 @@ def compute_concentration(df_nt, df_vmu):  # arguments are the chemical mass arr
                 df_vmu.loc[i, 'Mass_to_Conc_Conv_Factor'] = 1 / (df_vmu.loc[i, 'volume_m3'] * 1000) * df_vmu.loc[
                     i, 'concentrationOutputFactor']
 
-    # col_names = [str(ii) for ii in index_list]
-    # col_names = col_names + [str(ii) + '_units' for ii in index_list] + ['time', 'year']
-    # df_conc = pd.DataFrame(columns=col_names)
-    df_conc = pd.DataFrame()
-    df_conc['time'] = df_nt['time']  # add time column
-
+    conc_data = {
+        'time': df_nt['time']
+    }
     for i in index_list:
-        conv_fact = df_vmu.loc[i, 'Mass_to_Conc_Conv_Factor']
-        units = df_vmu.loc[i, 'concentrationOutputUnits']
-        # col_name=i+'_'+units
-        col_name = i
-        col_val = np.array(df_nt[i]) * conv_fact
-        df_conc[col_name] = col_val
-        df_conc[col_name + '_units'] = units
+        conc_data[i] = df_nt[i] * df_vmu.loc[i, 'Mass_to_Conc_Conv_Factor']
+        conc_data[f'{i}_units'] = pd.Series(
+            [df_vmu.loc[i, 'concentrationOutputUnits']] * len(conc_data[i])
+        )
+
+    df_conc = pd.concat(conc_data.values(), axis=1, ignore_index=True)
+    df_conc.columns = conc_data.keys()
 
     df_conc = df_conc.replace(np.nan, 0)
     return df_conc
 
 
 def gen_avg(df_nt, df_conc, inputs):
-    # get simulation start and end dates
-    start_date, end_date = inputs['simulation_start_date'], inputs['simulation_end_date']
-    # convert the start_date and end_date to datetime objects
-    start_date = pd.to_datetime(start_date, format='%Y-%m-%d')
-    # convert the start_date and end_date to datetime objects
-    end_date = pd.to_datetime(end_date, format='%Y-%m-%d')
+    # get simulation start date and convert to datetime object
+    start_date = pd.to_datetime(inputs['simulation_start_date'], format='%Y-%m-%d')
+
     # convert the first col (time in d) to datetime objects
-    df_nt.iloc[:, 0] = pd.to_datetime(df_nt.iloc[:, 0], origin=start_date, unit='d')
-    # convert the first col (time in d) to datetime objects
-    df_conc.iloc[:, 0] = pd.to_datetime(df_conc.iloc[:, 0], origin=start_date, unit='d')
-    df_nt['year'] = df_nt.iloc[:, 0].dt.year   # create year column
-    df_conc['year'] = df_conc.iloc[:, 0].dt.year  # create year column
+    df_nt['time'] = pd.to_datetime(df_nt['time'], origin=start_date, unit='d')
+    df_nt['year'] = df_nt['time'].dt.year   # create year column
     # group the data by year and calculate the annual averages
     dfn_avg = df_nt.groupby('year').mean().reset_index()
     # drop last line (just one day)
     dfn_avg = dfn_avg.head(len(dfn_avg)-1)
-    # defragment the conc dataframe
-    # new_df_conc = df_conc.copy()
-    # group the data by year and calculate the annual averages
-    # dfc_avg = df_conc.groupby('year').mean().reset_index() # this fails because of all the units (objects) in the df
-    dct = {
-        'number': 'mean',
-        'object': lambda col: col.mode() if col.nunique() == 1 else np.nan,
-    }
 
-    groupby_cols = ['year']
-    dct = {k: v for i in
-           [{col: agg for col in df_conc.select_dtypes(tp).columns.difference(groupby_cols)} for tp, agg in dct.items()] for
-           k, v in i.items()}
-    dfc_avg = df_conc.groupby(groupby_cols).agg(**{k: (k, v) for k, v in dct.items()})
+    # convert the first col (time in d) to datetime objects
+    df_conc['time'] = pd.to_datetime(df_conc['time'], origin=start_date, unit='d')
+    df_conc['year'] = df_conc['time'].dt.year  # create year column
+    # group the data by year and calculate the annual averages
+    conc_agg = {
+        c: (
+            'mean' if is_numeric_dtype(df_conc[c])
+            else lambda col: (col.mode() if col.nunique() == 1 else np.nan)
+        )
+        for c in df_conc.columns.values if c != 'year'
+    }
+    dfc_avg = df_conc.groupby('year').agg(conc_agg).reset_index()
     # drop last line (just one day)
     dfc_avg = dfc_avg.head(len(dfc_avg)-1)
     return dfn_avg, dfc_avg
@@ -611,6 +593,7 @@ def run_full_model(scn):
 
 def model_err(scn, err_msg, status):
     print(err_msg)
+    # import traceback; traceback.print_exc()
     scn.latest_proc_status.run_status = status
     ScenarioService.commit()
     return {}, {}, "", ""
