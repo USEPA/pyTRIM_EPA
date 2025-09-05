@@ -287,6 +287,8 @@
 
         var resultsReadyEvent = document.createEvent('Event');
         resultsReadyEvent.initEvent('results:ready', true, true);
+        let exportLoadedForRun = false;
+        let lastExportScenarioId = null;
         TRIM.refreshResults = function(force) {
             force = force || false;
             if (TRIM.store.latestRunInfo && !force) {
@@ -347,6 +349,12 @@
             })
 
             function load_scenario_export() {
+                if (exportLoadedForRun && lastExportScenarioId === TRIM.store.currentScenario.id) {
+                    return;
+                }
+                exportLoadedForRun = true;
+                lastExportScenarioId = TRIM.store.currentScenario.id;
+
                 LoadingScreen.show("export_mirc");
                 TRIM.api.exportScenarioForMirc(TRIM.store.currentScenario.id).on('load', (rsp) => {
                     LoadingScreen.hide("export_mirc");
@@ -574,6 +582,8 @@
 
             $('#btn_execute_model').on('click', function (e) {
                 e.preventDefault()
+                exportLoadedForRun = false;
+                lastExportScenarioId = Trim.store.currentScenario.id;
                 reset_for_run()
                 let scenario_info = [{
                     'type': 'data',
