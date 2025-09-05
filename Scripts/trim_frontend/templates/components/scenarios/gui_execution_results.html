@@ -323,6 +323,7 @@
             }
 
             let plot_types = ['Time Series', 'Mass Distribution (Bar Chart)', 'Mass Distribution (Pie Chart)', 'Mass Distribution (Animated Bar Chart)']
+            $('#plt_type').find("div.dropdown-menu").empty();
             plot_types.forEach((e, i) => {$('#plt_type').find("div.dropdown-menu").append(`<a class='dropdown-item'> ${e} </a>`)})
             var comp_list = {}
             var ve_list = {}
@@ -371,6 +372,10 @@
 
             function initialize_components() {
                 let dt = JSON.parse(TRIM.store.latestRunInfo.run_results.mass_results)
+                
+                $('#plt_comp').find('div#menuItems_searchable_dd').empty();
+                $('#plt_chem').find('div.dropdown-menu').empty();
+
                 comp_list = Object.keys(dt).filter(e => ['year','time'].indexOf(e) == -1).map(e=> e.split("_").slice(1).join("_")).filter((v, i, a) => {
                     return a.indexOf(v) === i  // Get unique compartment names
                 })

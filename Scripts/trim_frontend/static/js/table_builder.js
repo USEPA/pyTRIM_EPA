@@ -21,6 +21,8 @@ function scientific(val) { // to scientific notation
 
 // static value dropdown menu of column names
 function appendHeaderOptions(datatable, skip_columns=[]) {
+    // clear existing options to avoid duplicates
+    $("#" + datatable.attr('id') + "_columns").empty();
     datatable.api().columns().every(function(column_idx) {
         let header = this.header().textContent;
         if (!skip_columns.includes(header))
