@@ -1,6 +1,7 @@
 """
 Farm media
 AverageVerticalVelocity
+ExternalWaterInflow
 TransferFractionToSoilConiferousLeaf
 Aquatic food web
 
@@ -40,6 +41,14 @@ def upgrade():
             SELECT id FROM formula
             WHERE equation = '0.2 * environment.Rain' AND description= 'default AverageVerticalVelocity'
         ) WHERE variable_name = 'AverageVerticalVelocity';
+        """
+    )
+
+    # External water inflow
+    op.execute(
+        """
+        INSERT INTO parameter_definition (variable_name, full_name, domain_id, default_value, default_unit) 
+        VALUES ('ExternalWaterInflow', 'ExternalWaterInflow', 33, 0, 'm^3[water]/y');
         """
     )
 
@@ -109,6 +118,13 @@ def downgrade():
     )
     op.execute(
         "DELETE FROM formula WHERE equation = '0.2 * environment.Rain' AND description= 'default AverageVerticalVelocity';"
+    )
+
+    # External water inflow
+    op.execute(
+        """
+        DELETE FROM parameter_definition WHERE variable_name = 'ExternalWaterInflow' and domain_id = 33;
+        """
     )
 
     op.execute(

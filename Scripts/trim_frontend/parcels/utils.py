@@ -67,7 +67,8 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         'water_ph': "pH",
         'sed_deposition_vel': "SedimentDepositionVelocity",
         'water_temp': "WaterTemperature",
-        'sed_inflow': "ExternalSedimentInflow"
+        'sed_inflow': "ExternalSedimentInflow",
+        'externalWaterInflow': "ExternalWaterInflow"
     }
 
     bed_params = {
@@ -900,7 +901,7 @@ def delete_parcel_contents(del_parcel):
             par = par[0]
             eq = par.formula.equation
             del_id = c.id
-            if del_id not in eq:
+            if str(del_id) not in eq:
                 continue
             eq_parts = eq.split('compartment.id in {')
             for i, p in enumerate(eq_parts):

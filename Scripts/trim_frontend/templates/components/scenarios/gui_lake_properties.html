@@ -44,14 +44,14 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="WBP_ModalLabel">Modal title</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <!--<button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
-                    </button>
+                    </button>-->
                 </div>
                 <div class="modal-body">
                 </div>
                 <div class="modal-footer">
-                    <a  class="btn btn-secondary" id="WBP_closeModalButton" data-dismiss="modal">Close</a>
+                    <a  class="btn btn-secondary" id="WBP_closeModalButton" data-dismiss="modal">Cancel</a>
                     <!-- <button type="button"  id="saveModalButton" class="btn btn-primary" data-dismiss="modal">Save</button> -->
                     <button type="button"  id="WBP_saveModalButton" class="btn btn-primary">Save</button>
                 </div>
@@ -516,7 +516,7 @@
                             this_btn = $(this_btn).click(
                                 function(evt1) {
                                     let valueFormDiv = $('#WBP_editModal div.modal-body')
-                                    $('#WBP_editModal div.modal-body h5.modal-title').text("Lake Inflow")
+                                    $('#WBP_ModalLabel').text("Lake Inflow")
                                     $(valueFormDiv).empty()
                                     let initial_ifr = []
                                     for (const this_val of values){
@@ -535,7 +535,7 @@
                                                 for (const this_prc of values) {
                                                     let this_FR_id = "#FRatio_input_" + this_prc + "_" + this_parcel_name
                                                     let fraction_val = parseFloat($(this_FR_id).val())
-                                                    console.log($(this_FR_id))
+                                                    // console.log($(this_FR_id))
                                                     let row_idx = table_row_headers.indexOf("Water Column Discharge Volumetric Rate")
                                                     let col_idx = table_col_headers.indexOf(this_prc)
                                                     let inflow_val = parseFloat($("#LakeTable").find('tr').eq(row_idx + 1).find('td').eq(col_idx).find("label").first().text())
@@ -572,7 +572,7 @@
                                                     $("#LakeTable").find('tr').eq(fr_row_idx+1).find('td').eq(col_idx).find("input").attr("value",res_fr)
                                                 }
                                                 // post flush, discharge, inflow rates and linked discharge fractions to backend
-
+                                                submit_external_water_inflow(parcel_name, total_IF, res_dc);
                                             }
                                         })
                                         // Add Parcel name label and ratio input field in the modal body
@@ -625,6 +625,7 @@
                                             $("#LakeTable").find('tr').eq(fr_row_idx+1).find('td').eq(col_idx).find("input").attr("value",res_fr)
                                         }
                                         // post flush, discharge, inflow rates and linked discharge fractions to backend
+                                        submit_external_water_inflow(parcel_name, total_IF, res_dc);
                                     })
                                 }
                             )
@@ -646,6 +647,21 @@
                     $(this).attr("data-dismiss","modal")
                 }
             })
+
+            function submit_external_water_inflow(pcl_name, total_IF, discharge_rate) {
+                let pcl = getParcelByKey('name', pcl_name);
+                let parcel_info = [
+                    {type: 'data', name: 'id', value: pcl.id},
+                    {type: 'data', name: 'field', value: 'externalWaterInflow'},
+                    {type: 'input', name: 'externalWaterInflow', value: total_IF},
+                ];
+                LoadingScreen.show('external_water_inflow');
+                TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', (rsp)=>{
+                    pcl.surface_water.wc_props.externalWaterInflow = total_IF;
+                    pcl.surface_water.wc_props.discharge_vol_rate = discharge_rate;
+                    LoadingScreen.hide('external_water_inflow');
+                });
+            }
 
             function validate_input(e) {
                 let elem = $(e).closest("div.modal-content").find("input.form-control")
