@@ -384,7 +384,10 @@
 						clearInterval(keepCheckingId);
 						getflowStatusArea.html("Run complete!&nbsp;&nbsp;");
 						getflowStatusArea.css("background-color", "lime");
-						$("<a/>").attr("href", data.output.presigned_urls[1]).html("Download results").appendTo(getflowStatusArea);
+						// disabling download since it is a different format from the upload!
+						// we'll just allow users to update the matrix (and they can then
+						// use "Export Matrix" to download in the right format)
+						// $("<a/>").attr("href", data.output.presigned_urls[1]).html("Download results").appendTo(getflowStatusArea);
 
                         toggleBtnState(false);
 

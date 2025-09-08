@@ -121,7 +121,7 @@
         let vadose_apTable = null;
         let gw_apTable = null;
         let AIR_PROPS = ['parcelid','Surface Parcel','DustParticleConcentration', 'DustParticleDensity', 'AirDensity',
-            'DustParticleOrganicMatter', 'AirHeight','hasAir'];
+            'DustParticleOrganicMatter','hasAir'];
         let SOIL_PROPS = ['parcelid','Surface Parcel','Tillage', 'SurfaceSoilThick', 'RootSoilThick',
             'VadoseZoneSoilThick', 'GroundwaterZoneSoilThick', 'hasLand', 'Soil_Surface',  'Soil_Root_Zone',
             'Soil_Vadose_Zone', 'Groundwater'
@@ -271,11 +271,6 @@
                         'data': "DustParticleOrganicMatter",
                         'bSortable': false,
                         'render':  render_function_air('fractionOrganicMatterOnParticulates', "ErrorValidation.isValidFraction(this)")
-                    },
-                    {
-                        'data': "AirHeight",
-                        'bSortable': false,
-                        'render':  render_function_air('airHeight', "ErrorValidation.isPositiveValue(this)")
                     }
                 ],
                 initComplete: function (settings, json) {

@@ -125,6 +125,15 @@ window.AJAX = (function(ajax) {
 			if (callback !== undefined) { callback(true, parsedResponseData); }
 		  } 
           else if (request.readyState === 4 && request.status >= 400) {
+            if ((parsedResponseData?.message || '').indexOf('The CSRF token has expired') > -1) {
+                window.CSRFManager.refresh(data)
+                    .done(() => {
+                        opts.data = data;
+                        ajax.call(opts);
+                    })
+                return;
+            }
+
             if (callback !== undefined) { callback(false, parsedResponseData); }
             else {
                 if (this.alertErrs) { alert(parsedResponseData?.message); }

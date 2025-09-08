@@ -130,13 +130,17 @@ class Scenario(Model, TrackUpdatesMixin):
         return sim_beg, sim_end
 
     @property
+    def latest_proc_status(self):
+        return self.proc_status.order_by(ScenarioLoadRunProc.id.desc()).first()
+
+    @property
     def has_process_hist(self):
         try:
-            if len([*self.proc_status]) == 0:
-                return False
+            if self.latest_proc_status is not None:
+                return True
         except Exception:
             return False
-        return True
+        return False
 
     def __repr__(self):
         return (
@@ -163,7 +167,9 @@ class ScenarioLoadRunProc(Model):
         sa.Integer(), sa.ForeignKey('scenario.id'), nullable=False
     )
     scenario = sa.orm.relationship(
-        'Scenario', backref=sa.orm.backref('proc_status', lazy='dynamic')
+        'Scenario', backref=sa.orm.backref(
+            'proc_status', lazy='dynamic', cascade='all, delete-orphan'
+        )
     )
     run_datetime = sa.Column(sa.sql.sqltypes.DATETIME)
     result_file_nt = sa.Column(sa.String(255))

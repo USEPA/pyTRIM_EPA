@@ -11,7 +11,7 @@ from .defaults import SURFACE_SOIL_SPECIFIC_MEDIA_PARAMS
 from flask_api import ApiResult
 from pyproj import Transformer
 
-from trim_db.schema import CustomParameter, ParameterDefinition, Parcel
+from trim_db.schema import ureg, CustomParameter, ParameterDefinition, Parcel
 from trim_db.services import ChemicalService, CompartmentService, FormulaService, \
     ParameterService, ParcelService, ScenarioService, VolumeElementService
 from trim_db.services.parameters import get_or_create_custom_param, update_custom_param_value
@@ -19,7 +19,7 @@ from .defaults import get_watershed_area, \
      Air_Parcel_VolElem_defaults, Aquatic_Biota_SW_Compartment_defaults, \
      Aquatic_Biota_Sed_Compartment_defaults, Farm_Biota_SurfSoil_Compartment_defaults, \
      LAND_USE_TYPES, AQUATIC_DIET, Land_Parcel_VolElem_defaults, Water_Parcel_VolElem_defaults, \
-     Wet_Dry_Source_VolElem_defaults
+     Wet_Dry_Source_VolElem_defaults, EROSION_DEFAULTS
 from .forms import ScenarioParcelsForm
 from ..scenarios.forms import ScenarioAbioticPropertiesForm
 from ..utils.logging import make_logger
@@ -67,7 +67,8 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         'water_ph': "pH",
         'sed_deposition_vel': "SedimentDepositionVelocity",
         'water_temp': "WaterTemperature",
-        'sed_inflow': "ExternalSedimentInflow"
+        'sed_inflow': "ExternalSedimentInflow",
+        'externalWaterInflow': "ExternalWaterInflow"
     }
 
     bed_params = {
@@ -198,22 +199,77 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
 
     elif field_name == "description":
         p.description = parcels_data['description']
+
     elif field_name == 'totalErosionRate':
+        val = float(parcels_data['totalErosionRate'])
         for c in p.compartments:
             if c.media.isa('Surface_Soil'):
-                par = c.parameters.get('TotalErosionRate')
-                par.value = parcels_data['totalErosionRate']
-    elif ("erosion1" in field_name or "erosion2" in field_name or "erosion3" in field_name): # unique structure
-        param = ParameterService.definitions.get(full_name=field_name)
-        param = ParameterService.get_or_create(
-            definition_id=param.id,
-            scenario_id=p.scenario_id,
-            requirements=f"(self.id == {p.id})", # parcel id
-        )
-        # storing in unit since value is decimal only
-        param.unit = parcels_data[field_name]
-        ParameterService.update(param)
+                ter = c.parameters.get('TotalErosionRate')
+                par = get_or_create_custom_param(
+                    ter,
+                    {"requirements": f"(self.id == {c.id})", "scenario_id": p.scenario_id},
+                )
+                update_custom_param_value(par, val)
         ParameterService.commit()
+
+    elif ("erosion1-" in field_name or "erosion2-" in field_name or "erosion3-" in field_name): # HACKY
+        option_num = int(field_name.split('-')[0].replace('erosion', ''))
+
+        # Delete all erosionN- params for other options,
+        # and only store one active parameter at a time
+        for param in list(p.scenario.parameters.values()):
+            if not isinstance(param, CustomParameter):
+                continue
+            if not(
+                param.variable_name.startswith('erosion1-')
+                or param.variable_name.startswith('erosion2-')
+                or param.variable_name.startswith('erosion3-')
+            ):
+                continue
+            if not param.requirements == f'(self.id == {p.id})':
+                continue
+            if (
+                param.variable_name.endswith('-active')
+                or not param.variable_name.startswith(f'erosion{option_num}-')
+            ):
+                ParameterService.delete(param, no_commit=True)
+
+        # Create/update the specified parameter
+        param_def = ParameterService.definitions.get_or_create(
+            variable_name=field_name,
+            full_name=field_name,
+            domain=ParameterService.domains.get(name='Scenario')
+        )
+        param = ParameterService.get_or_create(
+            definition_id=param_def.id,
+            scenario_id=p.scenario_id,
+            requirements=f'(self.id == {p.id})', # parcel id
+        )
+        val = parcels_data[field_name]
+        has_value = (str(val) == '0' or (val or ''))
+        if has_value:
+            # has value; update the param
+            param.value = parcels_data[field_name]
+            ParameterService.update(param)
+        else:
+            # no value; delete the param
+            ParameterService.delete(param)
+
+        if has_value and (str(parcels_data.get('is_active')).lower() == 'true'):
+            # Create/update the specified parameter active flag
+            param_def = ParameterService.definitions.get_or_create(
+                variable_name=f'{field_name}-active',
+                full_name=f'{field_name}-active',
+                domain=ParameterService.domains.get(name='Scenario')
+            )
+            param = ParameterService.get_or_create(
+                definition_id=param_def.id,
+                scenario_id=p.scenario_id,
+                requirements=f'(self.id == {p.id})', # parcel id
+            )
+            param.value = 1
+            ParameterService.update(param)
+
     elif field_name in air_params:
         par_name = air_params[field_name]
         # the below part was generating error due to missing par for dustLoad, dustDensity etc...
@@ -224,11 +280,6 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         )
         update_custom_param_value(par, parcels_data[field_name])
         ParameterService.commit()
-    # Note that 0 is the fixed datum for volume element boundary locations
-    elif field_name == "airHeight":
-        for co in p.compartments:
-            if co.name == "Air":
-                co.volume_element.top = parcels_data['airHeight']
 
     elif field_name == "surfaceSoilThickness":
         update_soil_thickness(p, "Soil_Surface", 'SurfSoil', parcels_data['surfaceSoilThickness'])
@@ -408,6 +459,12 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             {"requirements": f"(self.id == {this_comp.id})", "scenario_id": p.scenario_id},
         )
         update_custom_param_value(this_par, float(parcels_data[field_name]))
+
+        # we no longer want to use a formula for auto calculating this
+        if field_name == 'AverageVerticalVelocity' and this_par.formula:
+            this_par.formula = None
+            ParameterService.commit()
+
     elif field_name == "emission":
         src_comp = [c for c in p.compartments if c.name == parcels_data["compartment_name"]][0]
         src_par = [par for parn, par in src_comp.parameters.items() if parn == "surfaceDepositionRate"]
@@ -635,7 +692,7 @@ def initialize_parcel_contents(new_parcel, vol_elem_defaults=None):
         nve.top = ve['top']
         nve.bottom = ve['bottom']
         for c_name, c in ve["Compartments"].items():
-            print(f'creating {c_name} for volume element {ve_name}')
+            # print(f'creating {c_name} for volume element {ve_name}')
             # Create standard compartments linking them to default volume elements and media for each compartment
             # nc = new_parcel.get_compartment(c_name) # This won't work because the compartment names are not unique
             nc = CompartmentService.get_or_create(
@@ -737,7 +794,26 @@ def calc_default_erosion_rate_sdr(pcl):
     for c in pcl.compartments:
         if not c.media.isa("Surface_Soil"):
             continue
-        unit_soil_loss = c.parameters["unitSoilLoss"].default_value
+
+        land_use = get_land_use(pcl)
+        if land_use in ['Agriculture (General)', 'Tilled Soil']:
+            cover_management_factor = 0.5
+        elif land_use == 'Soil':
+            cover_management_factor = 1.0
+        elif land_use == 'Impervious':
+            cover_management_factor = 0
+        else:
+            cover_management_factor = 0.1
+
+        unit_soil_loss = (
+            EROSION_DEFAULTS['R']
+            * EROSION_DEFAULTS['K']
+            * EROSION_DEFAULTS['LS']
+            * cover_management_factor
+            * EROSION_DEFAULTS['P']
+        ).to('(kg / m^2) / day')
+        print('A =', unit_soil_loss)
+
         area_in_sq_mile = pcl.area.to('mile^2').magnitude
         if area_in_sq_mile <= 0.1:
             intercept_coef = 2.1
@@ -749,8 +825,15 @@ def calc_default_erosion_rate_sdr(pcl):
             intercept_coef = 1.2
         else:
             intercept_coef = 0.6
+
+        intercept_coef = intercept_coef
+
         slope_coef = c.parameters["sedimentDeliveryRatioSlopeCoef"].default_value
-        sed_delivery_ratio = intercept_coef * (pcl.area ** (-1 * slope_coef))
+        sed_delivery_ratio = intercept_coef * (pcl.area.magnitude ** (-1 * slope_coef))
+
+        print('SD =', sed_delivery_ratio)
+        print('ER =', unit_soil_loss * sed_delivery_ratio)
+
         return (unit_soil_loss * sed_delivery_ratio).magnitude
 
 
@@ -818,7 +901,7 @@ def delete_parcel_contents(del_parcel):
             par = par[0]
             eq = par.formula.equation
             del_id = c.id
-            if del_id not in eq:
+            if str(del_id) not in eq:
                 continue
             eq_parts = eq.split('compartment.id in {')
             for i, p in enumerate(eq_parts):
@@ -842,6 +925,21 @@ def delete_parcel_contents(del_parcel):
         # Delete Compartments
         # print(f'- delete compartment {c}')
         CompartmentService.delete(c)
+
+    # Delete associated HACKY params at the scenario level
+    print('deleting erosion-table parameters')
+    for param in list(del_parcel.scenario.parameters.values()):
+        if not isinstance(param, CustomParameter):
+            continue
+        if not param.requirements == f'(self.id == {del_parcel.id})':
+            continue
+        if not(
+            param.variable_name.startswith('erosion1-')
+            or param.variable_name.startswith('erosion2-')
+            or param.variable_name.startswith('erosion3-')
+        ):
+            continue
+        ParameterService.delete(param, no_commit=True)
 
     # Delete Volume Elements
     print('deleting parcel volume elements')
