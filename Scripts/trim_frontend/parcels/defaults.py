@@ -322,7 +322,10 @@ def calculate_avg_precipitation_runoff_fraction(all_soil_comps, fraction_name):
         pcl_runoff_fraction = getattr(soil_comp, fraction_name)
         numerator += (pcl_area * pcl_runoff_fraction)
         denominator += pcl_area
-    return numerator / denominator
+    try:
+        return numerator / denominator
+    except ZeroDivisionError:
+        return 0
 
 
 def get_correct_param(par_name, par_obj):
@@ -704,8 +707,8 @@ AQUATIC_DIET = {
         "FractionDietZooplankton": 0,
         "FractionDietBenthicInvertebrate": 0,
         "FractionDietFishHerbivore": 0,
-        "FractionDietFishBenthicOmnivore": 0.5,
-        "FractionDietFishOmnivore": 0.5,
+        "FractionDietFishBenthicOmnivore": 0,
+        "FractionDietFishOmnivore": 1,
         "FractionDietFishBenthicCarnivore": 0,
         "FractionDietFishCarnivore": 0
     },
