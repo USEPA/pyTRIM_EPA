@@ -24,7 +24,7 @@
       "label": "Density of Dust Particles",
       "data_type": "float",
       "default": 1400,
-      "tooltip": "(kg/cm<sup>3</sup>)",
+      "tooltip": "(kg/m<sup>3</sup>)",
       "help": "Enter the density of dust particles in the air compartments. Valid values are >= 0. The default value of 1400 (1.4 g/cm3) is from Page 2 of Bidleman 1998 (Atmospheric processes). See the TRIM User Guide Appendix for full reference information."
     },
     {
