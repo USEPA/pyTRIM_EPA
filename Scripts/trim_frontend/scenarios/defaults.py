@@ -30,15 +30,16 @@ def get_met_data(scen):
     else:
         ambient_air_temp = None
 
-    mixing_height = scen.mixingHeight
-    if mixing_height:
-        mixing_height = mixing_height.magnitude
-    if not mixing_height:
-        air_comps = [
-            c for c in scen.get_compartment(media='Air')
-            if "Upper" not in c.standard_name
-        ]
-        mixing_height = max([c.height.magnitude for c in air_comps])
+    # All air compartments are expected to have the same height = mixing height
+    air_comps = [
+        c for c in scen.get_compartment(media='Air')
+        if "Upper" not in c.standard_name
+    ]
+    if len(air_comps) == 0:
+        print("\nThis scenario does not have any parcels containing air volume elements\n")
+        mixing_height = -1
+    else:
+        mixing_height = air_comps[0].volume_element.height.magnitude
 
     met_data = {
         'ambient_air_static_value': ambient_air_temp,

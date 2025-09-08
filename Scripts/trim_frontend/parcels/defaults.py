@@ -447,7 +447,7 @@ def get_water_params(pcl, parcel_type):
         )
 
         precipitation_vol_rate_to_sw = 0  # 4.8E6
-        wc_external_inflow = 0
+        wc_external_inflow = get_correct_param("ExternalWaterInflow", sw_pars)
 
         try:
             precipitation_vol_rate_to_sw = (
@@ -552,6 +552,7 @@ def get_water_params(pcl, parcel_type):
                 'water_ph': get_correct_param("pH", sw_pars),
                 'sed_deposition_vel': get_correct_param("SedimentDepositionVelocity", sw_pars),
                 'water_temp': get_correct_param("WaterTemperature", sw_pars),
+                'externalWaterInflow': wc_external_inflow,
                 'sed_inflow': get_correct_param("ExternalSedimentInflow", sw_pars),
                 'discharge_vol_rate': wc_discharge_vol_rate,
                 'sed_discharge_rate': wc_sed_discharge_rate,
@@ -794,7 +795,7 @@ Wet_Dry_Source_VolElem_defaults = {
 Air_Parcel_VolElem_defaults = {
     'Air': {
         'name': 'Air',
-        'top': 800,
+        'top': 226,
         'bottom': 0,
         'Compartments': {
             'Air': {
@@ -809,8 +810,8 @@ Air_Parcel_VolElem_defaults = {
     },
     'UpperAir': {
         'name': 'UpperAir',
-        'top': 1000,
-        'bottom': 800,
+        'top': 10000,
+        'bottom': 226,
         'Compartments': {
             'UpperAir': {
                 'name': 'Air',

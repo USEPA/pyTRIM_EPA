@@ -67,7 +67,8 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         'water_ph': "pH",
         'sed_deposition_vel': "SedimentDepositionVelocity",
         'water_temp': "WaterTemperature",
-        'sed_inflow': "ExternalSedimentInflow"
+        'sed_inflow': "ExternalSedimentInflow",
+        'externalWaterInflow': "ExternalWaterInflow"
     }
 
     bed_params = {
@@ -279,11 +280,6 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         )
         update_custom_param_value(par, parcels_data[field_name])
         ParameterService.commit()
-    # Note that 0 is the fixed datum for volume element boundary locations
-    elif field_name == "airHeight":
-        for co in p.compartments:
-            if co.name == "Air":
-                co.volume_element.top = parcels_data['airHeight']
 
     elif field_name == "surfaceSoilThickness":
         update_soil_thickness(p, "Soil_Surface", 'SurfSoil', parcels_data['surfaceSoilThickness'])
@@ -463,6 +459,12 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             {"requirements": f"(self.id == {this_comp.id})", "scenario_id": p.scenario_id},
         )
         update_custom_param_value(this_par, float(parcels_data[field_name]))
+
+        # we no longer want to use a formula for auto calculating this
+        if field_name == 'AverageVerticalVelocity' and this_par.formula:
+            this_par.formula = None
+            ParameterService.commit()
+
     elif field_name == "emission":
         src_comp = [c for c in p.compartments if c.name == parcels_data["compartment_name"]][0]
         src_par = [par for parn, par in src_comp.parameters.items() if parn == "surfaceDepositionRate"]
@@ -899,7 +901,7 @@ def delete_parcel_contents(del_parcel):
             par = par[0]
             eq = par.formula.equation
             del_id = c.id
-            if del_id not in eq:
+            if str(del_id) not in eq:
                 continue
             eq_parts = eq.split('compartment.id in {')
             for i, p in enumerate(eq_parts):
