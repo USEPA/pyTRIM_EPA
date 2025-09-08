@@ -12,10 +12,46 @@
                 <div class="row mb-1">
                     <div class="col-sm">
                         <div class="mt-3">
-                            <p id="cb_proc_trm"><span style="display: none"><label class="lds-dual-ring mr-2"></label></span><i class="fas fa-play"></i><label for="cb_proc_trm" class="ml-1">Calculating Transfer Matrix</label>&emsp;<label id="lb_perc_trm">(0%)</label></p>
-                            <p id="cb_proc_ode"><span style="display: none"><label class="lds-dual-ring mr-2"></label></span><i class="fas fa-play"></i><label for="cb_proc_ode" class="ml-1">Running ODE Solver</label>&emsp;<label id="lb_perc_ode">(0%)</label></p>
-                            <p id="cb_proc_out"><span style="display: none"><label class="lds-dual-ring mr-2"></label></span><i class="fas fa-play"></i><label for="cb_proc_out" class="ml-1">Writing results to Excel file </label>&emsp;<label id="lb_perc_out">(0%)</label></p>
-                            <p id="cb_proc_vis"><span style="display: none"><label class="lds-dual-ring mr-2"></label></span><i class="fas fa-play"></i><label for="cb_proc_vis" class="ml-1">Loading results for visualization </label>&emsp;<label id="lb_perc_vis">(0%)</label></p>
+                            <p id="cb_proc_trm">
+                                <span style="margin-right: 0.1em; display: none">
+                                    <label class="lds-dual-ring mr-1"></label>
+                                </span>
+                                <i class="fas fa-play"></i>
+                                <label for="cb_proc_trm" class="ml-2">
+                                    Calculating Transfer Matrix
+                                </label>
+                                <label id="lb_perc_trm" class="ml-3">(0%)</label>
+                            </p>
+                            <p id="cb_proc_ode">
+                                <span style="margin-right: 0.1em; display: none">
+                                    <label class="lds-dual-ring mr-1"></label>
+                                </span>
+                                <i class="fas fa-play"></i>
+                                <label for="cb_proc_ode" class="ml-2">
+                                    Running ODE Solver
+                                </label>
+                                <label id="lb_perc_ode" class="ml-3">(0%)</label>
+                            </p>
+                            <p id="cb_proc_out">
+                                <span style="margin-right: 0.1em; display: none">
+                                    <label class="lds-dual-ring mr-1"></label>
+                                </span>
+                                <i class="fas fa-play"></i>
+                                <label for="cb_proc_out" class="ml-2">
+                                    Writing results to Excel file
+                                </label>
+                                <label id="lb_perc_out" class="ml-3">(0%)</label>
+                            </p>
+                            <p id="cb_proc_vis">
+                                <span style="margin-right: 0.1em; display: none">
+                                    <label class="lds-dual-ring mr-1"></label>
+                                </span>
+                                <i class="fas fa-play"></i>
+                                <label for="cb_proc_vis" class="ml-2">
+                                    Loading results for visualization
+                                </label>
+                                <label id="lb_perc_vis" class="ml-3">(0%)</label>
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -621,12 +657,11 @@
             const statusValidator = status => (status !== 'fin' && status !== 'err');
 
             const pollModelResults = async function (
-                fn, fnCondition, result, ms, deployment_type, skipLoadingResults
+                fn, fnCondition, result, ms, deployment_type
             ) {
                 const scenario_head = TRIM.store.currentScenario;
                 await fn();
                 while (fnCondition(result)) {
-                    await wait(ms);
                     TRIM.api.poll(scenario_head.id).on('load', function() {
                         // ignore the responses if a scenario is already run and we are running it again but the container takes long time to initiate
                         let status = (result == 'new' && this.responseJSON.status == 'fin') ? 'new' : this.responseJSON.status
@@ -654,9 +689,7 @@
                             $('#lb_perc_ode').text("(100%)")
                             $('#lb_perc_out').text("(100%)")
                             $('#lb_perc_trm').text("(100%)")
-                            if (skipLoadingResults !== true) {
-                                let result_data = get_result_data(scenario_head)
-                            }
+                            let result_data = get_result_data(scenario_head)
                         } else if (status == "tm") {
                             setChecked("p#cb_proc_trm", "run")
                             $('#lb_perc_trm').text("(" + percent + "%)")
@@ -672,7 +705,8 @@
                                 "<p style='color:red;' id='model_err_msg'>Model ran into an error and stopped running.</p>"
                             )
                         }
-                    })
+                    });
+                    await wait(ms);
                     if (deployment_type == 'prod') {
                         break
                     }
@@ -708,6 +742,35 @@
                 return result;
             };
 
+            // run the model via AWS StepFunction / Docker on ECS
+            var dockerPoller = function(executionArn, callback, numAttempts) {
+                if (numAttempts === undefined) { numAttempts = 1; }
+                console.log("POLLER ATTEMPT #" + numAttempts + "...");
+
+                if (true || numAttempts < 30) {
+                    TRIM.api.checkExecutionCompletion(executionArn, function(success, data) {
+                        displayModelDebugging(data.debug_messages);
+
+                        // pass it along to the actual callback...
+                        if ("sfn_output" in data && data.sfn_output !== false) {
+                            callback(success, data);
+                        } else {
+                            let dev_poll = function() {
+                                setTimeout(function () {
+                                    dockerPoller(executionArn, callback, numAttempts + 1);
+                                }, 30000); // sleep for 30 seconds
+                            }
+                            let this_result = (numAttempts < 3) ? 'new' : ''
+                            pollModelResults(
+                                dev_poll, statusValidator, this_result, 1000, 'prod'
+                            );
+                        }
+                    });
+                } else {
+                  console.log("no more tries...");
+                }
+            }
+
             function run_model(scenario_head) {
                 let scenario_info = [{
                         'type': 'data',
@@ -739,33 +802,6 @@
                     let fetchResults = () => exec_model_run();
                     pollModelResults(fetchResults, statusValidator, '', 5000, 'local');
                 } else {
-                    // run the model via AWS StepFunction / Docker on ECS
-                    var poller = function(executionArn, callback, numAttempts) {
-                        if (numAttempts === undefined) { numAttempts = 1; }
-                        console.log("POLLER ATTEMPT #" + numAttempts + "...");
-
-                        if (true || numAttempts < 30) {
-                            TRIM.api.checkExecutionCompletion(executionArn, function(success, data) {
-								displayModelDebugging(data.debug_messages);
-
-                                // pass it along to the actual callback...
-                                if ("sfn_output" in data && data.sfn_output !== false) {
-                                    callback(success, data);
-                                } else {
-                                    let dev_poll = function() {
-                                        setTimeout(function () {
-                                            poller(executionArn, callback, numAttempts + 1);
-                                        }, 30000); // sleep for 30 seconds
-                                    }
-                                    let this_result = (numAttempts < 3) ? 'new' : ''
-                                    pollModelResults(dev_poll, statusValidator, this_result, 1000, 'prod');
-                                }
-                            });
-                        } else {
-                          console.log("no more tries...");
-                        }
-                    }
-
                     var fetchAndDisplayResults = function(bucket, uuid) {
                         TRIM.api.fetchRunResults(bucket, uuid, function(success, data) {
                             var mass = "{" + data.model_output.mass + "}";
@@ -807,7 +843,7 @@
 
                     var resp = TRIM.api.runModel(scenario_info, function(kickoffSuccess, kickoffData) {
                         let executionArn = kickoffData.executionArn;
-                        poller(executionArn, function(checkSuccess, checkData) {
+                        dockerPoller(executionArn, function(checkSuccess, checkData) {
                             console.log("ALL THE WAY BACK IN THE CALLBACK:");
                             console.log(checkData);
                             fetchAndDisplayResults(checkData["sfn_output"]["bucket"], checkData["sfn_output"]["uuid"]);
@@ -816,18 +852,27 @@
                 }
             }
 
-            // Plot something for the first load
-            if (TRIM.store.latestRunInfo.run_has_results) {
+            if (TRIM.store.latestRunInfo?.run_has_results) {
+                // Plot something for the first load
                 $($('#plt_type').find('a.dropdown-item')[0]).trigger('click')
                 $('#btn_visualize').trigger('click')
             }
+            else if (TRIM.store.latestRunInfo?.has_run) {
+                console.log('Checking for in-progress model run ...')
+                if (TRIM.trim_env_profile == 'local') {
+                    pollModelResults(() => wait(1), statusValidator, '', 5000, 'local');
+                }
+                else if (TRIM.store.latestRunInfo.execution_arn) {
+                    dockerPoller(TRIM.store.latestRunInfo.execution_arn, function(checkSuccess, checkData) {
+                        console.log("ALL THE WAY BACK IN THE CALLBACK:");
+                        console.log(checkData);
+                        fetchAndDisplayResults(
+                            checkData["sfn_output"]["bucket"], checkData["sfn_output"]["uuid"]
+                        );
+                    });
+                }
+            }
             console.log('populated model run form!')
-
-            console.log('Checking for in-progress model run ...')
-            pollModelResults(
-                () => wait(1), statusValidator, '', 1000, TRIM.trim_env_profile, true
-            );
-
             setTimeout(() => LoadingScreen.hide('model_run_loading'), 1500);
         }
 

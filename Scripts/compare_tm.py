@@ -3,8 +3,8 @@ import pandas as pd
 
 
 def compare_tm(tm_1, tm_2):
-    df1 = pd.read_csv(tm_1, index_col=0)
-    df2 = pd.read_csv(tm_2, index_col=0)
+    df1 = pd.read_excel(tm_1, index_col=0)
+    df2 = pd.read_excel(tm_2, index_col=0)
 
     print(df1)
     print(df2)
