@@ -315,8 +315,6 @@
 
         var resultsReadyEvent = document.createEvent('Event');
         resultsReadyEvent.initEvent('results:ready', true, true);
-        let exportLoadedForRun = false;
-        let lastExportScenarioId = null;
         TRIM.refreshResults = function(force) {
             force = force || false;
             if (TRIM.store.latestRunInfo && !force) {
