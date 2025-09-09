@@ -771,6 +771,43 @@
                 }
             }
 
+            var fetchAndDisplayResults = function(bucket, uuid) {
+                TRIM.api.fetchRunResults(bucket, uuid, function(success, data) {
+                    var mass = "{" + data.model_output.mass + "}";
+                    var conc = "{" + data.model_output.conc + "}";
+                    console.log("DATA IS ....")
+                    console.log(data)
+                    TRIM.store.latestRunInfo.run_results.mass_results = mass
+                    TRIM.store.latestRunInfo.run_results.conc_results = conc
+                    TRIM.store.latestRunInfo.run_results.mass_results_file = data.outputMass
+                    TRIM.store.latestRunInfo.run_results.conc_results_file = data.outputConc
+                    TRIM.store.latestRunInfo.lastest_run_date = data.run_date
+                    $('#btn_get_mass_results').attr("href",data.outputMass)
+                    $('#btn_get_mass_results').attr("download","mass_results.xlsx")
+                    $('#btn_get_conc_results').attr("href",data.outputConc)
+                    $('#btn_get_conc_results').attr("download","concentration_results.xlsx")
+                    if (data.outputTM !== undefined) {
+                        $('#btn_get_tm_results').attr("href", data.outputTM)
+                        $('#btn_get_tm_results').attr("download", "transfer_matrix.xlsx")
+                    }
+                    setChecked("p#cb_proc_trm", "on")
+                    setChecked("p#cb_proc_ode", "on")
+                    setChecked("p#cb_proc_out", "on")
+                    setChecked("p#cb_proc_vis", "on")
+                    $('#lb_perc_trm').text("(100%)")
+                    $('#lb_perc_ode').text("(100%)")
+                    $('#lb_perc_out').text("(100%)")
+                    $('#lb_perc_vis').text("(100%)")
+                    setTimeout(function(){
+                        initialize_components()
+                        $('#btn_visualize').prop('disabled', false)
+                        $($('#plt_type').find('a.dropdown-item')[0]).trigger('click')
+                        $('#btn_visualize').prop('disabled', false).trigger('click');
+                        LoadingScreen.hide('model_run_loading');
+                    }, 3000);
+                });
+            };
+
             function run_model(scenario_head) {
                 let scenario_info = [{
                         'type': 'data',
@@ -802,42 +839,6 @@
                     let fetchResults = () => exec_model_run();
                     pollModelResults(fetchResults, statusValidator, '', 5000, 'local');
                 } else {
-                    var fetchAndDisplayResults = function(bucket, uuid) {
-                        TRIM.api.fetchRunResults(bucket, uuid, function(success, data) {
-                            var mass = "{" + data.model_output.mass + "}";
-                            var conc = "{" + data.model_output.conc + "}";
-                            console.log("DATA IS ....")
-                            console.log(data)
-                            TRIM.store.latestRunInfo.run_results.mass_results = mass
-                            TRIM.store.latestRunInfo.run_results.conc_results = conc
-                            TRIM.store.latestRunInfo.run_results.mass_results_file = data.outputMass
-                            TRIM.store.latestRunInfo.run_results.conc_results_file = data.outputConc
-                            TRIM.store.latestRunInfo.lastest_run_date = data.run_date
-                            $('#btn_get_mass_results').attr("href",data.outputMass)
-                            $('#btn_get_mass_results').attr("download","mass_results.xlsx")
-                            $('#btn_get_conc_results').attr("href",data.outputConc)
-                            $('#btn_get_conc_results').attr("download","concentration_results.xlsx")
-                            if (data.outputTM !== undefined) {
-                                $('#btn_get_tm_results').attr("href", data.outputTM)
-                                $('#btn_get_tm_results').attr("download", "transfer_matrix.xlsx")
-                            }
-                            setChecked("p#cb_proc_trm", "on")
-                            setChecked("p#cb_proc_ode", "on")
-                            setChecked("p#cb_proc_out", "on")
-                            setChecked("p#cb_proc_vis", "on")
-                            $('#lb_perc_trm').text("(100%)")
-                            $('#lb_perc_ode').text("(100%)")
-                            $('#lb_perc_out').text("(100%)")
-                            $('#lb_perc_vis').text("(100%)")
-                            setTimeout(function(){
-                                initialize_components()
-                                $('#btn_visualize').prop('disabled', false)
-                                $($('#plt_type').find('a.dropdown-item')[0]).trigger('click')
-                                $('#btn_visualize').prop('disabled', false).trigger('click');
-                            }, 3000)
-                        });
-                    };
-
                     // hardcoded test
                     // fetchAndDisplayResults("pytrim-dev-stalk-model-run-storage-bucket", "98a921a2-1788-11ef-a37f-0a58a9feac02");
 
@@ -854,8 +855,9 @@
 
             if (TRIM.store.latestRunInfo?.run_has_results) {
                 // Plot something for the first load
-                $($('#plt_type').find('a.dropdown-item')[0]).trigger('click')
-                $('#btn_visualize').trigger('click')
+                $($('#plt_type').find('a.dropdown-item')[0]).trigger('click');
+                $('#btn_visualize').trigger('click');
+                console.log('populated model run form!');
             }
             else if (TRIM.store.latestRunInfo?.has_run) {
                 console.log('Checking for in-progress model run ...')
@@ -872,7 +874,6 @@
                     });
                 }
             }
-            console.log('populated model run form!')
             setTimeout(() => LoadingScreen.hide('model_run_loading'), 1500);
         }
 
