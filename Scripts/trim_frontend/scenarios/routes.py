@@ -662,8 +662,18 @@ def get_result_scenario():
         output_file_t = Path(s.latest_proc_status.result_file_tm).name
         json_n_avg = s.latest_proc_status.result_nt
         json_c_avg = s.latest_proc_status.result_conc
+        trim_data = compile_mirc_data(s, s.latest_proc_status, logger)
+        result_resp = json.loads(json.dumps({
+            "mass": json.loads(json_n_avg), 
+            "conc": json.loads(json_c_avg), 
+            "final_status": fin_stat, 
+            "run_date": run_date, 
+            "outputMass": output_file_n, 
+            "outputConc": output_file_c, 
+            "outputTM": output_file_t,
+            "trim_data": trim_data
+        }, indent=4, sort_keys=True, default=str))
 
-        result_resp = json.loads(json.dumps({"mass": json.loads(json_n_avg), "conc": json.loads(json_c_avg), "final_status": fin_stat, "run_date": run_date, "outputMass": output_file_n, "outputConc": output_file_c, "outputTM": output_file_t}, indent=4, sort_keys=True, default=str))
     except Exception as e:
         logger.info(f"Error when attempting to get results: {e}")
         result_resp = {"error": e}
@@ -683,8 +693,10 @@ def poll_model_run_scenario(id):
             run_status = "err"
             run_percent = "err"
         else:
-            run_status, run_percent = s.latest_proc_status.run_step
+            run_status, run_percent = [v for v in s.proc_status][0].run_step
+        print(f"Poll status for scenario {s.name} is {run_status} at {run_percent}%")
         return ApiResult({'status': run_status, 'percent': run_percent})
+    print(f"Poll status for scenario {s.name} is 'tm' at 0%")
     return ApiResult({'status': "tm", 'percent': "0"})
 
 
@@ -975,40 +987,15 @@ def export_for_mirc(scenario_id):
         return ApiException("Unknown Scenario")
 
     logger = make_logger('mirc_exporter')
-    logger.info(f"Compiling required MIRC data for scenario {scen.name}...")
     try:
-        latest_model_run = [v for v in scen.proc_status.all() if not v.is_run_error]
-        if len(latest_model_run) == 0:
-            return ApiResult({
-                'trim_data': {"message": "No valid data found"}
-            })
-        latest_model_run = latest_model_run[-1]
-
-        mass = json.loads(latest_model_run.result_nt)
-        mass = json.loads("{"+mass+"}")
-        conc = json.loads(latest_model_run.result_conc)
-        conc = json.loads("{"+conc+"}")
-
-        logger.info(f"Model run found, using run with id [{latest_model_run.id}]...")
-
-        chems = {c.name : c for c in scen.chemicals}
-        timestamps = [f"01/01/{year} 00:00:00 EST" for year in mass['year'].values()]
-
-        trim_data = {
-            'scenario_name': scen.name,
-            'chemicals': list(chems.keys()),
-            'timestamps': timestamps,
-        }
-
-        trim_data["parcels"] = compile_mirc_parcel_data(scen, chems, conc, timestamps, logger)
-    except Exception as e:
+        latest_model_run = scen.latest_proc_status
+        trim_data = compile_mirc_data(scen, latest_model_run, logger)
+    except Exception as e:  
         logger.error(e)
         traceback.print_exc()
         trim_data = {"message": "No valid data found"}
 
-    return ApiResult({
-        'trim_data': trim_data
-    })
+    return ApiResult({trim_data})
 
 
 @scenario_api.route(

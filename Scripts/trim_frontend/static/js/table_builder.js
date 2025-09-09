@@ -86,7 +86,10 @@ let ErrorValidation = {
         }
         else if (min !== undefined) {
             is_valid = is_valid >= min;
-            msg = `Value must be greater than or equal to ${min}.`;
+            if (min == Number.MIN_VALUE)
+                msg = `Value must be greater than 0.`;
+            else
+                msg = `Value must be greater than or equal to ${min}.`;
         }
         else if (max !== undefined) {
             is_valid = is_valid <= max;
