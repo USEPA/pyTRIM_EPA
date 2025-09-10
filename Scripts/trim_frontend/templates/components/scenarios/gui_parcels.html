@@ -1579,11 +1579,17 @@
 		map.on('pm:create', e => { console.log("DEBUGME create!"); });
 		*/
 
-        L.easyButton('<span class = DownArrowBar style = "font-size: 1.5em;">&DownArrowBar;</span>', function(btn, map){
-            saveToFile(shapes, "Test")
-        }).addTo(map);
+        L.easyButton(
+            '<span class = DownArrowBar style = "font-size: 1.5em;">&DownArrowBar;</span>', 
+            function(btn, map){
+                saveToFile(shapes, "Test")
+            },
+            'Download parcel geojson'
+        ).addTo(map);
 
-        L.easyButton('<span class = UpArrowBar style = "font-size: 1.5em;">&UpArrowBar;</span>', function(btn, map){
+        L.easyButton(
+            '<span class = UpArrowBar style = "font-size: 1.5em;">&UpArrowBar;</span>', 
+            function(btn, map){
             var input = document.createElement('input');
             input.type = 'file';
 
@@ -1653,8 +1659,11 @@
             // else {console.log("Unsupported File")}
             }
             input.click();
-        }).addTo(map);
+        },
+        'Upload parcel geojson'
+    ).addTo(map);
 
+        
         function update_data(this_table_id) {
             let new_table_data = get_Data_from_table(this_table_id)
             new_table_data.forEach(function (e) {
