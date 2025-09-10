@@ -1579,106 +1579,91 @@
 		map.on('pm:create', e => { console.log("DEBUGME create!"); });
 		*/
 
-
-                
-        // add function to add tooltip
-        function attachTooltip(easyBtnCtrl, title) {
-            var $btn = $(easyBtnCtrl.button);
-                $btn.attr({ "data-toggle": "tooltip", title: title });
-                $btn.addClass("leaflet-buttons-control-button");
-                $btn.tooltip({ container: "body", placement: "right", trigger: "hover" });
-        }
-
-        // download button
-        const dlBtn = L.easyButton(
-            '<span class="DownArrowBar" style="font-size: 1.5em;">&DownArrowBar;</span>',
-            function (btn, map) {
-                saveToFile(shapes, "Test");
+        L.easyButton(
+            '<span class = DownArrowBar style = "font-size: 1.5em;">&DownArrowBar;</span>', 
+            function(btn, map){
+                saveToFile(shapes, "Test")
             },
-            "Download parcel geojson"
+            'Download parcel geojson'
         ).addTo(map);
-        attachTooltip(dlBtn, "Download parcel geojson");
 
+        L.easyButton(
+            '<span class = UpArrowBar style = "font-size: 1.5em;">&UpArrowBar;</span>', 
+            function(btn, map){
+            var input = document.createElement('input');
+            input.type = 'file';
 
-        // upload button
-        const upBtn = L.easyButton(
-            '<span class="UpArrowBar" style="font-size: 1.5em;">&UpArrowBar;</span>',
-            function (btn, map) {
-                var input = document.createElement("input");
-                input.type = "file";
-                input.onchange = (e) => {
-                    // getting a hold of the file reference
-                    var file = e.target.files[0];
-                    if (file.name.split(".").pop() == "geojson") {
-                        // setting up the reader
-                        var reader = new FileReader();
-                        reader.readAsText(file, "UTF-8");
-                        // here we tell the reader what to do when it's done reading...
-                        reader.onload = (readerEvent) => {
-                            var fileContent = readerEvent.target.result; // this is the content!
-                            shapesJson = JSON.parse(fileContent);
-                            let fieldData = [{
-                                type: "input",
-                                name: "geojson",
-                                value: JSON.stringify(shapesJson["features"]),
-                            },];
-                            fieldData.push({
-                                type: "input",
-                                name: "scenario_id",
-                                value: TRIM.store.currentScenario.id,
-                            });
-                            
-                            LoadingScreen.show("upload_parcel_geojson");
-                            TRIM.api.uploadParcelFile(
-                                fieldData,
-                                function (success, responseData, c) {
-                                    LoadingScreen.hide("upload_parcel_geojson");
-                                    if (!success) {
-                                        //alert('An error occurred during upload.');
-                                        alert(responseData?.message);
-                                        console.log(responseData);
-                                        console.log(c);
-                                    } else {
-                                        console.log("reload...");
-                                        window.location.reload();
-                                    }
-                                }
-                            );
-                        };
-                    } else if (file.name.split(".").pop() == "shp") {
-                        console.log("This is a ShapeFile");
-                        var shpfile = new L.Shapefile("shpFile/Durham.zip", {
-                            onEachFeature: function (feature, layer) {
-                                if (feature.properties) {
-                                    layer.bindPopup(
-                                        Object.keys(feature.properties)
-                                        .map(function (k) {
-                                            return k + ": " + feature.properties[k];
-                                        }).join("<br />"),
-                                        {
-                                            maxHeight: 200,
-                                        });
-                                    }
-                                },
-                            });
-                            shpfile.addTo(map);
+            input.onchange = e => {
+
+            // getting a hold of the file reference
+            var file = e.target.files[0];
+            if (file.name.split('.').pop() == "geojson"){
+                // setting up the reader
+                var reader = new FileReader();
+                reader.readAsText(file,'UTF-8');
+
+                // here we tell the reader what to do when it's done reading...
+                reader.onload = readerEvent => {
+                    var fileContent = readerEvent.target.result; // this is the content!
+                    shapesJson = JSON.parse(fileContent);
+
+                    let fieldData = [{
+                        "type": "input",
+                        "name": "geojson",
+                        "value": JSON.stringify(shapesJson["features"])
+                    }];
+
+                    fieldData.push({
+                        "type": "input",
+                        "name": "scenario_id",
+                        "value": TRIM.store.currentScenario.id
+                    });
+
+                    LoadingScreen.show('upload_parcel_geojson');
+                    TRIM.api.uploadParcelFile(fieldData, function(success,responseData,c) {
+                        LoadingScreen.hide('upload_parcel_geojson');
+                        
+                        if (!success) {
+                            //alert('An error occurred during upload.');
+                            alert(responseData?.message)
+                            console.log(responseData)
+                            console.log(c)
+                        } else {
+                            console.log("reload...");
+                            window.location.reload();
                         }
-                        // else if (file.name.split('.').pop() == "kml"){
-                        //     console.log("This is a KML")
-                        // }
-                        // else if (file.name.split('.').pop() == "kmz"){
-                        //     console.log("This is a KMZ")
-                        // }
-                        // else {console.log("Unsupported File")}
-                        };
-                        input.click();
-                    },
-                    "Upload parcel geojson"
-                ).addTo(map);
-        attachTooltip(upBtn, 'Upload parcel geojson');
+                    });
+                }
+            }
+            else if (file.name.split('.').pop() == "shp"){
+                console.log("This is a ShapeFile")
+                var shpfile = new L.Shapefile('shpFile/Durham.zip', {
+                    onEachFeature: function(feature, layer) {
+                        if (feature.properties) {
+                            layer.bindPopup(Object.keys(feature.properties).map(function(k) {
+                                return k + ": " + feature.properties[k];
+                            }).join("<br />"), {
+                                maxHeight: 200
+                            });
+                        }
+                    }
+                });
+                shpfile.addTo(map);
+            }
+            // else if (file.name.split('.').pop() == "kml"){
+            //     console.log("This is a KML")
+            // }
+            // else if (file.name.split('.').pop() == "kmz"){
+            //     console.log("This is a KMZ")
+            // }
+            // else {console.log("Unsupported File")}
+            }
+            input.click();
+        },
+        'Upload parcel geojson'
+    ).addTo(map);
 
-
-
+        
         function update_data(this_table_id) {
             let new_table_data = get_Data_from_table(this_table_id)
             new_table_data.forEach(function (e) {
