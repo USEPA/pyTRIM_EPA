@@ -51,7 +51,7 @@
             "label": "UTM Zone",
             "data_type": "string",
             "required": true,
-            "help": "Enter the default UTM zone number/letter for the coordinate values in your PLT file; e.g., \"16N\".",
+            "help": "Enter the UTM zone number/letter for the coordinate values in your PLT file; e.g., \"16N\".",
             "if_true": ["have_AERMOD_file"]
         },
         {
