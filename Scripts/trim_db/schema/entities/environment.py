@@ -342,38 +342,41 @@ class Media(Model):
         return f'{self.parent.category}|{self.name}'
 
     def isa(self, name_or_media, or_child=True):
-        if isinstance(name_or_media, str):
-            if (
-                name_or_media == self.name
-                or name_or_media == self.category
-            ):
-                return True
-            if name_or_media.startswith(GLOBAL_WILDCARD):
+        @CacheManager.with_caching(f'media_isa::{self.id}')
+        def cached_isa(name_or_media, or_child):
+            if isinstance(name_or_media, str):
                 if (
-                    self.name.endswith(name_or_media[1:])
-                    or self.category.endswith(name_or_media[1:])
+                    name_or_media == self.name
+                    or name_or_media == self.category
                 ):
                     return True
-            elif name_or_media.endswith(GLOBAL_WILDCARD):
-                if (
-                    self.name.startswith(name_or_media[:-1])
-                    or self.category.startswith(name_or_media[:-1])
-                ):
+                if name_or_media.startswith(GLOBAL_WILDCARD):
+                    if (
+                        self.name.endswith(name_or_media[1:])
+                        or self.category.endswith(name_or_media[1:])
+                    ):
+                        return True
+                elif name_or_media.endswith(GLOBAL_WILDCARD):
+                    if (
+                        self.name.startswith(name_or_media[:-1])
+                        or self.category.startswith(name_or_media[:-1])
+                    ):
+                        return True
+            elif isinstance(name_or_media, Media):
+                if name_or_media.id == self.id:
                     return True
-        elif isinstance(name_or_media, Media):
-            if name_or_media.id == self.id:
-                return True
-        elif isinstance(name_or_media, list):
-            for check in name_or_media:
-                if self.isa(check):
-                    return True
-        else:
-            raise TypeError
+            elif isinstance(name_or_media, list):
+                for check in name_or_media:
+                    if self.isa(check):
+                        return True
+            else:
+                raise TypeError
 
-        if or_child and self.parent is not None:
-            return self.parent.isa(name_or_media)
+            if or_child and self.parent is not None:
+                return self.parent.isa(name_or_media)
 
-        return False
+            return False
+        return cached_isa(name_or_media, or_child)
 
     def __repr__(self):
         return (

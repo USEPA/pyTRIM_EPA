@@ -30,7 +30,7 @@ def generate_tm(scenario_name):
     print('creating tm ...')
     start = time.time()
     try:
-        (tm, df_tm, sm, df_sm, df_vmu, df_n0) = make_transition_matrix(scenario)
+        (df_tm, df_sm, df_vmu, df_c0) = make_transition_matrix(scenario)
     except Exception as e:
         print('!>>', e)
     end = time.time()
