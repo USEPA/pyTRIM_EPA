@@ -862,12 +862,14 @@ def fetch_run_results():
     content_object = s3_resource.Object(bucket, f"{uuid}/model_output.json")
     file_content = content_object.get()["Body"].read().decode("utf-8")
     json_content = json.loads(file_content)
-
+    trim_data = compile_mirc_data(scenario, scenario.latest_proc_status)
+    
     resp = {
         "success": True,
         "model_output": json_content
     }
-
+    resp['trim_data'] = trim_data
+    
     for f in ["outputMass", "outputConc", "outputTM"]:
         full_key = f"{uuid}/{f}.xlsx"
         response = s3_client.generate_presigned_url("get_object",
