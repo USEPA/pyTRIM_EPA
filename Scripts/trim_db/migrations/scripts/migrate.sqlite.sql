@@ -209,6 +209,7 @@ CREATE TABLE scenario_load_run_proc (
     result_file_conc VARCHAR(255), 
     result_nt VARCHAR, 
     result_conc VARCHAR, 
+    execution_arn VARCHAR(255), 
     scenario_id INTEGER NOT NULL, 
     PRIMARY KEY (id), 
     FOREIGN KEY(scenario_id) REFERENCES scenario (id)

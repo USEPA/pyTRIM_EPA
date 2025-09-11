@@ -21,6 +21,8 @@ function scientific(val) { // to scientific notation
 
 // static value dropdown menu of column names
 function appendHeaderOptions(datatable, skip_columns=[]) {
+    // clear existing options to avoid duplicates
+    $("#" + datatable.attr('id') + "_columns").empty();
     datatable.api().columns().every(function(column_idx) {
         let header = this.header().textContent;
         if (!skip_columns.includes(header))
@@ -84,7 +86,10 @@ let ErrorValidation = {
         }
         else if (min !== undefined) {
             is_valid = is_valid >= min;
-            msg = `Value must be greater than or equal to ${min}.`;
+            if (min == Number.MIN_VALUE)
+                msg = `Value must be greater than 0.`;
+            else
+                msg = `Value must be greater than or equal to ${min}.`;
         }
         else if (max !== undefined) {
             is_valid = is_valid <= max;

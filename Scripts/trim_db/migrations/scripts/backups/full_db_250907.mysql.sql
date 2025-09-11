@@ -16,7 +16,7 @@
 --
 -- Dumping data for table `alembic_version`
 --
-
+DELETE FROM alembic_version;
 INSERT INTO alembic_version (version_num) VALUES ('60eb40203023');
 
 --

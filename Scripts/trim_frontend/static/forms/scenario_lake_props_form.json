@@ -6,6 +6,7 @@
             "label": "pH of water column (unitless)",
             "data_type": "float",
             "min": 0,
+            "max": 14,
             "default": 7.3,
             "required": true,
             "help": "Enter the pH of the water column. Valid values are 0 to 14. The default value of 7.3 is the midpoint of the optimal pH range for most aquatic organisms (6.5 to 8.0, a range provided by the U.S. EPA Casual Analysis/Diagnosis Decision Information System (CADDIS; available online at: https://www.epa.gov/caddis-vol2/caddis-volume-2-sources-stressors-responses-ph). Typical sources of site-specific values include the Water Quality Portal of the National Water Quality Monitoring Council (available online at: http://www.waterqualitydata.us/; includes data from U.S. Geological Survey National Water Information System and U.S. Environmental Protection Agency STORET data warehouses), state department of environment or natural resources, and state or local watershed watch or lake stewardship programs."

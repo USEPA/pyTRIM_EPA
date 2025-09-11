@@ -75,6 +75,8 @@
                 'is_editable': true,
                 'default_value': 7.3,
                 'unit': 'unitless',
+                'min': 0,
+                'max': 14,
                 'helpText': 'Enter the pH of the water column. Valid values are 0 to 14. The default value of 7.3 is the midpoint of the optimal pH range for most aquatic organisms (6.5 to 8.0, a range provided by the U.S. EPA Casual Analysis/Diagnosis Decision Information System (CADDIS; available online at: https://www.epa.gov/caddis-vol2/caddis-volume-2-sources-stressors-responses-ph). Typical sources of site-specific values include the Water Quality Portal of the National Water Quality Monitoring Council (available online at: http://www.waterqualitydata.us/; includes data from U.S. Geological Survey National Water Information System and U.S. Environmental Protection Agency STORET data warehouses), state department of environment or natural resources, and state or local watershed watch or lake stewardship programs.'
             },
             'Water Temperature':{
@@ -82,13 +84,15 @@
                 'is_editable': true,
                 'default_value': 298,
                 'unit': 'K',
-                'helpText': 'Enter the average water temperature. Valid values are >= 0. The default value of 298 is from Table B-4-12 of U.S. EPA 2005 (Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities). Typical sources of site-specific values include state departments of fish and wildlife or natural resources, and state or local lake stewardship programs. See the TRIM User Guide Appendix for full reference information.'
+                'min': Number.MIN_VALUE,
+                'helpText': 'Enter the average water temperature. Valid values are > 0. The default value of 298 is from Table B-4-12 of U.S. EPA 2005 (Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities). Typical sources of site-specific values include state departments of fish and wildlife or natural resources, and state or local lake stewardship programs. See the TRIM User Guide Appendix for full reference information.'
             },
             'Water Column Depth':{
                 'short_name':'mean_depth',
                 'is_editable': true,
                 'default_value': 1,
                 'unit': 'm',
+                'min': Number.MIN_VALUE,
                 'helpText': 'Enter the average depth of the water column (i.e., lake depth). Valid values are > 0. There is no recommended default value. Typical sources of site-specific values include state departments of fish and wildlife or natural resources, and state or local lake stewardship programs.'
             },
             'Water Column Algae Density':{
@@ -117,6 +121,8 @@
                 'is_editable': true,
                 'default_value': 0.02,
                 'unit': 'unitless',
+                'min': 0,
+                'max': 1,
                 'helpText': 'Enter the organic carbon fraction in sediments suspended in the water column. Valid values are 0 to 1. The default value of 0.02 is from Table 3 (assumed equivalent to the organic carbon fraction in sediments) of McKone et al. 2001 (Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models). For site-specific values, it is typical to assume the same value as Water Body Organic Carbon Fraction in Sediment Bed (also a model input). See the TRIM User Guide Appendix for full reference information.'
             },
             'Water Column Suspended Sediment Concentration':{
@@ -138,7 +144,7 @@
                 'is_editable': true,
                 'default_value': 2,
                 'unit': 'm [water]/d',
-                'helpText': 'Enter the sediment deposition velocity in the water column. The default of 2 is for fine silt with a diameter of 0.005 mm and is from Section B.2.22 of U.S. EPA 1997 (Mercury study report to Congress, volume III: fate and transport of mercury in the environment). There is no typical source of site-specific values. See the TRIM User Guide Appendix for full reference information.'
+                'helpText': 'Enter the sediment deposition velocity in the water column. Valid values are >= 0. The default of 2 is for fine silt with a diameter of 0.005 mm and is from Section B.2.22 of U.S. EPA 1997 (Mercury study report to Congress, volume III: fate and transport of mercury in the environment). There is no typical source of site-specific values. See the TRIM User Guide Appendix for full reference information.'
             },
             'Water Column Sediment Discharge Rate':{
                 'short_name':'sed_discharge_rate',
@@ -151,8 +157,9 @@
             'Water Column Flush Rate':{
                 'short_name':'flush_rate',
                 'is_editable': true,
-                'default_value': 0,
+                'default_value': 1,
                 'unit': 'y<sup>-1</sup>',
+                'min': Number.MIN_VALUE,
                 'helpText': 'Enter the flush rate of the water column (the number of times per year that the water column is completely refreshed with new water). Valid values are > 0. There is no default value recommended. Typical sources of site-specific values include state departments of fish and wildlife or natural resources, and state or local lake stewardship programs. Otherwise, if water column retention time is available, the flush rate is a simple conversion: the ratio of 365 d to the water column retention time (also in unit of d). If a value is not available for flush rate or retention time, then flush rate will be calculated for you as the ratio of the water body&#39;s estimated annual discharge and the water body&#39;s volume, with the assumption that the water body maintains a constant volume, that is, water input (from precipitation, watershed runoff, groundwater seepage, and any contributions from other water bodies) is balanced against output (from evaporation and discharge).'
             },
             'Water Column Discharge Volumetric Rate':{
@@ -224,6 +231,7 @@
                 'is_editable': true,
                 'default_value': 0.05,
                 'unit': 'm',
+                'min': Number.MIN_VALUE,
                 'helpText': 'Enter the average thickness of the water body sediment bed (i.e., the unburied sediment). Valid values are > 0. The default value of 0.05 is from Table 3 of McKone et al. 2001 (Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models). There is no typical source of site-specific values. See the TRIM User Guide Appendix for full reference information.'
             },
             'Sediment Bed Density':{
@@ -231,6 +239,7 @@
                 'is_editable': true,
                 'default_value': 2600,
                 'unit': 'kg [sediment particles]/m<sup>3</sup> [sediment particles]',
+                'min': Number.MIN_VALUE,
                 'helpText': 'Enter the density of dry sediment in the water bodys sediment bed (i.e., the unburied sediment). Valid values are > 0. The default value of 2600 is from Table 3 of McKone et al. 2001 (Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models). There is no typical source of site-specific values. See the TRIM User Guide Appendix for full reference information.'
             },
             'Sediment Bed pH':{
@@ -238,6 +247,8 @@
                 'is_editable': true,
                 'default_value': 7.3,
                 'unit': 'unitless',
+                'min': 0,
+                'max': 14,
                 'helpText': 'Enter the pH of the water body sediment bed (i.e., the unburied sediment). Valid values are 0 to 14. The default value of 7.3 assumes equilibrium with the overlying surface water and is the midpoint of the optimal pH range for most aquatic organisms (6.5 to 8.0, a range provided by the U.S. EPA Casual Analysis/Diagnosis Decision Information System (CADDIS; available online at: https://www.epa.gov/caddis-vol2/caddis-volume-2-sources-stressors-responses-ph). Typical sources of site-specific values of water column pH include the Water Quality Portal of the National Water Quality Monitoring Council (available online at: http://www.waterqualitydata.us/; includes data from U.S. Geological Survey National Water Information System and U.S. Environmental Protection Agency STORET data warehouses), state department of environment or natural resources, and state or local watershed watch or lake stewardship programs.'
             },
             'Organic Carbon Fraction in Sediment Bed':{
@@ -245,6 +256,8 @@
                 'is_editable': true,
                 'default_value': 0.02,
                 'unit': 'unitless',
+                'min': 0,
+                'max': 1,
                 'helpText': 'Enter the organic carbon fraction in sediments in the sediment bed (i.e., the unburied sediment). Valid values are 0 to 1. The default value of 0.02 is from Table 3 of McKone et al. 2001 (Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models). Also, approximately the lowest value obtained from surface sediments in 46 Minnesota lakes (range: 0.029 to 28.6), from Dean et al. 2006 (Characterization of organic matter in lake sediments from Minnesota and Yellowstone National Park). Many contaminants will sorb to organic carbon, so it is health-protective to assume a lower value. Sources of site-specific data might include state departments of natural resources or environmental protection: organic carbon content is measured when sediment samples are analyzed for organic contaminants. See the TRIM User Guide Appendix for full reference information.'
             },
             'Sediment Bed Porosity':{
@@ -252,6 +265,8 @@
                 'is_editable': true,
                 'default_value': 0.6,
                 'unit': 'unitless',
+                'min': 0,
+                'max': 1,
                 'helpText': 'Enter the porosity of the sediment bed (i.e., the ratio of the volume of the pore space in the sediment bed to the overall volume of the sediment bed). Valid values are 0 to 1. The default value of 0.6 is based on the value of 0.2 used in Table 3 of McKone et al. 2001 (Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models). Screening scenarios with TRIM have shown that higher values generally lead to higher concentrations in fish. As such, we utilize a more conservative default value of 0.6 (midpoint between 0.2 and 1.0; professional judgment). See the TRIM User Guide Appendix for full reference information. There are no typical sources of site-specific values.'
             },
             'Sediment Resuspension Velocity':{
@@ -699,6 +714,16 @@
                 if (!ErrorValidation.isPositiveValue(this)) {
                     return;
                 }
+                if (elementIsValid(($(elm).parent()))) {
+                    let minAttr = elm.getAttribute('min');
+                    let maxAttr = elm.getAttribute('max');
+                    let min = minAttr !== null ? parseFloat(minAttr) : undefined;
+                    let max = maxAttr !== null ? parseFloat(maxAttr) : undefined;
+                    if (min || max)
+                        if (!ErrorValidation.isWithinRange(elm, $(elm).parent(), min, max)) {
+                            return;
+                        }
+                }
                 let parcel_name = $($(this).closest("table").find("thead > tr > th")[$(this).closest("td").prevAll().length]).text()
                 let parcels = TRIM.store.currentScenario.parcels;
                 let area = Number(parcels.find(e => e.name == parcel_name).area)
@@ -800,6 +825,8 @@
                             e['helpText'] = default_water_data[e['Property']]['helpText']
                             e['shortProperty'] = default_water_data[e['Property']]['short_name']
                             e['isEditable'] = default_water_data[e['Property']]['is_editable']
+                            e['min'] = default_water_data[e['Property']]['min']
+                            e['max'] = default_water_data[e['Property']]['max']
                         }
                     )
                     TableRedraw(wc_table_data, "lake")
@@ -809,6 +836,8 @@
                             e['helpText'] = default_sed_data[e['Property']]['helpText']
                             e['shortProperty'] = default_sed_data[e['Property']]['short_name']
                             e['isEditable'] = default_sed_data[e['Property']]['is_editable']
+                            e['min'] = default_sed_data[e['Property']]['min']
+                            e['max'] = default_sed_data[e['Property']]['max']
                         }
                     )
                     TableRedraw(sed_table_data, "sed")
@@ -905,10 +934,12 @@
                         let this_cell_data = !isNaN(Number(data)) && String(data).length > 6 ? Number.parseFloat(data).toExponential(4) : data
                         let this_cell_prop = row.isEditable ? 'editableCell badge badge-light' : 'nonEditableCell text-muted'
                         let input_prop = 'editableCell form-control form-control-sm'
+                        let min = row.min !== undefined ? " min='" + row.min + "' " : ""
+                        let max = row.max !== undefined ? " max='" + row.max + "' " : ""
                         if (linked_data.indexOf(row.Property) >= 0) {
                             return "<div class='divLinkedPropBtn'><label>" + this_cell_data + "</label></div>" + auto_calc_button + linked_prop_input
                         }
-                        return "<input class='" + input_prop + "' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none' />" +
+                        return "<input class='" + input_prop + "' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none' " + min + " " + max + "/>" +
                             "<label class='"+ this_cell_prop +"'>" + this_cell_data + "</label>" + auto_calc_button
                     }
                 })
@@ -1025,6 +1056,8 @@
             if (parcels.length > 0) {
                 water_properties.forEach(function (p, i) {
                     let this_water_property = {}
+                    this_water_property["min"] = default_water_data[p]['min'];
+                    this_water_property["max"] = default_water_data[p]['max'];
                     parcels.forEach(function (e, i) {
                         if (e.parcelType == "Water Only" || e.parcelType == "Water & Air") {
                             let exceptions = ['Precipitation Runoff Watershed Area',
@@ -1046,6 +1079,8 @@
                 TableRedraw(water_data, "lake")
                 sed_properties.forEach(function (p, i) {
                     let this_sed_property = {}
+                    this_sed_property["min"] = default_sed_data[p]['min'];
+                    this_sed_property["max"] = default_sed_data[p]['max'];
                     parcels.forEach(function (e, i) {
                         if (e.parcelType == "Water Only" || e.parcelType == "Water & Air") {
                             let d = e['surface_water']['sed_props']

@@ -65,6 +65,34 @@ def init_parameter_definitions(kwarg_list, check_subtypes=False):
     ParameterService.commit()
 
 
+def compile_mirc_data(scen, latest_model_run, logger=None):
+    if not logger:
+        logger = make_logger('compile_mirc_data')
+    logger.info(f"Compiling required MIRC data for scenario {scen.name}...")
+    
+    if latest_model_run and not latest_model_run.is_run_error:
+        mass = json.loads(latest_model_run.result_nt)
+        mass = json.loads("{"+mass+"}")
+        conc = json.loads(latest_model_run.result_conc)
+        conc = json.loads("{"+conc+"}")
+
+        logger.info(f"Model run found, using run with id [{latest_model_run.id}]...")
+
+        chems = {c.name : c for c in scen.chemicals}
+        timestamps = [f"01/01/{year} 00:00:00 EST" for year in mass['year'].values()]
+
+        trim_data = {
+            'scenario_name': scen.name,
+            'chemicals': list(chems.keys()),
+            'timestamps': timestamps,
+        }
+        trim_data["parcels"] = compile_mirc_parcel_data(scen, chems, conc, timestamps, logger)
+        return {"trim_data": trim_data}
+    else:
+        return {"trim_data": {"message": "No valid data found"}}
+
+
+
 def compile_mirc_parcel_data(scen, chems, conc, timestamps, logger):
     logger.info(f"Compiling parcel data for...")
     parcels = []
@@ -90,6 +118,8 @@ def compile_mirc_parcel_data(scen, chems, conc, timestamps, logger):
                 for chem_name in chems.keys():
                     props = {}
                     filtered_key = f'{chem_name}_{compartment.standard_name}'
+                    if filtered_key not in conc:
+                        continue
                     filtered_conc = list(conc[filtered_key].values())
                     filtered_conc_units = list(conc[filtered_key+"_units"].values())
 

@@ -614,6 +614,22 @@ def run_result_scenario():
     scenario_id = int(exec_data['scenario_id'])
 
     try:
+        s = ScenarioService.get(scenario_id)
+        if s.has_process_hist:
+            s.latest_proc_status.run_status = 'run tm 0'
+            s.latest_proc_status.run_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        else:
+            try:
+                new_proc = ScenarioLoadRunProc(
+                    scenario=s,
+                    load_status='load 100',
+                    run_status='run tm 0',
+                    run_datetime=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                )
+                s.proc_status.add(new_proc)
+            except Exception as e:
+                print(e)
+        ScenarioService.commit()
         # in dev/prod, we execute an AWS StepFunction to run the model via Docker/ECS. Locally,
         # we just run the model directly.
         if trim_env_profile in [ "dev", "devgetflow", "prod" ]:
@@ -625,20 +641,23 @@ def run_result_scenario():
                     stateMachineArn=state_machine_arn,
                     input=json.dumps({ "scenarioId": str(scenario_id), "generateFakeResults": "false" })
                 )
+                try:
+                    s.latest_proc_status.execution_arn = resp["executionArn"]
+                    ScenarioService.commit()
+                except Exception:
+                    pass
                 data_resp = { "executionArn": resp["executionArn"] }
             else:
                 data_resp = { "error": "Missing required variable to run re-architected model" }
         else:
-            s = ScenarioService.get(scenario_id)
             print(f"Starting Model Run ({datetime.now()}) ...")
             json_n_avg, json_c_avg, output_file_n, output_file_c, output_file_tm = run_full_model(s)
             data_resp = {"mass": json_n_avg, "conc": json_c_avg, "outputMass": output_file_n,
                          "outputConc": output_file_c, "outputTM": output_file_tm}
+            print(f"Model Run Finished ({datetime.now()}) ...")
     except Exception as e:
         print('scenario run error:', e)
         data_resp = {"error": e}
-
-    print(f"Model Run Finished ({datetime.now()}) ...")
 
     return ApiResult(data_resp)
 
@@ -662,8 +681,18 @@ def get_result_scenario():
         output_file_t = Path(s.latest_proc_status.result_file_tm).name
         json_n_avg = s.latest_proc_status.result_nt
         json_c_avg = s.latest_proc_status.result_conc
+        trim_data = compile_mirc_data(s, s.latest_proc_status, logger)
+        result_resp = json.loads(json.dumps({
+            "mass": json.loads(json_n_avg), 
+            "conc": json.loads(json_c_avg), 
+            "final_status": fin_stat, 
+            "run_date": run_date, 
+            "outputMass": output_file_n, 
+            "outputConc": output_file_c, 
+            "outputTM": output_file_t,
+            "trim_data": trim_data
+        }, indent=4, sort_keys=True, default=str))
 
-        result_resp = json.loads(json.dumps({"mass": json.loads(json_n_avg), "conc": json.loads(json_c_avg), "final_status": fin_stat, "run_date": run_date, "outputMass": output_file_n, "outputConc": output_file_c, "outputTM": output_file_t}, indent=4, sort_keys=True, default=str))
     except Exception as e:
         logger.info(f"Error when attempting to get results: {e}")
         result_resp = {"error": e}
@@ -683,8 +712,10 @@ def poll_model_run_scenario(id):
             run_status = "err"
             run_percent = "err"
         else:
-            run_status, run_percent = s.latest_proc_status.run_step
+            run_status, run_percent = [v for v in s.proc_status][0].run_step
+        print(f"Poll status for scenario {s.name} is {run_status} at {run_percent}%")
         return ApiResult({'status': run_status, 'percent': run_percent})
+    print(f"Poll status for scenario {s.name} is 'tm' at 0%")
     return ApiResult({'status': "tm", 'percent': "0"})
 
 
@@ -774,13 +805,20 @@ def fetch_output_for_step_function_execution(execution_arn):
 
         # get the specific event relating to kickoff of the Docker container... 
         ecs_task_event = next((e for e in exec_hist_response["events"] if e.get("type") == "TaskSubmitted" and e.get("taskSubmittedEventDetails", {}).get("resourceType") == "ecs"), None)
+        if not ecs_task_event:
+            return []
         # re-parse the details/output, included as a JSON string in the boto3 reply... 
         output = json.loads(ecs_task_event.get("taskSubmittedEventDetails", {}).get("output", "{}"))
+        if not output:
+            return []
 
         # get the ECS task id
         tasks = output.get("Tasks", [])
 
         task = tasks[0] if len(tasks) > 0 else None
+        if not task:
+            return []
+
         task_arn = task.get("TaskArn")
         task_key = task_arn.split("/")[-1]
 
@@ -841,6 +879,7 @@ def fetch_run_results():
     if not req_data.get('bucket') or not req_data.get('uuid'):
         raise AssertionError("bucket/uuid cannot be blank.")
 
+    scenario = ScenarioService.get(req_data['scenario_id'])
     bucket = req_data['bucket']
     uuid = req_data['uuid']
 
@@ -850,12 +889,14 @@ def fetch_run_results():
     content_object = s3_resource.Object(bucket, f"{uuid}/model_output.json")
     file_content = content_object.get()["Body"].read().decode("utf-8")
     json_content = json.loads(file_content)
-
+    trim_data = compile_mirc_data(scenario, scenario.latest_proc_status)
+    
     resp = {
         "success": True,
-        "model_output": json_content
+        "model_output": json_content,
+        "trim_data": trim_data
     }
-
+    
     for f in ["outputMass", "outputConc", "outputTM"]:
         full_key = f"{uuid}/{f}.xlsx"
         response = s3_client.generate_presigned_url("get_object",
@@ -975,40 +1016,15 @@ def export_for_mirc(scenario_id):
         return ApiException("Unknown Scenario")
 
     logger = make_logger('mirc_exporter')
-    logger.info(f"Compiling required MIRC data for scenario {scen.name}...")
     try:
-        latest_model_run = [v for v in scen.proc_status.all() if not v.is_run_error]
-        if len(latest_model_run) == 0:
-            return ApiResult({
-                'trim_data': {"message": "No valid data found"}
-            })
-        latest_model_run = latest_model_run[-1]
-
-        mass = json.loads(latest_model_run.result_nt)
-        mass = json.loads("{"+mass+"}")
-        conc = json.loads(latest_model_run.result_conc)
-        conc = json.loads("{"+conc+"}")
-
-        logger.info(f"Model run found, using run with id [{latest_model_run.id}]...")
-
-        chems = {c.name : c for c in scen.chemicals}
-        timestamps = [f"01/01/{year} 00:00:00 EST" for year in mass['year'].values()]
-
-        trim_data = {
-            'scenario_name': scen.name,
-            'chemicals': list(chems.keys()),
-            'timestamps': timestamps,
-        }
-
-        trim_data["parcels"] = compile_mirc_parcel_data(scen, chems, conc, timestamps, logger)
-    except Exception as e:
+        latest_model_run = scen.latest_proc_status
+        trim_data = compile_mirc_data(scen, latest_model_run, logger)
+    except Exception as e:  
         logger.error(e)
         traceback.print_exc()
         trim_data = {"message": "No valid data found"}
 
-    return ApiResult({
-        'trim_data': trim_data
-    })
+    return ApiResult({trim_data})
 
 
 @scenario_api.route(

@@ -178,6 +178,8 @@ class ScenarioLoadRunProc(Model):
     result_nt = sa.Column(sa.sql.sqltypes.TEXT)
     result_conc = sa.Column(sa.sql.sqltypes.TEXT)
 
+    execution_arn = sa.Column(sa.String(255))
+
     @property
     def load_percent(self):
         if self.load_status.startswith("loaded"):

@@ -81,24 +81,132 @@ def make_transition_matrix(scenario):
 
     n_chem = len(chem_list)
     n_comp = len(comp_list)
-    vmu = []
 
     matrix_dimensions = n_chem * n_comp
 
-    source_matrix = np.zeros(matrix_dimensions, dtype=float)
-    ic_matrix = np.zeros(matrix_dimensions, dtype=float)
-    ic_units = [''] * matrix_dimensions  # create empty list of c0 units
     transition_matrix = np.zeros(
         (matrix_dimensions, matrix_dimensions), dtype=float
     )
 
-    index_names = ['' for _ in source_matrix]
+    index_names = ['' for _ in transition_matrix]
+
+    source_matrix = []
+    ic_matrix = []
+    vmu = []
 
     chem_indices = {
         c: i for i, c in enumerate(chem_list)
     }
 
-    i_perc = int(100/n_chem)
+    i_perc = int(100 / n_chem)
+
+    def update_source_matrix(chem, comp):
+        try:
+            dr = comp.surfaceDepositionRate(chem)
+            if not pd.isna(dr):
+                chem_comp_name = chem.name + '_' + comp.standard_name
+                source_matrix.append((chem_comp_name, dr.magnitude))
+        except Exception:
+            print(
+                f'{"*" * 20}'
+                f' Problem with getting Surface Deposition Rate'
+                f' for compartment={comp.name}, chemical={chem}'
+                f' {"*" * 20}'
+                f'\nException is {full_stack()}'
+            )
+
+    def update_ic_matrix(chem, comp):
+        chem_comp_name = chem.name + '_' + comp.standard_name
+
+        try:
+            ic = comp.initialConcentration(chem)
+            ic_units = 'g/kg'
+            if not pd.isna(ic):
+                if hasattr(ic, 'dimensionality'):
+                    ic_units = str(ic.units).replace(" ", "").replace("**", "^")
+                    ic = ic.magnitude
+                ic_matrix.append((chem_comp_name, ic, ic_units))
+            else:
+                ic_matrix.append((chem_comp_name, 0, ic_units))
+        except Exception:
+            print(
+                f'{"*" * 20}'
+                f' Problem with getting Initial Concentration'
+                f' for compartment={comp.name}, chemical={chem}'
+                f' {"*" * 20}'
+                f'\nException is {full_stack()}'
+            )
+
+    def update_vmu(chem, comp):
+        if comp.media.isa('Sink') or comp.media.isa('Air'):
+            # Ignore sinks and air entirely (concentration is meaningless)
+            return
+
+        chem_comp_name = chem.name + '_' + comp.standard_name
+
+        try:
+            # if sending compartment has volume (m3)
+            vol = comp.Volume
+            if not pd.isna(vol) and vol:
+                vol = vol.magnitude
+            else:
+                vol = np.nan
+
+            # if sending compartment has mass (kg)
+            mass = comp.TotalMass
+            if not pd.isna(mass) and mass:
+                mass = mass.magnitude
+            else:
+                mass = np.nan
+
+            # if sending compartment has concentration output factor
+            cof = comp.concentrationOutputFactor
+            cou = ''
+            if pd.isna(cof) or (not cof):
+                if comp.media.isa('Soil'):
+                    cof = chem.concentrationOutputFactor(comp)
+                    cou = 'g / g'  # HACKY
+                else:
+                    cof = np.nan
+                    cou = ''
+            else:
+                if hasattr(cof, 'dimensionality'):
+                    cou = str(cof.units)
+                    cof = cof.magnitude
+                if not cou and comp.media.isa('Soil'):
+                    cou = 'g / g'  # HACKY
+
+            # denominator in concentration calculation
+            if (
+                comp.media.isa("Abiotic")
+                or comp.media.isa("$Leaf")
+                or comp.media.isa("$Leaf_Particle")
+            ):
+                denom = "volume"
+            elif comp.media.isa("Surface_Water") or comp.media.isa("Groundwater"):
+                # note that denom must be in L
+                denom = "volume_L"
+            else:
+                denom = "mass"  # default denom is mass
+
+            # tuples of volume, mass, units, output factor, and denominator quantity
+            vmu_tup = (chem_comp_name, comp.name, vol, mass, cou, cof, denom)
+        except Exception:
+            print(
+                f'{"*" * 20}'
+                f' Problem with getting Surface Concentration Output factor'
+                f' for compartment={comp.name}, chemical={chem}'
+                f' {"*" * 20}'
+                f'\nException is {full_stack()}'
+            )
+            vmu_tup = (chem_comp_name, comp.name, np.nan, np.nan, '', np.nan, 'mass')
+
+        vmu.append(vmu_tup)
+
+    def update_other_matrices(chem, comp):
+        update_source_matrix(chem, comp)
+        update_ic_matrix(chem, comp)
+        update_vmu(chem, comp)
 
     try:
         ureg.default_format = '~'
@@ -121,83 +229,7 @@ def make_transition_matrix(scenario):
 
                 index_names[tm_x] = chem.name + '_' + sender.standard_name
 
-                try:
-                    dr = sender.surfaceDepositionRate(chem)
-                    if not pd.isna(dr):
-                        source_matrix[tm_x] += dr.magnitude
-                except Exception as e:
-                    print(f'{"*" * 20} Problem with getting Surface Deposition Rate for compartment={sender.name}, '
-                          f'chemical={chem} {"*" * 20}\nException is {e}')
-
-                try:
-                    ic = sender.initialConcentration(chem)
-                    if not pd.isna(ic):
-                        ic_matrix[tm_x] += ic.magnitude
-                        if hasattr(ic, "units"):
-                            ic_units[tm_x] = str(ic.units).replace(" ", "").replace("**", "^")
-                        else:
-                            ic_units[tm_x] = 'g/kg'
-                    else:
-                        ic_matrix[tm_x] += 0
-                        ic_units[tm_x] = 'g/kg'
-                except Exception as e_ic:
-                    print(f'{"*" * 20} Problem with getting initial concentration for compartment={sender.name}, '
-                          f'chemical={chem} {"*" * 20}\nException is {e_ic}')
-
-                try:
-                    # if sending compartment has volume (m3)
-                    vol = sender.Volume
-                    if not pd.isna(vol) and vol:
-                        vol = vol.magnitude
-                    else:
-                        vol = np.nan
-
-                    # if sending compartment has mass (kg)
-                    mass = sender.TotalMass
-                    if not pd.isna(mass) and mass:
-                        mass = mass.magnitude
-                    else:
-                        mass = np.nan
-
-                    # if sending compartment has concentration output factor
-                    cof = sender.concentrationOutputFactor
-                    cou = ''
-                    if not pd.isna(cof) and cof:
-                        if hasattr(cof, 'dimensionality'):
-                            cou = str(cof.units)
-                            cof = cof.magnitude
-                    elif sender.media.isa("Root_Zone") or sender.media.isa("Surface_Soil"):
-                        cof = chem.concentrationOutputFactor(sender)
-                        cou = "g / g"
-                    else:
-                        cof = np.nan
-
-                    denom = "mass"  # default denom is mass
-                    if sender.media.isa("Abiotic"):
-                        # if compartment is abiotic
-                        denom = "volume"  # denominator in concentration calculation must be volume
-                    elif sender.media.isa("$Leaf") or sender.media.isa("$Leaf_Particle"):
-                        # if compartment is leaf or leaf particle (inferred this based on concentration output factor)
-                        denom = "volume"  # denominator in concentration calculation must be volume
-                    elif sender.media.isa("Surface_Water"):
-                        # if compartment is surface water note that denom must be in L
-                        denom = "volume_L"  # denominator in concentration calculation must be volume
-                    elif sender.media.isa("Groundwater"):
-                        # if compartment is groundwater note that denom must be in L
-                        denom = "volume_L"  # denominator in concentration calculation must be volume
-                    # tuples of volume, mass, units, output factor, and denominator quantity
-                    vmu_tup = (sender.name, vol, mass, cou, cof, denom)
-                    vmu.append(vmu_tup)
-                except Exception as e:
-                    print(f'{"*" * 20} Problem with getting Surface Concentration Output factor for '
-                          f'compartment={sender.name}, chemical={chem} {"*" * 20}\nException is {full_stack()}')
-                    vol = np.nan
-                    mass = np.nan
-                    cof = np.nan
-                    cou = ""
-                    denom = "mass"
-                    vmu_tup = (sender.name, vol, mass, cou, cof, denom)
-                    vmu.append(vmu_tup)
+                update_other_matrices(chem, sender)
 
                 # Some media just don't send anything
                 if not sender.media.can_emit:
@@ -316,41 +348,74 @@ def make_transition_matrix(scenario):
         columns=index_names
     )
 
-    def compute_initial_mass(df_c0, df_vmu):  # arguments are the chemical mass array (nt), mass dataframe
-
-        df = df_c0.merge(df_vmu, left_index=True, right_index=True)
-        df['n0_g'] = 0
-        df.loc[df['initial_concentration_units'] == 'g/m^3', 'n0_g'] = df['initial_concentration'] * df['volume_m3']
-        df.loc[df['initial_concentration_units'] == 'g/L', 'n0_g'] = df['initial_concentration'] * df[
-            'volume_m3'] * 1000
-        df.loc[df['initial_concentration_units'] == 'g/kg', 'n0_g'] = df['initial_concentration'] * df['mass_kg']
-        df_n0 = df[['initial_concentration_units', 'n0_g']]
-
-        return (df_n0)
-
     try:
         df_sm = pd.DataFrame(
-            source_matrix, index=index_names,
-            columns=['deposition_rate_g_day-1']
-        )
+            source_matrix, columns=['chem_sender_name', 'deposition_rate_g_day-1']
+        ).set_index('chem_sender_name')
+        df_sm.index.name = None
 
-        df_vmu = pd.DataFrame(vmu, index=index_names,
-                              columns=['comp_name', 'volume_m3', 'mass_kg', 'concentrationOutputUnits',
-                                       'concentrationOutputFactor', 'denominator'])
+        df_vmu = pd.DataFrame(
+            vmu, columns=[
+                'chem_sender_name',
+                'comp_name',
+                'volume_m3',
+                'mass_kg',
+                'concentrationOutputUnits',
+                'concentrationOutputFactor',
+                'denominator'
+            ]
+        ).set_index('chem_sender_name')
+        df_vmu.index.name = None
 
-        df_ic = pd.DataFrame({'initial_concentration': ic_matrix, 'initial_concentration_units': ic_units}, index=index_names)
-        df_n0 = compute_initial_mass(df_ic, df_vmu)  # dataframe of initial masses computed
+        df_c0 = pd.DataFrame(
+            ic_matrix, columns=[
+                'chem_sender_name',
+                'initial_concentration',
+                'initial_concentration_units'
+            ]
+        ).set_index('chem_sender_name')
+        df_c0.index.name = None
 
     except Exception as a:
         print(full_stack())
 
+    return df_tm, df_sm, df_vmu, df_c0
 
-    return transition_matrix, df_tm, source_matrix, df_sm, df_vmu, df_n0
+
+def compute_initial_mass(df_c0, df_vmu):
+    # arguments are the chemical mass array (nt), mass dataframe
+    df = df_c0.merge(df_vmu, how='left', left_index=True, right_index=True)
+
+    def compute_mass(row):
+        try:
+            ic_units = row.initial_concentration_units
+            ic_val = row.initial_concentration
+            if ic_units == 'g/m^3':
+                return ic_val * row.volume_m3
+            elif ic_units == 'g/L':
+                return ic_val * row.volume_m3 * 1000
+            elif ic_units == 'g/kg':
+                return ic_val * row.mass_kg
+        except Exception:
+            pass
+        return 0
+
+    df['n0_g'] = df.apply(compute_mass, axis=1)
+
+    df_n0 = df[['initial_concentration_units', 'n0_g']]
+
+    return df_n0
 
 
-def ode_sim(tm, sm, df_sm, df_n0, scn):
-
-    tm = np.nan_to_num(tm, copy=True, nan=0.0, posinf=None, neginf=None)  # replace nans with zero
+def ode_sim(df_tm, df_sm, df_n0, scn):
+    sm = df_sm['deposition_rate_g_day-1']
+    tm = np.nan_to_num(
+        df_tm.to_records(index=False).tolist(),
+        copy=True,
+        nan=0.0,  # replace nans with zero
+        posinf=None,
+        neginf=None
+    )
     steps_per_day = 24  # steps per day for integration and output -- will need to be input / argument eventually
 
     def m(t):  # transition matrix
@@ -367,63 +432,50 @@ def ode_sim(tm, sm, df_sm, df_n0, scn):
         n_prime = np.matmul(m(t), n) + s(t)
         return n_prime
 
-    ndim = sm.shape[0]  # number of compartments
-
     simulation_start_date = scn.sim_begin_end_time[0]
     simulation_end_date = scn.sim_begin_end_time[1]
-    time_range_h = pd.date_range(simulation_start_date, simulation_end_date,
-                                 freq='H')  # pandas date times series in hours over the simulation period
-    time_range_d = pd.date_range(simulation_start_date, simulation_end_date,
-                                 freq='D')  # pandas date times series in days over the simulation period
+    time_range_d = pd.date_range(  # date times series in days over the simulation period
+        simulation_start_date, simulation_end_date, freq='D'
+    )
     ndays = len(time_range_d) - 1  # last day is not a full day
-    # nhours = len(time_range_h) - 1  # last hour is not modelled
     ts = np.linspace(0, ndays, ndays * 24)  # array of hours to be modelled (in units of days because TFs are in /d)
-
-    # ts = np.linspace(0, 365 * nyear,
-    #               365 * nyear * steps_per_day)  # time line in hours for nyear years, tstart and tend should be inputs
 
     n0 = np.array(df_n0['n0_g'], dtype='float64')  # get initial masses
     n0 = pd.Series(n0).fillna(0).to_numpy()
-    nt = odeint(dn_dt, n0, ts, hmax=24)  # mass at time t
 
-    df_nt = pd.DataFrame(nt)
+    df_nt = pd.DataFrame(odeint(dn_dt, n0, ts, hmax=24))  # mass at time t
     # print(df_nt)
     cols = list(df_sm.index)
     df_nt.columns = cols
     df_nt['time'] = ts
-    cols_ordered = ['time'] + cols
-    #
+    cols_ordered = ['time'] + [c for c in cols if not ('Air in ' in c)]
+
     df_nt = df_nt[cols_ordered]
 
-    return nt, df_nt
+    return df_nt
 
 
 def compute_concentration(df_nt, df_vmu):  # arguments are the chemical mass array (nt), mass dataframe
-
-    df_vmu['Mass_to_Conc_Conv_Factor'] = np.nan
-    index_list = list(df_vmu.index)
-    for i in index_list:  # loop over the rows of the compartment volume mass units dataframe
-        if df_vmu.loc[i, 'concentrationOutputFactor'] == np.nan:
-            pass
-        else:
-            if 'mass' in df_vmu.loc[i, 'denominator']:
-                df_vmu.loc[i, 'Mass_to_Conc_Conv_Factor'] = 1 / df_vmu.loc[i, 'mass_kg'] * df_vmu.loc[
-                    i, 'concentrationOutputFactor']
-            if 'volume' in df_vmu.loc[i, 'denominator']:
-                df_vmu.loc[i, 'Mass_to_Conc_Conv_Factor'] = 1 / df_vmu.loc[i, 'volume_m3'] * df_vmu.loc[
-                    i, 'concentrationOutputFactor']
-            # need to convert volume from m3 to L for these compartments (surface water and groundwater)
-            if 'volume_L' in df_vmu.loc[i, 'denominator']:
-                df_vmu.loc[i, 'Mass_to_Conc_Conv_Factor'] = 1 / (df_vmu.loc[i, 'volume_m3'] * 1000) * df_vmu.loc[
-                    i, 'concentrationOutputFactor']
-
     conc_data = {
         'time': df_nt['time']
     }
-    for i in index_list:
-        conc_data[i] = df_nt[i] * df_vmu.loc[i, 'Mass_to_Conc_Conv_Factor']
-        conc_data[f'{i}_units'] = pd.Series(
-            [df_vmu.loc[i, 'concentrationOutputUnits']] * len(conc_data[i])
+
+    for row in df_vmu.itertuples():  # loop over the rows of the compartment volume mass units dataframe
+        conc_out_factor = row.concentrationOutputFactor
+        mass_conc_conv_factor = np.nan
+        if conc_out_factor != np.nan:
+            if 'mass' in row.denominator:
+                mass_conc_conv_factor = 1 / row.mass_kg * conc_out_factor
+            if 'volume' in row.denominator:
+                mass_conc_conv_factor = 1 / row.volume_m3 * conc_out_factor
+            # need to convert volume from m3 to L for these compartments (surface water and groundwater)
+            if 'volume_L' in row.denominator:
+                mass_conc_conv_factor = 1 / (row.volume_m3 * 1000) * conc_out_factor
+
+        full_name = row.Index
+        conc_data[full_name] = df_nt[full_name] * mass_conc_conv_factor
+        conc_data[f'{full_name}_units'] = pd.Series(
+            [row.concentrationOutputUnits] * len(conc_data[full_name])
         )
 
     df_conc = pd.concat(conc_data.values(), axis=1, ignore_index=True)
@@ -451,7 +503,7 @@ def gen_avg(df_nt, df_conc, inputs):
     # group the data by year and calculate the annual averages
     conc_agg = {
         c: (
-            'mean' if is_numeric_dtype(df_conc[c])
+            'mean' if (c == 'time') or is_numeric_dtype(df_conc[c])
             else lambda col: (col.mode() if col.nunique() == 1 else np.nan)
         )
         for c in df_conc.columns.values if c != 'year'
@@ -517,30 +569,40 @@ def run_full_model(scn):
     try:
         # get transition matrix and source matrix
         # if none exist create new one
+        run_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         if scn.has_process_hist:
             scn.latest_proc_status.run_status = 'run tm 0'
-            scn.latest_proc_status.run_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            scn.latest_proc_status.run_datetime = run_time
         else:
             try:
-                new_proc = ScenarioLoadRunProc(scenario=scn, load_status='load 100', run_status='run null null',
-                                               run_datetime=datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+                new_proc = ScenarioLoadRunProc(
+                    scenario=scn,
+                    load_status='load 100', run_status='run null null',
+                    run_datetime=run_time
+                )
                 scn.proc_status.add(new_proc)
             except Exception as e:
                 print(e)
         ScenarioService.commit()
         scn = ScenarioService.get(id=scn.id)
         try:
-            (tm, df_tm, sm, df_sm, df_vmu, df_n0) = make_transition_matrix(scn)
+            (df_tm, df_sm, df_vmu, df_c0) = make_transition_matrix(scn)
         except Exception as e:
             print(full_stack())
             return model_err(scn, f"ERRORED WHILE MAKING TRANSITION MATRIX: {e}", 'err tm 0')
+
+        try:
+            df_n0 = compute_initial_mass(df_c0, df_vmu)  # dataframe of initial masses computed
+        except Exception as e:
+            print(full_stack())
+            return model_err(scn, f"ERRORED WHILE COMPUTING INITIAL MASS: {e}", 'err tm 0')
 
         # get result
         scn.latest_proc_status.run_status = 'run ode 0'
         ScenarioService.commit()
         scn = ScenarioService.get(id=scn.id)
         try:
-            (nt, df_nt) = ode_sim(tm, sm, df_sm, df_n0, scn)
+            df_nt = ode_sim(df_tm, df_sm, df_n0, scn)
             scn.latest_proc_status.run_status = 'run ode 50'
             ScenarioService.commit()
             # make concentration output
@@ -561,19 +623,15 @@ def run_full_model(scn):
         except Exception as e:
             return model_err(scn, f"ERRORED WHILE COMPUTING AVERAGES: {e}", 'err ode 0')
 
-        outfile_nt, outfile_conc = "", ""
-
-        # Output components as csv
-        # df_tm.to_csv("Transfer_Matrix_test.csv")
-        # df_sm.to_csv("Source_Matrix_test.csv")
-        # df_nt.to_csv("Result_Matrix_test.csv")
-        # df_conc.to_csv("Concentration_Result_Matrix_test.csv")
-
         scn.latest_proc_status.run_status = 'run csv 0'
         ScenarioService.commit()
         scn = ScenarioService.get(id=scn.id)
+
+        outfile_nt, outfile_conc = "", ""
         try:
-            outfile_nt, outfile_conc, outfile_tm = safe_save_output(dfn_avg, dfc_avg, df_tm, scn, filetype='excel')
+            outfile_nt, outfile_conc, outfile_tm = safe_save_output(
+                dfn_avg, dfc_avg, df_tm, scn, filetype='excel'
+            )
             # safe_save_output(df_nt, df_conc, scn, filetype='excel')
             scn.latest_proc_status.result_file_nt = outfile_nt
             scn.latest_proc_status.result_file_conc = outfile_conc
