@@ -604,7 +604,10 @@
                         'data-active': isActive ? 1 : 0
                     })
                     .addClass('editableCell form-control form-control-sm')
-                    .css('display', 'none')
+                    .css({
+                        'min-width': '4em',
+                        display: 'none'
+                    })
                     .appendTo(td);
                 const lbl = $('<label />')
                     .text(renderer(data))
@@ -643,7 +646,7 @@
                             const td = makeEditableCell(
                                 'Total Effective Erosion Rate',
                                 'erosion1-' + ABBR_TO_PARAM['Total Effective Erosion Rate'],
-                                'number', row, (x) => scientific(x)
+                                'text', row, (x) => scientific(x)
                             )
                             return td.html();
                         }
@@ -671,7 +674,7 @@
                         render: function(data, type, row, meta) {
                             const td = makeEditableCell(
                                 'A', 'erosion2-' + ABBR_TO_PARAM.A,
-                                'number', row, (x) => scientific(x)
+                                'text', row, (x) => scientific(x)
                             )
                             return td.html();
                         }
@@ -682,7 +685,7 @@
                         render: function(data, type, row, meta) {
                             const td = makeEditableCell(
                                 'a', 'erosion2-' + ABBR_TO_PARAM.a,
-                                'number', row, (x) => scientific(x)
+                                'text', row, (x) => scientific(x)
                             )
                             return td.html();
                         }
@@ -693,7 +696,7 @@
                         render: function(data, type, row, meta) {
                             const td = makeEditableCell(
                                 'b', 'erosion2-' + ABBR_TO_PARAM.b,
-                                'number', row, (x) => scientific(x)
+                                'text', row, (x) => scientific(x)
                             )
                             return td.html();
                         }
@@ -704,7 +707,7 @@
                         render: function(data, type, row, meta) {
                             const td = makeEditableCell(
                                 'SD', 'erosion2-' + ABBR_TO_PARAM.SD,
-                                'number', row, (x) => scientific(x)
+                                'text', row, (x) => scientific(x)
                             )
                             return td.html();
                         }
@@ -716,7 +719,7 @@
                             const td = makeEditableCell(
                                 'Total Effective Erosion Rate',
                                 'erosion2-' + ABBR_TO_PARAM['Total Effective Erosion Rate'],
-                                'number', row, (x) => scientific(x)
+                                'text', row, (x) => scientific(x)
                             )
                             return td.html();
                         }
@@ -743,7 +746,7 @@
                         render: function(data, type, row, meta) {
                             const td = makeEditableCell(
                                 'R', 'erosion3-' + ABBR_TO_PARAM.R,
-                                'number', row, (x) => x
+                                'text', row, (x) => x
                             )
                             return td.html();
                         }
@@ -753,7 +756,7 @@
                         render: function(data, type, row, meta) {
                             const td = makeEditableCell(
                                 'K', 'erosion3-' + ABBR_TO_PARAM.K,
-                                'number', row, (x) => scientific(x)
+                                'text', row, (x) => scientific(x)
                             )
                             return td.html();
                         }
@@ -764,7 +767,7 @@
                         render: function(data, type, row, meta) {
                             const td = makeEditableCell(
                                 'S', 'erosion3-' + ABBR_TO_PARAM.S,
-                                'number', row, (x) => x
+                                'text', row, (x) => x
                             )
                             return td.html();
                         }
@@ -775,7 +778,7 @@
                         render: function(data, type, row, meta) {
                             const td = makeEditableCell(
                                 'L', 'erosion3-' + ABBR_TO_PARAM.L,
-                                'number', row, (x) => x
+                                'text', row, (x) => x
                             )
                             return td.html();
                         }
@@ -786,7 +789,7 @@
                         render: function(data, type, row, meta) {
                             const td = makeEditableCell(
                                 'LS', 'erosion3-' + ABBR_TO_PARAM.LS,
-                                'number', row, (x) => scientific(x)
+                                'text', row, (x) => scientific(x)
                             )
                             return td.html();
                         }
@@ -796,7 +799,7 @@
                         render: function(data, type, row, meta) {
                             const td = makeEditableCell(
                                 'C', 'erosion3-' + ABBR_TO_PARAM.C,
-                                'number', row, (x) => scientific(x)
+                                'text', row, (x) => scientific(x)
                             )
                             return td.html();
                         }
@@ -806,7 +809,7 @@
                         render: function(data, type, row, meta) {
                             const td = makeEditableCell(
                                 'P', 'erosion3-' + ABBR_TO_PARAM.P,
-                                'number', row, (x) => scientific(x)
+                                'text', row, (x) => scientific(x)
                             )
                             return td.html();
                         }
@@ -817,7 +820,7 @@
                         render: function(data, type, row, meta) {
                             const td = makeEditableCell(
                                 'A', 'erosion3-' + ABBR_TO_PARAM.A,
-                                'number', row, (x) => scientific(x)
+                                'text', row, (x) => scientific(x)
                             )
                             return td.html();
                         }
@@ -828,7 +831,7 @@
                         render: function(data, type, row, meta) {
                             const td = makeEditableCell(
                                 'a', 'erosion3-' + ABBR_TO_PARAM.a,
-                                'number', row, (x) => scientific(x)
+                                'text', row, (x) => scientific(x)
                             )
                             return td.html();
                         }
@@ -839,7 +842,7 @@
                         render: function(data, type, row, meta) {
                             const td = makeEditableCell(
                                 'b', 'erosion3-' + ABBR_TO_PARAM.b,
-                                'number', row, (x) => scientific(x)
+                                'text', row, (x) => scientific(x)
                             )
                             return td.html();
                         }
@@ -850,7 +853,7 @@
                         render: function(data, type, row, meta) {
                             const td = makeEditableCell(
                                 'SD', 'erosion3-' + ABBR_TO_PARAM.SD,
-                                'number', row, (x) => scientific(x)
+                                'text', row, (x) => scientific(x)
                             )
                             return td.html();
                         }
@@ -862,7 +865,7 @@
                             const td = makeEditableCell(
                                 'Total Effective Erosion Rate',
                                 'erosion3-' + ABBR_TO_PARAM['Total Effective Erosion Rate'],
-                                'number', row, (x) => scientific(x)
+                                'text', row, (x) => scientific(x)
                             )
                             return td.html();
                         }
