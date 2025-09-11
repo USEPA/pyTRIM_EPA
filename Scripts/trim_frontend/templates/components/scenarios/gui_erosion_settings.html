@@ -274,7 +274,7 @@
                 );
 
                 const targetFieldMappers = { // to extract the correct value from the USDA data
-                    R: (data) => data.R,
+                    // R: (data) => data.R,
                     K: (data) => data.kwfact['0'],
                     S: (data) => data.slope_r['0'].toFixed(2),
                     L: (data) => data.slopelenusle_r['0'].toFixed(2)
@@ -282,7 +282,7 @@
 
                 // Update the table data from the USDA soil data
                 for (const k in soilData) {
-                    if (k === 'success') {
+                    if (k === 'success' || currentDataByPcl[k] === undefined) {
                         continue;
                     }
                     try {
@@ -300,7 +300,7 @@
                 // tell the update function that field 'S' triggered this
                 // -- that will cascade updates that will catch R, K, and L,
                 // since they're all in calculations that depend on S
-                updateAllErosionData(tbl, currentData, 'S', ['R', 'K', 'L']);
+                updateAllErosionData(tbl, currentData, 'S', ['K', 'L']); // ['R', 'K', 'L']);
             }
 
             LoadingScreen.hide('erosion_settings_init');
@@ -1108,7 +1108,7 @@
                     for (fieldName of alsoSaveFields) {
                         if (validateField(tbl, fieldName, i)) {
                             // If valid, submit to the DB
-                            updateDB(rowData, fieldName, optionNum);
+                            updateDB(rowData, fieldName, optionNum, false);
                         }
                     }
                 }
