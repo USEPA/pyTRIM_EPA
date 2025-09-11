@@ -30,15 +30,16 @@ def get_met_data(scen):
     else:
         ambient_air_temp = None
 
-    mixing_height = scen.mixingHeight
-    if mixing_height:
-        mixing_height = mixing_height.magnitude
-    if not mixing_height:
-        air_comps = [
-            c for c in scen.get_compartment(media='Air')
-            if "Upper" not in c.standard_name
-        ]
-        mixing_height = max([c.height.magnitude for c in air_comps])
+    # All air compartments are expected to have the same height = mixing height
+    air_comps = [
+        c for c in scen.get_compartment(media='Air')
+        if "Upper" not in c.standard_name
+    ]
+    if len(air_comps) == 0:
+        print("\nThis scenario does not have any parcels containing air volume elements\n")
+        mixing_height = -1
+    else:
+        mixing_height = air_comps[0].volume_element.height.magnitude
 
     met_data = {
         'ambient_air_static_value': ambient_air_temp,
@@ -156,6 +157,8 @@ def get_seasonal_dynamics_params(scen, sd_type, media_name, default=-1):
 def get_latest_run_info(scen):
     import json
     from pathlib import Path
+    from .utils import compile_mirc_data
+
     run_info = {'has_run': scen.has_process_hist,
                 "lastest_run_date": "",
                 "execution_arn": "",
@@ -173,6 +176,7 @@ def get_latest_run_info(scen):
                 "mass_results_file": proc_info.result_file_nt if ".s3.amazonaws.com" in proc_info.result_file_nt else Path(proc_info.result_file_nt).name,
                 "conc_results": f'{{{json.loads(json.dumps(json.loads(proc_info.result_conc), indent=4, sort_keys=True, default=str))}}}',
                 "conc_results_file": proc_info.result_file_conc if ".s3.amazonaws.com" in proc_info.result_file_conc else Path(proc_info.result_file_conc).name,
+                "trim_data": compile_mirc_data(scen, scen.latest_proc_status)
             }
             if hasattr(proc_info, 'result_file_tm'):
                 run_info["run_results"]["tm_results_file"] = proc_info.result_file_tm if ".s3.amazonaws.com" in proc_info.result_file_tm else Path(proc_info.result_file_tm).name

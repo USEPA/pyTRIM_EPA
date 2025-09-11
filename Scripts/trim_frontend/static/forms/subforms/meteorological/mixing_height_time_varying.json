@@ -12,7 +12,7 @@
             "min": 20,
             "default": 226,
             "required": true,
-            "readonly": true,
+            "readonly": false,
             "help": "Enter a single value to use throughout your model run. The default value of 226 is a health-protective choice from: approximately the 5th percentile of median hourly mixing heights, derived from data at 824 meteorological stations paired with upper-air stations across the United States from January 1–December 31, 2016."
         }
     ]

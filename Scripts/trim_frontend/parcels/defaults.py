@@ -322,7 +322,10 @@ def calculate_avg_precipitation_runoff_fraction(all_soil_comps, fraction_name):
         pcl_runoff_fraction = getattr(soil_comp, fraction_name)
         numerator += (pcl_area * pcl_runoff_fraction)
         denominator += pcl_area
-    return numerator / denominator
+    try:
+        return numerator / denominator
+    except ZeroDivisionError:
+        return 0
 
 
 def get_correct_param(par_name, par_obj):
@@ -447,7 +450,7 @@ def get_water_params(pcl, parcel_type):
         )
 
         precipitation_vol_rate_to_sw = 0  # 4.8E6
-        wc_external_inflow = 0
+        wc_external_inflow = get_correct_param("ExternalWaterInflow", sw_pars)
 
         try:
             precipitation_vol_rate_to_sw = (
@@ -552,6 +555,7 @@ def get_water_params(pcl, parcel_type):
                 'water_ph': get_correct_param("pH", sw_pars),
                 'sed_deposition_vel': get_correct_param("SedimentDepositionVelocity", sw_pars),
                 'water_temp': get_correct_param("WaterTemperature", sw_pars),
+                'externalWaterInflow': wc_external_inflow,
                 'sed_inflow': get_correct_param("ExternalSedimentInflow", sw_pars),
                 'discharge_vol_rate': wc_discharge_vol_rate,
                 'sed_discharge_rate': wc_sed_discharge_rate,
@@ -703,8 +707,8 @@ AQUATIC_DIET = {
         "FractionDietZooplankton": 0,
         "FractionDietBenthicInvertebrate": 0,
         "FractionDietFishHerbivore": 0,
-        "FractionDietFishBenthicOmnivore": 0.5,
-        "FractionDietFishOmnivore": 0.5,
+        "FractionDietFishBenthicOmnivore": 0,
+        "FractionDietFishOmnivore": 1,
         "FractionDietFishBenthicCarnivore": 0,
         "FractionDietFishCarnivore": 0
     },
@@ -794,7 +798,7 @@ Wet_Dry_Source_VolElem_defaults = {
 Air_Parcel_VolElem_defaults = {
     'Air': {
         'name': 'Air',
-        'top': 800,
+        'top': 226,
         'bottom': 0,
         'Compartments': {
             'Air': {
@@ -809,8 +813,8 @@ Air_Parcel_VolElem_defaults = {
     },
     'UpperAir': {
         'name': 'UpperAir',
-        'top': 1000,
-        'bottom': 800,
+        'top': 10000,
+        'bottom': 226,
         'Compartments': {
             'UpperAir': {
                 'name': 'Air',

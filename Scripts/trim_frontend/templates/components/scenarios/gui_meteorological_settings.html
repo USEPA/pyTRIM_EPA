@@ -353,6 +353,10 @@
                             property_name = property_name.replace("fractions", "frac")
                         }*/
                     }
+                    // need re-pull AverageVerticalVelocity soil param
+                    if (param_info[1].value.includes('_precipitation_')) {
+                        delete TRIM.store.currentScenario.parcels;
+                    }
                 })
             } else {
                 return

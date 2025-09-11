@@ -225,4 +225,5 @@ CREATE TABLE api_key (
     UNIQUE (value)
 );
 
-INSERT INTO alembic_version (version_num) VALUES ('12f3b3bc93f9');
+-- Now handled in the full_db backup script
+-- INSERT INTO alembic_version (version_num) VALUES ('12f3b3bc93f9');
