@@ -29,7 +29,7 @@ def init_first_time_default_param_values():
         {"kwargs": {"variable_name":"AirTemperature", "default_unit":"K"}, "value": 298},
         {"kwargs": {"variable_name":"horizontalWindSpeed"}, "value": 1.6},
         {"kwargs": {"variable_name":"windDirection"}, "value": 270},
-        {"kwargs": {"variable_name":"isDay_Dynamic"}, "value": 1},
+        {"kwargs": {"variable_name":"isDay_Dynamic"}, "value": 0.5},
         {"kwargs": {"variable_name":"Rain"}, "value": 0.0041}, # Precipitation
 
         # Water Body Properties
