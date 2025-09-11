@@ -879,6 +879,7 @@ def fetch_run_results():
     if not req_data.get('bucket') or not req_data.get('uuid'):
         raise AssertionError("bucket/uuid cannot be blank.")
 
+    scenario = ScenarioService.get(req_data['scenario_id'])
     bucket = req_data['bucket']
     uuid = req_data['uuid']
 
@@ -892,9 +893,9 @@ def fetch_run_results():
     
     resp = {
         "success": True,
-        "model_output": json_content
+        "model_output": json_content,
+        "trim_data": trim_data
     }
-    resp['trim_data'] = trim_data
     
     for f in ["outputMass", "outputConc", "outputTM"]:
         full_key = f"{uuid}/{f}.xlsx"

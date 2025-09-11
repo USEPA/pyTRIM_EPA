@@ -92,7 +92,7 @@
                     {% if current_user.email.lower().endswith("@icf.com") %}
                         <a id="btn_get_tm_results" class="btn btn-warning" style="display: none" href="_top">Download Transfer Matrix</a>
                     {% endif %}
-                    <a id="btn_mirc_export" href="#" class="btn btn-primary" style="display: none" href="_top">
+                    <a id="btn_mirc_export" href="#" class="btn btn-warning" style="display: none" href="_top">
                         <i class="fa fa-file-download"></i>&nbsp;
                         Export for MIRC
                     </a>
@@ -802,7 +802,7 @@
             }
 
             var fetchAndDisplayResults = function(bucket, uuid) {
-                TRIM.api.fetchRunResults(bucket, uuid, function(success, data) {
+                TRIM.api.fetchRunResults(bucket, uuid, TRIM.store.currentScenario.id, function(success, data) {
                     var mass = "{" + data.model_output.mass + "}";
                     var conc = "{" + data.model_output.conc + "}";
                     console.log("DATA IS ....")
@@ -811,7 +811,7 @@
                     TRIM.store.latestRunInfo.run_results.conc_results = conc
                     TRIM.store.latestRunInfo.run_results.mass_results_file = data.outputMass
                     TRIM.store.latestRunInfo.run_results.conc_results_file = data.outputConc
-                            TRIM.store.latestRunInfo.run_results.trim_data = data.trim_data
+                    TRIM.store.latestRunInfo.run_results.trim_data = data.trim_data;
                     TRIM.store.latestRunInfo.lastest_run_date = data.run_date
                     $('#btn_get_mass_results').attr("href",data.outputMass)
                     $('#btn_get_mass_results').attr("download","mass_results.xlsx")
@@ -821,7 +821,7 @@
                         $('#btn_get_tm_results').attr("href", data.outputTM)
                         $('#btn_get_tm_results').attr("download", "transfer_matrix.xlsx")
                     }
-                            load_scenario_export()
+                    load_scenario_export();
                     setChecked("p#cb_proc_trm", "on")
                     setChecked("p#cb_proc_ode", "on")
                     setChecked("p#cb_proc_out", "on")

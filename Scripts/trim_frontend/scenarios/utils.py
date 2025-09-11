@@ -118,6 +118,8 @@ def compile_mirc_parcel_data(scen, chems, conc, timestamps, logger):
                 for chem_name in chems.keys():
                     props = {}
                     filtered_key = f'{chem_name}_{compartment.standard_name}'
+                    if filtered_key not in conc:
+                        continue
                     filtered_conc = list(conc[filtered_key].values())
                     filtered_conc_units = list(conc[filtered_key+"_units"].values())
 
