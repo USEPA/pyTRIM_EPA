@@ -614,6 +614,22 @@ def run_result_scenario():
     scenario_id = int(exec_data['scenario_id'])
 
     try:
+        s = ScenarioService.get(scenario_id)
+        if s.has_process_hist:
+            s.latest_proc_status.run_status = 'run tm 0'
+            s.latest_proc_status.run_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        else:
+            try:
+                new_proc = ScenarioLoadRunProc(
+                    scenario=s,
+                    load_status='load 100',
+                    run_status='run tm 0',
+                    run_datetime=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                )
+                s.proc_status.add(new_proc)
+            except Exception as e:
+                print(e)
+        ScenarioService.commit()
         # in dev/prod, we execute an AWS StepFunction to run the model via Docker/ECS. Locally,
         # we just run the model directly.
         if trim_env_profile in [ "dev", "devgetflow", "prod" ]:
@@ -625,20 +641,23 @@ def run_result_scenario():
                     stateMachineArn=state_machine_arn,
                     input=json.dumps({ "scenarioId": str(scenario_id), "generateFakeResults": "false" })
                 )
+                try:
+                    s.latest_proc_status.execution_arn = resp["executionArn"]
+                    ScenarioService.commit()
+                except Exception:
+                    pass
                 data_resp = { "executionArn": resp["executionArn"] }
             else:
                 data_resp = { "error": "Missing required variable to run re-architected model" }
         else:
-            s = ScenarioService.get(scenario_id)
             print(f"Starting Model Run ({datetime.now()}) ...")
             json_n_avg, json_c_avg, output_file_n, output_file_c, output_file_tm = run_full_model(s)
             data_resp = {"mass": json_n_avg, "conc": json_c_avg, "outputMass": output_file_n,
                          "outputConc": output_file_c, "outputTM": output_file_tm}
+            print(f"Model Run Finished ({datetime.now()}) ...")
     except Exception as e:
         print('scenario run error:', e)
         data_resp = {"error": e}
-
-    print(f"Model Run Finished ({datetime.now()}) ...")
 
     return ApiResult(data_resp)
 
@@ -786,13 +805,20 @@ def fetch_output_for_step_function_execution(execution_arn):
 
         # get the specific event relating to kickoff of the Docker container... 
         ecs_task_event = next((e for e in exec_hist_response["events"] if e.get("type") == "TaskSubmitted" and e.get("taskSubmittedEventDetails", {}).get("resourceType") == "ecs"), None)
+        if not ecs_task_event:
+            return []
         # re-parse the details/output, included as a JSON string in the boto3 reply... 
         output = json.loads(ecs_task_event.get("taskSubmittedEventDetails", {}).get("output", "{}"))
+        if not output:
+            return []
 
         # get the ECS task id
         tasks = output.get("Tasks", [])
 
         task = tasks[0] if len(tasks) > 0 else None
+        if not task:
+            return []
+
         task_arn = task.get("TaskArn")
         task_key = task_arn.split("/")[-1]
 
@@ -853,6 +879,7 @@ def fetch_run_results():
     if not req_data.get('bucket') or not req_data.get('uuid'):
         raise AssertionError("bucket/uuid cannot be blank.")
 
+    scenario = ScenarioService.get(req_data['scenario_id'])
     bucket = req_data['bucket']
     uuid = req_data['uuid']
 
@@ -866,9 +893,9 @@ def fetch_run_results():
     
     resp = {
         "success": True,
-        "model_output": json_content
+        "model_output": json_content,
+        "trim_data": trim_data
     }
-    resp['trim_data'] = trim_data
     
     for f in ["outputMass", "outputConc", "outputTM"]:
         full_key = f"{uuid}/{f}.xlsx"

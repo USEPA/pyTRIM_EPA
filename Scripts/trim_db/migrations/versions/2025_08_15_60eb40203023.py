@@ -12,7 +12,6 @@ Create Date: 2025-08-15 13:38:00.664906
 """
 from alembic import op
 import sqlalchemy as sa
-from trim_db.migrations.utils import has_results
 
 
 # revision identifiers, used by Alembic.
@@ -29,10 +28,9 @@ def upgrade():
 
     # AverageVerticalVelocity = 0.2 * precip
     # where default value of Rain = 0.0041
-    if not has_results("SELECT * FROM formula WHERE equation = '0.2 * environment.Rain' AND description= 'default AverageVerticalVelocity'"):
-        op.execute(
-            "INSERT INTO formula (equation, description) VALUES ('0.2 * environment.Rain', 'default AverageVerticalVelocity');"
-        )
+    op.execute(
+        "INSERT INTO formula (equation, description) VALUES ('0.2 * environment.Rain', 'default AverageVerticalVelocity');"
+    )
     op.execute(
         """
         UPDATE parameter_definition

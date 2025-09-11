@@ -194,6 +194,7 @@ def upgrade():
     sa.Column('result_file_tm', sa.String(length=255), nullable=True),
     sa.Column('result_nt', sa.Text(), nullable=True),
     sa.Column('result_conc', sa.Text(), nullable=True),
+    sa.Column('execution_arn', sa.String(length=255), nullable=True),
     sa.Column('scenario_id', sa.Integer(), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.ForeignKeyConstraint(['scenario_id'], ['scenario.id'], ),

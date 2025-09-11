@@ -92,7 +92,7 @@
                     {% if current_user.email.lower().endswith("@icf.com") %}
                         <a id="btn_get_tm_results" class="btn btn-warning" style="display: none" href="_top">Download Transfer Matrix</a>
                     {% endif %}
-                    <a id="btn_mirc_export" href="#" class="btn btn-primary" style="display: none" href="_top">
+                    <a id="btn_mirc_export" href="#" class="btn btn-warning" style="display: none" href="_top">
                         <i class="fa fa-file-download"></i>&nbsp;
                         Export for MIRC
                     </a>
@@ -638,44 +638,43 @@
                 }]
                 let results_data = TRIM.api.getResults(scenario_info).on('load',function(){
                     let result_data = {}
-                    let m_results = JSON.parse(JSON.stringify(this.responseJSON.mass))
-                    result_data["m_results"] = "{" + m_results.trimStart().trimEnd() + "}"
-                    let c_results = JSON.parse(JSON.stringify(this.responseJSON.conc))
-                    result_data["c_results"] = "{" + c_results.trimStart().trimEnd() + "}"
-                    result_data["m_file"] = JSON.parse(JSON.stringify(this.responseJSON.outputMass))
-                    result_data["c_file"] = JSON.parse(JSON.stringify(this.responseJSON.outputConc))
+                    result_data["m_results"] = "{" + (this.responseJSON.mass || '').trim() + "}";
+                    result_data["c_results"] = "{" + (this.responseJSON.conc || '').trim() + "}";
+                    result_data["m_file"] = (this.responseJSON.outputMass || '');
+                    result_data["c_file"] = (this.responseJSON.outputConc || '');
                     result_data["trim_data"] = JSON.parse(JSON.stringify(this.responseJSON.trim_data))
-                    let fpath = "{{ url_for('static', filename='.output') }}"
+                    let fpath = "{{ url_for('static', filename='.output') }}";
                     let t_filepath = ""
                     if (this.responseJSON.outputTM) {
-                        result_data["t_file"] = JSON.parse(JSON.stringify(this.responseJSON.outputTM))
-                        TRIM.store.latestRunInfo.run_results.tm_results_file = result_data["t_file"]
-                        t_filepath = result_data["t_file"].includes(".s3.amazonaws.com") ? result_data["t_file"] : fpath + "/" + result_data["t_file"]
+                        result_data["t_file"] = (this.responseJSON.outputTM || '');
+                        TRIM.store.latestRunInfo.run_results.tm_results_file = result_data["t_file"];
+                        t_filepath = result_data["t_file"].includes(".s3.amazonaws.com") ? result_data["t_file"] : fpath + "/" + result_data["t_file"];
                     }
-                    result_data["Last_run"] = JSON.parse(JSON.stringify(this.responseJSON.run_date))
-                    let id_sting = "_id" + scenario_info[0]["value"]
-                    TRIM.store.latestRunInfo.run_results.mass_results = result_data["m_results"]
-                    TRIM.store.latestRunInfo.run_results.conc_results = result_data["c_results"]
-                    TRIM.store.latestRunInfo.run_results.mass_results_file = result_data["m_file"]
-                    TRIM.store.latestRunInfo.run_results.conc_results_file = result_data["c_file"]
+                    result_data["Last_run"] = (this.responseJSON.run_date || '');
+                    let id_sting = "_id" + scenario_info[0]["value"];
+                    TRIM.store.latestRunInfo.run_results.mass_results = result_data["m_results"];
+                    TRIM.store.latestRunInfo.run_results.conc_results = result_data["c_results"];
+                    TRIM.store.latestRunInfo.run_results.mass_results_file = result_data["m_file"];
+                    TRIM.store.latestRunInfo.run_results.conc_results_file = result_data["c_file"];
                     TRIM.store.latestRunInfo.run_results.trim_data = result_data["trim_data"]
 
-                    TRIM.store.latestRunInfo.lastest_run_date = result_data["Last_run"]
-                    let m_filepath = result_data["m_file"].includes(".s3.amazonaws.com") ? result_data["m_file"] : fpath + "/" + result_data["m_file"]
-                    let c_filepath = result_data["c_file"].includes(".s3.amazonaws.com") ? result_data["c_file"] : fpath + "/" + result_data["c_file"]
+                    TRIM.store.latestRunInfo.lastest_run_date = result_data["Last_run"];
+                    let m_filepath = result_data["m_file"].includes(".s3.amazonaws.com") ? result_data["m_file"] : fpath + "/" + result_data["m_file"];
+                    let c_filepath = result_data["c_file"].includes(".s3.amazonaws.com") ? result_data["c_file"] : fpath + "/" + result_data["c_file"];
 
-                    $('#btn_get_mass_results').attr("href",m_filepath)
-                    $('#btn_get_mass_results').attr("download","mass_results.xlsx")
-                    $('#btn_get_conc_results').attr("href",c_filepath)
-                    $('#btn_get_conc_results').attr("download","concentration_results.xlsx")
+                    $('#btn_get_mass_results').attr("href",m_filepath);
+                    $('#btn_get_mass_results').attr("download","mass_results.xlsx");
+                    $('#btn_get_conc_results').attr("href",c_filepath);
+                    $('#btn_get_conc_results').attr("download","concentration_results.xlsx");
                     if ($('#btn_get_tm_results').length > 0) {
-                        $('#btn_get_tm_results').attr("href", t_filepath)
-                        $('#btn_get_tm_results').attr("download", "transfer_matrix.xlsx")
+                        $('#btn_get_tm_results').attr("href", t_filepath);
+                        $('#btn_get_tm_results').attr("download", "transfer_matrix.xlsx");
                     }
                     load_scenario_export()
-                    return result_data
-                })
-                return results_data
+                    $('#btn_visualize').trigger('click') // redraw
+                    return result_data;
+                });
+                return results_data;
             }
 
             const wait = function (ms = 1000) {
@@ -720,7 +719,7 @@
                             $('#lb_perc_ode').text("(100%)")
                             $('#lb_perc_out').text("(100%)")
                             $('#lb_perc_trm').text("(100%)")
-                            let result_data = get_result_data(scenario_head)
+                            get_result_data(scenario_head)
                         } else if (status == "tm") {
                             setChecked("p#cb_proc_trm", "run")
                             $('#lb_perc_trm').text("(" + percent + "%)")
@@ -802,6 +801,45 @@
                 }
             }
 
+            var fetchAndDisplayResults = function(bucket, uuid) {
+                TRIM.api.fetchRunResults(bucket, uuid, TRIM.store.currentScenario.id, function(success, data) {
+                    var mass = "{" + data.model_output.mass + "}";
+                    var conc = "{" + data.model_output.conc + "}";
+                    console.log("DATA IS ....")
+                    console.log(data)
+                    TRIM.store.latestRunInfo.run_results.mass_results = mass
+                    TRIM.store.latestRunInfo.run_results.conc_results = conc
+                    TRIM.store.latestRunInfo.run_results.mass_results_file = data.outputMass
+                    TRIM.store.latestRunInfo.run_results.conc_results_file = data.outputConc
+                    TRIM.store.latestRunInfo.run_results.trim_data = data.trim_data;
+                    TRIM.store.latestRunInfo.lastest_run_date = data.run_date
+                    $('#btn_get_mass_results').attr("href",data.outputMass)
+                    $('#btn_get_mass_results').attr("download","mass_results.xlsx")
+                    $('#btn_get_conc_results').attr("href",data.outputConc)
+                    $('#btn_get_conc_results').attr("download","concentration_results.xlsx")
+                    if (data.outputTM !== undefined) {
+                        $('#btn_get_tm_results').attr("href", data.outputTM)
+                        $('#btn_get_tm_results').attr("download", "transfer_matrix.xlsx")
+                    }
+                    load_scenario_export();
+                    setChecked("p#cb_proc_trm", "on")
+                    setChecked("p#cb_proc_ode", "on")
+                    setChecked("p#cb_proc_out", "on")
+                    setChecked("p#cb_proc_vis", "on")
+                    $('#lb_perc_trm').text("(100%)")
+                    $('#lb_perc_ode').text("(100%)")
+                    $('#lb_perc_out').text("(100%)")
+                    $('#lb_perc_vis').text("(100%)")
+                    setTimeout(function(){
+                        initialize_components()
+                        $('#btn_visualize').prop('disabled', false)
+                        $($('#plt_type').find('a.dropdown-item')[0]).trigger('click')
+                        $('#btn_visualize').prop('disabled', false).trigger('click');
+                        LoadingScreen.hide('model_run_loading');
+                    }, 3000);
+                });
+            };
+
             function run_model(scenario_head) {
                 let scenario_info = [{
                         'type': 'data',
@@ -833,44 +871,6 @@
                     let fetchResults = () => exec_model_run();
                     pollModelResults(fetchResults, statusValidator, '', 5000, 'local');
                 } else {
-                    var fetchAndDisplayResults = function(bucket, uuid) {
-                        TRIM.api.fetchRunResults(bucket, uuid, function(success, data) {
-                            var mass = "{" + data.model_output.mass + "}";
-                            var conc = "{" + data.model_output.conc + "}";
-                            console.log("DATA IS ....")
-                            console.log(data)
-                            TRIM.store.latestRunInfo.run_results.mass_results = mass
-                            TRIM.store.latestRunInfo.run_results.conc_results = conc
-                            TRIM.store.latestRunInfo.run_results.mass_results_file = data.outputMass
-                            TRIM.store.latestRunInfo.run_results.conc_results_file = data.outputConc
-                            TRIM.store.latestRunInfo.run_results.trim_data = data.trim_data
-                            TRIM.store.latestRunInfo.lastest_run_date = data.run_date
-                            $('#btn_get_mass_results').attr("href",data.outputMass)
-                            $('#btn_get_mass_results').attr("download","mass_results.xlsx")
-                            $('#btn_get_conc_results').attr("href",data.outputConc)
-                            $('#btn_get_conc_results').attr("download","concentration_results.xlsx")
-                            if (data.outputTM !== undefined) {
-                                $('#btn_get_tm_results').attr("href", data.outputTM)
-                                $('#btn_get_tm_results').attr("download", "transfer_matrix.xlsx")
-                            }
-                            load_scenario_export()
-                            setChecked("p#cb_proc_trm", "on")
-                            setChecked("p#cb_proc_ode", "on")
-                            setChecked("p#cb_proc_out", "on")
-                            setChecked("p#cb_proc_vis", "on")
-                            $('#lb_perc_trm').text("(100%)")
-                            $('#lb_perc_ode').text("(100%)")
-                            $('#lb_perc_out').text("(100%)")
-                            $('#lb_perc_vis').text("(100%)")
-                            setTimeout(function(){
-                                initialize_components()
-                                $('#btn_visualize').prop('disabled', false)
-                                $($('#plt_type').find('a.dropdown-item')[0]).trigger('click')
-                                $('#btn_visualize').prop('disabled', false).trigger('click');
-                            }, 3000)
-                        });
-                    };
-
                     // hardcoded test
                     // fetchAndDisplayResults("pytrim-dev-stalk-model-run-storage-bucket", "98a921a2-1788-11ef-a37f-0a58a9feac02");
 
@@ -887,8 +887,9 @@
 
             if (TRIM.store.latestRunInfo?.run_has_results) {
                 // Plot something for the first load
-                $($('#plt_type').find('a.dropdown-item')[0]).trigger('click')
-                $('#btn_visualize').trigger('click')
+                $($('#plt_type').find('a.dropdown-item')[0]).trigger('click');
+                $('#btn_visualize').trigger('click');
+                console.log('populated model run form!');
             }
             else if (TRIM.store.latestRunInfo?.has_run) {
                 console.log('Checking for in-progress model run ...')
@@ -905,7 +906,6 @@
                     });
                 }
             }
-            console.log('populated model run form!')
             setTimeout(() => LoadingScreen.hide('model_run_loading'), 1500);
         }
 
@@ -914,76 +914,87 @@
             let unit_type = ""
             let unit = ""
             if ($('#switch_res_conc').prop("checked")) {
-                results = JSON.parse(TRIM.store.latestRunInfo.run_results.conc_results)
-                unit_type = "Concentration"
-                unit = "(g/g)"
-                results["year"]={};
-                Object.keys(results[Object.keys(results)[0]]).forEach((e,i) => results["year"][e]=e)
+                results = JSON.parse(TRIM.store.latestRunInfo.run_results.conc_results);
+                unit_type = "Concentration";
+                unit = "(g/g)";
             } else {
-                results = JSON.parse(TRIM.store.latestRunInfo.run_results.mass_results)
-                unit_type = "Mass"
-                unit = "(g)"
+                results = JSON.parse(TRIM.store.latestRunInfo.run_results.mass_results);
+                unit_type = "Mass";
+                unit = "(g)";
             }
 
-            let selected_chem_name = $('#plt_chem').find("button.dropdown-toggle").text().trim() == "Chemical" ?
-                $($('#plt_chem').find("a.dropdown-item")[0]).text().trim() :
-                $('#plt_chem').find("button.dropdown-toggle").text().trim()
-
-            if ($('#plt_chem').find("button.dropdown-toggle").text().trim() == "Chemical") {
-                $($('#plt_chem').find("a.dropdown-item")[0]).trigger("click")
+            let pltChemVal = $('#plt_chem').find("button.dropdown-toggle").text().trim();
+            let selected_chem_name = pltChemVal;
+            if (pltChemVal == "Chemical") {
+                let pltChemItem = $($('#plt_chem').find("a.dropdown-item")[0]);
+                selected_chem_name = pltChemItem.text().trim()
+                pltChemItem.trigger("click")
             }
 
-            let selected_comp_name = $('#plt_comp').find("button.dropdown-toggle").text().trim() == "Compartment" ?
-                $($('#plt_comp').find("a.dropdown-item")[0]).text().trim() :
-                $('#plt_comp').find("button.dropdown-toggle").text().trim()
+            let pltCompVal = $('#plt_comp').find("button.dropdown-toggle").text().trim();
+            let selected_comp_name = pltCompVal;
 
             let comp_names = []
-            if ($('#plt_comp').find("button.dropdown-toggle").text().trim() == "Compartment") {
-                $($('#plt_comp').find("a.dropdown-item")[0]).trigger("click")
-                comp_names = [$('#plt_comp').find("button.dropdown-toggle").text().trim()]
-            } else {
-                comp_names = $('#div_comp_pill').find('h5').map((i,e) => $(e).find('span').text().trim())
+            if (pltCompVal == "Compartment") {
+                let pltCompItem = $($('#plt_comp').find("a.dropdown-item")[0]);
+                selected_comp_name = pltCompItem.text().trim()
+                pltCompItem.trigger("click");
+                comp_names = [selected_comp_name];
+            }
+            else {
+                comp_names = $('#div_comp_pill').find('h5').map(
+                    (i,e) => $(e).find('span').text().trim()
+                );
             }
 
             let pData = []
 
-            pData[0]=["year"]
-            for (let ind = 0; ind <= comp_names.length-1; ind++) {
-                let selected_comp = selected_chem_name + '_' + comp_names[ind]
+            pData[0] = ["year"]
+            for (let i = 0; i <= comp_names.length - 1; i++) {
+                let selected_comp = selected_chem_name + '_' + comp_names[i]
                 pData[0].push(selected_comp)
             }
 
             Object.keys(results["year"]).forEach(
                 function(e, i) {
-                    pData[i+1]=[];
+                    pData[i + 1] = [];
                     pData[0].forEach(
-                        (c, ii) => {
-                            pData[i+1].push(Number(results[c][e]))
+                        (c) => {
+                            pData[i + 1].push(Number(results[c][e]))
                         }
                     )
                 }
             )
 
             // data.addRows(pData)
-            let data = google.visualization.arrayToDataTable(pData)
+            let data = google.visualization.arrayToDataTable(pData);
+
+            // years as plain numbers
+            (new google.visualization.NumberFormat({
+                pattern: '####'
+            })).format(data, 0);
+
+            // data as scientific notation
+            (new google.visualization.NumberFormat({
+                pattern: 'scientific'
+            })).format(data, 1);
 
             // Set chart options
-            let options = {
-                'title':`${unit_type} for ` + selected_comp_name,
-                'subtitle': 'in grams',
-                'width':800,
-                'height':600,
-                'hAxis': {
-                    'title': 'Year',
-                    'format': '####'
-                },
-                'vAxis': {
-                    'title': `${unit_type} ${unit}`
-                }
-            };
-
             let chart = new google.visualization.LineChart(document.getElementById('plot_div'));
-            chart.draw(data, options)
+            chart.draw(data, {
+                title: `${unit_type} for ` + selected_comp_name,
+                subtitle: 'in grams',
+                width: 800,
+                height: 600,
+                hAxis: {
+                    title: 'Year',
+                    format: '####'
+                },
+                vAxis: {
+                    title: `${unit_type} ${unit}`,
+                    format: 'scientific'
+                }
+            })
         }
 
         function draw_mass_dist_chart(c_type){
@@ -991,15 +1002,13 @@
             let unit_type = ""
             let unit = ""
             if ($('#switch_res_conc').prop("checked")) {
-                results = JSON.parse(TRIM.store.latestRunInfo.run_results.conc_results)
-                unit_type = "Concentration"
-                unit = "(g/g)"
-                results["year"]={};
-                Object.keys(results[Object.keys(results)[0]]).forEach((e,i) => results["year"][e]=e)
+                results = JSON.parse(TRIM.store.latestRunInfo.run_results.conc_results);
+                unit_type = "Concentration";
+                unit = "(g/g)";
             } else {
-                results = JSON.parse(TRIM.store.latestRunInfo.run_results.mass_results)
-                unit_type = "Mass"
-                unit = "(g)"
+                results = JSON.parse(TRIM.store.latestRunInfo.run_results.mass_results);
+                unit_type = "Mass";
+                unit = "(g)";
             }
 
             let selected_chem_name = $('#plt_chem').find("button.dropdown-toggle").text().trim() == "Chemical" ?

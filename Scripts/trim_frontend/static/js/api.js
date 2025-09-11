@@ -403,9 +403,13 @@ window.TRIM = (function(trim) {
         });
     }
 
-    api.fetchRunResults = function(bucket, uuid, callback_fxn) {
+    api.fetchRunResults = function(bucket, uuid, scenario_id, callback_fxn) {
         let url = api.getUrl('scenario_api.fetch_run_results');
-        let data = makeFormData([{ "name": "bucket", "value": bucket }, {"name": "uuid", "value": uuid}])
+        let data = makeFormData([
+            { "name": "bucket", "value": bucket }, 
+            { "name": "uuid", "value": uuid }, 
+            { "name": "scenario_id", "value": scenario_id }
+        ])
         return AJAX.call({
             method: 'POST',
             url: url,
