@@ -267,8 +267,8 @@
                 'is_editable': false,
                 'default_value': 0,
                 'unit': 'm<sup>3</sup> [sediment] /m<sup>2</sup> [sediment bed interface] /d',
-                'helpText': 'Volume of sediment received per day by the water body&#39;s sediment bed (per unit area) from the suspended sediment in the water column. Ratio of the product of the water column sediment deposition velocity (2 m [water] / d; source unknown) and the Water Column Suspended Sediment Concentration to the Sediment Bed Density.' +
-                    '<strong><p>= (water column sediment deposition velocity (2 m [water] / d) * Water Column Suspended Sediment Concentration / Sediment Bed Density)</p></strong>'
+                'helpText': 'Volume of sediment received per day by the water body’s sediment bed (per unit area) from the suspended sediment in the water column. Ratio of the product of the Water Column Sediment Deposition Velocity and the Water Column Suspended Sediment Concentration to the Sediment Bed Density.' +
+                    '<strong><p>= Water Column Sediment Deposition Velocity * Water Column Suspended Sediment Concentration / Sediment Bed Density)</p></strong>'
             },
             'Soil Erosion Rate to Water Body':{
                 'short_name':'sed_soil_erosion_to_sw',
@@ -307,8 +307,13 @@
         function TableRedraw(table_data, table_type){
             let tblHandle = table_type == "lake" ? lkTable : sdTable
             let tblId = table_type == "lake" ? '#LakeTable' : '#SedTable'
+            
+            let scrollBody = $(tblId + '_wrapper').find('.dataTables_scrollBody');
+            let scrollTop = scrollBody.length > 0 ? scrollBody.scrollTop() : 0;
+            
             tblHandle.clear().draw();
             tblHandle.destroy()
+            
             tblHandle = $(tblId).removeAttr('width').DataTable({
                 data : table_data,
                 aaSorting: [],
@@ -330,6 +335,17 @@
                     $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
+
+                    if (scrollTop > 0) {
+                        //using setTimeout to ensure DOM is fully rendered
+                        setTimeout(function() {
+                            let newScrollBody = $(tblId + '_wrapper').find('.dataTables_scrollBody');
+                            if (newScrollBody.length > 0) {
+                                newScrollBody.scrollTop(scrollTop);
+                            }
+                        }, 0);
+                    }
+
                 }
             });
 

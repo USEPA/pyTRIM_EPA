@@ -123,6 +123,22 @@ let ErrorValidation = {
         let is_valid = parseFloat(data) <= 1;
         return ErrToolTip(ele, is_valid, "Fractional value must be no greater than 1.");
     },
+    isInputAtLeast : function (ele, min) {
+        if (!this.isPositiveValue(ele)) {
+            return false;
+        }
+        let data = $(ele).val();
+        let is_valid = parseFloat(data) >= min;
+        return ErrToolTip(ele, is_valid, "Fractional value must be at least " + min + ".");
+    },
+    isInputInRange : function (ele, min, max){
+        if (!this.isPositiveValue(ele)) {
+            return false;
+        }
+        let data = $(ele).val();
+        let is_valid = parseFloat(data) >=min & parseFloat(data) <= max;
+        return ErrToolTip(ele, is_valid, "Fractional value must be in the range " + min + " to "+ max +".");
+    },
     isInSimulationTimeSpan: function(ele, datedata){
         let has_data = datedata.length > 0;
         return ErrToolTip(ele, has_data, "Input date(s) not in simulation date range.")

@@ -275,7 +275,7 @@
                     {
                         'data': "AirHeight",
                         'bSortable': false,
-                        'render':  render_function_air('airHeight', "ErrorValidation.isPositiveValue(this)")
+                        'render':  render_function_air('airHeight', "ErrorValidation.isInputAtLeast(this,20)")
                     }
                 ],
                 initComplete: function (settings, json) {
@@ -381,7 +381,7 @@
                     {
                         'data': 'Soil_Surface.pH',
                         'bSortable': false,
-                        'render':  render_function_soil('pH',"ErrorValidation.isPositiveValue(this)", "Soil_Surface")
+                        'render':  render_function_soil('pH',"ErrorValidation.isInputInRange(this, 0, 14)", "Soil_Surface")
                     },
                     {
                         'data': 'Soil_Surface.TotalRunoffRate',
@@ -453,7 +453,7 @@
                     {
                         'data': 'Soil_Root_Zone.pH',
                         'bSortable': false,
-                        'render':  render_function_soil('pH',"ErrorValidation.isPositiveValue(this)", "Soil_Root_Zone")
+                        'render':  render_function_soil('pH',"ErrorValidation.isInputInRange(this, 0, 14)", "Soil_Root_Zone")
                     },
                     {
                         'data': "Soil_Root_Zone.VolumeFraction_Liquid",
@@ -520,7 +520,7 @@
                     {
                         'data': 'Soil_Vadose_Zone.pH',
                         'bSortable': false,
-                        'render':  render_function_soil('pH',"ErrorValidation.isPositiveValue(this)", "Soil_Vadose_Zone")
+                        'render':  render_function_soil('pH',"ErrorValidation.isInputInRange(this, 0, 14)", "Soil_Vadose_Zone")
                     },
                     {
                         'data': "Soil_Vadose_Zone.VolumeFraction_Liquid",
@@ -577,7 +577,7 @@
                     {
                         'data': 'Groundwater.pH',
                         'bSortable': false,
-                        'render':  render_function_soil('pH',"ErrorValidation.isPositiveValue(this)", "Groundwater")
+                        'render':  render_function_soil('pH',"ErrorValidation..isInputInRange(this, 0, 14)", "Groundwater")
                     },
                     {
                         'data': 'Groundwater.Porosity',
