@@ -6,6 +6,10 @@ from trim_db.services import ParameterService
 @register_serializer(Scenario)
 def serialize_scenario(scen: Scenario):
     start_time, end_time = scen.sim_begin_end_time
+    try:
+        erosion_source = scen.erosionRateCalcSource
+    except Exception:
+        erosion_source = 1
     s = {
         'id': scen.id,
         'name': scen.name,
@@ -13,7 +17,8 @@ def serialize_scenario(scen: Scenario):
         'simulation_start_date': start_time,
         'simulation_end_date': end_time,
         'has_chemicals': len(list(scen.chemicals)) > 0,
-        'has_parcels': len(list(scen.parcels)) > 0
+        'has_parcels': len(list(scen.parcels)) > 0,
+        'erosionRateSource': erosion_source
     }
     return s
    
@@ -25,15 +30,16 @@ def get_met_data(scen):
     else:
         ambient_air_temp = None
 
-    mixing_height = scen.mixingHeight
-    if mixing_height:
-        mixing_height = mixing_height.magnitude
-    if not mixing_height:
-        air_comps = [
-            c for c in scen.get_compartment(media='Air')
-            if "Upper" not in c.standard_name
-        ]
-        mixing_height = max([c.height.magnitude for c in air_comps])
+    # All air compartments are expected to have the same height = mixing height
+    air_comps = [
+        c for c in scen.get_compartment(media='Air')
+        if "Upper" not in c.standard_name
+    ]
+    if len(air_comps) == 0:
+        print("\nThis scenario does not have any parcels containing air volume elements\n")
+        mixing_height = -1
+    else:
+        mixing_height = air_comps[0].volume_element.height.magnitude
 
     met_data = {
         'ambient_air_static_value': ambient_air_temp,
@@ -151,14 +157,18 @@ def get_seasonal_dynamics_params(scen, sd_type, media_name, default=-1):
 def get_latest_run_info(scen):
     import json
     from pathlib import Path
+    from .utils import compile_mirc_data
+
     run_info = {'has_run': scen.has_process_hist,
                 "lastest_run_date": "",
+                "execution_arn": "",
                 "run_has_results": False,
                 "run_results": {}
                 }
     if run_info["has_run"]:
-        proc_info = [*scen.proc_status][0]
+        proc_info = scen.latest_proc_status
         run_info["lastest_run_date"] = proc_info.run_datetime.strftime('%Y-%m-%d "%H:%M:%S"')
+        run_info["execution_arn"] = proc_info.execution_arn or ""
         run_info["run_has_results"] = True if proc_info.run_status == 'run fin 100' else False
         if run_info["run_has_results"]:
             run_info["run_results"] = {
@@ -166,6 +176,7 @@ def get_latest_run_info(scen):
                 "mass_results_file": proc_info.result_file_nt if ".s3.amazonaws.com" in proc_info.result_file_nt else Path(proc_info.result_file_nt).name,
                 "conc_results": f'{{{json.loads(json.dumps(json.loads(proc_info.result_conc), indent=4, sort_keys=True, default=str))}}}',
                 "conc_results_file": proc_info.result_file_conc if ".s3.amazonaws.com" in proc_info.result_file_conc else Path(proc_info.result_file_conc).name,
+                "trim_data": compile_mirc_data(scen, scen.latest_proc_status)
             }
             if hasattr(proc_info, 'result_file_tm'):
                 run_info["run_results"]["tm_results_file"] = proc_info.result_file_tm if ".s3.amazonaws.com" in proc_info.result_file_tm else Path(proc_info.result_file_tm).name
@@ -217,108 +228,3 @@ param_map = {
         'seasonal_agriculture_allowexchange_field_name_TS': ['Agriculture_Leaf', 'AllowExchange_Dynamic'],
     }
 }
-
-EROSION_TABLE_KWARGS = [
-        # table 1
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion1-total_effective_erosion_rate",
-            "domain_id": 1,
-        },
-
-        # table 2
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion2-unit_soil_loss",
-            "domain_id": 1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion2-empirical_intercept_coefficient",
-            "domain_id": 1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion2-empirical_slope_coefficient",
-            "domain_id": 1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion2-sediment_delivery_ratio",
-            "domain_id": 1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion2-total_effective_erosion_rate",
-            "domain_id": 1,
-        },
-
-        # table 3
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-rainfall_erosivity_index",
-            "domain_id": 1,
-            "default_value": 300,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-erodibility_index",
-            "domain_id": 1,
-            "default_value": 3.6e-1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-slope_gradient",
-            "domain_id": 1,
-            "default_value": 1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-slope_length",
-            "domain_id": 1,
-            "default_value": 1.5,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-topographical_length-slope_factor",
-            "domain_id": 1,
-            "default_value": 1.5,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-cover_management_factor",
-            "domain_id": 1,
-            "default_value": 0.1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-supporting_practices_factor",
-            "domain_id": 1,
-            "default_value": 1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-unit_soil_loss",
-            "domain_id": 1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-empirical_intercept_coefficient",
-            "domain_id": 1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-empirical_slope_coefficient",
-            "domain_id": 1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-sediment_delivery_ratio",
-            "domain_id": 1,
-        },
-        {
-            "variable_name": "erosion_table",
-            "full_name": "erosion3-total_effective_erosion_rate",
-            "domain_id": 1,
-        },
-    ]

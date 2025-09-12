@@ -209,6 +209,7 @@ CREATE TABLE scenario_load_run_proc (
     result_file_conc VARCHAR(255), 
     result_nt VARCHAR, 
     result_conc VARCHAR, 
+    execution_arn VARCHAR(255), 
     scenario_id INTEGER NOT NULL, 
     PRIMARY KEY (id), 
     FOREIGN KEY(scenario_id) REFERENCES scenario (id)
@@ -224,4 +225,5 @@ CREATE TABLE api_key (
     UNIQUE (value)
 );
 
-INSERT INTO alembic_version (version_num) VALUES ('12f3b3bc93f9');
+-- Now handled in the full_db backup script
+-- INSERT INTO alembic_version (version_num) VALUES ('12f3b3bc93f9');

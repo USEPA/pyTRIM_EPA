@@ -110,11 +110,16 @@
             TRIM.api.getChemicalProperties('{{ scenario.id }}').on('load', function () {
                 TRIM.store.currentScenario.chemical_properties = this.responseJSON
             });
+            TRIM.api.getMeteorology(TRIM.store.currentScenario).on('load', function () {
+                TRIM.store.currentScenario.meteorology = this.responseJSON.meteorology;
+            });
             document.body.addEventListener('parcels:ready', updateSummaryFields());
         });
 
         function updateSummaryFields() {
-            if (!TRIM.store.currentScenario.parcels || !TRIM.store.currentScenario.chemical_properties) {
+            if (!TRIM.store.currentScenario.parcels 
+            || !TRIM.store.currentScenario.chemical_properties
+            || !TRIM.store.currentScenario.meteorology) {
                 // Parcels haven't loaded yet; wait a bit and try again
                 setTimeout(function() { updateSummaryFields(); }, 1000);
                 return;
@@ -344,7 +349,6 @@
                         "Land Use": {'value': scenario.parcels[prc_ind].landUse, 'unit': '-', 'fieldname': ''},
                         "Soil Tillage": {'value': scenario.parcels[prc_ind].soilTillage, 'unit': '-', 'fieldname': ''},
                         "Air Density": {'value': scenario.parcels[prc_ind].airDensity, 'unit': 'g/cm<sup>3</sup>', 'fieldname': ''},
-                        "Air Height": {'value': scenario.parcels[prc_ind].airHeight, 'unit': 'm', 'fieldname': ''},
                         "Area": {'value': scenario.parcels[prc_ind].area, 'unit': 'm<sup>2</sup>', 'fieldname': ''},
                     },
                     "Compartment":{
@@ -420,7 +424,7 @@
                         "(Groundwater Zone) pH": {'value': scenario.parcels[prc_ind].soil_params.Groundwater?.pH ?? '-', 'unit': '-', 'fieldname':''},
                     },
                     "Volume Element": {
-                        "(Air) Air Height": {'value': scenario.parcels[prc_ind].airHeight, 'unit': 'm', 'fieldname': ''},
+                        "(Air) Air Height": {'value': scenario.meteorology.mixing_height_static_value, 'unit': 'm', 'fieldname': ''},
                         "(Surface Soil) Thickness": {'value': scenario.parcels[prc_ind].surfaceSoilThickness, 'unit': 'm', 'fieldname': ''},
                         "(Vadose Soil) Thickness": {'value': scenario.parcels[prc_ind].vadoseSoilThickness, 'unit': 'm', 'fieldname': ''},
                         "(Root Soil) Thickness": {'value': scenario.parcels[prc_ind].rootSoilThickness, 'unit': 'm', 'fieldname': ''},

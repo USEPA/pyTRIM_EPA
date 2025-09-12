@@ -1,10 +1,9 @@
+import pandas as pd
 import numpy as np
-from trim_db.schema import Parcel
+from trim_db.schema import ureg, Parcel
 from trim_db.schema.utils.serialize import register_serializer
 from trim_db.schema.parameters.models import ParameterDefinition, CustomParameter
 from trim_db.services import *
-from trim_frontend.scenarios.defaults import EROSION_TABLE_KWARGS
-import pint
 
 
 @register_serializer(Parcel)
@@ -62,28 +61,31 @@ def get_general_params(pcl):
     dust_load = None
     dust_density = None
     fraction_organic_matter_on_particulates = None
+    erosion_source = 1
     total_erosion_rate = None
     is_tilled = False
 
+    # HACKY
     erosion_table_params = {}
-
-    # FIXME -- the commented-out code below will never do anything,
-    # because these params are defined by EROSION_TABLE_KWARGS as Scenario-domain parameters,
-    # and thus will never have Parcel-domain custom parameters -- which don't exist in any event,
-    # as Parcel models are not parameterized!!
-
-    # default_erosion = [
-    #     ParameterService.definitions.get(full_name=kwargs["full_name"])
-    #     for kwargs in EROSION_TABLE_KWARGS
-    # ]
-    # for default_param in default_erosion:
-    #     custom_param = ParameterService.get(
-    #         scenario_id=pcl.scenario_id,
-    #         requirements=f"(self.id == {pcl.id})",
-    #         definition_id=default_param.id,
-    #     )
-    #     if custom_param and custom_param.unit:
-    #         erosion_table_params[default_param.full_name] =  custom_param.unit
+    for param in list(pcl.scenario.parameters.values()):
+        if not isinstance(param, CustomParameter):
+            continue
+        if not param.requirements == f'(self.id == {pcl.id})':
+            continue
+        if not(
+            param.variable_name.startswith('erosion1-')
+            or param.variable_name.startswith('erosion2-')
+            or param.variable_name.startswith('erosion3-')
+        ):
+            continue
+        if param.variable_name.endswith('-active'):
+            erosion_table_params[
+                param.variable_name.split('-')[0] + '-active'
+            ] = EROSION_TABLE_PARAM_MAP.get(
+                param.variable_name.split('-', 1)[1].rsplit('-', 1)[0]
+            )
+        else:
+            erosion_table_params[param.variable_name] =  param.value
 
     surface_soil_height = None
 
@@ -266,6 +268,13 @@ def get_watershed_area(pcl):
     # 1. get runoff fractions matrix (rom) and parcel areas as vector (pav)
     ro_array = ScenarioService(pcl.scenario).get_surface_runoff()
 
+    pcl_types = [
+        "water"
+        if pcl.scenario.get_parcel(name=pn).get_compartment("Surface_water")
+        else "N/A"
+        for pn in ro_array.keys()
+    ]
+
     pa_dict = {pp.name: pp.area.magnitude for pp in pcl.scenario.parcels}
     rom = []
     pav = []
@@ -282,31 +291,46 @@ def get_watershed_area(pcl):
     pav = np.array(pav)
     rom = np.array(rom)
     # 2. Compute watershed area matrix
-    wsa_matrix = compute_watershed_areas(rom, pav)
+    wsa_matrix = compute_watershed_areas(rom, pav, pcl_types)
     # 3. get the watershed area specific to this surface water parcel
-    pcl_watershed = wsa_matrix[pcl_names.index(pcl.name)]
-    return pcl_watershed[0, 0]
+    return wsa_matrix.loc[pcl_names.index(pcl.name), 0]
 
 
-def compute_watershed_areas(runoff_matrix, area_parcels):
-    # function to compute watershed areas by markov chain estimation. Only works if lakes runoff 100% to themselves.
+def compute_watershed_areas(runoff_matrix, area_parcels, parcel_type):
+    # v3 deducts area of lakes from watershed (technically the area of a lake catches rain and 
+    # delivers it to the lake and this how MC computes it. but to be consistent with the builder 
+    # formulas this version substracts lake areas from runoff area of lakes only)
+    # function to compute watershed areas by markov chain estimation. Only works if lakes runoff 100% to themselves. 
     # Land parcel do not have watersheds and will tend to zero but lake parcel watersheds will be accurate.
-    # runoff_matrix is a square nxn matrix that must not include sinks and must include lakes in both rows and columns.
-    # Lakes must run off 100% to themselves. n is a large number like 200 or 300 that will enable the markov chain to
-    # reach steady state. area_parcels is a single matrix with areas of all parcels in the same order as the rows/cols
-    # of the runoff_matrix.
-    # Note: the transpose is required because of the arrangement of the matrix such that row are senders and cols are
-    # receivers. When multiplying by area matrix to estimate watershed, the rows must be receivers, so transpose.
-    m = np.matrix(runoff_matrix)  # convert to np matrix
+    # runoff_matrix is a square nxn matrix that must not include sinks and must include lakes in both rows and columns. 
+    # Lakes must runoff 100% to themselves.
+    # n is a large number like 200 or 300 that will enable the markov chain to reach steady state. 
+    # area_parcels is a single matrix with areas of all parcels in the same order as the rows/cols of the runoff_matrix
 
-    # raise M to a large number (markov chain estimation of probabilities of endpoint of flow)
-    m_n = np.linalg.matrix_power(m, 500)
+    # New in v3: parcel_type is a list of parcel type with the same indexing as the other matrices. 
+    # Note: the transpose is required because of the arrangment of the matrix such that row are senders 
+    # and cols are receivers. When multiplying by area matrix to estimate watershed, the rows must be receivers, so transpose.
 
-    m_n_t = m_n.T  # transpose of M_n so that it can be multiplied as a dot product with
+    M = np.matrix(runoff_matrix)# convert to np matrix
+    M = np.nan_to_num(M)
+    M_n = np.linalg.matrix_power(M, 1000) # raise M to a large number (markov chain estimation of probabilities of endpoint of flow)
+    M_n_T = M_n.T # transpose of M_n so that it can be multiplied as a dot product with area parcels
+    
+    try:
+        indexlist=area_parcels.index
+    except:
+        indexlist=[] # if already a matrix then 
+    area_parcels = np.matrix(area_parcels)# convert to np matrix
 
-    runoff_areas = m_n_t @ area_parcels  # this is the dot product
+    runoff_areas = M_n_T @ area_parcels
+    try:
+        runoff_areas=pd.DataFrame(runoff_areas,index=indexlist)
+    except:
+        runoff_areas=pd.DataFrame(runoff_areas)
 
-    return runoff_areas
+    # new line to subtract parcel area from runoff area is parcel type is water
+    runoff_areas.loc[pd.Series(parcel_type).str.contains('water', case=False), 0] -= np.array(area_parcels[pd.Series(parcel_type).str.contains('water', case=False)]).flatten()
+    return (runoff_areas)
 
 
 def calculate_avg_precipitation_runoff_fraction(all_soil_comps, fraction_name):
@@ -320,7 +344,10 @@ def calculate_avg_precipitation_runoff_fraction(all_soil_comps, fraction_name):
         pcl_runoff_fraction = getattr(soil_comp, fraction_name)
         numerator += (pcl_area * pcl_runoff_fraction)
         denominator += pcl_area
-    return numerator / denominator
+    try:
+        return numerator / denominator
+    except ZeroDivisionError:
+        return 0
 
 
 def get_correct_param(par_name, par_obj):
@@ -445,7 +472,7 @@ def get_water_params(pcl, parcel_type):
         )
 
         precipitation_vol_rate_to_sw = 0  # 4.8E6
-        wc_external_inflow = 0
+        wc_external_inflow = get_correct_param("ExternalWaterInflow", sw_pars)
 
         try:
             precipitation_vol_rate_to_sw = (
@@ -550,6 +577,7 @@ def get_water_params(pcl, parcel_type):
                 'water_ph': get_correct_param("pH", sw_pars),
                 'sed_deposition_vel': get_correct_param("SedimentDepositionVelocity", sw_pars),
                 'water_temp': get_correct_param("WaterTemperature", sw_pars),
+                'externalWaterInflow': wc_external_inflow,
                 'sed_inflow': get_correct_param("ExternalSedimentInflow", sw_pars),
                 'discharge_vol_rate': wc_discharge_vol_rate,
                 'sed_discharge_rate': wc_sed_discharge_rate,
@@ -701,8 +729,8 @@ AQUATIC_DIET = {
         "FractionDietZooplankton": 0,
         "FractionDietBenthicInvertebrate": 0,
         "FractionDietFishHerbivore": 0,
-        "FractionDietFishBenthicOmnivore": 0.5,
-        "FractionDietFishOmnivore": 0.5,
+        "FractionDietFishBenthicOmnivore": 0,
+        "FractionDietFishOmnivore": 1,
         "FractionDietFishBenthicCarnivore": 0,
         "FractionDietFishCarnivore": 0
     },
@@ -792,7 +820,7 @@ Wet_Dry_Source_VolElem_defaults = {
 Air_Parcel_VolElem_defaults = {
     'Air': {
         'name': 'Air',
-        'top': 800,
+        'top': 226,
         'bottom': 0,
         'Compartments': {
             'Air': {
@@ -807,8 +835,8 @@ Air_Parcel_VolElem_defaults = {
     },
     'UpperAir': {
         'name': 'UpperAir',
-        'top': 1000,
-        'bottom': 800,
+        'top': 10000,
+        'bottom': 226,
         'Compartments': {
             'UpperAir': {
                 'name': 'Air',
@@ -1106,14 +1134,6 @@ SURFACE_SOIL_SPECIFIC_MEDIA_PARAMS = [
         'default_formula_id': 2485
     },
     {
-        'variable_name': 'unitSoilLoss',
-        'full_name': 'unitSoilLoss',
-        'domain_id': None,
-        'default_value': 0.00036,
-        'default_unit': 'kg/m^2/day',
-        'default_formula_id': None
-    },
-    {
         'variable_name': 'sedimentDeliveryRatioSlopeCoef',
         'full_name': 'sedimentDeliveryRatioSlopeCoef',
         'domain_id': None,
@@ -1122,3 +1142,25 @@ SURFACE_SOIL_SPECIFIC_MEDIA_PARAMS = [
         'default_formula_id': None
     }
 ]
+
+EROSION_TABLE_PARAM_MAP = {
+    'rainfall_erosivity_index': 'R',
+    'erodibility_index': 'K',
+    'slope_gradient': 'S',
+    'slope_length': 'L',
+    'topographical_length-slope_factor': 'LS',
+    'cover_management_factor': 'C',
+    'supporting_practices_factor': 'P',
+    'unit_soil_loss': 'A',
+    'empirical_intercept_coefficient': 'a',
+    'empirical_slope_coefficient': 'b',
+    'sediment_delivery_ratio': 'SD',
+    'total_effective_erosion_rate': 'Total Effective Erosion Rate'
+}
+
+EROSION_DEFAULTS = {
+    'R': 300 * ureg('((100 * ft * US_ton) / acre) / year'),
+    'K': 0.36 * ureg('(ton / acre) / ((100 * ft * US_ton) / acre)'),
+    'LS': 1.5,
+    'P': 1
+}

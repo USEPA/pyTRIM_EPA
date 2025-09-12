@@ -253,9 +253,7 @@
                 submit_meteo_value(e.target);
             });
             $('#daytime_indicator_static_value').on('change', function(e) {
-                let daytime_val = parseFloat($(e.target).val());
-                let valid_daytime = (daytime_val == 0 || daytime_val == 1);
-                let is_valid = ErrToolTip(e.target, valid_daytime, "Daytime Indicator must be either 0 or 1.", "div");
+                let is_valid = ErrorValidation.isWithinRange(e.target, "div", 0, 1);
                 if (is_valid) {
                     submit_meteo_value(e.target);
                 }
@@ -352,6 +350,10 @@
                             property_name = "wet_dep_" + property_name;
                             property_name = property_name.replace("fractions", "frac")
                         }*/
+                    }
+                    // need re-pull AverageVerticalVelocity soil param
+                    if (param_info[1].value.includes('_precipitation_')) {
+                        delete TRIM.store.currentScenario.parcels;
                     }
                 })
             } else {

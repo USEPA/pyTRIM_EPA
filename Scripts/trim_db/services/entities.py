@@ -86,7 +86,7 @@ class TransportProcessService(GenericService):
     __model__ = TransportProcess
 
 
-@CacheManager.with_caching('link-tps::')
+@CacheManager.with_caching('link-tps')
 def get_transport_processes(link, chemical):
     tfs = TransportProcessService.get_all()
     s = link.sender

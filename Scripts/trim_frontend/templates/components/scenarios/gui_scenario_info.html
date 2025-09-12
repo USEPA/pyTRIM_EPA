@@ -125,6 +125,7 @@
             let resp = TRIM.api.updateScenario(param_info).on('load',function(){
                 let val_resp = this.responseJSON
                 if (this.responseText == 'success') {
+                    TRIM.store.currentScenario[param_info[2].name] = param_info[2].value
                     if ($(form_field).attr("name") == 'name') {
                         $('#root').find('h1.text-center.pb-2').text($(form_field).val())
                     }

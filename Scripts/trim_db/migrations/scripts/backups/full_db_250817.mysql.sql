@@ -15,6 +15,12 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
+--
+-- Dumping data for table `alembic_version`
+--
+
+INSERT INTO alembic_version (version_num) VALUES ('151911e8b6a9');
+
 
 --
 -- Dumping data for table `api_key`
