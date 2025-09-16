@@ -108,6 +108,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
 
     # Update the specified property
     field_name = parcels_data["field"]
+
     if field_name == "parcelType":
         # Delete all compartments and volume elements
         delete_parcel_contents(p)
@@ -618,6 +619,14 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             raise Exception("unexpected param_obj type...")
 
         ParameterService.commit()
+    elif field_name == "vertices":
+        print(f"save vertices change FOR {p.id} / {p.name}...")
+        coords_data = json.loads(parcels_data.get("vertices", []))
+
+        if coords_data:
+            # coords_data is lat,long; we store long,lat in TRIM
+            long_lat = [ [x[1], x[0]] for x in coords_data ]
+            p.vertices = long_lat
 
 
     # Update record
