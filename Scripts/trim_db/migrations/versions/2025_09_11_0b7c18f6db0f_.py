@@ -18,9 +18,9 @@ depends_on = None
 
 
 def upgrade():
-    op.execute(
-        "ALTER TABLE scenario_load_run_proc ADD COLUMN execution_arn VARCHAR(255);"
-    )
+    #op.execute(
+    #    "ALTER TABLE scenario_load_run_proc ADD COLUMN execution_arn VARCHAR(255);"
+    #)
 
     op.execute(
         "UPDATE parameter_definition SET default_value = 0.5 WHERE variable_name = 'isDay_Dynamic';"
@@ -28,9 +28,9 @@ def upgrade():
 
 
 def downgrade():
-    op.execute(
-        "ALTER TABLE scenario_load_run_proc DROP COLUMN execution_arn;"
-    )
+    #op.execute(
+    #    "ALTER TABLE scenario_load_run_proc DROP COLUMN execution_arn;"
+    #)
 
     op.execute(
         "UPDATE parameter_definition SET default_value = 1 WHERE variable_name = 'isDay_Dynamic';"
