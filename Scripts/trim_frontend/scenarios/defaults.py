@@ -157,14 +157,14 @@ def get_seasonal_dynamics_params(scen, sd_type, media_name, default=-1):
 def get_latest_run_info(scen):
     import json
     from pathlib import Path
-    from .utils import compile_mirc_data
 
-    run_info = {'has_run': scen.has_process_hist,
-                "lastest_run_date": "",
-                "execution_arn": "",
-                "run_has_results": False,
-                "run_results": {}
-                }
+    run_info = {
+        'has_run': scen.has_process_hist,
+        "lastest_run_date": "",
+        "execution_arn": "",
+        "run_has_results": False,
+        "run_results": {}
+    }
     if run_info["has_run"]:
         proc_info = scen.latest_proc_status
         run_info["lastest_run_date"] = proc_info.run_datetime.strftime('%Y-%m-%d "%H:%M:%S"')
@@ -176,7 +176,6 @@ def get_latest_run_info(scen):
                 "mass_results_file": proc_info.result_file_nt if ".s3.amazonaws.com" in proc_info.result_file_nt else Path(proc_info.result_file_nt).name,
                 "conc_results": f'{{{json.loads(json.dumps(json.loads(proc_info.result_conc), indent=4, sort_keys=True, default=str))}}}',
                 "conc_results_file": proc_info.result_file_conc if ".s3.amazonaws.com" in proc_info.result_file_conc else Path(proc_info.result_file_conc).name,
-                "trim_data": compile_mirc_data(scen, scen.latest_proc_status)
             }
             if hasattr(proc_info, 'result_file_tm'):
                 run_info["run_results"]["tm_results_file"] = proc_info.result_file_tm if ".s3.amazonaws.com" in proc_info.result_file_tm else Path(proc_info.result_file_tm).name

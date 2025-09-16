@@ -681,7 +681,6 @@ def get_result_scenario():
         output_file_t = Path(s.latest_proc_status.result_file_tm).name
         json_n_avg = s.latest_proc_status.result_nt
         json_c_avg = s.latest_proc_status.result_conc
-        trim_data = compile_mirc_data(s, s.latest_proc_status, logger)
         result_resp = json.loads(json.dumps({
             "mass": json.loads(json_n_avg), 
             "conc": json.loads(json_c_avg), 
@@ -689,8 +688,7 @@ def get_result_scenario():
             "run_date": run_date, 
             "outputMass": output_file_n, 
             "outputConc": output_file_c, 
-            "outputTM": output_file_t,
-            "trim_data": trim_data
+            "outputTM": output_file_t
         }, indent=4, sort_keys=True, default=str))
 
     except Exception as e:
@@ -889,23 +887,22 @@ def fetch_run_results():
     content_object = s3_resource.Object(bucket, f"{uuid}/model_output.json")
     file_content = content_object.get()["Body"].read().decode("utf-8")
     json_content = json.loads(file_content)
-    trim_data = compile_mirc_data(scenario, scenario.latest_proc_status)
     
     resp = {
         "success": True,
-        "model_output": json_content,
-        "trim_data": trim_data
+        "model_output": json_content
     }
     
     for f in ["outputMass", "outputConc", "outputTM"]:
         full_key = f"{uuid}/{f}.xlsx"
-        response = s3_client.generate_presigned_url("get_object",
-                                                    Params={
-                                                        "Bucket": bucket,
-                                                        "Key": full_key
-                                                    },
-                                                    ExpiresIn=600) # expires in 10 minute(s)
-
+        response = s3_client.generate_presigned_url(
+            "get_object",
+            Params={
+                "Bucket": bucket,
+                "Key": full_key
+            },
+            ExpiresIn=600
+        ) # expires in 10 minute(s)
         resp[f] = response
 
 
@@ -1022,9 +1019,9 @@ def export_for_mirc(scenario_id):
     except Exception as e:  
         logger.error(e)
         traceback.print_exc()
-        trim_data = {"message": "No valid data found"}
+        trim_data = {"trim_data": {"message": "No valid data found"}}
 
-    return ApiResult({trim_data})
+    return ApiResult(trim_data)
 
 
 @scenario_api.route(

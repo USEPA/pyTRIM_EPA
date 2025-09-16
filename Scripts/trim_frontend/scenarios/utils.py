@@ -94,10 +94,9 @@ def compile_mirc_data(scen, latest_model_run, logger=None):
 
 
 def compile_mirc_parcel_data(scen, chems, conc, timestamps, logger):
-    logger.info(f"Compiling parcel data for...")
     parcels = []
     for parcel in scen.parcels:
-        logger.info(f"{parcel.name}")
+        logger.info(f"Compiling parcel data for {parcel.name}...")
         p = {
             "name": parcel.name,
             "vertices": parcel.vertices,

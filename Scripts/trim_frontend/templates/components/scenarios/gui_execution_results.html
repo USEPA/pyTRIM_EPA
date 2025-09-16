@@ -375,18 +375,6 @@
                 }
             })
 
-            function load_scenario_export() {
-                let responseJSON = JSON.stringify(TRIM.store.latestRunInfo.run_results.trim_data)
-                
-                let jsonData = 'data:application/json;charset=utf-8,' + encodeURIComponent(responseJSON);
-                let filename = TRIM.store.currentScenario.name + "_MIRC Export_" + moment(new Date()).format('YYYY_MM_DD-HH_MM') + ".json";
-                $("#btn_mirc_export").attr("download", filename);
-                $("#btn_mirc_export").attr("href", jsonData);
-                $("#btn_mirc_export").attr("target", "_blank");
-                // Optionally, trigger download automatically:
-                // $("#btn_mirc_export")[0].click();
-            }
-
             function initialize_components() {
                 let dt = JSON.parse(TRIM.store.latestRunInfo.run_results.mass_results)
                 
@@ -454,10 +442,6 @@
                 }
                 initialize_components()
                 $('#btn_visualize').prop('disabled', false)
-            }
-
-            if (TRIM.store.latestRunInfo.run_results.trim_data) {
-                load_scenario_export()
             }
 
             function add_dynamic_props(){
@@ -623,7 +607,47 @@
                 let resp = TRIM.api.clearOldResults(scenario_info).on('load',function() {
                     let m_results, c_results = run_model(TRIM.store.currentScenario)
                 })
-            })
+            });
+
+            $('#btn_mirc_export').on('click', function (e) {
+                e.preventDefault();
+                if (!TRIM.store.latestRunInfo?.run_has_results) {
+                    return;
+                }
+                console.log('Exporting data for MIRC ...')
+                LoadingScreen.show('mirc_export');
+
+                TRIM.api.exportScenarioForMirc(TRIM.store.currentScenario.id).on('load', function() {
+                    try {
+                        const trim_data = this.responseJSON.trim_data || null;
+
+                        if (!trim_data) {
+                            console.log('ERROR: No data returned');
+                        }
+                        else if (trim_data?.message) {
+                            console.log(trim_data.message);
+                        }
+                        else {
+                            const jsonData = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(trim_data));
+                            const filename = TRIM.store.currentScenario.name + "_MIRC Export_" + moment(new Date()).format('YYYY_MM_DD-HH_MM') + ".json";
+                            const exportBtn = $('<a />');
+                            exportBtn.attr({
+                                download: filename,
+                                href: jsonData,
+                                target: '_blank'
+                            });
+                            exportBtn.appendTo(document.body)[0].click()
+                            setTimeout(() => {
+                                exportBtn.remove();
+                            }, 500);
+                        }
+                    }
+                    finally {
+                        LoadingScreen.hide('mirc_export');
+                    }
+                });
+            });
+
 
             function get_result_data(scenario_head){
                 console.log('Loading result data ...')
@@ -642,7 +666,6 @@
                     result_data["c_results"] = "{" + (this.responseJSON.conc || '').trim() + "}";
                     result_data["m_file"] = (this.responseJSON.outputMass || '');
                     result_data["c_file"] = (this.responseJSON.outputConc || '');
-                    result_data["trim_data"] = JSON.parse(JSON.stringify(this.responseJSON.trim_data))
                     let fpath = "{{ url_for('static', filename='.output') }}";
                     let t_filepath = ""
                     if (this.responseJSON.outputTM) {
@@ -656,7 +679,6 @@
                     TRIM.store.latestRunInfo.run_results.conc_results = result_data["c_results"];
                     TRIM.store.latestRunInfo.run_results.mass_results_file = result_data["m_file"];
                     TRIM.store.latestRunInfo.run_results.conc_results_file = result_data["c_file"];
-                    TRIM.store.latestRunInfo.run_results.trim_data = result_data["trim_data"]
 
                     TRIM.store.latestRunInfo.lastest_run_date = result_data["Last_run"];
                     let m_filepath = result_data["m_file"].includes(".s3.amazonaws.com") ? result_data["m_file"] : fpath + "/" + result_data["m_file"];
@@ -670,7 +692,6 @@
                         $('#btn_get_tm_results').attr("href", t_filepath);
                         $('#btn_get_tm_results').attr("download", "transfer_matrix.xlsx");
                     }
-                    load_scenario_export()
                     $('#btn_visualize').trigger('click') // redraw
                     return result_data;
                 });
@@ -811,7 +832,6 @@
                     TRIM.store.latestRunInfo.run_results.conc_results = conc
                     TRIM.store.latestRunInfo.run_results.mass_results_file = data.outputMass
                     TRIM.store.latestRunInfo.run_results.conc_results_file = data.outputConc
-                    TRIM.store.latestRunInfo.run_results.trim_data = data.trim_data;
                     TRIM.store.latestRunInfo.lastest_run_date = data.run_date
                     $('#btn_get_mass_results').attr("href",data.outputMass)
                     $('#btn_get_mass_results').attr("download","mass_results.xlsx")
@@ -821,7 +841,6 @@
                         $('#btn_get_tm_results').attr("href", data.outputTM)
                         $('#btn_get_tm_results').attr("download", "transfer_matrix.xlsx")
                     }
-                    load_scenario_export();
                     setChecked("p#cb_proc_trm", "on")
                     setChecked("p#cb_proc_ode", "on")
                     setChecked("p#cb_proc_out", "on")
