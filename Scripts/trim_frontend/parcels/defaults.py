@@ -454,8 +454,9 @@ def get_water_params(pcl, parcel_type):
             #               f"They are not next to each other. Check Runoff Matrix!")
             #         this_precip_runoff_frac_to_sw = 0
 
+            erosion_rate = this_soil_comp.TotalErosionRate.magnitude if this_soil_comp.TotalErosionRate else 0
             sed_soil_erosion_to_sw += (
-                this_soil_comp.TotalErosionRate.magnitude
+                erosion_rate
                 * this_soil_comp.FractionOfTotalRunoff(sw) # surface runoff matrix
                 * this_soil_comp.volume_element.parcel.area.magnitude
             )
@@ -513,10 +514,10 @@ def get_water_params(pcl, parcel_type):
         # wc_sed_discharge_rate = 3.13E5
 
         try:
-            sed_burial_vol_rate = (
+            sed_burial_vol_rate = ( # need to convert all to /day
                 get_correct_param("ExternalSedimentInflow", sw_pars)
                 + sed_soil_erosion_to_sw
-                - wc_sed_discharge_rate
+                - (wc_sed_discharge_rate / 365)
             ) / (get_correct_param("BedDensity", sed_pars) * pcl.area.magnitude)
             burial_par = sed_pars.get("SedimentBurialRateToHaveZeroNetDeposition")
             if isinstance(burial_par, ParameterDefinition):
