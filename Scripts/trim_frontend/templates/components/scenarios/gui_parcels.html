@@ -541,7 +541,6 @@
 	// case 2 -- fires when drawing a parcel on-the-fly. We don't have an entry in currentScenario.parcels so all we can use is
 	// the internal leaflet id we get by calling L.stamp
 	map.on('pm:create', ({layer})=>{
-		console.log("TIBS - create!");
 		let dotMarkers = [];
 		for (let i = 0 ; i < layer._latlngs[0].length ; i++) {
 			let dotMarker = L.circleMarker(layer._latlngs[0][i], { radius: 3, stroke: true, color: mapDotColor});
