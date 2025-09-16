@@ -139,6 +139,7 @@
 </form>
 <link rel="stylesheet" href="{{url_for('static', filename='css/form_styles.css')}}"/>
 <link rel="stylesheet" href="{{url_for('static', filename='css/custom_icons.css')}}"/>
+<link rel="stylesheet" href="{{url_for('static', filename='css/lib/leaflet.measurecontrol.css')}}"/>
 <script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}">
 </script>
 <script src="{{ url_for('static', filename='js/lib/dataTables/jquery.dataTables.min.js') }}">
@@ -150,6 +151,8 @@
 <script src="{{ url_for('static', filename='js/lib/leaflet.shpfile.js') }}">
 </script>
 <script src="{{ url_for('static', filename='js/lib/shp.js') }}">
+</script>
+<script src="{{ url_for('static', filename='js/lib/leaflet.measurecontrol.min.js') }}">
 </script>
 <script>
 	// aermod receptor related helper functions -- START
@@ -1348,6 +1351,24 @@
             rotateMode : false,
             editMode  : true,
         });
+
+		window.measurementControl = L.Control.measureControl().addTo(map);
+
+		// make measuring and use of other tools mutually exclusive
+		$("a.leaflet-control-draw-measure").click(function() {
+			if ($(this).parent().hasClass("enabled")) {
+				map.pm.disableDraw();
+				map.pm.disableGlobalEditMode();
+				map.pm.disableGlobalRemovalMode();
+				map.pm.Toolbar.buttons.removalMode.disable();
+				map.pm.Toolbar.buttons.editMode.disable();
+				map.pm.Toolbar.buttons.drawPolygon.disable();
+			} else {
+				map.pm.Toolbar.buttons.removalMode.enable();
+				map.pm.Toolbar.buttons.editMode.enable();
+				map.pm.Toolbar.buttons.drawPolygon.enable();
+			}
+		});
 
 		// proof of concept -- add a red dot near Duke
 		// var barMarker = L.circleMarker([35.997895, -78.922519], { radius: 3, stroke: true, color: "red"}).bindPopup('BAR!').addTo(map);
