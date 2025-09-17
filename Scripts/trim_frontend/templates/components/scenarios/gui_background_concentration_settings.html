@@ -191,6 +191,30 @@
                 $('button.comp_hide_all').trigger('click');
             });
 
+            $('a[href*="remove-background"]').each((i, e) => {
+                let chem = $(e).parent().siblings().find(".chemInfo").text();
+                e.onclick = function() {
+                    LoadingScreen.show('removing_chemical');
+                    let scenario_info = [{
+                        'type': 'data',
+                        'name': 'id',
+                        'value': TRIM.store.currentScenario.id
+                    },{
+                        'type': 'data',
+                        'name': 'field',
+                        'value': 'chemical'
+                    },{
+                        'type': 'input',
+                        'name': 'chemical',
+                        'value': chem
+                    }]
+                    TRIM.api.updateScenario(scenario_info).on('load', function() {
+                        LoadingScreen.hide('removing_chemical');
+                        $('#save-btn').click();
+                    });
+                }
+            });
+
             function toggle_expand_icon(tr, dir){
                 if ($(tr).find("i.fas").length <= 0) return;
                 if (!dir) {
