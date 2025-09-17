@@ -12,7 +12,7 @@ def serialize_parcel(pcl: Parcel):
     water_params = get_water_params(pcl, general_params['parcelType'])
     source_params = get_source_params(pcl)
     soil_abiotic_params = get_soil_abiotic_params(pcl)
-    initial_conc = get_initial_concetrations(pcl)
+    initial_conc = get_initial_concentrations(pcl)
 
     try:
         cdv = pcl.get_compartment("DryVaporSource")
@@ -603,7 +603,7 @@ def get_water_params(pcl, parcel_type):
     return water_params
 
 
-def get_initial_concetrations(pcl):
+def get_initial_concentrations(pcl):
     chem_objs = {c for c in pcl.scenario.chemicals}
     chems = {c.name: {} for c in pcl.scenario.chemicals}
     initial_conc = {"initialConcentrations": chems}
