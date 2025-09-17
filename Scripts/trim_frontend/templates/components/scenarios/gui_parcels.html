@@ -139,6 +139,7 @@
 </form>
 <link rel="stylesheet" href="{{url_for('static', filename='css/form_styles.css')}}"/>
 <link rel="stylesheet" href="{{url_for('static', filename='css/custom_icons.css')}}"/>
+<link rel="stylesheet" href="{{url_for('static', filename='css/lib/leaflet.measurecontrol.css')}}"/>
 <script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}">
 </script>
 <script src="{{ url_for('static', filename='js/lib/dataTables/jquery.dataTables.min.js') }}">
@@ -150,6 +151,8 @@
 <script src="{{ url_for('static', filename='js/lib/leaflet.shpfile.js') }}">
 </script>
 <script src="{{ url_for('static', filename='js/lib/shp.js') }}">
+</script>
+<script src="{{ url_for('static', filename='js/lib/leaflet.measurecontrol.min.js') }}">
 </script>
 <script>
 	// aermod receptor related helper functions -- START
@@ -385,8 +388,115 @@
 
 	let mapDotColor = "#3388ff";
 
+	// EDIT MODE - start
+	let globalEditMode = false;
+	let globalEditBuildup = {}; // dictionary of { parcel_id: lat_lng_array }
+	map.on('pm:globaleditmodetoggled', function(e) {
+		globalEditMode = e.enabled;
+
+		if (globalEditMode) {
+			// console.log("EDITME handle prep...");
+			globalEditBuildup = {};
+		} else if (!globalEditMode) {
+			// console.log("EDITME handle cleanup/update...");
+
+			let numParcelsToUpdate = 0;
+			for (let key in globalEditBuildup) {
+				numParcelsToUpdate++;
+			}
+
+			let finishedCounter = 0;
+			for (let key in globalEditBuildup) {
+				let coords = globalEditBuildup[key];
+				console.log("SAVE: " + coords + " for parcel " + key);
+				// TRIM.api.updateParcel('{{ scenario.id }}', parcel.toGeoJSON()).on('load', function() {
+
+				let parcel_info = [{
+					'type': 'data',
+					'name': 'id',
+					'value': key
+				},{
+					'type': 'data',
+					'name': 'field',
+					'value': 'vertices'
+				}, {
+					'type': 'input',
+					'name': 'vertices',
+					'value': JSON.stringify(coords)
+				}]
+
+				TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load',function(){
+					finishedCounter++;
+					// console.log("finished [" + finishedCounter + "/" + numParcelsToUpdate + "]");
+					if (finishedCounter >= numParcelsToUpdate) {
+						window.location.reload(); // reload the page; redraws the dotMarkers, etc.
+					}
+				});
+				// FUTURE ENHANCEMENT - do we want to try to be smart if moving a shared vertex?
+				// e.g. if vertex is in two parcels we could try to update it for both...
+			}
+			globalEditBuildup = {};
+		}
+	});
+	// EDIT MODE - end
+
+	// as soon as a vertex change is made, we are going to reload the page at the end.
+	// easiest way to handle the blue dotMarkers is to just remove them all at this point.
+	// the page reload will re-add them at the new vertex locations.
+	//
+	// alternative would be to constantly be moving vertices around but that doesn't really seem
+	// worth the trouble.
+	let hideAllDotMarkers = function() {
+		map.eachLayer(function(probe) {
+			if (probe.dotMarkerData !== undefined && probe.dotMarkerData.type == "VertexDotMarkers") {
+				let dots = probe.getLayers();
+				for (let i = 0 ; i < dots.length ; i++) {
+					let dot = dots[i];
+					dot.setStyle({opacity:0, fillOpacity:0});
+				}
+			}
+		});
+	};
+
 	// case 1 -- fires on initial load, NOT when drawing a parcel on-the-fly
 	map.on('layeradd', function(e) {
+		
+		// user is editing vertices...
+		let vertexChangesMade = false;
+		e.layer.on('pm:change', function (e) {
+			if (globalEditMode === true) {
+				let parcelName = e.layer.feature.properties.name;
+				let parcelId = e.layer.feature.properties.parcelid;
+				let coords = e.latlngs[0];
+				// console.log("EDITME: '" + parcelName + "' (" + parcelId + ") resize, now has " + coords.length + " points");
+				let rawLatLongs = [];
+				for (let i = 0; i < coords.length ; i++) {
+					rawLatLongs.push([coords[i].lat, coords[i].lng]);
+				}
+				rawLatLongs.push([coords[0].lat, coords[0].lng]); // add trailing vertex to close
+				globalEditBuildup[parcelId] = rawLatLongs;
+			}
+
+			// fire the very first time a user moves a vertex, just one time.
+			for (let key in globalEditBuildup) {
+				if (!vertexChangesMade) {
+					vertexChangesMade = true;
+					hideAllDotMarkers();
+					break;
+				}
+			}
+		});
+
+
+
+
+
+
+
+
+
+
+
 		if (e.layer.feature !== undefined) { // a parcel polygon was just added...doesn't fire for e.g. dotMarkers
 			// see also e.layer._leaflet_id
 			// console.log("layer add: '" + e.layer.feature.properties.name + "' (leafletid==" + L.stamp(e.layer) + ", TRIM parcelid==" + e.layer.feature.properties.parcelid + ")");
@@ -1239,8 +1349,26 @@
             dragMode: false,
             cutPolygon : false,
             rotateMode : false,
-            editMode  : false,
+            editMode  : true,
         });
+
+		window.measurementControl = L.Control.measureControl().addTo(map);
+
+		// make measuring and use of other tools mutually exclusive
+		$("a.leaflet-control-draw-measure").click(function() {
+			if ($(this).parent().hasClass("enabled")) {
+				map.pm.disableDraw();
+				map.pm.disableGlobalEditMode();
+				map.pm.disableGlobalRemovalMode();
+				map.pm.Toolbar.buttons.removalMode.disable();
+				map.pm.Toolbar.buttons.editMode.disable();
+				map.pm.Toolbar.buttons.drawPolygon.disable();
+			} else {
+				map.pm.Toolbar.buttons.removalMode.enable();
+				map.pm.Toolbar.buttons.editMode.enable();
+				map.pm.Toolbar.buttons.drawPolygon.enable();
+			}
+		});
 
 		// proof of concept -- add a red dot near Duke
 		// var barMarker = L.circleMarker([35.997895, -78.922519], { radius: 3, stroke: true, color: "red"}).bindPopup('BAR!').addTo(map);

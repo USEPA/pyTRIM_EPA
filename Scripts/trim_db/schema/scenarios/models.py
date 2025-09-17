@@ -120,13 +120,14 @@ class Scenario(Model, TrackUpdatesMixin):
         sim_beg = '2001-01-01'
         sim_end = '2010-12-31'
         try:
-            sim_beg = datetime.utcfromtimestamp(int(self.simulationBeginDateTime)).strftime('%Y-%m-%d') or sim_beg
-            sim_end = datetime.utcfromtimestamp(int(self.simulationEndDateTime)).strftime('%Y-%m-%d') or sim_end
+            param_start = self.parameters.get('simulationBeginDateTime')
+            param_end = self.parameters.get("simulationEndDateTime")
+            if param_start.value:
+                sim_beg = datetime.utcfromtimestamp(int(param_start.value)).strftime('%Y-%m-%d')
+            if param_end.value:
+                sim_end = datetime.utcfromtimestamp(int(param_end.value)).strftime('%Y-%m-%d')
         except Exception as ex:
-            # print(f'Problem getting simulation begin and/or end times!\n{ex}')
-            sim_beg = '2001-01-01'
-            sim_end = '2010-12-31'
-
+            pass
         return sim_beg, sim_end
 
     @property

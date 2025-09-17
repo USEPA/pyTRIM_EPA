@@ -29,7 +29,7 @@ def init_first_time_default_param_values():
         {"kwargs": {"variable_name":"AirTemperature", "default_unit":"K"}, "value": 298},
         {"kwargs": {"variable_name":"horizontalWindSpeed"}, "value": 1.6},
         {"kwargs": {"variable_name":"windDirection"}, "value": 270},
-        {"kwargs": {"variable_name":"isDay_Dynamic"}, "value": 1},
+        {"kwargs": {"variable_name":"isDay_Dynamic"}, "value": 0.5},
         {"kwargs": {"variable_name":"Rain"}, "value": 0.0041}, # Precipitation
 
         # Water Body Properties
@@ -257,17 +257,13 @@ def handle_scenario_update(s, scenario_data):
         date_obj = datetime(int(date_parts[0]), int(date_parts[1]), int(date_parts[2]))
         ts_date = time.mktime(date_obj.timetuple())
         par_name = "simulationBeginDateTime" if field_name == "simulation_start_date" else "simulationEndDateTime"
-        par_list = {par_k: par for par_k, par in s.parameters.items() if par_k == par_name}
-        this_param = par_list.get(par_name)
-        if this_param is None:
-            s.parameters.add(par_name, value=ts_date)
-        elif this_param.__tablename__ != "custom_parameter":
-            ParameterService.create(definition_id=this_param.id, scenario_id=s.id,
-                                    requirements=f"(self.id == {s.id})", value=ts_date)
-        else:
-            this_param.value = ts_date
-            ParameterService.update(this_param)
-        ParameterService.commit()
+        param = s.parameters.get(par_name)
+        param = get_or_create_custom_param(
+            param,
+            {"requirements": f"(self.id == {s.id})", "scenario_id": s.id},
+        )
+        param.value = ts_date
+        ParameterService.update(param)
 
     elif field_name == "chemical": # emission settings, add/remove chemicals from a scenario
         new_chem = ChemicalService.get(name=scenario_data["chemical"])
@@ -414,7 +410,7 @@ def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
     if param_type == "MET":
         df_met = df_met.loc[(df_met.Hour < 25)]  # drop faulty
         metcol_dict = {'Rain': (0, 1), 'AirTemperature': (200, 373), 'HorizontalWindSpeed': (0, 100),
-                       'WindDirection': (-360, 360), 'mixingHeight': (0, 10000), 'isDay': (0, 1),
+                       'WindDirection': (-360, 360), 'mixingHeight': (0, 10000), 'IsDay': (0, 1),
                        'CumulativeRain': (0, 1.6)}  # k, v represent name and min-max
         for k, v in metcol_dict.items():
             if k in df_met.columns:

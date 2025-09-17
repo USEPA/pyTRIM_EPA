@@ -12,9 +12,9 @@
             "min": 0,
             "step": 1,
             "max": 1,
-            "default": 1,
+            "default": 0.5,
             "required": true,
-            "help": "Enter a single value to use throughout your model run. The default is constant daytime (value of 1). For constant nighttime select 0"
+            "help": "Enter a single value to use throughout your model run. The default is 0.5 and assumes the location experiences daylight hours approximately half of the time when averaged across the year. Use a value of 1 if you want to assume constant daytime or a value of 0 for constant nighttime."
         }
     ]
 }
