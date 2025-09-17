@@ -268,7 +268,7 @@ def handle_scenario_update(s, scenario_data):
     elif field_name == "chemical": # emission settings, add/remove chemicals from a scenario
         new_chem = ChemicalService.get(name=scenario_data["chemical"])
         if new_chem in s.chemicals:
-            # It's a pain to remove, so we're just going to reset the value to 0
+            # Just reset to 0
             from trim_frontend.parcels.utils import handle_parcel_update
             for comp in s.compartments:
                 pcl = comp.volume_element.parcel
