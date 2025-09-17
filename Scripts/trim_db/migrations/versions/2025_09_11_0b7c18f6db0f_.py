@@ -28,7 +28,6 @@ def upgrade():
 
     op.execute("UPDATE parameter_definition SET default_value = 1 WHERE variable_name = 'AllowExchange_forAir';")
 
-    # TODO check sd domains
     # fixing incorrect litterfall domains -- no particle
     op.execute("UPDATE parameter_definition SET domain_id = 16 WHERE variable_name = 'LitterFallRate' AND domain_id = 20;") # coniferous
     op.execute("UPDATE parameter_definition SET domain_id = 15 WHERE variable_name = 'LitterFallRate' AND domain_id = 19;") # agriculture
