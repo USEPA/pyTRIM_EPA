@@ -453,7 +453,7 @@
                 function convertDate(inputFormat) {
                     function pad(s) { return (s < 10) ? '0' + s : s; }
                     let d = new Date(inputFormat)
-                    return [pad(d.getDate()), pad(d.getMonth()+1), d.getFullYear()].join('/')
+                    return [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/')
                 }
 
                 // Restrict file data date range to the simulation period
@@ -463,12 +463,12 @@
                 // Get only the column for this select
                 let this_sel_data = new_data.map((e,i) => {
                     let this_row = {
-                        'Date': convertDate(e['Date']),
+                        'Date': e['Date'],
                         'xHour': e['xHour'],
                         'TimeZone': e['TimeZone']
                     }
-                    this_row[def_data_name]= e[selected_val]
-                    return this_row
+                    this_row[def_data_name] = e[selected_val];
+                    return this_row;
                 });
                 sel.attr('data-meteo',JSON.stringify(this_sel_data))
 

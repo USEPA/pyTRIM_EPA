@@ -83,6 +83,8 @@ def get_parcels(scenario_id):
             for this_p in p:
                 start_time = time.time()
                 parcels.append(this_p.as_serializable())
+                if isinstance(parcels[-1], str):
+                    raise Exception(parcels[-1])
                 logger.info(f"Acquired parcel {this_p.name} in {time.time() - start_time} seconds")
             logger.info(f"Acquired all parcels in {time.time() - total_start} seconds")
     except Exception as e:
