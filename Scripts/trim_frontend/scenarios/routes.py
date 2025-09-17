@@ -701,7 +701,8 @@ def get_result_scenario():
         logger.error(f'Api result conversion error: {e}')
     return resp
 
-@scenario_api.route('/api/scenario/poll/<int:id>', methods=['GET'])
+
+@scenario_api.route('/api/scenario/<int:id>/poll', methods=['GET'])
 @login_required
 def poll_model_run_scenario(id):
     s = ScenarioService.get(id)
@@ -710,28 +711,11 @@ def poll_model_run_scenario(id):
             run_status = "err"
             run_percent = "err"
         else:
-            run_status, run_percent = [v for v in s.proc_status][0].run_step
+            run_status, run_percent = s.latest_proc_status.run_step
         print(f"Poll status for scenario {s.name} is {run_status} at {run_percent}%")
         return ApiResult({'status': run_status, 'percent': run_percent})
     print(f"Poll status for scenario {s.name} is 'tm' at 0%")
     return ApiResult({'status': "tm", 'percent': "0"})
-
-
-@scenario_api.route('/api/scenario/poll/', methods=['POST'])
-@login_required
-def reset_poll_model_run_scenario():
-    scenario_data = request.form.to_dict()
-    if not scenario_data.get('scenario_id'):
-        raise AssertionError("Scenario ID cannot be blank.")
-    scenario_id = int(scenario_data['scenario_id'])
-    s = ScenarioService.get(scenario_id)
-    if s.has_process_hist:
-        s.latest_proc_status.run_status = 'run null null'
-    else:
-        new_proc = ScenarioLoadRunProc(scenario=s, load_status='load 100', run_status='run null null')
-        s.proc_status.add(new_proc)
-    ScenarioService.commit()
-    return "success"
 
 
 def get_complete_logs_from_group_and_stream(log_group, log_stream):

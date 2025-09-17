@@ -382,16 +382,6 @@ window.TRIM = (function(trim) {
         });
     }
 
-    api.resetPoll = function(scenario_info) {
-        let data = makeFormData(scenario_info);
-        let url = api.getUrl('scenario_api.reset_poll_model_run_scenario')
-        return AJAX.call({
-            method: 'POST',
-            url: url,
-            data: data
-        });
-    }
-
     api.checkExecutionCompletion = function(execution_arn, callback_fxn) {
         let url = api.getUrl('scenario_api.check_execution_completion');
         let data = makeFormData([{ "name": "execution_arn", "value": execution_arn }])
