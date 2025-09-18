@@ -633,15 +633,19 @@ def run_full_model(scn):
                 dfn_avg, dfc_avg, df_tm, scn, filetype='excel'
             )
             # safe_save_output(df_nt, df_conc, scn, filetype='excel')
+        except Exception as e:
+            return model_err(scn, f"ERRORED WHILE MAKING CSV: {e}", 'err csv 0')
+
+        try:
             scn.latest_proc_status.result_file_nt = outfile_nt
             scn.latest_proc_status.result_file_conc = outfile_conc
             scn.latest_proc_status.result_file_tm = outfile_tm
             scn.latest_proc_status.run_status = 'run fin 100'
             scn.latest_proc_status.result_nt = json.dumps(json_n_avg, default=str)
             scn.latest_proc_status.result_conc = json.dumps(json_c_avg, default=str)
+            ScenarioService.commit()
         except Exception as e:
-            return model_err(scn, f"ERRORED WHILE MAKING CSV: {e}", 'err csv 0')
-        ScenarioService.commit()
+            return model_err(scn, f"ERRORED WHILE UPDATING DB: {e}", 'err fin 0')
 
         return json_n_avg, json_c_avg, outfile_nt, outfile_conc, outfile_tm
     finally:
@@ -652,9 +656,12 @@ def run_full_model(scn):
 def model_err(scn, err_msg, status):
     print(err_msg)
     # import traceback; traceback.print_exc()
-    scn.latest_proc_status.run_status = status
-    ScenarioService.commit()
-    return {}, {}, "", ""
+    try:
+        scn.latest_proc_status.run_status = status
+        ScenarioService.commit()
+    except Exception:
+        pass
+    return {}, {}, "", "", ""
 
 
 def safe_save_output(df_nt, df_conc, df_tm, scn, filetype='csv'):

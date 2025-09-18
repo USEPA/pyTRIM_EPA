@@ -100,13 +100,6 @@ window.TRIM = (function(trim) {
         });
     }
 
-    api.getLastResults = function(scenario) {
-        var url = api.getUrl('scenario_api.get_last_results');
-        return AJAX.call({
-            url: url.replace('/0/', '/' + scenario.id + '/')
-        });
-    }
-
     api.loadForms = function(names) {
         if (!names) {
             return undefined;
@@ -314,17 +307,6 @@ window.TRIM = (function(trim) {
         });
     };
 
-    api.runModel = function(scenario_info, callback_fxn) {
-        let url = api.getUrl('scenario_api.run_result_scenario');
-        let data = makeFormData(scenario_info);
-        return AJAX.call({
-            method: 'POST',
-            url: url,
-            data: data,
-			callback: callback_fxn
-        });
-    }
-
 	api.checkStepFunctionStatus = function(execution_arn, callback_fxn) {
         let url = api.getUrl('general_api.stepfxn_check');
         console.log("CHECK STEPFXN STATUS URL IS: [" + url + "]");
@@ -339,7 +321,7 @@ window.TRIM = (function(trim) {
 	}
 
     api.runGetFlow = function(scenario_id, callback_fxn) {
-        console.log("runGetFlow (api.js");
+        console.log("runGetFlow (api.js)");
         let url = api.getUrl('scenario_api.run_getflow').replace("/0/", "/" + scenario_id + "/");
         console.log("RUN GETFLOW URL IS: [" + url + "]");
 
@@ -353,58 +335,26 @@ window.TRIM = (function(trim) {
         });
     }
 
-    api.clearOldResults = function(scenario_info, callback_fxn) {
-        let url = api.getUrl('scenario_api.clear_old_result');
-        let data = makeFormData(scenario_info);
+    api.getLastResults = function(scenarioId) {
+        var url = api.getUrl('scenario_api.get_last_results');
         return AJAX.call({
-            method: 'POST',
-            url: url,
-            data: data,
-            callback: callback_fxn
+            url: url.replace('/0/', '/' + scenarioId + '/')
+        });
+    }
+
+    api.clearOldResults = function(scenarioId) {
+        let url = api.getUrl('scenario_api.clear_old_result');
+        return AJAX.call({
+            method: 'DELETE',
+            url: url.replace("/0/", "/" + scenarioId + "/")
         })
     }
 
-    api.getResults = function(scenario_info) {
-        let url = api.getUrl('scenario_api.get_result_scenario');
-        let data = makeFormData(scenario_info);
+    api.runModel = function(scenarioId) {
+        let url = api.getUrl('scenario_api.run_result_scenario');
         return AJAX.call({
             method: 'POST',
-            url: url,
-            data: data
-        });
-    }
-
-    api.poll = function(scenario_id) {
-        let url = TRIM.api.getUrl('scenario_api.poll_model_run_scenario').replace('/0', '/' + scenario_id);
-        return AJAX.call({
-            method: 'GET',
-            url: url
-        });
-    }
-
-    api.checkExecutionCompletion = function(execution_arn, callback_fxn) {
-        let url = api.getUrl('scenario_api.check_execution_completion');
-        let data = makeFormData([{ "name": "execution_arn", "value": execution_arn }])
-        return AJAX.call({
-            method: 'POST',
-            url: url,
-            data: data,
-			callback: callback_fxn
-        });
-    }
-
-    api.fetchRunResults = function(bucket, uuid, scenario_id, callback_fxn) {
-        let url = api.getUrl('scenario_api.fetch_run_results');
-        let data = makeFormData([
-            { "name": "bucket", "value": bucket }, 
-            { "name": "uuid", "value": uuid }, 
-            { "name": "scenario_id", "value": scenario_id }
-        ])
-        return AJAX.call({
-            method: 'POST',
-            url: url,
-            data: data,
-			callback: callback_fxn
+            url: url.replace('/0/', '/' + scenarioId + '/')
         });
     }
 
