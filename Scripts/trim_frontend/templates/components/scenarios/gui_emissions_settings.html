@@ -250,9 +250,10 @@
                         'name': 'chemical',
                         'value': chem
                     }]
-                TRIM.api.updateScenario(scenario_info)
-                LoadingScreen.hide('adding_chemical')
-                $('#save-btn').click(); // FIXME awkward fix for broken event handlers, shouldn't rely on page reload
+                TRIM.api.updateScenario(scenario_info).on('load', function() {
+                    LoadingScreen.hide('adding_chemical');
+                    $('#save-btn').click(); // FIXME awkward fix for broken event handlers, shouldn't rely on page reload
+                });
             })
 
             attach_event_handlers()
@@ -372,6 +373,7 @@
             $('a[href*="remove-chemicals"]').each((i, e) => {
                 let chem = $(e).parent().siblings().find(".chemInfo").text();
                 e.onclick = function() {
+                    LoadingScreen.show('removing_chemical');
                     let scenario_info = [{
                         'type': 'data',
                         'name': 'id',
@@ -385,8 +387,10 @@
                         'name': 'chemical',
                         'value': chem
                     }]
-                    TRIM.api.updateScenario(scenario_info)
-                    $('#save-btn').click();
+                    TRIM.api.updateScenario(scenario_info).on('load', function() {
+                        LoadingScreen.hide('removing_chemical');
+                        $('#save-btn').click();
+                    });
                 }
             });
 

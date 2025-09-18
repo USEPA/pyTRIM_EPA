@@ -680,6 +680,8 @@
                 let param_store_key = "soil_params"
                 TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', (rsp)=>{
                     update_data_store_callback(rsp, cell, parcel_info, param_store_key, data, old_data)
+                    if (parcel_info[2].name == 'surfaceSoilThickness')
+                        getParcelByKey('id', parcel_info[0].value).surfaceSoilThickness = parseFloat(data);
                     LoadingScreen.hide(ls_info)
                 })
                 table_data = get_Data_from_table(`#${focusTblId}`)
@@ -782,8 +784,7 @@
                     if (e.soilTillage == "Yes" || e.soilTillage == true) {
                         till_val = "tilled";
                     }
-                    let soil_params = e.soil_params?.Soil_Surface
-                    let surface_soil_thickness = (soil_params?.surfaceSoilThickness ? soil_params?.surfaceSoilThickness : TRIM.forms.fetchDefault('SurfaceSoilThick')[till_val]);
+                    let surface_soil_thickness = (e?.surfaceSoilThickness ? e.surfaceSoilThickness : TRIM.forms.fetchDefault('SurfaceSoilThick')[till_val]);
                     
                     // default root soil thickness depends on (0.8 - surface soil thickness)
                     let root_soil_default = Math.abs(0.8 - surface_soil_thickness);

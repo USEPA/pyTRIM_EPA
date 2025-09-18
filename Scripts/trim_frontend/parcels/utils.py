@@ -109,6 +109,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
 
     # Update the specified property
     field_name = parcels_data["field"]
+
     if field_name == "parcelType":
         # Delete all compartments and volume elements
         delete_parcel_contents(p)
@@ -466,12 +467,12 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             ParameterService.commit()
 
     elif field_name == "emission":
-        src_comp = [c for c in p.compartments if c.name == parcels_data["compartment_name"]][0]
-        src_par = [par for parn, par in src_comp.parameters.items() if parn == "surfaceDepositionRate"]
+        src_comp = p.get_compartment(name=parcels_data["compartment_name"])
+        src_par = src_comp.parameters.get('surfaceDepositionRate')
         chem = ChemicalService.get(name=parcels_data["chemical_name"])
-        if len(src_par) > 0:
+        if src_par:
             src_par = get_or_create_custom_param(
-                src_par[0],
+                src_par,
                 {"requirements": f"(self.id == {src_comp.id})", "scenario_id": p.scenario.id},
                 new_formula=True
             )
@@ -498,13 +499,13 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             FormulaService.get(src_par.formula.id).equation = new_formula
             FormulaService.commit()
     elif field_name == "initial concentration":
-        ic_comp = [c for c in p.compartments if c.name == parcels_data["compartment_name"]][0]
-        ic_par = [par for parn, par in ic_comp.parameters.items() if parn == "initialConcentration"]
+        ic_comp = p.get_compartment(name=parcels_data["compartment_name"])
+        ic_par = ic_comp.parameters.get('initialConcentration')
         chem = ChemicalService.get(name=parcels_data["chemical_name"])
-        if len(ic_par) > 0:
+        if ic_par:
             unit = "g / m^3" if ic_comp.media.id in [2, 5, 7, 56, 55, 8, 9] else "g / kg" if ic_comp.media.id in [23, 24, 27, 28, 29, 31, 32, 33, 37, 39, 41, 43, 44, 45, 46, 47, 48, 49, 50, 51] else "g / L" if ic_comp.media.id in [10, 4] else ""
             ic_par = get_or_create_custom_param(
-                ic_par[0],
+                ic_par,
                 {"requirements": f"(self.id == {ic_comp.id})", "scenario_id": p.scenario.id, "unit": unit},
                 new_formula=True
             )
@@ -620,6 +621,14 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             raise Exception("unexpected param_obj type...")
 
         ParameterService.commit()
+    elif field_name == "vertices":
+        print(f"save vertices change FOR {p.id} / {p.name}...")
+        coords_data = json.loads(parcels_data.get("vertices", []))
+
+        if coords_data:
+            # coords_data is lat,long; we store long,lat in TRIM
+            long_lat = [ [x[1], x[0]] for x in coords_data ]
+            p.vertices = long_lat
 
 
     # Update record

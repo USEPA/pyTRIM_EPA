@@ -92,7 +92,6 @@ def compile_mirc_data(scen, latest_model_run, logger=None):
         return {"trim_data": {"message": "No valid data found"}}
 
 
-
 def compile_mirc_parcel_data(scen, chems, conc, timestamps, logger):
     logger.info(f"Compiling parcel data for...")
     parcels = []
@@ -269,6 +268,44 @@ def handle_scenario_update(s, scenario_data):
     elif field_name == "chemical": # emission settings, add/remove chemicals from a scenario
         new_chem = ChemicalService.get(name=scenario_data["chemical"])
         if new_chem in s.chemicals:
+            # Just reset to 0
+            from trim_frontend.parcels.utils import handle_parcel_update
+            for comp in s.compartments:
+                pcl = comp.volume_element.parcel
+                src_param = comp.parameters.get('surfaceDepositionRate')
+                ic_param = comp.parameters.get('initialConcentration')
+
+                if (
+                    isinstance(src_param, CustomParameter)
+                    and f"chemical.id == {str(new_chem.id)}" in src_param.formula.equation
+                ):
+                    handle_parcel_update(
+                        pcl,
+                        {
+                            "chemical_name": new_chem.name,
+                            "compartment_name": comp.name,
+                            "emission_value": "0",
+                            "field": "emission",
+                            "id": pcl.id,
+                            "ve_name": comp.volume_element.name,
+                        },
+                    )
+                if (
+                    isinstance(ic_param, CustomParameter)
+                    and f"chemical.id == {str(new_chem.id)}" in ic_param.formula.equation
+                ):
+                    handle_parcel_update(
+                        pcl,
+                        {
+                            "chemical_name": new_chem.name,
+                            "compartment_name": comp.name,
+                            "initial_concentration_value": "0",
+                            "field": "initial concentration",
+                            "id": pcl.id,
+                            "ve_name": comp.volume_element.name,
+                        },
+                    )
+
             s.chemicals.remove(new_chem)
         else:
             s.chemicals.append(new_chem)
