@@ -271,11 +271,6 @@
                         'data': "DustParticleOrganicMatter",
                         'bSortable': false,
                         'render':  render_function_air('fractionOrganicMatterOnParticulates', "ErrorValidation.isValidFraction(this)")
-                    },
-                    {
-                        'data': "AirHeight",
-                        'bSortable': false,
-                        'render':  render_function_air('airHeight', "ErrorValidation.isInputAtLeast(this,20)")
                     }
                 ],
                 initComplete: function (settings, json) {
@@ -553,7 +548,7 @@
                     {
                         'data': "Surface Parcel",
                         'className': 'font-weight-bold rightBorder freeze-column'
-                    },
+                     },
                     {
                         'data': "GroundwaterZoneSoilThick",
                         'bSortable': false,
