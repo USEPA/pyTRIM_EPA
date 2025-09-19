@@ -498,7 +498,9 @@ def handle_scenario_update(s, scenario_data):
 
     elif field_name == "chemical": # emission settings, add/remove chemicals from a scenario
         new_chem = ChemicalService.get(name=scenario_data["chemical"])
-        if new_chem in s.chemicals:
+        if scenario_data.get('ic_reset') == 'true':
+            reset_emissions_and_concentrations(s, new_chem, ic_reset=True)
+        elif new_chem in s.chemicals:
             reset_emissions_and_concentrations(s, new_chem)
             s.chemicals.remove(new_chem)
         else:
@@ -509,7 +511,7 @@ def handle_scenario_update(s, scenario_data):
     return ret_val
 
 
-def reset_emissions_and_concentrations(s, chem):
+def reset_emissions_and_concentrations(s, chem, ic_reset=False):
     # Just reset to 0
     from trim_frontend.parcels.utils import handle_parcel_update
     for comp in s.compartments:
@@ -520,6 +522,7 @@ def reset_emissions_and_concentrations(s, chem):
         if (
             isinstance(src_param, CustomParameter)
             and f"chemical.id == {str(chem.id)}" in src_param.formula.equation
+            and not ic_reset
         ):
             handle_parcel_update(
                 pcl,

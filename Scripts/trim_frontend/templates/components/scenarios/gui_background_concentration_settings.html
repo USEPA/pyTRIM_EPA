@@ -43,7 +43,7 @@
                                             <div class="dropdown-menu">
                                             </div>
                                         </div>
-                                        <button class="comp_reset_all btn btn-danger">Reset All to Zero</button>
+                                        <button class="comp_reset_all btn btn-danger" id="ic-reset-vals">Reset All to Zero</button>
                                         <table class="compMap" style="border-collapse: collapse" cellpadding="6">
                                             <thead>
                                                 <tr>
@@ -191,10 +191,13 @@
                 $('button.comp_hide_all').trigger('click');
             });
 
-            $('a[href*="remove-background"]').each((i, e) => {
+            $('a[href*="remove-background"], #ic-reset-vals').each((i, e) => {
                 let chem = $(e).parent().siblings().find(".chemInfo").text();
-                e.onclick = function() {
+                e.onclick = function(e) {
                     LoadingScreen.show('removing_chemical');
+                    if (!chem) {
+                        chem = $(e.target).closest('[data-tab-id]').find(".chemInfo").text();
+                    }
                     let scenario_info = [{
                         'type': 'data',
                         'name': 'id',
@@ -207,6 +210,14 @@
                         'type': 'input',
                         'name': 'chemical',
                         'value': chem
+                    },{
+                        'type': 'data',
+                        'name': 'field',
+                        'value': 'ic_reset'
+                    },{
+                        'type': 'input',
+                        'name': 'ic_reset',
+                        'value': $(e.target).attr("id") == 'ic-reset-vals'
                     }]
                     TRIM.api.updateScenario(scenario_info).on('load', function() {
                         LoadingScreen.hide('removing_chemical');
