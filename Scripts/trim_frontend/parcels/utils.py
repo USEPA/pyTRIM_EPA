@@ -804,6 +804,7 @@ def add_compartment_custom_parameters(nc, par_name, par_val, par_unit):
         no_commit=True
     )
 
+
 def init_diet_table_custom_parameters(pcl):
     comp_names = AQUATIC_DIET.keys()
     for comp_name in comp_names:
@@ -819,50 +820,54 @@ def init_diet_table_custom_parameters(pcl):
 
 
 def calc_default_erosion_rate_sdr(pcl):
-    for c in pcl.compartments:
-        if not c.media.isa("Surface_Soil"):
-            continue
+    surf_soil_comp = pcl.get_compartment(media='Surface_Soil')
+    if not surf_soil_comp:
+        return None
 
-        land_use = get_land_use(pcl)
-        if land_use in ['Agriculture (General)', 'Tilled Soil']:
+    has_farm_food_chain = pcl.get_compartment(media='Farm') or False
+
+    land_use = get_land_use(pcl)
+    if land_use == 'Impervious':
+        cover_management_factor = 0
+    elif land_use in ['Agriculture (General)', 'Tilled Soil']:
+        if has_farm_food_chain:
             cover_management_factor = 0.5
-        elif land_use == 'Soil':
+        else:
             cover_management_factor = 1.0
-        elif land_use == 'Impervious':
-            cover_management_factor = 0
-        else:
+    elif land_use == 'Untilled Soil':
+        if has_farm_food_chain:
             cover_management_factor = 0.1
-
-        unit_soil_loss = (
-            EROSION_DEFAULTS['R']
-            * EROSION_DEFAULTS['K']
-            * EROSION_DEFAULTS['LS']
-            * cover_management_factor
-            * EROSION_DEFAULTS['P']
-        ).to('(kg / m^2) / day')
-        print('A =', unit_soil_loss)
-
-        area_in_sq_mile = pcl.area.to('mile^2').magnitude
-        if area_in_sq_mile <= 0.1:
-            intercept_coef = 2.1
-        elif 0.1 < area_in_sq_mile <= 1:
-            intercept_coef = 1.9
-        elif 1 < area_in_sq_mile <= 10:
-            intercept_coef = 1.4
-        elif 10 < area_in_sq_mile <= 100:
-            intercept_coef = 1.2
         else:
-            intercept_coef = 0.6
+            cover_management_factor = 1.0
+    else:
+        cover_management_factor = 0.1
 
-        intercept_coef = intercept_coef
+    unit_soil_loss = (
+        EROSION_DEFAULTS['R']
+        * EROSION_DEFAULTS['K']
+        * EROSION_DEFAULTS['LS']
+        * cover_management_factor
+        * EROSION_DEFAULTS['P']
+    ).to('(kg / m^2) / day')
 
-        slope_coef = c.parameters["sedimentDeliveryRatioSlopeCoef"].default_value
-        sed_delivery_ratio = intercept_coef * (pcl.area.magnitude ** (-1 * slope_coef))
+    area_in_sq_mile = pcl.area.to('mile^2').magnitude
+    if area_in_sq_mile <= 0.1:
+        intercept_coef = 2.1
+    elif 0.1 < area_in_sq_mile <= 1:
+        intercept_coef = 1.9
+    elif 1 < area_in_sq_mile <= 10:
+        intercept_coef = 1.4
+    elif 10 < area_in_sq_mile <= 100:
+        intercept_coef = 1.2
+    else:
+        intercept_coef = 0.6
 
-        print('SD =', sed_delivery_ratio)
-        print('ER =', unit_soil_loss * sed_delivery_ratio)
+    intercept_coef = intercept_coef
 
-        return (unit_soil_loss * sed_delivery_ratio).magnitude
+    slope_coef = surf_soil_comp.parameters["sedimentDeliveryRatioSlopeCoef"].default_value
+    sed_delivery_ratio = intercept_coef * (pcl.area.magnitude ** (-1 * slope_coef))
+
+    return (unit_soil_loss * sed_delivery_ratio).magnitude
 
 
 def get_land_use(pcl):
@@ -1132,7 +1137,19 @@ def create_base_land_compartments(parcels_data, p, land_use):
     rootsoil_thickness = round(0.8 - surfsoil_thickness, 2)
     update_soil_thickness(p, 'Soil_Surface', 'SurfSoil', surfsoil_thickness)
     update_soil_thickness(p, 'Soil_Root_Zone', 'RootSoil', rootsoil_thickness)
-    
+
+    # reset cover_management_factor (HACKY)
+    for param in list(p.scenario.parameters.values()):
+        if not isinstance(param, CustomParameter):
+            continue
+        if not(
+            param.variable_name.startswith('erosion3-cover_management_factor')
+        ):
+            continue
+        if not param.requirements == f'(self.id == {p.id})':
+            continue
+        ParameterService.delete(param, no_commit=True)
+
     CompartmentService.update(c_surfsoil)
     for nc in new_comps:
         initialize_compartment_custom_parameters(nc)
