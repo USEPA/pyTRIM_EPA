@@ -175,8 +175,8 @@ def get_step_function_results(execution_arn):
         json_content = json.loads(file_content)
 
         sfn_results = {
-            'mass_results': restringify_model_data(json_content['mass']),
-            'conc_results': restringify_model_data(json_content['conc'])
+            'mass_results': restringify_model_data(json.dumps(json_content['mass'], default=str)),
+            'conc_results': restringify_model_data(json.dumps(json_content['conc'], default=str))
         }
 
         s3_client = boto3.client("s3")
