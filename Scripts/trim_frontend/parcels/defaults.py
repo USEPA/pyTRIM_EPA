@@ -9,7 +9,7 @@ from trim_db.services import *
 @register_serializer(Parcel)
 def serialize_parcel(pcl: Parcel):
     general_params = get_general_params(pcl)
-    water_params = get_water_params(pcl, general_params['parcelType'])
+    water_params = get_water_params(pcl, general_params['parcelType'], general_params['hasWetland'])
     source_params = get_source_params(pcl)
     soil_abiotic_params = get_soil_abiotic_params(pcl)
     initial_conc = get_initial_concentrations(pcl)
@@ -360,7 +360,7 @@ def is_significantly_different(a, b):
     return abs(a - b) > 0.000_000_000_1
 
 
-def get_water_params(pcl, parcel_type):
+def get_water_params(pcl, parcel_type, has_Wetland):
     runoff_watershed_area = 0  # 1e3
     runoff_fraction = None  # 0.001
     precip_seepage_frac_to_gw = None
@@ -383,9 +383,9 @@ def get_water_params(pcl, parcel_type):
             * comp_surfaceSoil.FractionofAreaAvailableforRunoff
         ).magnitude
 
-        precip_seepage_frac_to_gw = comp_surfaceSoil.GroundwaterSeepageFraction  # 1 - runoff_fraction
-        runoff_fraction = comp_surfaceSoil.PrecipitationRunoffFraction  # 1 - precip_seepage_frac_to_gw
-        evapotranspiration_fraction = comp_surfaceSoil.EvapotranspirationFraction
+        precip_seepage_frac_to_gw = 0 if has_Wetland else comp_surfaceSoil.GroundwaterSeepageFraction  # 1 - runoff_fraction
+        runoff_fraction = 0.6 if has_Wetland else comp_surfaceSoil.PrecipitationRunoffFraction  # 1 - precip_seepage_frac_to_gw
+        evapotranspiration_fraction = 0.4 if has_Wetland else comp_surfaceSoil.EvapotranspirationFraction 
 
         try:
             seepage_vol_rate_to_gw = (

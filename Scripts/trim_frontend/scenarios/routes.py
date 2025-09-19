@@ -106,106 +106,6 @@ def get_scenario(id):
     return ApiResult({'scenario': s})
 
 
-@scenario_api.route(
-    '/api/scenario/<int:scenario_id>/chemical', methods=['GET']
-)
-@login_required
-def get_scenario_chemicals(scenario_id):
-    s = ScenarioService.get(scenario_id)
-    if not s:
-        return ApiException("Unknown Scenario")
-    chems = [c.as_serializable() for c in s.chemicals]
-    return ApiResult({
-        'chemicals': chems
-    })
-
-
-@scenario_api.route('/api/scenario/<int:scenario_id>/meteorology/', methods=['GET'])
-@login_required
-def get_scenario_met_data(scenario_id):
-    logger = make_logger('scenario_met_api_get')
-    s = ScenarioService.get(scenario_id)
-    start_time = time.time()
-    try:
-        met = get_met_data(s)
-    except Exception as e:
-        logger.info(e)
-        met = {}
-    logger.info(f"Acquired meteorology in {time.time() - start_time} seconds")
-    return ApiResult({'meteorology': met})
-
-
-@scenario_api.route('/api/scenario/<int:scenario_id>/seasonal_dynamics/', methods=['GET'])
-@login_required
-def get_scenario_seasonal_dynamics(scenario_id):
-    logger = make_logger('scenario_seasonal_dynamics_api_get')
-    s = ScenarioService.get(scenario_id)
-    start_time = time.time()
-    met = get_seasonal_dynamics(s)
-    logger.info(f"Acquired seasonal dynamics in {time.time() - start_time} seconds")
-    return ApiResult({'seasonal_dynamics': met})
-
-
-@scenario_api.route('/api/scenario/<int:scenario_id>/runoff_matrix/', methods=['GET'])
-@login_required
-def get_scenario_runoff_matrix(scenario_id):
-    logger = make_logger('scenario_runoff_matrix_api_get')
-    try:
-        s = ScenarioService.get(scenario_id)
-        start_time = time.time()
-        runoff_matrix = ScenarioService(s).get_surface_runoff()
-        logger.info(f"Acquired runoff matrix in {time.time() - start_time} seconds")
-    except Exception as e:
-        logger.error(traceback.format_exc())
-        return ApiException(repr(e))
-    return ApiResult({'runoff_matrix': runoff_matrix})
-
-
-@scenario_api.route(
-    '/api/scenario/<int:scenario_id>/parameter',
-    methods=['GET']
-)
-@login_required
-def get_parameters(scenario_id):
-    s = ScenarioService.get(scenario_id)
-    if not s:
-        return ApiException("Unknown Scenario")
-
-    logger = make_logger('scenario_parameter_get')
-    try:
-        params = request.args.getlist('parameter')
-        s_params = dict(s.parameters)
-        r = {}
-        for x in params:
-            param = s_params.get(x)
-            if param is not None:
-                if param not in db.session:
-                    db.session.merge(param)
-                param = param.as_serializable()
-            r[x] = param
-
-        ScenarioService.commit() # required because of session update
-    except Exception as e:
-        logger.error(traceback.format_exc())
-        return ApiException(repr(e))
-    return ApiResult({'parameters': r})
-
-
-@scenario_api.route('/api/scenario/<int:scenario_id>/results/', methods=['GET'])
-@login_required
-def get_last_results(scenario_id):
-    logger = make_logger('scenario_last_results_api_get')
-    try:
-        s = ScenarioService.get(scenario_id)
-        start_time = time.time()
-        latest_run_info = get_latest_run_info(s)
-        logger.info(f"Acquired scenario results in {time.time() - start_time} seconds")
-    except Exception as e:
-        logger.error(traceback.format_exc())
-        return ApiException(repr(e))
-    return ApiResult({'latest_run_info': latest_run_info})
-
-
 @scenario_api.route('/api/scenario/<int:scenario_id>/update', methods=['POST'])
 @login_required
 def update_scenario(scenario_id):
@@ -579,13 +479,112 @@ def delete_scenario():
     return redirect(request.referrer)
 
 
-@scenario_api.route('/api/scenario/clearresult/', methods=['POST'])
+@scenario_api.route(
+    '/api/scenario/<int:scenario_id>/chemical', methods=['GET']
+)
 @login_required
-def clear_old_result():
-    exec_data = request.form.to_dict()
-    if not exec_data.get('scenario_id'):
-        raise AssertionError("Scenario ID cannot be blank.")
-    scenario_id = int(exec_data['scenario_id'])
+def get_scenario_chemicals(scenario_id):
+    s = ScenarioService.get(scenario_id)
+    if not s:
+        return ApiException("Unknown Scenario")
+    chems = [c.as_serializable() for c in s.chemicals]
+    return ApiResult({
+        'chemicals': chems
+    })
+
+
+@scenario_api.route('/api/scenario/<int:scenario_id>/meteorology/', methods=['GET'])
+@login_required
+def get_scenario_met_data(scenario_id):
+    logger = make_logger('scenario_met_api_get')
+    s = ScenarioService.get(scenario_id)
+    start_time = time.time()
+    try:
+        met = get_met_data(s)
+    except Exception as e:
+        logger.info(e)
+        met = {}
+    logger.info(f"Acquired meteorology in {time.time() - start_time} seconds")
+    return ApiResult({'meteorology': met})
+
+
+@scenario_api.route('/api/scenario/<int:scenario_id>/seasonal_dynamics/', methods=['GET'])
+@login_required
+def get_scenario_seasonal_dynamics(scenario_id):
+    logger = make_logger('scenario_seasonal_dynamics_api_get')
+    s = ScenarioService.get(scenario_id)
+    start_time = time.time()
+    met = get_seasonal_dynamics(s)
+    logger.info(f"Acquired seasonal dynamics in {time.time() - start_time} seconds")
+    return ApiResult({'seasonal_dynamics': met})
+
+
+@scenario_api.route('/api/scenario/<int:scenario_id>/runoff_matrix/', methods=['GET'])
+@login_required
+def get_scenario_runoff_matrix(scenario_id):
+    logger = make_logger('scenario_runoff_matrix_api_get')
+    try:
+        s = ScenarioService.get(scenario_id)
+        start_time = time.time()
+        runoff_matrix = ScenarioService(s).get_surface_runoff()
+        logger.info(f"Acquired runoff matrix in {time.time() - start_time} seconds")
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        return ApiException(repr(e))
+    return ApiResult({'runoff_matrix': runoff_matrix})
+
+
+@scenario_api.route(
+    '/api/scenario/<int:scenario_id>/parameter',
+    methods=['GET']
+)
+@login_required
+def get_parameters(scenario_id):
+    s = ScenarioService.get(scenario_id)
+    if not s:
+        return ApiException("Unknown Scenario")
+
+    logger = make_logger('scenario_parameter_get')
+    try:
+        params = request.args.getlist('parameter')
+        s_params = dict(s.parameters)
+        r = {}
+        for x in params:
+            param = s_params.get(x)
+            if param is not None:
+                if param not in db.session:
+                    db.session.merge(param)
+                param = param.as_serializable()
+            r[x] = param
+
+        ScenarioService.commit() # required because of session update
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        return ApiException(repr(e))
+    return ApiResult({'parameters': r})
+
+
+@scenario_api.route('/api/scenario/<int:scenario_id>/results/', methods=['GET'])
+@login_required
+def get_last_results(scenario_id):
+    logger = make_logger('scenario_last_results_api_get')
+    try:
+        s = ScenarioService.get(scenario_id)
+        start_time = time.time()
+        latest_run_info = get_latest_run_info(
+            s,
+            allow_debug=(current_user.email.lower().endswith('@icf.com'))
+        )
+        logger.info(f"Acquired scenario results in {time.time() - start_time} seconds")
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        return ApiException(repr(e))
+    return ApiResult({'latest_run_info': latest_run_info})
+
+
+@scenario_api.route('/api/scenario/<int:scenario_id>/results/', methods=['DELETE'])
+@login_required
+def clear_old_result(scenario_id):
     scn = ScenarioService.get(scenario_id)
 
     data_resp = {"success": "success"}
@@ -597,319 +596,60 @@ def clear_old_result():
     except Exception as e:
         print(f'problem deleting {e}')
         return ApiException(f"Problem deleting {repr(e)}")
-    
+
     print(f"Model Result deleted for {scn.name}")
     ScenarioService.commit()
     return ApiResult(data_resp)
 
 
-@scenario_api.route('/api/scenario/run/', methods=['POST', 'GET'])
+@scenario_api.route('/api/scenario/<int:scenario_id>/run/', methods=['POST'])
 @login_required
-def run_result_scenario():
-    trim_env_profile = os.environ.get("TRIM_ENV_PROFILE", "").lower()
-
-    exec_data = request.form.to_dict()
-    if not exec_data.get('scenario_id'):
-        raise AssertionError("Scenario ID cannot be blank.")
-    scenario_id = int(exec_data['scenario_id'])
-
+def run_result_scenario(scenario_id):
+    clear_old_result(scenario_id)
     try:
         s = ScenarioService.get(scenario_id)
-        if s.has_process_hist:
+        start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        try:
             s.latest_proc_status.run_status = 'run tm 0'
-            s.latest_proc_status.run_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        else:
-            try:
-                new_proc = ScenarioLoadRunProc(
-                    scenario=s,
-                    load_status='load 100',
-                    run_status='run tm 0',
-                    run_datetime=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                )
-                s.proc_status.add(new_proc)
-            except Exception as e:
-                print(e)
-        ScenarioService.commit()
-        # in dev/prod, we execute an AWS StepFunction to run the model via Docker/ECS. Locally,
-        # we just run the model directly.
-        if trim_env_profile in [ "dev", "devgetflow", "prod" ]:
-            sfn_client = boto3.client("stepfunctions")
-            state_machine_arn = os.environ.get("TRIM_DOCKERIZED_RUNMODEL_STATEMACHINE_ARN")
-
-            if state_machine_arn is not None:
-                resp = sfn_client.start_execution(
-                    stateMachineArn=state_machine_arn,
-                    input=json.dumps({ "scenarioId": str(scenario_id), "generateFakeResults": "false" })
-                )
-                try:
-                    s.latest_proc_status.execution_arn = resp["executionArn"]
-                    ScenarioService.commit()
-                except Exception:
-                    pass
-                data_resp = { "executionArn": resp["executionArn"] }
-            else:
-                data_resp = { "error": "Missing required variable to run re-architected model" }
-        else:
+            s.latest_proc_status.run_datetime = start_time
+            ScenarioService.commit()
+        except Exception:
+            new_proc = ScenarioLoadRunProc(
+                scenario=s,
+                load_status='load 100',
+                run_status='run tm 0',
+                run_datetime=start_time
+            )
+            s.proc_status.add(new_proc)
+            ScenarioService.commit()
+        if use_local_model_run():
+            print('Running model locally ...')
             print(f"Starting Model Run ({datetime.now()}) ...")
-            json_n_avg, json_c_avg, output_file_n, output_file_c, output_file_tm = run_full_model(s)
-            data_resp = {"mass": json_n_avg, "conc": json_c_avg, "outputMass": output_file_n,
-                         "outputConc": output_file_c, "outputTM": output_file_tm}
+            # TODO: Should this be a thread so the endpoint can return?
+            # No idea why this works at the moment ...
+            run_full_model(s)
+            data_resp = {"success": True}
             print(f"Model Run Finished ({datetime.now()}) ...")
+        else:
+            print('Running model on state machine ...')
+            execution_arn = start_state_machine_model_run(s)
+            if execution_arn is not None:
+                try:
+                    s.latest_proc_status.execution_arn = execution_arn
+                    ScenarioService.commit()
+                except Exception as e:
+                    print('state machine start error:', e)
+                data_resp = {"success": True, "executionArn": execution_arn}
+            else:
+                data_resp = {
+                    "success": False,
+                    "error": "Missing required variable to run re-architected model"
+                }
     except Exception as e:
         print('scenario run error:', e)
-        data_resp = {"error": e}
+        data_resp = {"success": False, "error": e}
 
     return ApiResult(data_resp)
-
-
-@scenario_api.route('/api/scenario/getresults/', methods=['POST'])
-@login_required
-def get_result_scenario():
-    logger = make_logger('scenario_get_results_process')
-    exec_data = request.form.to_dict()
-    if not exec_data.get('scenario_id'):
-        raise AssertionError("Scenario ID cannot be blank.")
-    scenario_id = int(exec_data['scenario_id'])
-    s = ScenarioService.get(scenario_id)
-
-    try:
-        logger.info(f'Getting Model Run Results for scenario {s.name}...')
-        fin_stat = s.latest_proc_status.run_status
-        run_date = s.latest_proc_status.run_datetime
-        output_file_n = Path(s.latest_proc_status.result_file_nt).name
-        output_file_c = Path(s.latest_proc_status.result_file_conc).name
-        output_file_t = Path(s.latest_proc_status.result_file_tm).name
-        json_n_avg = s.latest_proc_status.result_nt
-        json_c_avg = s.latest_proc_status.result_conc
-        trim_data = compile_mirc_data(s, s.latest_proc_status, logger)
-        result_resp = json.loads(json.dumps({
-            "mass": json.loads(json_n_avg), 
-            "conc": json.loads(json_c_avg), 
-            "final_status": fin_stat, 
-            "run_date": run_date, 
-            "outputMass": output_file_n, 
-            "outputConc": output_file_c, 
-            "outputTM": output_file_t,
-            "trim_data": trim_data
-        }, indent=4, sort_keys=True, default=str))
-
-    except Exception as e:
-        logger.info(f"Error when attempting to get results: {e}")
-        result_resp = {"error": e}
-    try:
-        resp = ApiResult(result_resp)
-    except Exception as e:
-        resp = ""
-        logger.error(f'Api result conversion error: {e}')
-    return resp
-
-@scenario_api.route('/api/scenario/poll/<int:id>', methods=['GET'])
-@login_required
-def poll_model_run_scenario(id):
-    s = ScenarioService.get(id)
-    if s.has_process_hist:
-        if s.latest_proc_status.is_run_error:
-            run_status = "err"
-            run_percent = "err"
-        else:
-            run_status, run_percent = [v for v in s.proc_status][0].run_step
-        print(f"Poll status for scenario {s.name} is {run_status} at {run_percent}%")
-        return ApiResult({'status': run_status, 'percent': run_percent})
-    print(f"Poll status for scenario {s.name} is 'tm' at 0%")
-    return ApiResult({'status': "tm", 'percent': "0"})
-
-
-@scenario_api.route('/api/scenario/poll/', methods=['POST'])
-@login_required
-def reset_poll_model_run_scenario():
-    scenario_data = request.form.to_dict()
-    if not scenario_data.get('scenario_id'):
-        raise AssertionError("Scenario ID cannot be blank.")
-    scenario_id = int(scenario_data['scenario_id'])
-    s = ScenarioService.get(scenario_id)
-    if s.has_process_hist:
-        s.latest_proc_status.run_status = 'run null null'
-    else:
-        new_proc = ScenarioLoadRunProc(scenario=s, load_status='load 100', run_status='run null null')
-        s.proc_status.add(new_proc)
-    ScenarioService.commit()
-    return "success"
-
-
-def get_complete_logs_from_group_and_stream(log_group, log_stream):
-    logs_client = boto3.client("logs")
-
-    # retrieve logs from CloudWatch.
-    # note this does NOT do anything smart with pagination -- just returns everything in one shot
-    # nice future enhancement might be to return a subset of this that we've deemed fit for public consumption; that could then
-    # be something we display to all users, not just internal ICF'ers
-
-    # also note - the pagination on this call is truly strange. According to the docs, you only know that pagination on the response
-    # from get_log_events is done if the "nextXToken" in the response is equivalent to the "nextToken" passed in in your request. (the next/prev
-    # tokens that are returned are never null).
-    #
-    # In my tests I was seeing things like:
-    # 1. make first call, get all the logs
-    # 2. make second call with the "nextToken" from call 1 (have to, as programatically I don't know that's the end). This returns empty array - but a non-matching end token
-    # 3. make third call with "nextToken" from call 2 (since they didn't match). Again, empty array, but this time they match and I can stop.
-    #
-    # Adding a sanity check just in case, to break after some number of attempts
-
-    sanity = 0
-    rv = []
-    next_token = None
-    while True:
-        if sanity > 10:
-            break
-
-        params = {
-            "logGroupName": log_group,
-            "logStreamName": log_stream,
-            "startFromHead": True,
-        }
-
-        if next_token is not None:
-            params["nextToken"] = next_token
-
-        print(f"CALL ITERATION {sanity} w/ params {params}...")
-
-        logs_response = logs_client.get_log_events(**params)
-        log_events = logs_response["events"]
-
-        for e in log_events:
-            rv.append({
-                "timestamp": e["timestamp"],
-                "message": e["message"]
-            })
-
-        if next_token is not None and logs_response["nextForwardToken"] == next_token:
-            print(f"safe to break; got same token we passed in...")
-            break
-        else:
-            print(f"need to keep going...")
-            next_token = logs_response["nextForwardToken"]
-
-        sanity += 1
-
-    return rv
-
-
-def fetch_output_for_step_function_execution(execution_arn):
-    # build boto3 clients we need
-    sfn_client = boto3.client("stepfunctions")
-    ecs_client = boto3.client("ecs")
-
-    try:
-        # get the details of the execution...
-        exec_hist_response = sfn_client.get_execution_history(executionArn=execution_arn)
-
-        # get the specific event relating to kickoff of the Docker container... 
-        ecs_task_event = next((e for e in exec_hist_response["events"] if e.get("type") == "TaskSubmitted" and e.get("taskSubmittedEventDetails", {}).get("resourceType") == "ecs"), None)
-        if not ecs_task_event:
-            return []
-        # re-parse the details/output, included as a JSON string in the boto3 reply... 
-        output = json.loads(ecs_task_event.get("taskSubmittedEventDetails", {}).get("output", "{}"))
-        if not output:
-            return []
-
-        # get the ECS task id
-        tasks = output.get("Tasks", [])
-
-        task = tasks[0] if len(tasks) > 0 else None
-        if not task:
-            return []
-
-        task_arn = task.get("TaskArn")
-        task_key = task_arn.split("/")[-1]
-
-        taskdef_arn = task.get("TaskDefinitionArn")
-        def_resp = ecs_client.describe_task_definition(
-            taskDefinition=taskdef_arn,
-            include=[ 'TAGS', ]
-        )
-
-        # construct log group/stream relating to this execution
-        log_group=def_resp["taskDefinition"]["containerDefinitions"][0]["logConfiguration"]["options"]["awslogs-group"]
-        log_stream=f"ecs/{def_resp['taskDefinition']['containerDefinitions'][0]['name']}/{task_key}"
-
-        print(f"let's use {log_group=} / {log_stream=}...")
-
-        return get_complete_logs_from_group_and_stream(log_group, log_stream)
-    except Exception as e:
-        return [ f"Error fetching logs: {e}" ]
-
-
-@scenario_api.route('/api/scenario/check_execution_completion/', methods=['POST'])
-@login_required
-def check_execution_completion():
-    req_data = request.form.to_dict()
-    if not req_data.get('execution_arn'):
-        raise AssertionError("execution ARN cannot be blank.")
-
-    execution_arn = req_data['execution_arn']
-
-    sfn_client = boto3.client("stepfunctions")
-
-    debug_messages = fetch_output_for_step_function_execution(execution_arn) if current_user.email.lower().endswith("@icf.com") else [ "debug output disabled for external users" ]
-
-    desc_resp = sfn_client.describe_execution(executionArn=execution_arn)
-    if desc_resp["status"] == "SUCCEEDED":
-        resp = {
-            "success": True,
-            "sfn_output": json.loads(desc_resp["output"]),
-            "debug_messages": debug_messages
-        }
-    else:
-        # success should still be True b/c we didn't fail; we're just not done yet...
-        # calling client will just wait and retry.
-        resp = {
-            "success": True,
-            "sfn_output": False,
-            "debug_messages": debug_messages
-        }
-
-    return ApiResult(resp)
-
-
-# downloads the output from a model run and creates presigned url's for the xlsx files
-@scenario_api.route('/api/scenario/fetch_run_results/', methods=['POST'])
-@login_required
-def fetch_run_results():
-    req_data = request.form.to_dict()
-    if not req_data.get('bucket') or not req_data.get('uuid'):
-        raise AssertionError("bucket/uuid cannot be blank.")
-
-    scenario = ScenarioService.get(req_data['scenario_id'])
-    bucket = req_data['bucket']
-    uuid = req_data['uuid']
-
-    s3_client = boto3.client("s3")
-    s3_resource = boto3.resource("s3")
-
-    content_object = s3_resource.Object(bucket, f"{uuid}/model_output.json")
-    file_content = content_object.get()["Body"].read().decode("utf-8")
-    json_content = json.loads(file_content)
-    trim_data = compile_mirc_data(scenario, scenario.latest_proc_status)
-    
-    resp = {
-        "success": True,
-        "model_output": json_content,
-        "trim_data": trim_data
-    }
-    
-    for f in ["outputMass", "outputConc", "outputTM"]:
-        full_key = f"{uuid}/{f}.xlsx"
-        response = s3_client.generate_presigned_url("get_object",
-                                                    Params={
-                                                        "Bucket": bucket,
-                                                        "Key": full_key
-                                                    },
-                                                    ExpiresIn=600) # expires in 10 minute(s)
-
-        resp[f] = response
-
-
-    return ApiResult(resp)
 
 
 @scenario_api.route(
@@ -1022,9 +762,9 @@ def export_for_mirc(scenario_id):
     except Exception as e:  
         logger.error(e)
         traceback.print_exc()
-        trim_data = {"message": "No valid data found"}
+        trim_data = {"trim_data": {"message": "No valid data found"}}
 
-    return ApiResult({trim_data})
+    return ApiResult(trim_data)
 
 
 @scenario_api.route(
