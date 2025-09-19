@@ -166,8 +166,8 @@ def get_step_function_results(execution_arn):
     desc_resp = sfn_client.describe_execution(executionArn=execution_arn)
     if desc_resp["status"] == "SUCCEEDED":
         output = json.loads(desc_resp["output"])
-        bucket = req_data['bucket']
-        uuid = req_data['uuid']
+        bucket = output['bucket']
+        uuid = output['uuid']
 
         s3_resource = boto3.resource("s3")
         content_object = s3_resource.Object(bucket, f"{uuid}/model_output.json")

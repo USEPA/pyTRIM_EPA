@@ -184,11 +184,29 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                             CompartmentService.delete(cmp, False)
 
     elif field_name == "hasWetland":
+        def update_precip_fractions(ve, vals={}):
+            # Wetland has different default surface precipitation values
+            surfsoil = ve.get_compartment("Soil_Surface")
+            kwargs = {"requirements": f"(self.id == {surfsoil.id})", "scenario_id": ve.parcel.scenario_id}
+            
+            evapo = surfsoil.parameters.get('EvapotranspirationFraction')
+            groundwater = surfsoil.parameters.get('GroundwaterSeepageFraction')
+            precip = surfsoil.parameters.get('PrecipitationRunoffFraction')
+
+            evapo = get_or_create_custom_param(evapo, {**kwargs, "definition_id": evapo.id})
+            groundwater = get_or_create_custom_param(groundwater, {**kwargs, "definition_id": groundwater.id})
+            precip = get_or_create_custom_param(precip, {**kwargs, "definition_id": precip.id})
+            
+            update_custom_param_value(evapo, vals["evapo"])
+            update_custom_param_value(groundwater, vals["groundwater"])
+            update_custom_param_value(precip, vals["precip"])
+
         if parcels_data[field_name] == "Yes":
             ve = p.get_volume_element("SurfSoil")
             if ve:
                 m = CompartmentService.media.get(name='Wetland')
                 c = CompartmentService.get_or_create(name="Wetland", volume_element=ve, media=m)
+                update_precip_fractions(ve, {"evapo":0.4, "groundwater":0, "precip":0.6})
             else:
                 raise ValueError("Cannot create or get Wetland Compartment")
         else:
@@ -197,6 +215,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                 c = ve.get_compartment("Wetland")
                 if c:
                     CompartmentService.delete(c, False)
+                update_precip_fractions(ve, {"evapo":0.35, "groundwater":0.25, "precip":0.4})
 
     elif field_name == "description":
         p.description = parcels_data['description']
