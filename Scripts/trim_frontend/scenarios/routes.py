@@ -52,7 +52,7 @@ def view_scenarios():
 @login_required
 def view_scenario(id):
     s = ScenarioService.get(id=id)
-    return render_template('scenarios/view_single.html', scenario=s)
+    return render_template('scenarios/view_single.html', scenario=s, title=s.name)
 
 
 @scenario.route('/scenario', methods=['POST'])
@@ -84,7 +84,7 @@ def create_scenario():
 def edit_scenario(id):
     s = ScenarioService.get(id)
 
-    return render_template('scenarios/editor.html', scenario=s)
+    return render_template('scenarios/editor.html', scenario=s, title=s.name)
 
 
 scenario_api = Blueprint('scenario_api', __name__)
