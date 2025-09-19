@@ -555,7 +555,11 @@
             function setIndicator(parent, state, pct) {
                 const spinner = parent.find("span");
                 const statusIndicator = parent.find("i.fas");
-                if (state == "run") {
+                // defaults
+                parent.removeClass('text-danger');
+                statusIndicator.attr("class", "fas fa-play");
+                // In-progress or done
+                if (state == "run" && status != "err") {
                     spinner.show();
                     statusIndicator.hide();
                 }
@@ -563,14 +567,8 @@
                     statusIndicator.show();
                     spinner.hide();
                     if (state == "done") {
-                        statusIndicator.attr("class", "fas fa-check").css('color', 'black');
+                        statusIndicator.attr("class", "fas fa-check");
                     }
-                    else { // off
-                        statusIndicator.attr("class", "fas fa-play").css('color', 'black');
-                    }
-                }
-                if (status == "err") {
-                    statusIndicator.css('color', 'red');
                 }
                 parent.find('label:last').text(`(${pct}%)`);
             }
@@ -581,6 +579,10 @@
                 }
                 else {
                     setIndicator(indicator, "done", 100);
+                }
+                if (status == "err") {
+                    indicator.addClass('text-danger');
+                    indicator.find("i.fas").attr('class', 'fas fa-exclamation-triangle');
                 }
             }
 
@@ -623,12 +625,20 @@
                 setIndicator(loadIndicator, "off", 0);
             }
 
+            tmIndicator.parent().removeClass('text-muted');
             if (status == 'err') {
-                btnRunModel.parent().append(
-                    `<p style='color: red;' id='${errMsgId}'>`
-                    + 'Model ran into an error and stopped running.'
-                    + '</p>'
-                )
+                tmIndicator.parent().addClass('text-muted');
+                const errMsg = $('<div />').attr('id', errMsgId)
+                    .addClass('row mb-0 mt-1 text-danger');
+                btnRunModel.closest('.row').after(errMsg);
+                $('<p />')
+                    .addClass('mb-0 px-3')
+                    .append($('<span />').html(
+                        'Model run (<span class="font-weight-bold">'
+                        + TRIM.store.latestRunInfo.lastest_run_date
+                        + '</span>) encountered an error and stopped.'
+                    ))
+                    .appendTo(errMsg);
             }
         }
 
@@ -770,7 +780,11 @@
                     console.log("Error pulling latest run info\n", err);
                 }
                 ResultsDisplay.draw();
-                if (TRIM.store.latestRunInfo.has_run && !TRIM.store.latestRunInfo.run_has_results) {
+                if (
+                    TRIM.store.latestRunInfo.has_run
+                    && !TRIM.store.latestRunInfo.run_has_results
+                    && TRIM.store.latestRunInfo.run_status.indexOf('err ') < 0
+                ) {
                     setTimeout(pollForResults, 6000);
                 }
                 else {
