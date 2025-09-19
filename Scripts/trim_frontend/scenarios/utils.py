@@ -166,8 +166,8 @@ def get_step_function_results(execution_arn):
     desc_resp = sfn_client.describe_execution(executionArn=execution_arn)
     if desc_resp["status"] == "SUCCEEDED":
         output = json.loads(desc_resp["output"])
-        bucket = req_data['bucket']
-        uuid = req_data['uuid']
+        bucket = output['bucket']
+        uuid = output['uuid']
 
         s3_resource = boto3.resource("s3")
         content_object = s3_resource.Object(bucket, f"{uuid}/model_output.json")
@@ -498,45 +498,10 @@ def handle_scenario_update(s, scenario_data):
 
     elif field_name == "chemical": # emission settings, add/remove chemicals from a scenario
         new_chem = ChemicalService.get(name=scenario_data["chemical"])
-        if new_chem in s.chemicals:
-            # Just reset to 0
-            from trim_frontend.parcels.utils import handle_parcel_update
-            for comp in s.compartments:
-                pcl = comp.volume_element.parcel
-                src_param = comp.parameters.get('surfaceDepositionRate')
-                ic_param = comp.parameters.get('initialConcentration')
-
-                if (
-                    isinstance(src_param, CustomParameter)
-                    and f"chemical.id == {str(new_chem.id)}" in src_param.formula.equation
-                ):
-                    handle_parcel_update(
-                        pcl,
-                        {
-                            "chemical_name": new_chem.name,
-                            "compartment_name": comp.name,
-                            "emission_value": "0",
-                            "field": "emission",
-                            "id": pcl.id,
-                            "ve_name": comp.volume_element.name,
-                        },
-                    )
-                if (
-                    isinstance(ic_param, CustomParameter)
-                    and f"chemical.id == {str(new_chem.id)}" in ic_param.formula.equation
-                ):
-                    handle_parcel_update(
-                        pcl,
-                        {
-                            "chemical_name": new_chem.name,
-                            "compartment_name": comp.name,
-                            "initial_concentration_value": "0",
-                            "field": "initial concentration",
-                            "id": pcl.id,
-                            "ve_name": comp.volume_element.name,
-                        },
-                    )
-
+        if scenario_data.get('ic_reset') == 'true':
+            reset_emissions_and_concentrations(s, new_chem, ic_reset=True)
+        elif new_chem in s.chemicals:
+            reset_emissions_and_concentrations(s, new_chem)
             s.chemicals.remove(new_chem)
         else:
             s.chemicals.append(new_chem)
@@ -544,6 +509,48 @@ def handle_scenario_update(s, scenario_data):
     ScenarioService.update(s)
 
     return ret_val
+
+
+def reset_emissions_and_concentrations(s, chem, ic_reset=False):
+    # Just reset to 0
+    from trim_frontend.parcels.utils import handle_parcel_update
+    for comp in s.compartments:
+        pcl = comp.volume_element.parcel
+        src_param = comp.parameters.get('surfaceDepositionRate')
+        ic_param = comp.parameters.get('initialConcentration')
+
+        if (
+            isinstance(src_param, CustomParameter)
+            and f"chemical.id == {str(chem.id)}" in src_param.formula.equation
+            and not ic_reset
+        ):
+            handle_parcel_update(
+                pcl,
+                {
+                    "chemical_name": chem.name,
+                    "compartment_name": comp.name,
+                    "emission_value": "0",
+                    "field": "emission",
+                    "id": pcl.id,
+                    "ve_name": comp.volume_element.name,
+                },
+            )
+        if (
+            isinstance(ic_param, CustomParameter)
+            and f"chemical.id == {str(chem.id)}" in ic_param.formula.equation
+        ):
+            handle_parcel_update(
+                pcl,
+                {
+                    "chemical_name": chem.name,
+                    "compartment_name": comp.name,
+                    "initial_concentration_value": "0",
+                    "field": "initial concentration",
+                    "id": pcl.id,
+                    "ve_name": comp.volume_element.name,
+                },
+            )
+
 
 def update_avg_vertical_velocity(scen):
         # unless modified, the AverageVerticalVelocity default value is calculated as (0.2 * precip)

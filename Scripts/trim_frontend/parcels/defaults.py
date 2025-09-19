@@ -385,7 +385,7 @@ def get_water_params(pcl, parcel_type):
 
         precip_seepage_frac_to_gw = comp_surfaceSoil.GroundwaterSeepageFraction  # 1 - runoff_fraction
         runoff_fraction = comp_surfaceSoil.PrecipitationRunoffFraction  # 1 - precip_seepage_frac_to_gw
-        evapotranspiration_fraction = comp_surfaceSoil.EvapotranspirationFraction
+        evapotranspiration_fraction = comp_surfaceSoil.EvapotranspirationFraction 
 
         try:
             seepage_vol_rate_to_gw = (
