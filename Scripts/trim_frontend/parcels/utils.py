@@ -184,11 +184,29 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                             CompartmentService.delete(cmp, False)
 
     elif field_name == "hasWetland":
+        def update_precip_fractions(ve, vals={}):
+            # Wetland has different default surface precipitation values
+            surfsoil = ve.get_compartment("Soil_Surface")
+            kwargs = {"requirements": f"(self.id == {surfsoil.id})", "scenario_id": ve.parcel.scenario_id}
+            
+            evapo = surfsoil.parameters.get('EvapotranspirationFraction')
+            groundwater = surfsoil.parameters.get('GroundwaterSeepageFraction')
+            precip = surfsoil.parameters.get('PrecipitationRunoffFraction')
+
+            evapo = get_or_create_custom_param(evapo, {**kwargs, "definition_id": evapo.id})
+            groundwater = get_or_create_custom_param(groundwater, {**kwargs, "definition_id": groundwater.id})
+            precip = get_or_create_custom_param(precip, {**kwargs, "definition_id": precip.id})
+            
+            update_custom_param_value(evapo, vals["evapo"])
+            update_custom_param_value(groundwater, vals["groundwater"])
+            update_custom_param_value(precip, vals["precip"])
+
         if parcels_data[field_name] == "Yes":
             ve = p.get_volume_element("SurfSoil")
             if ve:
                 m = CompartmentService.media.get(name='Wetland')
                 c = CompartmentService.get_or_create(name="Wetland", volume_element=ve, media=m)
+                update_precip_fractions(ve, {"evapo":0.4, "groundwater":0, "precip":0.6})
             else:
                 raise ValueError("Cannot create or get Wetland Compartment")
         else:
@@ -197,6 +215,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                 c = ve.get_compartment("Wetland")
                 if c:
                     CompartmentService.delete(c, False)
+                update_precip_fractions(ve, {"evapo":0.35, "groundwater":0.25, "precip":0.4})
 
     elif field_name == "description":
         p.description = parcels_data['description']
@@ -785,6 +804,7 @@ def add_compartment_custom_parameters(nc, par_name, par_val, par_unit):
         no_commit=True
     )
 
+
 def init_diet_table_custom_parameters(pcl):
     comp_names = AQUATIC_DIET.keys()
     for comp_name in comp_names:
@@ -800,50 +820,54 @@ def init_diet_table_custom_parameters(pcl):
 
 
 def calc_default_erosion_rate_sdr(pcl):
-    for c in pcl.compartments:
-        if not c.media.isa("Surface_Soil"):
-            continue
+    surf_soil_comp = pcl.get_compartment(media='Surface_Soil')
+    if not surf_soil_comp:
+        return None
 
-        land_use = get_land_use(pcl)
-        if land_use in ['Agriculture (General)', 'Tilled Soil']:
+    has_farm_food_chain = pcl.get_compartment(media='Farm') or False
+
+    land_use = get_land_use(pcl)
+    if land_use == 'Impervious':
+        cover_management_factor = 0
+    elif land_use in ['Agriculture (General)', 'Tilled Soil']:
+        if has_farm_food_chain:
             cover_management_factor = 0.5
-        elif land_use == 'Soil':
+        else:
             cover_management_factor = 1.0
-        elif land_use == 'Impervious':
-            cover_management_factor = 0
-        else:
+    elif land_use == 'Untilled Soil':
+        if has_farm_food_chain:
             cover_management_factor = 0.1
-
-        unit_soil_loss = (
-            EROSION_DEFAULTS['R']
-            * EROSION_DEFAULTS['K']
-            * EROSION_DEFAULTS['LS']
-            * cover_management_factor
-            * EROSION_DEFAULTS['P']
-        ).to('(kg / m^2) / day')
-        print('A =', unit_soil_loss)
-
-        area_in_sq_mile = pcl.area.to('mile^2').magnitude
-        if area_in_sq_mile <= 0.1:
-            intercept_coef = 2.1
-        elif 0.1 < area_in_sq_mile <= 1:
-            intercept_coef = 1.9
-        elif 1 < area_in_sq_mile <= 10:
-            intercept_coef = 1.4
-        elif 10 < area_in_sq_mile <= 100:
-            intercept_coef = 1.2
         else:
-            intercept_coef = 0.6
+            cover_management_factor = 1.0
+    else:
+        cover_management_factor = 0.1
 
-        intercept_coef = intercept_coef
+    unit_soil_loss = (
+        EROSION_DEFAULTS['R']
+        * EROSION_DEFAULTS['K']
+        * EROSION_DEFAULTS['LS']
+        * cover_management_factor
+        * EROSION_DEFAULTS['P']
+    ).to('(kg / m^2) / day')
 
-        slope_coef = c.parameters["sedimentDeliveryRatioSlopeCoef"].default_value
-        sed_delivery_ratio = intercept_coef * (pcl.area.magnitude ** (-1 * slope_coef))
+    area_in_sq_mile = pcl.area.to('mile^2').magnitude
+    if area_in_sq_mile <= 0.1:
+        intercept_coef = 2.1
+    elif 0.1 < area_in_sq_mile <= 1:
+        intercept_coef = 1.9
+    elif 1 < area_in_sq_mile <= 10:
+        intercept_coef = 1.4
+    elif 10 < area_in_sq_mile <= 100:
+        intercept_coef = 1.2
+    else:
+        intercept_coef = 0.6
 
-        print('SD =', sed_delivery_ratio)
-        print('ER =', unit_soil_loss * sed_delivery_ratio)
+    intercept_coef = intercept_coef
 
-        return (unit_soil_loss * sed_delivery_ratio).magnitude
+    slope_coef = surf_soil_comp.parameters["sedimentDeliveryRatioSlopeCoef"].default_value
+    sed_delivery_ratio = intercept_coef * (pcl.area.magnitude ** (-1 * slope_coef))
+
+    return (unit_soil_loss * sed_delivery_ratio).magnitude
 
 
 def get_land_use(pcl):
@@ -1113,7 +1137,19 @@ def create_base_land_compartments(parcels_data, p, land_use):
     rootsoil_thickness = round(0.8 - surfsoil_thickness, 2)
     update_soil_thickness(p, 'Soil_Surface', 'SurfSoil', surfsoil_thickness)
     update_soil_thickness(p, 'Soil_Root_Zone', 'RootSoil', rootsoil_thickness)
-    
+
+    # reset cover_management_factor (HACKY)
+    for param in list(p.scenario.parameters.values()):
+        if not isinstance(param, CustomParameter):
+            continue
+        if not(
+            param.variable_name.startswith('erosion3-cover_management_factor')
+        ):
+            continue
+        if not param.requirements == f'(self.id == {p.id})':
+            continue
+        ParameterService.delete(param, no_commit=True)
+
     CompartmentService.update(c_surfsoil)
     for nc in new_comps:
         initialize_compartment_custom_parameters(nc)

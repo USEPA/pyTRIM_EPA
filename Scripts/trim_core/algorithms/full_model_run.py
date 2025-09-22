@@ -637,12 +637,13 @@ def run_full_model(scn):
             return model_err(scn, f"ERRORED WHILE MAKING CSV: {e}", 'err csv 0')
 
         try:
+            scn.latest_proc_status.run_status = 'run fin 0'
             scn.latest_proc_status.result_file_nt = outfile_nt
             scn.latest_proc_status.result_file_conc = outfile_conc
             scn.latest_proc_status.result_file_tm = outfile_tm
-            scn.latest_proc_status.run_status = 'run fin 100'
             scn.latest_proc_status.result_nt = json.dumps(json_n_avg, default=str)
             scn.latest_proc_status.result_conc = json.dumps(json_c_avg, default=str)
+            scn.latest_proc_status.run_status = 'run fin 100'
             ScenarioService.commit()
         except Exception as e:
             return model_err(scn, f"ERRORED WHILE UPDATING DB: {e}", 'err fin 0')
@@ -656,8 +657,19 @@ def run_full_model(scn):
 def model_err(scn, err_msg, status):
     print(err_msg)
     # import traceback; traceback.print_exc()
+    if ' fin ' in status:
+        new_status = status  # force the provided status
+    else:
+        try:
+            # Try to see if we can replace the old status with an err status
+            # while keeping progress indicators
+            old_status = scn.latest_proc_status.run_status
+            new_status = 'err ' + old_status.split(' ', 1)[1]
+        except Exception:
+            # Just use the provided status
+            new_status = status
     try:
-        scn.latest_proc_status.run_status = status
+        scn.latest_proc_status.run_status = new_status
         ScenarioService.commit()
     except Exception:
         pass
