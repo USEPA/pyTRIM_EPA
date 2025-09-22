@@ -31,8 +31,6 @@ function appendHeaderOptions(datatable, skip_columns=[]) {
 }
 
 function ErrToolTip(ele, is_valid, message, parent_ele="td") {
-
-    console.log('THIS IS THE ERROR MESSAGE ' + message);
     let parent = $(ele).parent();
     $(parent).find("label.warningTT").tooltip('dispose');
     $(parent).find("label.warningTT").remove();
@@ -81,8 +79,7 @@ let ErrorValidation = {
         let data = $(ele).val();
         let is_valid = parseFloat(data);
         let msg = "Value is not valid.";
-        console.log('THIS IS THE VALIDATION DATA: ' + data);
-        console.log('THIS IS THE RANGE [' + min + " , " + max +"]");
+
         if (min !== undefined && max !== undefined) {
             is_valid = (is_valid >= min && is_valid <= max);
             msg = `Value must be between, or equal to, ${min} and ${max}.`;

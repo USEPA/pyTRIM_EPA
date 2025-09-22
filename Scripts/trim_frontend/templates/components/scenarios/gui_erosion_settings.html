@@ -319,6 +319,30 @@
         };
 
         const VAL_FUNCS = {
+            C: (parcel) => {
+                const landUse = parcel.landUse;
+                if (landUse == 'Impervious') {
+                    return 0.0;
+                }
+                const hasFarmFoodChain = parcel.hasFarmFoodChain;
+                if (landUse == 'Agriculture (General)' || landUse == 'Tilled Soil') {
+                    if (hasFarmFoodChain) {
+                        return 0.5;
+                    }
+                    else {
+                        return 1.0;
+                    }
+                }
+                else if (landUse == 'Untilled Soil') {
+                    if (hasFarmFoodChain) {
+                        return 0.1;
+                    }
+                    else {
+                        return 1.0;
+                    }
+                }
+                return 0.1;
+            },
             SD: (a, b, area) => {
                 return a * (area ** (-b));
             },
@@ -437,13 +461,7 @@
                 ////////////////////////
 
                 // Get "C"-factor
-                const CFactor = (
-                    ['Agriculture (General)', 'Tilled Soil'].indexOf(pcl.landUse) > -1 ? 0.5 : (
-                        pcl.landUse === 'Soil' ? 1.0 : (
-                            pcl.landUse === 'Impervious' ? 0 : 0.1
-                        )
-                    )
-                );
+                const CFactor = VAL_FUNCS.C(pcl);
 
                 // Calculate "A"
                 const AVal2 = getForOpt(
