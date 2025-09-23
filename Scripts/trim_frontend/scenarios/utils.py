@@ -512,7 +512,7 @@ def handle_scenario_update(s, scenario_data):
 
     elif field_name == "chemical": # emission settings, add/remove chemicals from a scenario
         # group all mercuries
-        if 'Mercury' in scenario_data["chemical"]:
+        if 'Mercury' in scenario_data["chemical"] and scenario_data.get('ic_reset', 'false') == 'false':
             chems = [
                 ChemicalService.get(name="Divalent Mercury"),
                 ChemicalService.get(name="Elemental Mercury"),

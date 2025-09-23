@@ -216,9 +216,8 @@
                 // Collapse all mercuries to a single field
                 // 'Divalent Mercury', 'Elemental Mercury', 'MethylMercury'
                 let mercuries = new Set(TRIM.store.allChemicals.filter(x => x.name.includes("Mercury")).map(x => x.id));
-                let containsAllMercuries = currentScenarioChemicalIds.intersection(mercuries).size == mercuries.size;
                 unusedChemicals = unusedChemicals.filter(x => !mercuries.has(x.id));
-                if (!containsAllMercuries)
+                if (!mercuries.isSubsetOf(currentScenarioChemicalIds))
                     unusedChemicals.push({'name':'Mercury'})
 
                 TRIM.forms.updateSelect($('#chemical')[0], unusedChemicals.map(x => x.name), true); // only show the unused chemicals in the add dialog
