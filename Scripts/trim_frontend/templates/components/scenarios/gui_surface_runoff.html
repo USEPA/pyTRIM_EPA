@@ -514,6 +514,7 @@
             }]
             if (runoff_matrix) {
                 let parcel_list = TRIM.store.currentScenario.parcels.map(e=>e.name)
+                parcel_list = parcel_list.filter(x=>Object.keys(runoff_matrix).indexOf(x) !== -1)
                 parcel_list.forEach(function (s, i) {
                     runoff_data.push({
                         'sender':s
