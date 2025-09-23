@@ -358,6 +358,14 @@ window.TRIM = (function(trim) {
         });
     }
 
+    api.refreshDebugLogs = function(scenarioId) {
+        let url = api.getUrl('scenario_api.get_debug_logs');
+        return AJAX.call({
+            method: 'GET',
+            url: url.replace('/0/', '/' + scenarioId + '/')
+        });
+    }
+
     api.runReceptorGeneration = function(scenario_id, callback_fxn) {
         let url = api.getUrl('scenario_api.run_receptor_generation').replace("/0/", "/" + scenario_id + "/");
 

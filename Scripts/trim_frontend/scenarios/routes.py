@@ -652,6 +652,28 @@ def run_result_scenario(scenario_id):
     return ApiResult(data_resp)
 
 
+@scenario_api.route('/api/scenario/<int:scenario_id>/debuglogs/', methods=['GET'])
+@login_required
+def get_debug_logs(scenario_id):
+    logger = make_logger('scenario_last_results_api_get')
+    if not current_user.email.lower().endswith('@icf.com'):
+        return ApiResult({'debug_messages': ['Not authorized']})
+    try:
+        if use_local_model_run():
+            debug_messages = ["debug messages not tracked for local runs"]
+        else:
+            start_time = time.time()
+            s = ScenarioService.get(scenario_id)
+            debug_messages = fetch_output_for_step_function_execution(
+                s.latest_proc_status.execution_arn
+            )
+            logger.info(f"Acquired debug messages in {time.time() - start_time} seconds")
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        return ApiResult({'debug_messages': [str(e)]})
+    return ApiResult({'debug_messages': debug_messages})
+
+
 @scenario_api.route(
     '/api/scenario/<int:scenario_id>/run_getflow', methods=['POST']
 )
