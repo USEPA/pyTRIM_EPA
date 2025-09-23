@@ -96,12 +96,6 @@ def start_state_machine_model_run(scen):
         return None  # Nothing to do
 
 
-def restringify_model_data(data):
-    parsed = json.loads(data)
-    restrung = json.dumps(parsed, sort_keys=True, default=str)
-    return f'{{{json.loads(restrung)}}}'
-
-
 def get_latest_run_info(scen, allow_debug=False):
     run_info = {
         'has_run': scen.has_process_hist,
@@ -111,9 +105,6 @@ def get_latest_run_info(scen, allow_debug=False):
         "run_has_results": False,
         "run_results": {}
     }
-
-    def aws_or_local(f):
-        return f if ".s3.amazonaws.com" in f else Path(f).name
 
     if run_info["has_run"]:
         proc_info = scen.latest_proc_status
@@ -126,31 +117,54 @@ def get_latest_run_info(scen, allow_debug=False):
         is_local_run = use_local_model_run()
         if run_info["run_has_results"]:
             if is_local_run:
-                run_info["run_results"] = {
-                    "mass_results": restringify_model_data(proc_info.result_nt),
-                    "mass_results_file": aws_or_local(proc_info.result_file_nt),
-                    "conc_results": restringify_model_data(proc_info.result_conc),
-                    "conc_results_file": aws_or_local(proc_info.result_file_conc)
-                }
-                if hasattr(proc_info, 'result_file_tm'):
-                    run_info["run_results"].update({
-                        "tm_results_file": aws_or_local(proc_info.result_file_tm)
-                    })
+                run_info["run_results"] = get_local_results(proc_info)
             elif proc_info.execution_arn:
                 run_info["run_results"] = get_step_function_results(proc_info.execution_arn)
 
         if (not is_local_run) and proc_info.execution_arn:
-            if allow_debug:
-                debug_messages = fetch_output_for_step_function_execution(
-                    proc_info.execution_arn
-                )
-            else:
-                debug_messages = [
-                    "debug output disabled for external users"
-                ]
-            run_info['debug_messages'] = debug_messages
+            if (not run_info["run_has_results"]) or ('err ' in proc_info.run_status):
+                if allow_debug:
+                    debug_messages = fetch_output_for_step_function_execution(
+                        proc_info.execution_arn
+                    )
+                else:
+                    debug_messages = [
+                        "debug output disabled for external users"
+                    ]
+                run_info['debug_messages'] = debug_messages
 
     return run_info
+
+
+def process_model_data(data):
+    if data is None:
+        return None
+    parsed = json.loads(data)
+    restrung = json.dumps(parsed, sort_keys=True, default=str)
+    processed = json.loads(f'{{{json.loads(restrung)}}}')
+    processed = {
+        k: v for k, v in processed.items()
+        if (not k.endswith('_units')) or (k.rsplit('_', 1)[0] not in processed)
+    }
+    return processed
+
+
+def get_local_results(proc_info):
+    def aws_or_local(f):
+        if f is None:
+            return None
+        return f if ".s3.amazonaws.com" in f else Path(f).name
+
+    run_results = {
+        "mass_results": process_model_data(proc_info.result_nt),
+        "mass_results_file": aws_or_local(proc_info.result_file_nt),
+        "conc_results": process_model_data(proc_info.result_conc),
+        "conc_results_file": aws_or_local(proc_info.result_file_conc)
+    }
+    if hasattr(proc_info, 'result_file_tm'):
+        run_results["tm_results_file"] = aws_or_local(proc_info.result_file_tm)
+
+    return run_results
 
 
 def get_step_function_results(execution_arn):
@@ -175,8 +189,8 @@ def get_step_function_results(execution_arn):
         json_content = json.loads(file_content)
 
         sfn_results = {
-            'mass_results': restringify_model_data(json.dumps(json_content['mass'], default=str)),
-            'conc_results': restringify_model_data(json.dumps(json_content['conc'], default=str))
+            'mass_results': process_model_data(json.dumps(json_content['mass'], default=str)),
+            'conc_results': process_model_data(json.dumps(json_content['conc'], default=str))
         }
 
         s3_client = boto3.client("s3")

@@ -95,7 +95,7 @@ class ProdConfig(AppConfig):
 
 
 class DevConfig(AppConfig):
-    SECRET_KEY = 'dcf917c34aec178987494a853bffa479'
+    SECRET_KEY = os.getenv('SECRET_KEY', 'dcf917c34aec178987494a853bffa479')
     SECURITY_PASSWORD_SALT = ''
     SQLALCHEMY_DATABASE_URI = db_uri
     # SQLALCHEMY_ECHO = True

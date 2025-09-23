@@ -214,6 +214,13 @@
                             <div><b>Model run debug output will appear here.</b></div>
                             <div><b>This info only appears for @icf.com accounts.</b></div>
                             <textarea rows=15 cols=103></textarea>
+                            <div class="mt-1 mb-2">
+                                <button type="button" id="btn-load-debug" disabled="disabled"
+                                    class="btn btn-sm btn-outline-info"
+                                >
+                                    Refresh Debug Logs
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -349,6 +356,7 @@
                 return;
             }
             initializingForms = true;
+            LoadingScreen.show('initializing_forms');
             TRIM.store.latestRunInfo = noRunInfo;
             initFormFields();
             pollForResults();
@@ -374,6 +382,8 @@
         const divSelectedVEs = $('#div_ve_pill');
         const btnVisChem = $('#plt_chem button.dropdown-toggle');
         const btnVis = $('#btn_visualize');
+
+        const btnLoadDebug = $('#btn-load-debug');
 
         function initFormFields() {
             LoadingScreen.show('results_display_init');
@@ -548,6 +558,11 @@
                 $('#btn_visualize').trigger('click')
             });
 
+            btnLoadDebug.on('click', function(e) {
+                e.preventDefault();
+                refreshDebugLogs();
+            });
+
             LoadingScreen.hide('results_display_init');
         }
 
@@ -640,6 +655,26 @@
                     ))
                     .appendTo(errMsg);
             }
+        }
+
+        function refreshDebugLogs() {
+            let debugZone = $("#model_progress_debug_zone textarea");
+            if (!debugZone.length) {
+                console.log('Unable to refresh debug logs; not authorized');
+                return;
+            }
+            console.log('Refreshing debug logs...')
+            LoadingScreen.show('refresh_debug_logs');
+            TRIM.api.refreshDebugLogs(TRIM.store.currentScenario.id).on('load', function() {
+                try {
+                    displayModelDebugging(this.responseJSON.debug_messages || []);
+                    console.log('Done! Got latest debug logs')
+                }
+                catch (err) {
+                    console.log("Error refreshing debug logs\n", err);
+                }
+                LoadingScreen.hide('refresh_debug_logs');
+            });
         }
 
         const divPlot = $('#plot_div');
@@ -754,7 +789,7 @@
                 return;
             }
 
-            updateVisualsOpts(JSON.parse(TRIM.store.latestRunInfo.run_results.mass_results));
+            updateVisualsOpts(TRIM.store.latestRunInfo.run_results.mass_results);
             updateFileDownloads(TRIM.store.latestRunInfo.run_results);
             console.log('Done! Drew latest run results')
         };
@@ -772,6 +807,7 @@
         }
 
         function pollForResults() {
+            btnLoadDebug.prop('disabled', true);
             TRIM.api.getLastResults(TRIM.store.currentScenario.id).on('load', function() {
                 try {
                     TRIM.store.latestRunInfo = this.responseJSON.latest_run_info || noRunInfo;
@@ -789,7 +825,9 @@
                 }
                 else {
                     btnRunModel.prop('disabled', false);
+                    btnLoadDebug.prop('disabled', false);
                 }
+                LoadingScreen.hide('initializing_forms');
             });
         }
 
@@ -823,11 +861,11 @@
             let unit_type = ""
             let unit = ""
             if ($('#switch_res_conc').prop("checked")) {
-                results = JSON.parse(TRIM.store.latestRunInfo.run_results.conc_results);
+                results = TRIM.store.latestRunInfo.run_results.conc_results;
                 unit_type = "Concentration";
                 unit = "(g/g)";
             } else {
-                results = JSON.parse(TRIM.store.latestRunInfo.run_results.mass_results);
+                results = TRIM.store.latestRunInfo.run_results.mass_results;
                 unit_type = "Mass";
                 unit = "(g)";
             }
@@ -911,11 +949,11 @@
             let unit_type = ""
             let unit = ""
             if ($('#switch_res_conc').prop("checked")) {
-                results = JSON.parse(TRIM.store.latestRunInfo.run_results.conc_results);
+                results = TRIM.store.latestRunInfo.run_results.conc_results;
                 unit_type = "Concentration";
                 unit = "(g/g)";
             } else {
-                results = JSON.parse(TRIM.store.latestRunInfo.run_results.mass_results);
+                results = TRIM.store.latestRunInfo.run_results.mass_results;
                 unit_type = "Mass";
                 unit = "(g)";
             }
