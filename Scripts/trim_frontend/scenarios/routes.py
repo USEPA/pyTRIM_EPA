@@ -9,7 +9,7 @@ from pathlib import Path
 
 import boto3
 import pandas as pd
-from flask import Blueprint, request, render_template, redirect, url_for
+from flask import Blueprint, request, abort, render_template, redirect, url_for
 from flask_security import login_required, current_user
 from flask_api import ApiException, ApiResult
 from datetime import datetime
@@ -52,6 +52,8 @@ def view_scenarios():
 @login_required
 def view_scenario(id):
     s = ScenarioService.get(id=id)
+    if not s.has_access(current_user):
+        abort(403)
     return render_template('scenarios/view_single.html', scenario=s, title=s.name)
 
 
@@ -83,7 +85,8 @@ def create_scenario():
 @login_required
 def edit_scenario(id):
     s = ScenarioService.get(id)
-
+    if not s.has_access(current_user):
+        abort(403)
     return render_template('scenarios/editor.html', scenario=s, title=s.name)
 
 
