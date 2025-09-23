@@ -137,6 +137,8 @@ def get_latest_run_info(scen, allow_debug=False):
 
 
 def process_model_data(data):
+    if data is None:
+        return None
     parsed = json.loads(data)
     restrung = json.dumps(parsed, sort_keys=True, default=str)
     processed = json.loads(f'{{{json.loads(restrung)}}}')
@@ -149,6 +151,8 @@ def process_model_data(data):
 
 def get_local_results(proc_info):
     def aws_or_local(f):
+        if f is None:
+            return None
         return f if ".s3.amazonaws.com" in f else Path(f).name
 
     run_results = {

@@ -660,7 +660,7 @@ def get_debug_logs(scenario_id):
         return ApiResult({'debug_messages': ['Not authorized']})
     try:
         if use_local_model_run():
-            debug_messages = ["debug messages not tracked for local runs"]
+            debug_messages = ["Debug messages not tracked for local runs"]
         else:
             start_time = time.time()
             s = ScenarioService.get(scenario_id)
