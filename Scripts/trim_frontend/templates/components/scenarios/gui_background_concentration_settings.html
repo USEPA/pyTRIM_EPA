@@ -213,19 +213,11 @@
                     },{
                         'type': 'data',
                         'name': 'field',
-                        'value': 'ic_reset'
-                    },{
-                        'type': 'input',
-                        'name': 'ic_reset',
-                        'value': $(e.target).attr("id") == 'ic-reset-vals'
-                    },{
-                        'type': 'data',
-                        'name': 'field',
                         'value': 'operation'
                     },{
                         'type': 'input',
                         'name': 'operation',
-                        'value': 'remove'
+                        'value': $(e.target).attr("id") == 'ic-reset-vals' ? 'reset' : 'remove'
                     }]
                     TRIM.api.updateScenario(scenario_info).on('load', function() {
                         LoadingScreen.hide('removing_chemical');
