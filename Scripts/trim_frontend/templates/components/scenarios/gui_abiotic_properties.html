@@ -200,17 +200,14 @@
                     }
                 ],
                 initComplete: function (settings, json) {
-                    // remove water parcels
-                    let waterPcls = [];
-                    TRIM.store.currentScenario.parcels.forEach((p, i) => {
-                        if (p?.parcelType?.includes("Water")) waterPcls.push(p.name)
-                    });
                     $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
                     $(spatially_varying_tblId).find("tr").each(function (i,e) {
                         let pclName = $(e).children(":first").text();
-                        if (waterPcls.includes(pclName)) {
+                        let pclType = getParcelByKey('name', pclName)?.parcelType || "";
+                        if (pclType.includes("Water")
+                        || pclType.includes("Air Only")) {
                             $(e).remove();
                         }
                         else {
@@ -222,6 +219,13 @@
                     })
                     $(spatially_varying_tblId).DataTable().columns.adjust();
                     appendHeaderOptions(this, skip_columns=["Parcel Name"]);
+
+                    // hide if no data
+                    if (!$(spatially_varying_tblId).DataTable().any()) {
+                        $("#abiotic-props-gui").html($("#abiotic-props-gui").html().replace('What Happens to Precipitation on the Surface',''));
+                        $('#spatially_varying_table_columns').parent().hide();
+                        $('#spatially_varying_table_wrapper').hide();
+                    }
                 }
             });
 
