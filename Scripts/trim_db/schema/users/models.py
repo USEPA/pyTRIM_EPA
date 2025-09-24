@@ -75,7 +75,7 @@ class UserMixin(ActiveFlagMixin):
     @property
     def is_admin(self):
         return (
-            self.is_superuser()
+            self.is_superuser
             or False
         )
 
@@ -85,6 +85,9 @@ class UserMixin(ActiveFlagMixin):
         else:
             name, at, domain = self.email.partition('@')
             return name.split('.')[0].title()
+
+    def has_access(self, scenario):
+        return self.is_admin or scenario in self.active_scenarios
 
     @property
     def active_scenarios(self):

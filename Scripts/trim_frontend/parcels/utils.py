@@ -823,6 +823,8 @@ def calc_default_erosion_rate_sdr(pcl):
     surf_soil_comp = pcl.get_compartment(media='Surface_Soil')
     if not surf_soil_comp:
         return None
+    else:
+        surf_soil_comp = surf_soil_comp[0]
 
     has_farm_food_chain = pcl.get_compartment(media='Farm') or False
 
