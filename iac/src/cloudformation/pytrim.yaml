@@ -887,7 +887,7 @@ Resources:
         BastionHostName: !Sub '${EnvironmentName}-bastionhost'
         BastionInstanceType: 't2.micro'
         NumBastionHosts: 1
-        RemoteAccessCIDR: '0.0.0.0/0' # TODO - how to lock this down a bit, maybe post-construction?
+        RemoteAccessCIDR: '199.223.30.0/24' # ICF VPN a, may need to manually add more after creation
         VPCID: !Ref Vpc
         PublicSubnet1ID: !Ref SubnetPublicAlphaAZ
         PublicSubnet2ID: !Ref SubnetPublicBravoAZ

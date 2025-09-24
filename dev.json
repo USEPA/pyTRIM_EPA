@@ -9,10 +9,6 @@
 
 		"ec2_ingress": [
 			{
-				"description": "berk b home IP",
-				"cidr": "108.77.86.235/32"
-			},
-			{
 				"description": "ICF VPN a",
 				"cidr": "199.223.30.0/24"
 			},
