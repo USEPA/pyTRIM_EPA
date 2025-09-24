@@ -143,9 +143,6 @@ class Scenario(Model, TrackUpdatesMixin):
             return False
         return False
 
-    def has_access(self, user):
-        return user.id == self.creator_id or 'superuser' in user.roles
-
     def __repr__(self):
         return (
             f'{self.__class__.__qualname__}('

@@ -52,7 +52,7 @@ def view_scenarios():
 @login_required
 def view_scenario(id):
     s = ScenarioService.get(id=id)
-    if not s.has_access(current_user):
+    if not current_user.has_access(s):
         abort(403)
     return render_template('scenarios/view_single.html', scenario=s, title=s.name)
 
@@ -85,7 +85,7 @@ def create_scenario():
 @login_required
 def edit_scenario(id):
     s = ScenarioService.get(id)
-    if not s.has_access(current_user):
+    if not current_user.has_access(s):
         abort(403)
     return render_template('scenarios/editor.html', scenario=s, title=s.name)
 
