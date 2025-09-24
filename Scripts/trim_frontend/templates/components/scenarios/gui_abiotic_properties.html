@@ -797,7 +797,7 @@
                         'DustParticleDensity': (e.dustDensity !== null ? e.dustDensity : TRIM.forms.fetchDefault('DustParticleDensity')),
                         'AirDensity': (e.airDensity !== null ? e.airDensity : TRIM.forms.fetchDefault('AirDensity')),
                         'DustParticleOrganicMatter': (e.fractionOrganicMatterOnParticulates !== null ? e.fractionOrganicMatterOnParticulates : TRIM.forms.fetchDefault('DustParticleOrganicMatter')),
-                        'AirHeight': (e.airHeight !== null ? e.airHeight : TRIM.forms.fetchDefault('AirHeight')),
+                        'AirHeight': e.airHeight,
                         'Tillage': (e.soilTillage !== null ? e.soilTillage : TRIM.forms.fetchDefault('Tillage')),
                         'SurfaceSoilThick': surface_soil_thickness,
                         'RootSoilThick': (e.rootSoilThickness !== null ? e.rootSoilThickness : root_soil_default),
