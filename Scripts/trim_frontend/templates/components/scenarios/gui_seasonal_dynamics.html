@@ -5,12 +5,12 @@
     data-form-src="scenario_seasonal_dynamics_form"
 >
     <section class="container px-0">
-        <div class="sd_subsection">
-            <div class="row">
-                <div class="col-sm">
-                    <h3 class="text-center">Litterfall</h3>
-                </div>
+        <div class="row">
+            <div class="col-sm">
+                <h3 class="text-center">Litterfall</h3>
             </div>
+        </div>
+        <div class="sd_subsection">
             <div class="row">
                 <div class="col-sm">
                     <div data-slot="true" data-target="default_seasonal_litterfall_file"></div>
@@ -199,6 +199,7 @@
         }
 
         function renderSeasonalForm() {
+            $(".sd_subsection").hide();
             $("div.sd_subsection").each((i, subsection) => enableFieldUpdates(subsection))
             let seasonal_dyn_obj = TRIM.store.currentScenario.seasonal_dynamics
             let leaves = ["coniferous", "deciduous", "grass", "agriculture"]
@@ -213,6 +214,9 @@
                 let val_ae = seasonal_dyn_obj[`allow_exchange_${e}`]
                 if (val_lf == -1 || val_ae == -1) {
                     this_chkbx.closest('div[data-slot=true]').css('display', 'none')
+                }
+                else {
+                    $(".sd_subsection").show();
                 }
                 $(this_text_lf).val(val_lf)
                 $(this_text_ae).val(val_ae)
