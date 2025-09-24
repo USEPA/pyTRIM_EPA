@@ -10,6 +10,13 @@
     Value: <input id="{{table_id}}_sv_val" type="text"> <button id="{{table_id}}_sv_btn" class="btn btn-warning" style="height:1.8em;padding:2px;">Update</button>
 </div>
 
+<style>
+    /* fix bootstrap tooltip conflicts */
+    .tooltip.show {
+        pointer-events: none !important;
+    }
+</style>
+
 <script>
     // trigger input cell blur
     $("#{{table_id}}_sv_btn").on("click", (e) => {

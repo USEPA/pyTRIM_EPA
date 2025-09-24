@@ -1125,7 +1125,9 @@
                                 'name': 'hasWetland',
                                 'value': data
                             }]
-                            let editFlag = (row.properties.parceltype.includes("Water") || row.properties.landuse.lu == "Impervious") ? "text-muted" : "editableCell badge badge-light"
+                            let editFlag = (row.properties.parceltype.includes("Water")
+                                            || row.properties.parceltype.includes("Air Only")
+                                            || row.properties.landuse.lu == "Impervious") ? "text-muted" : "editableCell badge badge-light"
                             parcel_info = JSON.stringify(parcel_info)
                             return "<select class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' name='select' style='display:none'>" +
                                         "<option value='Yes'>Yes</option>" +
@@ -1169,7 +1171,7 @@
                         //get row being changed
                         var row = mapTable.row($(this).closest('tr'));
                         var data = row.data();
-                        if (changed == "Water" || changed == "Impervious") {
+                        if (changed == "Water" || changed == "Impervious" || changed == "Air Only") {
                             $(this).closest('tr').find("label.wetland").text("No")
                         }
                         if (changed != "Tilled Soil" || changed != "Untilled Soil") {
@@ -1189,7 +1191,7 @@
                         //get row being changed
                         var row = mapTable.row($(this).closest('tr'));
                         var data = row.data();
-                        if (changed.includes("Water")) {
+                        if (changed.includes("Water") || changed.includes("Air Only")) {
                             $(this).closest('tr').find("label.wetland").text("No")
                         }
                         if (!changed.includes("Water")) {
