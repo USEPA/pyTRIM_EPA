@@ -2,6 +2,7 @@
 Model run updates
 Meteorology default values
 Seasonal dynamics default values
+Surface Soil TotalRunoffRate
 
 Revision ID: 0b7c18f6db0f
 Revises: 60eb40203023
@@ -38,6 +39,24 @@ def upgrade():
     op.execute("UPDATE parameter_definition SET default_value = 0.0126 WHERE variable_name = 'LitterFallRate';")
     op.execute("UPDATE parameter_definition SET default_value = 0.0021 WHERE variable_name = 'LitterFallRate' AND domain_id = 16;")
 
+    # Surface Soil TotalRunoffRate
+    op.execute(
+        """
+        INSERT INTO formula (equation, description) 
+        VALUES ('self.PrecipitationRunoffFraction * environment.Rain', 'default Surface Soil TotalRunoffRate');
+        """
+    )
+    op.execute(
+        """
+        UPDATE parameter_definition
+        SET default_value = NULL,
+        default_formula_id = (
+            SELECT id FROM formula
+            WHERE equation = 'self.PrecipitationRunoffFraction * environment.Rain' AND description= 'default Surface Soil TotalRunoffRate'
+        ) WHERE variable_name = 'TotalRunoffRate';
+        """
+    )
+
 
 def downgrade():
     #op.execute(
@@ -49,3 +68,10 @@ def downgrade():
 
     op.execute("UPDATE parameter_definition SET default_value = NULL WHERE variable_name = 'AllowExchange_forAir';")
     op.execute("UPDATE parameter_definition SET default_value = 0.0021 WHERE variable_name = 'AllowExchange_forAir' AND domain_id = 3;")
+
+    op.execute(
+        "UPDATE parameter_definition SET default_value = NULL, default_formula_id = NULL WHERE variable_name = 'TotalRunoffRate';"
+    )
+    op.execute(
+        "DELETE FROM formula WHERE equation = 'self.PrecipitationRunoffFraction * environment.Rain' AND description= 'default Surface Soil TotalRunoffRate';"
+    )

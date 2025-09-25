@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-from trim_frontend.scenarios.utils import update_avg_vertical_velocity
 from trim_db.schema import ureg, Parcel
 from trim_db.schema.utils.serialize import register_serializer
 from trim_db.schema.parameters.models import ParameterDefinition, CustomParameter
@@ -237,10 +236,7 @@ def get_soil_abiotic_params(pcl):
     def get_magnitude(comp, param):
         val = comp.parameters.get(param)
         if val is not None:
-            return val.value
-
-    # dynamically calculated under certain conditions
-    update_avg_vertical_velocity(pcl.scenario, skip_existing=True)
+            return round(val.value, 5)
 
     soil_abiotic_params = {}
 

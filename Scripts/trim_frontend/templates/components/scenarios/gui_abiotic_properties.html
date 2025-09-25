@@ -332,7 +332,7 @@
                     {
                         'data': 'Soil_Surface.AverageVerticalVelocity',
                         'bSortable': false,
-                        'render':  render_function_soil('AverageVerticalVelocity',"ErrorValidation.isPositiveValue(this)", "Soil_Surface")
+                        'render':  render_function_soil('AverageVerticalVelocity',"ErrorValidation.isWithinRange(this, 'td', Number.MIN_VALUE)", "Soil_Surface")
                     },
                     {
                         'data': 'Soil_Surface.AirSoilBoundaryThickness',
@@ -424,7 +424,7 @@
                     {
                         'data': 'Soil_Root_Zone.AverageVerticalVelocity',
                         'bSortable': false,
-                        'render':  render_function_soil('AverageVerticalVelocity',"ErrorValidation.isPositiveValue(this)", "Soil_Root_Zone")
+                        'render':  render_function_soil('AverageVerticalVelocity',"ErrorValidation.isWithinRange(this, 'td', Number.MIN_VALUE)", "Soil_Root_Zone")
                     },
                     {
                         'data': 'Soil_Root_Zone.rho',
@@ -491,7 +491,7 @@
                     {
                         'data': 'Soil_Vadose_Zone.AverageVerticalVelocity',
                         'bSortable': false,
-                        'render':  render_function_soil('AverageVerticalVelocity',"ErrorValidation.isPositiveValue(this)", "Soil_Vadose_Zone")
+                        'render':  render_function_soil('AverageVerticalVelocity',"ErrorValidation.isWithinRange(this, 'td', Number.MIN_VALUE)", "Soil_Vadose_Zone")
                     },
                     {
                         'data': 'Soil_Vadose_Zone.rho',
@@ -697,8 +697,11 @@
                                 pcl.evapotrans_frac = Number(field.value);
                             else if (field.name == "GroundwaterSeepageFractions")
                                 pcl.seepage_frac = Number(field.value);
-                            else if (field.name == "RunoffFractions")
+                            else if (field.name == "RunoffFractions") {
                                 pcl.runoff_fraction = Number(field.value);
+                                pcl.soil_params.Soil_Surface.TotalRunoffRate = JSON.parse(rsp.target.responseJSON).TotalRunoffRate;
+                                updateAbioticData();
+                            }  
                         }
                         LoadingScreen.hide(ls_info);
                     })
