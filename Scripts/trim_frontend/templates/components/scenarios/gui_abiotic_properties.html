@@ -172,30 +172,36 @@
                         'data': "EvapotranspirationFractions",
                         'bSortable': false,
                         'render': function (data, type, row) {
-                            let this_cell_prop = 'editableCell badge badge-light';
+                            let isValidPcl = !(row.parcelType.includes("Water") || row.parcelType.includes("Air Only"));
+                            let this_cell_data = isValidPcl ? data : "N/A"
+                            let this_cell_prop = isValidPcl ? 'editableCell badge badge-light' : 'text-muted'
                             let parcel_info = create_parcel_object('EvapotranspirationFractions', row, data);
                             let err_html = "onblur='ErrorValidation.isValidFraction(this);ErrorValidation.rowTotalIsValid(this);'";
-                            return create_cell_html(parcel_info, data, this_cell_prop, data, err_html);
+                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html);
                         }
                     },
                     {
                         'data': "GroundwaterSeepageFractions",
                         'bSortable': false,
                         'render': function (data, type, row) {
-                            let this_cell_prop = 'editableCell badge badge-light';
+                            let isValidPcl = !(row.parcelType.includes("Water") || row.parcelType.includes("Air Only"));
+                            let this_cell_data = isValidPcl ? data : "N/A"
+                            let this_cell_prop = isValidPcl ? 'editableCell badge badge-light' : 'text-muted'
                             let parcel_info = create_parcel_object('GroundwaterSeepageFractions', row, data);
                             let err_html = "onblur='ErrorValidation.isValidFraction(this);ErrorValidation.rowTotalIsValid(this);'";
-                            return create_cell_html(parcel_info, data, this_cell_prop, data, err_html);
+                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html);
                         }
                     },
                     {
                         'data': "RunoffFractions",
                         'bSortable': false,
                         'render': function (data, type, row) {
-                            let this_cell_prop = 'editableCell badge badge-light';
+                            let isValidPcl = !(row.parcelType.includes("Water") || row.parcelType.includes("Air Only"));
+                            let this_cell_data = isValidPcl ? data : "N/A"
+                            let this_cell_prop = isValidPcl ? 'editableCell badge badge-light' : 'text-muted'
                             let parcel_info = create_parcel_object('RunoffFractions', row, data);
                             let err_html = "onblur='ErrorValidation.isValidFraction(this);ErrorValidation.rowTotalIsValid(this);'";
-                            return create_cell_html(parcel_info, data, this_cell_prop, data, err_html);
+                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html);
                         }
                     }
                 ],
@@ -204,18 +210,10 @@
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
                     $(spatially_varying_tblId).find("tr").each(function (i,e) {
-                        let pclName = $(e).children(":first").text();
-                        let pclType = getParcelByKey('name', pclName)?.parcelType || "";
-                        if (pclType.includes("Water")
-                        || pclType.includes("Air Only")) {
-                            $(e).remove();
-                        }
-                        else {
-                            $(e).attr({
-                                "data-rsval": 1,
-                                "data-entity": "fractions for given precipitation"
-                            })
-                        }
+                        $(e).attr({
+                            "data-rsval": 1,
+                            "data-entity": "fractions for given precipitation"
+                        })
                     })
                     $(spatially_varying_tblId).DataTable().columns.adjust();
                     appendHeaderOptions(this, skip_columns=["Parcel Name"]);

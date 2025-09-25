@@ -578,7 +578,7 @@ def reset_emissions_and_concentrations(s, chem, ic_reset=False):
             )
 
 
-def update_avg_vertical_velocity(scen):
+def update_avg_vertical_velocity(scen, skip_existing=False):
         # unless modified, the AverageVerticalVelocity default value is calculated as (0.2 * precip)
         for comp in scen.compartments:
             if comp.name in ["Soil_Surface", "Soil_Root_Zone", "Soil_Vadose_Zone"]:
@@ -593,6 +593,8 @@ def update_avg_vertical_velocity(scen):
                             "value": val,
                         },
                     )
+                elif skip_existing: # skip custom params
+                    continue
                 # User hasn't submitted a value, so still use formula
                 elif isinstance(avg_vertical_velocity, CustomParameter) and avg_vertical_velocity.formula:
                     avg_vertical_velocity.value = val
