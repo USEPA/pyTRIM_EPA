@@ -23,6 +23,24 @@ window.TRIM = (function(trim) {
         });
     };
 
+    api.getScenarioPermissions = function(scenarioId) {
+        var url = api.getUrl('scenario_api.get_permissions').replace('/0', '/' + scenarioId);
+        return AJAX.call({
+            method: 'GET',
+            url: url
+        });
+    }
+
+    api.saveScenarioPermissions = function(scenarioId, newPermissions) {
+        var url = api.getUrl('scenario_api.save_permissions').replace('/0', '/' + scenarioId);
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: {'permissions': newPermissions},
+            json: true
+        });
+    }
+
     api.copyScenario = function(scenario) {
         var url = api.getUrl('scenario_api.copy_scenario');
         var data = makeFormData(scenario);

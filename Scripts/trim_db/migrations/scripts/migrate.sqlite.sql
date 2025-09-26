@@ -225,5 +225,16 @@ CREATE TABLE api_key (
     UNIQUE (value)
 );
 
+CREATE TABLE scenario_permissions (
+    user_id INTEGER NOT NULL, 
+    scenario_id INTEGER NOT NULL, 
+    level INTEGER NOT NULL, 
+    id INTEGER NOT NULL, 
+    PRIMARY KEY (id), 
+    FOREIGN KEY(scenario_id) REFERENCES scenario (id), 
+    FOREIGN KEY(user_id) REFERENCES "user" (id), 
+    UNIQUE (user_id, scenario_id)
+);
+
 -- Now handled in the full_db backup script
--- INSERT INTO alembic_version (version_num) VALUES ('12f3b3bc93f9');
+INSERT INTO alembic_version (version_num) VALUES ('81e92f9ff252');

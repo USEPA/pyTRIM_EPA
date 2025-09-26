@@ -223,4 +223,15 @@ CREATE TABLE `api_key` (
     UNIQUE (`value`)
 );
 
-INSERT INTO `alembic_version` (`version_num`) VALUES ('12f3b3bc93f9');
+CREATE TABLE `scenario_permissions` (
+    `user_id` INTEGER NOT NULL, 
+    `scenario_id` INTEGER NOT NULL, 
+    `level` INTEGER NOT NULL, 
+    `id` INTEGER NOT NULL AUTO_INCREMENT, 
+    PRIMARY KEY (`id`), 
+    FOREIGN KEY(`scenario_id`) REFERENCES scenario (`id`), 
+    FOREIGN KEY(`user_id`) REFERENCES `user` (`id`), 
+    UNIQUE (`user_id`, `scenario_id`)
+);
+
+INSERT INTO `alembic_version` (`version_num`) VALUES ('81e92f9ff252');
