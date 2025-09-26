@@ -1,4 +1,6 @@
-"""empty message
+"""
+new EnrichmentRatio parameter for erosion that 
+modifies the total erosion value based on the type of chemical (organic/non-organic)
 
 Revision ID: 287d3ddae792
 Revises: 0b7c18f6db0f
