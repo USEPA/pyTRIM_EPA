@@ -476,7 +476,7 @@ def handle_scenario_update(s, scenario_data):
                 update_custom_param(s, s, param_name, param_value, create_if_dne=True)
 
         if "_precipitation_" in field_name:
-            update_avg_vertical_velocity(s)
+            update_dynamic_params(s)
 
     elif field_name.startswith("seasonal_"):  # Data from the seasonal dynamics tab
         param_media = param_map["seasonal"].get(field_name)[0]
@@ -578,25 +578,36 @@ def reset_emissions_and_concentrations(s, chem, ic_reset=False):
             )
 
 
-def update_avg_vertical_velocity(scen):
-        # unless modified, the AverageVerticalVelocity default value is calculated as (0.2 * precip)
-        for comp in scen.compartments:
-            if comp.name in ["Soil_Surface", "Soil_Root_Zone", "Soil_Vadose_Zone"]:
-                avg_vertical_velocity = comp.parameters.get('AverageVerticalVelocity')
-                val = round(0.2 * scen.Rain.magnitude, 5)
-                if isinstance(avg_vertical_velocity, ParameterDefinition):
-                    get_or_create_custom_param(
-                        avg_vertical_velocity,
-                        {
-                            "requirements": f"(self.id == {comp.id})",
-                            "scenario_id": scen.id,
-                            "value": val,
-                        },
-                    )
-                # User hasn't submitted a value, so still use formula
-                elif isinstance(avg_vertical_velocity, CustomParameter) and avg_vertical_velocity.formula:
-                    avg_vertical_velocity.value = val
-                    ParameterService.commit()
+def update_dynamic_params(scen, skip_existing=False):
+    def update_param(param, comp, val):
+        if isinstance(param, ParameterDefinition):
+            get_or_create_custom_param(
+                param,
+                {
+                    "requirements": f"(self.id == {comp.id})",
+                    "scenario_id": scen.id,
+                    "value": val,
+                },
+            )
+        elif skip_existing: # skip custom params
+            return
+        # User hasn't submitted a value, so still use formula
+        elif isinstance(param, CustomParameter) and param.formula:
+            param.value = val
+            ParameterService.commit()
+
+    for comp in scen.compartments:
+        # AverageVerticalVelocity
+        if comp.name in ["Soil_Surface", "Soil_Root_Zone", "Soil_Vadose_Zone"]:
+            avg_vertical_velocity = comp.parameters.get('AverageVerticalVelocity')
+            val = round(0.2 * scen.Rain.magnitude, 5)
+            update_param(avg_vertical_velocity, comp, val)
+
+        # TotalRunoffRate
+        if comp.name in ["Soil_Surface"]:
+            total_runoff_rate = comp.parameters.get('TotalRunoffRate')
+            val = comp.PrecipitationRunoffFraction * scen.Rain.magnitude
+            update_param(total_runoff_rate, comp, val)
 
 
 def update_mixing_height(scen, mixing_height):

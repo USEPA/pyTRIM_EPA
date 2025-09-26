@@ -11,6 +11,7 @@ from .defaults import SURFACE_SOIL_SPECIFIC_MEDIA_PARAMS
 from flask_api import ApiResult
 from pyproj import Transformer
 
+from trim_frontend.scenarios.utils import update_dynamic_params
 from trim_db.schema import ureg, CustomParameter, ParameterDefinition, Parcel
 from trim_db.services import ChemicalService, CompartmentService, FormulaService, \
     ParameterService, ParcelService, ScenarioService, VolumeElementService
@@ -201,6 +202,8 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             update_custom_param_value(groundwater, vals["groundwater"])
             update_custom_param_value(precip, vals["precip"])
 
+            update_dynamic_params(p.scenario)
+
         if parcels_data[field_name] == "Yes":
             ve = p.get_volume_element("SurfSoil")
             if ve:
@@ -358,18 +361,12 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         update_custom_param_value(par, par_val)
 
         if field_name == "RunoffFractions":
-            total_runoff_val = frac_val * p.scenario.Rain.magnitude  # was multiplied by watershed area but removed per Arun on 08/12/2024
-            par_name = "TotalRunoffRate"
-            par_val = total_runoff_val
-            par = get_or_create_custom_param(
-                soil_comp.parameters.get(par_name),
-                {
-                    "requirements": f"(self.id == {soil_comp.id})",
-                    "scenario_id": p.scenario.id,
-                },
-                no_commit=True
-            )
-            update_custom_param_value(par, par_val)
+            update_dynamic_params(p.scenario)
+            ParcelService.update(p)
+            return ApiResult(json.dumps({
+                'message': 'success',
+                'TotalRunoffRate': soil_comp.TotalRunoffRate.magnitude
+            }))
 
     elif field_name in misc_water_params:
         par_name = misc_water_params[field_name]
@@ -481,7 +478,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         update_custom_param_value(this_par, float(parcels_data[field_name]))
 
         # we no longer want to use a formula for auto calculating this
-        if field_name == 'AverageVerticalVelocity' and this_par.formula:
+        if field_name in ['AverageVerticalVelocity', 'TotalRunoffRate'] and this_par.formula:
             this_par.formula = None
             ParameterService.commit()
 
@@ -733,6 +730,7 @@ def initialize_parcel_contents(new_parcel, vol_elem_defaults=None):
             initialize_compartment_custom_parameters(nc)
     ParameterService.commit()
 
+    update_dynamic_params(new_parcel.scenario, skip_existing=True)
 
 # This is for parameters of new compartments whose default value cannot be used
 # and will need custom parameters defined
@@ -744,10 +742,6 @@ def initialize_compartment_custom_parameters(nc):
         # Default Total Erosion Rate
         ter_val = calc_default_erosion_rate_sdr(this_parcel)
         add_compartment_custom_parameters(nc, "TotalErosionRate", ter_val, "kg/m^2/day")
-        # add Total Runoff Rate
-        # using Groundwater seepage fraction and precipitation to calculate runoff
-        trr_val = (nc.PrecipitationRunoffFraction) * (nc.volume_element.parcel.scenario.Rain).magnitude
-        add_compartment_custom_parameters(nc, "TotalRunoffRate", trr_val, "m^3/m^2/day")
 
     if nc.media.isa("Flora"):
         # add AllowExchange_Dynamic, AllowExchange_SteadyState_forAir, AllowExchange_SteadyState_forOther

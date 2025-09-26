@@ -172,53 +172,48 @@
                         'data': "EvapotranspirationFractions",
                         'bSortable': false,
                         'render': function (data, type, row) {
-                            let this_cell_prop = 'editableCell badge badge-light';
+                            let isValidPcl = !(row.parcelType.includes("Water") || row.parcelType.includes("Air Only"));
+                            let this_cell_data = isValidPcl ? data : "N/A"
+                            let this_cell_prop = isValidPcl ? 'editableCell badge badge-light' : 'text-muted'
                             let parcel_info = create_parcel_object('EvapotranspirationFractions', row, data);
                             let err_html = "onblur='ErrorValidation.isValidFraction(this);ErrorValidation.rowTotalIsValid(this);'";
-                            return create_cell_html(parcel_info, data, this_cell_prop, data, err_html);
+                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html);
                         }
                     },
                     {
                         'data': "GroundwaterSeepageFractions",
                         'bSortable': false,
                         'render': function (data, type, row) {
-                            let this_cell_prop = 'editableCell badge badge-light';
+                            let isValidPcl = !(row.parcelType.includes("Water") || row.parcelType.includes("Air Only"));
+                            let this_cell_data = isValidPcl ? data : "N/A"
+                            let this_cell_prop = isValidPcl ? 'editableCell badge badge-light' : 'text-muted'
                             let parcel_info = create_parcel_object('GroundwaterSeepageFractions', row, data);
                             let err_html = "onblur='ErrorValidation.isValidFraction(this);ErrorValidation.rowTotalIsValid(this);'";
-                            return create_cell_html(parcel_info, data, this_cell_prop, data, err_html);
+                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html);
                         }
                     },
                     {
                         'data': "RunoffFractions",
                         'bSortable': false,
                         'render': function (data, type, row) {
-                            let this_cell_prop = 'editableCell badge badge-light';
+                            let isValidPcl = !(row.parcelType.includes("Water") || row.parcelType.includes("Air Only"));
+                            let this_cell_data = isValidPcl ? data : "N/A"
+                            let this_cell_prop = isValidPcl ? 'editableCell badge badge-light' : 'text-muted'
                             let parcel_info = create_parcel_object('RunoffFractions', row, data);
                             let err_html = "onblur='ErrorValidation.isValidFraction(this);ErrorValidation.rowTotalIsValid(this);'";
-                            return create_cell_html(parcel_info, data, this_cell_prop, data, err_html);
+                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html);
                         }
                     }
                 ],
                 initComplete: function (settings, json) {
-                    // remove water parcels
-                    let waterPcls = [];
-                    TRIM.store.currentScenario.parcels.forEach((p, i) => {
-                        if (p?.parcelType?.includes("Water")) waterPcls.push(p.name)
-                    });
                     $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
                     $(spatially_varying_tblId).find("tr").each(function (i,e) {
-                        let pclName = $(e).children(":first").text();
-                        if (waterPcls.includes(pclName)) {
-                            $(e).remove();
-                        }
-                        else {
-                            $(e).attr({
-                                "data-rsval": 1,
-                                "data-entity": "fractions for given precipitation"
-                            })
-                        }
+                        $(e).attr({
+                            "data-rsval": 1,
+                            "data-entity": "fractions for given precipitation"
+                        })
                     })
                     $(spatially_varying_tblId).DataTable().columns.adjust();
                     appendHeaderOptions(this, skip_columns=["Parcel Name"]);
@@ -337,7 +332,7 @@
                     {
                         'data': 'Soil_Surface.AverageVerticalVelocity',
                         'bSortable': false,
-                        'render':  render_function_soil('AverageVerticalVelocity',"ErrorValidation.isPositiveValue(this)", "Soil_Surface")
+                        'render':  render_function_soil('AverageVerticalVelocity',"ErrorValidation.isWithinRange(this, 'td', Number.MIN_VALUE)", "Soil_Surface")
                     },
                     {
                         'data': 'Soil_Surface.AirSoilBoundaryThickness',
@@ -429,7 +424,7 @@
                     {
                         'data': 'Soil_Root_Zone.AverageVerticalVelocity',
                         'bSortable': false,
-                        'render':  render_function_soil('AverageVerticalVelocity',"ErrorValidation.isPositiveValue(this)", "Soil_Root_Zone")
+                        'render':  render_function_soil('AverageVerticalVelocity',"ErrorValidation.isWithinRange(this, 'td', Number.MIN_VALUE)", "Soil_Root_Zone")
                     },
                     {
                         'data': 'Soil_Root_Zone.rho',
@@ -496,7 +491,7 @@
                     {
                         'data': 'Soil_Vadose_Zone.AverageVerticalVelocity',
                         'bSortable': false,
-                        'render':  render_function_soil('AverageVerticalVelocity',"ErrorValidation.isPositiveValue(this)", "Soil_Vadose_Zone")
+                        'render':  render_function_soil('AverageVerticalVelocity',"ErrorValidation.isWithinRange(this, 'td', Number.MIN_VALUE)", "Soil_Vadose_Zone")
                     },
                     {
                         'data': 'Soil_Vadose_Zone.rho',
@@ -702,8 +697,11 @@
                                 pcl.evapotrans_frac = Number(field.value);
                             else if (field.name == "GroundwaterSeepageFractions")
                                 pcl.seepage_frac = Number(field.value);
-                            else if (field.name == "RunoffFractions")
+                            else if (field.name == "RunoffFractions") {
                                 pcl.runoff_fraction = Number(field.value);
+                                pcl.soil_params.Soil_Surface.TotalRunoffRate = JSON.parse(rsp.target.responseJSON).TotalRunoffRate;
+                                updateAbioticData();
+                            }  
                         }
                         LoadingScreen.hide(ls_info);
                     })
