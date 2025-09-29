@@ -393,14 +393,13 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                     "requirements": f"(self.id == {comp.id})",
                     "scenario_id": p.scenario.id,
                 },
+                #new_formula=(True if field_name == 'flush_rate' else False)
             )
             update_custom_param_value(par, parcels_data[field_name])
-        else:
-            par_obj = [pp for pp in ParameterService.definitions.get_all() if
-                       pp.full_name == par_name]
-            comp.parameters.add(par_name, domain_name="Compartment", unit=par_obj[0].default_unit)
-            comp.parameters.get(par_name).value = parcels_data[field_name]
-            comp.parameters.get(par_name).scenario_id = p.scenario_id
+
+        #if field_name == 'flush_rate':
+        #    FormulaService.get(par.formula.id).equation = 'true'
+        #    FormulaService.commit()
 
     elif field_name in bed_params:
         par_name = bed_params[field_name]

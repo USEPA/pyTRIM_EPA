@@ -473,7 +473,15 @@ def get_water_params(pcl, parcel_type):
         )
 
         precipitation_vol_rate_to_sw = 0  # 4.8E6
-        wc_external_inflow = get_correct_param("ExternalWaterInflow", sw_pars)
+        wc_external_inflow = get_correct_param("ExternalWaterInflow", sw_pars) or 0
+        wc_flush_rate = get_correct_param("Flushes", sw_pars)
+
+        fr_param = sw.parameters.get("Flushes")
+        wc_flush_rate_is_autocalc = 'False'
+        if isinstance(fr_param, CustomParameter) and fr_param.formula:
+            wc_flush_rate_is_autocalc = 'True' if fr_param.formula.equation == 'True' else 'False'
+
+        print(f"\n{wc_flush_rate_is_autocalc}\n")
 
         try:
             precipitation_vol_rate_to_sw = (
@@ -497,6 +505,11 @@ def get_water_params(pcl, parcel_type):
                 + precipitation_vol_rate_to_sw
                  - evaporation_vol_rate
             ))
+
+            if wc_flush_rate_is_autocalc:
+                wc_discharge_vol_rate = float('{:.5f}'.format(
+                    wc_flush_rate * abs(sw.MeanDepth.magnitude) * pcl.area.magnitude
+                ))
         except Exception as ex:
             wc_discharge_vol_rate = None
             print(f'Problem Calculating Water Column Discharge Volumetric Rate:\n {ex}')
@@ -565,8 +578,11 @@ def get_water_params(pcl, parcel_type):
         # sed_resuspension_vel = get_correct_param("SedimentResuspensionVelocity", sed_pars)  # 6.2480e-5
 
         sw_params = {
+            'autocalc': {
+                'flush_rate': wc_flush_rate_is_autocalc
+            },
             'wc_props':  {
-                'flush_rate': get_correct_param("Flushes", sw_pars),
+                'flush_rate': wc_flush_rate,
                 'suspended_sed_conc': get_correct_param("SuspendedSedimentConcentration", sw_pars),
                 'algae_density': get_correct_param("AlgaeDensityInWaterColumn", sw_pars),
                 'chloride_conc': get_correct_param("ChlorideConcentration", sw_pars),
