@@ -229,7 +229,7 @@ CREATE TABLE `scenario_permissions` (
     `level` INTEGER NOT NULL, 
     `id` INTEGER NOT NULL AUTO_INCREMENT, 
     PRIMARY KEY (`id`), 
-    FOREIGN KEY(`scenario_id`) REFERENCES scenario (`id`), 
+    FOREIGN KEY(`scenario_id`) REFERENCES `scenario` (`id`), 
     FOREIGN KEY(`user_id`) REFERENCES `user` (`id`), 
     UNIQUE (`user_id`, `scenario_id`)
 );
