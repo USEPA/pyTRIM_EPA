@@ -297,9 +297,9 @@
                 'is_editable': false,
                 'default_value': 0,
                 'unit': 'm<sup>3</sup> [sediment] /m<sup>2</sup> [sediment bed interface] /d',
-                'helpText': 'Volume of sediment buried per day into the sediment bed (per unit area) from the suspended sediment in the water column. Ratio of the difference between the sum (across all contributing water bodies) of the Water Column External Sediment Inflow from Other Water Bodies and the Soil Erosion Rate to Water Body and the Water Column Sediment Discharge Rate to the product of the Sediment Bed Density and water body surface area.' +
-                    '<strong><p>= (Water Column External Sediment Inflow from Other Water Bodies + Soil Erosion Rate to Water Body - Water Column Sediment Discharge Rate) / (Sediment Bed Density* water body surface area)</p></strong>'
-            }
+                'helpText': 'Volume of sediment buried per day into the sediment bed (per unit area) from the suspended sediment in the water column. Ratio of the difference between the sum (across all contributing water bodies) of the Water Column External Sediment Inflow from Other Water Bodies and the Soil Erosion Rate to Water Body and the Water Column Sediment Discharge Rate (converted from kg/y to kg/d) to the product of the Water Body Sediment Bed Density and water body surface area.' +
+                    '<strong><p>= (Water Column External Sediment Inflow from Other Water Bodies + Soil Erosion Rate to Water Body - [Water Column Sediment Discharge Rate]/365) / (Sediment Bed Density* water body surface area)</p></strong>'                
+            }            
         }
 
         $('#toggleData').click(function(event){
