@@ -585,7 +585,12 @@ def manage_misc_scenario_file():
                     helper_rv = associated_file_helper(scenario_id, misc_file_type, "UPLOAD", file_obj=file_obj, file_metadata=submitted_metadata)
                 except Exception as e:
                     print(f"POST ERROR: {e}")
-                    errors.append(f"Error uploading file: {e}")
+
+                    try:
+                        detailed_error_message = json.loads(str(e))
+                        errors.append(detailed_error_message.get("user_facing_error_msg"))
+                    except Exception as e:
+                        errors.append("generic_error")
         elif request.method == "DELETE":
             try:
                 helper_rv = associated_file_helper(scenario_id, misc_file_type, "DELETE")
