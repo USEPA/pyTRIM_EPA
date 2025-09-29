@@ -5,6 +5,7 @@ import sqlalchemy.sql.sqltypes
 
 from ..utils.base import Model
 from ..utils.mixins import TrackUpdatesMixin
+from ..utils.permissions import require_permissions, PermissionsEnum
 from ..utils.serialize import register_serializer
 
 
@@ -13,6 +14,7 @@ __all__ = [
 ]
 
 
+@require_permissions(allow_keys={'creator_id': PermissionsEnum.manage})
 class Scenario(Model, TrackUpdatesMixin):
     name = sa.Column(sa.String(120), nullable=False)
     description = sa.Column(sa.String(255))

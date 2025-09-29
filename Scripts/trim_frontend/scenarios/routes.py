@@ -15,9 +15,7 @@ from flask_api import ApiException, ApiResult
 from datetime import datetime
 from trim_db.schema import ScenarioLoadRunProc, \
     CustomParameter, ParameterDefinition
-from trim_db.services import ScenarioService, ChemicalService, \
-    ParcelService, CompartmentService, VolumeElementService, \
-    ParameterService, FormulaService
+from trim_db.services import *
 from trim_frontend import api, db
 from trim_frontend.parcels.routes import delete_parcel_contents
 from .defaults import *
@@ -38,7 +36,9 @@ scenario = Blueprint('scenario', __name__)
 @scenario.route('/scenario', methods=['GET'])
 @login_required
 def view_scenarios():
-    scenarios = current_user.active_scenarios
+    scenarios = [
+        s for s in ScenarioService.get_all() if current_user.can('view', s)
+    ]
     scenario_form = ScenarioDefinitionForm()
 
     return render_template(
@@ -51,8 +51,9 @@ def view_scenarios():
 @scenario.route('/scenario/<int:id>', methods=['GET'])
 @login_required
 def view_scenario(id):
+    abort(404)  # DISABLED for now -- edit_scenario is the only relevant page
     s = ScenarioService.get(id=id)
-    if not current_user.has_access(s):
+    if not current_user.can('view', s):
         abort(403)
     return render_template('scenarios/view_single.html', scenario=s, title=s.name)
 
@@ -72,6 +73,7 @@ def create_scenario():
 
     # Set the current_user as the form creator
     s.creator = current_user
+    ScenarioService.grant(s, current_user, 'manage')
 
     init_first_time_default_param_values()
 
@@ -85,9 +87,13 @@ def create_scenario():
 @login_required
 def edit_scenario(id):
     s = ScenarioService.get(id)
-    if not current_user.has_access(s):
+    if not current_user.can('edit', s):
         abort(403)
-    return render_template('scenarios/editor.html', scenario=s, title=s.name)
+    user_emails = [u.email for u in UserService.get_all()]
+    return render_template(
+        'scenarios/editor.html',
+        scenario=s, title=s.name, user_emails=user_emails
+    )
 
 
 scenario_api = Blueprint('scenario_api', __name__)
@@ -100,6 +106,8 @@ def get_scenario(id):
     logger = make_logger('scenario_api_get')
     try:
         s = ScenarioService.get(id)
+        if not current_user.can('view', s):
+            abort(403)
         start_time = time.time()
         s = s.as_serializable()
         logger.info(f"Acquired scenario in {time.time() - start_time} seconds")
@@ -113,10 +121,11 @@ def get_scenario(id):
 @login_required
 def update_scenario(scenario_id):
     logger = make_logger('scenario_api_update')
-
     try:
         # Get the specified scenario
         s = ScenarioService.get(int(scenario_id))
+        if not current_user.can('edit', s):
+            abort(403)
         scenario_data = request.form.to_dict()
         # print(f"updating with {scenario_data}")
 
@@ -136,6 +145,57 @@ def update_scenario(scenario_id):
     return "success"
 
 
+@scenario_api.route(
+    '/api/scenario/<int:scenario_id>/permissions/', methods=['GET']
+)
+@login_required
+def get_permissions(scenario_id):
+    s = ScenarioService.get(scenario_id)
+    if not s:
+        raise ApiException('Scenario Not Found', 404)
+
+    if not current_user.can('view', s):
+        raise ApiException('Not Authorized', 403)
+
+    permissions = {
+        u.email: p.name
+        for u, p in ScenarioService(s).user_permissions().items()
+        if p is not None
+    }
+
+    return ApiResult({'success': True, 'permissions': permissions})
+
+
+@scenario_api.route(
+    '/api/scenario/<int:scenario_id>/permissions/', methods=['POST']
+)
+@login_required
+@api.csrf_exempt
+def save_permissions(scenario_id):
+    s = ScenarioService.get(scenario_id)
+    if not s:
+        raise ApiException('Scenario Not Found', 404)
+
+    if not current_user.can('manage', s):
+        raise ApiException('Not Authorized', 403)
+
+    value = request.json
+
+    ScenarioService.clear_permissions(s, except_for=[current_user.id])
+
+    for email, permission in value.get('permissions', {}).items():
+        if permission.lower() == 'none':
+            continue
+        u = UserService.get(email=email)
+        if (not u) or (u.id == current_user.id):
+            continue
+        ScenarioService.grant(s, u, permission, no_commit=True)
+
+    ScenarioService.update(s)
+
+    return ApiResult({'success': True, 'scenario_id': s.id})
+
+
 @scenario_api.route('/api/scenario/copy', methods=['POST'])
 @login_required
 def copy_scenario():
@@ -149,6 +209,8 @@ def copy_scenario():
     scenario_id = int(scenario_data['scenario_id'])
     user_id = int(scenario_data['user_id'])
     s = ScenarioService.get(scenario_id)
+    if not current_user.can('view', s):
+        abort(403)
 
     try:
         copy_start_time = time.time()
@@ -396,6 +458,8 @@ def delete_scenario():
 
     scenario_id = int(scenario_data['scenario_id'])
     s = ScenarioService.get(scenario_id)
+    if not current_user.can('manage', s):
+        abort(403)
 
     try:
         # Delete compartment custom parameters
@@ -490,6 +554,8 @@ def get_scenario_chemicals(scenario_id):
     s = ScenarioService.get(scenario_id)
     if not s:
         return ApiException("Unknown Scenario")
+    if not current_user.can('view', s):
+        abort(403)
     chems = [c.as_serializable() for c in s.chemicals]
     return ApiResult({
         'chemicals': chems
@@ -501,6 +567,8 @@ def get_scenario_chemicals(scenario_id):
 def get_scenario_met_data(scenario_id):
     logger = make_logger('scenario_met_api_get')
     s = ScenarioService.get(scenario_id)
+    if not current_user.can('view', s):
+        abort(403)
     start_time = time.time()
     try:
         met = get_met_data(s)
@@ -516,6 +584,8 @@ def get_scenario_met_data(scenario_id):
 def get_scenario_seasonal_dynamics(scenario_id):
     logger = make_logger('scenario_seasonal_dynamics_api_get')
     s = ScenarioService.get(scenario_id)
+    if not current_user.can('view', s):
+        abort(403)
     start_time = time.time()
     met = get_seasonal_dynamics(s)
     logger.info(f"Acquired seasonal dynamics in {time.time() - start_time} seconds")
@@ -528,6 +598,8 @@ def get_scenario_runoff_matrix(scenario_id):
     logger = make_logger('scenario_runoff_matrix_api_get')
     try:
         s = ScenarioService.get(scenario_id)
+        if not current_user.can('view', s):
+            abort(403)
         start_time = time.time()
         runoff_matrix = ScenarioService(s).get_surface_runoff()
         logger.info(f"Acquired runoff matrix in {time.time() - start_time} seconds")
@@ -546,6 +618,8 @@ def get_parameters(scenario_id):
     s = ScenarioService.get(scenario_id)
     if not s:
         return ApiException("Unknown Scenario")
+    if not current_user.can('view', s):
+        abort(403)
 
     logger = make_logger('scenario_parameter_get')
     try:
@@ -573,6 +647,8 @@ def get_last_results(scenario_id):
     logger = make_logger('scenario_last_results_api_get')
     try:
         s = ScenarioService.get(scenario_id)
+        if not current_user.can('view', s):
+            abort(403)
         start_time = time.time()
         latest_run_info = get_latest_run_info(
             s,
@@ -589,6 +665,8 @@ def get_last_results(scenario_id):
 @login_required
 def clear_old_result(scenario_id):
     scn = ScenarioService.get(scenario_id)
+    if not current_user.can('edit', scn):
+        abort(403)
 
     data_resp = {"success": "success"}
     try:
@@ -611,6 +689,8 @@ def run_result_scenario(scenario_id):
     clear_old_result(scenario_id)
     try:
         s = ScenarioService.get(scenario_id)
+        if not current_user.can('edit', s):
+            abort(403)
         start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         try:
             s.latest_proc_status.run_status = 'run tm 0'
@@ -659,6 +739,9 @@ def run_result_scenario(scenario_id):
 @login_required
 def get_debug_logs(scenario_id):
     logger = make_logger('scenario_last_results_api_get')
+    s = ScenarioService.get(scenario_id)
+    if not current_user.can('view', s):
+        abort(403)
     if not current_user.email.lower().endswith('@icf.com'):
         return ApiResult({'debug_messages': ['Not authorized']})
     try:
@@ -666,7 +749,6 @@ def get_debug_logs(scenario_id):
             debug_messages = ["Debug messages not tracked for local runs"]
         else:
             start_time = time.time()
-            s = ScenarioService.get(scenario_id)
             debug_messages = fetch_output_for_step_function_execution(
                 s.latest_proc_status.execution_arn
             )
@@ -699,6 +781,8 @@ def run_getflow(scenario_id):
     s = ScenarioService.get(scenario_id)
     if not s:
         return ApiException("Unknown Scenario")
+    if not current_user.can('edit', s):
+        abort(403)
 
     print(f"scenario: {s}")
 
@@ -764,8 +848,6 @@ def check_stepfunction_status():
                 for key in parsed:
                     data_resp["output"][key] = parsed[key]
 
-
-
         except Exception as e:
             data_resp = {"error": str(e) }
 
@@ -779,6 +861,8 @@ def export_for_mirc(scenario_id):
     scen = ScenarioService.get(scenario_id)
     if not scen:
         return ApiException("Unknown Scenario")
+    if not current_user.can('view', scen):
+        abort(403)
 
     logger = make_logger('mirc_exporter')
     try:
@@ -807,6 +891,8 @@ def run_receptor_generation(scenario_id):
     """
 
     scen = ScenarioService.get(scenario_id)
+    if not current_user.can('edit', scen):
+        abort(403)
 
     try:
         all_calculations = []
@@ -837,6 +923,8 @@ def get_chemical_properties(scenario_id):
     logger.info("Pulling chemical properties...")
 
     scen = ScenarioService.get(scenario_id)
+    if not current_user.can('view', scen):
+        abort(403)
     comps = scen.compartments
 
     chem_properties = {}

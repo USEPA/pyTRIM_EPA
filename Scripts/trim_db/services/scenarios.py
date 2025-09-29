@@ -1,16 +1,25 @@
 from ..schema.utils.caching import CacheManager
 from ..schema.scenarios.models import *
-from .generic import GenericService
+from .generic import GenericService, PermissionsMixin
 from .parameters import parameterize
+from .users import UserService
 
 __all__ = ['ScenarioService']
 
 
-class ScenarioService(GenericService):
+class ScenarioService(GenericService, PermissionsMixin):
     __model__ = parameterize(Scenario)
 
     def __init__(self, model, *args, **kwargs):
         self.__instance = model
+
+    def user_permissions(self):
+        scenario = self.__instance
+        users = {
+            u: scenario.access_level(u)
+            for u in UserService.get_all() if u.can('view', scenario, ignore_superuser=True)
+        }
+        return users
 
     def get_surface_runoff(self):
         return get_scenario_surface_runoff(self.__instance)
