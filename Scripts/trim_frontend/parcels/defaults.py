@@ -65,27 +65,7 @@ def get_general_params(pcl):
     total_erosion_rate = None
     is_tilled = False
 
-    # HACKY
-    erosion_table_params = {}
-    for param in list(pcl.scenario.parameters.values()):
-        if not isinstance(param, CustomParameter):
-            continue
-        if not param.requirements == f'(self.id == {pcl.id})':
-            continue
-        if not(
-            param.variable_name.startswith('erosion1-')
-            or param.variable_name.startswith('erosion2-')
-            or param.variable_name.startswith('erosion3-')
-        ):
-            continue
-        if param.variable_name.endswith('-active'):
-            erosion_table_params[
-                param.variable_name.split('-')[0] + '-active'
-            ] = EROSION_TABLE_PARAM_MAP.get(
-                param.variable_name.split('-', 1)[1].rsplit('-', 1)[0]
-            )
-        else:
-            erosion_table_params[param.variable_name] =  param.value
+    erosion_table_params = get_erosion_params(pcl)
 
     surface_soil_height = None
 
@@ -219,6 +199,37 @@ def get_general_params(pcl):
         **erosion_table_params
     }
     return general_params
+
+
+def get_erosion_params(pcl):
+    # HACKY
+    erosion_table_params = {}
+    for param in list(ParameterService.get_all(
+        scenario_id=pcl.scenario_id, requirements=make_self_requirements(pcl)
+    )):
+        if not isinstance(param, CustomParameter):
+            continue
+        if not param.requirements == f'(self.id == {pcl.id})':
+            continue
+        if not(
+            param.variable_name.startswith('erosion1-')
+            or param.variable_name.startswith('erosion2-')
+            or param.variable_name.startswith('erosion3-')
+        ):
+            continue
+        if param.variable_name.endswith('-active'):
+            erosion_table_params[
+                param.variable_name.split('-')[0] + '-active'
+            ] = EROSION_TABLE_PARAM_MAP.get(
+                param.variable_name.split('-', 1)[1].rsplit('-', 1)[0]
+            )
+        else:
+            erosion_table_params[param.variable_name] =  param.value
+    return erosion_table_params
+
+
+def make_self_requirements(obj):
+    return f'(self.id == {obj.id})'
 
 
 def get_soil_abiotic_params(pcl):
@@ -473,7 +484,13 @@ def get_water_params(pcl, parcel_type):
         )
 
         precipitation_vol_rate_to_sw = 0  # 4.8E6
-        wc_external_inflow = get_correct_param("ExternalWaterInflow", sw_pars)
+        wc_external_inflow = get_correct_param("ExternalWaterInflow", sw_pars) or 0
+        wc_flush_rate = get_correct_param("Flushes", sw_pars)
+
+        fr_param = sw.parameters.get("Flushes")
+        wc_flush_rate_is_autocalc = 'True'
+        if isinstance(fr_param, CustomParameter) and fr_param.formula:
+            wc_flush_rate_is_autocalc = 'True' if fr_param.formula.equation == 'True' else 'False'
 
         try:
             precipitation_vol_rate_to_sw = (
@@ -497,6 +514,11 @@ def get_water_params(pcl, parcel_type):
                 + precipitation_vol_rate_to_sw
                  - evaporation_vol_rate
             ))
+
+            if wc_flush_rate_is_autocalc == 'False':
+                wc_discharge_vol_rate = float('{:.5f}'.format(
+                    wc_flush_rate * abs(sw.MeanDepth.magnitude) * pcl.area.magnitude
+                ))
         except Exception as ex:
             wc_discharge_vol_rate = None
             print(f'Problem Calculating Water Column Discharge Volumetric Rate:\n {ex}')
@@ -568,8 +590,11 @@ def get_water_params(pcl, parcel_type):
         # sed_resuspension_vel = get_correct_param("SedimentResuspensionVelocity", sed_pars)  # 6.2480e-5
 
         sw_params = {
+            'autocalc': {
+                'flush_rate': wc_flush_rate_is_autocalc
+            },
             'wc_props':  {
-                'flush_rate': get_correct_param("Flushes", sw_pars),
+                'flush_rate': wc_flush_rate,
                 'suspended_sed_conc': get_correct_param("SuspendedSedimentConcentration", sw_pars),
                 'algae_density': get_correct_param("AlgaeDensityInWaterColumn", sw_pars),
                 'chloride_conc': get_correct_param("ChlorideConcentration", sw_pars),

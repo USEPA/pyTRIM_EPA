@@ -298,7 +298,7 @@
                 }
 
                 // tell the update function that field 'S' triggered this
-                // -- that will cascade updates that will catch R, K, and L,
+                // -- that will cascade updates that will catch K, L // , and R
                 // since they're all in calculations that depend on S
                 updateAllErosionData(tbl, currentData, 'S', ['K', 'L']); // ['R', 'K', 'L']);
             }
@@ -895,6 +895,9 @@
             for (const k in tblColDefs) {
                 for (const colDef of tblColDefs[k]) {
                     colDef.name = colDef.name || colDef.data;
+                    if (colDef.name != 'Surface Parcel') {
+                        colDef.orderable = false;
+                    }
                 }
             }
 
@@ -957,7 +960,7 @@
                 tbl.DataTable({
                     destroy: true,
                     data: tblData,
-                    ordering: false,
+                    ordering: true,
                     paging: false,
                     bFilter: false,
                     info: false,
@@ -1126,16 +1129,27 @@
         }
 
         function updateAllErosionData(tbl, data, fromField, alsoSaveFields) {
+            // First pass; make sure data is consistent and update table
             const optionNum = tbl[0].id.split('_opt').pop();
             for (let i = 0; i < data.length; i++) {
                 const rowData = data[i];
                 rowData.active = calculateActiveValues(optionNum, fromField);
+                recalculateErosionRate(optionNum, rowData, fromField, false);
+            }
+            const dt = tbl.DataTable();
+            dt.rows().remove();
+            dt.rows.add(data).draw(false);
+
+            // Second pass; update DB
+            for (let i = 0; i < data.length; i++) {
+                const rowData = data[i];
 
                 if (validateField(tbl, fromField, i)) {
-                    // If valid, recalculate the row ER ...
-                    recalculateErosionRate(optionNum, rowData, fromField);
-                    // ... then submit to the DB
+                    // If valid, submit to the DB
                     updateDB(rowData, fromField, optionNum);
+                }
+                else {
+                    console.log('Invalid field! ' + fromField);
                 }
                 if (alsoSaveFields !== undefined) {
                     for (fieldName of alsoSaveFields) {
@@ -1143,13 +1157,12 @@
                             // If valid, submit to the DB
                             updateDB(rowData, fieldName, optionNum, false);
                         }
+                        else {
+                            console.log('Invalid field! ' + fieldName);
+                        }
                     }
                 }
             }
-
-            const dt = tbl.DataTable();
-            dt.rows().remove();
-            dt.rows.add(data).draw(false);
 
             // Update the saved total effective erosion rates
             saveErosionRates(tbl);

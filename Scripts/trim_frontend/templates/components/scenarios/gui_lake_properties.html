@@ -771,14 +771,7 @@
                     let ls_info = "Water_body_prop_update"
                     let sub_cat = this_table == "LakeTable" ? "wc_props" : "sed_props"
                     param_store_key = param_store_key + "." + sub_cat
-                    LoadingScreen.show(ls_info)
-                    TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', (rsp)=>{
-                        update_data_store_callback(rsp, elm, parcel_info, param_store_key, data, old_data)
-                        LoadingScreen.hide(ls_info)
-                    })
-                    // table_data = get_Data_from_table(tblId)
-                    let wc_table_data = get_Data_from_table("#LakeTable")
-                    let sed_table_data = get_Data_from_table("#SedTable")
+                    
                     let field_name = parcel_info[parcel_info.findIndex(e => e.name == 'field')].value
 
                     let table_col_headers = $("#LakeTable thead th").map((i,h)=>h.innerHTML).toArray()
@@ -787,6 +780,29 @@
                     let col_idx = table_col_headers.indexOf(parcel_name)
                     let is_auto_calculated = $("#LakeTable").find('tr').eq(fr_row_idx+1).find('td').eq(col_idx).find("button").data("active")
 
+                    if (field_name == 'flush_rate') {
+                        parcel_info = parcel_info.concat([
+                            {
+                                'type': 'data',
+                                'name': 'field',
+                                'value': 'autocalc'
+                            },{
+                                'type': 'input',
+                                'name': 'autocalc',
+                                'value': is_auto_calculated
+                            }
+                        ])                        
+                    }
+
+                    LoadingScreen.show(ls_info)
+                    TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', (rsp)=>{
+                        update_data_store_callback(rsp, elm, parcel_info, param_store_key, data, old_data)
+                        LoadingScreen.hide(ls_info)
+                    })
+                    // table_data = get_Data_from_table(tblId)
+                    let wc_table_data = get_Data_from_table("#LakeTable")
+                    let sed_table_data = get_Data_from_table("#SedTable")
+                    
                     switch (field_name) {
                         case "evaporation_rate":
                             var val=calculate_wc_evaporation_vol_rate(wc_table_data, parcel_name, area)
@@ -804,8 +820,12 @@
                             var val_srv = calculate_sed_resuspension_vel(wc_table_data,sed_table_data,parcel_name, area)
                             sed_table_data[sed_table_data.findIndex(e => e.Property == 'Sediment Resuspension Velocity')][parcel_name] = val_srv
                             break;
+                        case "flush_rate":
+                            // Fall through to discharge_vol_rate... no break!
+                            var val_dvr = calculate_discharge_vol_rate(wc_table_data, parcel_name)
+                            wc_table_data[wc_table_data.findIndex(e => e.Property == 'Water Column Discharge Volumetric Rate')][parcel_name] = val_dvr      
                         case "discharge_vol_rate":
-                            if (is_auto_calculated) {
+                            if (is_auto_calculated == 'True') {
                                 var val_fr = calculate_flush_rate(wc_table_data,parcel_name)
                                 wc_table_data[wc_table_data.findIndex(e => e.Property == 'Water Column Flush Rate')][parcel_name] = val_fr
                             }
@@ -849,8 +869,7 @@
                             sed_table_data[sed_table_data.findIndex(e => e.Property == 'Sediment Resuspension Velocity')][parcel_name] = val
                     }
 
-                    // let default_data = table_type == "lake" ? default_water_data : default_sed_data
-
+                    let wc_store = getParcelByKey('name', parcel_name).surface_water.wc_props;
                     wc_table_data.map(function(e,i){
                             e['unit'] = default_water_data[e['Property']]['unit']
                             e['helpText'] = default_water_data[e['Property']]['helpText']
@@ -858,10 +877,13 @@
                             e['isEditable'] = default_water_data[e['Property']]['is_editable']
                             e['min'] = default_water_data[e['Property']]['min']
                             e['max'] = default_water_data[e['Property']]['max']
+
+                            wc_store[e['shortProperty']] = e[parcel_name];
                         }
                     )
                     TableRedraw(wc_table_data, "lake")
 
+                    let sed_store = getParcelByKey('name', parcel_name).surface_water.sed_props;
                     sed_table_data.map(function(e,i){
                             e['unit'] = default_sed_data[e['Property']]['unit']
                             e['helpText'] = default_sed_data[e['Property']]['helpText']
@@ -869,6 +891,8 @@
                             e['isEditable'] = default_sed_data[e['Property']]['is_editable']
                             e['min'] = default_sed_data[e['Property']]['min']
                             e['max'] = default_sed_data[e['Property']]['max']
+
+                            sed_store[e['shortProperty']] = e[parcel_name];
                         }
                     )
                     TableRedraw(sed_table_data, "sed")
@@ -1026,6 +1050,20 @@
         }
 
         function calculate_discharge_vol_rate(data, parcel_name){
+            // use flush rate if manually applied
+            let table_col_headers = $("#LakeTable thead th").map((i,h)=>h.innerHTML).toArray()
+            let table_row_headers = $("#LakeTable tbody tr td:nth-child(1) label").map((i,r) => r.innerHTML).toArray()
+            let fr_row_idx = table_row_headers.indexOf("Water Column Flush Rate")
+            let col_idx = table_col_headers.indexOf(parcel_name)
+            let is_auto_calculated = $("#LakeTable").find('tr').eq(fr_row_idx+1).find('td').eq(col_idx).find("button").data("active");
+            if (is_auto_calculated == 'False') {
+                let flush_rate = Number(data.find(e=>e.Property == "Water Column Flush Rate")[parcel_name])
+                let area = getParcelByKey('name', parcel_name).area
+                let wc_depth = Number(data.find(e=>e.Property == "Water Column Depth")[parcel_name])
+                let res = flush_rate * area * wc_depth
+                return Number.parseFloat(res).toExponential(5)
+            }
+
             let runoff_gain = Number(data.find(e=>e.Property == "Precipitation Runoff Volumetric Rate from Land to Water Body")[parcel_name])
             let precipitation_gain = Number(data.find(e=>e.Property == "Precipitation Volumetric Rate to Water Body")[parcel_name])
             let precipitation_gw_seepage_gain = Number(data.find(e=>e.Property == "Precipitation Seepage Volumetric Rate to Groundwater")[parcel_name])

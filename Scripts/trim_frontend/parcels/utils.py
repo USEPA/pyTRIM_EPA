@@ -20,7 +20,7 @@ from .defaults import get_watershed_area, \
      Air_Parcel_VolElem_defaults, Aquatic_Biota_SW_Compartment_defaults, \
      Aquatic_Biota_Sed_Compartment_defaults, Farm_Biota_SurfSoil_Compartment_defaults, \
      LAND_USE_TYPES, AQUATIC_DIET, Land_Parcel_VolElem_defaults, Water_Parcel_VolElem_defaults, \
-     Wet_Dry_Source_VolElem_defaults, EROSION_DEFAULTS
+     Wet_Dry_Source_VolElem_defaults, EROSION_DEFAULTS, make_self_requirements
 from .forms import ScenarioParcelsForm
 from ..scenarios.forms import ScenarioAbioticPropertiesForm
 from ..utils.logging import make_logger
@@ -240,7 +240,9 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
 
         # Delete all erosionN- params for other options,
         # and only store one active parameter at a time
-        for param in list(p.scenario.parameters.values()):
+        for param in list(ParameterService.get_all(
+            scenario_id=p.scenario_id, requirements=make_self_requirements(p)
+        )):
             if not isinstance(param, CustomParameter):
                 continue
             if not(
@@ -249,7 +251,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                 or param.variable_name.startswith('erosion3-')
             ):
                 continue
-            if not param.requirements == f'(self.id == {p.id})':
+            if not param.requirements == make_self_requirements(p):
                 continue
             if (
                 param.variable_name.endswith('-active')
@@ -266,7 +268,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         param = ParameterService.get_or_create(
             definition_id=param_def.id,
             scenario_id=p.scenario_id,
-            requirements=f'(self.id == {p.id})', # parcel id
+            requirements=make_self_requirements(p), # parcel id
         )
         val = parcels_data[field_name]
         has_value = (str(val) == '0' or (val or ''))
@@ -288,7 +290,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             param = ParameterService.get_or_create(
                 definition_id=param_def.id,
                 scenario_id=p.scenario_id,
-                requirements=f'(self.id == {p.id})', # parcel id
+                requirements=make_self_requirements(p), # parcel id
             )
             param.value = 1
             ParameterService.update(param)
@@ -392,15 +394,17 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                 {
                     "requirements": f"(self.id == {comp.id})",
                     "scenario_id": p.scenario.id,
-                },
+                }
             )
             update_custom_param_value(par, parcels_data[field_name])
-        else:
-            par_obj = [pp for pp in ParameterService.definitions.get_all() if
-                       pp.full_name == par_name]
-            comp.parameters.add(par_name, domain_name="Compartment", unit=par_obj[0].default_unit)
-            comp.parameters.get(par_name).value = parcels_data[field_name]
-            comp.parameters.get(par_name).scenario_id = p.scenario_id
+
+        if field_name == 'flush_rate':
+            if not par.formula:
+                new_formula_obj = FormulaService.create(equation=parcels_data['autocalc'])
+                par.formula = new_formula_obj
+            else:
+                FormulaService.get(par.formula.id).equation = parcels_data['autocalc']
+                FormulaService.commit()
 
     elif field_name in bed_params:
         par_name = bed_params[field_name]
@@ -649,6 +653,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
 
     # Update record
     ParcelService.update(p)
+
 
 # TODO - define "Air Only", etc. as constants somewhere?!?!?
 # forgiving translation of user-supplied value
