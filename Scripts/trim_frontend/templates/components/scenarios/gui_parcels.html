@@ -1631,8 +1631,12 @@
                     parcel.bindTooltip(parcel.feature.properties.name, {permanent: false}).addTo(map);
                     shapes = parcels.toGeoJSON()
                     mapTableRedraw()
+                    // add new parcel to TRIM.store to prevent dupes
+                    if (parcelList.length > 0) {
+                        TRIM.store.currentScenario.parcels.push(new_parcel);
+                    }
                 }
-                TRIM.refreshParcels();
+                // TRIM.refreshParcels();
                 requires_reload = true;
                 LoadingScreen.hide('create_parcel');
             })
@@ -1653,7 +1657,12 @@
 			// console.log("DELETING: " + JSON.stringify(parcelObj));
             LoadingScreen.show('delete_parcel');
             TRIM.api.deleteParcels(TRIM.store.currentScenario.id, parcelObj).on('load', function(){
-				TRIM.refreshParcels();
+                // delete parcel from TRIM.store
+                const idx = TRIM.store.currentScenario.parcels.findIndex(p => p.id == parcelObj.properties.parcelid);
+                if (idx > -1) {
+                    TRIM.store.currentScenario.parcels.splice(idx, 1);
+                }
+				// TRIM.refreshParcels();
 				requires_reload = true;
 				shapes = parcels.toGeoJSON()
 				mapTableRedraw()
