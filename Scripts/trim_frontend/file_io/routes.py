@@ -814,7 +814,7 @@ def parse_runoff_matrix_upload():
             reader = csv.DictReader(io.StringIO(lines))
         for row in reader:
             sender_pcl = parcel_names[row.get("parcels").lower()]
-            if sender_pcl.name in request.form["water_parcels"]:
+            if sender_pcl.name in request.form["skip_parcels"]:
                 continue
             del row["parcels"]
             
@@ -834,7 +834,7 @@ def parse_runoff_matrix_upload():
                 
     except Exception as e:
         print(traceback.format_exc())
-        return ApiException(e)
+        return ApiException(traceback.format_exc())
     return ApiResult({'matrix_result': "success"})
 
 root = os.path.dirname(os.path.abspath(__file__))
