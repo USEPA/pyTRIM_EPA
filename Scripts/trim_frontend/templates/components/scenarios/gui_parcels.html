@@ -942,6 +942,21 @@
                 fnCreatedRow: function (row, data, index) {
                     $(row).find("td.rightBorder").addClass("freeze-column")
                 },
+                headerCallback: function(thead) {
+                    $(thead).find('th').each(function(index) {
+                        if (index == 0) {
+                        $(this).addClass('max-width-med', 'min-width-med');
+                        }
+                    });
+                },
+                columnDefs: [
+                    {
+                        targets: 0,
+                        createdCell: function(td) {
+                            td.classList.add('max-width-med', 'min-width-med', 'word-break');
+                        }
+                    }
+                ],
                 columns: [
                     {
                         data: "properties.name",

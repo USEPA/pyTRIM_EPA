@@ -338,8 +338,23 @@
                 bAutoWidth: false,
                 scrollX: true,
                 scrollY: 500,
+                headerCallback: function(thead) {
+                    $(thead).find('th').each(function(index) {
+                        if (index !== 0) {
+                        $(this).addClass('max-width-med', 'word-break');
+                        }
+                    });
+                },
                 columnDefs: [
-                   { width: '100%', targets: 0 }
+                    { width: '100%', targets: 0 },
+                    {
+                        targets: function() {
+                            return $(tblId).DataTable().columns().indexes().filter(i => i !== 0);
+                        },
+                        createdCell: function(td) {
+                            td.classList.add('max-width-med');
+                        }
+                    }
                 ],
                 fnCreatedRow: function (row, data, index) {
                     $(row).find("td.rightBorder-pivoted").addClass("freeze-column")

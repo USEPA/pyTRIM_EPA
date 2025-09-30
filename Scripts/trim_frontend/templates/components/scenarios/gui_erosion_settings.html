@@ -953,7 +953,7 @@
                 const optionNum = x.id.split('_opt').pop();
                 const tbl = $(x);
                 const tblData = tblsData[`opt${optionNum}`];
-
+                tbl.addClass('wrap-text-medium');
                 tbl.DataTable({
                     destroy: true,
                     data: tblData,
@@ -968,6 +968,17 @@
                     fnCreatedRow: function (row, data, index) {
                         $(row).attr('data-parcel-id', data.parcel_id);
                     },
+                    headerCallback: function(thead) {
+                        $(thead).find('th').eq(0).addClass('min-width-med');
+                    },
+                    columnDefs: [
+                        {
+                            targets: [0], 
+                            createdCell: function(td) {
+                            td.classList.add('min-width-med', 'break-word');
+                            }
+                        }
+                    ],
                     drawCallback: (settings) => {
                         globalDrawCallback(tbl);
                     }

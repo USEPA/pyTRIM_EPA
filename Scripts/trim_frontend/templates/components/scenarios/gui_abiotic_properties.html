@@ -34,7 +34,7 @@
                 {{ table_static_value(table_id='spatially_varying_table', columns=[]) }}
                 <div class ="row">
                     <div class="col-md">
-                        <table data-slot="true" data-target="spatially_varying_table" class="hover" id="spatially_varying_table">
+                        <table data-slot="true" data-target="spatially_varying_table" class="hover wrap-text-medium" id="spatially_varying_table">
                         </table>
                     </div>
                 </div>
@@ -46,7 +46,7 @@
                 {{ table_static_value(table_id='AirAbioticTable', columns=[]) }}
                 <div class ="row">
                     <div class="col-md">
-                        <table data-slot="true" data-target="AirAbioticTable" class="hover" id="AirAbioticTable"></table>
+                        <table data-slot="true" data-target="AirAbioticTable" class="hover wrap-text" id="AirAbioticTable"></table>
                     </div>
                 </div>
                 <div class = "row">
@@ -57,7 +57,7 @@
                 {{ table_static_value(table_id='SurfaceSoilAbioticTable', columns=[]) }}
                 <div class ="row">
                     <div class="col-md">
-                        <table data-slot="true" data-target="SurfaceSoilAbioticTable" class="hover" id="SurfaceSoilAbioticTable"></table>
+                        <table data-slot="true" data-target="SurfaceSoilAbioticTable" class="hover wrap-text" id="SurfaceSoilAbioticTable"></table>
                     </div>
                 </div>
                 <div class = "row">
@@ -68,7 +68,7 @@
                 {{ table_static_value(table_id='RootSoilAbioticTable', columns=[]) }}
                 <div class ="row">
                     <div class="col-md">
-                        <table data-slot="true" data-target="RootSoilAbioticTable" class="hover" id="RootSoilAbioticTable"></table>
+                        <table data-slot="true" data-target="RootSoilAbioticTable" class="hover wrap-text" id="RootSoilAbioticTable"></table>
                     </div>
                 </div>
                 <div class = "row">
@@ -79,7 +79,7 @@
                 {{ table_static_value(table_id='VadoseSoilAbioticTable', columns=[]) }}
                 <div class ="row">
                     <div class="col-md">
-                        <table data-slot="true" data-target="VadoseSoilAbioticTable" class="hover" id="VadoseSoilAbioticTable"></table>
+                        <table data-slot="true" data-target="VadoseSoilAbioticTable" class="hover wrap-text" id="VadoseSoilAbioticTable"></table>
                     </div>
                 </div>
                 <div class = "row">
@@ -90,7 +90,7 @@
                 {{ table_static_value(table_id='GWSoilAbioticTable', columns=[]) }}
                 <div class ="row">
                     <div class="col-md">
-                        <table data-slot="true" data-target="GWSoilAbioticTable" class="hover" id="GWSoilAbioticTable"></table>
+                        <table data-slot="true" data-target="GWSoilAbioticTable" class="hover wrap-text" id="GWSoilAbioticTable"></table>
                     </div>
                 </div>
             </div>
@@ -162,6 +162,19 @@
                 fnCreatedRow: function (row, data, index) {
                     $(row).find("td.rightBorder").addClass("freeze-column")
                 },
+                headerCallback: function(thead) {
+                    $(thead).find('th').each(function(index) {
+                        $(this).addClass('min-width-med');
+                    });
+                },
+                columnDefs: [
+                    {
+                        targets: '_all', 
+                        createdCell: function(td) {
+                            td.classList.add('word-break');
+                        }
+                    }
+                ],
                 columns: [
                     {
                         'bSortable': false,

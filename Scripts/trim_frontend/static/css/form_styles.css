@@ -87,6 +87,38 @@ th.rotated > div > span {
   padding: 10px 0px;
 }
 
+.wrap-text th, 
+.wrap-text td {
+  white-space: normal;
+  max-width: 30ch;
+}
+
+.wrap-text td {
+  word-break: break-word;
+}
+
+.wrap-text-medium th,
+.wrap-text-medium td {
+  white-space: normal;
+  max-width: 16ch;
+}
+
+th.min-width-med,
+td.min-width-med {
+  white-space: normal;
+  min-width: 16ch;
+}
+
+th.max-width-med,
+td.max-width-med {
+  white-space: normal;
+  max-width: 16ch;
+}
+
+.word-break {
+  word-break: break-word;
+}
+
 /*Legend specific*/
 .leaflet-legend {
   padding: 6px 8px;
