@@ -799,7 +799,11 @@
 					LoadingScreen.hide('upload_depo_overlay_plt');
 
 					if (!success) {
-						alert('An error occurred during upload.');
+						if ("message" in responseData && responseData.message != "generic_error") {
+							alert("An error occurred during upload: " + responseData.message);
+						} else {
+							alert('An error occurred during upload.');
+						}
 					} else {
 						installDepositionOverlayOntoMap(responseData)
 					}

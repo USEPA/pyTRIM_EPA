@@ -202,8 +202,8 @@ def get_step_function_results(execution_arn):
                     "Bucket": bucket,
                     "Key": full_key
                 },
-                ExpiresIn=600
-            ) # expires in 10 minute(s)
+                ExpiresIn=(60 * 60 * 6)  # == 6 hours
+            )
             sfn_results[fname] = response
     return sfn_results
 

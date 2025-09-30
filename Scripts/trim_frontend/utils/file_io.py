@@ -1,4 +1,4 @@
-import json, os
+import json, os, re
 import boto3
 import jenkspy
 import pandas as pd
@@ -55,8 +55,35 @@ def csv_to_df(file, encoding='utf-8-sig', dtype=None):
  
 see column Y; values can precede the "start" of the underscores!
 Safest approach I think is look for the end of a column and then take everything +1 as the next column
+
+UPDATE 20250929 -- got another input file that violates the above assumptions:
+
+* AERMOD (22112 ): 261658229211                                                             05/23/23
+* AERMET ( 15181):                                                                          15:33:53
+* MODELING OPTIONS USED:   NonDFAULT  DDEP  WDEP  FLAT and  ELEV  DRYDPLT  WETDPLT  ALPHA  RURAL  ADJ_U*
+*         PLOT FILE OF PERIOD VALUES AVERAGED ACROSS   0 YEARS FOR SOURCE GROUP: CEIM0010
+*         FOR A TOTAL OF   631 RECEPTORS.
+*         FORMAT: (2(1X,F13.5),2(1X,E13.6),3(1X,F8.2),2X,A6,2X,A8,2X,I8.8,2X,A8)                                                                                                                                          
+*        X             Y          DRY DEPO      WET DEPO    ZELEV    ZHILL    ZFLAG    AVE     GRP      NUM HRS   NET ID
+* ____________  ____________  ____________  ____________   ______   ______   ______  ______  ________  ________  ________
+534171.72  5263573.99  0.00000551039  4.88999999999988E-09  435.78  435.78  0  PERIOD  ALL  43824  
+534671.72  5264073.99  0.00000528898  5.07999999999962E-09  435  485  0  PERIOD  ALL  43824  
+530171.72  5260073.99  0.00000531296  5.27999999999921E-09  427.63  427.63  0  PERIOD  ALL  43824  
+530671.72  5260073.99  0.00000532421  5.14000000000043E-09  427.63  427.63  0  PERIOD  ALL  43824  
+530171.72  5260573.99  0.00000542571  5.37999999999943E-09  427.63  427.63  0  PERIOD  ALL  43824  
+
+
+Apparently this was a result of manually tweaking (breaking) the aermod .PLT file. (columns don't line up; 11 defined columns but only 10 values in data rows; etc.)
+
+Briefly experimented with parsing by spaces, but then spoke to cholder -- desired behavior is we maintain the old approach
+and parse by column widths, but we give a better error message if things look wonky. Gonna do this by looking for spaces
+within a value - like how "X" in the second example above would have values like "534171.72   526". If we see that, error
+and notify the user that their input file looks bad.
+
 """
 def parse_plt_file(raw_data):
+    raw_data = raw_data.strip()
+
     # we'll return this "parsed" dictionary. If ever useful, could also return stuff like the derived columns,
     # or things like the "modeling options used" that appear in the comment line
     # but the parsed data is probably all we truly care about.
@@ -69,15 +96,15 @@ def parse_plt_file(raw_data):
                 # "line_number_in_file" - line # of the line in the file it came from. Useful for
                 #                          debugging/troubleshooting.
 
-    if raw_data.endswith("\r\n"):
+    if "\r\n" in raw_data: #raw_data.endswith("\r\n"):
         lines = raw_data.split("\r\n")
-    elif raw_data.endswith("\n"):
+    elif "\n" in raw_data: #raw_data.endswith("\n"):
         lines = raw_data.split("\n")
-    elif raw_data.endswith("\r"):
+    elif "\r" in raw_data: #raw_data.endswith("\r"):
         lines = raw_data.split("\r")
     else:
-        raise Exception("Unable to determine line ending for plt data")
-
+        raise Exception(f"Unable to determine line ending for plt data")
+    
     line_num = 1
     header_underscore_line = None
     for line in lines:
@@ -133,13 +160,29 @@ def parse_plt_file(raw_data):
 
         slotted_data = {}
         original_data = {}
+
+        # old way -- based on column widths
         for col_name, col_start, col_end in cols:
             cell_data = (line[col_start:col_end+1]).strip()
-            slotted_data[col_name] = convert_data(col_name, cell_data)
+            converted = convert_data(col_name, cell_data)
+            if " " in converted:
+                raise Exception(json.dumps({"user_facing_error_msg": "data rows in uploaded file do not conform to column widths"}))
+            slotted_data[col_name] = converted
             original_data[col_name] = cell_data
 
-        parsed.append({ "data": slotted_data, "original": original_data, "raw_line": line, "line_number_in_file": line_number_in_file})
+        """
+        # new way -- split by space(s)
+        delimited_vals = [x.strip() for x in re.split(r' +', line.strip())]
+        pltfile_col_idx = 0
+        for col_name, _col_start, _col_end in cols:
+            cell_data = delimited_vals[pltfile_col_idx] if pltfile_col_idx < len(delimited_vals) else None
+            slotted_data[col_name] = convert_data(col_name, cell_data)
+            original_data[col_name] = cell_data
+            pltfile_col_idx += 1
+        """
 
+        parsed_line = { "data": slotted_data, "original": original_data, "raw_line": line, "line_number_in_file": line_number_in_file}
+        parsed.append(parsed_line)
         data_lines += 1
 
     # return column names too
@@ -270,7 +313,7 @@ class MiscAssociatedFileDepositionOverlay(MiscAssociatedFileVariety):
             if len(df) > 0:
                 if TOTAL_DEPO_COL not in plt_cols:
                     cols_to_sum = [x for x in [DRY_DEPO_COL, WET_DEPO_COL] if x in plt_cols]
-                    df[COMBINED_DEPO_COL]= df[cols_to_sum].sum(axis=1)
+                    df[COMBINED_DEPO_COL] = df[cols_to_sum].sum(axis=1)
                 else:
                     df[COMBINED_DEPO_COL] = df["TOTAL DEPO"]
             else:

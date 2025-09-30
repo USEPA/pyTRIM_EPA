@@ -153,6 +153,19 @@ window.AJAX = (function(ajax) {
 		});
 
         request.open(method, url);
+
+        if (opts.headers != undefined) {
+            for (var k in opts.headers) {
+                request.setRequestHeader(k, opts.headers[k]);
+            }
+        }
+        if (opts.json === true) {
+            request.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+            if (typeof('') != typeof(data)) {
+                data = JSON.stringify(data);
+            }
+        }
+
         request.send(data);
 
         request.addEventListener('load', function() {
