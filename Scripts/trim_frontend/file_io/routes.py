@@ -9,8 +9,8 @@ import numpy as np
 import json
 import requests as pyRequest
 from decimal import Decimal
-from flask import Blueprint, request
-from flask_security import login_required
+from flask import Blueprint, request, abort
+from flask_security import login_required, current_user
 from werkzeug.utils import secure_filename
 from flask_api import ApiException, ApiResult
 from trim_db.schema import *
@@ -100,6 +100,12 @@ def parse_aermod():
 
     files = request.files
     scenario_id = [v for k, v in request.form.items() if k == 'scenario_id'][0]
+    scenario = ScenarioService.get(id=scenario_id)
+    if not scenario:
+        return ApiException("Unknown Scenario")
+    if not current_user.can('edit', scenario):
+        abort(403)
+
     this_chem = [v for k, v in request.form.items() if k == 'chemical'][0]
     this_spec = [v for k, v in request.form.items() if k == 'species'][0]
     spacing = [v for k, v in request.form.items() if k == 'spacing'][0]
@@ -109,7 +115,6 @@ def parse_aermod():
     logger.info(f'Parsed AERMOD file: {list(files.items())[0][1].filename} for scenario id {scenario_id}, chemical {this_chem} with'
                 f' coordinate system {coord_sys} {"and utm zone of " + utm_zone if utm_zone else ""}.')
 
-    scenario = ScenarioService.get(id=scenario_id)
     chem = ChemicalService.get(name=this_chem)
 
     if not files:
@@ -270,6 +275,11 @@ def upload_background_conc():
     scenario_id = request.form["scenario_id"]
     chem_name = request.form["chemical_name"]
     scenario = ScenarioService.get(id=scenario_id)
+    if not scenario:
+        return ApiException("Unknown Scenario")
+    if not current_user.can('edit', scenario):
+        abort(403)
+
     chem = ChemicalService.get(name=chem_name)
     ureg = UnitRegistry()
     # First check if there are any existing CustomParameters
@@ -374,6 +384,12 @@ def parse_parcel_upload():
         return stackstr
 
     scenario_id = request.form["scenario_id"]
+    scenario = ScenarioService.get(id=scenario_id)
+    if not scenario:
+        return ApiException("Unknown Scenario")
+    if not current_user.can('edit', scenario):
+        abort(403)
+
     coord_system = request.form.get("coord_system")
     raw_utm_zone = request.form.get("utm_zone")
 
@@ -390,7 +406,6 @@ def parse_parcel_upload():
 
     if len(errors) == 0:
         # delete existing parcels...
-        scenario = ScenarioService.get(id=scenario_id)
         for del_parcel in scenario.parcels:
             del_parcel_description = f"'{del_parcel.name}' ({del_parcel.id})"
             print(f"deleting parcel {del_parcel}...")
@@ -533,6 +548,12 @@ def manage_misc_scenario_file():
     if scenario_id is None:
         errors.append("No scenario id supplied")
 
+    s = ScenarioService.get(scenario_id)
+    if not s:
+        return ApiException("Unknown Scenario")
+    if not current_user.can('edit', s):
+        abort(403)
+
     if misc_file_type is None:
         errors.append("No filetype supplied")
 
@@ -564,7 +585,12 @@ def manage_misc_scenario_file():
                     helper_rv = associated_file_helper(scenario_id, misc_file_type, "UPLOAD", file_obj=file_obj, file_metadata=submitted_metadata)
                 except Exception as e:
                     print(f"POST ERROR: {e}")
-                    errors.append(f"Error uploading file: {e}")
+
+                    try:
+                        detailed_error_message = json.loads(str(e))
+                        errors.append(detailed_error_message.get("user_facing_error_msg"))
+                    except Exception as e:
+                        errors.append("generic_error")
         elif request.method == "DELETE":
             try:
                 helper_rv = associated_file_helper(scenario_id, misc_file_type, "DELETE")
@@ -639,6 +665,12 @@ def get_parcel_row_geojson(row):
 @login_required
 def parse_runoff_matrix_upload():
     scenario_id = request.form["scenario_id"]
+    s = ScenarioService.get(scenario_id)
+    if not s:
+        return ApiException("Unknown Scenario")
+    if not current_user.can('edit', s):
+        abort(403)
+
     parcels = ParcelService.get_all(scenario_id=int(scenario_id))
     parcel_names = {p.name.lower() : p for p in parcels}
 
@@ -782,7 +814,7 @@ def parse_runoff_matrix_upload():
             reader = csv.DictReader(io.StringIO(lines))
         for row in reader:
             sender_pcl = parcel_names[row.get("parcels").lower()]
-            if sender_pcl.name in request.form["water_parcels"]:
+            if sender_pcl.name in request.form["skip_parcels"]:
                 continue
             del row["parcels"]
             
@@ -802,7 +834,7 @@ def parse_runoff_matrix_upload():
                 
     except Exception as e:
         print(traceback.format_exc())
-        return ApiException(e)
+        return ApiException(traceback.format_exc())
     return ApiResult({'matrix_result': "success"})
 
 root = os.path.dirname(os.path.abspath(__file__))
