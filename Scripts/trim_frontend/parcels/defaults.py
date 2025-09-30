@@ -65,27 +65,7 @@ def get_general_params(pcl):
     total_erosion_rate = None
     is_tilled = False
 
-    # HACKY
-    erosion_table_params = {}
-    for param in list(pcl.scenario.parameters.values()):
-        if not isinstance(param, CustomParameter):
-            continue
-        if not param.requirements == f'(self.id == {pcl.id})':
-            continue
-        if not(
-            param.variable_name.startswith('erosion1-')
-            or param.variable_name.startswith('erosion2-')
-            or param.variable_name.startswith('erosion3-')
-        ):
-            continue
-        if param.variable_name.endswith('-active'):
-            erosion_table_params[
-                param.variable_name.split('-')[0] + '-active'
-            ] = EROSION_TABLE_PARAM_MAP.get(
-                param.variable_name.split('-', 1)[1].rsplit('-', 1)[0]
-            )
-        else:
-            erosion_table_params[param.variable_name] =  param.value
+    erosion_table_params = get_erosion_params(pcl)
 
     surface_soil_height = None
 
@@ -219,6 +199,37 @@ def get_general_params(pcl):
         **erosion_table_params
     }
     return general_params
+
+
+def get_erosion_params(pcl):
+    # HACKY
+    erosion_table_params = {}
+    for param in list(ParameterService.get_all(
+        scenario_id=pcl.scenario_id, requirements=make_self_requirements(pcl)
+    )):
+        if not isinstance(param, CustomParameter):
+            continue
+        if not param.requirements == f'(self.id == {pcl.id})':
+            continue
+        if not(
+            param.variable_name.startswith('erosion1-')
+            or param.variable_name.startswith('erosion2-')
+            or param.variable_name.startswith('erosion3-')
+        ):
+            continue
+        if param.variable_name.endswith('-active'):
+            erosion_table_params[
+                param.variable_name.split('-')[0] + '-active'
+            ] = EROSION_TABLE_PARAM_MAP.get(
+                param.variable_name.split('-', 1)[1].rsplit('-', 1)[0]
+            )
+        else:
+            erosion_table_params[param.variable_name] =  param.value
+    return erosion_table_params
+
+
+def make_self_requirements(obj):
+    return f'(self.id == {obj.id})'
 
 
 def get_soil_abiotic_params(pcl):
