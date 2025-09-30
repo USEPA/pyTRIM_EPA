@@ -244,8 +244,12 @@ def run_getflow_v13_for_scenario_id(scenario_id):
     names_to_vertices = {}
     parcels = ParcelService.get_all(scenario_id=scenario_id)
     for p in parcels:
-        # names_to_vertices[p.name] = p.vertices
-        names_to_vertices[p.name] = [(v[1], v[0]) for v in p.as_serializable()['vertices']]
+        p_serialized = p.as_serializable()
+        if p_serialized['parcelType'] in ['Air Only']: # no air parcels
+            continue
+        print(f"{p.name}\t{p_serialized['parcelType']}")
+        names_to_vertices[p.name] = [(v[1], v[0]) for v in p_serialized['vertices']]
+
     # print(f"convert it ({names_to_vertices})")
     # parcels_for_this_scenario = json.dumps(names_to_vertices)
     parcels_for_this_scenario = names_to_vertices

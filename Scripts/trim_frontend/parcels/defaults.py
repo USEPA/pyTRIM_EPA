@@ -519,6 +519,9 @@ def get_water_params(pcl, parcel_type):
                 + sed_soil_erosion_to_sw
                 - (wc_sed_discharge_rate / 365)
             ) / (get_correct_param("BedDensity", sed_pars) * pcl.area.magnitude)
+
+            sed_burial_vol_rate = max(sed_burial_vol_rate, 0)
+
             burial_par = sed_pars.get("SedimentBurialRateToHaveZeroNetDeposition")
             if isinstance(burial_par, ParameterDefinition):
                 ParameterService.create(definition=burial_par, scenario=pcl.scenario,

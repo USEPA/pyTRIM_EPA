@@ -324,15 +324,15 @@
                 "value": TRIM.store.currentScenario.id
             });
 
-            // list of water parcels to skip
-            let waterPcls = [];
+            // list of parcels to skip
+            let skipPcls = [];
             TRIM.store.currentScenario.parcels.forEach((p, i) => {
-                if (p?.parcelType?.includes("Water")) waterPcls.push(p.name)
+                if (p?.parcelType?.includes("Water") || p?.parcelType?.includes("Air Only")) skipPcls.push(p.name)
             });
             fieldData.push({
                 "type": "input",
-                "name": "water_parcels",
-                "value": waterPcls
+                "name": "skip_parcels",
+                "value": skipPcls
             });
             
             LoadingScreen.show('upload_matrix_csv');
@@ -405,15 +405,15 @@
                                 "value": TRIM.store.currentScenario.id
                             });
 
-                            // list of water parcels to skip
-                            let waterPcls = [];
+                            // list of parcels to skip
+                            let skipPcls = [];
                             TRIM.store.currentScenario.parcels.forEach((p, i) => {
-                                if (p?.parcelType?.includes("Water")) waterPcls.push(p.name)
+                                if (p?.parcelType?.includes("Water") || p?.parcelType?.includes("Air Only")) skipPcls.push(p.name)
                             });
                             fieldData.push({
                                 "type": "input",
-                                "name": "water_parcels",
-                                "value": waterPcls
+                                "name": "skip_parcels",
+                                "value": skipPcls
                             });
                             
                             LoadingScreen.show('upload_matrix_csv');
@@ -427,6 +427,7 @@
                                 }
                             });
                         });
+                        $(getflowStatusArea).find('button').click(); // do this automatically... not great
 					} else if (data.status == "FAILED" || data.status == "TIMED_OUT" || data.status == "ABORTED") {
 						alert("An error occurred; run resulted in " + data.status + " status");
 						getflowStatusArea.html("Run in " + data.status + " state. Please contact support.");
