@@ -157,10 +157,13 @@ class GenericService(metaclass=ServiceMetaClass):
         query_options = kwargs.pop('query_options', None)
         if model_id is not None:
             if not isinstance(model_id, int):
-                raise TypeError(
-                    '"model_id" must be of type int,'
-                    f' not {model_id.__class__.__name__}'
-                )
+                try:
+                    model_id = int(model_id)
+                except Exception:
+                    raise TypeError(
+                        '"model_id" must be of type int,'
+                        f' not {model_id.__class__.__name__}'
+                    )
             if model_id > 0:
                 # if not cls.cached(model_id):
                 with cls.db.session.no_autoflush:

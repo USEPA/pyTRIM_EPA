@@ -1,5 +1,5 @@
-from flask import Blueprint, request, render_template
-from flask_security import login_required
+from flask import Blueprint, request, render_template, abort
+from flask_security import login_required, current_user
 from flask_api import ApiResult,  ApiException
 from trim_db.services import *
 from trim_db.schema import *
@@ -27,6 +27,8 @@ def create_parcel(scenario_id):
     s = ScenarioService.get(scenario_id)
     if not s:
         return ApiException("Unknown Scenario")
+    if not current_user.can('edit', s):
+        abort(403)
 
     logger = make_logger('parcels_api_create')
     # form = ScenarioParcelsForm()
@@ -64,6 +66,11 @@ def create_parcel(scenario_id):
 )
 @login_required
 def get_parcels(scenario_id):
+    s = ScenarioService.get(scenario_id)
+    if not s:
+        return ApiException("Unknown Scenario")
+    if not current_user.can('view', s):
+        abort(403)
     logger = make_logger('parcels_api_get')
     try:
         #s = ScenarioService.get(scenario_id)
@@ -102,6 +109,11 @@ def get_parcels(scenario_id):
 )
 @login_required
 def update_parcel(id, scenario_id):
+    s = ScenarioService.get(scenario_id)
+    if not s:
+        return ApiException("Unknown Scenario")
+    if not current_user.can('edit', s):
+        abort(403)
     logger = make_logger('parcels_api_update')
 
     try:
@@ -128,6 +140,11 @@ def update_parcel(id, scenario_id):
 @parcels_api.route('/api/scenario/<int:scenario_id>/parcel/<int:id>/delete', methods=['POST'])
 @login_required
 def delete_parcel(id, scenario_id):
+    s = ScenarioService.get(scenario_id)
+    if not s:
+        return ApiException("Unknown Scenario")
+    if not current_user.can('edit', s):
+        abort(403)
     logger = make_logger('parcels_api_delete')
     try:
         p = ParcelService.get(id)
