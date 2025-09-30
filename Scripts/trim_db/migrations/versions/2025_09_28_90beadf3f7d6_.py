@@ -21,7 +21,7 @@ def upgrade():
     op.execute(
         """
         INSERT INTO formula (equation, description) 
-        VALUES ('False', 'flush rate is autocalculated');
+        VALUES ('True', 'flush rate is autocalculated');
         """
     )
     op.execute(

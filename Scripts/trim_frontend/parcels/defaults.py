@@ -477,11 +477,9 @@ def get_water_params(pcl, parcel_type):
         wc_flush_rate = get_correct_param("Flushes", sw_pars)
 
         fr_param = sw.parameters.get("Flushes")
-        wc_flush_rate_is_autocalc = 'False'
+        wc_flush_rate_is_autocalc = 'True'
         if isinstance(fr_param, CustomParameter) and fr_param.formula:
             wc_flush_rate_is_autocalc = 'True' if fr_param.formula.equation == 'True' else 'False'
-
-        print(f"\n{wc_flush_rate_is_autocalc}\n")
 
         try:
             precipitation_vol_rate_to_sw = (
@@ -506,7 +504,7 @@ def get_water_params(pcl, parcel_type):
                  - evaporation_vol_rate
             ))
 
-            if wc_flush_rate_is_autocalc:
+            if wc_flush_rate_is_autocalc == 'False':
                 wc_discharge_vol_rate = float('{:.5f}'.format(
                     wc_flush_rate * abs(sw.MeanDepth.magnitude) * pcl.area.magnitude
                 ))

@@ -392,14 +392,17 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                 {
                     "requirements": f"(self.id == {comp.id})",
                     "scenario_id": p.scenario.id,
-                },
-                #new_formula=(True if field_name == 'flush_rate' else False)
+                }
             )
             update_custom_param_value(par, parcels_data[field_name])
 
-        #if field_name == 'flush_rate':
-        #    FormulaService.get(par.formula.id).equation = 'true'
-        #    FormulaService.commit()
+        if field_name == 'flush_rate':
+            if not par.formula:
+                new_formula_obj = FormulaService.create(equation=parcels_data['autocalc'])
+                par.formula = new_formula_obj
+            else:
+                FormulaService.get(par.formula.id).equation = parcels_data['autocalc']
+                FormulaService.commit()
 
     elif field_name in bed_params:
         par_name = bed_params[field_name]

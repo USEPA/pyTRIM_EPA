@@ -445,7 +445,6 @@
                     let res = null
                     if (calcInfo.property == "flush_rate") {
                         res = calculate_flush_rate(tbl_data, parcel_name)
-                        getParcelByKey('name', parcel_name).surface_water.autocalc.flush_rate = 'isTrue'
                     }
                     if (calcInfo.property == "discharge_vol_rate") {
                         res = calculate_discharge_vol_rate(tbl_data, parcel_name)
@@ -758,28 +757,14 @@
                     let sub_cat = this_table == "LakeTable" ? "wc_props" : "sed_props"
                     param_store_key = param_store_key + "." + sub_cat
                     
-
-                    let tt = getParcelByKey('name', parcel_name).surface_water.autocalc.flush_rate
-                    if (tt == 'isTrue')
-                        tt = 'True'
-                    else
-                        tt = 'False'
-                    console.log(tt)
-
-                    /*
                     let field_name = parcel_info[parcel_info.findIndex(e => e.name == 'field')].value
 
                     let table_col_headers = $("#LakeTable thead th").map((i,h)=>h.innerHTML).toArray()
                     let table_row_headers = $("#LakeTable tbody tr td:nth-child(1) label").map((i,r) => r.innerHTML).toArray()
                     let fr_row_idx = table_row_headers.indexOf("Water Column Flush Rate")
                     let col_idx = table_col_headers.indexOf(parcel_name)
+                    let is_auto_calculated = $("#LakeTable").find('tr').eq(fr_row_idx+1).find('td').eq(col_idx).find("button").data("active")
 
-                    let is_auto_calculated = getParcelByKey('name', parcel_name).surface_water.autocalc.flush_rate
-                    if (is_auto_calculated == 'isTrue')
-                        is_auto_calculated = 'True'
-                    else
-                        is_auto_calculated = 'False'
-                    
                     if (field_name == 'flush_rate') {
                         parcel_info = parcel_info.concat([
                             {
@@ -791,12 +776,9 @@
                                 'name': 'autocalc',
                                 'value': is_auto_calculated
                             }
-                        ])
-
-                        console.log(is_auto_calculated)
-                        
+                        ])                        
                     }
-                    */
+
                     LoadingScreen.show(ls_info)
                     TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', (rsp)=>{
                         update_data_store_callback(rsp, elm, parcel_info, param_store_key, data, old_data)
@@ -805,16 +787,7 @@
                     // table_data = get_Data_from_table(tblId)
                     let wc_table_data = get_Data_from_table("#LakeTable")
                     let sed_table_data = get_Data_from_table("#SedTable")
-                    let field_name = parcel_info[parcel_info.findIndex(e => e.name == 'field')].value
-
-                    let table_col_headers = $("#LakeTable thead th").map((i,h)=>h.innerHTML).toArray()
-                    let table_row_headers = $("#LakeTable tbody tr td:nth-child(1) label").map((i,r) => r.innerHTML).toArray()
-                    let fr_row_idx = table_row_headers.indexOf("Water Column Flush Rate")
-                    let col_idx = table_col_headers.indexOf(parcel_name)
-                    let is_auto_calculated = $("#LakeTable").find('tr').eq(fr_row_idx+1).find('td').eq(col_idx).find("button").data("active")
-
-                    console.log(is_auto_calculated)
-
+                    
                     switch (field_name) {
                         case "evaporation_rate":
                             var val=calculate_wc_evaporation_vol_rate(wc_table_data, parcel_name, area)
@@ -1067,8 +1040,8 @@
             let table_row_headers = $("#LakeTable tbody tr td:nth-child(1) label").map((i,r) => r.innerHTML).toArray()
             let fr_row_idx = table_row_headers.indexOf("Water Column Flush Rate")
             let col_idx = table_col_headers.indexOf(parcel_name)
-            let is_auto_calculated = $("#LakeTable").find('tr').eq(fr_row_idx+1).find('td').eq(col_idx).find("button").data("active") == 'True'
-            if (!is_auto_calculated) { // FIXME correct equation?
+            let is_auto_calculated = $("#LakeTable").find('tr').eq(fr_row_idx+1).find('td').eq(col_idx).find("button").data("active");
+            if (is_auto_calculated == 'False') {
                 let flush_rate = Number(data.find(e=>e.Property == "Water Column Flush Rate")[parcel_name])
                 let area = getParcelByKey('name', parcel_name).area
                 let wc_depth = Number(data.find(e=>e.Property == "Water Column Depth")[parcel_name])
