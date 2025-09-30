@@ -2,7 +2,7 @@
 Flush rate autocalculate
 
 Revision ID: 90beadf3f7d6
-Revises: 287d3ddae792
+Revises: 81e92f9ff252
 Create Date: 2025-09-28 14:06:28.433082
 
 """
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '90beadf3f7d6'
-down_revision = '287d3ddae792'
+down_revision = '81e92f9ff252'
 branch_labels = None
 depends_on = None
 
