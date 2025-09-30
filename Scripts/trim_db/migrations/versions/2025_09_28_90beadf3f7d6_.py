@@ -1,5 +1,6 @@
 """
 Flush rate autocalculate
+Erosion param cleanup
 
 Revision ID: 90beadf3f7d6
 Revises: 81e92f9ff252
@@ -31,6 +32,14 @@ def upgrade():
             SELECT id FROM formula
             WHERE description= 'flush rate is autocalculated'
         ) WHERE variable_name = 'Flushes';
+        """
+    )
+
+    op.execute(
+        """
+        DELETE FROM custom_parameter WHERE unit IS NOT NULL AND definition_id IN (
+            SELECT id FROM parameter_definition WHERE variable_name LIKE 'erosion%'
+        );
         """
     )
 
