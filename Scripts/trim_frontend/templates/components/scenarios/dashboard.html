@@ -65,6 +65,7 @@
                                             Copy
                                             {{ scenario_form.csrf_token }}</button>
                                         </form>
+                                        {% if current_user.can('manage', scenario) %}
                                         <form action="{{ url_for('scenario_api.delete_scenario') }}" id="delete-scenario-form" method="POST">
                                             <input name="scenario_id" value="{{scenario.id}}" type=hidden>
                                             <input name="scenario_name" value="{{scenario.name}}" type=hidden>
@@ -72,6 +73,7 @@
                                             Delete
                                             {{ scenario_form.csrf_token }}</button>
                                         </form>
+                                    {% endif %}
                                     </div>
                                 </div>
                             </div>

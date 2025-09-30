@@ -179,11 +179,39 @@
                 <div id="div_visuals">
                     <h6 class="mt-2 mb-3" id="res_version"></h6>
                     <div class="mb-0">
-                        <label class="switch">
+                        <label class="switch mb-0">
                             <input type="checkbox" id="switch_res_conc">
                             <span class="slider round"></span>
                         </label>
-                        <span>Plot results in Concentrations</span>
+                        <label for="switch_res_conc" class="mb-0" style="user-select: none;">
+                            Plot results in Concentrations
+                        </label>
+                    </div>
+                    <div id="units-warning" class="text-danger mt-1" style="display: none;">
+                        <div>
+                            <span class="font-weight-bold">Warning:</span>
+                            when plotting concentrations, note that different compartment types
+                            track concentration in different units. Be careful not to combine plots
+                            with different units! The default units for each compartment type
+                            are listed below.
+                        </div>
+                        <ul class="text-dark mb-0">
+                            <li>
+                                <span class="font-weight-bold">Soils: </span>g / g
+                            </li>
+                            <li>
+                                <span class="font-weight-bold">Aquatic Organisms &amp; Flora: </span>mg / kg
+                            </li>
+                            <li>
+                                <span class="font-weight-bold">Sediment: </span>µg / g
+                            </li>
+                            <li>
+                                <span class="font-weight-bold">Surface Water: </span>mg / L
+                            </li>
+                            <li>
+                                <span class="font-weight-bold">Groundwater: </span>g / L
+                            </li>
+                        </ul>
                     </div>
                     <div id="plot_div">
                     </div>
@@ -442,6 +470,7 @@
 
             btnVisType.parent().on('click', 'a.dropdown-item', function () {
                 let type_text =$(this).text().trim()
+                $('#units-warning').hide();
                 btnVisType.parent().find('button.dropdown-toggle').text(type_text)
                 if (plotTypes[type_text] != 'time') {
                     btnVisComp.parent().removeClass('d-inline').css("display", "none")
@@ -458,6 +487,9 @@
                     lblVisComp.css("display", "block")
                     divSelectedComps.css("display", 'block')
                     divSelectedVEs.css("display", 'none')
+                    if ($('#switch_res_conc').prop('checked')) {
+                        $('#units-warning').show();
+                    }
                 }
             });
 
@@ -519,6 +551,7 @@
 
             $('#btn_visualize').on('click', function(e) {
                 e.preventDefault()
+                $('#units-warning').hide();
                 let last_run_date_time = TRIM.store.latestRunInfo.lastest_run_date
                 $('#res_version').text("Displaying results of last model run on " + last_run_date_time)
                 let sel_type = $('#plt_type').find('button.dropdown-toggle').text().trim()
@@ -554,8 +587,8 @@
                 }
             }
 
-            $('#switch_res_conc').change(function(e){
-                $('#btn_visualize').trigger('click')
+            $('#switch_res_conc').change(function(e) {
+                $('#btn_visualize').trigger('click');
             });
 
             btnLoadDebug.on('click', function(e) {
@@ -859,15 +892,15 @@
         function draw_ts_chart() {
             let results = {}
             let unit_type = ""
-            let unit = ""
-            if ($('#switch_res_conc').prop("checked")) {
+            const isConcentrations = $('#switch_res_conc').prop("checked");
+            if (isConcentrations) {
                 results = TRIM.store.latestRunInfo.run_results.conc_results;
                 unit_type = "Concentration";
-                unit = "(g/g)";
+                $('#units-warning').show();
             } else {
                 results = TRIM.store.latestRunInfo.run_results.mass_results;
                 unit_type = "Mass";
-                unit = "(g)";
+                $('#units-warning').hide();
             }
 
             let pltChemVal = $('#plt_chem').find("button.dropdown-toggle").text().trim();
@@ -894,43 +927,64 @@
                 );
             }
 
-            let pData = []
-
-            pData[0] = ["year"]
-            for (let i = 0; i <= comp_names.length - 1; i++) {
-                let selected_comp = selected_chem_name + '_' + comp_names[i]
-                pData[0].push(selected_comp)
+            let dataTable = new google.visualization.DataTable();
+            dataTable.addColumn({
+                type: 'number',
+                label: 'Year',
+                pattern: '####'  // years as plain numbers
+            });
+            for (const compName of comp_names) {
+                dataTable.addColumn({
+                    type: 'number',
+                    label: compName,
+                    pattern: '#.##E0'  // data as scientific notation
+                });
+                dataTable.addColumn({
+                    type: 'string',
+                    role: 'tooltip',
+                    p: {html: true}
+                });
             }
 
-            Object.keys(results["year"]).forEach(
-                function(e, i) {
-                    pData[i + 1] = [];
-                    pData[0].forEach(
-                        (c) => {
-                            pData[i + 1].push(Number(results[c][e]))
-                        }
-                    )
+            const data = [];
+            for (const i in results.year) {
+                const row = [results.year[i]];
+                for (const compName of comp_names) {
+                    const dataName = selected_chem_name + '_' + compName;
+                    let val = results[dataName][i];
+                    row.push(val);
+                    const units = results[dataName + '_units'];
+                    row.push(makeTooltip(i, compName, val, units));
                 }
-            )
+                data.push(row);
+            }
 
-            // data.addRows(pData)
-            let data = google.visualization.arrayToDataTable(pData);
+            function makeTooltip(i, compName, value, units) {
+                const val = value.toExponential(1).toUpperCase();
+                let tooltipVal = `<div><b>${results.year[i]}</b></div>`;
+                tooltipVal += `${compName}: <b>`;
+                if (units == undefined) {
+                    tooltipVal += isConcentrations ? `${val}` : `${val} g`;
+                }
+                else {
+                    tooltipVal += `${val} ${units[i]}`;
+                }
+                tooltipVal += '</b>';
+                return '<div style="'
+                    + 'padding: 6px 8px;'
+                    + ' font-family: Arial; font-size: 14px; white-space: nowrap;'
+                    + '">'
+                    + tooltipVal
+                    + '</div>';
+            }
 
-            // years as plain numbers
-            (new google.visualization.NumberFormat({
-                pattern: '####'
-            })).format(data, 0);
-
-            // data as scientific notation
-            (new google.visualization.NumberFormat({
-                pattern: 'scientific'
-            })).format(data, 1);
+            dataTable.addRows(data);
 
             // Set chart options
             let chart = new google.visualization.LineChart(document.getElementById('plot_div'));
-            chart.draw(data, {
-                title: `${unit_type} for ` + selected_comp_name,
-                subtitle: 'in grams',
+            chart.draw(dataTable, {
+                title: `${unit_type} of ${selected_chem_name} in ` + selected_comp_name,
+                // subtitle: 'in grams',
                 width: 800,
                 height: 600,
                 hAxis: {
@@ -938,8 +992,11 @@
                     format: '####'
                 },
                 vAxis: {
-                    title: `${unit_type} ${unit}`,
-                    format: 'scientific'
+                    title: isConcentrations ? `${unit_type}` : `${unit_type} (g)`,
+                    format: '#.##E0'
+                },
+                tooltip: {
+                    isHtml: true
                 }
             })
         }
@@ -948,7 +1005,8 @@
             let results = {}
             let unit_type = ""
             let unit = ""
-            if ($('#switch_res_conc').prop("checked")) {
+            const isConcentrations = $('#switch_res_conc').prop("checked");
+            if (isConcentrations) {
                 results = TRIM.store.latestRunInfo.run_results.conc_results;
                 unit_type = "Concentration";
                 unit = "(g/g)";
