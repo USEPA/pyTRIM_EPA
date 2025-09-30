@@ -44,6 +44,7 @@
         </div>
     </section>
 
+    {% if current_user.can('manage', scenario) %}
     <section class="container px-0 mt-1">
         <div class="accordion" id="user-permissons-block">
             <div class="border-bottom" id="user-permissions-heading">
@@ -119,6 +120,7 @@
             </div>
         </div>
     </section>
+    {% endif %}
 </form>
 <script>
     onDomLoad(function() {

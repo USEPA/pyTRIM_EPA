@@ -142,10 +142,6 @@ def process_model_data(data):
     parsed = json.loads(data)
     restrung = json.dumps(parsed, sort_keys=True, default=str)
     processed = json.loads(f'{{{json.loads(restrung)}}}')
-    processed = {
-        k: v for k, v in processed.items()
-        if (not k.endswith('_units')) or (k.rsplit('_', 1)[0] not in processed)
-    }
     return processed
 
 
