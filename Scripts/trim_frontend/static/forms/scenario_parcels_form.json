@@ -23,7 +23,7 @@
             "label": "UTM Zone",
             "data_type": "string",
             "required": true,
-            "help": "Enter the default UTM zone number/letter for the coordinate values in your CSV file; e.g., \"16N\". Individual points can override this value if necessary."
+            "help": "Enter the UTM zone number/letter for the coordinate values in your PLT file; e.g., \"16N\"."
         },
         {
             "id": "parcel_coordinates_description",
@@ -36,7 +36,7 @@
             "label": "File for Deposition Overlay Data",
             "data_type": "file",
             "required": true,
-            "help": ".PLT file for data to overlay on map; e.g. output from AERMOD"
+            "help": "Indicate the .PLT file for data to overlay on the map; e.g., output form AERMOD."
         },
         {
             "id": "deposition_overlay_upload_coordinates_system",
@@ -60,7 +60,7 @@
             "label": "ZFLAG Restriction",
             "data_type": "string",
             "required": false,
-            "help": "If your PLT file contains multiple ZFLAG values and none of them are 0, use this value to specify which rows to include. If omitted, will include either rows where ZFLAG value equals 0, or all rows if only a single unique ZFLAG value is present in the file."
+            "help": "ZFLAG is the receptor height (meters) above ground level. Deposition typically is modeled at 0. If your PLT file contains multiple ZFLAG values, enter the ZFLAG value you want to plot the results of in the deposition overlay. If you do not enter a value, ZFLAG=0 will be used; if ZFLAG=0 is not present in the file you uploaded, if only a single ZFLAG value is used in the file then those are the results that will be shown, but if multiple values are in the file then you must enter a valid value."
         },
         {
             "id": "parcel_names_field",

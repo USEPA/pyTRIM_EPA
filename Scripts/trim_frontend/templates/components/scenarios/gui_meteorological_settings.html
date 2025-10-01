@@ -134,11 +134,17 @@
 
         form.addEventListener('form:visible', function() {
             LoadingScreen.show('met_info_loading');
-            console.log('met form visible')
-            populateMetForm();
+            console.log('met form visible');
+            TRIM.refreshParcels();
+            document.body.addEventListener('parcels:ready', populateMetForm());
         });
 
         function populateMetForm() {
+            if (!TRIM.store.currentScenario.parcels) {
+                // Parcels haven't loaded yet; wait a bit and try again
+                setTimeout(function() { populateMetForm(); }, 1000);
+                return;
+            }
             if ($(form).filter(':not(.form-loaded)').length) {
                 // Form hasn't loaded yet; wait a bit and try again
                 setTimeout(function() { populateMetForm(); }, 1000);
@@ -247,9 +253,7 @@
                 submit_meteo_value(e.target);
             });
             $('#daytime_indicator_static_value').on('change', function(e) {
-                let daytime_val = parseFloat($(e.target).val());
-                let valid_daytime = (daytime_val == 0 || daytime_val == 1);
-                let is_valid = ErrToolTip(e.target, valid_daytime, "Daytime Indicator must be either 0 or 1.", "div");
+                let is_valid = ErrorValidation.isWithinRange(e.target, "div", 0, 1);
                 if (is_valid) {
                     submit_meteo_value(e.target);
                 }
@@ -307,8 +311,13 @@
             }
             if (elementIsValid($(elem).parent())){
                 console.log(param_info);
-                let resp = TRIM.api.updateScenario(param_info).on('load',function(){
+                LoadingScreen.show("meteo_update_value")
+                let resp = TRIM.api.updateScenario(param_info).on('load',function(rsp){
                     let val_resp = this.responseJSON
+                    LoadingScreen.hide("meteo_update_value");
+                    if (val_resp?.success === false) {
+                        return;
+                    }
                     if (val_resp) {
                         let val = val_resp[Object.keys(val_resp)[0]]
                         let lb_static_val = $(elem).closest('div.form-group').find("label.wt_avg_val")
@@ -318,6 +327,33 @@
                             let lb_static_val = `<label class=wt_avg_val>Time-weighted average from file: ${val}</label>`
                             $(elem).closest('div.form-group').append(lb_static_val)
                         }
+                        if (param_info[1].value == "meteo_precipitation_field_name_rate_TS") {
+                            let scenario = TRIM.store.currentScenario;
+                            let sim_start = Date.parse(scenario["simulation_start_date"])
+                            let sim_end = Date.parse(scenario["simulation_end_date"])
+                            var diff = calculateDateDistance(sim_start, sim_end, ['days']);
+                            var days = parseInt(diff[0].split(' ')[0]);
+                            var annualVal = days / 365.2425 * val;
+                            $('#precipitation_average_annual').val(annualVal);
+                        }
+                    }
+                    else {
+                        delete TRIM.store.currentScenario.meteorology;
+                        /*
+                        let meteo_store = TRIM.store.currentScenario.meteorology;
+                        property_name = param_info[2].name.replace("meteo_", "");
+                        if (meteo_store.hasOwnProperty(property_name)) {
+                            meteo_store[property_name] = param_info[2].value;
+                        }
+                        else if (property_name.substring('interception') && property_name.substring('static') ) {
+                            meteo_store = TRIM.store.currentScenario.meteorology.wet_dep_interception;
+                            property_name = "wet_dep_" + property_name;
+                            property_name = property_name.replace("fractions", "frac")
+                        }*/
+                    }
+                    // need re-pull AverageVerticalVelocity soil param
+                    if (param_info[1].value.includes('_precipitation_')) {
+                        delete TRIM.store.currentScenario.parcels;
                     }
                 })
             } else {
@@ -387,6 +423,9 @@
                             updateFields(me.closest('section'));
                         }
                     }
+                    catch (err) {
+                        alert(err);
+                    }
                     finally {
                         LoadingScreen.hide(loadingRequest);
                     }
@@ -414,7 +453,7 @@
                 function convertDate(inputFormat) {
                     function pad(s) { return (s < 10) ? '0' + s : s; }
                     let d = new Date(inputFormat)
-                    return [pad(d.getDate()), pad(d.getMonth()+1), d.getFullYear()].join('/')
+                    return [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/')
                 }
 
                 // Restrict file data date range to the simulation period
@@ -424,12 +463,12 @@
                 // Get only the column for this select
                 let this_sel_data = new_data.map((e,i) => {
                     let this_row = {
-                        'Date': convertDate(e['Date']),
+                        'Date': e['Date'],
                         'xHour': e['xHour'],
                         'TimeZone': e['TimeZone']
                     }
-                    this_row[def_data_name]= e[selected_val]
-                    return this_row
+                    this_row[def_data_name] = e[selected_val];
+                    return this_row;
                 });
                 sel.attr('data-meteo',JSON.stringify(this_sel_data))
 
@@ -441,25 +480,23 @@
             var precipVaries = $('#precipitation_time_varying');
             var annualPrecip = $('#precipitation_average_annual');
 
-            var startDate = $('#start_date');
-            var endDate = $('#end_date');
             staticPrecip.add(precipVaries).change(function() {
                 staticCum.val('');
                 annualPrecip.val('');
 
-                var start = startDate.val();
-                var end = endDate.val();
-                if (!start || !end) {
+                let sim_start = Date.parse(TRIM.store.currentScenario.simulation_start_date);
+                let sim_end = Date.parse(TRIM.store.currentScenario.simulation_end_date);
+                if (!sim_start || !sim_end) {
                     return;
                 }
 
-                var diff = calculateDateDistance(start, end, ['days']);
+                var diff = calculateDateDistance(sim_start, sim_end, ['days']);
                 var days = parseInt(diff[0].split(' ')[0]);
 
                 var staticVal = days * staticPrecip.val()
                 staticCum.val(staticVal);
                 if (!precipVaries.prop('checked')) {
-                    var annualVal = days / 365.2425 * staticPrecip.val()
+                    var annualVal = 365 * staticPrecip.val()
                     annualPrecip.val(annualVal);
                 }
             });
@@ -471,13 +508,5 @@
                 daytimeIndicator.removeAttr('disabled');
             });
         }
-
-        form.addEventListener('form:visible', function() {
-            if (!TRIM.store.currentScenario.parcels) {
-                LoadingScreen.show('met_parcels_loading');
-            }
-            TRIM.refreshParcels();
-            LoadingScreen.hide('met_parcels_loading');
-        });
     });
 </script>

@@ -8,34 +8,39 @@
                 <h3> General Properties </h3>
                 <button class="scenario_show_all comp_show_all btn btn-warning">Show All</button>
                 <button class="scenario_hide_all comp_hide_all btn btn-warning">Hide All</button>
-                <table class="scenarioMap" style="border-collapse: collapse" cellpadding="6">
-                    <thead>
-                        <tr>
-                            <th>Entity</th>
-                            <th>Property</th>
-                            <th>Property Value</th>
-                        </tr>
-                    </thead>
-                </table>
+                <div class="border-right border-dark" style="overflow-x: auto;">
+                    <table class="scenarioMap" style="border-collapse: collapse" cellpadding="6">
+                        <thead>
+                            <tr>
+                                <th>Entity</th>
+                                <th>Property</th>
+                                <th>Property Value</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
             </div>
         </div>
 
         <div class="row mb-1">
             <div class="col-sm">
                 <h3> Chemical Properties </h3>
-                <button class="comp_show_all btn btn-warning">Show All</button>
-                <button class="comp_hide_all btn btn-warning">Hide All</button>
-                <button class="comp_show_nz btn btn-outline-success">Show Non-Zero</button>
-                <table class="chemMap" style="border-collapse: collapse" cellpadding="6">
-                    <thead>
-                        <tr>
-                            <th>Chemical</th>
-                            <th>Property Name</th>
-                            <th>Property Value</th>
-                            <th>Property Unit</th>
-                        </tr>
-                    </thead>
-                </table>
+                <button class="chem_show_all btn btn-warning">Show All</button>
+                <button class="chem_hide_all btn btn-warning">Hide All</button>
+                <button class="chem_show_nz btn btn-outline-success">Show Non-Zero</button>
+                <div class="border-right border-dark" style="overflow-x: auto;">
+                    <table class="chemMap" style="border-collapse: collapse" cellpadding="6">
+                        <thead>
+                            <tr>
+                                <th>Chemical</th>
+                                <th>Entity</th>
+                                <th>Property</th>
+                                <th>Property Value</th>
+                                <th>Property Unit</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -52,17 +57,19 @@
                     <div class="dropdown-menu">
                     </div>
                 </div>
-                <table class="compMap" style="border-collapse: collapse" cellpadding="6">
-                    <thead>
-                        <tr>
-                            <th>Parcel</th>
-                            <th>Entity</th>
-                            <th>Property</th>
-                            <th>Property Value</th>
-                            <th>Property Unit</th>
-                        </tr>
-                    </thead>
-                </table>
+                <div class="border-right border-dark" style="overflow-x: auto;">
+                    <table class="compMap" style="border-collapse: collapse" cellpadding="6">
+                        <thead>
+                            <tr>
+                                <th>Parcel</th>
+                                <th>Entity</th>
+                                <th>Property</th>
+                                <th>Property Value</th>
+                                <th>Property Unit</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
             </div>
         </div>
     </section>
@@ -71,15 +78,48 @@
     onDomLoad(function(e) {
         var form = document.getElementById('property-summary-gui');
 
+        // var chemPropsReadyEvent = document.createEvent('Event');
+        // chemPropsReadyEvent.initEvent('chemProps:ready', true, true);
+        // // console.log('loading chemical properties')
+        // function loadChemProps(force) {
+        //     force = force || false;
+        //     if (TRIM.store.currentScenario.chemical_properties && !force) {
+        //         document.body.dispatchEvent(chemPropsReadyEvent);
+        //         return
+        //     }
+        //     LoadingScreen.show('loading_chem_props');
+        //     TRIM.api.getChemicalProperties('{{ scenario.id }}').on('load', function () {
+        //         TRIM.store.currentScenario.chemical_properties = this.responseJSON;
+        //         document.body.dispatchEvent(chemPropsReadyEvent);
+        //         LoadingScreen.hide('loading_chem_props');
+        //     });
+        // }
+
+        // form.addEventListener('form:visible', function() {
+        //     console.log('property summary form visible')
+        //     LoadingScreen.show('property_summary_loading');
+        //     document.body.addEventListener('parcels:ready', loadChemProps());
+        //     document.body.addEventListener('chemProps:ready', updateSummaryFields());
+        //     TRIM.refreshParcels();
+        // });
+
         form.addEventListener('form:visible', function() {
             console.log('property summary form visible')
             LoadingScreen.show('property_summary_loading');
             TRIM.refreshParcels();
+            TRIM.api.getChemicalProperties('{{ scenario.id }}').on('load', function () {
+                TRIM.store.currentScenario.chemical_properties = this.responseJSON
+            });
+            TRIM.api.getMeteorology(TRIM.store.currentScenario).on('load', function () {
+                TRIM.store.currentScenario.meteorology = this.responseJSON.meteorology;
+            });
             document.body.addEventListener('parcels:ready', updateSummaryFields());
         });
 
         function updateSummaryFields() {
-            if (!TRIM.store.currentScenario.parcels) {
+            if (!TRIM.store.currentScenario.parcels 
+            || !TRIM.store.currentScenario.chemical_properties
+            || !TRIM.store.currentScenario.meteorology) {
                 // Parcels haven't loaded yet; wait a bit and try again
                 setTimeout(function() { updateSummaryFields(); }, 1000);
                 return;
@@ -128,6 +168,13 @@
                 $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "down"))
                 $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "down"))
             });
+            $('button.chem_show_all').on('click', function(e) {
+                e.preventDefault()
+                let this_table =$(this).closest("div[role=tabpanel]").find("table.chemMap")
+                $(this_table).find("tr.colps").show();
+                $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "down"))
+                $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "down"))
+            });
             $('button.comp_show_all').on('click', function(e) {
                 e.preventDefault()
                 let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap")
@@ -139,6 +186,13 @@
 
             $('button.scenario_hide_all').on('click', function(e) {
                 let this_table =$(this).closest("div[role=tabpanel]").find("table.scenarioMap")
+                $(this_table).find("tr.colps:not([data-depth='0'])").hide();
+                $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "up"))
+                $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "up"))
+            });
+            $('button.chem_hide_all').on('click', function(e) {
+                e.preventDefault()
+                let this_table =$(this).closest("div[role=tabpanel]").find("table.chemMap")
                 $(this_table).find("tr.colps:not([data-depth='0'])").hide();
                 $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "up"))
                 $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "up"))
@@ -161,8 +215,18 @@
                 $(non_zeros).prev("tr.level1").show()
                 $(this).closest("div").find("button.btn_show_comp").text("Show Compartment")
             });
+            $('button.chem_show_nz').on('click', function(e) {
+                e.preventDefault()
+                let this_table =$(this).closest("div[role=tabpanel]").find("table.chemMap");
+                $('button.chem_hide_all').trigger('click');
+                let non_zeros = $(this_table).find("tr.colps.level2").filter((i,e) => $(e).find("td.ems").text() > 0);
+                $(non_zeros).show()
+                $(non_zeros).prev("tr.level1").show()
+            });
 
             $(document).ready(function() {
+                $('button.scenario_hide_all').trigger('click');
+                $('button.chem_hide_all').trigger('click');
                 $('button.comp_hide_all').trigger('click');
             });
 
@@ -229,6 +293,7 @@
                 }
             }
 
+            $("[data-toggle=popover]").popover();
             console.log('populated property summary form!')
             LoadingScreen.hide('property_summary_loading');
         }
@@ -263,12 +328,11 @@
                 "Scenario": {
                     "name": scenario['name'],
                     "description": scenario['description'],
-                    "precipitation rate": scenario.parcels[0].precip_rate
+                    "precipitation rate": scenario.parcels[0]?.precip_rate
                 }
             }
-            let chem_map = {}
-            Object.keys(scenario.parcels[0].sources).forEach(e=>chem_map[e]={})
 
+            let chem_map = TRIM.store.currentScenario.chemical_properties;
             let env_map = {}
 
             for (const [prc_ind, entity_name] of Object.entries(scenario.parcels)){
@@ -285,7 +349,6 @@
                         "Land Use": {'value': scenario.parcels[prc_ind].landUse, 'unit': '-', 'fieldname': ''},
                         "Soil Tillage": {'value': scenario.parcels[prc_ind].soilTillage, 'unit': '-', 'fieldname': ''},
                         "Air Density": {'value': scenario.parcels[prc_ind].airDensity, 'unit': 'g/cm<sup>3</sup>', 'fieldname': ''},
-                        "Air Height": {'value': scenario.parcels[prc_ind].airHeight, 'unit': 'm', 'fieldname': ''},
                         "Area": {'value': scenario.parcels[prc_ind].area, 'unit': 'm<sup>2</sup>', 'fieldname': ''},
                     },
                     "Compartment":{
@@ -361,7 +424,7 @@
                         "(Groundwater Zone) pH": {'value': scenario.parcels[prc_ind].soil_params.Groundwater?.pH ?? '-', 'unit': '-', 'fieldname':''},
                     },
                     "Volume Element": {
-                        "(Air) Air Height": {'value': scenario.parcels[prc_ind].airHeight, 'unit': 'm', 'fieldname': ''},
+                        "(Air) Air Height": {'value': scenario.meteorology.mixing_height_static_value, 'unit': 'm', 'fieldname': ''},
                         "(Surface Soil) Thickness": {'value': scenario.parcels[prc_ind].surfaceSoilThickness, 'unit': 'm', 'fieldname': ''},
                         "(Vadose Soil) Thickness": {'value': scenario.parcels[prc_ind].vadoseSoilThickness, 'unit': 'm', 'fieldname': ''},
                         "(Root Soil) Thickness": {'value': scenario.parcels[prc_ind].rootSoilThickness, 'unit': 'm', 'fieldname': ''},
@@ -390,20 +453,54 @@
             //     scenario_map["Scenario"] = Object.assign({}, scenario_map["Scenario"], scenario['seasonal_dynamics'])
             // }
             // catch {}
-            if (type != "env") {
+            if (type == "general") {
                 for (const [entity_key, entity_value] of Object.entries(map)) {
-                map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>" + entity_key + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td></tr>"
+                    map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>"
+                        + entity_key +
+                        "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td></tr>"
+
                     for (const [property_key, property_value] of Object.entries(entity_value)) {
-                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td class='comp'>" + property_key + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted'>"+ property_value +"</label></td><td></td></tr>"
+                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td class='comp'>" 
+                            + property_key + 
+                            "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted'>"
+                            + property_value +
+                            "</label></td><td></td></tr>"
                     }
                 }
-            } else {
+            } else if (type == "env" || type == "chem"){
+                let prop_style = "style='max-width:20rem;text-wrap: wrap;'";
+                let prop_value_style = "style='max-width:10rem;text-wrap: no-wrap;overflow:hidden;'";
+                let prop_unit_style = "style='max-width:10rem;text-wrap: wrap;'";
+
                 for (const [entity_key, entity_value] of Object.entries(map)) {
-                    map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>" + entity_key + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td><td></td><td></td></tr>"
+                    map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>"
+                        + entity_key +
+                        "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td><td></td><td></td></tr>"
+
                     for (const [cat_key, cat_value] of Object.entries(entity_value)) {
-                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td class='comp'>" + cat_key + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
+                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td class='comp'>"
+                            + cat_key +
+                            "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
+
                         for (const [property_key, property_value] of Object.entries(cat_value)) {
-                            map_html = map_html + "<tr data-depth='2' class='level2 colps'><td></td><td></td><td class='comp'>" + property_key + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted'>" + property_value.value + "</label></td><td>" + property_value.unit + "</td></tr>"
+                            let prop_value = property_value.value;
+                            if (prop_value?.length > 18) { // turn into a link with a popup
+                                let title = property_key;
+                                let note = property_value.value.replace(/\"/g, '&quot;');
+                                prop_value = `
+                                    <a href="javascript:void(0);" data-toggle="popover" data-html="true" data-trigger="focus" data-original-title="${title}" data-content="${note}">
+                                        ${property_value.value.replace(/\"/g, '&quot;')}
+                                    </a>
+                                `;
+                            }
+
+                            map_html = map_html + `<tr data-depth='2' class='level2 colps'><td></td><td></td><td class='comp' ${prop_style}>`
+                                + property_key +
+                                `</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted' ${prop_value_style}>`
+                                + (prop_value == null ? '-' : prop_value) +
+                                `</label></td><td ${prop_unit_style}>`
+                                + (property_value.unit || '').replace(/\[.*?\]/g, '') +
+                                "</td></tr>"
                         }
                     }
                 }

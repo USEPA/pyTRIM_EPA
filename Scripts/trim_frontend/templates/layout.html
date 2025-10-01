@@ -24,7 +24,7 @@
     <script src="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.js"></script>
     <title>
         {% if title %}
-            {{ title }} | {{ site_name }}
+            {{ site_name }} | {{ title }}
         {% else %}
             {{ site_name }}
         {% endif %}
@@ -75,6 +75,8 @@
     </script>
     <script src="{{ url_for('static', filename='js/lib/dataTables/dataTables.bootstrap4.min.js') }}">
     </script>
+
+    {% include 'components/csrf_scripts.html' %}
 
     {% include 'components/api_scripts.html' %}
 

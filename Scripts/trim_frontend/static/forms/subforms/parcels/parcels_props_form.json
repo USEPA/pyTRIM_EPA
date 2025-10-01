@@ -45,7 +45,7 @@
       "label": "Farm Food Chain",
       "data_type": "str",
       "default": "",
-      "help": "(only for parcels with land use of Untilled Soil or Tilled Soil) Indicate whether the parcel will eventually be evaluated with exposure from a farm food chain. This is only compatible with Untilled Soil or Tilled Soil land uses because it is anticipated that, after TRIM modeling, you will use soil-to-plant uptake factors to estimate chemical concentrations in farm foods based on TRIM-modeled chemical concentrations in soil. Otherwise, this selection has no impact on TRIM modeling. The default selection is 'No' because the default land use is 'Grasses/Herbs'."
+      "help": "(only for parcels with land use of Untilled Soil or Tilled Soil) Indicate whether the parcel will eventually be evaluated with exposure from a farm food chain. This is only compatible with Untilled Soil or Tilled Soil land uses because it is anticipated that, after TRIM modeling, you will use soil-to-plant uptake factors to estimate chemical concentrations in farm foods based on TRIM-modeled chemical concentrations in soil. The only impact this Farm Food Chain setting has on the pyTRIM simulation is to set the cover management factor for erosion calculations."
     },
     {
       "id": "parcels-parcel_fish_food_web",
@@ -67,7 +67,7 @@
       "label": "Receptor Spacing (m)",
       "data_type": "str",
       "default": "100",
-      "help": "Enter the receptor spacing for each parcel. The receptors are not a TRIM feature, but they can be used offline in AERMOD modeling."
+      "help": "Enter the receptor spacing for each parcel. The receptors are not a TRIM feature, but they can be used offline in AERMOD modeling. The default spacing is 100 m (professional judgment). Each parcel should have at least 1 receptor, parcels larger than about 0.004 square km should have at least 2 receptors, and the spacing is not recommended to be larger than 1,000 m."
     }
   ]
 }

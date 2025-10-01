@@ -6,16 +6,22 @@ import geopandas as gpd
 from shapely.geometry import Polygon, Point
 from shapely.prepared import prep
 from ..scenarios.utils import init_parameter_definitions
-from ..scenarios.defaults import get_surface_runoff
 from .defaults import SURFACE_SOIL_SPECIFIC_MEDIA_PARAMS
 
 from flask_api import ApiResult
 from pyproj import Transformer
 
-from trim_db.schema import CustomParameter, ParameterDefinition, Parcel
-from trim_db.services import ChemicalService, CompartmentService, FormulaService, ParameterService, ParcelService, ScenarioService, VolumeElementService
+from trim_frontend.scenarios.utils import update_dynamic_params
+from trim_db.schema import ureg, CustomParameter, ParameterDefinition, Parcel
+from trim_db.services import ChemicalService, CompartmentService, FormulaService, \
+    ParameterService, ParcelService, ScenarioService, VolumeElementService
 from trim_db.services.parameters import get_or_create_custom_param, update_custom_param_value
-from .defaults import Air_Parcel_VolElem_defaults, Aquatic_Biota_SW_Compartment_defaults, Aquatic_Biota_Sed_Compartment_defaults, Farm_Biota_SurfSoil_Compartment_defaults, LAND_USE_TYPES, AQUATIC_DIET, Land_Parcel_VolElem_defaults, Water_Parcel_VolElem_defaults, Wet_Dry_Source_VolElem_defaults
+from .defaults import get_watershed_area, \
+     Air_Parcel_VolElem_defaults, Aquatic_Biota_SW_Compartment_defaults, \
+     Aquatic_Biota_Sed_Compartment_defaults, Farm_Biota_SurfSoil_Compartment_defaults, \
+     LAND_USE_TYPES, AQUATIC_DIET, Land_Parcel_VolElem_defaults, Water_Parcel_VolElem_defaults, \
+     Wet_Dry_Source_VolElem_defaults, EROSION_DEFAULTS, make_self_requirements
+from .forms import ScenarioParcelsForm
 from ..scenarios.forms import ScenarioAbioticPropertiesForm
 from ..utils.logging import make_logger
 
@@ -37,13 +43,74 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
     pprint(parcels_data)
     print(f"land_use == '{land_use}'\n")
 
-    Air_params = [('dustLoad', "DustLoad"),
-                  ("dustDensity", "DustDensity"),
-                  ("airDensity", "AirDensity"),
-                  ("fractionOrganicMatterOnParticulates", "FractionOrganicMatteronParticulates")]
+    air_params = {
+        'dustLoad': "DustLoad",
+        "dustDensity": "DustDensity",
+        "airDensity": "AirDensity",
+        "fractionOrganicMatterOnParticulates": "FractionOrganicMatteronParticulates"
+    }
+
+    fraction_params = {
+        "RunoffFractions": "PrecipitationRunoffFraction",
+        "GroundwaterSeepageFractions": "GroundwaterSeepageFraction",
+        "EvapotranspirationFractions": "EvapotranspirationFraction"
+    }
+
+    misc_water_params = {
+        'flush_rate': "Flushes",
+        'suspended_sed_conc': "SuspendedSedimentConcentration",
+        'algae_density': "AlgaeDensityInWaterColumn",
+        'chloride_conc': "ChlorideConcentration",
+        'chlorophyll_conc': "ChlorophyllConcentration",
+        'mean_depth': "MeanDepth",
+        'evaporation_rate': "waterEvaporationRate",
+        'suspended_organic_carbon': "OrganicCarbonContent",
+        'water_ph': "pH",
+        'sed_deposition_vel': "SedimentDepositionVelocity",
+        'water_temp': "WaterTemperature",
+        'sed_inflow': "ExternalSedimentInflow",
+        'externalWaterInflow': "ExternalWaterInflow"
+    }
+
+    bed_params = {
+        'bed_density': 'BedDensity',
+        'organic_carbon_frac': "OrganicCarbonContent",
+        'bed_pH': "pH",
+        'bed_porosity': "Porosity",
+        'bed_thickness': "MeanThickness"
+    }
+
+    fish_comps = {
+        "Zooplankton": "Zooplankton",
+        "FishHerbivore": "Water_Column_Herbivore",
+        "FishBenthicOmnivore": "Benthic_Omnivore",
+        "FishOmnivore": "Water_Column_Omnivore",
+        "FishBenthicCarnivore": "Benthic_Carnivore",
+        "FishCarnivore": "Water_Column_Carnivore"
+    }
+
+    fish_comps2 = {
+        "BenthicCarnivore": "Benthic_Carnivore",
+        "BenthicInvertebrate": "Benthic_Invertebrate",
+        "BenthicOmnivore": "Benthic_Omnivore",
+        "Macrophyte": "Macrophyte",
+        "WaterColumnCarnivore": "Water_Column_Carnivore",
+        "WaterColumnHerbivore": "Water_Column_Herbivore",
+        "WaterColumnOmnivore": "Water_Column_Omnivore",
+        "Zooplankton": "Zooplankton"
+    }
+    fish_fields = ([f'{x}Biomass' for x in fish_comps2] + [f'{x}Weight' for x in fish_comps2])
+
+    misc_params = [
+        "pH", "rho", "AverageVerticalVelocity", "FractionSand", "OrganicCarbonContent",
+        "VolumeFraction_Liquid", "VolumeFraction_Vapor", "Porosity", "AirSoilBoundaryThickness",
+        "FractionofAreaAvailableforErosion", "FractionofAreaAvailableforRunoff",
+        "FractionofAreaAvailableforVerticalDiffusion", "TotalRunoffRate"
+    ]
 
     # Update the specified property
     field_name = parcels_data["field"]
+
     if field_name == "parcelType":
         # Delete all compartments and volume elements
         delete_parcel_contents(p)
@@ -70,56 +137,44 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             # add standard Water & Air Volume element and compartments
             initialize_parcel_contents(p, water_and_air_parcel_vol_elem_defaults)
 
-    if field_name == "landUse":
-        if parcels_data['landUse'] in ['Coniferous Forest', 'Deciduous Forest', 'Agriculture (General)',
-                                       'Grasses/Herbs', 'Tilled Soil', 'Untilled Soil', 'Impervious']:
-            # COMPARTMENT CHANGE
-            if not parcels_data['landUse'] == land_use:
-                print(f'NEW LAND USE DETECTED {land_use} >> {parcels_data["landUse"]}')
-                create_base_land_compartments(parcels_data, p, land_use)
-        if parcels_data['landUse'] not in ['Tilled Soil', 'Untilled Soil']:
-            ve = p.get_volume_element("SurfSoil")
-            if ve:
-                if ve.get_compartment("Farm"):
-                    cmp = ve.get_compartment("Farm")
-                    CompartmentService.delete(cmp, False)
-        if parcels_data['landUse'] in ['Impervious']:
-            ve = p.get_volume_element("SurfSoil")
-            if ve:
-                if ve.get_compartment("Wetland"):
-                    cmp = ve.get_compartment("Wetland")
-                    CompartmentService.delete(cmp, False)
+    elif field_name == "landUse":
+        if parcels_data['landUse'] == land_use:
+            return
+        if parcels_data['landUse'] in LAND_USE_TYPES:
+            print(f'NEW LAND USE DETECTED {land_use} >> {parcels_data["landUse"]}')
+            create_base_land_compartments(parcels_data, p, land_use)
 
-    if field_name == "hasFarmFoodChain":
-        biotic_ve = deepcopy(Land_Parcel_VolElem_defaults)
-        biotic_ve["SurfSoil"]["Compartments"] = deepcopy(Farm_Biota_SurfSoil_Compartment_defaults["Compartments"])
-        if parcels_data['hasFarmFoodChain'] == "Yes":
-            surfsoil = p.get_volume_element("SurfSoil")
-            if surfsoil:
-                initialize_parcel_contents(p, biotic_ve)
-            else:
-                raise ValueError("Cannot create or get Farm Compartment")
-        if parcels_data['hasFarmFoodChain'] == "No":
-            for vek, vev in biotic_ve.items():
-                ve = p.get_volume_element(vek)
-                if ve:
-                    for k, v in biotic_ve[vek]["Compartments"].items():
-                        cmp = ve.get_compartment(v["name"])
-                        if cmp:
-                            logger.info(f"Deleted {cmp.name}")
-                            CompartmentService.delete(cmp, False)
-    if field_name == "hasFishFoodWeb":
+        surfsoil_ve = p.get_volume_element("SurfSoil")
+        if surfsoil_ve and surfsoil_ve.get_compartment("Farm"): # FFC should reset back to 'No' on change
+            CompartmentService.delete(surfsoil_ve.get_compartment("Farm"))
+                
+        if parcels_data['landUse'] in ['Impervious']:
+            if surfsoil_ve and surfsoil_ve.get_compartment("Wetland"):
+                CompartmentService.delete(surfsoil_ve.get_compartment("Wetland"))
+
+    elif field_name == "hasFarmFoodChain":
+        surfsoil_ve = p.get_volume_element("SurfSoil")
+        if parcels_data[field_name] == "Yes":
+            CompartmentService.create(
+                name="Farm", volume_element=surfsoil_ve,
+                media=CompartmentService.media.get(name="Farm"),
+            )
+        else:
+            if surfsoil_ve.get_compartment("Farm"):
+                CompartmentService.delete(surfsoil_ve.get_compartment("Farm"))
+
+    elif field_name == "hasFishFoodWeb":
         biotic_ve = deepcopy(Water_Parcel_VolElem_defaults)
         biotic_ve["Sed"]["Compartments"] = deepcopy(Aquatic_Biota_Sed_Compartment_defaults["Compartments"])
         biotic_ve["SW"]["Compartments"] = deepcopy(Aquatic_Biota_SW_Compartment_defaults["Compartments"])
-        if parcels_data['hasFishFoodWeb'] == "Yes":
+        if parcels_data[field_name] == "Yes":
             sw = p.get_volume_element("SW")
             if sw:
                 initialize_parcel_contents(p, biotic_ve)
                 init_diet_table_custom_parameters(p)
             else:
                 raise ValueError("Cannot create or get Fish Compartment")
-        if parcels_data['hasFishFoodWeb'] == "No":
+        else:
             for vek, vev in biotic_ve.items():
                 ve = p.get_volume_element(vek)
                 if ve:
@@ -128,40 +183,120 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                         if cmp:
                             logger.info(f"Deleted {cmp.name}")
                             CompartmentService.delete(cmp, False)
-    if field_name == "hasWetland":
-        if parcels_data['hasWetland'] == "Yes":
+
+    elif field_name == "hasWetland":
+        def update_precip_fractions(ve, vals={}):
+            # Wetland has different default surface precipitation values
+            surfsoil = ve.get_compartment("Soil_Surface")
+            kwargs = {"requirements": f"(self.id == {surfsoil.id})", "scenario_id": ve.parcel.scenario_id}
+            
+            evapo = surfsoil.parameters.get('EvapotranspirationFraction')
+            groundwater = surfsoil.parameters.get('GroundwaterSeepageFraction')
+            precip = surfsoil.parameters.get('PrecipitationRunoffFraction')
+
+            evapo = get_or_create_custom_param(evapo, {**kwargs, "definition_id": evapo.id})
+            groundwater = get_or_create_custom_param(groundwater, {**kwargs, "definition_id": groundwater.id})
+            precip = get_or_create_custom_param(precip, {**kwargs, "definition_id": precip.id})
+            
+            update_custom_param_value(evapo, vals["evapo"])
+            update_custom_param_value(groundwater, vals["groundwater"])
+            update_custom_param_value(precip, vals["precip"])
+
+            update_dynamic_params(p.scenario)
+
+        if parcels_data[field_name] == "Yes":
             ve = p.get_volume_element("SurfSoil")
             if ve:
                 m = CompartmentService.media.get(name='Wetland')
                 c = CompartmentService.get_or_create(name="Wetland", volume_element=ve, media=m)
+                update_precip_fractions(ve, {"evapo":0.4, "groundwater":0, "precip":0.6})
             else:
                 raise ValueError("Cannot create or get Wetland Compartment")
-        if parcels_data['hasWetland'] == "No":
+        else:
             ve = p.get_volume_element("SurfSoil")
             if ve:
-                cmp = ve.get_compartment("Wetland")
-                if cmp:
-                    CompartmentService.delete(cmp, False)
-    if field_name == "description":
+                c = ve.get_compartment("Wetland")
+                if c:
+                    CompartmentService.delete(c, False)
+                update_precip_fractions(ve, {"evapo":0.35, "groundwater":0.25, "precip":0.4})
+
+    elif field_name == "description":
         p.description = parcels_data['description']
-    if field_name == 'totalErosionRate':
+
+    elif field_name == 'totalErosionRate':
+        val = float(parcels_data['totalErosionRate'])
         for c in p.compartments:
             if c.media.isa('Surface_Soil'):
-                par = c.parameters.get('TotalErosionRate')
-                par.value = parcels_data['totalErosionRate']
-    if "erosion1" in field_name or "erosion2" in field_name or "erosion3" in field_name: # unique structure
-        param = ParameterService.definitions.get(full_name=field_name)
-        param = ParameterService.get_or_create(
-            definition_id=param.id,
-            scenario_id=p.scenario_id,
-            requirements=f"(self.id == {p.id})", # parcel id
-        )
-        # storing in unit since value is decimal only
-        param.unit = parcels_data[field_name]
-        ParameterService.update(param)
+                ter = c.parameters.get('TotalErosionRate')
+                par = get_or_create_custom_param(
+                    ter,
+                    {"requirements": f"(self.id == {c.id})", "scenario_id": p.scenario_id},
+                )
+                update_custom_param_value(par, val)
         ParameterService.commit()
-    if field_name in [k for k, v in Air_params]:
-        par_name = [v for k, v in Air_params if k == field_name][0]
+
+    elif ("erosion1-" in field_name or "erosion2-" in field_name or "erosion3-" in field_name): # HACKY
+        option_num = int(field_name.split('-')[0].replace('erosion', ''))
+
+        # Delete all erosionN- params for other options,
+        # and only store one active parameter at a time
+        for param in list(ParameterService.get_all(
+            scenario_id=p.scenario_id, requirements=make_self_requirements(p)
+        )):
+            if not isinstance(param, CustomParameter):
+                continue
+            if not(
+                param.variable_name.startswith('erosion1-')
+                or param.variable_name.startswith('erosion2-')
+                or param.variable_name.startswith('erosion3-')
+            ):
+                continue
+            if not param.requirements == make_self_requirements(p):
+                continue
+            if (
+                param.variable_name.endswith('-active')
+                or not param.variable_name.startswith(f'erosion{option_num}-')
+            ):
+                ParameterService.delete(param, no_commit=True)
+
+        # Create/update the specified parameter
+        param_def = ParameterService.definitions.get_or_create(
+            variable_name=field_name,
+            full_name=field_name,
+            domain=ParameterService.domains.get(name='Scenario')
+        )
+        param = ParameterService.get_or_create(
+            definition_id=param_def.id,
+            scenario_id=p.scenario_id,
+            requirements=make_self_requirements(p), # parcel id
+        )
+        val = parcels_data[field_name]
+        has_value = (str(val) == '0' or (val or ''))
+        if has_value:
+            # has value; update the param
+            param.value = parcels_data[field_name]
+            ParameterService.update(param)
+        else:
+            # no value; delete the param
+            ParameterService.delete(param)
+
+        if has_value and (str(parcels_data.get('is_active')).lower() == 'true'):
+            # Create/update the specified parameter active flag
+            param_def = ParameterService.definitions.get_or_create(
+                variable_name=f'{field_name}-active',
+                full_name=f'{field_name}-active',
+                domain=ParameterService.domains.get(name='Scenario')
+            )
+            param = ParameterService.get_or_create(
+                definition_id=param_def.id,
+                scenario_id=p.scenario_id,
+                requirements=make_self_requirements(p), # parcel id
+            )
+            param.value = 1
+            ParameterService.update(param)
+
+    elif field_name in air_params:
+        par_name = air_params[field_name]
         # the below part was generating error due to missing par for dustLoad, dustDensity etc...
         cmp = [c for c in p.compartments if "Air in Air_" in c.standard_name][0]
         par = get_or_create_custom_param(
@@ -170,65 +305,20 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         )
         update_custom_param_value(par, parcels_data[field_name])
         ParameterService.commit()
-    # Note that 0 is the fixed datum for volume element boundary locations
-    if field_name == "airHeight":
-        for co in p.compartments:
-            if co.name == "Air":
-                co.volume_element.top = parcels_data['airHeight']
 
-    if field_name == "surfaceSoilThickness":
-        thickness_before = p.get_compartment("Soil_Surface").volume_element.height.magnitude
-        p.get_compartment("Soil_Surface").volume_element.bottom = \
-            p.get_compartment("Soil_Surface").volume_element.top + \
-            (-1 * float(parcels_data['surfaceSoilThickness']))
-        thickness_now = p.get_compartment("Soil_Surface").volume_element.height.magnitude
-        delta_thickness = thickness_now - thickness_before
-        for soil_comp in ["Soil_Root_Zone", "Soil_Vadose_Zone", "Groundwater", "DryVaporSource", "WetVaporSource",
-                          "DryParticleSource", "WetParticleSource"]:
-            p.get_compartment(soil_comp).volume_element.top = \
-                (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.top
-            p.get_compartment(soil_comp).volume_element.bottom = \
-                (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.bottom
-    if field_name == "rootSoilThickness":
-        thickness_before = p.get_compartment("Soil_Root_Zone").volume_element.height
-        p.get_compartment("Soil_Root_Zone").volume_element.bottom = \
-            p.get_compartment("Soil_Root_Zone").volume_element.top + \
-            (-1 * float(parcels_data['rootSoilThickness']))
-        thickness_now = p.get_compartment("Soil_Root_Zone").volume_element.height
-        delta_thickness = thickness_now.magnitude - thickness_before.magnitude
-        for soil_comp in ["Soil_Vadose_Zone", "Groundwater", "DryVaporSource", "WetVaporSource",
-                          "DryParticleSource", "WetParticleSource"]:
-            p.get_compartment(soil_comp).volume_element.top = \
-                (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.top
-            p.get_compartment(soil_comp).volume_element.bottom = \
-                (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.bottom
-    if field_name == "vadoseSoilThickness":
-        thickness_before = p.get_compartment("Soil_Vadose_Zone").volume_element.height
-        p.get_compartment("Soil_Vadose_Zone").volume_element.bottom = \
-            p.get_compartment("Soil_Vadose_Zone").volume_element.top + \
-            (-1 * float(parcels_data['vadoseSoilThickness']))
-        thickness_now = p.get_compartment("Soil_Vadose_Zone").volume_element.height
-        delta_thickness = thickness_now.magnitude - thickness_before.magnitude
-        for soil_comp in ["Groundwater", "DryVaporSource", "WetVaporSource",
-                          "DryParticleSource", "WetParticleSource"]:
-            p.get_compartment(soil_comp).volume_element.top = \
-                (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.top
-            p.get_compartment(soil_comp).volume_element.bottom = \
-                (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.bottom
-    if field_name == "groundwaterZoneSoilThick":
-        thickness_before = p.get_compartment("Groundwater").volume_element.height
-        p.get_compartment("Groundwater").volume_element.bottom = \
-            p.get_compartment("Groundwater").volume_element.top + \
-            (-1 * float(parcels_data['groundwaterZoneSoilThick']))
-        thickness_now = p.get_compartment("Groundwater").volume_element.height
-        delta_thickness = thickness_now.magnitude - thickness_before.magnitude
-        for soil_comp in ["DryVaporSource", "WetVaporSource",
-                          "DryParticleSource", "WetParticleSource"]:
-            p.get_compartment(soil_comp).volume_element.top = \
-                (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.top
-            p.get_compartment(soil_comp).volume_element.bottom = \
-                (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.bottom
-    if field_name == "tillage":
+    elif field_name == "surfaceSoilThickness":
+        update_soil_thickness(p, "Soil_Surface", 'SurfSoil', parcels_data['surfaceSoilThickness'])
+
+    elif field_name == "rootSoilThickness":
+        update_soil_thickness(p, "Soil_Root_Zone", 'RootSoil', parcels_data['rootSoilThickness'])
+
+    elif field_name == "vadoseSoilThickness":
+        update_soil_thickness(p, "Soil_Vadose_Zone", 'VadoseSoil', parcels_data['vadoseSoilThickness'])
+        
+    elif field_name == "groundwaterZoneSoilThick":
+        update_soil_thickness(p, "Groundwater", 'GW', parcels_data['groundwaterZoneSoilThick'])
+
+    elif field_name == "tillage":
         for c in p.compartments:
             if c.name == 'Soil_Surface':
                 par = get_or_create_custom_param(
@@ -245,7 +335,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                     update_custom_param_value(par, 0)
         ParameterService.commit()
 
-    if field_name in ["EvapotranspirationFractions", "GroundwaterSeepageFractions", "RunoffFractions"]:
+    elif field_name in fraction_params:
         soil_comp = p.get_compartment("Soil_Surface")
         # data_name = field_name if field_name == "GroundwaterSeepageFractions" else "RunoffFractions"
         # seepage_frac_val = float(parcels_data[data_name]) if data_name == "GroundwaterSeepageFractions" else 1-float(parcels_data[data_name])
@@ -258,12 +348,9 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         # seepage_frac_val = parcels_data["GroundwaterSeepageFractions"]
         # runoff_frac_val = parcels_data["RunoffFractions"]
         frac_val = float(parcels_data[field_name])
-        par_name_map = {"RunoffFractions": "PrecipitationRunoffFraction",
-                       "GroundwaterSeepageFractions": "GroundwaterSeepageFraction",
-                       "EvapotranspirationFractions": "EvapotranspirationFraction"}
         # for par_name, par_val in {"TotalRunoffRate": total_runoff_val, "GroundwaterSeepageFraction": seepage_frac_val,
         #                           "EvapotranspirationFraction": evapotranspiration_frac_val}.items():
-        par_name = par_name_map[field_name]
+        par_name = fraction_params[field_name]
         par_val = frac_val
         par = get_or_create_custom_param(
             soil_comp.parameters.get(par_name),
@@ -276,74 +363,69 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         update_custom_param_value(par, par_val)
 
         if field_name == "RunoffFractions":
-            total_runoff_val = frac_val * p.scenario.Rain.magnitude  # was multiplied by watershed area but removed per Arun on 08/12/2024
-            par_name = "TotalRunoffRate"
-            par_val = total_runoff_val
-            par = get_or_create_custom_param(
-                soil_comp.parameters.get(par_name),
-                {
-                    "requirements": f"(self.id == {soil_comp.id})",
-                    "scenario_id": p.scenario.id,
-                },
-                no_commit=True
-            )
-            update_custom_param_value(par, par_val)
+            update_dynamic_params(p.scenario)
+            ParcelService.update(p)
+            return ApiResult(json.dumps({
+                'message': 'success',
+                'TotalRunoffRate': soil_comp.TotalRunoffRate.magnitude
+            }))
 
-    if field_name in ['flush_rate', 'suspended_sed_conc', 'algae_density', 'chloride_conc', 'chlorophyll_conc',
-                      'mean_depth', 'evaporation_rate', 'suspended_organic_carbon', 'water_ph',
-                      'sed_deposition_vel', 'water_temp', 'sed_inflow']:
-        par_name = {'flush_rate': "Flushes",
-                    'suspended_sed_conc': "SuspendedSedimentConcentration",
-                    'algae_density': "AlgaeDensityInWaterColumn",
-                    'chloride_conc': "ChlorideConcentration",
-                    'chlorophyll_conc': "ChlorophyllConcentration",
-                    'mean_depth': "MeanDepth",
-                    'evaporation_rate': "waterEvaporationRate",
-                    'suspended_organic_carbon': "OrganicCarbonContent",
-                    'water_ph': "pH",
-                    'sed_deposition_vel': "SedimentDepositionVelocity",
-                    'water_temp': "WaterTemperature",
-                    'sed_inflow': "ExternalSedimentInflow"}
+    elif field_name in misc_water_params:
+        par_name = misc_water_params[field_name]
         comp = p.get_compartment("Surface_water")
-        par = comp.parameters.get(par_name[field_name])
+        par = comp.parameters.get(par_name)
+
+        if field_name == "mean_depth":
+            csw = p.get_compartment("Surface_water")
+            h_diff = (csw.height.magnitude - float(parcels_data[field_name]))
+            # Now shift bounds of everything below the SW volume element
+            ves = [a for a in p.volume_elements]
+            for ve in ves:
+                if ve.top <= csw.volume_element.bottom:
+                    print(f'new {ve.name} top = {ve.top + h_diff} and bottom = {ve.bottom + h_diff}')
+                    ve.top = ve.top + h_diff
+                    ve.bottom = ve.bottom + h_diff
+            # finally fix the surface water element bottom
+            csw.volume_element.bottom = -1 * float(parcels_data[field_name])
+
         if par:
             par = get_or_create_custom_param(
                 par,
                 {
                     "requirements": f"(self.id == {comp.id})",
                     "scenario_id": p.scenario.id,
-                },
+                }
             )
             update_custom_param_value(par, parcels_data[field_name])
-        else:
-            par_obj = [pp for pp in ParameterService.definitions.get_all() if
-                       pp.full_name == par_name[field_name]]
-            comp.parameters.add(par_name[field_name], domain_name="Compartment", unit=par_obj[0].default_unit)
-            comp.parameters.get(par_name[field_name]).value = parcels_data[field_name]
-            comp.parameters.get(par_name[field_name]).scenario_id = p.scenario_id
 
-    if field_name == "MeanDepth":
-        csw = p.get_compartment("Surface_water")
-        h_diff = (csw.height - parcels_data[field_name]).magnitude
-        # Now shift bounds of everything below the SW volume element
-        ves = [a for a in p.volume_elements]
-        for ve in ves:
-            if ve.top <= csw.volume_element.bottom:
-                print(f'new {ve.name} top = {ve.top + h_diff} and bottom = {ve.bottom + h_diff}')
-                ve.top = ve.top + h_diff
-                ve.bottom = ve.bottom + h_diff
-        # finally fix the surface water element bottom
-        csw.volume_element.bottom = -1 * parcels_data[field_name]
+        if field_name == 'flush_rate':
+            if not par.formula:
+                new_formula_obj = FormulaService.create(equation=parcels_data['autocalc'])
+                par.formula = new_formula_obj
+            else:
+                FormulaService.get(par.formula.id).equation = parcels_data['autocalc']
+                FormulaService.commit()
 
-    if field_name in ['bed_density', 'organic_carbon_frac', 'bed_pH', 'bed_porosity', 'bed_thickness']:
-        par_name = {'bed_density': 'BedDensity',
-                    'organic_carbon_frac': "OrganicCarbonContent",
-                    'bed_pH': "pH",
-                    'bed_porosity': "Porosity",
-                    'bed_thickness': "MeanThickness"}
+    elif field_name in bed_params:
+        par_name = bed_params[field_name]
         comp = p.get_compartment("Sediment")
-        par = comp.parameters.get(par_name[field_name])
-        if par:
+        par = comp.parameters.get(par_name)
+        if field_name == "bed_thickness":
+            sed_ve = comp.volume_element
+            thickness_before = sed_ve.height
+            sed_ve.bottom = sed_ve.top - float(parcels_data[field_name])
+            thickness_now = sed_ve.height
+
+            # shift everything below the sediment volume element
+            delta_thickness = thickness_now.magnitude - thickness_before.magnitude
+            ves = [a for a in p.volume_elements]
+            for ve in ves:
+                if ve.top <= sed_ve.bottom:
+                    print(f'new {ve.name} top = {ve.top - delta_thickness} and bottom = {ve.bottom - delta_thickness}')
+                    ve.top = ve.top - delta_thickness
+                    ve.bottom = ve.bottom - delta_thickness
+
+        elif par:
             par = get_or_create_custom_param(
                 par,
                 {
@@ -354,23 +436,16 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             update_custom_param_value(par, parcels_data[field_name])
         else:
             par_obj = [pp for pp in ParameterService.definitions.get_all() if
-                       pp.full_name == par_name[field_name]]
-            comp.parameters.add(par_name[field_name], domain_name="Compartment", unit=par_obj[0].default_unit)
-            comp.parameters.get(par_name[field_name]).value = parcels_data[field_name]
-            comp.parameters.get(par_name[field_name]).scenario_id = p.scenario_id
+                       pp.full_name == par_name]
+            comp.parameters.add(par_name, domain_name="Compartment", unit=par_obj[0].default_unit)
+            comp.parameters.get(par_name).value = parcels_data[field_name]
+            comp.parameters.get(par_name).scenario_id = p.scenario_id
 
-    if field_name in ["Zooplankton", "FishHerbivore", "FishBenthicOmnivore", "FishOmnivore",
-                      "FishBenthicCarnivore", "FishCarnivore"]:
-        comp_name = {"Zooplankton": "Zooplankton",
-                     "FishHerbivore": "Water_Column_Herbivore",
-                     "FishBenthicOmnivore": "Benthic_Omnivore",
-                     "FishOmnivore": "Water_Column_Omnivore",
-                     "FishBenthicCarnivore": "Benthic_Carnivore",
-                     "FishCarnivore": "Water_Column_Carnivore"
-                     }
+    elif field_name in fish_comps:
+        comp_name = fish_comps[field_name]
         params = [pd for pd in parcels_data.keys() if pd not in ["id", "field", "csrf_token"]]
         # print(f"{field_name} {[c for c in p.compartments if c.name == comp_name[field_name]]}")
-        this_comp = [c for c in p.compartments if c.name == comp_name[field_name]][0]
+        this_comp = [c for c in p.compartments if c.name == comp_name][0]
         for param in params:
             this_par = get_or_create_custom_param(
                 this_comp.parameters[param],
@@ -380,22 +455,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             update_custom_param_value(this_par, parcels_data[param])
         ParameterService.commit()
 
-    if field_name in ["BenthicCarnivoreBiomass", "BenthicInvertebrateBiomass", "BenthicOmnivoreBiomass",
-                      "MacrophyteBiomass", "WaterColumnCarnivoreBiomass", "WaterColumnHerbivoreBiomass",
-                      "WaterColumnOmnivoreBiomass", "ZooplanktonBiomass", "BenthicCarnivoreWeight",
-                      "BenthicInvertebrateWeight", "BenthicOmnivoreWeight",
-                      "WaterColumnCarnivoreWeight", "WaterColumnHerbivoreWeight", "WaterColumnOmnivoreWeight",
-                      "ZooplanktonWeight"]:
-        comp_name = {
-            "BenthicCarnivore": "Benthic_Carnivore",
-            "BenthicInvertebrate": "Benthic_Invertebrate",
-            "BenthicOmnivore": "Benthic_Omnivore",
-            "Macrophyte": "Macrophyte",
-            "WaterColumnCarnivore": "Water_Column_Carnivore",
-            "WaterColumnHerbivore": "Water_Column_Herbivore",
-            "WaterColumnOmnivore": "Water_Column_Omnivore",
-            "Zooplankton": "Zooplankton"
-        }
+    elif field_name in fish_fields:
         if "Biomass" in field_name:
             base_name = field_name.replace("Biomass", "")
             prop = "BiomassPerArea"
@@ -404,7 +464,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             prop = "BW"
 
         for this_comp in p.compartments:
-            if this_comp.name == comp_name[base_name]:
+            if this_comp.name == fish_comps2[base_name]:
                 this_param = get_or_create_custom_param(
                     this_comp.parameters.get(prop),
                     {"requirements": f"(self.id == {this_comp.id})", "scenario_id": p.scenario_id},
@@ -413,23 +473,26 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                 update_custom_param_value(this_param, float(parcels_data[field_name]))
         ParameterService.commit()
 
-    if field_name in ["pH", "rho", "AverageVerticalVelocity", "FractionSand", "OrganicCarbonContent",
-                      "VolumeFraction_Liquid", "VolumeFraction_Vapor", "Porosity", "AirSoilBoundaryThickness",
-                      "FractionofAreaAvailableforErosion", "FractionofAreaAvailableforRunoff",
-                      "FractionofAreaAvailableforVerticalDiffusion", "TotalRunoffRate"]:
+    elif field_name in misc_params:
         this_comp = p.get_compartment(name=parcels_data["comp_name"])
         this_par = get_or_create_custom_param(
             this_comp.parameters.get(parcels_data["field"]),
             {"requirements": f"(self.id == {this_comp.id})", "scenario_id": p.scenario_id},
         )
         update_custom_param_value(this_par, float(parcels_data[field_name]))
-    if field_name == "emission":
-        src_comp = [c for c in p.compartments if c.name == parcels_data["compartment_name"]][0]
-        src_par = [par for parn, par in src_comp.parameters.items() if parn == "surfaceDepositionRate"]
+
+        # we no longer want to use a formula for auto calculating this
+        if field_name in ['AverageVerticalVelocity', 'TotalRunoffRate'] and this_par.formula:
+            this_par.formula = None
+            ParameterService.commit()
+
+    elif field_name == "emission":
+        src_comp = p.get_compartment(name=parcels_data["compartment_name"])
+        src_par = src_comp.parameters.get('surfaceDepositionRate')
         chem = ChemicalService.get(name=parcels_data["chemical_name"])
-        if len(src_par) > 0:
+        if src_par:
             src_par = get_or_create_custom_param(
-                src_par[0],
+                src_par,
                 {"requirements": f"(self.id == {src_comp.id})", "scenario_id": p.scenario.id},
                 new_formula=True
             )
@@ -455,14 +518,14 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                 print(new_formula)
             FormulaService.get(src_par.formula.id).equation = new_formula
             FormulaService.commit()
-    if field_name == "initial concentration":
-        ic_comp = [c for c in p.compartments if c.name == parcels_data["compartment_name"]][0]
-        ic_par = [par for parn, par in ic_comp.parameters.items() if parn == "initialConcentration"]
+    elif field_name == "initial concentration":
+        ic_comp = p.get_compartment(name=parcels_data["compartment_name"])
+        ic_par = ic_comp.parameters.get('initialConcentration')
         chem = ChemicalService.get(name=parcels_data["chemical_name"])
-        if len(ic_par) > 0:
+        if ic_par:
             unit = "g / m^3" if ic_comp.media.id in [2, 5, 7, 56, 55, 8, 9] else "g / kg" if ic_comp.media.id in [23, 24, 27, 28, 29, 31, 32, 33, 37, 39, 41, 43, 44, 45, 46, 47, 48, 49, 50, 51] else "g / L" if ic_comp.media.id in [10, 4] else ""
             ic_par = get_or_create_custom_param(
-                ic_par[0],
+                ic_par,
                 {"requirements": f"(self.id == {ic_comp.id})", "scenario_id": p.scenario.id, "unit": unit},
                 new_formula=True
             )
@@ -488,12 +551,12 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                 print(new_formula)
             FormulaService.get(ic_par.formula.id).equation = new_formula
             FormulaService.commit()
-    if field_name == "runoff_matrix_value":
+    elif field_name == "runoff_matrix_value":
         scn = ScenarioService.get(id=p.scenario.id)
         sender_parcel_name = parcels_data["sender"].replace("ro_", "")
         receivers = parcels_data["receiver"].split(",")
         values = parcels_data["ro_value"].split(",")
-        sp = scn.parcels.where(Parcel.name == sender_parcel_name).first()
+        sp = [sp for sp in scn.parcels if sp.name == sender_parcel_name][0]
         sender_comp = sp.get_compartment("Soil_Surface")
         sender_par = [sender_comp.parameters.get("FractionOfTotalRunoff")]
         if len(sender_par) > 0:
@@ -512,7 +575,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                     if isinstance(receiver_comp, list):
                         receiver_comp = receiver_comp[0]
                 else:
-                    rp = scn.parcels.where(Parcel.name == receiver_name).first()
+                    rp = [rp for rp in scn.parcels if rp.name == receiver_name][0]
                     receiver_comp = rp.get_compartment("Soil_Surface")
                     if not receiver_comp: # try for water parcels
                         receiver_comp = rp.get_compartment("Surface_water")
@@ -551,7 +614,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                 eq = new_formula
             FormulaService.get(sender_par.formula.id).equation = new_formula
             FormulaService.commit()
-    if field_name == "receptor_spacing":
+    elif field_name == "receptor_spacing":
         submitted_spacing_val = parcels_data.get("receptor_spacing")
 
         if (not str(submitted_spacing_val).isnumeric()):
@@ -578,10 +641,19 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             raise Exception("unexpected param_obj type...")
 
         ParameterService.commit()
+    elif field_name == "vertices":
+        print(f"save vertices change FOR {p.id} / {p.name}...")
+        coords_data = json.loads(parcels_data.get("vertices", []))
+
+        if coords_data:
+            # coords_data is lat,long; we store long,lat in TRIM
+            long_lat = [ [x[1], x[0]] for x in coords_data ]
+            p.vertices = long_lat
 
 
     # Update record
     ParcelService.update(p)
+
 
 # TODO - define "Air Only", etc. as constants somewhere?!?!?
 # forgiving translation of user-supplied value
@@ -639,42 +711,42 @@ def initialize_parcel_contents(new_parcel, vol_elem_defaults=None):
 
     for ve_name, ve in vol_elem_defaults.items():
         # Create standard volume elements
-        nve = new_parcel.get_volume_element(ve_name)
-        if not nve:
-            nve = VolumeElementService.get_or_create(name=ve_name,
-                                                     parcel=new_parcel,
-                                                     top=ve["top"],
-                                                     bottom=ve["bottom"])
+        nve = VolumeElementService.get_or_create(
+            name=ve_name,
+            parcel=new_parcel,
+            create_kwargs={
+                'top': ve['top'],
+                'bottom': ve['bottom']
+            }
+        )
+        nve.top = ve['top']
+        nve.bottom = ve['bottom']
         for c_name, c in ve["Compartments"].items():
-            print(f'creating {c_name} for volume element {ve_name}')
+            # print(f'creating {c_name} for volume element {ve_name}')
             # Create standard compartments linking them to default volume elements and media for each compartment
-            # nc = new_parcel.get_compartment(c_name) # This won't work because the compartment names are not unique,
-            # get_compartment gets the first compartment with that name and ignores volume_element type.
-            # we need a list meeting both compartment name and volume_element name conditions.
-            nc = [c for c in new_parcel.compartments if c.name == c_name and c.volume_element.name == nve.name]
-            # if not nc:
-            if len(nc) == 0:
-                this_media = CompartmentService.media.get(name=c["media_name"])
-                nc = CompartmentService.get_or_create(name=c_name,
-                                                      volume_element=nve,
-                                                      media=this_media)
+            # nc = new_parcel.get_compartment(c_name) # This won't work because the compartment names are not unique
+            nc = CompartmentService.get_or_create(
+                name=c_name, volume_element=nve, no_commit=True
+            )
+            nc.volume_element = nve
+            if nc.media is None or nc.media.name != c['media_name']:
+                nc.media = CompartmentService.media.get(name=c["media_name"])
+            # print('- initializing params')
             initialize_compartment_custom_parameters(nc)
     ParameterService.commit()
 
+    update_dynamic_params(new_parcel.scenario, skip_existing=True)
 
-# This is for parameters of new compartments whose default value cannot be used and will need custom parameters defined
+# This is for parameters of new compartments whose default value cannot be used
+# and will need custom parameters defined
 # at the time of creation of new compartment.
 def initialize_compartment_custom_parameters(nc):
     # Add in custom parameters for new compartments using the self.id = <id of new compartment>
     this_parcel = nc.volume_element.parcel
-    if nc.name == "Soil_Surface":
+    if nc.media.isa('Surface_Soil'):
         # Default Total Erosion Rate
         ter_val = calc_default_erosion_rate_sdr(this_parcel)
         add_compartment_custom_parameters(nc, "TotalErosionRate", ter_val, "kg/m^2/day")
-        # add Total Runoff Rate
-        # using Groundwater seepage fraction and precipitation to calculate runoff
-        trr_val = (nc.PrecipitationRunoffFraction) * (nc.volume_element.parcel.scenario.Rain).magnitude
-        add_compartment_custom_parameters(nc, "TotalRunoffRate", trr_val, "m^3/m^2/day")
 
     if nc.media.isa("Flora"):
         # add AllowExchange_Dynamic, AllowExchange_SteadyState_forAir, AllowExchange_SteadyState_forOther
@@ -712,7 +784,11 @@ def initialize_compartment_custom_parameters(nc):
             water_c_val = get_default_value_from_json_form(f"Abiotic_{nc.media.name}", 'VolumeFraction_Liquid')
             add_compartment_custom_parameters(nc, 'VolumeFraction_Liquid', water_c_val, None)
 
-    # elif nc.name == "Surface_water" or nc.name == "Sediment":
+    if nc.media.isa('Dry_Vapor'):
+        receptor_spacing_val = get_default_value_from_json_form('Parcels_Props', 'parcels-receptor_spacing')
+        add_compartment_custom_parameters(nc, 'ReceptorSpacing', int(receptor_spacing_val), None)
+
+    # if nc.media.isa('Surface_Water') or nc.media.isa("Sediment"):
 
 
 def add_compartment_custom_parameters(nc, par_name, par_val, par_unit):
@@ -726,6 +802,7 @@ def add_compartment_custom_parameters(nc, par_name, par_val, par_unit):
         },
         no_commit=True
     )
+
 
 def init_diet_table_custom_parameters(pcl):
     comp_names = AQUATIC_DIET.keys()
@@ -742,24 +819,56 @@ def init_diet_table_custom_parameters(pcl):
 
 
 def calc_default_erosion_rate_sdr(pcl):
-    for c in pcl.compartments:
-        if not c.media.isa("Surface_Soil"):
-            continue
-        unit_soil_loss = c.parameters["unitSoilLoss"].default_value
-        area_in_sq_mile = pcl.area.to('mile^2').magnitude
-        if area_in_sq_mile <= 0.1:
-            intercept_coef = 2.1
-        elif 0.1 < area_in_sq_mile <= 1:
-            intercept_coef = 1.9
-        elif 1 < area_in_sq_mile <= 10:
-            intercept_coef = 1.4
-        elif 10 < area_in_sq_mile <= 100:
-            intercept_coef = 1.2
+    surf_soil_comp = pcl.get_compartment(media='Surface_Soil')
+    if not surf_soil_comp:
+        return None
+    else:
+        surf_soil_comp = surf_soil_comp[0]
+
+    has_farm_food_chain = pcl.get_compartment(media='Farm') or False
+
+    land_use = get_land_use(pcl)
+    if land_use == 'Impervious':
+        cover_management_factor = 0
+    elif land_use in ['Agriculture (General)', 'Tilled Soil']:
+        if has_farm_food_chain:
+            cover_management_factor = 0.5
         else:
-            intercept_coef = 0.6
-        slope_coef = c.parameters["sedimentDeliveryRatioSlopeCoef"].default_value
-        sed_delivery_ratio = intercept_coef * (pcl.area ** (-1 * slope_coef))
-        return (unit_soil_loss * sed_delivery_ratio).magnitude
+            cover_management_factor = 1.0
+    elif land_use == 'Untilled Soil':
+        if has_farm_food_chain:
+            cover_management_factor = 0.1
+        else:
+            cover_management_factor = 1.0
+    else:
+        cover_management_factor = 0.1
+
+    unit_soil_loss = (
+        EROSION_DEFAULTS['R']
+        * EROSION_DEFAULTS['K']
+        * EROSION_DEFAULTS['LS']
+        * cover_management_factor
+        * EROSION_DEFAULTS['P']
+    ).to('(kg / m^2) / day')
+
+    area_in_sq_mile = pcl.area.to('mile^2').magnitude
+    if area_in_sq_mile <= 0.1:
+        intercept_coef = 2.1
+    elif 0.1 < area_in_sq_mile <= 1:
+        intercept_coef = 1.9
+    elif 1 < area_in_sq_mile <= 10:
+        intercept_coef = 1.4
+    elif 10 < area_in_sq_mile <= 100:
+        intercept_coef = 1.2
+    else:
+        intercept_coef = 0.6
+
+    intercept_coef = intercept_coef
+
+    slope_coef = surf_soil_comp.parameters["sedimentDeliveryRatioSlopeCoef"].default_value
+    sed_delivery_ratio = intercept_coef * (pcl.area.magnitude ** (-1 * slope_coef))
+
+    return (unit_soil_loss * sed_delivery_ratio).magnitude
 
 
 def get_land_use(pcl):
@@ -791,7 +900,13 @@ def get_land_use(pcl):
     return land_use
 
 
+PARAMS_WITH_COMPARTMENT_ID_IN_FORMULA = [
+    "MethylationRate", "DemethylationRate", "ReductionRate"
+]
+
+
 def delete_parcel_contents(del_parcel):
+    print('deleting parcel compartments')
     for c in del_parcel.compartments:
         # Delete Links
         comp_id = c.id
@@ -802,31 +917,26 @@ def delete_parcel_contents(del_parcel):
             CompartmentService.links.delete(lnk_r)
         for lnk_s in ls:
             CompartmentService.links.delete(lnk_s)
+
         # Delete Custom Parameters
-
-        # THIS IS A TERRIBLE WAY TO DELETE A CUSTOM PARAMETER!!! self.id may be for a different domain
-        #  and it will be deleted!!!
-        # custom_params = ParameterService.get_all(requirements=f'(self.id == {comp_id})')
-        # for cp in custom_params:
-        #     ParameterService.delete(cp, False)
-
-        # This is much better!
-        custom_params = [cp for _, cp in c.parameters.items() if isinstance(cp, CustomParameter)]
+        # print(f'- delete parameters for {c}')
+        custom_params = ParameterService(c).get_own_custom_parameters()
         for cp in custom_params:
-            ParameterService.delete(cp, False)
+            ParameterService.delete(cp, no_commit=True)
 
-        # Delete Compartments
-        CompartmentService.delete(c, False)
         # Delete compartment id from formulas with custom values for give compartment (from legacy Trim)
-        formulas = ["MethylationRate", "DemethylationRate", "ReductionRate"]
-        for t in formulas:
-            ins = ParameterService.definitions.get(variable_name=t).instances
-            par = [i for i in ins if i.scenario.id == scenario_id]
+        # print(f'-- remove compartment {c} from custom formulas')
+        for var_name in PARAMS_WITH_COMPARTMENT_ID_IN_FORMULA:
+            par = ParameterService.get_custom_parameters_by_name(
+                var_name, scenario_id=scenario_id
+            )
             if not par:
                 continue
             par = par[0]
             eq = par.formula.equation
             del_id = c.id
+            if str(del_id) not in eq:
+                continue
             eq_parts = eq.split('compartment.id in {')
             for i, p in enumerate(eq_parts):
                 if i == 0:
@@ -844,9 +954,31 @@ def delete_parcel_contents(del_parcel):
                 eq_parts[i] = "}".join(sub_parts)
             new_eq = 'compartment.id in {'.join(eq_parts)
             ParameterService.get(par.id).formula.equation = new_eq
-            ParameterService.commit()
+            # ParameterService.commit()
+
+        # Delete Compartments
+        # print(f'- delete compartment {c}')
+        CompartmentService.delete(c)
+
+    # Delete associated HACKY params at the scenario level
+    print('deleting erosion-table parameters')
+    for param in list(del_parcel.scenario.parameters.values()):
+        if not isinstance(param, CustomParameter):
+            continue
+        if not param.requirements == f'(self.id == {del_parcel.id})':
+            continue
+        if not(
+            param.variable_name.startswith('erosion1-')
+            or param.variable_name.startswith('erosion2-')
+            or param.variable_name.startswith('erosion3-')
+        ):
+            continue
+        ParameterService.delete(param, no_commit=True)
+
     # Delete Volume Elements
+    print('deleting parcel volume elements')
     for ve in del_parcel.volume_elements:
+        # print(f'- delete volume element {ve}')
         VolumeElementService.delete(ve, False)
 
 
@@ -855,17 +987,43 @@ def delete_parcel_contents(del_parcel):
 # the relevant flask form template (json) from the frontend.
 def get_default_value_from_json_form(form_name, parameter_name):
     json_forms = {
-        'Abiotic_Air': ScenarioAbioticPropertiesForm.__getattribute__(ScenarioAbioticPropertiesForm, "AirAbioticTable"),
-        'Abiotic_Surface_Soil': ScenarioAbioticPropertiesForm.__getattribute__(ScenarioAbioticPropertiesForm, "SurfaceSoilAbioticTable"),
-        'Abiotic_Tilled_Soil': ScenarioAbioticPropertiesForm.__getattribute__(ScenarioAbioticPropertiesForm, "SurfaceSoilAbioticTable"),
-        'Abiotic_Root_Zone': ScenarioAbioticPropertiesForm.__getattribute__(ScenarioAbioticPropertiesForm, "RootSoilAbioticTable"),
-        'Abiotic_Vadose_Zone': ScenarioAbioticPropertiesForm.__getattribute__(ScenarioAbioticPropertiesForm, "VadoseSoilAbioticTable"),
-        'Abiotic_Groundwater': ScenarioAbioticPropertiesForm.__getattribute__(ScenarioAbioticPropertiesForm, "GWSoilAbioticTable")
+        'Abiotic_Air': ScenarioAbioticPropertiesForm.__getattribute__(
+            ScenarioAbioticPropertiesForm, "AirAbioticTable"
+        ),
+        'Abiotic_Surface_Soil': ScenarioAbioticPropertiesForm.__getattribute__(
+            ScenarioAbioticPropertiesForm, "SurfaceSoilAbioticTable"
+        ),
+        'Abiotic_Tilled_Soil': ScenarioAbioticPropertiesForm.__getattribute__(
+            ScenarioAbioticPropertiesForm, "SurfaceSoilAbioticTable"
+        ),
+        'Abiotic_Root_Zone': ScenarioAbioticPropertiesForm.__getattribute__(
+            ScenarioAbioticPropertiesForm, "RootSoilAbioticTable"
+        ),
+        'Abiotic_Vadose_Zone': ScenarioAbioticPropertiesForm.__getattribute__(
+            ScenarioAbioticPropertiesForm, "VadoseSoilAbioticTable"
+        ),
+        'Abiotic_Groundwater': ScenarioAbioticPropertiesForm.__getattribute__(
+            ScenarioAbioticPropertiesForm, "GWSoilAbioticTable"
+        ),
+        'Parcels_Props': getattr(ScenarioParcelsForm, "mapTable")
     }
     form_obj = json_forms[form_name]
     form_class = form_obj.kwargs['form_class']
     def_val = form_class.__getattribute__(form_class, parameter_name).kwargs["default"]
     return def_val
+
+
+def update_soil_thickness(p, comp_name, layer_name, thickness):
+    soil_ve = p.get_compartment(comp_name).volume_element
+
+    thickness_before = soil_ve.height
+    soil_ve.bottom = soil_ve.top + (-1 * float(thickness))
+    thickness_now = soil_ve.height
+    delta_thickness = thickness_now.magnitude - thickness_before.magnitude
+    for layer in Land_Parcel_VolElem_defaults[layer_name]['layers']:
+        soil_ve = p.get_compartment(layer).volume_element
+        soil_ve.top = (-1 * delta_thickness) + soil_ve.top
+        soil_ve.bottom = (-1 * delta_thickness) + soil_ve.bottom
 
 
 def create_base_land_compartments(parcels_data, p, land_use):
@@ -883,6 +1041,7 @@ def create_base_land_compartments(parcels_data, p, land_use):
     if land_use in ['Tilled Soil', 'Untilled Soil', 'Impervious']:
         # Revert Soil_surface compartment to default media (Surface_Soil [id = 7])
         c_surfsoil.media = CompartmentService.media.get(name="Surface_Soil")  # Surface Soil
+        CompartmentService.update(c_surfsoil)
         # if switching from Impervious, calculate Total erosion rate
         if land_use == 'Impervious':
             custom_param_erosion.value = calc_default_erosion_rate_sdr(p)
@@ -909,70 +1068,89 @@ def create_base_land_compartments(parcels_data, p, land_use):
     # Create the base compartments for the new land use/ land cover
     new_comps = []
     if parcels_data['landUse'] == 'Tilled Soil':
-        c_surfsoil.media_id = [m.id for m in CompartmentService.media.get_all() if m.name == "Tilled_Soil"][0]
+        c_surfsoil.media_id = CompartmentService.media.get(name='Tilled_Soil').id
         init_tillage_default_params('Tilled_Soil')
         update_tillage_formula_media('Tilled_Soil')
         c_surfsoil.soilTillage = 1
-        thickness_before = c_surfsoil.volume_element.height.magnitude
-        c_surfsoil.volume_element.bottom = c_surfsoil.volume_element.top - 0.20
-        thickness_now = abs(c_surfsoil.volume_element.bottom - c_surfsoil.volume_element.top)
-        delta_thickness = thickness_now - thickness_before
-        for soil_comp in ["Soil_Root_Zone", "Soil_Vadose_Zone", "Groundwater", "DryVaporSource", "WetVaporSource",
-                          "DryParticleSource", "WetParticleSource"]:
-            p.get_compartment(soil_comp).volume_element.top = \
-                (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.top
-            p.get_compartment(soil_comp).volume_element.bottom = \
-                (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.bottom
-            print(f"New top/bottom for {soil_comp}:\ntop: {p.get_compartment(soil_comp).volume_element.top}"
-                  f" bottom: {p.get_compartment(soil_comp).volume_element.bottom}")
+
     elif parcels_data['landUse'] == 'Untilled Soil':
-        c_surfsoil.media_id = [m.id for m in CompartmentService.media.get_all() if m.name == "Untilled_Soil"][0]
+        c_surfsoil.media_id = CompartmentService.media.get(name='Untilled_Soil').id
         init_tillage_default_params('Untilled_Soil')
         update_tillage_formula_media('Untilled_Soil')
         c_surfsoil.soilTillage = 0
-        thickness_before = c_surfsoil.volume_element.height.magnitude
-        c_surfsoil.volume_element.bottom = c_surfsoil.volume_element.top - 0.01
-        thickness_now = abs(c_surfsoil.volume_element.bottom - c_surfsoil.volume_element.top)
-        delta_thickness = thickness_now - thickness_before
-        for soil_comp in ["Soil_Root_Zone", "Soil_Vadose_Zone", "Groundwater", "DryVaporSource", "WetVaporSource",
-                          "DryParticleSource", "WetParticleSource"]:
-            p.get_compartment(soil_comp).volume_element.top = \
-                (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.top
-            p.get_compartment(soil_comp).volume_element.bottom = \
-                (-1 * delta_thickness) + p.get_compartment(soil_comp).volume_element.bottom
-            print(f"New top/bottom for {soil_comp}:\ntop: {p.get_compartment(soil_comp).volume_element.top}"
-                  f" bottom: {p.get_compartment(soil_comp).volume_element.bottom}")
+
     elif parcels_data['landUse'] == 'Impervious':
-        c_surfsoil.media_id = [m.id for m in CompartmentService.media.get_all() if m.name == "Impervious"][0]
+        c_surfsoil.media_id = CompartmentService.media.get(name='Impervious').id
         custom_param_erosion.value = 0
+
     elif parcels_data['landUse'] == 'Coniferous Forest':
-        new_comps.append(CompartmentService.create(name="Leaf_Coniferous_Forest", volume_element=ve_surfsoil,
-                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Coniferous_Leaf')][0]))
-        new_comps.append(CompartmentService.create(name="Leaf_Particle_Coniferous_Forest", volume_element=ve_surfsoil,
-                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Coniferous_Leaf_Particle')][0]))
+        new_comps += [
+            CompartmentService.create(
+                name="Leaf_Coniferous_Forest", volume_element=ve_surfsoil, media=CompartmentService.media.get(name="Coniferous_Leaf"),
+            ),
+            CompartmentService.create(
+                name="Leaf_Particle_Coniferous_Forest", volume_element=ve_surfsoil, media=CompartmentService.media.get(name="Coniferous_Leaf_Particle"),
+            )]
+
     elif parcels_data['landUse'] == 'Deciduous Forest':
-        new_comps.append(CompartmentService.create(name="Leaf_Deciduous_Forest", volume_element=ve_surfsoil,
-                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Deciduous_Leaf')][0]))
-        new_comps.append(CompartmentService.create(name="Leaf_Particle_Deciduous_Forest", volume_element=ve_surfsoil,
-                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Deciduous_Leaf_Particle')][0]))
+        new_comps += [
+            CompartmentService.create(
+                name="Leaf_Deciduous_Forest", volume_element=ve_surfsoil, media=CompartmentService.media.get(name="Deciduous_Leaf"),
+            ),
+            CompartmentService.create(
+                name="Leaf_Particle_Deciduous_Forest", volume_element=ve_surfsoil, media=CompartmentService.media.get(name="Deciduous_Leaf_Particle"),
+            )]
+
     elif parcels_data['landUse'] == 'Grasses/Herbs':
-        new_comps.append(CompartmentService.create(name="Leaf_Grasses_Herbs", volume_element=ve_surfsoil,
-                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Grass_Leaf')][0]))
-        new_comps.append(CompartmentService.create(name="Leaf_Particle_Grasses_Herbs", volume_element=ve_surfsoil,
-                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Grass_Leaf_Particle')][0]))
-        new_comps.append(CompartmentService.create(name="Stem_Grasses_Herbs", volume_element=ve_surfsoil,
-                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Grass_Stem')][0]))
-        new_comps.append(CompartmentService.create(name="Root_Grasses_Herbs", volume_element=ve_surfsoil,
-                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Grass_Root')][0]))
+        new_comps += [
+            CompartmentService.create(
+                name="Leaf_Grasses_Herbs", volume_element=ve_surfsoil, media=CompartmentService.media.get(name="Grass_Leaf"),
+            ),
+            CompartmentService.create(
+                name="Leaf_Particle_Grasses_Herbs", volume_element=ve_surfsoil, media=CompartmentService.media.get(name="Grass_Leaf_Particle"),
+            ),
+            CompartmentService.create(
+                name="Stem_Grasses_Herbs", volume_element=ve_surfsoil, media=CompartmentService.media.get(name="Grass_Stem"),
+            ),
+            CompartmentService.create(
+                name="Root_Grasses_Herbs", volume_element=ve_surfsoil, media=CompartmentService.media.get(name="Grass_Root"),
+            )]
+        
     elif parcels_data['landUse'] == 'Agriculture (General)':
-        new_comps.append(CompartmentService.create(name="Leaf_Agriculture", volume_element=ve_surfsoil,
-                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Agriculture_Leaf')][0]))
-        new_comps.append(CompartmentService.create(name="Leaf_Particle_Agriculture", volume_element=ve_surfsoil,
-                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Agriculture_Leaf_Particle')][0]))
-        new_comps.append(CompartmentService.create(name="Stem_Agriculture", volume_element=ve_surfsoil,
-                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Agriculture_Stem')][0]))
-        new_comps.append(CompartmentService.create(name="Root_Agriculture", volume_element=ve_surfsoil,
-                                                   media=[m for m in CompartmentService.media.get_all() if m.isa('Agriculture_Root')][0]))
+        new_comps += [
+            CompartmentService.create(
+                name="Leaf_Agriculture", volume_element=ve_surfsoil, media=CompartmentService.media.get(name="Agriculture_Leaf"),
+            ),
+            CompartmentService.create(
+                name="Leaf_Particle_Agriculture", volume_element=ve_surfsoil, media=CompartmentService.media.get(name="Agriculture_Leaf_Particle"),
+            ),
+            CompartmentService.create(
+                name="Stem_Agriculture", volume_element=ve_surfsoil, media=CompartmentService.media.get(name="Agriculture_Stem"),
+            ),
+            CompartmentService.create(
+                name="Root_Agriculture", volume_element=ve_surfsoil, media=CompartmentService.media.get(name="Agriculture_Root"),
+            )]
+
+    # layers and thickness
+    surfsoil_thickness = (-1 * Land_Parcel_VolElem_defaults['SurfSoil']['bottom'])
+    if parcels_data['landUse'] in ['Tilled Soil', 'Agriculture (General)']:
+        surfsoil_thickness = 0.2
+    rootsoil_thickness = round(0.8 - surfsoil_thickness, 2)
+    update_soil_thickness(p, 'Soil_Surface', 'SurfSoil', surfsoil_thickness)
+    update_soil_thickness(p, 'Soil_Root_Zone', 'RootSoil', rootsoil_thickness)
+
+    # reset cover_management_factor (HACKY)
+    for param in list(p.scenario.parameters.values()):
+        if not isinstance(param, CustomParameter):
+            continue
+        if not(
+            param.variable_name.startswith('erosion3-cover_management_factor')
+        ):
+            continue
+        if not param.requirements == f'(self.id == {p.id})':
+            continue
+        ParameterService.delete(param, no_commit=True)
+
     CompartmentService.update(c_surfsoil)
     for nc in new_comps:
         initialize_compartment_custom_parameters(nc)
@@ -980,9 +1158,9 @@ def create_base_land_compartments(parcels_data, p, land_use):
 
 
 def init_tillage_default_params(till_media_name):
-    media_id = [m.id for m in CompartmentService.media.get_all() if m.name == till_media_name][0]
+    #media_id = [m.id for m in CompartmentService.media.get_all() if m.name == till_media_name][0]
     domain_id = [d.id for d in ParameterService.domains.get_all()
-                 if d.requirements == f'self.media_id == {media_id}'][0]
+                 if d.requirements == f'self.media.isa("{till_media_name}")'][0]
     new_pd_kwargs = SURFACE_SOIL_SPECIFIC_MEDIA_PARAMS
     for i, pd in enumerate(new_pd_kwargs):
         for k, v in pd.items():
@@ -1017,7 +1195,7 @@ def update_tillage_formula_media(till_media_name):
         nf = f.equation
         for ids in fv:
             nf = nf.replace(f'media.id in {{{ids[0]}}}', f'media.id in {{{ids[1]}}}')
-        print(f'old formula: {f.equation}\nnew formula: {nf}\n')
+        # print(f'old formula: {f.equation}\nnew formula: {nf}\n')
         f.equation = nf
     FormulaService.commit()
 
@@ -1027,53 +1205,6 @@ def create_new_parameter_defs_for_domain(comp_name):
     med_par_defs = [pd for pd in ParameterService.definitions.get_all() if pd.domain_id == domain_id]
     # TODO Complete this for affinity
     pass
-
-
-def compute_watershed_areas(runoff_matrix, area_parcels):
-    # function to compute watershed areas by markov chain estimation. Only works if lakes runoff 100% to themselves.
-    # Land parcel do not have watersheds and will tend to zero but lake parcel watersheds will be accurate.
-    # runoff_matrix is a square nxn matrix that must not include sinks and must include lakes in both rows and columns.
-    # Lakes must run off 100% to themselves. n is a large number like 200 or 300 that will enable the markov chain to
-    # reach steady state. area_parcels is a single matrix with areas of all parcels in the same order as the rows/cols
-    # of the runoff_matrix.
-    # Note: the transpose is required because of the arrangement of the matrix such that row are senders and cols are
-    # receivers. When multiplying by area matrix to estimate watershed, the rows must be receivers, so transpose.
-    m = np.matrix(runoff_matrix)  # convert to np matrix
-
-    # raise M to a large number (markov chain estimation of probabilities of endpoint of flow)
-    m_n = np.linalg.matrix_power(m, 500)
-
-    m_n_t = m_n.T  # transpose of M_n so that it can be multiplied as a dot product with
-
-    runoff_areas = m_n_t @ area_parcels  # this is the dot product
-
-    return runoff_areas
-
-
-def get_watershed_area(pcl):
-    # Compute watershed area using Markoff chain approach
-    # 1. get runoff fractions matrix (rom) and parcel areas as vector (pav)
-    ro_array = get_surface_runoff(pcl.scenario)
-    pa_dict = {pp.name: pp.area.magnitude for pp in pcl.scenario.parcels}
-    rom = []
-    pav = []
-    pcl_names = []
-    for p, ro_dict in ro_array.items():
-        pav.append([pa_dict[p]])
-        pcl_names.append(p)
-        m_row = []
-        for pp, ro in ro_dict.items():
-            if pp == 'sink':
-                continue
-            m_row.append(ro)
-        rom.append(m_row)
-    pav = np.array(pav)
-    rom = np.array(rom)
-    # 2. Compute watershed area matrix
-    wsa_matrix = compute_watershed_areas(rom, pav)
-    # 3. get the watershed area specific to this surface water parcel
-    pcl_watershed = wsa_matrix[pcl_names.index(pcl.name)]
-    return pcl_watershed[0, 0]
 
 
 # adapted from Samuel's "grid_points_in_polygon_meters" method

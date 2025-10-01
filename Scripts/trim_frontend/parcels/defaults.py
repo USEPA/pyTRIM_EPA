@@ -1,28 +1,25 @@
-from trim_db.schema import Parcel
+import pandas as pd
+import numpy as np
+from trim_db.schema import ureg, Parcel
 from trim_db.schema.utils.serialize import register_serializer
 from trim_db.schema.parameters.models import ParameterDefinition, CustomParameter
-from trim_db.schema.entities.models import VolumeElement, Compartment, Media
-from trim_db.schema.scenarios.models import Scenario
 from trim_db.services import *
-from trim_frontend.scenarios.defaults import EROSION_TABLE_KWARGS
-import pint
-from sqlalchemy.orm import selectinload, joinedload
 
-comp_local_cache = {}
 
 @register_serializer(Parcel)
 def serialize_parcel(pcl: Parcel):
-    init_comp_cache(pcl)
-
     general_params = get_general_params(pcl)
     water_params = get_water_params(pcl, general_params['parcelType'])
     source_params = get_source_params(pcl)
     soil_abiotic_params = get_soil_abiotic_params(pcl)
-    initial_conc = get_initial_concetrations(pcl)
+    initial_conc = get_initial_concentrations(pcl)
 
-    cdv = get_comp(pcl, {"name":"DryVaporSource"})
-    spacing_param = cdv.parameters.get("ReceptorSpacing")
-    spacing_val = spacing_param.default_value if type(spacing_param) is ParameterDefinition else spacing_param.value
+    try:
+        cdv = pcl.get_compartment("DryVaporSource")
+        spacing_param = cdv.parameters.get("ReceptorSpacing")
+        spacing_val = spacing_param.value
+    except Exception:
+        spacing_val = None
 
     s = {
         'id': pcl.id,
@@ -38,8 +35,6 @@ def serialize_parcel(pcl: Parcel):
         **soil_abiotic_params,
         **initial_conc
     }
-
-    comp_local_cache.clear()
     return s
 
 
@@ -53,41 +48,7 @@ def safe_get_val(comp, k, default=None):
     return v
 
 
-def get_soil_magnitude(comp, attr):
-    par_val = comp.__getattr__(attr)
-    if isinstance(par_val, pint.Quantity):
-        return par_val.magnitude
-    return par_val
-
-
-def init_comp_cache(pcl):
-    # calling .compartments and .get_compartment a lot is slow
-    comp_local_cache["all"] = pcl.compartments
-    for c in comp_local_cache["all"]:
-        kwargs = {"name": c.name}
-        uuid = f"{pcl.id}_{str(kwargs.keys())}_{str(kwargs.values())}"
-        if uuid in comp_local_cache:
-            comp_local_cache[uuid].append(c)
-        else:
-            comp_local_cache.setdefault(uuid, [c])
-
-
-def get_comp(pcl, kwargs):
-    # comp_local_cache.clear()
-    uuid = f"{pcl.id}_{str(kwargs.keys())}_{str(kwargs.values())}"
-    comp = comp_local_cache.get(uuid)
-    if not comp:
-        comp = pcl.get_compartment(**kwargs)
-        comp_local_cache[uuid] = comp
-    
-    if kwargs.get("name") and isinstance(comp, list):
-        comp = comp[0]
-
-    return comp
-
-
 def get_general_params(pcl):
-    pcl = get_eager_parcel(pcl)
     air = False
     water = False
     land = False
@@ -100,40 +61,34 @@ def get_general_params(pcl):
     dust_load = None
     dust_density = None
     fraction_organic_matter_on_particulates = None
+    erosion_source = 1
     total_erosion_rate = None
     is_tilled = False
 
-    erosion_table_params = {}
-    default_erosion = [ParameterService.definitions.get(full_name=kwargs["full_name"]) for kwargs in EROSION_TABLE_KWARGS]
-    for default_param in default_erosion:
-        custom_param = ParameterService.get(
-            scenario_id=pcl.scenario_id,
-            requirements=f"(self.id == {pcl.id})",
-            definition_id=default_param.id,
-        )
-        if custom_param and custom_param.unit:
-            erosion_table_params[default_param.full_name] =  custom_param.unit
+    erosion_table_params = get_erosion_params(pcl)
 
     surface_soil_height = None
-    root_soil_height = get_comp(pcl, {"name":"Soil_Root_Zone"})
-    vadose_soil_height = get_comp(pcl, {"name":"Soil_Vadose_Zone"})
-    groundwater_height = get_comp(pcl, {"name":"Groundwater"})
 
     diet_by_media = {}
     biomass_by_media = {}
     bw_by_media = {}
 
-    land_use = 'Grasses/Herbs'
+    land_use = None
 
     # FIXME verify this is okay
+    root_soil_height = pcl.get_compartment(media="Root_Zone")
     if root_soil_height:
-        root_soil_height = root_soil_height.volume_element.height.m_as('m')
+        root_soil_height = root_soil_height[0].volume_element.height.m_as('m')
+        root_soil_height = round(root_soil_height, 4)
+    vadose_soil_height = pcl.get_compartment(media="Vadose_Zone")
     if vadose_soil_height:
-        vadose_soil_height = vadose_soil_height.volume_element.height.m_as('m')
+        vadose_soil_height = vadose_soil_height[0].volume_element.height.m_as('m')
+        vadose_soil_height = round(vadose_soil_height, 4)
+    groundwater_height = pcl.get_compartment(media="Groundwater")
     if groundwater_height:
-        groundwater_height = groundwater_height.volume_element.height.m_as('m')
+        groundwater_height = groundwater_height[0].volume_element.height.m_as('m')
+        groundwater_height = round(groundwater_height, 4)
 
-    # for comp in comp_local_cache["all"]:
     for comp in pcl.compartments:
         # Check parcel type
         if comp.media.isa('Air', or_child=False):
@@ -230,7 +185,7 @@ def get_general_params(pcl):
         'hasWater': 'Yes' if water else 'No',
         'hasFishFoodWeb': 'Yes' if fish_food_web else 'No',
 
-        'surfaceSoilThickness': surface_soil_height,
+        'surfaceSoilThickness': surface_soil_height,  
         'rootSoilThickness': root_soil_height,
         'vadoseSoilThickness': vadose_soil_height,
         "groundwaterZoneThickness": groundwater_height,
@@ -246,100 +201,177 @@ def get_general_params(pcl):
     return general_params
 
 
-def get_parcel_comp_params(pcl, comps, params):
-    cmps = [comp for comp in pcl.compartments if comp.name in [c for c in comps]]
-    pars = {c.name: {pn: p for pn, p in c.parameters.items()} for c in cmps}
-    return {cn: {pn: pars[cn][pn].value if isinstance(pars[cn][pn], CustomParameter) else pars[cn][pn].default_value
-                 for pn in params} for cn in comps}
+def get_erosion_params(pcl):
+    # HACKY
+    erosion_table_params = {}
+    for param in list(ParameterService.get_all(
+        scenario_id=pcl.scenario_id, requirements=make_self_requirements(pcl)
+    )):
+        if not isinstance(param, CustomParameter):
+            continue
+        if not param.requirements == f'(self.id == {pcl.id})':
+            continue
+        if not(
+            param.variable_name.startswith('erosion1-')
+            or param.variable_name.startswith('erosion2-')
+            or param.variable_name.startswith('erosion3-')
+        ):
+            continue
+        if param.variable_name.endswith('-active'):
+            erosion_table_params[
+                param.variable_name.split('-')[0] + '-active'
+            ] = EROSION_TABLE_PARAM_MAP.get(
+                param.variable_name.split('-', 1)[1].rsplit('-', 1)[0]
+            )
+        else:
+            erosion_table_params[param.variable_name] =  param.value
+    return erosion_table_params
 
 
-def get_soil_abiotic_params(pcl, run_old=True):
-    pcl = get_eager_parcel(pcl)
-    comps = ["Soil_Surface", "Soil_Root_Zone", "Soil_Vadose_Zone", "Groundwater"]
-    if not run_old:
-         params = ["pH", "FractionSand", "OrganicCarbonContent", "rho", "Porosity", "VolumeFraction_Vapor",
-                   "AverageVerticalVelocity", "VolumeFraction_Liquid", "AirSoilBoundaryThickness",
-                   "FractionofAreaAvailableforErosion", "FractionofAreaAvailableforRunoff",
-                   "FractionofAreaAvailableforVerticalDiffusion", "TotalRunoffRate"]
-         new_soil_abiotic_params = get_parcel_comp_params(pcl, comps, params)
-         return {"soil_params": new_soil_abiotic_params}
+def make_self_requirements(obj):
+    return f'(self.id == {obj.id})'
 
-    has_surf_soil = True if get_comp(pcl, {"name":"Soil_Surface"}) else False
-    has_root_soil = True if get_comp(pcl, {"name":"Soil_Root_Zone"}) else False
-    has_vadose_soil = True if get_comp(pcl, {"name":"Soil_Vadose_Zone"}) else False
-    has_groundwater = True if get_comp(pcl, {"name":"Groundwater"}) else False
+
+def get_soil_abiotic_params(pcl):
+    comp_names = ["Soil_Surface", "Soil_Root_Zone", "Soil_Vadose_Zone", "Groundwater"]
+
+    general_params = ['pH', 'FractionSand', 'OrganicCarbonContent', 'rho']
+    gw_params = ['Porosity']
+    soil_params = ['VolumeFraction_Vapor', 'AverageVerticalVelocity', 'VolumeFraction_Liquid']
+    surf_params = [
+        'AirSoilBoundaryThickness', 'FractionofAreaAvailableforErosion',
+        'FractionofAreaAvailableforRunoff', 'FractionofAreaAvailableforVerticalDiffusion',
+        'TotalRunoffRate'
+    ]
+
+    def get_magnitude(comp, param):
+        val = comp.parameters.get(param)
+        if val is not None:
+            return round(val.value, 5)
+
     soil_abiotic_params = {}
 
-    if has_surf_soil and has_root_soil and has_vadose_soil and has_groundwater:
-        # get pH, fractionSand, organicCarbonContent, density
-        for c in comps:
-            this_comp = get_comp(pcl, {"name":c})
-            params = {"pH": "", "FractionSand": "", "OrganicCarbonContent": "", "rho": ""}
-            for k, _ in params.items():
-                params[k] = get_soil_magnitude(this_comp, k)
-            soil_abiotic_params[c] = params
-
-    if has_groundwater:
-        # get porosity
-        param = soil_abiotic_params.get("Groundwater")
-        if param:
-            param["Porosity"] = get_comp(pcl, {"name":"Groundwater"}).Porosity
-        else:
-            param.setdefault("Groundwater", {"Porosity": get_comp(pcl, {"name":"Groundwater"}).Porosity})
-        soil_abiotic_params["Groundwater"] = param
-
-    comps.pop(comps.index("Groundwater"))
-    if has_root_soil and has_vadose_soil and has_surf_soil:
-        # get VolumeFraction_vapor, AverageVerticalVelocity, VolumeFraction_liquid
-        for c in comps:
-            this_comp = get_comp(pcl, {"name":c})
-            params = {"VolumeFraction_Vapor": "", "AverageVerticalVelocity": "", "VolumeFraction_Liquid": "", "rho": ""}
-            if soil_abiotic_params.get(c):
-                for k, _ in params.items():
-                    soil_abiotic_params[c].setdefault(k, get_soil_magnitude(this_comp, k))
-            else:
-                for k, _ in params.items():
-                    params[k] = get_soil_magnitude(this_comp, k)
-                soil_abiotic_params[c] = params
-
-    if has_surf_soil:
-        params = {"AirSoilBoundaryThickness": "", "FractionofAreaAvailableforErosion": "",
-                  "FractionofAreaAvailableforRunoff": "", "FractionofAreaAvailableforVerticalDiffusion": "",
-                  "TotalRunoffRate": ""}
-        comp = "Soil_Surface"
-        this_comp = get_comp(pcl, {"name":comp})
-        if soil_abiotic_params.get(comp):
-            for k, _ in params.items():
-                soil_abiotic_params[comp].setdefault(k, get_soil_magnitude(this_comp, k))
-        else:
-            for k, _ in params.items():
-                params[k] = get_soil_magnitude(this_comp, k)
-            soil_abiotic_params[comp] = params
+    for name in comp_names:
+        comp = pcl.get_compartment(name)
+        if not comp:
+            continue
+        soil_abiotic_params[name] = {
+            k: get_magnitude(comp, k) for k in general_params
+        }
+        if name == 'Groundwater':
+            soil_abiotic_params[name].update([
+                (k, get_magnitude(comp, k)) for k in gw_params
+            ])
+        elif 'Soil_' in name:
+            soil_abiotic_params[name].update([
+                (k, get_magnitude(comp, k)) for k in soil_params
+            ])
+            if name == 'Soil_Surface':
+                soil_abiotic_params[name].update([
+                    (k, get_magnitude(comp, k)) for k in surf_params
+                ])
 
     return {"soil_params": soil_abiotic_params}
 
-def get_eager_parcel(pcl):
-    # Attempting to Eager load parcel
-    epcl = (ParameterService.db.session.query(Parcel)
-           .filter(Parcel.id == pcl.id)
-           .options(selectinload(Parcel.scenario).selectinload(Scenario._chemicals),
-                    selectinload(Parcel.volume_elements).selectinload(VolumeElement.compartments)
-                    .joinedload(Compartment.media)).first())
-    return epcl
+
+def get_watershed_area(pcl):
+    # Compute watershed area using Markoff chain approach
+    # 1. get runoff fractions matrix (rom) and parcel areas as vector (pav)
+    ro_array = ScenarioService(pcl.scenario).get_surface_runoff()
+
+    pcl_types = [
+        "water"
+        if pcl.scenario.get_parcel(name=pn).get_compartment("Surface_water")
+        else "N/A"
+        for pn in ro_array.keys()
+    ]
+
+    pa_dict = {pp.name: pp.area.magnitude for pp in pcl.scenario.parcels}
+    rom = []
+    pav = []
+    pcl_names = []
+    for p, ro_dict in ro_array.items():
+        pav.append([pa_dict[p]])
+        pcl_names.append(p)
+        m_row = []
+        for pp, ro in ro_dict.items():
+            if pp == 'sink':
+                continue
+            m_row.append(ro)
+        rom.append(m_row)
+    pav = np.array(pav)
+    rom = np.array(rom)
+    # 2. Compute watershed area matrix
+    wsa_matrix = compute_watershed_areas(rom, pav, pcl_types)
+    # 3. get the watershed area specific to this surface water parcel
+    return wsa_matrix.loc[pcl_names.index(pcl.name), 0]
+
+
+def compute_watershed_areas(runoff_matrix, area_parcels, parcel_type):
+    # v3 deducts area of lakes from watershed (technically the area of a lake catches rain and 
+    # delivers it to the lake and this how MC computes it. but to be consistent with the builder 
+    # formulas this version substracts lake areas from runoff area of lakes only)
+    # function to compute watershed areas by markov chain estimation. Only works if lakes runoff 100% to themselves. 
+    # Land parcel do not have watersheds and will tend to zero but lake parcel watersheds will be accurate.
+    # runoff_matrix is a square nxn matrix that must not include sinks and must include lakes in both rows and columns. 
+    # Lakes must runoff 100% to themselves.
+    # n is a large number like 200 or 300 that will enable the markov chain to reach steady state. 
+    # area_parcels is a single matrix with areas of all parcels in the same order as the rows/cols of the runoff_matrix
+
+    # New in v3: parcel_type is a list of parcel type with the same indexing as the other matrices. 
+    # Note: the transpose is required because of the arrangment of the matrix such that row are senders 
+    # and cols are receivers. When multiplying by area matrix to estimate watershed, the rows must be receivers, so transpose.
+
+    M = np.matrix(runoff_matrix)# convert to np matrix
+    M = np.nan_to_num(M)
+    M_n = np.linalg.matrix_power(M, 1000) # raise M to a large number (markov chain estimation of probabilities of endpoint of flow)
+    M_n_T = M_n.T # transpose of M_n so that it can be multiplied as a dot product with area parcels
+    
+    try:
+        indexlist=area_parcels.index
+    except:
+        indexlist=[] # if already a matrix then 
+    area_parcels = np.matrix(area_parcels)# convert to np matrix
+
+    runoff_areas = M_n_T @ area_parcels
+    try:
+        runoff_areas=pd.DataFrame(runoff_areas,index=indexlist)
+    except:
+        runoff_areas=pd.DataFrame(runoff_areas)
+
+    # new line to subtract parcel area from runoff area is parcel type is water
+    runoff_areas.loc[pd.Series(parcel_type).str.contains('water', case=False), 0] -= np.array(area_parcels[pd.Series(parcel_type).str.contains('water', case=False)]).flatten()
+    return (runoff_areas)
+
+
+def calculate_avg_precipitation_runoff_fraction(all_soil_comps, fraction_name):
+    # Example
+    # get the fraction of precipitation that contributes to overland runoff 
+    # summation (area of parcel * runoff_fraction of parcel) / (summation (area of parcels))
+    numerator = 0
+    denominator = 0
+    for soil_comp in all_soil_comps:
+        pcl_area = soil_comp.volume_element.parcel.area.magnitude
+        pcl_runoff_fraction = getattr(soil_comp, fraction_name)
+        numerator += (pcl_area * pcl_runoff_fraction)
+        denominator += pcl_area
+    try:
+        return numerator / denominator
+    except ZeroDivisionError:
+        return 0
+
+
+def get_correct_param(par_name, par_obj):
+    if par_name in par_obj:
+        return par_obj[par_name].value
+    return None
+
+
+def is_significantly_different(a, b):
+    return abs(a - b) > 0.000_000_000_1
+
 
 def get_water_params(pcl, parcel_type):
-    from .utils import get_watershed_area
-    pcl = get_eager_parcel(pcl)
-    precipitation_rate = pcl.scenario.Rain.magnitude
-    if precipitation_rate is None:
-        precipitation_rate = 0  # 0.0041
-
-    comp_surfaceSoil = get_comp(pcl, {"media": "Surface_Soil"})
-
-    # TODO This is not right. We need params for all chemicals. How to show this in frontend???
-    ch = ChemicalService.get(id=32)
-    ch.current_scenario(pcl.scenario)
-
     runoff_watershed_area = 0  # 1e3
     runoff_fraction = None  # 0.001
     precip_seepage_frac_to_gw = None
@@ -347,22 +379,24 @@ def get_water_params(pcl, parcel_type):
     sed_soil_erosion_to_sw = 0
     evapotranspiration_fraction = None
 
+    precipitation_rate = pcl.scenario.Rain.magnitude
+    if precipitation_rate is None:
+        precipitation_rate = 0  # 0.0041
+
     # Even though this function's name is "get_water_parameters" many of the parameters directly below are related to
     # water on land parcels and not water parcels as they are related to watersheds that only exists on land.
 
+    comp_surfaceSoil = pcl.get_compartment(media="Surface_Soil")
     if len(comp_surfaceSoil) > 0:
         comp_surfaceSoil = comp_surfaceSoil[0]
-
         runoff_watershed_area = (
             comp_surfaceSoil.area
             * comp_surfaceSoil.FractionofAreaAvailableforRunoff
         ).magnitude
 
         precip_seepage_frac_to_gw = comp_surfaceSoil.GroundwaterSeepageFraction  # 1 - runoff_fraction
-
         runoff_fraction = comp_surfaceSoil.PrecipitationRunoffFraction  # 1 - precip_seepage_frac_to_gw
-
-        evapotranspiration_fraction = comp_surfaceSoil.EvapotranspirationFraction
+        evapotranspiration_fraction = comp_surfaceSoil.EvapotranspirationFraction 
 
         try:
             seepage_vol_rate_to_gw = (
@@ -371,8 +405,7 @@ def get_water_params(pcl, parcel_type):
                 * runoff_watershed_area
             )
         except Exception as e:
-            print(e)
-
+            print('error calculating seepage_vol_rate_to_gw:', e)
 
     water_params = {
         'precip_rate': precipitation_rate,
@@ -386,27 +419,30 @@ def get_water_params(pcl, parcel_type):
 
     sw_params = None
     if 'Water' in parcel_type:
-        sw = get_comp(pcl, {"media": "Surface_Water"})[0]
-        sw_pars = {parn: par for parn, par in sw.parameters.items()}
-        sed = get_comp(pcl, {"media": "Sediment"})[0]
-        sed_pars = {parn: par for parn, par in sed.parameters.items()}
+        sw = pcl.get_compartment(media="Surface_Water")[0]
+        sw_pars = dict(sw.parameters)
+        sed = pcl.get_compartment(media="Sediment")[0]
+        sed_pars = dict(sed.parameters)
 
         # we need a new watershed area here as the watershed of a water parcel is located on surrounding land parcels.
         sw_total_watershed_area = 0
         total_runoff_vol_rate_to_this_sw = 0
         total_seepage_vol_rate_to_gw = 0
 
-        # get watershed are for water parcel
+        # get watershed area for water parcel
         sw_total_watershed_area = get_watershed_area(pcl)
 
         all_soil_comps = []
         connected_soil_comps = []
-        for this_parcel in pcl.scenario.parcels:
-            soil_comp = get_comp(this_parcel, {"name":"Soil_Surface"})
-            if soil_comp:
-                all_soil_comps.append(soil_comp)
-            if soil_comp and soil_comp.connects_to(sw):
+        for soil_comp in pcl.scenario.get_compartment(media="Surface_Soil"):
+            all_soil_comps.append(soil_comp)
+            if soil_comp.connects_to(sw):
                 connected_soil_comps.append(soil_comp)
+
+        # weighted average of precipitation fractions
+        avg_precip_runoff_frac = calculate_avg_precipitation_runoff_fraction(all_soil_comps, 'PrecipitationRunoffFraction')
+        avg_precip_seepage_frac = calculate_avg_precipitation_runoff_fraction(all_soil_comps, 'GroundwaterSeepageFraction')
+        
         # sum up watershed area of connected Soil parcels.
         for this_soil_comp in connected_soil_comps:
             # this_watershed_area = (
@@ -414,7 +450,6 @@ def get_water_params(pcl, parcel_type):
             #         * this_soil_comp.FractionofAreaAvailableforRunoff
             # ).magnitude
             # sw_total_watershed_area += this_watershed_area
-            this_parcel_area = this_soil_comp.volume_element.parcel.area.magnitude  # get_watershed_area(this_soil_comp.volume_element.parcel)
             # we need to calculate runoff to this surface_water body using the watershed area above
             # comp_link = this_soil_comp.get_links(sw)
             # if len(comp_link) > 0:
@@ -429,42 +464,33 @@ def get_water_params(pcl, parcel_type):
             #         print(f"No runoff transport from {this_soil_comp.standard_name} to {sw.standard_name}. "
             #               f"They are not next to each other. Check Runoff Matrix!")
             #         this_precip_runoff_frac_to_sw = 0
-            # WE DO NOT NEED TO CALCULATE RUNOFF IT IS FROM RUNOFF MATRIX
-            this_precip_runoff_frac_to_sw = this_soil_comp.FractionOfTotalRunoff(sw)
-            total_runoff_vol_rate_to_this_sw += (
-                    precipitation_rate * 365
-                    * this_precip_runoff_frac_to_sw
-                    * this_parcel_area
-            )
-            # total_runoff_vol_rate_to_this_sw = 0 if not total_runoff_vol_rate_to_this_sw else total_runoff_vol_rate_to_this_sw
-            this_seepage_frac_to_gw = this_soil_comp.GroundwaterSeepageFraction
-            total_seepage_vol_rate_to_gw += (
-                    precipitation_rate * 365
-                    * this_seepage_frac_to_gw
-                    * this_parcel_area
-            )
-            this_total_erosion_rate = this_soil_comp.TotalErosionRate.magnitude
+
+            erosion_rate = this_soil_comp.TotalErosionRate.magnitude if this_soil_comp.TotalErosionRate else 0
             sed_soil_erosion_to_sw += (
-                this_total_erosion_rate
-                * this_precip_runoff_frac_to_sw
-                * this_parcel_area
+                erosion_rate
+                * this_soil_comp.FractionOfTotalRunoff(sw) # surface runoff matrix
+                * this_soil_comp.volume_element.parcel.area.magnitude
             )
 
-        def get_correct_param(par_name, par_obj):
-            par = par_obj.get(par_name)
-            return par.value if isinstance(par, CustomParameter) else par.default_value if \
-                isinstance(par, ParameterDefinition) else None
+        total_runoff_vol_rate_to_this_sw = (
+                precipitation_rate * 365
+                * avg_precip_runoff_frac
+                * sw_total_watershed_area
+        )
+        total_seepage_vol_rate_to_gw = (
+                precipitation_rate * 365
+                * avg_precip_seepage_frac
+                * sw_total_watershed_area
+        )
 
-        wc_external_inflow = 0
         precipitation_vol_rate_to_sw = 0  # 4.8E6
+        wc_external_inflow = get_correct_param("ExternalWaterInflow", sw_pars) or 0
+        wc_flush_rate = get_correct_param("Flushes", sw_pars)
 
-        def get_weighted_avg(wgt, val):
-            total_wgt = 0
-            sum_weighted_val = 0
-            for i, w in enumerate(wgt):
-                total_wgt += w
-                sum_weighted_val += w * val[i]
-            return sum_weighted_val/total_wgt
+        fr_param = sw.parameters.get("Flushes")
+        wc_flush_rate_is_autocalc = 'True'
+        if isinstance(fr_param, CustomParameter) and fr_param.formula:
+            wc_flush_rate_is_autocalc = 'True' if fr_param.formula.equation == 'True' else 'False'
 
         try:
             precipitation_vol_rate_to_sw = (
@@ -481,33 +507,18 @@ def get_water_params(pcl, parcel_type):
         # evaporation_vol_rate = 3.3E6
 
         try:
-            # wc_discharge_vol_rate = float('{:.5f}'.format(
-            #     total_runoff_vol_rate_to_this_sw
-            #     + total_seepage_vol_rate_to_gw
-            #     + wc_external_inflow
-            #     + precipitation_vol_rate_to_sw
-            #     - evaporation_vol_rate
-            # ))
-            # print(wc_discharge_vol_rate)
-            # wc_discharge_vol_rate = 0 if wc_discharge_vol_rate else wc_discharge_vol_rate
-
-            pcl_area = [c.volume_element.parcel.area.magnitude for c in all_soil_comps]
-            pcl_runoff_frac = [c.PrecipitationRunoffFraction for c in all_soil_comps]
-            pcl_seepage_frac = [c.GroundwaterSeepageFraction for c in all_soil_comps]
-            wgt_ave_runoff = get_weighted_avg(pcl_area, pcl_runoff_frac)
-            wgt_ave_seepage = get_weighted_avg(pcl_area, pcl_seepage_frac)
             wc_discharge_vol_rate = float('{:.5f}'.format(
-                (pcl.scenario.Rain.magnitude * pcl.area.magnitude * 365)
-                + (sw_total_watershed_area * pcl.scenario.Rain.magnitude * 365 * wgt_ave_runoff)
-                + (sw_total_watershed_area * pcl.scenario.Rain.magnitude * 365 * wgt_ave_seepage)
+                total_runoff_vol_rate_to_this_sw
+                + total_seepage_vol_rate_to_gw
                 + wc_external_inflow
-                - evaporation_vol_rate
+                + precipitation_vol_rate_to_sw
+                 - evaporation_vol_rate
             ))
-            # print(f'runoff term is  {(sw_total_watershed_area * pcl.scenario.Rain.magnitude * 365 * wgt_ave_runoff)}\n'
-            #       f'seepage term is {(sw_total_watershed_area * pcl.scenario.Rain.magnitude * 365 * wgt_ave_seepage)}\n'
-            #       f'inflow term is {wc_external_inflow}\n'
-            #       f'evaporation term is {evaporation_vol_rate}\n'
-            #       f'Discharge vol rate is {wc_discharge_vol_rate}')
+
+            if wc_flush_rate_is_autocalc == 'False':
+                wc_discharge_vol_rate = float('{:.5f}'.format(
+                    wc_flush_rate * abs(sw.MeanDepth.magnitude) * pcl.area.magnitude
+                ))
         except Exception as ex:
             wc_discharge_vol_rate = None
             print(f'Problem Calculating Water Column Discharge Volumetric Rate:\n {ex}')
@@ -517,7 +528,7 @@ def get_water_params(pcl, parcel_type):
         try:
             wc_sed_discharge_rate = (
                 get_correct_param("SuspendedSedimentConcentration", sw_pars)
-                * (wc_discharge_vol_rate/365)
+                * (wc_discharge_vol_rate)
             )
         except Exception as ex:
             wc_sed_discharge_rate = None
@@ -525,20 +536,24 @@ def get_water_params(pcl, parcel_type):
         # wc_sed_discharge_rate = 3.13E5
 
         try:
-            sed_burial_vol_rate = (
+            sed_burial_vol_rate = ( # need to convert all to /day
                 get_correct_param("ExternalSedimentInflow", sw_pars)
                 + sed_soil_erosion_to_sw
-                - wc_sed_discharge_rate
+                - (wc_sed_discharge_rate / 365)
             ) / (get_correct_param("BedDensity", sed_pars) * pcl.area.magnitude)
+
+            sed_burial_vol_rate = max(sed_burial_vol_rate, 0)
+
             burial_par = sed_pars.get("SedimentBurialRateToHaveZeroNetDeposition")
             if isinstance(burial_par, ParameterDefinition):
                 ParameterService.create(definition=burial_par, scenario=pcl.scenario,
                                         requirements=f"(self.id == {sed.id})", value=sed_burial_vol_rate,
                                         unit=burial_par.default_unit)
                 ParameterService.commit()
-            elif isinstance(burial_par, CustomParameter) and burial_par.value != sed_burial_vol_rate:
-                burial_par.value = sed_burial_vol_rate
-                ParameterService.commit()
+            elif isinstance(burial_par, CustomParameter):
+                if is_significantly_different(burial_par.value, sed_burial_vol_rate):
+                    burial_par.value = sed_burial_vol_rate
+                    ParameterService.commit()
         except Exception as ex:
             sed_burial_vol_rate = None
             print(f'Problem Calculating Sediment Burial Rate:\n {ex}')
@@ -565,17 +580,21 @@ def get_water_params(pcl, parcel_type):
                                         requirements=f"(self.id == {sed.id})", value=sed_resuspension_vel,
                                         unit=resus_par.default_unit)
                 ParameterService.commit()
-            elif isinstance(resus_par, CustomParameter) and resus_par.value != sed_resuspension_vel:
-                resus_par.value = sed_resuspension_vel
-                ParameterService.commit()
+            elif isinstance(resus_par, CustomParameter):
+                if is_significantly_different(resus_par.value, sed_resuspension_vel):
+                    resus_par.value = sed_resuspension_vel
+                    ParameterService.commit()
         except Exception as ex:
             sed_resuspension_vel = None
             print(f'Problem Calculating Sediment Resuspension Velocity:\n {ex}')
         # sed_resuspension_vel = get_correct_param("SedimentResuspensionVelocity", sed_pars)  # 6.2480e-5
 
         sw_params = {
+            'autocalc': {
+                'flush_rate': wc_flush_rate_is_autocalc
+            },
             'wc_props':  {
-                'flush_rate': get_correct_param("Flushes", sw_pars),
+                'flush_rate': wc_flush_rate,
                 'suspended_sed_conc': get_correct_param("SuspendedSedimentConcentration", sw_pars),
                 'algae_density': get_correct_param("AlgaeDensityInWaterColumn", sw_pars),
                 'chloride_conc': get_correct_param("ChlorideConcentration", sw_pars),
@@ -587,6 +606,7 @@ def get_water_params(pcl, parcel_type):
                 'water_ph': get_correct_param("pH", sw_pars),
                 'sed_deposition_vel': get_correct_param("SedimentDepositionVelocity", sw_pars),
                 'water_temp': get_correct_param("WaterTemperature", sw_pars),
+                'externalWaterInflow': wc_external_inflow,
                 'sed_inflow': get_correct_param("ExternalSedimentInflow", sw_pars),
                 'discharge_vol_rate': wc_discharge_vol_rate,
                 'sed_discharge_rate': wc_sed_discharge_rate,
@@ -600,7 +620,7 @@ def get_water_params(pcl, parcel_type):
                 'organic_carbon_frac': get_correct_param("OrganicCarbonContent", sed_pars),
                 'bed_pH': get_correct_param("pH", sed_pars),
                 'bed_porosity': get_correct_param("Porosity", sed_pars),
-                'bed_thickness': sed.volume_element.top - sed.volume_element.bottom,
+                'bed_thickness': round(sed.volume_element.top - sed.volume_element.bottom, 4),
                 'sed_burial_vol_rate': sed_burial_vol_rate,
                 'sed_deposition_vol_rate': sed_deposition_vol_rate,
                 'sed_resuspension_vel': sed_resuspension_vel,
@@ -611,8 +631,7 @@ def get_water_params(pcl, parcel_type):
     return water_params
 
 
-def get_initial_concetrations(pcl):
-    pcl = get_eager_parcel(pcl)
+def get_initial_concentrations(pcl):
     chem_objs = {c for c in pcl.scenario.chemicals}
     chems = {c.name: {} for c in pcl.scenario.chemicals}
     initial_conc = {"initialConcentrations": chems}
@@ -630,30 +649,23 @@ def get_initial_concetrations(pcl):
 
 
 def get_source_params(pcl):
-    pcl = get_eager_parcel(pcl)
-    chem_objs = {c for c in pcl.scenario.chemicals}
-    # source_comps = [c for c in comp_local_cache["all"] if c.media.isa("Source")]
-    source_comps = [c for c in pcl.compartments]
-    chems = {c.name: {} for c in pcl.scenario.chemicals}
-    source_params = {"sources": chems}
-    for comp in source_comps:
-        for chem in chem_objs:
-            try:
-                # source_params["sources"][chem.name][comp.volume_element.name] = {comp.name: comp.surfaceDepositionRate(chemical=chem).magnitude}
-                spd = source_params["sources"][chem.name].get(comp.volume_element.name)
-                if spd:
-                    spd.setdefault(comp.name, comp.surfaceDepositionRate(chemical=chem).magnitude)
-                else:
-                    source_params["sources"][chem.name].setdefault(comp.volume_element.name, {comp.name: comp.surfaceDepositionRate(chemical=chem).magnitude})
-            except AttributeError:
-                # source_params["sources"][chem.name][comp.volume_element.name] = {comp.name: comp.surfaceDepositionRate(chemical=chem)}
-                spd = source_params["sources"][chem.name].get(comp.volume_element.name)
-                if spd:
-                    spd.setdefault(comp.name, comp.surfaceDepositionRate(chemical=chem))
-                else:
-                    source_params["sources"][chem.name].setdefault(comp.volume_element.name, {
-                        comp.name: comp.surfaceDepositionRate(chemical=chem)})
-    return source_params
+    source_params = {}
+    for chem in pcl.scenario.chemicals:
+        chem_name = chem.name
+        if chem_name not in source_params:
+            source_params[chem_name] = {}
+        for ve in pcl.volume_elements:
+            ve_name = ve.name
+            if ve_name not in source_params[chem_name]:
+                source_params[chem_name][ve_name] = {}
+            for comp in ve.compartments:
+                deposition_rate = comp.surfaceDepositionRate(chemical=chem)  # slow ...
+                try:
+                    deposition_rate = deposition_rate.magnitude
+                except Exception:
+                    pass
+                source_params[chem_name][ve_name][comp.name] = deposition_rate
+    return {'sources': source_params}
 
 
 def get_fish_params(comp):
@@ -663,7 +675,7 @@ def get_fish_params(comp):
     }
     biomass_by_media = safe_get_val(comp, 'BiomassPerArea', None)
     bw_by_media = safe_get_val(comp, 'BW', None)
-    
+
     fish_params = {
         'aquatic_diet_fractions': diet_by_media,
         'aquatic_biomass': biomass_by_media,
@@ -746,8 +758,8 @@ AQUATIC_DIET = {
         "FractionDietZooplankton": 0,
         "FractionDietBenthicInvertebrate": 0,
         "FractionDietFishHerbivore": 0,
-        "FractionDietFishBenthicOmnivore": 0.5,
-        "FractionDietFishOmnivore": 0.5,
+        "FractionDietFishBenthicOmnivore": 0,
+        "FractionDietFishOmnivore": 1,
         "FractionDietFishBenthicCarnivore": 0,
         "FractionDietFishCarnivore": 0
     },
@@ -837,7 +849,7 @@ Wet_Dry_Source_VolElem_defaults = {
 Air_Parcel_VolElem_defaults = {
     'Air': {
         'name': 'Air',
-        'top': 800,
+        'top': 226,
         'bottom': 0,
         'Compartments': {
             'Air': {
@@ -852,8 +864,8 @@ Air_Parcel_VolElem_defaults = {
     },
     'UpperAir': {
         'name': 'UpperAir',
-        'top': 1000,
-        'bottom': 800,
+        'top': 10000,
+        'bottom': 226,
         'Compartments': {
             'UpperAir': {
                 'name': 'Air',
@@ -868,6 +880,7 @@ Land_Parcel_VolElem_defaults = {
         'name': 'SurfSoil',
         'top': 0,
         'bottom': -0.01,
+        'layers': ["Soil_Root_Zone", "Soil_Vadose_Zone", "Groundwater", "DryVaporSource", "WetVaporSource", "DryParticleSource", "WetParticleSource"],
         'Compartments': {
             'Soil_Surface': {
                 'name': 'Soil_Surface',
@@ -903,6 +916,7 @@ Land_Parcel_VolElem_defaults = {
         'name': 'RootSoil',
         'top': -0.01,
         'bottom': -0.8,
+        'layers': ["Soil_Vadose_Zone", "Groundwater", "DryVaporSource", "WetVaporSource", "DryParticleSource", "WetParticleSource"],
         'Compartments': {
             'Soil_Root_Zone': {
                 'name': 'Soil_Root_Zone',
@@ -918,6 +932,7 @@ Land_Parcel_VolElem_defaults = {
         'name': 'VadoseSoil',
         'top': -0.8,
         'bottom': -2.2,
+        'layers': ["Groundwater", "DryVaporSource", "WetVaporSource", "DryParticleSource", "WetParticleSource"],
         'Compartments': {
             'Soil_Vadose_Zone': {
                 'name': 'Soil_Vadose_Zone',
@@ -933,6 +948,7 @@ Land_Parcel_VolElem_defaults = {
         'name': 'GW',
         'top': -2.2,
         'bottom': -5.2,
+        'layers': ["DryVaporSource", "WetVaporSource", "DryParticleSource", "WetParticleSource"],
         'Compartments': {
             'Groundwater': {
                 'name': 'Groundwater',
@@ -946,6 +962,7 @@ Land_Parcel_VolElem_defaults = {
     }
 }
 
+# these defaults are set when land use == tilled or untilled
 Farm_Biota_SurfSoil_Compartment_defaults = {
     'Compartments': {
         'Soil_Surface': {
@@ -1146,14 +1163,6 @@ SURFACE_SOIL_SPECIFIC_MEDIA_PARAMS = [
         'default_formula_id': 2485
     },
     {
-        'variable_name': 'unitSoilLoss',
-        'full_name': 'unitSoilLoss',
-        'domain_id': None,
-        'default_value': 0.00036,
-        'default_unit': 'kg/m^2/day',
-        'default_formula_id': None
-    },
-    {
         'variable_name': 'sedimentDeliveryRatioSlopeCoef',
         'full_name': 'sedimentDeliveryRatioSlopeCoef',
         'domain_id': None,
@@ -1162,3 +1171,25 @@ SURFACE_SOIL_SPECIFIC_MEDIA_PARAMS = [
         'default_formula_id': None
     }
 ]
+
+EROSION_TABLE_PARAM_MAP = {
+    'rainfall_erosivity_index': 'R',
+    'erodibility_index': 'K',
+    'slope_gradient': 'S',
+    'slope_length': 'L',
+    'topographical_length-slope_factor': 'LS',
+    'cover_management_factor': 'C',
+    'supporting_practices_factor': 'P',
+    'unit_soil_loss': 'A',
+    'empirical_intercept_coefficient': 'a',
+    'empirical_slope_coefficient': 'b',
+    'sediment_delivery_ratio': 'SD',
+    'total_effective_erosion_rate': 'Total Effective Erosion Rate'
+}
+
+EROSION_DEFAULTS = {
+    'R': 300 * ureg('((100 * ft * US_ton) / acre) / year'),
+    'K': 0.36 * ureg('(ton / acre) / ((100 * ft * US_ton) / acre)'),
+    'LS': 1.5,
+    'P': 1
+}

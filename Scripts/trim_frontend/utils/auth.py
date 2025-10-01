@@ -1,21 +1,26 @@
+import os
+from datetime import datetime
 from flask_security import SQLAlchemyUserDatastore
 from flask_security.utils import hash_password
 
 
 def define_superusers(app, security):
-    superusers = [
-        'josiah.mccoy@icf.com',
-        'farha.zindah@icf.com'
-    ]
     r = security.datastore.find_or_create_role('superuser')
-    for name in superusers:
-        u = security.datastore.get_user(name)
+    default_superuser = os.getenv('DEFAULT_SUPERUSER')
+    if default_superuser is None:
+        app.logger.warning('No default superuser specified')
+    else:
+        default_superuser_pwd = os.getenv('DEFAULT_SUPERUSER_PWD', '@dm1nUs3r')
+        u = security.datastore.get_user(default_superuser)
+        pwd = hash_password(default_superuser_pwd)
         if not u:
             security.datastore.create_user(
-                email=name,
-                password=hash_password('@dm1nUs3r')
+                email=default_superuser, password=pwd,
+                confirmed_at=datetime.utcnow()
             )
-            u = security.datastore.get_user(name)
+            security.datastore.commit()
+            u = security.datastore.get_user(default_superuser)
+        # u.password = pwd
         security.datastore.add_role_to_user(u, r)
     security.datastore.commit()
 
@@ -46,3 +51,16 @@ def init_auth(app, db, bcrypt, security):
     from ..users.models import AnonUser
     app.login_manager.login_message_category = 'danger'
     app.login_manager.anonymous_user = AnonUser
+
+    from trim_db.services import UserService
+
+    # Add a request loader to enable Api-Key auth
+    @app.login_manager.request_loader
+    def load_request(request):
+        # First check if an API key is present
+        api_key = request.headers.get('api-key')  # AWS doesn't allow underscores!
+        if api_key:
+            u = UserService.from_key(value=api_key)
+            if u is not None:
+                return u
+        return None

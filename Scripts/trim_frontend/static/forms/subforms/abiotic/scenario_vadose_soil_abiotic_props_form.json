@@ -32,7 +32,7 @@
       "data_type": "float",
       "default": "<<<0.2 * e.precip_rate>>>",
       "tooltip": "m/day",
-      "help": "Enter the average downward velocity of water in the soil layer. Valid values are >= 0. The default value is calculated based on the assumption of 0.2 multiplied by the average meters of daily precipitation for the modeled site. For wetland parcels, a value of 0 might be appropriate (professional judgment)."
+      "help": "Enter the average downward velocity of water in the soil layer. Valid values are > 0. The default value is calculated based on the assumption of 0.2 multiplied by the average meters of daily precipitation for the modeled site. For wetland parcels, a value of 0 might be appropriate (professional judgment)."
     },
     {
       "id": "rho",

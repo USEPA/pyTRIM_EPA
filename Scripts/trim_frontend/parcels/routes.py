@@ -1,5 +1,5 @@
-from flask import Blueprint, request, render_template
-from flask_security import login_required
+from flask import Blueprint, request, render_template, abort
+from flask_security import login_required, current_user
 from flask_api import ApiResult,  ApiException
 from trim_db.services import *
 from trim_db.schema import *
@@ -26,7 +26,9 @@ api.use_api_errors(parcels_api)
 def create_parcel(scenario_id):
     s = ScenarioService.get(scenario_id)
     if not s:
-        raise ApiException("Unknown Scenario")
+        return ApiException("Unknown Scenario")
+    if not current_user.can('edit', s):
+        abort(403)
 
     logger = make_logger('parcels_api_create')
     # form = ScenarioParcelsForm()
@@ -47,15 +49,16 @@ def create_parcel(scenario_id):
         p.scenario_id = scenario_id
         p.vertices = json.loads(parcels_data['geom'])
 
-        # Save the scenario
+        # Save the parcel
         ParcelService.commit()
         # Add default compartments, media and parameters
         initialize_parcel_contents(p)
         media = LAND_USE_TYPES
     except Exception as e:
         logger.error(traceback.format_exc())
+        return ApiException(repr(e))
 
-    return ApiResult({'scenario': p.as_serializable(), 'media': media})
+    return ApiResult({'parcel': p.as_serializable(), 'media': media})
 
 
 @parcels_api.route(
@@ -63,6 +66,11 @@ def create_parcel(scenario_id):
 )
 @login_required
 def get_parcels(scenario_id):
+    s = ScenarioService.get(scenario_id)
+    if not s:
+        return ApiException("Unknown Scenario")
+    if not current_user.can('view', s):
+        abort(403)
     logger = make_logger('parcels_api_get')
     try:
         #s = ScenarioService.get(scenario_id)
@@ -82,10 +90,13 @@ def get_parcels(scenario_id):
             for this_p in p:
                 start_time = time.time()
                 parcels.append(this_p.as_serializable())
+                if isinstance(parcels[-1], str):
+                    raise Exception(parcels[-1])
                 logger.info(f"Acquired parcel {this_p.name} in {time.time() - start_time} seconds")
             logger.info(f"Acquired all parcels in {time.time() - total_start} seconds")
     except Exception as e:
         logger.error(traceback.format_exc())
+        return ApiException(repr(e))
 
     return ApiResult({
         'parcels': parcels,
@@ -98,6 +109,11 @@ def get_parcels(scenario_id):
 )
 @login_required
 def update_parcel(id, scenario_id):
+    s = ScenarioService.get(scenario_id)
+    if not s:
+        return ApiException("Unknown Scenario")
+    if not current_user.can('edit', s):
+        abort(403)
     logger = make_logger('parcels_api_update')
 
     try:
@@ -111,17 +127,24 @@ def update_parcel(id, scenario_id):
         except Exception as e:
             print(f"exception while updating parcel {p} with {parcels_data}:\n")
             print(traceback.format_exc())
+            return ApiException(repr(e))
 
         if rv is not None:
             return rv
     except Exception as e:
         logger.error(traceback.format_exc())
+        return ApiException(repr(e))
     return ApiResult({'message': 'success'})
 
 
 @parcels_api.route('/api/scenario/<int:scenario_id>/parcel/<int:id>/delete', methods=['POST'])
 @login_required
 def delete_parcel(id, scenario_id):
+    s = ScenarioService.get(scenario_id)
+    if not s:
+        return ApiException("Unknown Scenario")
+    if not current_user.can('edit', s):
+        abort(403)
     logger = make_logger('parcels_api_delete')
     try:
         p = ParcelService.get(id)
@@ -135,5 +158,6 @@ def delete_parcel(id, scenario_id):
         ParcelService.commit()
     except Exception as e:
         logger.error(traceback.format_exc())
+        return ApiException(repr(e))
 
     return "success"

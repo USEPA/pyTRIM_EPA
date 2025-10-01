@@ -184,7 +184,7 @@
                                 matrix_row_sum += parseFloat($(this_input).val());
                         }
                     )
-                    $(row_sink).val(Math.max(1-matrix_row_sum, 0));
+                    $(row_sink).val(Math.max(1-matrix_row_sum, 0).toPrecision(4));
                     $(row_sink).parent().find('label').addClass('modified');
                 }
 
@@ -264,7 +264,19 @@
                                 $(e).siblings("label").text(old_vals[i])
                                 $(e).siblings("label").removeClass("modified")
                             })
-                            alert(msg)
+                        }
+                        else {
+                            let row = $(elem_list[0]).closest("tr");
+                            let headers = row.closest('table').find('th');
+                            let matrix = TRIM.store.currentScenario.runoff_matrix;
+                            let sender = parcel_info[2].value.replace("ro_", "");
+                            $(row).find('td').each((i, o)=>{
+                                let val = $(o).text();
+                                if (!isNaN(Number(val))) {
+                                    let col = headers.eq(i).text();
+                                    matrix[sender][col] = standardize_val(val);
+                                }
+                            });
                         }
                     })
                 } else {
@@ -303,22 +315,24 @@
             }
 
             let matrixFile = $(form).find("#default_runoff_matrix_file");
+
             let fieldData = [matrixFile.get(0)];
+
             fieldData.push({
                 "type": "input",
                 "name": "scenario_id",
                 "value": TRIM.store.currentScenario.id
             });
 
-            // list of water parcels to skip
-            let waterPcls = [];
+            // list of parcels to skip
+            let skipPcls = [];
             TRIM.store.currentScenario.parcels.forEach((p, i) => {
-                if (p?.parcelType?.includes("Water")) waterPcls.push(p.name)
+                if (p?.parcelType?.includes("Water") || p?.parcelType?.includes("Air Only")) skipPcls.push(p.name)
             });
             fieldData.push({
                 "type": "input",
-                "name": "water_parcels",
-                "value": waterPcls
+                "name": "skip_parcels",
+                "value": skipPcls
             });
             
             LoadingScreen.show('upload_matrix_csv');
@@ -370,7 +384,11 @@
 						clearInterval(keepCheckingId);
 						getflowStatusArea.html("Run complete!&nbsp;&nbsp;");
 						getflowStatusArea.css("background-color", "lime");
-						$("<a/>").attr("href", data.output.presigned_url).html("Download results").appendTo(getflowStatusArea);
+						// disabling download since it is a different format from the upload!
+						// we'll just allow users to update the matrix (and they can then
+						// use "Export Matrix" to download in the right format)
+						// $("<a/>").attr("href", data.output.presigned_urls[1]).html("Download results").appendTo(getflowStatusArea);
+
                         toggleBtnState(false);
 
                         // import getflow generated matrix
@@ -379,7 +397,7 @@
                             let fieldData = [{
                                 "type": "input",
                                 "name": "presigned_url",
-                                "value": data.output.presigned_url
+                                "value": data.output.presigned_urls[1]
                             }]; 
                             fieldData.push({
                                 "type": "input",
@@ -387,15 +405,15 @@
                                 "value": TRIM.store.currentScenario.id
                             });
 
-                            // list of water parcels to skip
-                            let waterPcls = [];
+                            // list of parcels to skip
+                            let skipPcls = [];
                             TRIM.store.currentScenario.parcels.forEach((p, i) => {
-                                if (p?.parcelType?.includes("Water")) waterPcls.push(p.name)
+                                if (p?.parcelType?.includes("Water") || p?.parcelType?.includes("Air Only")) skipPcls.push(p.name)
                             });
                             fieldData.push({
                                 "type": "input",
-                                "name": "water_parcels",
-                                "value": waterPcls
+                                "name": "skip_parcels",
+                                "value": skipPcls
                             });
                             
                             LoadingScreen.show('upload_matrix_csv');
@@ -409,6 +427,7 @@
                                 }
                             });
                         });
+                        $(getflowStatusArea).find('button').click(); // do this automatically... not great
 					} else if (data.status == "FAILED" || data.status == "TIMED_OUT" || data.status == "ABORTED") {
 						alert("An error occurred; run resulted in " + data.status + " status");
 						getflowStatusArea.html("Run in " + data.status + " state. Please contact support.");
@@ -496,6 +515,7 @@
             }]
             if (runoff_matrix) {
                 let parcel_list = TRIM.store.currentScenario.parcels.map(e=>e.name)
+                parcel_list = parcel_list.filter(x=>Object.keys(runoff_matrix).indexOf(x) !== -1)
                 parcel_list.forEach(function (s, i) {
                     runoff_data.push({
                         'sender':s

@@ -24,8 +24,8 @@
       "label": "Density of Dust Particles",
       "data_type": "float",
       "default": 1400,
-      "tooltip": "(kg/cm<sup>3</sup>)",
-      "help": "Enter the density of dust particles in the air compartments. Valid values are >= 0. The default value of 1400 (1.4 g/cm3) is from Page 2 of Bidleman 1998 (Atmospheric processes). See the TRIM User Guide Appendix for full reference information."
+      "tooltip": "(kg/m<sup>3</sup>)",
+      "help": "Enter the density of dust particles in the air compartments. Valid values are >= 0. The default value of 1400 (1.4 g/cm3) is from Page 2 of Bidleman 1988 (Atmospheric processes). See the TRIM User Guide Appendix for full reference information."
     },
     {
       "id": "AirDensity",
@@ -41,14 +41,6 @@
       "data_type": "float",
       "default": 0.2,
       "help": "Enter the fraction organic matter of dust particles in the air compartments. Valid values are 0 to 1. The default value of 0.2 (20%) is from page 1601 of Harner and Bidleman 1998 (Octanol-air partition coefficient for describing particle/gas partitioning of aromatic compounds in urban air). See the TRIM User Guide Appendix for full reference information."
-    },
-    {
-      "id": "AirHeight",
-      "label": "Height of Air Volume Elements",
-      "data_type": "integer",
-      "default": 226,
-      "tooltip": "(m)",
-      "help": "Enter the default height of air volume elements. Valid values are >= 20. The default value of 226 is a health-protective choice from: approximately the 5th percentile of median hourly mixing heights, derived from data at 824 meteorological stations paired with upper-air stations across the United States from January 1–December 31, 2016. You may later override this value using a site-specific single value or a time series of mixing heights."
     }
   ]
 }

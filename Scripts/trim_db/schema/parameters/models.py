@@ -4,8 +4,6 @@ from ..utils.caching import CacheManager
 from ..utils.serialize import register_serializer
 from .equations import *
 from .utils import *
-from sqlalchemy.orm.exc import DetachedInstanceError
-from sqlalchemy.exc import StatementError
 
 __all__ = [
     'ParameterDomain', 'ParameterDefinition', 'CustomParameter',
@@ -234,7 +232,7 @@ class FormulaArgument(Model):
         sa.Integer(), sa.ForeignKey('formula.id'), nullable=False
     )
     formula = sa.orm.relationship(
-        'Formula', backref=sa.orm.backref('_arguments', lazy='selectin')
+        'Formula', backref=sa.orm.backref('_arguments')
     )
 
     name = sa.Column(sa.String(60), nullable=False)
@@ -281,7 +279,7 @@ class ParameterDefinition(Model):
     )
     domain = sa.orm.relationship(
         'ParameterDomain',
-        backref=sa.orm.backref('parameter_definitions', lazy='selectin')
+        backref=sa.orm.backref('parameter_definitions')
     )
 
     default_value = sa.Column(sa.Float())
@@ -295,6 +293,14 @@ class ParameterDefinition(Model):
     @property
     def value(self):
         return self.default_value
+
+    @property
+    def unit(self):
+        return self.default_unit
+
+    @property
+    def formula(self):
+        return self.default_formula
 
     @property
     def quantity(self):
@@ -329,15 +335,11 @@ class ParameterDefinition(Model):
 
 @register_serializer(ParameterDefinition)
 def serialize_parameter_definition(pd: ParameterDefinition):
-    try:
-        formula = pd.default_formula.equation if pd.default_formula else None
-    except (DetachedInstanceError, StatementError):
-        formula = None
     s = {
         'name': pd.variable_name,
         'value': pd.default_value,
         'unit': pd.default_unit,
-        'formula': formula
+        'formula': pd.default_formula.equation if pd.default_formula else None
     }
     return s
 
@@ -357,7 +359,7 @@ class CustomParameter(Model):
     # scenario = sa.orm.relationship('Scenario')
 
     scenario = sa.orm.relationship(
-        'Scenario', backref=sa.orm.backref('custom_params', lazy='selectin')
+        'Scenario', backref=sa.orm.backref('custom_params', lazy='dynamic')
     )
 
     @property
@@ -367,6 +369,18 @@ class CustomParameter(Model):
     @property
     def domain_id(self):
         return self.definition.domain_id
+
+    @property
+    def full_name(self):
+        return self.definition.full_name
+
+    @property
+    def variable_name(self):
+        return self.definition.variable_name
+
+    @property
+    def name(self):
+        return self.definition.name
 
     requirements = sa.Column(sa.String())
 
@@ -420,16 +434,10 @@ class CustomParameter(Model):
 
 @register_serializer(CustomParameter)
 def serialize_custom_parameter(cp: CustomParameter):
-    try:
-        formula = cp.formula.equation if cp.formula else None
-        name = cp.definition.variable_name if cp.definition else None
-    except (DetachedInstanceError, StatementError):
-        formula = None
-        name = None
     s = {
-        'name': name,
+        'name': cp.variable_name,
         'value': cp.value,
         'unit': cp.unit,
-        'formula': formula
+        'formula': cp.formula.equation if cp.formula else None
     }
     return s

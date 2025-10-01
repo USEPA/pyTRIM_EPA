@@ -28,11 +28,11 @@ if os.getenv('TEST_DB_SERVERLESS'):
         db = DataBase(db_path, model_base=Model)
     else:
         import urllib.parse
-        USERNAME = "root"
-        PASSWORD = urllib.parse.quote_plus(os.getenv('MYSQLPASSWORD'))
-        HOST = "localhost"
-        PORT = "3306"
-        DBNAME = "pytrim"
+        USERNAME = os.getenv('MYSQL_USERNAME', 'root')
+        PASSWORD = urllib.parse.quote_plus(os.getenv('MYSQL_PASSWORD', ''))
+        HOST = os.getenv('MYSQL_HOSTNAME', 'localhost')
+        PORT = os.getenv('MYSQL_PORT', '3306')
+        DBNAME = os.getenv('MYSQL_DB_NAME', 'pytrim')
         print(f'-- Connecting to local MYSQL db')
         db_uri = f'mysql+pymysql://{USERNAME}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}'
         db = DataBase(db_uri, model_base=Model)
@@ -85,10 +85,10 @@ class GenericService(metaclass=ServiceMetaClass):
     auto_commit = True
 
     @classmethod
-    def commit(cls):
-        # cls.clear_cache()
-        for k in CacheManager._CACHERS:
-            CacheManager.clear_cache(k)
+    def commit(cls, preserve_cache=False):
+        if not preserve_cache:
+            # cls.clear_cache()
+            CacheManager.clear()
         try:
             cls.db.session.commit()
         except Exception as e:
@@ -157,10 +157,13 @@ class GenericService(metaclass=ServiceMetaClass):
         query_options = kwargs.pop('query_options', None)
         if model_id is not None:
             if not isinstance(model_id, int):
-                raise TypeError(
-                    '"model_id" must be of type int,'
-                    f' not {model_id.__class__.__name__}'
-                )
+                try:
+                    model_id = int(model_id)
+                except Exception:
+                    raise TypeError(
+                        '"model_id" must be of type int,'
+                        f' not {model_id.__class__.__name__}'
+                    )
             if model_id > 0:
                 # if not cls.cached(model_id):
                 with cls.db.session.no_autoflush:
@@ -187,8 +190,11 @@ class GenericService(metaclass=ServiceMetaClass):
     @classmethod
     def get_or_create(cls, model_id=None, no_commit=False, **kwargs):
         check_unique = kwargs.pop('check_unique', False)
+        create_kwargs = kwargs.pop('create_kwargs', None)
         model = cls.get(model_id=model_id, **kwargs)
         if model is None:
+            if create_kwargs:
+                kwargs.update(create_kwargs)
             model = cls.create(
                 no_commit=no_commit, check_unique=check_unique, **kwargs
             )
@@ -218,8 +224,7 @@ class GenericService(metaclass=ServiceMetaClass):
 
     @classmethod
     def delete(cls, model_or_id, no_commit=False):
-        for k in CacheManager._CACHERS:
-            CacheManager.clear_cache(k)
+        CacheManager.clear()
         if isinstance(model_or_id, int):
             model = cls.get(model_or_id)
         elif isinstance(model_or_id, cls.__model__):

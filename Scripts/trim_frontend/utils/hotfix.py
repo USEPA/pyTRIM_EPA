@@ -1,5 +1,6 @@
 import wtforms_sqlalchemy.fields as f
 from wtforms.fields import Field
+from trim_db.schema.utils.caching import CacheManager
 
 
 def patch_wtforms_sqlalchemy():
@@ -30,3 +31,11 @@ def add_help_text_to_forms():
 def patch_flask(app):
     patch_wtforms_sqlalchemy()
     add_help_text_to_forms()
+
+    @app.after_request
+    def clean_up_cache(response):
+        try:
+            CacheManager.clear()
+        except Exception:
+            print('WARNING: UNABLE TO CLEAR CACHE')
+        return response

@@ -2,6 +2,8 @@
 window.TRIM = (function(trim) {
     var api = trim.api || {};
 
+    var internalStore = trim.store || {};
+
     api.getScenario = function(id) {
         var url = api.getUrl('scenario_api.get_scenario').replace('/0', '/' + id);
         return AJAX.call({
@@ -10,15 +12,34 @@ window.TRIM = (function(trim) {
         });
     }
 
-     api.updateScenario = function(scenario) {
-        var url = api.getUrl('scenario_api.update_scenario');
+    api.updateScenario = function(scenario) {
         var data = makeFormData(scenario);
+        var id = data.get('id');
+        var url = api.getUrl('scenario_api.update_scenario').replace('/0', '/' + id);
         return AJAX.call({
             method: 'POST',
             url: url,
             data: data
         });
     };
+
+    api.getScenarioPermissions = function(scenarioId) {
+        var url = api.getUrl('scenario_api.get_permissions').replace('/0', '/' + scenarioId);
+        return AJAX.call({
+            method: 'GET',
+            url: url
+        });
+    }
+
+    api.saveScenarioPermissions = function(scenarioId, newPermissions) {
+        var url = api.getUrl('scenario_api.save_permissions').replace('/0', '/' + scenarioId);
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: {'permissions': newPermissions},
+            json: true
+        });
+    }
 
     api.copyScenario = function(scenario) {
         var url = api.getUrl('scenario_api.copy_scenario');
@@ -94,13 +115,6 @@ window.TRIM = (function(trim) {
         url = url + '?' + query.join('&')
         return AJAX.call({
             url: url
-        });
-    }
-
-    api.getLastResults = function(scenario) {
-        var url = api.getUrl('scenario_api.get_last_results');
-        return AJAX.call({
-            url: url.replace('/0/', '/' + scenario.id + '/')
         });
     }
 
@@ -311,17 +325,6 @@ window.TRIM = (function(trim) {
         });
     };
 
-    api.runModel = function(scenario_info, callback_fxn) {
-        let url = api.getUrl('scenario_api.run_result_scenario');
-        let data = makeFormData(scenario_info);
-        return AJAX.call({
-            method: 'POST',
-            url: url,
-            data: data,
-			callback: callback_fxn
-        });
-    }
-
 	api.checkStepFunctionStatus = function(execution_arn, callback_fxn) {
         let url = api.getUrl('general_api.stepfxn_check');
         console.log("CHECK STEPFXN STATUS URL IS: [" + url + "]");
@@ -336,7 +339,7 @@ window.TRIM = (function(trim) {
 	}
 
     api.runGetFlow = function(scenario_id, callback_fxn) {
-        console.log("runGetFlow (api.js");
+        console.log("runGetFlow (api.js)");
         let url = api.getUrl('scenario_api.run_getflow').replace("/0/", "/" + scenario_id + "/");
         console.log("RUN GETFLOW URL IS: [" + url + "]");
 
@@ -350,64 +353,34 @@ window.TRIM = (function(trim) {
         });
     }
 
-    api.clearOldResults = function(scenario_info, callback_fxn) {
-        let url = api.getUrl('scenario_api.clear_old_result');
-        let data = makeFormData(scenario_info);
+    api.getLastResults = function(scenarioId) {
+        var url = api.getUrl('scenario_api.get_last_results');
         return AJAX.call({
-            method: 'POST',
-            url: url,
-            data: data,
-            callback: callback_fxn
+            url: url.replace('/0/', '/' + scenarioId + '/')
+        });
+    }
+
+    api.clearOldResults = function(scenarioId) {
+        let url = api.getUrl('scenario_api.clear_old_result');
+        return AJAX.call({
+            method: 'DELETE',
+            url: url.replace("/0/", "/" + scenarioId + "/")
         })
     }
 
-    api.getResults = function(scenario_info) {
-        let url = api.getUrl('scenario_api.get_result_scenario');
-        let data = makeFormData(scenario_info);
+    api.runModel = function(scenarioId) {
+        let url = api.getUrl('scenario_api.run_result_scenario');
         return AJAX.call({
             method: 'POST',
-            url: url,
-            data: data
+            url: url.replace('/0/', '/' + scenarioId + '/')
         });
     }
 
-    api.poll = function(scenario_id) {
-        let url = TRIM.api.getUrl('scenario_api.poll_model_run_scenario').replace('/0', '/' + scenario_id);
+    api.refreshDebugLogs = function(scenarioId) {
+        let url = api.getUrl('scenario_api.get_debug_logs');
         return AJAX.call({
             method: 'GET',
-            url: url
-        });
-    }
-
-    api.resetPoll = function(scenario_info) {
-        let data = makeFormData(scenario_info);
-        let url = api.getUrl('scenario_api.reset_poll_model_run_scenario')
-        return AJAX.call({
-            method: 'POST',
-            url: url,
-            data: data
-        });
-    }
-
-    api.checkExecutionCompletion = function(execution_arn, callback_fxn) {
-        let url = api.getUrl('scenario_api.check_execution_completion');
-        let data = makeFormData([{ "name": "execution_arn", "value": execution_arn }])
-        return AJAX.call({
-            method: 'POST',
-            url: url,
-            data: data,
-			callback: callback_fxn
-        });
-    }
-
-    api.fetchRunResults = function(bucket, uuid, callback_fxn) {
-        let url = api.getUrl('scenario_api.fetch_run_results');
-        let data = makeFormData([{ "name": "bucket", "value": bucket }, {"name": "uuid", "value": uuid}])
-        return AJAX.call({
-            method: 'POST',
-            url: url,
-            data: data,
-			callback: callback_fxn
+            url: url.replace('/0/', '/' + scenarioId + '/')
         });
     }
 
@@ -424,9 +397,93 @@ window.TRIM = (function(trim) {
         });
     }
 
-    trim.api = api;
+    api.getChemicalProperties = function(scenario_id) {
+        let url = TRIM.api.getUrl('scenario_api.get_chemical_properties').replace('/0', '/' + scenario_id);
+        return AJAX.call({
+            method: 'GET',
+            url: url
+        });
+    }
 
-    trim.store = {}
+    api.updateParameter = (entityType, opts) => {
+        if (internalStore.currentScenario == undefined) {
+            throw new Error('Cannot Call `TRIM.api.updateParameter()` Before Loading a Scenario')
+        }
+        if (entityType === 'scenario') {
+            // Update local store
+            for (const field in opts) {
+                if (field === 'id') {
+                    continue;
+                }
+                internalStore.currentScenario[field] = opts[field];
+            }
+            // Update backend
+            const postData = [
+                {
+                    'type': 'data',
+                    'name': 'id',
+                    'value': internalStore.currentScenario.id
+                }
+            ];
+            for (const field in opts) {
+                postData.push({
+                    'type': 'data',
+                    'name': 'field',
+                    'value': field
+                });
+                postData.push({
+                    'type': 'input',
+                    'name': field,
+                    'value': opts[field]
+                });
+            }
+            return api.updateScenario(postData);
+        }
+        else if (entityType === 'parcel') {
+            let parcelId = opts.id;
+            // Update local store
+            for (const pcl of internalStore.currentScenario.parcels) {
+                if (pcl.id != parcelId) {
+                    continue;
+                }
+                for (const field in opts) {
+                    if (field === 'id') {
+                        continue;
+                    }
+                    pcl[field] = opts[field];
+                }
+                break;
+            }
+            // Update backend
+            const postData = [
+                {
+                    'type': 'data',
+                    'name': 'id',
+                    'value': parcelId
+                }
+            ];
+            for (const field in opts) {
+                if (field === 'id') {
+                    continue;
+                }
+                postData.push({
+                    'type': 'data',
+                    'name': 'field',
+                    'value': field
+                });
+                postData.push({
+                    'type': 'input',
+                    'name': field,
+                    'value': opts[field]
+                });
+            }
+            return api.updateParcel(internalStore.currentScenario.id, postData);
+        }
+        throw new Error('Unsupported Entity Type for `TRIM.api.updateParameter()`')
+    }
+
+    trim.api = api;
+    trim.store = internalStore;
 
     return trim;
 })(window.TRIM || {});

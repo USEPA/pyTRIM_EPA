@@ -43,9 +43,93 @@
             </div>
         </div>
     </section>
+
+    {% if current_user.can('manage', scenario) %}
+    <section class="container px-0 mt-1">
+        <div class="accordion" id="user-permissons-block">
+            <div class="border-bottom" id="user-permissions-heading">
+                <h2 class="mb-0">
+                    <button class="btn btn-link btn-block text-left text-decoration-none"
+                        type="button" data-toggle="collapse" data-target="#user-permissions"
+                        aria-expanded="false" aria-controls="user-permissions"
+                    >
+                        <i class="fa fa-chevron-down mr-2"></i>User Access
+                    </button>
+                </h2>
+            </div>
+
+            <div id="user-permissions" class="collapse"
+                aria-labelledby="user-permissions-heading" data-parent="#user-permissons-block"
+            >
+                <div class="my-2 px-2 pb-2">
+                    <table class="table table-striped">
+                        <thead class="thead-light">
+                            <th class="border-top-0">User Email</th>
+                            <th class="border-top-0">Access Level*</th>
+                            <th></th>
+                        </thead>
+                        <tbody>
+                            <tr class="text-center font-italic">
+                                <td colspan="3">
+                                    No Users Found with Access
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td>
+                                    <div class="row form-inline">
+                                        <div class="col-auto">
+                                            <label for="new-user-email" class="mr-1">
+                                                Add User:
+                                            </label>
+                                        </div>
+                                        <div class="col pl-0">
+                                            <select id="new-user-email"
+                                                class="custom-select custom-select-sm w-100"
+                                            >
+                                                {% for email in user_emails %}
+                                                    <option value="{{ email }}">
+                                                        {{ email }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <select id="new-user-level" class="custom-select custom-select-sm">
+                                        {# <option value="view">view</option> #}
+                                        <option value="edit">edit</option>
+                                        <option value="manage">manage</option>
+                                    </select>
+                                </td>
+                                <td class="text-center">
+                                    <a href="#add" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fa fa-plus"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    <div class="font-italic">
+                        *The only difference between editors and managers is that
+                        managers can delete a scenario.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    {% endif %}
 </form>
 <script>
     onDomLoad(function() {
+        // DEBUG
+        let email = '{{ current_user.email.lower() }}';
+        if (email.endsWith('@icf.com')) {
+            AJAX.alertErrs = true;
+        }
+
         var form = document.getElementById('scenario-info-gui');
 
         form.addEventListener('form:visible', function() {
@@ -64,8 +148,129 @@
             // console.log(TRIM.store.currentScenario)
             TRIM.forms.populate(form, TRIM.store.currentScenario);
             console.log('populated scenario form!')
+            loadUserPermissions()
             LoadingScreen.hide('scenario_info_loading');
         }
+
+        function loadUserPermissions() {
+            LoadingScreen.show('loading_permissions');
+            console.log('loading scenario permissions...')
+            TRIM.api.getScenarioPermissions(TRIM.store.currentScenario.id).on('load', function() {
+                try {
+                    var perms = this.responseJSON.permissions;
+                    updatePermissionsDisplay(perms);
+                }
+                catch (err) {
+                    console.log('Unable to load permissions: ' + err);
+                }
+                finally {
+                    LoadingScreen.hide('loading_permissions');
+                }
+            });
+        }
+
+        const permissionsOpts = [
+            // 'view',
+            'edit',
+            'manage',
+            'none'
+        ];
+
+        function updatePermissionsDisplay(permissions) {
+            TRIM.store.currentScenario.permissions = permissions;
+
+            var tbl = $('#user-permissions table tbody').empty();
+
+            if (!permissions || !Object.keys(permissions).length) {
+                var tr = $('<tr class="text-center font-italic" />').appendTo(tbl);
+                $('<td colspan="3" />')
+                    .text('No Users Found with Access')
+                    .appendTo(tr);
+            }
+            else {
+                for (var email in permissions) {
+                    var level = permissions[email];
+                    addUserPermissions(email, level);
+                }
+            }
+        }
+
+        function addUserPermissions(email, level) {
+            var tbl = $('#user-permissions table tbody');
+            var tr = $('<tr />').appendTo(tbl);
+            $('<td class="user-email" />').text(email).appendTo(tr);
+            var td = $('<td colspan="2" />').appendTo(tr);
+            var select = $('<select class="custom-select custom-select-sm" />').appendTo(td);
+            for (var opt of permissionsOpts) {
+                var o = $('<option />').attr('value', opt).text(opt).appendTo(select);
+            }
+            select.val(level);
+            if (email == '{{ current_user.email }}') {
+                select.prop('disabled', true).attr('disabled', 'disabled');
+            }
+
+            var userSelects = $('#new-user-email').find('option').show();
+            var currentPerms = currentPermissionsInTable();
+            userSelects.each(function(i, e) {
+                var me = $(e);
+                if (currentPerms[me.val()] != undefined) {
+                    me.hide();
+                }
+            });
+            $('#new-user-email').val('');
+            $('#new-user-email').val(permissionsOpts[0]);
+        }
+
+        function currentPermissionsInTable() {
+            var permissions = {};
+
+            $('#user-permissions table tbody tr').each(function(i, e) {
+                var tr = $(e);
+                var email = tr.find('.user-email').text();
+                if (email == '{{ current_user.email }}') {
+                    permissions[email] = TRIM.store.currentScenario.permissions[email];
+                    return;
+                }
+                var level = tr.find('select').val();
+                if (level === 'none') {
+                    return;
+                }
+                permissions[email] = level;
+            });
+
+            return permissions;
+        }
+
+        function saveNewPermissions() {
+            var permissions = currentPermissionsInTable();
+            console.log('saving scenario permissions...')
+            TRIM.api.saveScenarioPermissions(TRIM.store.currentScenario.id, permissions)
+                .on('load', function() {
+                    updatePermissionsDisplay(permissions);
+                });
+        }
+
+        $('#user-permissions table tbody').on('change', 'select', function(e) {
+            console.log('change permissions');
+            saveNewPermissions();
+        });
+        $('#user-permissions table tfoot a.btn').on('click', function(e) {
+            e.preventDefault();
+            console.log('add user');
+            var email = $('#new-user-email').val();
+            if (!email || email.indexOf('@') < 0) {
+                return;
+            }
+            if (TRIM.store.currentScenario.permissions[email] !== undefined) {
+                return;
+            }
+            var level = $('#new-user-level').val();
+            if (!level) {
+                return;
+            }
+            addUserPermissions(email, level);
+            saveNewPermissions();
+        });
 
         var ENABLED_FORM = false;
 
@@ -119,6 +324,7 @@
             let resp = TRIM.api.updateScenario(param_info).on('load',function(){
                 let val_resp = this.responseJSON
                 if (this.responseText == 'success') {
+                    TRIM.store.currentScenario[param_info[2].name] = param_info[2].value
                     if ($(form_field).attr("name") == 'name') {
                         $('#root').find('h1.text-center.pb-2').text($(form_field).val())
                     }
@@ -154,5 +360,9 @@
                 );
             }
         }
+
+        $('#user-permissions-heading button').on('click', function() {
+            $(this).find('i.fa').toggleClass('fa-chevron-up fa-chevron-down')
+        });
     });
 </script>

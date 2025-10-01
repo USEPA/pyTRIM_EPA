@@ -5,6 +5,7 @@ import sqlalchemy.sql.sqltypes
 
 from ..utils.base import Model
 from ..utils.mixins import TrackUpdatesMixin
+from ..utils.permissions import require_permissions, PermissionsEnum
 from ..utils.serialize import register_serializer
 
 
@@ -13,6 +14,7 @@ __all__ = [
 ]
 
 
+@require_permissions(allow_keys={'creator_id': PermissionsEnum.manage})
 class Scenario(Model, TrackUpdatesMixin):
     name = sa.Column(sa.String(120), nullable=False)
     description = sa.Column(sa.String(255))
@@ -120,23 +122,28 @@ class Scenario(Model, TrackUpdatesMixin):
         sim_beg = '2001-01-01'
         sim_end = '2010-12-31'
         try:
-            sim_beg = datetime.utcfromtimestamp(int(self.simulationBeginDateTime)).strftime('%Y-%m-%d') or sim_beg
-            sim_end = datetime.utcfromtimestamp(int(self.simulationEndDateTime)).strftime('%Y-%m-%d') or sim_end
+            param_start = self.parameters.get('simulationBeginDateTime')
+            param_end = self.parameters.get("simulationEndDateTime")
+            if param_start.value:
+                sim_beg = datetime.utcfromtimestamp(int(param_start.value)).strftime('%Y-%m-%d')
+            if param_end.value:
+                sim_end = datetime.utcfromtimestamp(int(param_end.value)).strftime('%Y-%m-%d')
         except Exception as ex:
-            # print(f'Problem getting simulation begin and/or end times!\n{ex}')
-            sim_beg = '2001-01-01'
-            sim_end = '2010-12-31'
-
+            pass
         return sim_beg, sim_end
+
+    @property
+    def latest_proc_status(self):
+        return self.proc_status.order_by(ScenarioLoadRunProc.id.desc()).first()
 
     @property
     def has_process_hist(self):
         try:
-            if len([*self.proc_status]) == 0:
-                return False
+            if self.latest_proc_status is not None:
+                return True
         except Exception:
             return False
-        return True
+        return False
 
     def __repr__(self):
         return (
@@ -163,7 +170,9 @@ class ScenarioLoadRunProc(Model):
         sa.Integer(), sa.ForeignKey('scenario.id'), nullable=False
     )
     scenario = sa.orm.relationship(
-        'Scenario', backref=sa.orm.backref('proc_status', lazy='dynamic')
+        'Scenario', backref=sa.orm.backref(
+            'proc_status', lazy='dynamic', cascade='all, delete-orphan'
+        )
     )
     run_datetime = sa.Column(sa.sql.sqltypes.DATETIME)
     result_file_nt = sa.Column(sa.String(255))
@@ -171,6 +180,8 @@ class ScenarioLoadRunProc(Model):
     result_file_tm = sa.Column(sa.String(255))
     result_nt = sa.Column(sa.sql.sqltypes.TEXT)
     result_conc = sa.Column(sa.sql.sqltypes.TEXT)
+
+    execution_arn = sa.Column(sa.String(255))
 
     @property
     def load_percent(self):

@@ -5,12 +5,12 @@
     data-form-src="scenario_seasonal_dynamics_form"
 >
     <section class="container px-0">
-        <div class="sd_subsection">
-            <div class="row">
-                <div class="col-sm">
-                    <h3 class="text-center">Litterfall</h3>
-                </div>
+        <div class="row">
+            <div class="col-sm">
+                <h3 class="text-center">Litterfall</h3>
             </div>
+        </div>
+        <div class="sd_subsection">
             <div class="row">
                 <div class="col-sm">
                     <div data-slot="true" data-target="default_seasonal_litterfall_file"></div>
@@ -199,6 +199,7 @@
         }
 
         function renderSeasonalForm() {
+            $(".sd_subsection").hide();
             $("div.sd_subsection").each((i, subsection) => enableFieldUpdates(subsection))
             let seasonal_dyn_obj = TRIM.store.currentScenario.seasonal_dynamics
             let leaves = ["coniferous", "deciduous", "grass", "agriculture"]
@@ -213,6 +214,9 @@
                 let val_ae = seasonal_dyn_obj[`allow_exchange_${e}`]
                 if (val_lf == -1 || val_ae == -1) {
                     this_chkbx.closest('div[data-slot=true]').css('display', 'none')
+                }
+                else {
+                    $(".sd_subsection").show();
                 }
                 $(this_text_lf).val(val_lf)
                 $(this_text_ae).val(val_ae)
@@ -288,11 +292,14 @@
         function submit_seasonal_dyn_value(elem) {
             let param_info = get_form_data(elem)
             if (elementIsValid($(elem).parent())){
-                console.log(param_info)
                 LoadingScreen.show('loading_results');
                 let resp = TRIM.api.updateScenario(param_info).on('load',function(){
                     let val_resp = this.responseJSON
-                    if (val_resp) {
+                    LoadingScreen.hide('loading_results');
+                    if (val_resp?.success === false) {
+                        return;
+                    }
+                    else if (val_resp) {
                         let val = val_resp[Object.keys(val_resp)[0]]
                         let lb_static_val = $(elem).closest('div.form-group').find("label.wt_avg_val")
                         if (lb_static_val.length > 0) {
@@ -302,7 +309,7 @@
                             $(elem).closest('div.form-group').append(lb_static_val)
                         }
                     }
-                    LoadingScreen.hide('loading_results');
+                    delete TRIM.store.currentScenario.seasonal_dynamics;
                 })
             } else {
                 return
@@ -374,6 +381,9 @@
                         if (ErrorValidation.tsFileHasDateColumn(me.closest("div").siblings("label"),  filedata)) {
                             updateFields(me);
                         }
+                    }
+                    catch (err) {
+                        alert(err);
                     }
                     finally {
                         LoadingScreen.hide(loadingRequest);

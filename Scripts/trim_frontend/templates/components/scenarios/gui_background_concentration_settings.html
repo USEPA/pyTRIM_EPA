@@ -43,7 +43,7 @@
                                             <div class="dropdown-menu">
                                             </div>
                                         </div>
-                                        <button class="comp_reset_all btn btn-danger">Reset All to Zero</button>
+                                        <button class="comp_reset_all btn btn-danger" id="ic-reset-vals">Reset All to Zero</button>
                                         <table class="compMap" style="border-collapse: collapse" cellpadding="6">
                                             <thead>
                                                 <tr>
@@ -189,6 +189,42 @@
 
             $(document).ready(function() {
                 $('button.comp_hide_all').trigger('click');
+                $('a[href*="remove-background"]').hide();
+            });
+
+            $('a[href*="remove-background"], #ic-reset-vals').each((i, e) => {
+                let chem = $(e).parent().siblings().find(".chemInfo").text();
+                e.onclick = function(e) {
+                    LoadingScreen.show('removing_chemical');
+                    if (!chem) {
+                        chem = $(e.target).closest('[data-tab-id]').find(".chemInfo").text();
+                    }
+                    let scenario_info = [{
+                        'type': 'data',
+                        'name': 'id',
+                        'value': TRIM.store.currentScenario.id
+                    },{
+                        'type': 'data',
+                        'name': 'field',
+                        'value': 'chemical'
+                    },{
+                        'type': 'input',
+                        'name': 'chemical',
+                        'value': chem
+                    },{
+                        'type': 'data',
+                        'name': 'field',
+                        'value': 'operation'
+                    },{
+                        'type': 'input',
+                        'name': 'operation',
+                        'value': $(e.target).attr("id") == 'ic-reset-vals' ? 'reset' : 'remove'
+                    }]
+                    TRIM.api.updateScenario(scenario_info).on('load', function() {
+                        LoadingScreen.hide('removing_chemical');
+                        $('#save-btn').click();
+                    });
+                }
             });
 
             function toggle_expand_icon(tr, dir){
@@ -383,8 +419,9 @@
                             filedata.push(scenario_data)
                             filedata.push(chem_data)
                         }
-                    }
-                    finally {
+                    } catch (err) {
+                        alert(err);
+                    } finally {
                         LoadingScreen.hide(loadingRequest);
                         my_upload_button.removeClass("disabled")
                     }
@@ -394,7 +431,7 @@
 
         function initialize_compartment_map() {
             var map_html = "<tbody>"
-            let exclude = ["WetVaporSource", "DryVaporSource", "WetParticleSource", "DryParticleSource", "Degradation_Reaction_Sink", "Degradation_Reaction_Sink_Air", "Flush_Rate_Sink"]
+            let exclude = ["WetVaporSource", "DryVaporSource", "WetParticleSource", "DryParticleSource"] // + Sinks
             TRIM.store.currentScenario.parcels.forEach( function(e,i){
                 map_html = map_html + "<tr data-depth='0' class='level0 colps'><td data-pcl-name='" + e.name + "'>" + e.name + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td><td></td></tr>"
                 for (ve in e.compartment_map) {
@@ -402,6 +439,11 @@
                         map_html = map_html + "<tr data-depth='1' class='level1 colps'><td data-pcl-name='" + e.name + "'></td><td data-ve-name='" + ve + "'>" + ve + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
                     }
                     for (comp in e.compartment_map[ve]) {
+                        if (exclude.map(el => el + '_' + ve).indexOf(e.compartment_map[ve][comp]) > -1
+                        || exclude.indexOf(e.compartment_map[ve][comp]) > -1
+                        || e.compartment_map[ve][comp].includes("_Sink")) {
+                            continue;
+                        }
                         if (exclude.indexOf(e.compartment_map[ve][comp]) == -1){
                             map_html = map_html + "<tr data-depth='2' class='level2 colps'><td data-pcl-name='" + e.name + "'><td data-ve-name='" + ve + "'><td class='comp' data-comp-name='" + e.compartment_map[ve][comp] + "'>" + e.compartment_map[ve][comp]+ "</td><td class='ic'><input class='editableCell' style='width: 50px; display:none'/><label class='editableCell badge badge-light'>0</label></td><td class='ic_unit'></td></tr>"
                         }

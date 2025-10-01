@@ -3,26 +3,24 @@ import os
 import re
 import time
 import pint
+import types
 from datetime import datetime
 from pathlib import Path
 
 import boto3
 import pandas as pd
-from flask import Blueprint, request, render_template, redirect, url_for
+from flask import Blueprint, request, abort, render_template, redirect, url_for
 from flask_security import login_required, current_user
 from flask_api import ApiException, ApiResult
 from datetime import datetime
 from trim_db.schema import ScenarioLoadRunProc, \
     CustomParameter, ParameterDefinition
-from trim_db.services import ScenarioService, ChemicalService, \
-    ParcelService, CompartmentService, VolumeElementService, \
-    ParameterService, FormulaService
-from trim_db.services.parameters import get_or_create_custom_param
+from trim_db.services import *
 from trim_frontend import api, db
-from trim_frontend.scenarios.utils import init_first_time_default_param_values, init_erosion_default_params
 from trim_frontend.parcels.routes import delete_parcel_contents
 from .defaults import *
 from .forms import *
+from .utils import *
 from ..utils.logging import make_logger
 from ..utils.file_io import MiscAssociatedFileVariety, associated_file_helper
 from ..parcels.utils import calculate_receptor_grid_points_for_parcel
@@ -38,7 +36,9 @@ scenario = Blueprint('scenario', __name__)
 @scenario.route('/scenario', methods=['GET'])
 @login_required
 def view_scenarios():
-    scenarios = current_user.active_scenarios
+    scenarios = [
+        s for s in ScenarioService.get_all() if current_user.can('view', s)
+    ]
     scenario_form = ScenarioDefinitionForm()
 
     return render_template(
@@ -51,8 +51,11 @@ def view_scenarios():
 @scenario.route('/scenario/<int:id>', methods=['GET'])
 @login_required
 def view_scenario(id):
+    abort(404)  # DISABLED for now -- edit_scenario is the only relevant page
     s = ScenarioService.get(id=id)
-    return render_template('scenarios/view_single.html', scenario=s)
+    if not current_user.can('view', s):
+        abort(403)
+    return render_template('scenarios/view_single.html', scenario=s, title=s.name)
 
 
 @scenario.route('/scenario', methods=['POST'])
@@ -70,6 +73,7 @@ def create_scenario():
 
     # Set the current_user as the form creator
     s.creator = current_user
+    ScenarioService.grant(s, current_user, 'manage')
 
     init_first_time_default_param_values()
 
@@ -83,8 +87,13 @@ def create_scenario():
 @login_required
 def edit_scenario(id):
     s = ScenarioService.get(id)
-
-    return render_template('scenarios/editor.html', scenario=s)
+    if not current_user.can('edit', s):
+        abort(403)
+    user_emails = [u.email for u in UserService.get_all()]
+    return render_template(
+        'scenarios/editor.html',
+        scenario=s, title=s.name, user_emails=user_emails
+    )
 
 
 scenario_api = Blueprint('scenario_api', __name__)
@@ -95,354 +104,96 @@ api.use_api_errors(scenario_api)
 @login_required
 def get_scenario(id):
     logger = make_logger('scenario_api_get')
-    s = ScenarioService.get(id)
-    start_time = time.time()
-    s = s.as_serializable()
-    init_erosion_default_params()
-    logger.info(f"Acquired scenario in {time.time() - start_time} seconds")
+    try:
+        s = ScenarioService.get(id)
+        if not current_user.can('view', s):
+            abort(403)
+        start_time = time.time()
+        s = s.as_serializable()
+        logger.info(f"Acquired scenario in {time.time() - start_time} seconds")
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        return ApiException(repr(e))
     return ApiResult({'scenario': s})
 
 
-@scenario_api.route(
-    '/api/scenario/<int:scenario_id>/chemical', methods=['GET']
-)
+@scenario_api.route('/api/scenario/<int:scenario_id>/update', methods=['POST'])
 @login_required
-def get_scenario_chemicals(scenario_id):
-    s = ScenarioService.get(scenario_id)
-    if not s:
-        raise ApiException("Unknown Scenario")
-    chems = [c.as_serializable() for c in s.chemicals]
-    return ApiResult({
-        'chemicals': chems
-    })
-
-
-@scenario_api.route('/api/scenario/<int:scenario_id>/meteorology/', methods=['GET'])
-@login_required
-def get_scenario_met_data(scenario_id):
-    logger = make_logger('scenario_met_api_get')
-    s = ScenarioService.get(scenario_id)
-    start_time = time.time()
-    try:
-        met = get_met_data(s)
-    except Exception as e:
-        print(e)
-        met = {}
-    logger.info(f"Acquired meteorology in {time.time() - start_time} seconds")
-    return ApiResult({'meteorology': met})
-
-
-@scenario_api.route('/api/scenario/<int:scenario_id>/seasonal_dynamics/', methods=['GET'])
-@login_required
-def get_scenario_seasonal_dynamics(scenario_id):
-    logger = make_logger('scenario_seasonal_dynamics_api_get')
-    s = ScenarioService.get(scenario_id)
-    start_time = time.time()
-    met = get_seasonal_dynamics(s)
-    logger.info(f"Acquired seasonal dynamics in {time.time() - start_time} seconds")
-    return ApiResult({'seasonal_dynamics': met})
-
-
-@scenario_api.route('/api/scenario/<int:scenario_id>/runoff_matrix/', methods=['GET'])
-@login_required
-def get_scenario_runoff_matrix(scenario_id):
-    logger = make_logger('scenario_runoff_matrix_api_get')
-    s = ScenarioService.get(scenario_id)
-    start_time = time.time()
-    runoff_matrix = get_surface_runoff(s)
-    logger.info(f"Acquired runoff matrix in {time.time() - start_time} seconds")
-    return ApiResult({'runoff_matrix': runoff_matrix})
-
-
-@scenario_api.route(
-    '/api/scenario/<int:scenario_id>/parameter',
-    methods=['GET']
-)
-@login_required
-def get_parameters(scenario_id):
-    s = ScenarioService.get(scenario_id)
-    if not s:
-        raise ApiException("Unknown Scenario")
-
-    params = request.args.getlist('parameter')
-    s_params = dict(s.parameters)
-    r = {}
-    for x in params:
-        param = s_params.get(x)
-        if param is not None:
-            db.session.add(param)
-            param = param.as_serializable()
-        r[x] = param
-
-    ScenarioService.commit() # required because of session update
-    return ApiResult({'parameters': r})
-
-
-@scenario_api.route('/api/scenario/<int:scenario_id>/results/', methods=['GET'])
-@login_required
-def get_last_results(scenario_id):
-    logger = make_logger('scenario_last_results_api_get')
-    s = ScenarioService.get(scenario_id)
-    start_time = time.time()
-    latest_run_info = get_latest_run_info(s)
-    logger.info(f"Acquired scenario results in {time.time() - start_time} seconds")
-    return ApiResult({'latest_run_info': latest_run_info})
-
-
-@scenario_api.route('/api/scenario/update', methods=['POST'])
-@login_required
-def update_scenario():
+def update_scenario(scenario_id):
     logger = make_logger('scenario_api_update')
-    ret_val = ''
-
-    def create_new_custom_param_meteo(scen, comp, par_name):
-        print(f"\n{par_name}\n")
-        default_param = ParameterService.definitions.get_all(variable_name=par_name)
-        
-        if par_name == "AirTemperature":
-            default_param = ParameterService.definitions.get(variable_name=par_name, default_unit="K")
-        elif par_name == "WetDepInterceptionFraction_UserSupplied":
-            default_param = ParameterService.definitions.get_all(variable_name=par_name, 
-                                                                 domain=ParameterService.domains.get(name="Compartment"))
-            default_param = default_param[0]
-        elif len(default_param) > 1: 
-            print(f"\tTried to create new custom parameter but multiple defaults found!\n{default_param}")
-            default_param = default_param[0]
-        else:
-            default_param = default_param[0]
-
-        return get_or_create_custom_param(
-            default_param,
-            {"requirements": f"(self.id == {comp.id})", "scenario_id": scen.id},
-        )
-
-    def create_litterfallrate_custom_param(scen, comps, par_name):
-        # FIXME shouldn't use this eventually, maybe just create for all media?
-        # step 1 grab the right compartments by media name, using a hardcoded map
-        comp_media = [
-            "Leaf_Grasses_Herbs", # Grass
-            "Leaf_Deciduous_Forest" # Deciduous forest
-        ]
-        filtered_comps = [c for c in comps if c.name in comp_media]
-        if not filtered_comps:
-            filtered_comps = comps
-
-        # step 2 grab the correct default param
-        default_param = ParameterService.definitions.get(variable_name=par_name, 
-                                                            domain=ParameterService.domains.get(name="Compartment"))
-        
-        # step 3 create new custom param for each of the identified compartments (per parcel)
-        custom_params = []
-        for comp in filtered_comps:
-            custom_params.append(
-                get_or_create_custom_param(
-                    default_param,
-                    {"requirements": f"(self.id == {comp.id})", "scenario_id": scen.id},
-                    no_commit=True
-                )
-            )
-        ParameterService.commit()
-        return custom_params
-
-    def update_custom_param(scen, comp, par_name, par_val, create_if_dne = False):
-        par_list = [p for p in scen.custom_params if
-                    p.definition.variable_name == par_name and f'self.id == {comp.id}' in p.requirements]
-        
-        if not par_list and create_if_dne:
-            par_list.append(create_new_custom_param_meteo(scen, comp, par_name))
-
-        for c_p in par_list:
-            c_p.value = par_val
-            ParameterService.update(c_p)
-        ParameterService.commit()
-
-    def update_assumed_all_comp_fixed_params(scen, comps, par_name, par_val):
-        # media_name = comp.media.name
-        # c_par_list = [c.parameters.get(par_name) for c in scen.compartments if c.media.isa(media_name)]
-        ParameterService.commit() # for some reason gets open instance errors otherwise
-        c_par_list = set(c.parameters.get(par_name) for c in comps if c.parameters.get(par_name))
-        c_par_list = [par for par in c_par_list if isinstance(par, CustomParameter)]
-
-        if not c_par_list:
-            c_par_list = create_litterfallrate_custom_param(scen, comps, par_name)
-
-        for c_p in c_par_list:
-            try:                
-                c_p.value = par_val
-                ParameterService.update(c_p)
-            except AttributeError as e:
-                print(e)
-        ParameterService.commit()
-
-    def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
-        import pandas as pd
-        from numpy import timedelta64
-
-        par_dat = json.loads(par_dat)
-        df_met = pd.DataFrame.from_dict(par_dat, orient='columns')
-
-        df_met['dlist'] = df_met['Date'].str.split('/')  # split date column into list
-        df_met = df_met[df_met.dlist.str.len() == 3]  # drop rows that have less than three elements
-        df_met[['Month', 'Day', 'Year']] = df_met.Date.str.split("/", expand=True)
-        df_met['Month'] = pd.to_numeric(df_met['Month'], errors='coerce')
-        df_met['Day'] = pd.to_numeric(df_met['Day'], errors='coerce')
-        df_met['Year'] = pd.to_numeric(df_met['Year'], errors='coerce')
-        hour_col_name = 'xHour' if param_type == "MET" else 'Hour'
-        df_met['Hour'] = pd.to_numeric(df_met[hour_col_name], errors='coerce')
-        df_met = df_met.loc[
-            (df_met.Month < 13) & (df_met.Day < 32) & (df_met.Year < 2100)]  # drop faulty
-
-        if param_type == "MET":
-            df_met = df_met.loc[(df_met.Hour < 25)]  # drop faulty
-            metcol_dict = {'Rain': (0, 1), 'AirTemperature': (200, 373), 'HorizontalWindSpeed': (0, 100),
-                           'WindDirection': (-360, 360), 'mixingHeight': (0, 1000), 'isDay': (0, 1),
-                           'CumulativeRain': (0, 1.6)}  # k, v represent name and min-max
-            for k, v in metcol_dict.items():
-                if k in df_met.columns:
-                    df_met['metcol'] = pd.to_numeric(df_met[k], errors='coerce')
-                    df_met = df_met[
-                        (df_met['metcol'] <= v[1]) & (df_met['metcol'] >= v[0])]  # keep rows within min max bounds
-
-            df_met['DT'] = list(pd.to_datetime(df_met[['Year', 'Month', 'Day', 'Hour']], errors='coerce'))
-        else:
-            # Ignored hour resolution.
-            df_met['DT'] = list(pd.to_datetime(df_met[['Year', 'Month', 'Day']], errors='coerce'))
-
-        df_met.sort_values(by='DT', inplace=True)
-        df_met['date_delta'] = (df_met['DT'] - df_met['DT'].min()) / timedelta64(1, 'D')
-        df_met['time_delta'] = df_met['date_delta'].diff()
-        # shift up the column 1 so that applicability of met condition is aligned to duration
-        df_met['time_delta'] = df_met['time_delta'].shift(-1)
-
-        # Clean up non sequential dates
-        df_met['DT_Check'] = df_met.DT >= (df_met.DT.shift())
-        df_met = df_met[df_met['DT_Check']]
-
-        # Get time-weighted averages
-        met_dict = {}
-        if param_type == "MET":
-            for k, v in metcol_dict.items():
-                if k in df_met.columns:
-                    df_met['metcol'] = pd.to_numeric(df_met[k], errors='coerce')
-                    df_met['prod'] = df_met['metcol'] * df_met['time_delta']
-                    wt_ave = df_met['prod'].sum() / df_met['time_delta'].sum()
-                    met_dict['wt_av_' + k] = wt_ave
-
-            if 'Rain' in df_met.columns:
-                df_met['Rain'] = pd.to_numeric(df_met['Rain'], errors='coerce')
-                df_met['is_Rain'] = [1 if x > 0 else 0 for x in df_met['Rain']]
-                df_met['RainTime'] = df_met['is_Rain'] * df_met['time_delta']
-                rain_frac_time = df_met['RainTime'].sum() / df_met['time_delta'].sum()
-                met_dict['frac_time_rain'] = rain_frac_time
-        if param_type == "AE":
-            # process AE.
-            df_met['ae'] = pd.to_numeric(df_met['AllowExchange'], errors='coerce')
-            df_met['prod_ae'] = df_met['ae'] * df_met['time_delta']
-            wt_ave = df_met['prod_ae'].sum() / df_met['time_delta'].sum()
-            met_dict['wt_av_allowexchange'] = wt_ave
-        elif param_type == "LF":
-            # process LF
-            df_met['lf'] = pd.to_numeric(df_met['LitterfallRate'], errors='coerce')
-            df_met['prod_lf'] = df_met['lf'] * df_met['time_delta']
-            wt_ave = df_met['prod_lf'].sum() / df_met['time_delta'].sum()
-            met_dict['wt_av_litterfallrate'] = wt_ave
-
-        return met_dict
-
     try:
+        # Get the specified scenario
+        s = ScenarioService.get(int(scenario_id))
+        if not current_user.can('edit', s):
+            abort(403)
         scenario_data = request.form.to_dict()
-        # print(scenario_data)
-        if not scenario_data['id']:
-            raise AssertionError("Scenario ID cannot be blank.")
-        # Get the specified parcel
-        s = ScenarioService.get(int(scenario_data['id']))
+        # print(f"updating with {scenario_data}")
 
-        # Update the specified property
-        field_name = scenario_data["field"]
-        if field_name == "erosionRateCalcSource":  # Data from erosion tab
-            ercs = scenario_data["erosionRateCalcSource"]
-            default_ercs = ParameterService.definitions.get(full_name="erosionRateCalcSource")
-            ercs_cp = ParameterService.get_or_create(definition=default_ercs, scenario_id=s.id)
-            ercs_cp.value = ercs
-            # for cp in s.custom_params:
-            #     if cp.definition.variable_name == "erosionRateCalcSource":
-            #         cp.value = ercs
-            ParameterService.commit()
-        elif field_name == "name":  # Scenario Name
-            s.name = scenario_data["name"]
-            ParameterService.commit()
-        elif field_name == "description":  # Scenario Description
-            s.description = scenario_data["description"]
-            ParameterService.commit()
-        elif field_name.startswith("meteo_"):  # Data from the meteorology tab
-            if "_interception_" in field_name:
-                param_media = param_map["meteo"].get(field_name)[0]
-                param_name = param_map["meteo"].get(field_name)[1]
-                comp_list = [c for c in s.compartments if c.media.isa(param_media)]
-                for c in comp_list:
-                    update_custom_param(s, c, param_name, scenario_data[field_name], create_if_dne=True)
-            else:
-                param_name = param_map["meteo"].get(field_name)
-                param_data = scenario_data[field_name]
-                if "_static_" in field_name:
-                    update_custom_param(s, s, param_name, param_data, create_if_dne=True)
-                elif field_name.endswith("_TS"):
-                    ret_val = meteo_wgt_avg_value_from_timeseries(param_data, "MET")
-                    if isinstance(ret_val, dict) and "wt_av_Rain" in ret_val.keys():
-                        param_value = ret_val["wt_av_Rain"]
-                    elif isinstance(ret_val, dict) and "wt_av_CumulativeRain" in ret_val.keys():
-                        param_value = ret_val["wt_av_CumulativeRain"]
-                    else:
-                        param_value = list(ret_val.values())[0]
-                    update_custom_param(s, s, param_name, param_value, create_if_dne=True)
+        rv = None
+        try:
+            rv = handle_scenario_update(s, scenario_data)
+        except Exception as e:
+            print(f"exception while updating scenario {s} with {scenario_data}:\n")
+            print(traceback.format_exc())
+            return ApiException(repr(e))
 
-        elif field_name.startswith("seasonal_"):  # Data from the seasonal dynamics tab
-            param_media = param_map["seasonal"].get(field_name)[0]
-            param_name = param_map["seasonal"].get(field_name)[1]
-            param_data = scenario_data[field_name]
-            comp_list = [c for c in s.compartments if c.media.isa(param_media)]
-            if "_static_" in field_name:
-                # update_custom_param(s, comp_list[0], param_name, param_data)
-                update_assumed_all_comp_fixed_params(s, comp_list, param_name, param_data)
-            elif field_name.endswith("_TS"):
-                ret_type = "LF" if field_name.find("_litterfall_") > 0 else "AE"
-                ret_type_name = "wt_av_litterfallrate" if field_name.find("_litterfall_") > 0 else \
-                    "wt_av_allowexchange" if field_name.find("_allowexchange_") > 0 else "None"
-                # The condition below assures that we do not utilize the value from the file for Coniferous forest leaf
-                # If not set via custom parameter, it defaults to the desired value of 0.0021.
-                if not (ret_type_name == "wt_av_litterfallrate" and param_media == 'Coniferous_Leaf'):
-                    ret_val = meteo_wgt_avg_value_from_timeseries(param_data, ret_type)
-                    if ret_type != "None":
-                        update_assumed_all_comp_fixed_params(s, comp_list, param_name, ret_val[ret_type_name])
-        elif field_name == "simulation_start_date" or field_name == "simulation_end_date":
-            date_parts = scenario_data[field_name].split("-")
-            date_obj = datetime(int(date_parts[0]), int(date_parts[1]), int(date_parts[2]))
-            ts_date = time.mktime(date_obj.timetuple())
-            par_name = "simulationBeginDateTime" if field_name == "simulation_start_date" else "simulationEndDateTime"
-            par_list = {par_k: par for par_k, par in s.parameters.items() if par_k == par_name}
-            this_param = par_list.get(par_name)
-            if this_param is None:
-                s.parameters.add(par_name, value=ts_date)
-            elif this_param.__tablename__ != "custom_parameter":
-                ParameterService.create(definition_id=this_param.id, scenario_id=s.id,
-                                        requirements=f"(self.id == {s.id})", value=ts_date)
-            else:
-                this_param.value = ts_date
-                ParameterService.update(this_param)
-            ParameterService.commit()
-        elif field_name == "chemical": # emission settings, add/remove chemicals from a scenario
-            new_chem = ChemicalService.get(name=scenario_data["chemical"])
-            if new_chem in s.chemicals:
-                s.chemicals.remove(new_chem)
-            else:
-                s.chemicals.append(new_chem)
-
+        if rv is not None:
+            return ApiResult(rv)
     except Exception as e:
         logger.error(traceback.format_exc())
-    ScenarioService.update(s)
-    if ret_val:
-        return ApiResult(ret_val)
+        return ApiException(repr(e))
     return "success"
+
+
+@scenario_api.route(
+    '/api/scenario/<int:scenario_id>/permissions/', methods=['GET']
+)
+@login_required
+def get_permissions(scenario_id):
+    s = ScenarioService.get(scenario_id)
+    if not s:
+        raise ApiException('Scenario Not Found', 404)
+
+    if not current_user.can('view', s):
+        raise ApiException('Not Authorized', 403)
+
+    permissions = {
+        u.email: p.name
+        for u, p in ScenarioService(s).user_permissions().items()
+        if p is not None
+    }
+
+    return ApiResult({'success': True, 'permissions': permissions})
+
+
+@scenario_api.route(
+    '/api/scenario/<int:scenario_id>/permissions/', methods=['POST']
+)
+@login_required
+@api.csrf_exempt
+def save_permissions(scenario_id):
+    s = ScenarioService.get(scenario_id)
+    if not s:
+        raise ApiException('Scenario Not Found', 404)
+
+    if not current_user.can('manage', s):
+        raise ApiException('Not Authorized', 403)
+
+    value = request.json
+
+    ScenarioService.clear_permissions(s, except_for=[current_user.id])
+
+    for email, permission in value.get('permissions', {}).items():
+        if permission.lower() == 'none':
+            continue
+        u = UserService.get(email=email)
+        if (not u) or (u.id == current_user.id):
+            continue
+        ScenarioService.grant(s, u, permission, no_commit=True)
+
+    ScenarioService.update(s)
+
+    return ApiResult({'success': True, 'scenario_id': s.id})
 
 
 @scenario_api.route('/api/scenario/copy', methods=['POST'])
@@ -458,6 +209,8 @@ def copy_scenario():
     scenario_id = int(scenario_data['scenario_id'])
     user_id = int(scenario_data['user_id'])
     s = ScenarioService.get(scenario_id)
+    if not current_user.can('view', s):
+        abort(403)
 
     try:
         copy_start_time = time.time()
@@ -705,6 +458,8 @@ def delete_scenario():
 
     scenario_id = int(scenario_data['scenario_id'])
     s = ScenarioService.get(scenario_id)
+    if not current_user.can('manage', s):
+        abort(403)
 
     try:
         # Delete compartment custom parameters
@@ -790,287 +545,219 @@ def delete_scenario():
 
     return redirect(request.referrer)
 
-@scenario_api.route('/api/scenario/clearresult/', methods=['POST'])
+
+@scenario_api.route(
+    '/api/scenario/<int:scenario_id>/chemical', methods=['GET']
+)
 @login_required
-def clear_old_result():
-    exec_data = request.form.to_dict()
-    if not exec_data.get('scenario_id'):
-        raise AssertionError("Scenario ID cannot be blank.")
-    scenario_id = int(exec_data['scenario_id'])
+def get_scenario_chemicals(scenario_id):
+    s = ScenarioService.get(scenario_id)
+    if not s:
+        return ApiException("Unknown Scenario")
+    if not current_user.can('view', s):
+        abort(403)
+    chems = [c.as_serializable() for c in s.chemicals]
+    return ApiResult({
+        'chemicals': chems
+    })
+
+
+@scenario_api.route('/api/scenario/<int:scenario_id>/meteorology/', methods=['GET'])
+@login_required
+def get_scenario_met_data(scenario_id):
+    logger = make_logger('scenario_met_api_get')
+    s = ScenarioService.get(scenario_id)
+    if not current_user.can('view', s):
+        abort(403)
+    start_time = time.time()
+    try:
+        met = get_met_data(s)
+    except Exception as e:
+        logger.info(e)
+        met = {}
+    logger.info(f"Acquired meteorology in {time.time() - start_time} seconds")
+    return ApiResult({'meteorology': met})
+
+
+@scenario_api.route('/api/scenario/<int:scenario_id>/seasonal_dynamics/', methods=['GET'])
+@login_required
+def get_scenario_seasonal_dynamics(scenario_id):
+    logger = make_logger('scenario_seasonal_dynamics_api_get')
+    s = ScenarioService.get(scenario_id)
+    if not current_user.can('view', s):
+        abort(403)
+    start_time = time.time()
+    met = get_seasonal_dynamics(s)
+    logger.info(f"Acquired seasonal dynamics in {time.time() - start_time} seconds")
+    return ApiResult({'seasonal_dynamics': met})
+
+
+@scenario_api.route('/api/scenario/<int:scenario_id>/runoff_matrix/', methods=['GET'])
+@login_required
+def get_scenario_runoff_matrix(scenario_id):
+    logger = make_logger('scenario_runoff_matrix_api_get')
+    try:
+        s = ScenarioService.get(scenario_id)
+        if not current_user.can('view', s):
+            abort(403)
+        start_time = time.time()
+        runoff_matrix = ScenarioService(s).get_surface_runoff()
+        logger.info(f"Acquired runoff matrix in {time.time() - start_time} seconds")
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        return ApiException(repr(e))
+    return ApiResult({'runoff_matrix': runoff_matrix})
+
+
+@scenario_api.route(
+    '/api/scenario/<int:scenario_id>/parameter',
+    methods=['GET']
+)
+@login_required
+def get_parameters(scenario_id):
+    s = ScenarioService.get(scenario_id)
+    if not s:
+        return ApiException("Unknown Scenario")
+    if not current_user.can('view', s):
+        abort(403)
+
+    logger = make_logger('scenario_parameter_get')
+    try:
+        params = request.args.getlist('parameter')
+        s_params = dict(s.parameters)
+        r = {}
+        for x in params:
+            param = s_params.get(x)
+            if param is not None:
+                if param not in db.session:
+                    db.session.merge(param)
+                param = param.as_serializable()
+            r[x] = param
+
+        ScenarioService.commit() # required because of session update
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        return ApiException(repr(e))
+    return ApiResult({'parameters': r})
+
+
+@scenario_api.route('/api/scenario/<int:scenario_id>/results/', methods=['GET'])
+@login_required
+def get_last_results(scenario_id):
+    logger = make_logger('scenario_last_results_api_get')
+    try:
+        s = ScenarioService.get(scenario_id)
+        if not current_user.can('view', s):
+            abort(403)
+        start_time = time.time()
+        latest_run_info = get_latest_run_info(
+            s,
+            allow_debug=(current_user.email.lower().endswith('@icf.com'))
+        )
+        logger.info(f"Acquired scenario results in {time.time() - start_time} seconds")
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        return ApiException(repr(e))
+    return ApiResult({'latest_run_info': latest_run_info})
+
+
+@scenario_api.route('/api/scenario/<int:scenario_id>/results/', methods=['DELETE'])
+@login_required
+def clear_old_result(scenario_id):
     scn = ScenarioService.get(scenario_id)
-    print(f"Clearing Last Model Run for {scn.name} {[v for v in scn.proc_status][0].run_datetime}...")
+    if not current_user.can('edit', scn):
+        abort(403)
+
     data_resp = {"success": "success"}
     try:
-        if len(scn.proc_status.all()) > 0:
-            scn.proc_status.delete()
+        if scn.has_process_hist:
+            print(f"Clearing Last Model Run for {scn.name} {scn.proc_status.all()[-1].run_datetime}...")
+            scn.proc_status.remove(scn.latest_proc_status)
+            ScenarioService.commit()
     except Exception as e:
-        print([v for v in scn.proc_status][0])
         print(f'problem deleting {e}')
+        return ApiException(f"Problem deleting {repr(e)}")
+
     print(f"Model Result deleted for {scn.name}")
     ScenarioService.commit()
     return ApiResult(data_resp)
 
-@scenario_api.route('/api/scenario/run/', methods=['POST', 'GET'])
+
+@scenario_api.route('/api/scenario/<int:scenario_id>/run/', methods=['POST'])
 @login_required
-def run_result_scenario():
-    trim_env_profile = os.environ.get("TRIM_ENV_PROFILE", "").lower()
-
-    exec_data = request.form.to_dict()
-    if not exec_data.get('scenario_id'):
-        raise AssertionError("Scenario ID cannot be blank.")
-    scenario_id = int(exec_data['scenario_id'])
-
+def run_result_scenario(scenario_id):
+    clear_old_result(scenario_id)
     try:
-        # in dev/prod, we execute an AWS StepFunction to run the model via Docker/ECS. Locally,
-        # we just run the model directly.
-        if trim_env_profile in [ "dev", "devgetflow", "prod" ]:
-            sfn_client = boto3.client("stepfunctions")
-            state_machine_arn = os.environ.get("TRIM_DOCKERIZED_RUNMODEL_STATEMACHINE_ARN")
-
-            if state_machine_arn is not None:
-                resp = sfn_client.start_execution(
-                    stateMachineArn=state_machine_arn,
-                    input=json.dumps({ "scenarioId": str(scenario_id), "generateFakeResults": "false" })
-                )
-                data_resp = { "executionArn": resp["executionArn"] }
-            else:
-                data_resp = { "error": "Missing required variable to run re-architected model" }
+        s = ScenarioService.get(scenario_id)
+        if not current_user.can('edit', s):
+            abort(403)
+        start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        try:
+            s.latest_proc_status.run_status = 'run tm 0'
+            s.latest_proc_status.run_datetime = start_time
+            ScenarioService.commit()
+        except Exception:
+            new_proc = ScenarioLoadRunProc(
+                scenario=s,
+                load_status='load 100',
+                run_status='run tm 0',
+                run_datetime=start_time
+            )
+            s.proc_status.add(new_proc)
+            ScenarioService.commit()
+        if use_local_model_run():
+            print('Running model locally ...')
+            print(f"Starting Model Run ({datetime.now()}) ...")
+            # TODO: Should this be a thread so the endpoint can return?
+            # No idea why this works at the moment ...
+            run_full_model(s)
+            data_resp = {"success": True}
+            print(f"Model Run Finished ({datetime.now()}) ...")
         else:
-            s = ScenarioService.get(scenario_id)
-            print(f"Starting Model Run ({datetime.now()}...")
-            json_n_avg, json_c_avg, output_file_n, output_file_c, output_file_tm = run_full_model(s)
-            data_resp = {"mass": json_n_avg, "conc": json_c_avg, "outputMass": output_file_n,
-                         "outputConc": output_file_c, "outputTM": output_file_tm}
+            print('Running model on state machine ...')
+            execution_arn = start_state_machine_model_run(s)
+            if execution_arn is not None:
+                try:
+                    s.latest_proc_status.execution_arn = execution_arn
+                    ScenarioService.commit()
+                except Exception as e:
+                    print('state machine start error:', e)
+                data_resp = {"success": True, "executionArn": execution_arn}
+            else:
+                data_resp = {
+                    "success": False,
+                    "error": "Missing required variable to run re-architected model"
+                }
     except Exception as e:
-        print(e)
-        data_resp = {"error": e}
-
-    print(f"Model Run Finished ({datetime.now()}...")
+        print('scenario run error:', e)
+        data_resp = {"success": False, "error": e}
 
     return ApiResult(data_resp)
 
 
-@scenario_api.route('/api/scenario/getresults/', methods=['POST'])
+@scenario_api.route('/api/scenario/<int:scenario_id>/debuglogs/', methods=['GET'])
 @login_required
-def get_result_scenario():
-    logger = make_logger('scenario_get_results_process')
-    exec_data = request.form.to_dict()
-    if not exec_data.get('scenario_id'):
-        raise AssertionError("Scenario ID cannot be blank.")
-    scenario_id = int(exec_data['scenario_id'])
+def get_debug_logs(scenario_id):
+    logger = make_logger('scenario_last_results_api_get')
     s = ScenarioService.get(scenario_id)
-
+    if not current_user.can('view', s):
+        abort(403)
+    if not current_user.email.lower().endswith('@icf.com'):
+        return ApiResult({'debug_messages': ['Not authorized']})
     try:
-        logger.info(f'Getting Model Run Results for scenario {s.name}...')
-        fin_stat = [v for v in s.proc_status][0].run_status
-        run_date = [v for v in s.proc_status][0].run_datetime
-        output_file_n = Path([v for v in s.proc_status][0].result_file_nt).name
-        output_file_c = Path([v for v in s.proc_status][0].result_file_conc).name
-        output_file_t = Path([v for v in s.proc_status][0].result_file_tm).name
-        json_n_avg = [v for v in s.proc_status][0].result_nt
-        json_c_avg = [v for v in s.proc_status][0].result_conc
-
-        result_resp = json.loads(json.dumps({"mass": json.loads(json_n_avg), "conc": json.loads(json_c_avg), "final_status": fin_stat, "run_date": run_date, "outputMass": output_file_n, "outputConc": output_file_c, "outputTM": output_file_t}, indent=4, sort_keys=True, default=str))
-    except Exception as e:
-        logger.info(f"Error when attempting to get results: {e}")
-        result_resp = {"error": e}
-    try:
-        resp = ApiResult(result_resp)
-    except Exception as e:
-        resp = ""
-        logger.error(f'Api result conversion error: {e}')
-    return resp
-
-@scenario_api.route('/api/scenario/poll/<int:id>', methods=['GET'])
-@login_required
-def poll_model_run_scenario(id):
-    s = ScenarioService.get(id)
-    if [v for v in s.proc_status][0].is_run_error:
-        run_status = "err"
-        run_percent = "err"
-    else:
-        run_status, run_percent = [v for v in s.proc_status][0].run_step
-    return ApiResult({'status': run_status, 'percent': run_percent})
-
-
-@scenario_api.route('/api/scenario/poll/', methods=['POST'])
-@login_required
-def reset_poll_model_run_scenario():
-    scenario_data = request.form.to_dict()
-    if not scenario_data.get('scenario_id'):
-        raise AssertionError("Scenario ID cannot be blank.")
-    scenario_id = int(scenario_data['scenario_id'])
-    s = ScenarioService.get(scenario_id)
-    if s.has_process_hist:
-        [v for v in s.proc_status][0].run_status = 'run null null'
-    else:
-        new_proc = ScenarioLoadRunProc(scenario=s, load_status='load 100', run_status='run null null')
-        [s.proc_status][0].add(new_proc)
-    ScenarioService.commit()
-    return "success"
-
-def get_complete_logs_from_group_and_stream(log_group, log_stream):
-    logs_client = boto3.client("logs")
-
-    # retrieve logs from CloudWatch.
-    # note this does NOT do anything smart with pagination -- just returns everything in one shot
-    # nice future enhancement might be to return a subset of this that we've deemed fit for public consumption; that could then
-    # be something we display to all users, not just internal ICF'ers
-
-    # also note - the pagination on this call is truly strange. According to the docs, you only know that pagination on the response
-    # from get_log_events is done if the "nextXToken" in the response is equivalent to the "nextToken" passed in in your request. (the next/prev
-    # tokens that are returned are never null).
-    #
-    # In my tests I was seeing things like:
-    # 1. make first call, get all the logs
-    # 2. make second call with the "nextToken" from call 1 (have to, as programatically I don't know that's the end). This returns empty array - but a non-matching end token
-    # 3. make third call with "nextToken" from call 2 (since they didn't match). Again, empty array, but this time they match and I can stop.
-    #
-    # Adding a sanity check just in case, to break after some number of attempts
-
-    sanity = 0
-    rv = []
-    next_token = None
-    while True:
-        if sanity > 10:
-            break
-
-        params = {
-            "logGroupName": log_group,
-            "logStreamName": log_stream,
-            "startFromHead": True,
-        }
-
-        if next_token is not None:
-            params["nextToken"] = next_token
-
-        print(f"CALL ITERATION {sanity} w/ params {params}...")
-
-        logs_response = logs_client.get_log_events(**params)
-        log_events = logs_response["events"]
-
-        for e in log_events:
-            rv.append({
-                "timestamp": e["timestamp"],
-                "message": e["message"]
-            })
-
-        if next_token is not None and logs_response["nextForwardToken"] == next_token:
-            print(f"safe to break; got same token we passed in...")
-            break
+        if use_local_model_run():
+            debug_messages = ["Debug messages not tracked for local runs"]
         else:
-            print(f"need to keep going...")
-            next_token = logs_response["nextForwardToken"]
-
-        sanity += 1
-
-    return rv
-
-def fetch_output_for_step_function_execution(execution_arn):
-    # build boto3 clients we need
-    sfn_client = boto3.client("stepfunctions")
-    ecs_client = boto3.client("ecs")
-
-    try:
-        # get the details of the execution...
-        exec_hist_response = sfn_client.get_execution_history(executionArn=execution_arn)
-
-        # get the specific event relating to kickoff of the Docker container... 
-        ecs_task_event = next((e for e in exec_hist_response["events"] if e.get("type") == "TaskSubmitted" and e.get("taskSubmittedEventDetails", {}).get("resourceType") == "ecs"), None)
-        # re-parse the details/output, included as a JSON string in the boto3 reply... 
-        output = json.loads(ecs_task_event.get("taskSubmittedEventDetails", {}).get("output", "{}"))
-
-        # get the ECS task id
-        tasks = output.get("Tasks", [])
-
-        task = tasks[0] if len(tasks) > 0 else None
-        task_arn = task.get("TaskArn")
-        task_key = task_arn.split("/")[-1]
-
-        taskdef_arn = task.get("TaskDefinitionArn")
-        def_resp = ecs_client.describe_task_definition(
-            taskDefinition=taskdef_arn,
-            include=[ 'TAGS', ]
-        )
-
-        # construct log group/stream relating to this execution
-        log_group=def_resp["taskDefinition"]["containerDefinitions"][0]["logConfiguration"]["options"]["awslogs-group"]
-        log_stream=f"ecs/{def_resp['taskDefinition']['containerDefinitions'][0]['name']}/{task_key}"
-
-        print(f"let's use {log_group=} / {log_stream=}...")
-
-        return get_complete_logs_from_group_and_stream(log_group, log_stream)
+            start_time = time.time()
+            debug_messages = fetch_output_for_step_function_execution(
+                s.latest_proc_status.execution_arn
+            )
+            logger.info(f"Acquired debug messages in {time.time() - start_time} seconds")
     except Exception as e:
-        return [ f"Error fetching logs: {e}" ]
+        logger.error(traceback.format_exc())
+        return ApiResult({'debug_messages': [str(e)]})
+    return ApiResult({'debug_messages': debug_messages})
 
-
-@scenario_api.route('/api/scenario/check_execution_completion/', methods=['POST'])
-@login_required
-def check_execution_completion():
-    req_data = request.form.to_dict()
-    if not req_data.get('execution_arn'):
-        raise AssertionError("execution ARN cannot be blank.")
-
-    execution_arn = req_data['execution_arn']
-
-    sfn_client = boto3.client("stepfunctions")
-
-    debug_messages = fetch_output_for_step_function_execution(execution_arn) if current_user.email.lower().endswith("@icf.com") else [ "debug output disabled for external users" ]
-
-    desc_resp = sfn_client.describe_execution(executionArn=execution_arn)
-    if desc_resp["status"] == "SUCCEEDED":
-        resp = {
-            "success": True,
-            "sfn_output": json.loads(desc_resp["output"]),
-            "debug_messages": debug_messages
-        }
-    else:
-        # success should still be True b/c we didn't fail; we're just not done yet...
-        # calling client will just wait and retry.
-        resp = {
-            "success": True,
-            "sfn_output": False,
-            "debug_messages": debug_messages
-        }
-
-    return ApiResult(resp)
-
-# downloads the output from a model run and creates presigned url's for the xlsx files
-@scenario_api.route('/api/scenario/fetch_run_results/', methods=['POST'])
-@login_required
-def fetch_run_results():
-    req_data = request.form.to_dict()
-    if not req_data.get('bucket') or not req_data.get('uuid'):
-        raise AssertionError("bucket/uuid cannot be blank.")
-
-    bucket = req_data['bucket']
-    uuid = req_data['uuid']
-
-    s3_client = boto3.client("s3")
-    s3_resource = boto3.resource("s3")
-
-    content_object = s3_resource.Object(bucket, f"{uuid}/model_output.json")
-    file_content = content_object.get()["Body"].read().decode("utf-8")
-    json_content = json.loads(file_content)
-
-    resp = {
-        "success": True,
-        "model_output": json_content
-    }
-
-    for f in ["outputMass", "outputConc", "outputTM"]:
-        full_key = f"{uuid}/{f}.xlsx"
-        response = s3_client.generate_presigned_url("get_object",
-                                                    Params={
-                                                        "Bucket": bucket,
-                                                        "Key": full_key
-                                                    },
-                                                    ExpiresIn=600) # expires in 10 minute(s)
-
-        resp[f] = response
-
-
-    return ApiResult(resp)
 
 @scenario_api.route(
     '/api/scenario/<int:scenario_id>/run_getflow', methods=['POST']
@@ -1093,7 +780,9 @@ def run_getflow(scenario_id):
 
     s = ScenarioService.get(scenario_id)
     if not s:
-        raise ApiException("Unknown Scenario")
+        return ApiException("Unknown Scenario")
+    if not current_user.can('edit', s):
+        abort(403)
 
     print(f"scenario: {s}")
 
@@ -1122,10 +811,11 @@ def run_getflow(scenario_id):
         else:
             data_resp = {"not": "implemented!"}
     except Exception as e:
-        print(e)
+        print('getflow kickoff exception:', e)
         data_resp = {"error": repr(e)}
 
     return ApiResult(data_resp)
+
 
 @scenario_api.route(
     '/api/stepfxn_check', methods=['POST']
@@ -1158,12 +848,11 @@ def check_stepfunction_status():
                 for key in parsed:
                     data_resp["output"][key] = parsed[key]
 
-
-
         except Exception as e:
             data_resp = {"error": str(e) }
 
     return ApiResult(data_resp)
+
 
 @scenario_api.route('/api/scenario/<int:scenario_id>/export/mirc', methods=['GET'])
 # TODO: Need some way for MIRC *app* to authenticate?
@@ -1171,128 +860,21 @@ def check_stepfunction_status():
 def export_for_mirc(scenario_id):
     scen = ScenarioService.get(scenario_id)
     if not scen:
-        raise ApiException("Unknown Scenario")
+        return ApiException("Unknown Scenario")
+    if not current_user.can('view', scen):
+        abort(403)
 
     logger = make_logger('mirc_exporter')
-    logger.info(f"Compiling required MIRC data for scenario {scen.name}...")
     try:
-        latest_model_run = [v for v in scen.proc_status if not v.is_run_error]
-        if len(latest_model_run) == 0:
-            return ApiResult({
-                'trim_data': {"message": "No valid data found"}
-            })
-        latest_model_run = latest_model_run[0]
-
-        mass = json.loads(latest_model_run.result_nt)
-        mass = json.loads("{"+mass+"}")
-        conc = json.loads(latest_model_run.result_conc)
-        conc = json.loads("{"+conc+"}")
-
-        logger.info(f"Model run found, using run with id [{latest_model_run.id}]...")
-
-        chems = {c.name : c for c in scen.chemicals}
-        timestamps = [f"01/01/{year} 00:00:00 EST" for year in mass['year'].values()]
-
-        trim_data = {
-            'scenario_name': scen.name,
-            'chemicals': list(chems.keys()),
-            'timestamps': timestamps,
-        }
-
-        trim_data["parcels"] = compile_mirc_parcel_data(scen, chems, conc, timestamps, logger)
-    except Exception as e:
+        latest_model_run = scen.latest_proc_status
+        trim_data = compile_mirc_data(scen, latest_model_run, logger)
+    except Exception as e:  
         logger.error(e)
         traceback.print_exc()
-        trim_data = {"error": "No valid data found"}
+        trim_data = {"trim_data": {"message": "No valid data found"}}
 
-    return ApiResult({
-        'trim_data': trim_data
-    })
+    return ApiResult(trim_data)
 
-def compile_mirc_parcel_data(scen, chems, conc, timestamps, logger):
-    logger.info(f"Compiling parcel data for...")
-    parcels = []
-    for parcel in scen.parcels:
-        logger.info(f"{parcel.name}")
-        p = {
-            "name": parcel.name,
-            "vertices": parcel.vertices,
-            "volume_elements": [],
-        }
-        for volume_element in parcel.volume_elements:
-            ve = {
-                "name": volume_element.name,
-                "compartments": [],
-            }
-            for compartment in volume_element.compartments:
-                c = {
-                    "name": compartment.name,
-                    "properties": {},
-                }
-
-                # properties not relevant for a given compartment can be skipped
-                for chem_name in chems.keys():
-                    props = {}
-                    filtered_key = f'{chem_name}_{compartment.standard_name}'
-                    filtered_conc = list(conc[filtered_key].values())
-                    filtered_conc_units = list(conc[filtered_key+"_units"].values())
-
-                    # constants
-                    if "air" in c["name"].lower():
-                        props["rho_a"] = {
-                            "value": compartment.rho.magnitude,
-                            "unit": str(compartment.rho.units), # "g/cm^3"
-                        }
-
-                    chem_kd = chems[chem_name].Kd(compartment=compartment)
-                    props["Kd"] = {
-                        "value": chem_kd.magnitude,
-                        "unit": str(chem_kd.units), # "L/kg"
-                    }
-
-                    chem_fmd = chems[chem_name].FractionMass_Dissolved(compartment=compartment)
-                    if chem_fmd:
-                        if isinstance(chem_fmd, pint.Quantity):
-                            props["FMD"] = chem_fmd.magnitude
-                        else:
-                            props["FMD"] = chem_fmd
-    
-                    chem_fv = chems[chem_name].FractionMass_Vapor(compartment=compartment)
-                    if chem_fv:
-                        if isinstance(chem_fv, pint.Quantity):
-                            props["Fv"] = chem_fv.magnitude
-                        else:
-                            props["Fv"] = chem_fv
-
-
-                    # timestamp values
-                    props["C"] = {}  # concentration
-
-                    chem_wet = chems[chem_name].ParticleVolumetricWetDepositionRate(compartment=compartment)
-                    props["Drwp"] = {}  # deposition rate wet particle
-
-                    chem_dry = chems[chem_name].ParticleVolumetricDRYDepositionRate(compartment=compartment)
-                    props["Drdp"] = {}  # deposition rate dry particle
-                    for i, timestamp in enumerate(timestamps):
-                        if isinstance(filtered_conc_units[0], str):
-                            props["C"][timestamp] = {
-                                "value": filtered_conc[i],
-                                "unit": filtered_conc_units[i] # "ug/g"
-                            }
-                        props["Drwp"][timestamp] = {
-                            "value": chem_wet.magnitude,
-                            "unit": str(chem_wet.units) # "g/day/m^2"
-                        }
-                        props["Drdp"][timestamp] = {
-                            "value": chem_dry.magnitude,
-                            "unit": str(chem_dry.units) # "g/day/m^2"
-                        }
-
-                    c["properties"][chem_name] = props
-                ve["compartments"].append(c)
-            p["volume_elements"].append(ve)
-        parcels.append(p)
-    return parcels
 
 @scenario_api.route(
     '/api/scenario/<int:scenario_id>/run_receptor_generation', methods=['POST']
@@ -1309,20 +891,172 @@ def run_receptor_generation(scenario_id):
     """
 
     scen = ScenarioService.get(scenario_id)
+    if not current_user.can('edit', scen):
+        abort(403)
 
-    all_calculations = []
-    for parcel in scen.parcels:
-        grid_points_etc = calculate_receptor_grid_points_for_parcel(parcel)
-        all_calculations.append(grid_points_etc)
-
-    fv = MiscAssociatedFileVariety.construct_file_variety("generated_aermod_receptors")
-    file_like_obj = fv.convert_grid_point_data_to_binary_geojson(all_calculations)
-
-    data_resp = {}
     try:
+        all_calculations = []
+        for parcel in scen.parcels:
+            grid_points_etc = calculate_receptor_grid_points_for_parcel(parcel)
+            all_calculations.append(grid_points_etc)
+
+        fv = MiscAssociatedFileVariety.construct_file_variety("generated_aermod_receptors")
+        file_like_obj = fv.convert_grid_point_data_to_binary_geojson(all_calculations)
+
+        data_resp = {}
+        
         upload_data = associated_file_helper(scenario_id, "generated_aermod_receptors", "UPLOAD", file_obj = file_like_obj, file_metadata={})
         data_resp = upload_data
     except Exception as e:
-        print(f"UPLOAD ERROR: {e}")
+        traceback.print_exc()
+        return ApiException(repr(e))
 
     return ApiResult(data_resp)
+
+
+@scenario_api.route(
+    "/api/scenario/<int:scenario_id>/chemical/properties", methods=["GET"]
+)
+@login_required
+def get_chemical_properties(scenario_id):
+    logger = make_logger('chemical_properties')
+    logger.info("Pulling chemical properties...")
+
+    scen = ScenarioService.get(scenario_id)
+    if not current_user.can('view', scen):
+        abort(403)
+    comps = scen.compartments
+
+    chem_properties = {}
+
+    def serialize_value(value, param):
+        v = None
+        u = None
+        if isinstance(value, pint.Quantity):
+            v = value.magnitude
+            u = param.unit
+        else:
+            v = value
+        if isinstance(v, float):
+            # Round value
+            if v < 1:
+                v = float(f'{v:.12f}')
+            else:
+                v = float(f'{v:.4f}')
+
+        return {
+            "value": v,
+            "unit": u
+        }
+
+    def get_prop_name(param):
+        return param.variable_name
+
+    def add_prop(chem_name, scope, param, value, restriction=None):
+        if chem_name not in chem_properties:
+            chem_properties[chem_name] = {}
+        if scope not in chem_properties[chem_name]:
+            chem_properties[chem_name][scope] = {}
+
+        prop_name = get_prop_name(param)
+
+        if prop_name not in chem_properties[chem_name][scope]:
+            chem_properties[chem_name][scope][prop_name] = {
+                "name": prop_name,
+                **serialize_value(value, param)
+            }
+
+        if restriction is not None:
+            if 'options' not in chem_properties[chem_name][scope][prop_name]:
+                chem_properties[chem_name][scope][prop_name]['options'] = {}
+            opts = chem_properties[chem_name][scope][prop_name]['options']
+            for k, val in restriction.items():
+                opts[k] = serialize_value(val, param)
+
+    def get_by_compartment(param, chem, fn=None):
+        prop_name = get_prop_name(param)
+        var_name = param.variable_name
+        chem_name = chem.name
+        for comp in comps:
+            scope = f'Compartment [{comp.media.name}]'
+            if (
+                chem_name in chem_properties
+                and scope in chem_properties[chem_name]
+                and prop_name in chem_properties[chem_name][scope]
+            ):
+                continue
+            try:
+                if fn is None:
+                    comp_fn = comp.parameters.evaluate(var_name)
+                    if isinstance(comp_fn, types.FunctionType):
+                        try:
+                            val = comp_fn(chem)
+                        except Exception as e:
+                            # print('\t-', e)
+                            continue
+                    else:
+                        val = comp_fn
+                else:
+                    val = fn(comp)
+                # print('\t>', val)
+                add_prop(
+                    chem_name, scope, param, val,
+                    restriction={comp.standard_name: val}
+                )
+            except Exception as e:
+                # print('\t-', e)
+                pass
+
+    def is_recursive(param):
+        if param.formula is None:
+            return False
+        eq = param.formula.equation
+        if f'self.{param.variable_name}(' in eq:
+            return True
+        if f'self.{param.variable_name}.' in eq:
+            return True
+        if f'self.{param.variable_name} ' in eq:
+            return True
+        return False
+
+    try:
+        for chem in scen.chemicals:
+            # print('\n========================================')
+            # print(chem)
+            # print('----------------------------------')
+            chem_name = chem.name
+            for param_name, param in chem.parameters.items():
+                # print('~', param_name)
+                if is_recursive(param):
+                    logger.error(
+                        f'Chemical Parameter "{param_name}" is recursively defined!'
+                    )
+                    if param_name == 'initialConcentration':
+                        # DISABLED FOR NOW - SEE BELOW
+                        # logger.warning(f'Using compartment "{param_name}" instead ...')
+                        # get_by_compartment(param, chem)
+                        pass
+                    else:
+                        logger.warning(f'Skipping parameter "{param_name}" ...')
+                    continue
+
+                val = chem.parameters.evaluate(param)
+                scope = None
+                if not isinstance(val, types.FunctionType):
+                    # print('\t>', val)
+                    add_prop(chem_name, 'Scenario', param, val)
+                else:
+                    try:
+                        val = val()
+                        # print('\t>', val)
+                        add_prop(chem_name, 'Scenario', param, val)
+                        continue
+                    except Exception as e:
+                        # print('\t-', e)
+                        pass
+                    # DISABLED FOR NOW - MAYBE LATER?
+                    # - we want to figure out a way to display the formulas (too?)
+                    # get_by_compartment(param, chem, fn=val)
+    except Exception as e:
+        import traceback; traceback.print_exc()
+    return ApiResult(chem_properties)

@@ -391,10 +391,10 @@ def fix_formula():
         FormulaService.get(f.id).equation = '(((10 ** (- 1.5 + 0.4 * math.log10(self.K_ow)) if math.log10(self.K_ow) < 3 else (0.5 if (math.log10(self.K_ow) >= 3 and math.log10(self.K_ow) < 6) else 10 ** (1.2 - 0.25 * math.log10(self.K_ow)))) if compartment.BW.magnitude > 0.1 else (10 ** (- 2.6 + 0.5 * math.log10(self.K_ow)) if math.log10(self.K_ow) < 5 else (0.8 if (math.log10(self.K_ow) >= 5 and math.log10(self.K_ow) < 6) else 10 ** (2.9 - 0.5 * math.log10(self.K_ow))))) if compartment.media.id in {32 , 33 , 27 , 28 , 29} else 0)'
 
     # f = [f for f in FormulaService.get_all() if
-    #      f.equation == '0.3262149134948966 * chemical.ParticleVolumetricDRYDepositionRate(receiver) * sender.linked_compartments(media="$Leaf" , same_parcel=True)[0].DryDepInterceptionFraction * sender.volume_element.interface_with(receiver.volume_element) / sender.Volume']
+    #      f.equation == '0.3262149134948966 * chemical.ParticleVolumetricDRYDepositionRate(receiver) * sender.linked_compartments(media="$Leaf" , same_parcel=True)[0].DryDepInterceptionFraction * sender.interface_with(receiver) / sender.Volume']
     # if len(f) > 0:
     #     f = f[0]
-    #     FormulaService.get(f.id).equation = 'sender.AllowExchange_forOther * chemical.ParticleVolumetricDRYDepositionRate(receiver) * sender.linked_compartments(media="$Leaf" , same_parcel=True)[0].DryDepInterceptionFraction * sender.volume_element.interface_with(receiver.volume_element) / sender.Volume'
+    #     FormulaService.get(f.id).equation = 'sender.AllowExchange_forOther * chemical.ParticleVolumetricDRYDepositionRate(receiver) * sender.linked_compartments(media="$Leaf" , same_parcel=True)[0].DryDepInterceptionFraction * sender.interface_with(receiver) / sender.Volume'
 
     # f = [f for f in FormulaService.get_all() if
     #      f.equation == '0.02359582829896095 * chemical.ParticleVolumetricWetDepositionRate(sender) * sender.linked_compartments(media="$Leaf" , same_parcel=True)[0].WetDepInterceptionFraction * receiver.volume_element.parcel.area / sender.Volume if (environment.Rain > 0 and sender.Volume > 0) else 0']
@@ -403,16 +403,16 @@ def fix_formula():
     #     FormulaService.get(f.id).equation = 'sender.AllowExchange_forOther * chemical.ParticleVolumetricWetDepositionRate(sender) * sender.linked_compartments(media="$Leaf" , same_parcel=True)[0].WetDepInterceptionFraction * receiver.volume_element.parcel.area / sender.Volume if (environment.Rain > 0 and sender.Volume > 0) else 0'
 
     # f = [f for f in FormulaService.get_all() if
-    #      f.equation == '((sender.SedimentDepositionRate / sender.rho)) * (chemical.FractionMass_Sorbed(sender) / sender.VolumeFraction_Solid) * (sender.volume_element.interface_with(receiver.volume_element)) / sender.Volume']
+    #      f.equation == '((sender.SedimentDepositionRate / sender.rho)) * (chemical.FractionMass_Sorbed(sender) / sender.VolumeFraction_Solid) * (sender.interface_with(receiver)) / sender.Volume']
     # if len(f) > 0:
     #     f = f[0]
-    #     FormulaService.get(f.id).equation = '((sender.SedimentDepositionRate / receiver.rho)) * (chemical.FractionMass_Sorbed(sender) / sender.VolumeFraction_Solid) * (sender.volume_element.interface_with(receiver.volume_element)) / sender.Volume'
+    #     FormulaService.get(f.id).equation = '((sender.SedimentDepositionRate / receiver.rho)) * (chemical.FractionMass_Sorbed(sender) / sender.VolumeFraction_Solid) * (sender.interface_with(receiver)) / sender.Volume'
     #
     # f = [f for f in FormulaService.get_all() if
-    #      f.equation == '((sender.SedimentDepositionRate / receiver.rho)) * (chemical.FractionMass_Sorbed(sender) / sender.VolumeFraction_Solid) * (sender.volume_element.interface_with(receiver.volume_element)) / sender.Volume']
+    #      f.equation == '((sender.SedimentDepositionRate / receiver.rho)) * (chemical.FractionMass_Sorbed(sender) / sender.VolumeFraction_Solid) * (sender.interface_with(receiver)) / sender.Volume']
     # if len(f) > 0:
     #     f = f[0]
-    #     FormulaService.get(f.id).equation = '((sender.SedimentDepositionRate / receiver.rho)) * (chemical.FractionMass_Sorbed(sender) / (sender.SuspendedSedimentConcentration / receiver.rho)) * (sender.volume_element.interface_with(receiver.volume_element)) / sender.Volume'
+    #     FormulaService.get(f.id).equation = '((sender.SedimentDepositionRate / receiver.rho)) * (chemical.FractionMass_Sorbed(sender) / (sender.SuspendedSedimentConcentration / receiver.rho)) * (sender.interface_with(receiver)) / sender.Volume'
 
     FormulaService.commit()
 

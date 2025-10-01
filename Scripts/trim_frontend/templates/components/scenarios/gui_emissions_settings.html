@@ -60,7 +60,7 @@
                                         <div class="pill pill-alert">
                                             <small>
                                                 <strong>
-                                                    Note that the non-pseudo source compartments (compartments other than Wet/Dry Vapor/Particle Source) do not follow a differentiated state (Gaseous or Particulate) and will automatically have the same value for both states of the source chemical.
+                                                    Note that only the following compartments in a parcel may receive values from an input AERMOD .PLT file which you can upload above (and these are also the only ones able to receive chemical inputs in differentiated states, i.e., vapor and particulate): DryVaporSource, WetVaporSource, DryParticleSource, and WetParticleSource.
                                                 </strong>
                                             </small>
                                         </div>
@@ -210,8 +210,16 @@
             // button that opens the "+ Add" modal for adding new chemical...
             // fix for https://icf.atlassian.net/jira/software/projects/PYTRIM/issues/PYTRIM-45; prevents selecting a previously added chemical (which then removed it)
             $('#chemicals-add-btn').on('click', function(e){
-                let currentScenarioChemicalIds = new Set(TRIM.store.currentScenario.chemicals.map(x => x.id)); // what chemicals (id's only) are currently assoc. with the scenario?
-                let unusedChemicals = TRIM.store.allChemicals.filter(x => !currentScenarioChemicalIds.has(x.id));  // filter those out...
+                let currentScenarioChemicalIds = new Set(TRIM.store.currentScenario.chemicals.map(x => x.id));
+                let unusedChemicals = TRIM.store.allChemicals.filter(x => !currentScenarioChemicalIds.has(x.id));
+                
+                // Collapse all mercuries to a single field
+                // 'Divalent Mercury', 'Elemental Mercury', 'MethylMercury'
+                let mercuries = new Set(TRIM.store.allChemicals.filter(x => x.name.includes("Mercury")).map(x => x.id));
+                unusedChemicals = unusedChemicals.filter(x => !mercuries.has(x.id));
+                if (!mercuries.isSubsetOf(currentScenarioChemicalIds))
+                    unusedChemicals.push({'name':'Mercury'})
+
                 TRIM.forms.updateSelect($('#chemical')[0], unusedChemicals.map(x => x.name), true); // only show the unused chemicals in the add dialog
             });
 
@@ -249,10 +257,19 @@
                         'type': 'input',
                         'name': 'chemical',
                         'value': chem
+                    },{
+                        'type': 'data',
+                        'name': 'field',
+                        'value': 'operation'
+                    },{
+                        'type': 'input',
+                        'name': 'operation',
+                        'value': 'add'
                     }]
-                TRIM.api.updateScenario(scenario_info)
-                LoadingScreen.hide('adding_chemical')
-                $('#save-btn').click(); // FIXME awkward fix for broken event handlers, shouldn't rely on page reload
+                TRIM.api.updateScenario(scenario_info).on('load', function() {
+                    LoadingScreen.hide('adding_chemical');
+                    $('#save-btn').click(); // FIXME awkward fix for broken event handlers, shouldn't rely on page reload
+                });
             })
 
             attach_event_handlers()
@@ -372,6 +389,7 @@
             $('a[href*="remove-chemicals"]').each((i, e) => {
                 let chem = $(e).parent().siblings().find(".chemInfo").text();
                 e.onclick = function() {
+                    LoadingScreen.show('removing_chemical');
                     let scenario_info = [{
                         'type': 'data',
                         'name': 'id',
@@ -384,9 +402,19 @@
                         'type': 'input',
                         'name': 'chemical',
                         'value': chem
+                    },{
+                        'type': 'data',
+                        'name': 'field',
+                        'value': 'operation'
+                    },{
+                        'type': 'input',
+                        'name': 'operation',
+                        'value': 'remove'
                     }]
-                    TRIM.api.updateScenario(scenario_info)
-                    $('#save-btn').click();
+                    TRIM.api.updateScenario(scenario_info).on('load', function() {
+                        LoadingScreen.hide('removing_chemical');
+                        $('#save-btn').click();
+                    });
                 }
             });
 

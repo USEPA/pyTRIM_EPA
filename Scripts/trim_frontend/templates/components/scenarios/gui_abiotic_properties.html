@@ -20,7 +20,8 @@
                     <div class="col-md mt-3">
                     </div>
                     <div class="col-md mt-3">
-                        <button id="abiotic-usda-soil-btn" class="btn btn-warning">Get data from USDA Soil DataMart</button>
+                        <!--TODO implement-->
+                        <button hidden id="abiotic-usda-soil-btn" class="btn btn-warning">Get data from USDA Soil DataMart</button>
                     </div>
                     <div class="col-md mt-3">
                     </div>
@@ -121,7 +122,7 @@
         let vadose_apTable = null;
         let gw_apTable = null;
         let AIR_PROPS = ['parcelid','Surface Parcel','DustParticleConcentration', 'DustParticleDensity', 'AirDensity',
-            'DustParticleOrganicMatter', 'AirHeight','hasAir'];
+            'DustParticleOrganicMatter','hasAir'];
         let SOIL_PROPS = ['parcelid','Surface Parcel','Tillage', 'SurfaceSoilThick', 'RootSoilThick',
             'VadoseZoneSoilThick', 'GroundwaterZoneSoilThick', 'hasLand', 'Soil_Surface',  'Soil_Root_Zone',
             'Soil_Vadose_Zone', 'Groundwater'
@@ -171,53 +172,48 @@
                         'data': "EvapotranspirationFractions",
                         'bSortable': false,
                         'render': function (data, type, row) {
-                            let this_cell_prop = 'editableCell badge badge-light';
+                            let isValidPcl = !(row.parcelType.includes("Water") || row.parcelType.includes("Air Only"));
+                            let this_cell_data = isValidPcl ? data : "N/A"
+                            let this_cell_prop = isValidPcl ? 'editableCell badge badge-light' : 'text-muted'
                             let parcel_info = create_parcel_object('EvapotranspirationFractions', row, data);
                             let err_html = "onblur='ErrorValidation.isValidFraction(this);ErrorValidation.rowTotalIsValid(this);'";
-                            return create_cell_html(parcel_info, data, this_cell_prop, data, err_html);
+                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html);
                         }
                     },
                     {
                         'data': "GroundwaterSeepageFractions",
                         'bSortable': false,
                         'render': function (data, type, row) {
-                            let this_cell_prop = 'editableCell badge badge-light';
+                            let isValidPcl = !(row.parcelType.includes("Water") || row.parcelType.includes("Air Only"));
+                            let this_cell_data = isValidPcl ? data : "N/A"
+                            let this_cell_prop = isValidPcl ? 'editableCell badge badge-light' : 'text-muted'
                             let parcel_info = create_parcel_object('GroundwaterSeepageFractions', row, data);
                             let err_html = "onblur='ErrorValidation.isValidFraction(this);ErrorValidation.rowTotalIsValid(this);'";
-                            return create_cell_html(parcel_info, data, this_cell_prop, data, err_html);
+                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html);
                         }
                     },
                     {
                         'data': "RunoffFractions",
                         'bSortable': false,
                         'render': function (data, type, row) {
-                            let this_cell_prop = 'editableCell badge badge-light';
+                            let isValidPcl = !(row.parcelType.includes("Water") || row.parcelType.includes("Air Only"));
+                            let this_cell_data = isValidPcl ? data : "N/A"
+                            let this_cell_prop = isValidPcl ? 'editableCell badge badge-light' : 'text-muted'
                             let parcel_info = create_parcel_object('RunoffFractions', row, data);
                             let err_html = "onblur='ErrorValidation.isValidFraction(this);ErrorValidation.rowTotalIsValid(this);'";
-                            return create_cell_html(parcel_info, data, this_cell_prop, data, err_html);
+                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html);
                         }
                     }
                 ],
                 initComplete: function (settings, json) {
-                    // remove water parcels
-                    let waterPcls = [];
-                    TRIM.store.currentScenario.parcels.forEach((p, i) => {
-                        if (p?.parcelType?.includes("Water")) waterPcls.push(p.name)
-                    });
                     $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
                     $(spatially_varying_tblId).find("tr").each(function (i,e) {
-                        let pclName = $(e).children(":first").text();
-                        if (waterPcls.includes(pclName)) {
-                            $(e).remove();
-                        }
-                        else {
-                            $(e).attr({
-                                "data-rsval": 1,
-                                "data-entity": "fractions for given precipitation"
-                            })
-                        }
+                        $(e).attr({
+                            "data-rsval": 1,
+                            "data-entity": "fractions for given precipitation"
+                        })
                     })
                     $(spatially_varying_tblId).DataTable().columns.adjust();
                     appendHeaderOptions(this, skip_columns=["Parcel Name"]);
@@ -271,11 +267,6 @@
                         'data': "DustParticleOrganicMatter",
                         'bSortable': false,
                         'render':  render_function_air('fractionOrganicMatterOnParticulates', "ErrorValidation.isValidFraction(this)")
-                    },
-                    {
-                        'data': "AirHeight",
-                        'bSortable': false,
-                        'render':  render_function_air('airHeight', "ErrorValidation.isPositiveValue(this)")
                     }
                 ],
                 initComplete: function (settings, json) {
@@ -341,7 +332,7 @@
                     {
                         'data': 'Soil_Surface.AverageVerticalVelocity',
                         'bSortable': false,
-                        'render':  render_function_soil('AverageVerticalVelocity',"ErrorValidation.isPositiveValue(this)", "Soil_Surface")
+                        'render':  render_function_soil('AverageVerticalVelocity',"ErrorValidation.isWithinRange(this, 'td', Number.MIN_VALUE)", "Soil_Surface")
                     },
                     {
                         'data': 'Soil_Surface.AirSoilBoundaryThickness',
@@ -381,7 +372,7 @@
                     {
                         'data': 'Soil_Surface.pH',
                         'bSortable': false,
-                        'render':  render_function_soil('pH',"ErrorValidation.isPositiveValue(this)", "Soil_Surface")
+                        'render':  render_function_soil('pH',"ErrorValidation.isWithinRange(this, 'td', 0, 14)", "Soil_Surface")
                     },
                     {
                         'data': 'Soil_Surface.TotalRunoffRate',
@@ -433,7 +424,7 @@
                     {
                         'data': 'Soil_Root_Zone.AverageVerticalVelocity',
                         'bSortable': false,
-                        'render':  render_function_soil('AverageVerticalVelocity',"ErrorValidation.isPositiveValue(this)", "Soil_Root_Zone")
+                        'render':  render_function_soil('AverageVerticalVelocity',"ErrorValidation.isWithinRange(this, 'td', Number.MIN_VALUE)", "Soil_Root_Zone")
                     },
                     {
                         'data': 'Soil_Root_Zone.rho',
@@ -453,7 +444,7 @@
                     {
                         'data': 'Soil_Root_Zone.pH',
                         'bSortable': false,
-                        'render':  render_function_soil('pH',"ErrorValidation.isPositiveValue(this)", "Soil_Root_Zone")
+                        'render':  render_function_soil('pH',"ErrorValidation.isWithinRange(this, 'td', 0, 14)", "Soil_Root_Zone")
                     },
                     {
                         'data': "Soil_Root_Zone.VolumeFraction_Liquid",
@@ -500,7 +491,7 @@
                     {
                         'data': 'Soil_Vadose_Zone.AverageVerticalVelocity',
                         'bSortable': false,
-                        'render':  render_function_soil('AverageVerticalVelocity',"ErrorValidation.isPositiveValue(this)", "Soil_Vadose_Zone")
+                        'render':  render_function_soil('AverageVerticalVelocity',"ErrorValidation.isWithinRange(this, 'td', Number.MIN_VALUE)", "Soil_Vadose_Zone")
                     },
                     {
                         'data': 'Soil_Vadose_Zone.rho',
@@ -520,7 +511,7 @@
                     {
                         'data': 'Soil_Vadose_Zone.pH',
                         'bSortable': false,
-                        'render':  render_function_soil('pH',"ErrorValidation.isPositiveValue(this)", "Soil_Vadose_Zone")
+                        'render':  render_function_soil('pH',"ErrorValidation.isWithinRange(this, 'td', 0, 14)", "Soil_Vadose_Zone")
                     },
                     {
                         'data': "Soil_Vadose_Zone.VolumeFraction_Liquid",
@@ -553,7 +544,7 @@
                     {
                         'data': "Surface Parcel",
                         'className': 'font-weight-bold rightBorder freeze-column'
-                    },
+                     },
                     {
                         'data': "GroundwaterZoneSoilThick",
                         'bSortable': false,
@@ -577,7 +568,7 @@
                     {
                         'data': 'Groundwater.pH',
                         'bSortable': false,
-                        'render':  render_function_soil('pH',"ErrorValidation.isPositiveValue(this)", "Groundwater")
+                        'render':  render_function_soil('pH',"ErrorValidation.isWithinRange(this, 'td', 0, 14)", "Groundwater")
                     },
                     {
                         'data': 'Groundwater.Porosity',
@@ -680,6 +671,8 @@
                 let param_store_key = "soil_params"
                 TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', (rsp)=>{
                     update_data_store_callback(rsp, cell, parcel_info, param_store_key, data, old_data)
+                    if (parcel_info[2].name == 'surfaceSoilThickness')
+                        getParcelByKey('id', parcel_info[0].value).surfaceSoilThickness = parseFloat(data);
                     LoadingScreen.hide(ls_info)
                 })
                 table_data = get_Data_from_table(`#${focusTblId}`)
@@ -696,9 +689,20 @@
                     if (f == cell) {
                         parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data;
                     }
-                    let param_store_key = ""
                     TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', (rsp)=>{
-                        // update_data_store_callback(rsp, cell, parcel_info, param_store_key, data, old_data)
+                        if (rsp.target.status === 200) {
+                            let field = parcel_info[2];
+                            let pcl = getParcelByKey('id', parcel_info[0].value);
+                            if (field.name == "EvapotranspirationFractions")
+                                pcl.evapotrans_frac = Number(field.value);
+                            else if (field.name == "GroundwaterSeepageFractions")
+                                pcl.seepage_frac = Number(field.value);
+                            else if (field.name == "RunoffFractions") {
+                                pcl.runoff_fraction = Number(field.value);
+                                pcl.soil_params.Soil_Surface.TotalRunoffRate = JSON.parse(rsp.target.responseJSON).TotalRunoffRate;
+                                updateAbioticData();
+                            }  
+                        }
                         LoadingScreen.hide(ls_info);
                     })
                     table_data = get_Data_from_table(`#${focusTblId}`);
@@ -774,7 +778,7 @@
                     if (e.soilTillage == "Yes" || e.soilTillage == true) {
                         till_val = "tilled";
                     }
-                    let surface_soil_thickness = (e.surfaceSoilThickness ? e.surfaceSoilThickness : TRIM.forms.fetchDefault('SurfaceSoilThick')[till_val]);
+                    let surface_soil_thickness = (e?.surfaceSoilThickness ? e.surfaceSoilThickness : TRIM.forms.fetchDefault('SurfaceSoilThick')[till_val]);
                     
                     // default root soil thickness depends on (0.8 - surface soil thickness)
                     let root_soil_default = Math.abs(0.8 - surface_soil_thickness);
@@ -791,7 +795,7 @@
                         'DustParticleDensity': (e.dustDensity !== null ? e.dustDensity : TRIM.forms.fetchDefault('DustParticleDensity')),
                         'AirDensity': (e.airDensity !== null ? e.airDensity : TRIM.forms.fetchDefault('AirDensity')),
                         'DustParticleOrganicMatter': (e.fractionOrganicMatterOnParticulates !== null ? e.fractionOrganicMatterOnParticulates : TRIM.forms.fetchDefault('DustParticleOrganicMatter')),
-                        'AirHeight': (e.airHeight !== null ? e.airHeight : TRIM.forms.fetchDefault('AirHeight')),
+                        'AirHeight': e.airHeight,
                         'Tillage': (e.soilTillage !== null ? e.soilTillage : TRIM.forms.fetchDefault('Tillage')),
                         'SurfaceSoilThick': surface_soil_thickness,
                         'RootSoilThick': (e.rootSoilThickness !== null ? e.rootSoilThickness : root_soil_default),

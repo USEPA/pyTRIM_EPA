@@ -6,6 +6,17 @@
 {% set create_modal_id = 'create-scenario-modal' %}
 
 <div class="text-right pb-2">
+    {% if current_user.is_admin %}
+    <div class="float-left">
+        <div class="mb-0">
+            <label class="switch">
+                <input checked type="checkbox" id="toggle-admin-view-off" />
+                <span class="slider round"></span>
+            </label>
+            <label for="toggle-admin-view-off">Show only my personal scenarios</label>
+        </div>
+    </div>
+    {% endif %}
     <button type="button"
         class="btn btn-primary"
         data-toggle="modal"
@@ -21,7 +32,12 @@
             <div class="col-lg-3 col-md-4 col-sm-6 py-2">
                 <div class="card border-primary h-100">
                     <div class="card-header">
-                        <h5 class="card-title mb-0">{{ scenario.name }}</h5>
+                        <h5 class="card-title mb-0">
+                            {% if not current_user.has_access(scenario, ignore_admin=True) %}
+                                <span class="admin-access-only">*</span>
+                            {% endif %}
+                            {{ scenario.name }}
+                        </h5>
                         <small class="text-muted">
                             {{ scenario.updated.strftime('%Y-%m-%d %I:%M %p') }}
                         </small>
@@ -32,7 +48,7 @@
                         </p>
                     </div>
                     <div class="card-footer">
-                        <a href="{{ url_for('scenario.view_scenario', id=scenario.id) }}"
+                        <a href="{{ url_for('scenario.edit_scenario', id=scenario.id) }}"
                             class="btn btn-block btn-outline-primary"
                         >
                             View
@@ -49,6 +65,7 @@
                                             Copy
                                             {{ scenario_form.csrf_token }}</button>
                                         </form>
+                                        {% if current_user.can('manage', scenario) %}
                                         <form action="{{ url_for('scenario_api.delete_scenario') }}" id="delete-scenario-form" method="POST">
                                             <input name="scenario_id" value="{{scenario.id}}" type=hidden>
                                             <input name="scenario_name" value="{{scenario.name}}" type=hidden>
@@ -56,6 +73,7 @@
                                             Delete
                                             {{ scenario_form.csrf_token }}</button>
                                         </form>
+                                    {% endif %}
                                     </div>
                                 </div>
                             </div>
@@ -76,6 +94,15 @@
             </div>
         {% endfor %}
     </div>
+    {% if current_user.is_admin %}
+    <div class="row mt-2 mx-1 card border-info text-info">
+        <div class="card-header font-weight-bold p-2">Admin Note</div>
+        <div class="card-body p-2">
+            An asterisk (*) before a Scenario name means that you have access
+            to that Scenario as an admin, but do not have explicit permissions to it.
+        </div>
+    </div>
+    {% endif %}
 </div>
 
 {% set modal_body %}
@@ -130,3 +157,87 @@
     id=create_modal_id, title='New Scenario',
     body=modal_body, footer=modal_footer
 ) }}
+
+{% if current_user.is_admin %}
+<style>
+    /* The switch - the box around the slider */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 30px;
+      height: 17px;
+    }
+
+    /* Hide default HTML checkbox */
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    /* The slider */
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      -webkit-transition: .4s;
+      transition: .4s;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 13px;
+      width: 13px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      -webkit-transition: .4s;
+      transition: .4s;
+    }
+
+    input:checked + .slider {
+      background-color: #2196F3;
+    }
+
+    input:focus + .slider {
+      box-shadow: 0 0 1px #2196F3;
+    }
+
+    input:checked + .slider:before {
+      -webkit-transform: translateX(13px);
+      -ms-transform: translateX(13px);
+      transform: translateX(13px);
+    }
+
+    /* Rounded sliders */
+    .slider.round {
+      border-radius: 17px;
+    }
+
+    .slider.round:before {
+      border-radius: 50%;
+    }
+
+</style>
+
+<script>
+    onDomLoad(function() {
+        $('.admin-access-only').closest('div.col-lg-3').hide(); // hide by default
+
+        $('#toggle-admin-view-off').on('change', function() {
+            var onlyMine = $(this).prop('checked');
+            if (onlyMine) {
+                $('.admin-access-only').closest('div.col-lg-3').hide();
+            }
+            else {
+                $('.admin-access-only').closest('div.col-lg-3').show();
+            }
+        });
+    });
+</script>
+{% endif %}

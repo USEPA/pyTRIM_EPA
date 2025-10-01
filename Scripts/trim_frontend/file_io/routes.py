@@ -9,8 +9,8 @@ import numpy as np
 import json
 import requests as pyRequest
 from decimal import Decimal
-from flask import Blueprint, request
-from flask_security import login_required
+from flask import Blueprint, request, abort
+from flask_security import login_required, current_user
 from werkzeug.utils import secure_filename
 from flask_api import ApiException, ApiResult
 from trim_db.schema import *
@@ -100,6 +100,12 @@ def parse_aermod():
 
     files = request.files
     scenario_id = [v for k, v in request.form.items() if k == 'scenario_id'][0]
+    scenario = ScenarioService.get(id=scenario_id)
+    if not scenario:
+        return ApiException("Unknown Scenario")
+    if not current_user.can('edit', scenario):
+        abort(403)
+
     this_chem = [v for k, v in request.form.items() if k == 'chemical'][0]
     this_spec = [v for k, v in request.form.items() if k == 'species'][0]
     spacing = [v for k, v in request.form.items() if k == 'spacing'][0]
@@ -109,7 +115,6 @@ def parse_aermod():
     logger.info(f'Parsed AERMOD file: {list(files.items())[0][1].filename} for scenario id {scenario_id}, chemical {this_chem} with'
                 f' coordinate system {coord_sys} {"and utm zone of " + utm_zone if utm_zone else ""}.')
 
-    scenario = ScenarioService.get(id=scenario_id)
     chem = ChemicalService.get(name=this_chem)
 
     if not files:
@@ -123,7 +128,7 @@ def parse_aermod():
         lines = fpn.read().decode("utf-8")
         lines = lines.split("\r\n")
     except Exception as e:
-        print(e)
+        print('parse airmod lines error:', e)
 
     row_ind = 0
     for line in lines:
@@ -167,7 +172,7 @@ def parse_aermod():
         df_aermod['newY'] = df_aermod.apply(
             lambda z: translate_position(float(z.X), float(z.Y), 'UTM', 'WGS84_LONGLAT', utm_zone=utm_zone)[1], axis=1)
     except Exception as e:
-        print(e)
+        print('parse airmod newX/newY error:', e)
 
     try:
         # add parcel location to each receptor in aermod file
@@ -216,7 +221,7 @@ def parse_aermod():
                                                                    'WetSource': v["WET DEPO"]}
                     for k, v in aermod_result_json.items()}
     except Exception as e:
-        print(e)
+        print('parse airmod res_json error:', e)
 
     source_comps = ["DryVaporSource", "WetVaporSource"] if this_spec == "Vapor" \
         else ["DryParticleSource", "WetParticleSource"]
@@ -258,7 +263,7 @@ def parse_aermod():
                         FormulaService.get(src_par.formula.id).equation = new_formula
                 FormulaService.commit()
     except Exception as e:
-        print(e)
+        print('parse airmod formulas error:', e)
 
     return ApiResult({'aermod_result': res_json})
 
@@ -270,6 +275,11 @@ def upload_background_conc():
     scenario_id = request.form["scenario_id"]
     chem_name = request.form["chemical_name"]
     scenario = ScenarioService.get(id=scenario_id)
+    if not scenario:
+        return ApiException("Unknown Scenario")
+    if not current_user.can('edit', scenario):
+        abort(403)
+
     chem = ChemicalService.get(name=chem_name)
     ureg = UnitRegistry()
     # First check if there are any existing CustomParameters
@@ -283,7 +293,7 @@ def upload_background_conc():
         print(f"problem deleting existing custom parameters: {e}")
     try:
         for ii, d in enumerate(data):
-            print(d)
+            print('d:', d)
             val = d["Background Concentration Value"]
             # Check parcel
             parcel = [p for p in scenario.parcels if p.name == d["Parcel Name"]]
@@ -348,7 +358,7 @@ def upload_background_conc():
                 FormulaService.get(bc_par.formula.id).equation = new_formula
                 FormulaService.commit()
     except Exception as e:
-        print(e)
+        print('background conc load error:', e)
     return ApiResult({'background_conc_file_data': data})
 
 @file_api.route('/api/parcel_file', methods=['POST'])
@@ -374,6 +384,12 @@ def parse_parcel_upload():
         return stackstr
 
     scenario_id = request.form["scenario_id"]
+    scenario = ScenarioService.get(id=scenario_id)
+    if not scenario:
+        return ApiException("Unknown Scenario")
+    if not current_user.can('edit', scenario):
+        abort(403)
+
     coord_system = request.form.get("coord_system")
     raw_utm_zone = request.form.get("utm_zone")
 
@@ -390,7 +406,6 @@ def parse_parcel_upload():
 
     if len(errors) == 0:
         # delete existing parcels...
-        scenario = ScenarioService.get(id=scenario_id)
         for del_parcel in scenario.parcels:
             del_parcel_description = f"'{del_parcel.name}' ({del_parcel.id})"
             print(f"deleting parcel {del_parcel}...")
@@ -488,7 +503,7 @@ def parse_parcel_upload():
 
             print(f"\tDONE FOR LINE {line_num}")
         except Exception as e:
-            errors.append(f"Error processing CSV line {line_num}: {e}")
+            errors.append(f"Error processing line {line_num}: {e}")
             print(f'{60*"*"}\nLINE {line_num}\n{full_stack()}')
 
         line_num += 1
@@ -533,6 +548,12 @@ def manage_misc_scenario_file():
     if scenario_id is None:
         errors.append("No scenario id supplied")
 
+    s = ScenarioService.get(scenario_id)
+    if not s:
+        return ApiException("Unknown Scenario")
+    if not current_user.can('edit', s):
+        abort(403)
+
     if misc_file_type is None:
         errors.append("No filetype supplied")
 
@@ -564,7 +585,12 @@ def manage_misc_scenario_file():
                     helper_rv = associated_file_helper(scenario_id, misc_file_type, "UPLOAD", file_obj=file_obj, file_metadata=submitted_metadata)
                 except Exception as e:
                     print(f"POST ERROR: {e}")
-                    errors.append(f"Error uploading file: {e}")
+
+                    try:
+                        detailed_error_message = json.loads(str(e))
+                        errors.append(detailed_error_message.get("user_facing_error_msg"))
+                    except Exception as e:
+                        errors.append("generic_error")
         elif request.method == "DELETE":
             try:
                 helper_rv = associated_file_helper(scenario_id, misc_file_type, "DELETE")
@@ -639,6 +665,12 @@ def get_parcel_row_geojson(row):
 @login_required
 def parse_runoff_matrix_upload():
     scenario_id = request.form["scenario_id"]
+    s = ScenarioService.get(scenario_id)
+    if not s:
+        return ApiException("Unknown Scenario")
+    if not current_user.can('edit', s):
+        abort(403)
+
     parcels = ParcelService.get_all(scenario_id=int(scenario_id))
     parcel_names = {p.name.lower() : p for p in parcels}
 
@@ -646,14 +678,55 @@ def parse_runoff_matrix_upload():
     presigned_url = request.form.get("presigned_url")
     if not files and not presigned_url:
         return ApiException("No files were uploaded")
-    
+
     try:
         if presigned_url: # getflow generated matrix
+            # START - validate the presigned_url
+            # make sure it hasn't been monkeyed with -- URL matches expected pattern,
+            # we have exactly the params we expect, etc. If we don't, we'll throw an Exception
+            validate_url = True
+
+            if validate_url:
+                regex = r"^https:\/\/[-a-z0-9]*\.s3\.amazonaws\.com\/[-0-9a-f]*\/[_a-z]*\.csv.*\?(.*)"
+                matches = re.finditer(regex, presigned_url)
+
+                presigned_params = {}
+                for matchNum, match in enumerate(matches, start=1):
+                    for groupNum in range(0, len(match.groups())):
+                        groupNum = groupNum + 1
+                        chunks = match.group(1).split("&")
+                        i = 0
+                        for c in chunks:
+                            print(f"\t[{i}] [{c}]")
+                            equal_pos = c.find("=")
+                            param_name = c[:equal_pos]
+                            param_val = c[equal_pos+1:]
+                            presigned_params[param_name] = param_val
+                            i += 1
+
+                expected = { "AWSAccessKeyId", "Signature", "x-amz-security-token", "Expires" }
+                for param_name in presigned_params:
+                    if param_name not in expected:
+                        return ApiException(f"Encountered unexpected presigned url param '{param_name}'")
+                    else:
+                        expected.remove(param_name)
+
+                if len(expected) > 0:
+                    return ApiException(f"Missing expected presigned url param(s): '{', '.join([x for x in expected])}'")
+
+                # if we make it this far -- presigned_url looks ok. We can proceed.
+            # END - validate the presigned_url
+
             r = pyRequest.get(presigned_url)
             csv_data = io.StringIO(r.content.decode('utf-8'))
             df = pd.read_csv(csv_data, delimiter=',')
-            df.rename(columns={ df.columns[0]: 'parcels' }, inplace = True)
 
+            make_adjustments=True
+            if make_adjustments:
+                df.rename(columns={ df.columns[0]: 'parcels' }, inplace = True)
+
+            """
+            # old v10 cleanup of raw values->percents; not needed in v13+
             # clean up extra rows/columns
             total_out_mask = df[df.columns[0]] != 'TOTAL_OUT'
             sink_mask = df[df.columns[0]] != 'SINK'
@@ -666,21 +739,43 @@ def parse_runoff_matrix_upload():
             pcls_col = df.pop('parcels').reset_index(drop=True)
             df = np.trunc(10000 * df) / 10000
             df = pd.concat([pcls_col, df], axis='columns')
+            """
+
+            if make_adjustments:
+                # getflow v13 is giving percentages like 85.23% == "85.23"; we want ".8523"
+                df[df.select_dtypes(include=['number']).columns] /= 100
+
+                # rename SINK->sink and move it to right after parcels (position==1)
+                df.insert(1, 'sink', df.pop('SINK'))
 
             reader = df.to_dict('records')
+            row_counter = 1
+            precision = 4
             for row in reader:
                 row_total = []
                 for k, v in row.items():
                     if k == "parcels": continue
-                    row_total.append(Decimal(v))
-                row_total = float(sum(row_total))
+                    rounded_val = round(v, precision)
+                    # print(f"\trow [{row_counter}] '{k}': {v} -> {rounded_val}")
+                    # row_total.append(Decimal(v))
+                    row_total.append(rounded_val)
+                # row_total = float(sum(row_total))
+                row_total = round(sum(row_total), precision)
+                # print(f"\t{row_total=}")
                 if row_total == 0: continue
+
                 elif row_total != 1:
                     row_diff = round(Decimal(1.0000) - Decimal(row_total), precision)
                     for k, v in row.items():
                         if k == "parcels" or k == 'sink' or v == 0: continue
-                        row[k] = round(row_diff + Decimal(v), precision)
+                        before = v
+                        after = round(row_diff + Decimal(v), precision)
+                        df.at[row_counter-1, k] = after
+                        row[k] = after
                         break
+
+                # print(f"ROW {row_counter} TOTAL {row_total}")
+                row_counter += 1
         else:
             fpn = [f.stream for n, f in files.items()][0]
             fpn.seek(0)
@@ -719,14 +814,14 @@ def parse_runoff_matrix_upload():
             reader = csv.DictReader(io.StringIO(lines))
         for row in reader:
             sender_pcl = parcel_names[row.get("parcels").lower()]
-            if sender_pcl.name in request.form["water_parcels"]:
+            if sender_pcl.name in request.form["skip_parcels"]:
                 continue
             del row["parcels"]
             
             row_receivers_all = [f"ro_{k}" for k in row.keys()]
             row_vals_all = [(vi, f"{float(Decimal(v))}") for vi, v in enumerate(row.values())]
-            row_receivers = [row_receivers_all[vi] for vi, v in row_vals_all if float(Decimal(v)) > 0]
-            row_vals = [row_vals_all[vi][1] for vi, v in row_vals_all if float(Decimal(v)) > 0]
+            row_receivers = [row_receivers_all[vi] for vi, v in row_vals_all]
+            row_vals = [row_vals_all[vi][1] for vi, v in row_vals_all]
             if len(row_vals) > 0:
                 payload = {
                     "id": sender_pcl.id,
@@ -739,7 +834,7 @@ def parse_runoff_matrix_upload():
                 
     except Exception as e:
         print(traceback.format_exc())
-        return ApiException(e)
+        return ApiException(traceback.format_exc())
     return ApiResult({'matrix_result': "success"})
 
 root = os.path.dirname(os.path.abspath(__file__))

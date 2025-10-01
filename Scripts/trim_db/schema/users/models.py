@@ -2,10 +2,11 @@ import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declared_attr
 from ..utils.base import Model
 from ..utils.mixins import ActiveFlagMixin
+from ..utils.permissions import PermissionsEnum
 
 
 __all__ = [
-    'RoleMixin', 'UserMixin',
+    'RoleMixin', 'UserMixin', 'ApiKey',
     'roles_users'
 ]
 
@@ -75,7 +76,7 @@ class UserMixin(ActiveFlagMixin):
     @property
     def is_admin(self):
         return (
-            self.is_superuser()
+            self.is_superuser
             or False
         )
 
@@ -86,10 +87,51 @@ class UserMixin(ActiveFlagMixin):
             name, at, domain = self.email.partition('@')
             return name.split('.')[0].title()
 
+    def has_access(self, scenario, ignore_admin=False):
+        return (scenario in self.active_scenarios) or (not ignore_admin and self.is_admin)
+
+    @property
+    def joined_scenarios(self):
+        scenarios = [
+            p.model for p in self._scenario_permissions
+            if p.level.value <= PermissionsEnum.view.value
+        ]
+        return scenarios
+
     @property
     def active_scenarios(self):
-        all_scenarios = [*self.created_scenarios]  # , *self.joined_scenarios]
+        all_scenarios = [*self.created_scenarios, *self.joined_scenarios]
         return all_scenarios
+
+    def can(self, action, restricted_model, ignore_superuser=False):
+        if not hasattr(restricted_model, '_permissions'):
+            raise ValueError(
+                f'{restricted_model} does not require access permissions'
+            )
+
+        if self.is_superuser and not ignore_superuser:
+            return True
+
+        return restricted_model.allows(self, action)
+
+        return False
 
     def __repr__(self):
         return f"{self.__class__.__qualname__}({self.email})"
+
+
+class ApiKey(Model):
+    value = sa.Column(sa.Unicode(255), unique=True, nullable=False)
+    active = sa.Column(sa.Boolean(), nullable=False, default=True)
+
+    user_id = sa.Column(
+        sa.Integer(), sa.ForeignKey('user.id'), nullable=False
+    )
+    user = sa.orm.relationship(
+        'User', backref=sa.orm.backref(
+            f'api_keys', cascade='all, delete-orphan'
+        )
+    )
+
+    def __repr__(self):
+        return f"{self.__class__.__qualname__}({self.user})"

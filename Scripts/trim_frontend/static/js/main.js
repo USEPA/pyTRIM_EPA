@@ -99,6 +99,8 @@ function update_data_store_callback(rsp, el, this_parcel_info, this_param_store_
 // An ajax handler
 window.AJAX = (function(ajax) {
 
+    ajax.alertErrs = false;
+
     ajax.call = function(opts) {
 
         var method = opts.method || 'GET';
@@ -123,7 +125,27 @@ window.AJAX = (function(ajax) {
 			if (callback !== undefined) { callback(true, parsedResponseData); }
 		  } 
           else if (request.readyState === 4 && request.status >= 400) {
+            var msg = parsedResponseData?.message || '';
+            if (
+                msg.indexOf('The CSRF token has expired') > -1
+                || msg.indexOf('The CSRF token is missing') > -1
+            ) {
+                if (data == null) {
+                    data = new FormData();
+                }
+                window.CSRFManager.refresh(data)
+                    .done(() => {
+                        opts.data = data;
+                        ajax.call(opts);
+                    })
+                return;
+            }
+
             if (callback !== undefined) { callback(false, parsedResponseData); }
+            else {
+                if (this.alertErrs) { alert(parsedResponseData?.message); }
+                console.log(parsedResponseData);
+            }
           }
           else if (request.readyState === 4) {
 		    if (callback !== undefined) { callback(false, "could not fetch the data"); }
@@ -131,6 +153,19 @@ window.AJAX = (function(ajax) {
 		});
 
         request.open(method, url);
+
+        if (opts.headers != undefined) {
+            for (var k in opts.headers) {
+                request.setRequestHeader(k, opts.headers[k]);
+            }
+        }
+        if (opts.json === true) {
+            request.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+            if (typeof('') != typeof(data)) {
+                data = JSON.stringify(data);
+            }
+        }
+
         request.send(data);
 
         request.addEventListener('load', function() {
