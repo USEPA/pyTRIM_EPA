@@ -7,6 +7,7 @@ from trim_db.schema import *
 from trim_db.services import *
 from trim_db.schema.parameters.equations import find_arguments
 import argparse
+from pathlib import Path
 
 DEFAULT_IMPORT_RULES = \
     {
@@ -212,7 +213,7 @@ def add_comp_chem_params(parlib, chem):
                                                      requirements=this_req, unit=this_unit, formula_id=new_formula.id,
                                                      no_commit=False)
             # Fix self as chemical for the new formula Arguments where applies
-            self_arr = [fa for fa in new_formula._arguments.all() if fa.name == "self"]
+            self_arr = [fa for fa in new_formula._arguments if fa.name == "self"]
             if len(self_arr) > 0:
                 self_arr[0].domain_id = FORMULA_ARG_DOMAINS.get("self")
             print(f'completed created new custom param {pr} with formula {frm[pr][0]} and arguments {frm[pr][1]}')
@@ -315,7 +316,7 @@ def add_chem_params(parlib, chem):
                                                                  formula_id=new_formula.id,
                                                                  no_commit=False)
                         # Fix self as chemical for the new formula Arguments where applies
-                        self_arr = [fa for fa in new_formula._arguments.all() if fa.name == "self"]
+                        self_arr = [fa for fa in new_formula._arguments if fa.name == "self"]
                         if len(self_arr) > 0:
                             self_arr[0].domain_id = FORMULA_ARG_DOMAINS.get("self")
                         print(
@@ -374,7 +375,7 @@ if __name__ == '__main__':
         print(e)
         raise
 
-    directory = "./trim_core/backend/Legacy_Input_Files"
+    directory = os.path.join(Path(__file__).parent.resolve(), "trim_core", "backend", "Legacy_Input_Files")
     trim_files = directory
     if not trim_files:
         raise AssertionError('Must specify a directory!')
