@@ -1,4 +1,5 @@
 import boto3, os, sys, pprint, re, time
+from pathlib import Path
 from datetime import datetime
 
 MAX_NUM_AWAIT_ATTEMPTS = 50
@@ -69,33 +70,19 @@ def loggy(x, indent=0):
 
 # get the root of the deployment project; e.g. /Users/tfeiler/development/trim-builder/iac/
 def figure_home_dir():
-    d = os.path.dirname(__file__)
-
-    # lose trailing directory marker
-    if d[-1] == os.path.sep:
-        d = d[:-1]
-
-    # lose leading directory marker
-    if d[0] == os.path.sep:
-        d = d[1:]
-
-    chunks = d.split(os.path.sep)
-    return os.path.sep + os.path.sep.join(chunks[0:-2]) + os.path.sep
+    cwd = Path(__file__).resolve()
+    for parent in cwd.parents:
+        if parent.name == "iac":
+            return os.path.normpath(parent.resolve()) + os.path.sep
+    raise FileNotFoundError("/trim-builder/iac/ not found")
 
 # get the root of the entire PyTrim project; e.g. /Users/tfeiler/development/trim-builder/
 def figure_parent_dir():
-    d = os.path.dirname(__file__)
-
-    # lose trailing directory marker
-    if d[-1] == os.path.sep:
-        d = d[:-1]
-
-    # lose leading directory marker
-    if d[0] == os.path.sep:
-        d = d[1:]
-
-    chunks = d.split(os.path.sep)
-    return os.path.sep + os.path.sep.join(chunks[0:-3]) + os.path.sep
+    cwd = Path(__file__).resolve()
+    for parent in cwd.parents:
+        if parent.name == "trim-builder":
+            return os.path.normpath(parent.resolve()) + os.path.sep
+    raise FileNotFoundError("/trim-builder/ not found")
 
 def whoami_aws():
     sts_client = boto3.client("sts")

@@ -1,0 +1,28 @@
+{
+	"environment_name": "pytrim-test",
+	"short_env_profile": "test",
+
+	"aws": {
+		"ssh_keypair_name": "pytrim-test-keypair-20251006",
+		"eip_name": "pytrim-test-eip",
+		"cidr_segment_vpc": 26,
+
+		"ec2_ingress": [
+			{
+				"description": "ICF VPN a",
+				"cidr": "199.223.30.0/24"
+			},
+			{
+				"description": "ICF VPN b",
+				"cidr": "199.223.31.0/24"
+			}
+		],
+
+		"db": {
+			"dbname": "pytrimTest",
+			"username": "pytrimUser",
+			"password": "B3rkB1ry0l1980"
+		}
+ 
+	}
+}

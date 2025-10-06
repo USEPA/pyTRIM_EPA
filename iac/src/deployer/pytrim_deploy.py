@@ -32,7 +32,7 @@ class PyTrimDeployer(object):
         if mode == "full" or mode == "docker":
             self.build_and_push_docker_images()
 
-        if mode == "_full" or mode == "push_flask_build":
+        if mode == "full" or mode == "push_flask_build":
             self.build_and_push_flask_app()
 
     def get_cfg_val(self, path, default_val = None):
@@ -106,11 +106,17 @@ class PyTrimDeployer(object):
         beanstalk_helper.build_etc(env_name)
 
 
+def usage(msg=""):
+    loggy(
+        f"Usage: python ls_deploy.py -c <json_configuration_file> (-m <mode>) (-p <aws_profile_name>)"
+    )
+    die(msg)
+
 if __name__ == "__main__":
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "c:m:", [ "config=", "mode=" ])
-    except getopt.GetoptError:
-        usage()
+        opts, args = getopt.getopt(sys.argv[1:], "c:m:p:", [ "config=", "mode=", "profile=" ])
+    except getopt.GetoptError as e:
+        usage(e)
 
     config_file = None
     mode = None
@@ -119,12 +125,19 @@ if __name__ == "__main__":
             config_file = arg
         elif opt in ("-m", "--mode"):
             mode = arg
+        elif opt in ("-p", "--profile"):
+            profile = arg
 
     if mode is None:
         mode = "full"
+    if profile:
+        import boto3
+
+        boto3.setup_default_session(profile_name=profile)
+
 
     if config_file is None:
-        print(f"Usage: python pytrim_deploy.py -c <json_configuration_file> (-m <mode>)")
+        usage("No config supplied")
     else:
         # message the user so they are sure to be credentialed as proper user
         whoami = whoami_aws()
