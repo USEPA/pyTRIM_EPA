@@ -85,7 +85,7 @@ class CronjobsHelper(object):
                 Description=job["name"],
                 ScheduleTimezone=job.get("timezone") or "America/New_York",
                 Schedule=f'cron({job["cron_expression"]})',
-                Duration=job["duration"],
+                Duration=job.get("duration") or 1,
                 Cutoff=job.get("cutoff") or 0,
                 AllowUnassociatedTargets=False,
             )["WindowId"]
