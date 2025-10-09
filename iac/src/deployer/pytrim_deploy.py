@@ -2,6 +2,7 @@ import getopt, json, sys
 from common import die, whoami_aws, loggy
 from helpers.cloudformation_helper import CloudFormationHelper
 from helpers.beanstalk_helper import BeanstalkHelper
+from helpers.cronjobs_helper import CronjobsHelper
 from helpers.docker_helper import DockerHelper
 from helpers.elastic_ip_helper import ElasticIpHelper
 from helpers.ssh_keypair_helper import SshKeypairHelper
@@ -28,6 +29,9 @@ class PyTrimDeployer(object):
 
         if mode == "full" or mode == "cloudformation":
             self.do_cf_stack_work()
+
+        if mode == "full" or mode == "crons":
+            self.create_cronjobs()
 
         if mode == "full" or mode == "docker":
             self.build_and_push_docker_images()
@@ -91,6 +95,16 @@ class PyTrimDeployer(object):
             "BastionPassthroughKeyPairName": ssh_keypair_name,
             "NATGatewayElasticIPAllocationID": elastic_ip_allocation_id,
         }, ingress_data)
+
+    def create_cronjobs(self):
+        loggy(f"setting up cronjobs")
+        crons = self.get_cfg_val("aws.crons")
+        if not crons:
+            loggy(f"Skipping...")
+            return
+        env_name = self.get_cfg_val("environment_name")
+        crons_helper = CronjobsHelper()
+        crons_helper.create_cronjobs(env_name, crons)
 
     def build_and_push_docker_images(self):
         loggy(f"DOCKER SETUP!")

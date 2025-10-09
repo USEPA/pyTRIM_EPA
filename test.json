@@ -22,6 +22,33 @@
 			"dbname": "pytrimTest",
 			"username": "pytrimUser",
 			"password": "B3rkB1ry0l1980"
+		},
+
+		"crons": {
+			"ec2": [
+				{
+					"name": "weekday_startup",
+					"cron_expression": "0 9 * * MON-FRI",
+					"capacity": 1
+				},
+				{
+					"name": "weekday_shutdown",
+					"cron_expression": "0 18 * * MON-FRI",
+					"capacity": 0
+				}
+			],
+			"rds": [
+				{
+					"name": "weekday_maintenance",
+					"cron_expression": "0 18 ? * 2-6 *",
+					"duration": 15
+				},
+				{
+					"name": "weekday_maintenance",
+					"cron_expression": "0 0 0 * SAT-SUN",
+					"duration": 24
+				}
+			]
 		}
  
 	}
