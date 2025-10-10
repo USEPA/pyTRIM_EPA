@@ -59,7 +59,9 @@ class CronjobsHelper(object):
         loggy("All EC2 cronjobs created successfully")
 
     # RDS maintenance start stop schedule
+    # TODO this needs to re-written as a change set for the existing stack
     def create_rds_cronjobs(self, stack_name, crons):
+        return
         self.create_resource_group(stack_name)
 
         rds_client = boto3.client("rds")

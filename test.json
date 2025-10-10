@@ -40,11 +40,11 @@
 			"rds": [
 				{
 					"name": "weekday_startup",
-					"cron_expression": "0 9 ? * 2-6 *"
+					"cron_expression": "0 9 ? * MON-FRI *"
 				},
 				{
 					"name": "weekday_shutdown",
-					"cron_expression": "0 18 ? * 2-6 *"
+					"cron_expression": "0 18 ? * MON-FRI *"
 				}
 			]
 		}
