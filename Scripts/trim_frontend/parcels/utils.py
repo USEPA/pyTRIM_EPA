@@ -489,6 +489,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
     elif field_name == "emission":
         src_comp = p.get_compartment(name=parcels_data["compartment_name"])
         src_par = src_comp.parameters.get('surfaceDepositionRate')
+        src_val = float(parcels_data["emission_value"])
         chem = ChemicalService.get(name=parcels_data["chemical_name"])
         if src_par:
             src_par = get_or_create_custom_param(
@@ -504,16 +505,16 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                 formula_part = formula_parts[0]
                 if "else" in formula_part:
                     arr = formula_part.split("else")[:-1]
-                    formula_part = "else".join(arr + [f' {parcels_data["emission_value"]} '])
+                    formula_part = "else".join(arr + [f' {src_val} '])
                 else:
-                    formula_part = f'{parcels_data["emission_value"]} '
+                    formula_part = f'{src_val} '
                 formula_parts[0] = formula_part
                 new_formula = f"if chemical.id == {chem.id}".join(formula_parts)
                 print(new_formula)
             # We do not have the chemical in the formula. We need to add it...
             else:
                 eq_arr = eq.split("else")
-                eq_arr.insert(-2, f' {parcels_data["emission_value"]} if chemical.id == {chem.id} ')
+                eq_arr.insert(-2, f' {src_val} if chemical.id == {chem.id} ')
                 new_formula = "else".join(eq_arr)
                 print(new_formula)
             FormulaService.get(src_par.formula.id).equation = new_formula
@@ -521,6 +522,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
     elif field_name == "initial concentration":
         ic_comp = p.get_compartment(name=parcels_data["compartment_name"])
         ic_par = ic_comp.parameters.get('initialConcentration')
+        ic_val = float(parcels_data["initial_concentration_value"])
         chem = ChemicalService.get(name=parcels_data["chemical_name"])
         if ic_par:
             unit = "g / m^3" if ic_comp.media.id in [2, 5, 7, 56, 55, 8, 9] else "g / kg" if ic_comp.media.id in [23, 24, 27, 28, 29, 31, 32, 33, 37, 39, 41, 43, 44, 45, 46, 47, 48, 49, 50, 51] else "g / L" if ic_comp.media.id in [10, 4] else ""
@@ -537,16 +539,16 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                 formula_part = formula_parts[0]
                 if "else" in formula_part:
                     arr = formula_part.split("else")[:-1]
-                    formula_part = "else".join(arr + [f' {parcels_data["initial_concentration_value"]} '])
+                    formula_part = "else".join(arr + [f' {ic_val} '])
                 else:
-                    formula_part = f'{parcels_data["initial_concentration_value"]} '
+                    formula_part = f'{ic_val} '
                 formula_parts[0] = formula_part
                 new_formula = f"if chemical.id == {chem.id}".join(formula_parts)
                 print(new_formula)
             # We do not have the chemical in the formula. We need to add it...
             else:
                 eq_arr = eq.split("else")
-                eq_arr.insert(-2, f' {parcels_data["initial_concentration_value"]} if chemical.id == {chem.id} ')
+                eq_arr.insert(-2, f' {ic_val} if chemical.id == {chem.id} ')
                 new_formula = "else".join(eq_arr)
                 print(new_formula)
             FormulaService.get(ic_par.formula.id).equation = new_formula
