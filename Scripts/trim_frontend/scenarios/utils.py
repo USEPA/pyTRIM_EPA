@@ -73,7 +73,7 @@ def use_local_model_run():
     # in dev/prod, we execute an AWS StepFunction to run the model via Docker/ECS. Locally,
     # we just run the model directly.
     trim_env_profile = os.environ.get("TRIM_ENV_PROFILE", "").lower()
-    return (trim_env_profile not in ["dev", "devgetflow", "prod"])
+    return (trim_env_profile not in ["test", "dev", "devgetflow", "prod"])
 
 
 def start_state_machine_model_run(scen):
@@ -782,6 +782,12 @@ def update_soil_from_api(s, logger):
     logger.info("Obtaining parcel soil data from USDA.gov")
     def calculate_layer_vals(pcl, data, layer):
         idx = [k for k,v in data['layer'].items() if v == layer][0]
+        param_map = {
+            "pH": data['ph1to1h2o_r'][idx],
+            "OrganicCarbonContent": (data['om_r'][idx] / 100) / 1.72,
+            "VolumeFraction_Liquid": data['awc_r'][idx], # water content
+            "FractionSand": data['sandtotal_r'][idx] / 100,
+        }
 
         comp = None
         if layer == "surface":
@@ -793,13 +799,6 @@ def update_soil_from_api(s, logger):
 
         if not comp: # water / air parcels
             return
-
-        param_map = {
-            "pH": data['ph1to1h2o_r'][idx],
-            "OrganicCarbonContent": (data['om_r'][idx] / 100) / 1.72,
-            "VolumeFraction_Liquid": data['awc_r'][idx], # water content
-            "FractionSand": data['sandtotal_r'][idx] / 100,
-        }
 
         for param_name, val in param_map.items():
             param = comp.parameters.get(param_name)
