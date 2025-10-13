@@ -808,11 +808,11 @@ def update_soil_from_api(s, logger):
             )
             update_custom_param_value(param, val)
 
-    parcels = {}
-    parcel_tillage = {}
     if not s.parcels:
         return
     
+    parcels = {}
+    parcel_tillage = {}
     for this_p in s.parcels:
         this_parcel_data = this_p.as_serializable()
         parcels[this_parcel_data['name']] = [(t[1], t[0]) for t in this_parcel_data['vertices']]
