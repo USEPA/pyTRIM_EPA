@@ -34,7 +34,7 @@
                 {{ table_static_value(table_id='spatially_varying_table', columns=[]) }}
                 <div class ="row">
                     <div class="col-md">
-                        <table data-slot="true" data-target="spatially_varying_table" class="hover wrap-text-medium" id="spatially_varying_table">
+                        <table data-slot="true" data-target="spatially_varying_table" class="hover wrap-text" id="spatially_varying_table">
                         </table>
                     </div>
                 </div>
@@ -150,32 +150,7 @@
                 return dd
             })
 
-            spatially_varying_apTable = $(spatially_varying_tblId).removeAttr('width').dataTable({
-                data : table_data,
-                paging: false,
-                bFilter: false,
-                info: false,
-                bAutoWidth: false,
-                scrollX: true,
-                scrollY: 500,
-                bDestroy: true,
-                fnCreatedRow: function (row, data, index) {
-                    $(row).find("td.rightBorder").addClass("freeze-column")
-                },
-                headerCallback: function(thead) {
-                    $(thead).find('th').each(function(index) {
-                        $(this).addClass('min-width-med');
-                    });
-                },
-                columnDefs: [
-                    {
-                        targets: '_all', 
-                        createdCell: function(td) {
-                            td.classList.add('word-break');
-                        }
-                    }
-                ],
-                columns: [
+            spatially_varying_cols = [
                     {
                         'bSortable': false,
                         'data': "Surface Parcel",
@@ -217,7 +192,20 @@
                             return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html);
                         }
                     }
-                ],
+            ];
+            spatially_varying_apTable = $(spatially_varying_tblId).dataTable({
+                data : table_data,
+                paging: false,
+                bFilter: false,
+                info: false,
+                bAutoWidth: false,
+                scrollX: true,
+                scrollY: 500,
+                bDestroy: true,
+                fnCreatedRow: function (row, data, index) {
+                    $(row).find("td.rightBorder").addClass("freeze-column")
+                },
+                columns: setDynamicColumnWidths(spatially_varying_tblId, spatially_varying_cols, table_data),
                 initComplete: function (settings, json) {
                     $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
                     $('[data-toggle="tooltip"]').tooltip()
@@ -244,19 +232,7 @@
                 return ret_func
             }
 
-            air_apTable =  $(air_tblId).removeAttr('width').dataTable({
-                destroy: true,
-                data : air_props,
-                paging: false,
-                bFilter: false,
-                info: false,
-                scrollX: true,
-                scrollY: 500,
-                bAutoWidth: false,
-                fnCreatedRow: function (row, data, index) {
-                    $(row).find("td.rightBorder").addClass("freeze-column")
-                },
-                columns: [
+            air_cols = [
                     {
                         'data': "Surface Parcel",
                         'className': 'font-weight-bold rightBorder freeze-column'
@@ -281,7 +257,20 @@
                         'bSortable': false,
                         'render':  render_function_air('fractionOrganicMatterOnParticulates', "ErrorValidation.isValidFraction(this)")
                     }
-                ],
+            ];
+            air_apTable =  $(air_tblId).dataTable({
+                destroy: true,
+                data : air_props,
+                paging: false,
+                bFilter: false,
+                info: false,
+                scrollX: true,
+                scrollY: 500,
+                bAutoWidth: false,
+                fnCreatedRow: function (row, data, index) {
+                    $(row).find("td.rightBorder").addClass("freeze-column")
+                },
+                columns: setDynamicColumnWidths(air_tblId, air_cols, air_props),
                 initComplete: function (settings, json) {
                     // $(air_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                     $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
@@ -302,19 +291,7 @@
                 return ret_func
             }
 
-            soil_apTable =  $(soil_tblId).removeAttr('width').dataTable({
-                destroy: true,
-                data : soil_props,
-                paging: false,
-                bFilter: false,
-                info: false,
-                bAutoWidth: false,
-                scrollX: true,
-                scrollY: 500,
-                fnCreatedRow: function (row, data, index) {
-                    $(row).find("td.rightBorder").addClass("freeze-column")
-                },
-                columns: [
+            soil_cols = [
                     {
                         'data': "Surface Parcel",
                         'className': 'font-weight-bold rightBorder freeze-column'
@@ -397,17 +374,8 @@
                         'bSortable': false,
                         'render': render_function_soil('VolumeFraction_Liquid',"ErrorValidation.isValidFraction(this)", "Soil_Surface")
                     }
-                ],
-                initComplete: function (settings, json) {
-                    // $(soil_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
-                    $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
-                    appendHeaderOptions(this, skip_columns=["Parcel Name", "Tillage"]);
-                    $('[data-toggle="tooltip"]').tooltip()
-                    $('[data-toggle="popover"]').popover()
-                }
-            });
-
-            root_apTable =  $(root_tblId).removeAttr('width').dataTable({
+            ];
+            soil_apTable =  $(soil_tblId).dataTable({
                 destroy: true,
                 data : soil_props,
                 paging: false,
@@ -419,7 +387,16 @@
                 fnCreatedRow: function (row, data, index) {
                     $(row).find("td.rightBorder").addClass("freeze-column")
                 },
-                columns: [
+                columns: setDynamicColumnWidths(soil_tblId, soil_cols, soil_props),
+                initComplete: function (settings, json) {
+                    // $(soil_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
+                    appendHeaderOptions(this, skip_columns=["Parcel Name", "Tillage"]);
+                    $('[data-toggle="tooltip"]').tooltip()
+                    $('[data-toggle="popover"]').popover()
+                }
+            });
+            let root_cols = [
                     {
                         'data': "Surface Parcel",
                         'className': 'font-weight-bold rightBorder freeze-column'
@@ -464,7 +441,20 @@
                         'bSortable': false,
                         'render': render_function_soil('VolumeFraction_Liquid',"ErrorValidation.isValidFraction(this)", "Soil_Root_Zone")
                     }
-                ],
+            ];
+            root_apTable =  $(root_tblId).dataTable({
+                destroy: true,
+                data : soil_props,
+                paging: false,
+                bFilter: false,
+                info: false,
+                bAutoWidth: false,
+                scrollX: true,
+                scrollY: 500,
+                fnCreatedRow: function (row, data, index) {
+                    $(row).find("td.rightBorder").addClass("freeze-column")
+                },
+                columns: setDynamicColumnWidths(root_tblId, root_cols, soil_props),
                 initComplete: function (settings, json) {
                     // $(root_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                     $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
@@ -473,20 +463,8 @@
                     $('[data-toggle="popover"]').popover()
                 }
             });
-
-            vadose_apTable =  $(vadose_tblId).removeAttr('width').dataTable({
-                destroy: true,
-                data : soil_props,
-                paging: false,
-                bFilter: false,
-                info: false,
-                scrollX: true,
-                scrollY: 500,
-                bAutoWidth: false,
-                fnCreatedRow: function (row, data, index) {
-                    $(row).find("td.rightBorder").addClass("freeze-column")
-                },
-                columns: [
+            
+            vadose_cols = [
                     {
                         'data': "Surface Parcel",
                         'className': 'font-weight-bold rightBorder freeze-column'
@@ -531,17 +509,9 @@
                         'bSortable': false,
                         'render': render_function_soil('VolumeFraction_Liquid',"ErrorValidation.isValidFraction(this)", "Soil_Vadose_Zone")
                     }
-                ],
-                initComplete: function (settings, json) {
-                    // $(vadose_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
-                    $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
-                    appendHeaderOptions(this, skip_columns=["Parcel Name"]);
-                    $('[data-toggle="tooltip"]').tooltip()
-                    $('[data-toggle="popover"]').popover()
-                }
-            });
+            ];
 
-            gw_apTable =  $(gw_tblId).removeAttr('width').dataTable({
+            vadose_apTable =  $(vadose_tblId).dataTable({
                 destroy: true,
                 data : soil_props,
                 paging: false,
@@ -553,7 +523,17 @@
                 fnCreatedRow: function (row, data, index) {
                     $(row).find("td.rightBorder").addClass("freeze-column")
                 },
-                columns: [
+                columns: setDynamicColumnWidths(vadose_tblId, vadose_cols, soil_props),
+                initComplete: function (settings, json) {
+                    // $(vadose_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
+                    appendHeaderOptions(this, skip_columns=["Parcel Name"]);
+                    $('[data-toggle="tooltip"]').tooltip()
+                    $('[data-toggle="popover"]').popover()
+                }
+            });
+
+            gw_cols = [
                     {
                         'data': "Surface Parcel",
                         'className': 'font-weight-bold rightBorder freeze-column'
@@ -588,7 +568,20 @@
                         'bSortable': false,
                         'render':  render_function_soil('Porosity',"ErrorValidation.isValidFraction(this)", "Groundwater")
                     }
-                ],
+            ];
+            gw_apTable =  $(gw_tblId).dataTable({
+                destroy: true,
+                data : soil_props,
+                paging: false,
+                bFilter: false,
+                info: false,
+                scrollX: true,
+                scrollY: 500,
+                bAutoWidth: false,
+                fnCreatedRow: function (row, data, index) {
+                    $(row).find("td.rightBorder").addClass("freeze-column")
+                },
+                columns: setDynamicColumnWidths(gw_tblId, gw_cols, soil_props),
                 initComplete: function (settings, json) {
                     // $(gw_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                     $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
@@ -841,6 +834,8 @@
                     abiotic_data.push(param_dict)
                 })
             }
+            console.log('abiotic data:')
+            console.log(abiotic_data)
             TableRedraw(abiotic_data)
             console.log('populated abiotic form!')
             LoadingScreen.hide('abiotic_info_loading');

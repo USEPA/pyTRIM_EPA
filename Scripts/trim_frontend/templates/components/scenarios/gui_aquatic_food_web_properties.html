@@ -25,7 +25,7 @@
                         <br><span style='color: firebrick;'>*</span> All editable cells are required.
                     </small>
                 </div>
-                <table data-slot="true" data-target="AquaticTable" class="hover wrap-text-medium" id="AquaticTable">
+                <table data-slot="true" data-target="AquaticTable" class="hover wrap-text" id="AquaticTable">
                     <thead>
                         <tr>
                             <th>Property</th>
@@ -218,14 +218,10 @@
                     fnCreatedRow: function (row, data, index) {
                         $(row).find("td.rightBorder-pivoted").addClass("freeze-column")
                     },
-                    headerCallback: function(thead) {
-                    $(thead).find('th').each(function(index) {
-                        if (![0].includes(index)) {
-                        $(this).addClass('word-break');
-                        }
-                    });
-                    },
-                    columns: get_pivoted_columns(table_data, table_type),
+                    columnDefs: [
+                       { width: '100%', targets: 0 }
+                    ],
+                    columns: setDynamicColumnWidths(tblId, get_pivoted_columns(table_data, table_type), table_data),
                     initComplete: function (settings, json) {
                         // $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                         $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});

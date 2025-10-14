@@ -956,7 +956,7 @@
                 const optionNum = x.id.split('_opt').pop();
                 const tbl = $(x);
                 const tblData = tblsData[`opt${optionNum}`];
-                tbl.addClass('wrap-text-medium');
+                tbl.addClass('wrap-text')
                 tbl.DataTable({
                     destroy: true,
                     data: tblData,
@@ -967,21 +967,10 @@
                     bAutoWidth: false,
                     scrollX: true,
                     scrollY: 500,
-                    columns: tblColDefs[`opt${optionNum}`],
+                    columns: setDynamicColumnWidths(tbl.attr('id'), tblColDefs[`opt${optionNum}`], tblData),
                     fnCreatedRow: function (row, data, index) {
                         $(row).attr('data-parcel-id', data.parcel_id);
                     },
-                    headerCallback: function(thead) {
-                        $(thead).find('th').eq(0).addClass('min-width-med');
-                    },
-                    columnDefs: [
-                        {
-                            targets: [0], 
-                            createdCell: function(td) {
-                            td.classList.add('min-width-med', 'break-word');
-                            }
-                        }
-                    ],
                     drawCallback: (settings) => {
                         globalDrawCallback(tbl);
                     }

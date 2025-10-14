@@ -19,6 +19,71 @@ function scientific(val) { // to scientific notation
     return new Intl.NumberFormat('en-US', {notation: "scientific"}).format(parseFloat(val));
 }
 
+function getMaxContentLength(headerText, col, dataRows, maxWidth) {
+    // remove html tags from header
+    let maxLen = headerText.replace(/<[^>]*>/g, '').trim().length;
+
+    if (col.data && Array.isArray(dataRows)) {
+        dataRows.forEach(function(row) {
+            // dot notation for nested keys
+            let cellValue = col.data.split('.').reduce((o, k) => o?.[k], row);
+            if (cellValue !== undefined && cellValue !== null) {
+                let cellText = cellValue.toString().trim();
+                if (!isNaN(cellText) && cellText !== '') {
+                    cellText = cellText.substring(0, 7);
+                }
+                if (cellText.length > maxLen) {
+                    maxLen = cellText.length;
+                }
+            }
+        });
+    }
+    return Math.min(maxLen, maxWidth);
+}
+
+function setDynamicColumnWidths(tableSelector, columns, dataRows, maxWidth=25) {
+    let $table = $(tableSelector);
+    let $thead = $table.find('thead');
+
+    if ($thead.find('th').length === 0) {
+        return setWidthFromDefinitions(columns, dataRows, maxWidth);
+    }
+
+    $thead.find('th').each(function(idx) {
+        let col = columns[idx];
+        if (!col) return;
+
+        // prevent question icon from moving to next line
+        let $label = $(this).find('label');
+        let $sup = $(this).find('sup');
+        if ($label.length && $sup.length) {
+            let labelText = $label.text().trim();
+            let words = labelText.split(' ');
+            let lastWord = words.pop();
+            let newHtml = (words.length ? words.join(' ') + ' ' : '') +
+                `<span style="white-space:nowrap;">${lastWord}${$sup[0].outerHTML}</span>`;
+            $label.html(newHtml);
+            $sup.remove();
+        }
+
+        // use th for length calculation
+        let headerText = $(this).clone().children('sup').remove().end().html() || '';
+        let colCh = getMaxContentLength(headerText, col, dataRows, maxWidth);
+        col.width = colCh + 'ch';
+    });
+
+    return columns;
+}
+
+function setWidthFromDefinitions(columns, dataRows, maxWidth=25) {
+    columns.forEach(function(col) {
+        let headerText = col.title || col.name || '';
+        let colCh = getMaxContentLength(headerText, col, dataRows, maxWidth);
+        col.width = (colCh + 1) + 'ch';
+    });
+    return columns;
+}
+
 // static value dropdown menu of column names
 function appendHeaderOptions(datatable, skip_columns=[]) {
     // clear existing options to avoid duplicates

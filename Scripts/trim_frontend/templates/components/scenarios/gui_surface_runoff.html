@@ -64,7 +64,7 @@
         </div>
         <div class="row">
             <div class="col-md">
-                <table class="hover wrap-text-medium" id="RunoffMatrix">
+                <table class="hover wrap-text" id="RunoffMatrix">
                 </table>
             </div>
         </div>
@@ -118,7 +118,7 @@
         let roTable = null;
         function TableRedraw_RO(table_data, cols) {
             let tblId = "#RunoffMatrix";
-            roTable =  $(tblId).removeAttr('width').dataTable({
+            roTable =  $(tblId).dataTable({
                 destroy: true,
                 data : table_data,
                 paging: false,
@@ -127,7 +127,7 @@
                 scrollX: true,
                 scrollY: 500,
                 bAutoWidth: false,
-                columns: cols,
+                columns: setDynamicColumnWidths(tblId, cols, table_data),
                 fnCreatedRow: function (row, data, index) {
                     $(row).attr("data-rsval","1")
                     $(row).attr("data-entity","run off fractions")
@@ -138,11 +138,11 @@
                     $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
-                    let first_row = $($("#RunoffMatrix").find("tr")[1])
-                    $('#ROHead').closest("table").find("th").each((i, e)=>{
-                        let col_width = $($(first_row).find("td")[i]).width()
-                        $(e).width(col_width)
-                    })
+                    // let first_row = $($("#RunoffMatrix").find("tr")[1])
+                    // $('#ROHead').closest("table").find("th").each((i, e)=>{
+                    //     let col_width = $($(first_row).find("td")[i]).width()
+                    //     $(e).width(col_width)
+                    // })
                 }
             });
 
