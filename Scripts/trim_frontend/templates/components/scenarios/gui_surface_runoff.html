@@ -136,6 +136,8 @@
                 initComplete: function (settings, json) {
                     // $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                     $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
+                    $(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
+                    $(".dataTables_scrollHead").addClass('wrap-text-scrollhead');
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
                     // let first_row = $($("#RunoffMatrix").find("tr")[1])

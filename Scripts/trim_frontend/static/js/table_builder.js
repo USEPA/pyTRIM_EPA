@@ -42,6 +42,7 @@ function getMaxContentLength(headerText, col, dataRows, maxWidth) {
 }
 
 function setDynamicColumnWidths(tableSelector, columns, dataRows, maxWidth=25) {
+    // update maxWidth to set default max width of columns in ch units
     let $table = $(tableSelector);
     let $thead = $table.find('thead');
 

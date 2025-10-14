@@ -208,6 +208,8 @@
                 columns: setDynamicColumnWidths(spatially_varying_tblId, spatially_varying_cols, table_data),
                 initComplete: function (settings, json) {
                     $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
+                    $(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
+                    $(".dataTables_scrollHead").addClass('wrap-text-scrollhead');
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
                     $(spatially_varying_tblId).find("tr").each(function (i,e) {
@@ -274,6 +276,8 @@
                 initComplete: function (settings, json) {
                     // $(air_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                     $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
+                    $(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
+                    $(".dataTables_scrollHead").addClass('wrap-text-scrollhead');
                     appendHeaderOptions(this, skip_columns=["Parcel Name"]);
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
@@ -391,6 +395,8 @@
                 initComplete: function (settings, json) {
                     // $(soil_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                     $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
+                    $(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
+                    $(".dataTables_scrollHead").addClass('wrap-text-scrollhead');
                     appendHeaderOptions(this, skip_columns=["Parcel Name", "Tillage"]);
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
@@ -458,6 +464,8 @@
                 initComplete: function (settings, json) {
                     // $(root_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                     $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
+                    $(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
+                    $(".dataTables_scrollHead").addClass('wrap-text-scrollhead');
                     appendHeaderOptions(this, skip_columns=["Parcel Name"]);
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
@@ -527,6 +535,8 @@
                 initComplete: function (settings, json) {
                     // $(vadose_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                     $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
+                    $(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
+                    $(".dataTables_scrollHead").addClass('wrap-text-scrollhead');
                     appendHeaderOptions(this, skip_columns=["Parcel Name"]);
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
@@ -585,6 +595,8 @@
                 initComplete: function (settings, json) {
                     // $(gw_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                     $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
+                    $(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
+                    $(".dataTables_scrollHead").addClass('wrap-text-scrollhead');
                     appendHeaderOptions(this, skip_columns=["Parcel Name"]);
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()

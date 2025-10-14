@@ -7,9 +7,9 @@ legend {
     width: inherit;
     padding: 2px;
 }
-table {
+/* table {
     white-space: nowrap;
-}
+} */
 td.rightBorder {
     text-align: right;
     border-right: 1px solid black;
@@ -87,36 +87,39 @@ th.rotated > div > span {
   padding: 10px 0px;
 }
 
-.wrap-text th, 
-.wrap-text td {
+/* For dataTables with dynamic cols */
+
+table.wrap-text {
+  table-layout: fixed;
+  width: 100%;
+}
+
+table.wrap-text th {
   white-space: normal;
-  max-width: 30ch;
+  word-break: normal;
+  overflow-wrap: break-word;
 }
 
-.wrap-text td {
-  word-break: break-word;
-}
-
-.wrap-text-medium th,
-.wrap-text-medium td {
+table.wrap-text td {
+  /* box-sizing: border-box; */
   white-space: normal;
-  max-width: 16ch;
+  word-break: break-all;
+  overflow-wrap: break-all;
 }
 
-th.min-width-med,
-td.min-width-med {
-  white-space: normal;
-  min-width: 16ch;
+.wrap-text-scrollbody {
+  overflow-x: auto;
+  overflow-y: auto;
+  width: 100% !important;
 }
 
-th.max-width-med,
-td.max-width-med {
-  white-space: normal;
-  max-width: 16ch;
+.wrap-text-scrollhead {
+  width: 100% !important;
 }
 
-.word-break {
-  word-break: break-word;
+.wrap-text table {
+  width: 100% !important;
+  min-width: 100% !important;
 }
 
 /*Legend specific*/

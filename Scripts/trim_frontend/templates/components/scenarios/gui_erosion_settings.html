@@ -904,6 +904,9 @@
             function globalDrawCallback(tbl) {
                 // General table formatting / features
                 tbl.find(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
+                tbl.find(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
+                tbl.find(".dataTables_scrollHead").addClass('wrap-text-scrollhead');
+
                 tbl.find("[data-toggle=popover]").popover();
                 tbl.find('[data-toggle="tooltip"]').tooltip();
 
