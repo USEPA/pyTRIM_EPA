@@ -17,6 +17,7 @@ class PyTrimDeployer(object):
     def __init__(self, config_file):
         with open(config_file, "r") as f:
             self.cfg = json.load(f)
+            loggy(f"Stack: '{self.get_cfg_val('environment_name')}'")
 
     def run_deployment(self, mode):
         loggy(f"running deployment in mode '{mode}'")
