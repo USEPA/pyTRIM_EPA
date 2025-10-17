@@ -41,32 +41,39 @@ function getMaxContentLength(headerText, col, dataRows, maxWidth) {
     return Math.min(maxLen, maxWidth);
 }
 
+function wrapIcon($element) {
+    let $label = $element.find('label');
+    let $sup = $element.find('sup');
+    if ($label.length && $sup.length) {
+        let labelText = $label.text().trim();
+        let words = labelText.split(' ');
+        let lastWord = words.pop();
+        let newHtml = (words.length ? words.join(' ') + ' ' : '') +
+            `<span style="white-space:nowrap;">${lastWord}${$sup[0].outerHTML}</span>`;
+        $label.html(newHtml);
+        $sup.remove();
+    }
+}
+
 function setDynamicColumnWidths(tableSelector, columns, dataRows, maxWidth=15) {
     // update maxWidth to set default max width of columns in ch units
     let $table = $(tableSelector);
     let $thead = $table.find('thead');
+    let $tbody = $table.find('tbody');
 
     if ($thead.find('th').length === 0) {
         return setWidthFromDefinitions(columns, dataRows, maxWidth);
     }
 
+    $tbody.find('td').each(function(idx) {
+        wrapIcon($(this));
+    });
+    
     $thead.find('th').each(function(idx) {
         let col = columns[idx];
         if (!col) return;
-
         // prevent question icon from moving to next line
-        let $label = $(this).find('label');
-        let $sup = $(this).find('sup');
-        if ($label.length && $sup.length) {
-            let labelText = $label.text().trim();
-            let words = labelText.split(' ');
-            let lastWord = words.pop();
-            let newHtml = (words.length ? words.join(' ') + ' ' : '') +
-                `<span style="white-space:nowrap;">${lastWord}${$sup[0].outerHTML}</span>`;
-            $label.html(newHtml);
-            $sup.remove();
-        }
-
+        wrapIcon($(this));
         // use th for length calculation
         let headerText = $(this).clone().children('sup').remove().end().html() || '';
         let colCh = getMaxContentLength(headerText, col, dataRows, maxWidth);

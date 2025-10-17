@@ -343,6 +343,9 @@
                 ],
                 fnCreatedRow: function (row, data, index) {
                     $(row).find("td.rightBorder-pivoted").addClass("freeze-column")
+                    $(row).find('td').each(function() {
+                        wrapIcon($(this));
+                    });
                 },
                 columns: setDynamicColumnWidths(tblId, get_pivoted_columns(table_type), table_data),
                 initComplete: function (settings, json) {

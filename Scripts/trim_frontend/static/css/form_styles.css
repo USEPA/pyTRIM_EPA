@@ -103,8 +103,8 @@ table.wrap-text th {
 table.wrap-text td {
   /* box-sizing: border-box; */
   white-space: normal;
-  word-break: break-all;
-  overflow-wrap: break-all;
+  word-break: normal;
+  overflow-wrap: anywhere;
 }
 
 .wrap-text-scrollbody {
