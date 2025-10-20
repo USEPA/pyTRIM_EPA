@@ -73,7 +73,7 @@ def use_local_model_run():
     # in dev/prod, we execute an AWS StepFunction to run the model via Docker/ECS. Locally,
     # we just run the model directly.
     trim_env_profile = os.environ.get("TRIM_ENV_PROFILE", "").lower()
-    return (trim_env_profile not in ["test", "dev", "devgetflow", "prod"])
+    return (trim_env_profile == 'local')
 
 
 def start_state_machine_model_run(scen):
