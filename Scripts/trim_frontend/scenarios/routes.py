@@ -791,7 +791,7 @@ def run_getflow(scenario_id):
         # unlike runmodel, here we use ECS even when running locally. (getting a working qgis
         # install is non-trivial, but if you wanted to run local you'd need to do that, then
         # modify this section of code to do something like "run_result_scenario".
-        if True or trim_env_profile != 'local':
+        if True or trim_env_profile in [ "test", "dev", "devgetflow", "prod" ]:
             sfn_client = boto3.client("stepfunctions")
             state_machine_arn = os.environ.get("TRIM_DOCKERIZED_GETFLOW_STATEMACHINE_ARN")
 
