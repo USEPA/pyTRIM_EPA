@@ -436,6 +436,7 @@
                 let sel = $(this);
                 let section = sel.closest('section');
                 var globalFileFiled = section.find('[type="file"][name^="default_"]');
+                let extension = globalFileFiled[0].files[0].name;
                 let data = globalFileFiled.attr('data-filedata');
 
                 let scenario = TRIM.store.currentScenario;
@@ -455,11 +456,14 @@
                     let d = new Date(inputFormat)
                     return [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/')
                 }
+                
+                let new_data = data.file_data;
+                if (!extension.endsWith(".sfc")) {
+                    // Restrict file data date range to the simulation period
+                    new_data = new_data.filter(e=>Date.parse(e['Date'])>=sim_start & Date.parse(e['Date'])<=sim_end)
+                    ErrorValidation.isInSimulationTimeSpan(sel, new_data)
+                }
 
-                // Restrict file data date range to the simulation period
-                let new_data = data.file_data.filter(e=>Date.parse(e['Date'])>=sim_start & Date.parse(e['Date'])<=sim_end)
-                // make sure we have data in the time window of simulation
-                ErrorValidation.isInSimulationTimeSpan(sel, new_data)
                 // Get only the column for this select
                 let this_sel_data = new_data.map((e,i) => {
                     let this_row = {

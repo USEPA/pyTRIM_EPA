@@ -31,7 +31,7 @@ class PyTrimDeployer(object):
         if mode == "full" or mode == "cloudformation":
             self.do_cf_stack_work()
 
-        if mode == "full" or mode == "crons":
+        if mode == "crons":
             self.create_cronjobs()
 
         if mode == "full" or mode == "docker":

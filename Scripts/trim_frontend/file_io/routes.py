@@ -21,7 +21,7 @@ from trim_db.services.entities import ParcelService
 from trim_frontend import api
 from ..parcels.utils import delete_parcel_contents, get_canonical_land_use_type, get_canonical_parcel_type, get_ve_defaults_for_parcel_type, handle_parcel_update, initialize_parcel_contents
 from ..utils.data_structures import calculate_list_depth
-from ..utils.file_io import csv_to_df, MiscAssociatedFileVariety, associated_file_helper
+from ..utils.file_io import csv_to_df, MiscAssociatedFileVariety, associated_file_helper, convert_sfc_to_meteo
 from ..utils.forms import assemble_json_form
 from ..utils.logging import make_logger
 from ..utils.spatial import determine_location, determine_nearest_neighbor_distance, ensure_closed_polygon, is_utm_zone_valid, translate_coordinates, translate_position
@@ -51,13 +51,17 @@ def parse():
         truncated = False
         record_limit = 1000000
         try:
+            df = None
             fname = secure_filename(f.filename)
 
             if fname.lower().endswith('.csv'):
                 df = csv_to_df(f, dtype=str)
                 # Get rid of carriage returns b/c they mess up output
                 df = df.replace('\r', '', regex=True)
+            elif fname.lower().endswith('.sfc'):
+                df = convert_sfc_to_meteo(f.read())
 
+            if df is not None:
                 fields = list(df.columns.values)
                 entries = len(df.index)
                 print(f'NUMBER OF ENTRIES IS {entries} ')

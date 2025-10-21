@@ -1,4 +1,7 @@
 import json, os, re
+from datetime import datetime
+from io import StringIO
+import numpy as np
 import boto3
 import jenkspy
 import pandas as pd
@@ -13,6 +16,15 @@ TRY_ENCODINGS = [
     'latin-1',
     'ascii'
 ]
+
+
+def vset(df: pd.DataFrame, func, arg_columns: list = []):
+    """set column with vectorization, much faster than .apply"""
+    if df.size == 0:
+        return None
+    args = [df[c] for c in arg_columns]
+    vfunc = np.vectorize(func, cache=True, excluded=["self"])
+    return vfunc(*args)
 
 
 def csv_to_df(file, encoding='utf-8-sig', dtype=None):
@@ -191,6 +203,117 @@ def parse_plt_file(raw_data):
 def parse_plt_file_as_dataframe(raw_data):
     parsed, _ = parse_plt_file(raw_data)
     return pd.DataFrame([p["data"] for p in parsed])
+
+"""
+.SFC file example
+
+   47.386N   92.839W          UA_ID:    14918  SF_ID:    94931  OS_ID:              VERSION: 16216   THRESH_1MIN =  0.50 m/s;  ADJ_U*  CCVR_Sub TEMP_Sub
+13  1  1   1  1 -999.0 -9.000 -9.000 -9.000 -999. -999. -99999.0  0.0601   0.49   1.00    0.00    0.0   10.0  247.5    2.0     0   0.00    74.   972.     0 ADJ-SFC NoSubs      
+13  1  1   1  2   -2.2  0.070 -9.000 -9.000 -999.   44.     13.6  0.0610   0.49   1.00    0.77  110.0   10.0  247.0    2.0     0   0.00    77.   972.     0 ADJ-A1  NoSubs      
+13  1  1   1  3 -999.0 -9.000 -9.000 -9.000 -999. -999. -99999.0  0.0601   0.49   1.00    0.00    0.0   10.0  245.9    2.0     0   0.00 
+"""
+def parse_sfc_file_as_dataframe(raw_data):
+    # These aren't provided in the file itself
+    SFC_HEADERS = {
+        "Year": 0, # last two digits e.g. 13 = 2013
+        "Month": 1,
+        "Day": 2,
+        "j_day": 3,
+        "hour": 4, # hour of day (1-24)
+        "H": 5, # sensible heat flux, missing value = -999
+        "u*": 6,
+        "w*": 7,
+        "VPTG": 8,
+        "zic": 9, # convective mixing height, missing value = -999
+        "zim": 10, # mechanical mixing height, missing value = -999
+        "L": 11,
+        "zo": 12,
+        "Bo": 13,
+        "R": 14,
+        "Ws": 15, # wind speed m/s, missing value = 999.0
+        "Wd": 16, # wind direction, missing value = 999.0
+        "zref": 17,
+        "temp": 18, # k, missing value = 999.0
+        "ztemp": 19,
+        "ipcode": 20,
+        "pamt": 21, # precipitation mm/hr, missing value = -9.00
+
+        # Not used
+        #"rh": 22,
+        #"pres": 23,
+        #"ccvr": 24,
+        #"WADJC": 25,
+        #"SUBflag": 26,
+    }
+
+    raw_data = str(raw_data, "utf-8")
+
+    if "\r\n" in raw_data: #raw_data.endswith("\r\n"):
+        lines = raw_data.split("\r\n")
+    elif "\n" in raw_data: #raw_data.endswith("\n"):
+        lines = raw_data.split("\n")
+    elif "\r" in raw_data: #raw_data.endswith("\r"):
+        lines = raw_data.split("\r")
+    else:
+        raise Exception(f"Unable to determine line ending for sfc data")
+
+    lines = "\n".join(lines[1:]) # first row isn't needed for anything
+
+    return pd.read_csv(
+        StringIO(lines),
+        sep="\s+",
+        names=SFC_HEADERS.keys(),
+        usecols=SFC_HEADERS.values(),
+    )
+
+# format sfc data so it mirrors a typical meteo csv upload
+# missing values e.g. -999, etc will be filtered out in the weighted average later
+def convert_sfc_to_meteo(raw_data):
+    def construct_date(year, month, day):
+        # 00-68 assumes 2000s; 69-99 assumes 1900s
+        year = f"{int(year):02}"
+        month = int(month)
+        day = int(day)
+        return datetime.strptime(f"{month}/{day}/{year}", "%m/%d/%y").strftime('%m/%d/%Y')
+    
+    def construct_winddirection(wd):
+        if wd == 0: # calm winds, no direction
+            return 999
+        return wd
+
+    def construct_mixingheight(heat_flux, zic, zim):
+        MISSING_VALUE = -999
+        if heat_flux == MISSING_VALUE:
+            return MISSING_VALUE
+        elif heat_flux > 0:
+            if max(zic, zim) != MISSING_VALUE:
+                return max(zic, zim)
+        elif heat_flux <= 0:
+            if zim != MISSING_VALUE:
+                return zim
+            elif zic != MISSING_VALUE:
+                return zic
+        return MISSING_VALUE
+
+    sfc_df = parse_sfc_file_as_dataframe(raw_data)
+    meteo_df = pd.DataFrame()
+
+    meteo_df["Date"] = vset(sfc_df, construct_date, ["Year", "Month", "Day"])
+    meteo_df["xHour"] = sfc_df["hour"] - 1 # 0-23, needs shift
+    meteo_df["TimeZone"] = "CST" # dummy data, not used?
+    meteo_df["AirTemperature"] = sfc_df["temp"]
+    meteo_df["HorizontalWindSpeed"] = sfc_df["Ws"]
+    meteo_df["WindDirection"] = vset(sfc_df, construct_winddirection, ["Wd"])
+    meteo_df["MixingHeight"] = vset(sfc_df, construct_mixingheight, ["H", "zic", "zim"])
+    meteo_df["Rain"] = sfc_df["pamt"] * 0.024 # convert from mm/hr to m/day
+
+    # convert from m/day to m
+    # meteo_df["CumulativeRain"] = pd.to_datetime(meteo_df["Date"])
+    # meteo_df["CumulativeRain"] = (meteo_df["CumulativeRain"].max() - meteo_df["CumulativeRain"].min())
+    # num_days = meteo_df.loc[0, 'CumulativeRain'].days
+    # meteo_df["CumulativeRain"] = meteo_df["Rain"] * num_days
+
+    return meteo_df
 
 
 class MiscAssociatedFileVariety():
