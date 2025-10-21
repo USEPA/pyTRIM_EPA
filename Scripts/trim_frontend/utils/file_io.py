@@ -1,6 +1,6 @@
 import json, os, re
 from datetime import datetime
-from io import StringIO
+from io import StringIO, TextIOWrapper
 import numpy as np
 import boto3
 import jenkspy
@@ -212,7 +212,7 @@ def parse_plt_file_as_dataframe(raw_data):
 13  1  1   1  2   -2.2  0.070 -9.000 -9.000 -999.   44.     13.6  0.0610   0.49   1.00    0.77  110.0   10.0  247.0    2.0     0   0.00    77.   972.     0 ADJ-A1  NoSubs      
 13  1  1   1  3 -999.0 -9.000 -9.000 -9.000 -999. -999. -99999.0  0.0601   0.49   1.00    0.00    0.0   10.0  245.9    2.0     0   0.00 
 """
-def parse_sfc_file_as_dataframe(raw_data):
+def parse_sfc_file_as_dataframe(raw_data: TextIOWrapper):
     # These aren't provided in the file itself
     SFC_HEADERS = {
         "Year": 0, # last two digits e.g. 13 = 2013
@@ -246,18 +246,14 @@ def parse_sfc_file_as_dataframe(raw_data):
         #"SUBflag": 26,
     }
 
-    raw_data = str(raw_data, "utf-8")
+    # we don't need the first line
+    raw_data.readline()
+    raw_data = raw_data.read()
 
-    if "\r\n" in raw_data: #raw_data.endswith("\r\n"):
-        lines = raw_data.split("\r\n")
-    elif "\n" in raw_data: #raw_data.endswith("\n"):
-        lines = raw_data.split("\n")
-    elif "\r" in raw_data: #raw_data.endswith("\r"):
-        lines = raw_data.split("\r")
-    else:
-        raise Exception(f"Unable to determine line ending for sfc data")
-
-    lines = "\n".join(lines[1:]) # first row isn't needed for anything
+    try:
+        lines = str(raw_data, "utf-8")
+    except:
+        lines = raw_data
 
     return pd.read_csv(
         StringIO(lines),
@@ -268,7 +264,7 @@ def parse_sfc_file_as_dataframe(raw_data):
 
 # format sfc data so it mirrors a typical meteo csv upload
 # missing values e.g. -999, etc will be filtered out in the weighted average later
-def convert_sfc_to_meteo(raw_data):
+def convert_sfc_to_meteo(sfc_df):
     def construct_date(year, month, day):
         # 00-68 assumes 2000s; 69-99 assumes 1900s
         year = f"{int(year):02}"
@@ -295,7 +291,6 @@ def convert_sfc_to_meteo(raw_data):
                 return zic
         return MISSING_VALUE
 
-    sfc_df = parse_sfc_file_as_dataframe(raw_data)
     meteo_df = pd.DataFrame()
 
     meteo_df["Date"] = vset(sfc_df, construct_date, ["Year", "Month", "Day"])
