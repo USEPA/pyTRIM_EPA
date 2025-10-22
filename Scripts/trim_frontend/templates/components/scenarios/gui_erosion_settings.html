@@ -904,6 +904,9 @@
             function globalDrawCallback(tbl) {
                 // General table formatting / features
                 tbl.find(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
+                tbl.find(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
+                tbl.find(".dataTables_scrollHead").addClass('wrap-text-scrollhead');
+
                 tbl.find("[data-toggle=popover]").popover();
                 tbl.find('[data-toggle="tooltip"]').tooltip();
 
@@ -956,7 +959,7 @@
                 const optionNum = x.id.split('_opt').pop();
                 const tbl = $(x);
                 const tblData = tblsData[`opt${optionNum}`];
-
+                tbl.addClass('wrap-text')
                 tbl.DataTable({
                     destroy: true,
                     data: tblData,
@@ -967,7 +970,7 @@
                     bAutoWidth: false,
                     scrollX: true,
                     scrollY: 500,
-                    columns: tblColDefs[`opt${optionNum}`],
+                    columns: setDynamicColumnWidths(tbl.attr('id'), tblColDefs[`opt${optionNum}`], tblData),
                     fnCreatedRow: function (row, data, index) {
                         $(row).attr('data-parcel-id', data.parcel_id);
                     },

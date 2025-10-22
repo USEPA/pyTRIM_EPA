@@ -1,7 +1,4 @@
 function isNumber(str) {
-    if (str.includes("+")) { // The '+' generated in something like e+0 crashes things in the backend
-        return false;
-    }
     const numberRegex = /^\s*[+-]?(\d+|\d*\.\d+|\d+\.\d*)([Ee][+-]?\d+)?\s*$/
     return numberRegex.test(str)
 }
@@ -17,6 +14,79 @@ function standardize_val(val) {
 
 function scientific(val) { // to scientific notation
     return new Intl.NumberFormat('en-US', {notation: "scientific"}).format(parseFloat(val));
+}
+
+function getMaxContentLength(headerText, col, dataRows, maxWidth) {
+    // remove html tags from header
+    let maxLen = headerText.replace(/<[^>]*>/g, '').trim().length;
+
+    if (col.data && Array.isArray(dataRows)) {
+        dataRows.forEach(function(row) {
+            // dot notation for nested keys
+            let cellValue = col.data.split('.').reduce((o, k) => o?.[k], row);
+            if (cellValue !== undefined && cellValue !== null) {
+                let cellText = cellValue.toString().trim();
+                if (!isNaN(cellText) && cellText !== '') {
+                    cellText = cellText.substring(0, 7);
+                }
+                if (cellText.length > maxLen) {
+                    maxLen = cellText.length;
+                }
+            }
+        });
+    }
+    return Math.min(maxLen, maxWidth);
+}
+
+function wrapIcon($element) {
+    let $label = $element.find('label');
+    let $sup = $element.find('sup');
+    if ($label.length && $sup.length) {
+        let labelText = $label.text().trim();
+        let words = labelText.split(' ');
+        let lastWord = words.pop();
+        let newHtml = (words.length ? words.join(' ') + ' ' : '') +
+            `<span style="white-space:nowrap;">${lastWord}${$sup[0].outerHTML}</span>`;
+        $label.html(newHtml);
+        $sup.remove();
+    }
+}
+
+function setDynamicColumnWidths(tableSelector, columns, dataRows, maxWidth=15) {
+    // update maxWidth to set default max width of columns in ch units
+    let $table = $(tableSelector);
+    let $thead = $table.find('thead');
+    let $tbody = $table.find('tbody');
+
+    if ($thead.find('th').length === 0) {
+        return setWidthFromDefinitions(columns, dataRows, maxWidth);
+    }
+
+    $tbody.find('td').each(function(idx) {
+        wrapIcon($(this));
+    });
+    
+    $thead.find('th').each(function(idx) {
+        let col = columns[idx];
+        if (!col) return;
+        // prevent question icon from moving to next line
+        wrapIcon($(this));
+        // use th for length calculation
+        let headerText = $(this).clone().children('sup').remove().end().html() || '';
+        let colCh = getMaxContentLength(headerText, col, dataRows, maxWidth);
+        col.width = colCh + 'ch';
+    });
+
+    return columns;
+}
+
+function setWidthFromDefinitions(columns, dataRows, maxWidth=25) {
+    columns.forEach(function(col) {
+        let headerText = col.title || col.name || '';
+        let colCh = getMaxContentLength(headerText, col, dataRows, maxWidth);
+        col.width = (colCh + 1) + 'ch';
+    });
+    return columns;
 }
 
 // static value dropdown menu of column names

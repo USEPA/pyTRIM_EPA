@@ -2,6 +2,7 @@ import getopt, json, sys
 from common import die, whoami_aws, loggy
 from helpers.cloudformation_helper import CloudFormationHelper
 from helpers.beanstalk_helper import BeanstalkHelper
+from helpers.cronjobs_helper import CronjobsHelper
 from helpers.docker_helper import DockerHelper
 from helpers.elastic_ip_helper import ElasticIpHelper
 from helpers.ssh_keypair_helper import SshKeypairHelper
@@ -16,6 +17,7 @@ class PyTrimDeployer(object):
     def __init__(self, config_file):
         with open(config_file, "r") as f:
             self.cfg = json.load(f)
+            loggy(f"Stack: '{self.get_cfg_val('environment_name')}'")
 
     def run_deployment(self, mode):
         loggy(f"running deployment in mode '{mode}'")
@@ -29,10 +31,13 @@ class PyTrimDeployer(object):
         if mode == "full" or mode == "cloudformation":
             self.do_cf_stack_work()
 
+        if mode == "crons":
+            self.create_cronjobs()
+
         if mode == "full" or mode == "docker":
             self.build_and_push_docker_images()
 
-        if mode == "_full" or mode == "push_flask_build":
+        if mode == "full" or mode == "push_flask_build":
             self.build_and_push_flask_app()
 
     def get_cfg_val(self, path, default_val = None):
@@ -92,6 +97,16 @@ class PyTrimDeployer(object):
             "NATGatewayElasticIPAllocationID": elastic_ip_allocation_id,
         }, ingress_data)
 
+    def create_cronjobs(self):
+        loggy(f"setting up cronjobs")
+        crons = self.get_cfg_val("aws.crons")
+        if not crons:
+            loggy(f"Skipping...")
+            return
+        env_name = self.get_cfg_val("environment_name")
+        crons_helper = CronjobsHelper()
+        crons_helper.create_cronjobs(env_name, crons)
+
     def build_and_push_docker_images(self):
         loggy(f"DOCKER SETUP!")
         docker_helper = DockerHelper()
@@ -106,11 +121,17 @@ class PyTrimDeployer(object):
         beanstalk_helper.build_etc(env_name)
 
 
+def usage(msg=""):
+    loggy(
+        f"Usage: python ls_deploy.py -c <json_configuration_file> (-m <mode>) (-p <aws_profile_name>)"
+    )
+    die(msg)
+
 if __name__ == "__main__":
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "c:m:", [ "config=", "mode=" ])
-    except getopt.GetoptError:
-        usage()
+        opts, args = getopt.getopt(sys.argv[1:], "c:m:p:", [ "config=", "mode=", "profile=" ])
+    except getopt.GetoptError as e:
+        usage(e)
 
     config_file = None
     mode = None
@@ -119,12 +140,19 @@ if __name__ == "__main__":
             config_file = arg
         elif opt in ("-m", "--mode"):
             mode = arg
+        elif opt in ("-p", "--profile"):
+            profile = arg
 
     if mode is None:
         mode = "full"
+    if profile:
+        import boto3
+
+        boto3.setup_default_session(profile_name=profile)
+
 
     if config_file is None:
-        print(f"Usage: python pytrim_deploy.py -c <json_configuration_file> (-m <mode>)")
+        usage("No config supplied")
     else:
         # message the user so they are sure to be credentialed as proper user
         whoami = whoami_aws()

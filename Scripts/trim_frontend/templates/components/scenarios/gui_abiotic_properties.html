@@ -20,8 +20,7 @@
                     <div class="col-md mt-3">
                     </div>
                     <div class="col-md mt-3">
-                        <!--TODO implement-->
-                        <button hidden id="abiotic-usda-soil-btn" class="btn btn-warning">Get data from USDA Soil DataMart</button>
+                        <button id="abiotic-usda-soil-btn" class="btn btn-secondary">Get data from USDA Soil DataMart</button>
                     </div>
                     <div class="col-md mt-3">
                     </div>
@@ -34,19 +33,19 @@
                 {{ table_static_value(table_id='SurfacePrecipitationAbioticTable', columns=[]) }}
                 <div class ="row">
                     <div class="col-md">
-                        <table data-slot="true" data-target="SurfacePrecipitationAbioticTable" class="hover" id="SurfacePrecipitationAbioticTable">
+                        <table data-slot="true" data-target="SurfacePrecipitationAbioticTable" class="hover wrap-text" id="SurfacePrecipitationAbioticTable">
                         </table>
                     </div>
                 </div>
                 <div class = "row">
-                    <div class="col-md m-2 text-center">
+                    <div class="col-md mt-4 text-center">
                         <h4>Air Properties</h4>
                     </div>
                 </div>
                 {{ table_static_value(table_id='AirAbioticTable', columns=[]) }}
                 <div class ="row">
                     <div class="col-md">
-                        <table data-slot="true" data-target="AirAbioticTable" class="hover" id="AirAbioticTable"></table>
+                        <table data-slot="true" data-target="AirAbioticTable" class="hover wrap-text" id="AirAbioticTable"></table>
                     </div>
                 </div>
                 <div class = "row">
@@ -57,7 +56,7 @@
                 {{ table_static_value(table_id='SurfaceSoilAbioticTable', columns=[]) }}
                 <div class ="row">
                     <div class="col-md">
-                        <table data-slot="true" data-target="SurfaceSoilAbioticTable" class="hover" id="SurfaceSoilAbioticTable"></table>
+                        <table data-slot="true" data-target="SurfaceSoilAbioticTable" class="hover wrap-text" id="SurfaceSoilAbioticTable"></table>
                     </div>
                 </div>
                 <div class = "row">
@@ -68,7 +67,7 @@
                 {{ table_static_value(table_id='RootSoilAbioticTable', columns=[]) }}
                 <div class ="row">
                     <div class="col-md">
-                        <table data-slot="true" data-target="RootSoilAbioticTable" class="hover" id="RootSoilAbioticTable"></table>
+                        <table data-slot="true" data-target="RootSoilAbioticTable" class="hover wrap-text" id="RootSoilAbioticTable"></table>
                     </div>
                 </div>
                 <div class = "row">
@@ -79,7 +78,7 @@
                 {{ table_static_value(table_id='VadoseSoilAbioticTable', columns=[]) }}
                 <div class ="row">
                     <div class="col-md">
-                        <table data-slot="true" data-target="VadoseSoilAbioticTable" class="hover" id="VadoseSoilAbioticTable"></table>
+                        <table data-slot="true" data-target="VadoseSoilAbioticTable" class="hover wrap-text" id="VadoseSoilAbioticTable"></table>
                     </div>
                 </div>
                 <div class = "row">
@@ -90,7 +89,7 @@
                 {{ table_static_value(table_id='GWSoilAbioticTable', columns=[]) }}
                 <div class ="row">
                     <div class="col-md">
-                        <table data-slot="true" data-target="GWSoilAbioticTable" class="hover" id="GWSoilAbioticTable"></table>
+                        <table data-slot="true" data-target="GWSoilAbioticTable" class="hover wrap-text" id="GWSoilAbioticTable"></table>
                     </div>
                 </div>
             </div>
@@ -140,8 +139,52 @@
             let vadose_tblId = "#VadoseSoilAbioticTable";
             let gw_tblId = "#GWSoilAbioticTable";
 
-            surfPrecip_apTable = $(surfPrecip_tblId).removeAttr('width').dataTable({
-                data : table_data,
+            var surfPrecip_cols = [
+                {
+                    'bSortable': false,
+                    'data': "Surface Parcel",
+                    'className': 'font-weight-bold rightBorder freeze-column'
+                },
+                {
+                    'data': "precipitation.EvapotranspirationFractions",
+                    'bSortable': false,
+                    'render': function (data, type, row) {
+                        let isValidPcl = !(row.parcelType.includes("Water") || row.parcelType.includes("Air Only"));
+                        let this_cell_data = isValidPcl ? data : "N/A"
+                        let this_cell_prop = isValidPcl ? 'editableCell badge badge-light' : 'text-muted'
+                        let parcel_info = create_parcel_object('EvapotranspirationFractions', row, data);
+                        let err_html = "onblur='ErrorValidation.isValidFraction(this);ErrorValidation.rowTotalIsValid(this);'";
+                        return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html);
+                    }
+                },
+                {
+                    'data': "precipitation.GroundwaterSeepageFractions",
+                    'bSortable': false,
+                    'render': function (data, type, row) {
+                        let isValidPcl = !(row.parcelType.includes("Water") || row.parcelType.includes("Air Only"));
+                        let this_cell_data = isValidPcl ? data : "N/A"
+                        let this_cell_prop = isValidPcl ? 'editableCell badge badge-light' : 'text-muted'
+                        let parcel_info = create_parcel_object('GroundwaterSeepageFractions', row, data);
+                        let err_html = "onblur='ErrorValidation.isValidFraction(this);ErrorValidation.rowTotalIsValid(this);'";
+                        return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html);
+                    }
+                },
+                {
+                    'data': "precipitation.RunoffFractions",
+                    'bSortable': false,
+                    'render': function (data, type, row) {
+                        let isValidPcl = !(row.parcelType.includes("Water") || row.parcelType.includes("Air Only"));
+                        let this_cell_data = isValidPcl ? data : "N/A"
+                        let this_cell_prop = isValidPcl ? 'editableCell badge badge-light' : 'text-muted'
+                        let parcel_info = create_parcel_object('RunoffFractions', row, data);
+                        let err_html = "onblur='ErrorValidation.isValidFraction(this);ErrorValidation.rowTotalIsValid(this);'";
+                        return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html);
+                    }
+                }
+            ];
+
+            var surfPrecip_apTable = $(surfPrecip_tblId).removeAttr('width').dataTable({
+                data: table_data,
                 paging: false,
                 bFilter: false,
                 info: false,
@@ -152,51 +195,11 @@
                 fnCreatedRow: function (row, data, index) {
                     $(row).find("td.rightBorder").addClass("freeze-column")
                 },
-                columns: [
-                    {
-                        'bSortable': false,
-                        'data': "Surface Parcel",
-                        'className': 'font-weight-bold rightBorder freeze-column'
-                    },
-                    {
-                        'data': "precipitation.EvapotranspirationFractions",
-                        'bSortable': false,
-                        'render': function (data, type, row) {
-                            let isValidPcl = !(row.parcelType.includes("Water") || row.parcelType.includes("Air Only"));
-                            let this_cell_data = isValidPcl ? data : "N/A"
-                            let this_cell_prop = isValidPcl ? 'editableCell badge badge-light' : 'text-muted'
-                            let parcel_info = create_parcel_object('EvapotranspirationFractions', row, data);
-                            let err_html = "onblur='ErrorValidation.isValidFraction(this);ErrorValidation.rowTotalIsValid(this);'";
-                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html);
-                        }
-                    },
-                    {
-                        'data': "precipitation.GroundwaterSeepageFractions",
-                        'bSortable': false,
-                        'render': function (data, type, row) {
-                            let isValidPcl = !(row.parcelType.includes("Water") || row.parcelType.includes("Air Only"));
-                            let this_cell_data = isValidPcl ? data : "N/A"
-                            let this_cell_prop = isValidPcl ? 'editableCell badge badge-light' : 'text-muted'
-                            let parcel_info = create_parcel_object('GroundwaterSeepageFractions', row, data);
-                            let err_html = "onblur='ErrorValidation.isValidFraction(this);ErrorValidation.rowTotalIsValid(this);'";
-                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html);
-                        }
-                    },
-                    {
-                        'data': "precipitation.RunoffFractions",
-                        'bSortable': false,
-                        'render': function (data, type, row) {
-                            let isValidPcl = !(row.parcelType.includes("Water") || row.parcelType.includes("Air Only"));
-                            let this_cell_data = isValidPcl ? data : "N/A"
-                            let this_cell_prop = isValidPcl ? 'editableCell badge badge-light' : 'text-muted'
-                            let parcel_info = create_parcel_object('RunoffFractions', row, data);
-                            let err_html = "onblur='ErrorValidation.isValidFraction(this);ErrorValidation.rowTotalIsValid(this);'";
-                            return create_cell_html(parcel_info, data, this_cell_prop, this_cell_data, err_html);
-                        }
-                    }
-                ],
+                columns: setDynamicColumnWidths(surfPrecip_tblId, surfPrecip_cols, table_data),
                 initComplete: function (settings, json) {
                     $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
+                    $(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
+                    $(".dataTables_scrollHead").addClass('wrap-text-scrollhead');
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
                     $(surfPrecip_tblId).find("tr").each(function (i,e) {
@@ -277,20 +280,22 @@
 
             air_apTable =  $(air_tblId).removeAttr('width').dataTable({
                 destroy: true,
-                data : table_data,
+                data: table_data,
                 paging: false,
                 bFilter: false,
                 info: false,
+                bAutoWidth: false,
                 scrollX: true,
                 scrollY: 500,
-                bAutoWidth: false,
                 fnCreatedRow: function (row, data, index) {
                     $(row).find("td.rightBorder").addClass("freeze-column")
                 },
-                columns: airTblCols,
+                columns: setDynamicColumnWidths(air_tblId, airTblCols, table_data),
                 initComplete: function (settings, json) {
                     // $(air_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                     $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
+                    $(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
+                    $(".dataTables_scrollHead").addClass('wrap-text-scrollhead');
                     appendHeaderOptions(this, skip_columns=["Parcel Name"]);
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
@@ -397,7 +402,7 @@
 
             soil_apTable =  $(soil_tblId).removeAttr('width').dataTable({
                 destroy: true,
-                data : table_data,
+                data: table_data,
                 paging: false,
                 bFilter: false,
                 info: false,
@@ -407,10 +412,12 @@
                 fnCreatedRow: function (row, data, index) {
                     $(row).find("td.rightBorder").addClass("freeze-column")
                 },
-                columns: soilTblCols,
+                columns: setDynamicColumnWidths(soil_tblId, soilTblCols, table_data),
                 initComplete: function (settings, json) {
                     // $(soil_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                     $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
+                    $(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
+                    $(".dataTables_scrollHead").addClass('wrap-text-scrollhead');
                     appendHeaderOptions(this, skip_columns=["Parcel Name", "Tillage"]);
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
@@ -468,7 +475,7 @@
 
             root_apTable =  $(root_tblId).removeAttr('width').dataTable({
                 destroy: true,
-                data : table_data,
+                data: table_data,
                 paging: false,
                 bFilter: false,
                 info: false,
@@ -478,10 +485,12 @@
                 fnCreatedRow: function (row, data, index) {
                     $(row).find("td.rightBorder").addClass("freeze-column")
                 },
-                columns: rootTblCols,
+                columns: setDynamicColumnWidths(root_tblId, rootTblCols, table_data),
                 initComplete: function (settings, json) {
                     // $(root_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                     $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
+                    $(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
+                    $(".dataTables_scrollHead").addClass('wrap-text-scrollhead');
                     appendHeaderOptions(this, skip_columns=["Parcel Name"]);
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
@@ -539,20 +548,22 @@
 
             vadose_apTable =  $(vadose_tblId).removeAttr('width').dataTable({
                 destroy: true,
-                data : table_data,
+                data: table_data,
                 paging: false,
                 bFilter: false,
                 info: false,
+                bAutoWidth: false,
                 scrollX: true,
                 scrollY: 500,
-                bAutoWidth: false,
                 fnCreatedRow: function (row, data, index) {
                     $(row).find("td.rightBorder").addClass("freeze-column")
                 },
-                columns: vadoseTblCols,
+                columns: setDynamicColumnWidths(vadose_tblId, vadoseTblCols, table_data),
                 initComplete: function (settings, json) {
                     // $(vadose_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                     $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
+                    $(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
+                    $(".dataTables_scrollHead").addClass('wrap-text-scrollhead');
                     appendHeaderOptions(this, skip_columns=["Parcel Name"]);
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
@@ -600,7 +611,7 @@
 
             gw_apTable =  $(gw_tblId).removeAttr('width').dataTable({
                 destroy: true,
-                data : table_data,
+                data: table_data,
                 paging: false,
                 bFilter: false,
                 info: false,
@@ -610,10 +621,12 @@
                 fnCreatedRow: function (row, data, index) {
                     $(row).find("td.rightBorder").addClass("freeze-column")
                 },
-                columns: gwTblCols,
+                columns: setDynamicColumnWidths(gw_tblId, gwTblCols, table_data),
                 initComplete: function (settings, json) {
                     // $(gw_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                     $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
+                    $(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
+                    $(".dataTables_scrollHead").addClass('wrap-text-scrollhead');
                     appendHeaderOptions(this, skip_columns=["Parcel Name"]);
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
@@ -747,26 +760,24 @@
 
         $("#abiotic-usda-soil-btn").on('click', (e) => {
             e.preventDefault();
-            /*
-            LoadingScreen.show('parcel_soil_data');
-            function parseSoilData(resp) { // till and notill
-                $.each(resp, (pcl, data) => {
-                    resp[pcl] = JSON.parse(data);
-                    
-                    let surface_idx = Object.values(resp[pcl].layer).indexOf('surface');
-                    let root_idx = Object.values(resp[pcl].layer).indexOf('root');
-                    let vadose_idx = Object.values(resp[pcl].layer).indexOf('vadose');
-                });
-                return resp;
-            }
-            TRIM.api.getSoilData('both').on('load', function () {
-                LoadingScreen.hide('parcel_soil_data');
-                let soil_data = JSON.parse(this.responseText);
-                let till = parseSoilData(soil_data.tilled_data);
-                let notill = parseSoilData(soil_data.no_till_data);
-
-                console.log("!")
-            });*/
+            LoadingScreen.show("update_soil_data")
+            scenario_info = [{
+                'type': 'data',
+                'name': 'id',
+                'value': TRIM.store.currentScenario.id
+            },{
+                'type': 'data',
+                'name': 'field',
+                'value': 'soil_api'
+            },{
+                'type': 'input',
+                'name': 'soil_api',
+                'value': true
+            }]
+            TRIM.api.updateScenario(scenario_info).on('load', function() {
+                LoadingScreen.hide('update_soil_data');
+                $('#save-btn').click();
+            });
         });
 
         function get_Data_from_table(thisTableID){
@@ -918,6 +929,8 @@
                 }
                 abiotic_data.push(props)
             }
+            console.log('abiotic data:')
+            console.log(abiotic_data)
             TableRedraw(abiotic_data)
             console.log('populated abiotic form!')
             LoadingScreen.hide('abiotic_info_loading');

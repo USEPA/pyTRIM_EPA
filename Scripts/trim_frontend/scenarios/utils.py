@@ -7,9 +7,10 @@ import pandas as pd
 import pint
 from numpy import timedelta64
 from pathlib import Path
+from trim_frontend.external_API.routes import SoilData
 from trim_db.schema import CustomParameter, ParameterDefinition
 from trim_db.services import *
-from trim_db.services.parameters import get_or_create_custom_param
+from trim_db.services.parameters import get_or_create_custom_param, update_custom_param_value
 from .defaults import *
 from ..utils.logging import make_logger
 
@@ -72,7 +73,7 @@ def use_local_model_run():
     # in dev/prod, we execute an AWS StepFunction to run the model via Docker/ECS. Locally,
     # we just run the model directly.
     trim_env_profile = os.environ.get("TRIM_ENV_PROFILE", "").lower()
-    return (trim_env_profile not in ["dev", "devgetflow", "prod"])
+    return (trim_env_profile not in ["test", "dev", "devgetflow", "prod"])
 
 
 def start_state_machine_model_run(scen):
@@ -528,6 +529,9 @@ def handle_scenario_update(s, scenario_data):
             elif chem not in s.chemicals and opt == 'add':
                 s.chemicals.append(chem)
 
+    elif field_name == "soil_api":
+        update_soil_from_api(s, logger)
+
     ScenarioService.update(s)
 
     return ret_val
@@ -772,3 +776,58 @@ def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
         met_dict['wt_av_litterfallrate'] = wt_ave
 
     return met_dict
+
+
+def update_soil_from_api(s, logger):
+    logger.info("Obtaining parcel soil data from USDA.gov")
+    def calculate_layer_vals(pcl, data, layer):
+        idx = [k for k,v in data['layer'].items() if v == layer][0]
+        param_map = {
+            "pH": data['ph1to1h2o_r'][idx],
+            "OrganicCarbonContent": (data['om_r'][idx] / 100) / 1.72,
+            "VolumeFraction_Liquid": data['awc_r'][idx], # water content
+            "FractionSand": data['sandtotal_r'][idx] / 100,
+        }
+
+        comp = None
+        if layer == "surface":
+            comp = pcl.get_compartment("Soil_Surface")
+        elif layer == "root":
+            comp = pcl.get_compartment("Soil_Root_Zone")
+        elif layer == "vadose":
+            comp = pcl.get_compartment("Soil_Vadose_Zone")
+
+        if not comp: # water / air parcels
+            return
+
+        for param_name, val in param_map.items():
+            param = comp.parameters.get(param_name)
+            param = get_or_create_custom_param(
+                param,
+                {"requirements": f"(self.id == {comp.id})", "scenario_id": pcl.scenario_id},
+            )
+            update_custom_param_value(param, val)
+
+    if not s.parcels:
+        return
+    
+    parcels = {}
+    parcel_tillage = {}
+    for this_p in s.parcels:
+        this_parcel_data = this_p.as_serializable()
+        parcels[this_parcel_data['name']] = [(t[1], t[0]) for t in this_parcel_data['vertices']]
+        parcel_tillage[this_parcel_data['name']] = (this_parcel_data['soilTillage'] == 'Yes')
+    sd = SoilData(vert_dict=parcels)
+    sd.run()
+    
+    for pcl_name, is_tilled in parcel_tillage.items():
+        logger.info(f"Calculating layer values for [{pcl_name}]")
+        pcl = ParcelService.get(name=pcl_name, scenario_id=s.id)
+        if is_tilled:
+            soil_data = json.loads(sd.scenario_tilled_results[pcl_name])
+        else:
+            soil_data = json.loads(sd.scenario_no_till_results[pcl_name])
+
+        calculate_layer_vals(pcl, soil_data, "surface")       
+        calculate_layer_vals(pcl, soil_data, "root")
+        calculate_layer_vals(pcl, soil_data, "vadose")
