@@ -35,6 +35,12 @@ def serialize_parcel(pcl: Parcel):
         **soil_abiotic_params,
         **initial_conc
     }
+    try:
+        s['mercury_transformation_rates'] = (
+            ChemicalService.get_mercury_transformation_rates(pcl)
+        )
+    except AssertionError:
+        pass  # No Mercuries Present
     return s
 
 

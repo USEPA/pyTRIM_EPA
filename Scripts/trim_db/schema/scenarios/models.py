@@ -35,6 +35,9 @@ class Scenario(Model, TrackUpdatesMixin):
                 return c
         return None
 
+    def get_chemicals(self, category):
+        return [c for c in self.chemicals if c.isa(category)]
+
     def get_parcel(self, name):
         for p in self.parcels:
             if p.name == name:

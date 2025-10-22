@@ -108,6 +108,12 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         "FractionofAreaAvailableforVerticalDiffusion", "TotalRunoffRate"
     ]
 
+    mercury_transform_rate_params = [
+        x
+        for rates in ChemicalService.mercury_transformation_parameters.values()
+        for x in rates
+    ]
+
     # Update the specified property
     field_name = parcels_data["field"]
 
@@ -518,6 +524,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                 print(new_formula)
             FormulaService.get(src_par.formula.id).equation = new_formula
             FormulaService.commit()
+
     elif field_name == "initial concentration":
         ic_comp = p.get_compartment(name=parcels_data["compartment_name"])
         ic_par = ic_comp.parameters.get('initialConcentration')
@@ -551,6 +558,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                 print(new_formula)
             FormulaService.get(ic_par.formula.id).equation = new_formula
             FormulaService.commit()
+
     elif field_name == "runoff_matrix_value":
         scn = ScenarioService.get(id=p.scenario.id)
         sender_parcel_name = parcels_data["sender"].replace("ro_", "")
@@ -614,6 +622,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                 eq = new_formula
             FormulaService.get(sender_par.formula.id).equation = new_formula
             FormulaService.commit()
+
     elif field_name == "receptor_spacing":
         submitted_spacing_val = parcels_data.get("receptor_spacing")
 
@@ -641,6 +650,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             raise Exception("unexpected param_obj type...")
 
         ParameterService.commit()
+
     elif field_name == "vertices":
         print(f"save vertices change FOR {p.id} / {p.name}...")
         coords_data = json.loads(parcels_data.get("vertices", []))
@@ -650,6 +660,14 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             long_lat = [ [x[1], x[0]] for x in coords_data ]
             p.vertices = long_lat
 
+    elif field_name.split('.', 1)[0] in mercury_transform_rate_params:
+        val = float(parcels_data[field_name])
+        field_name = field_name.split('.', 1)
+        rate_name = field_name[0]
+        media_type = field_name[1]
+        ChemicalService.update_mercury_transformation_rate(
+            p, rate_name, media_type, val
+        )
 
     # Update record
     ParcelService.update(p)
