@@ -463,7 +463,8 @@ def handle_scenario_update(s, scenario_data):
             if "_static_" in field_name:
                 update_custom_param(s, s, param_name, param_data, create_if_dne=True)
             elif field_name.endswith("_TS"):
-                ret_val = meteo_wgt_avg_value_from_timeseries(param_data, "MET")
+                param_type = "SFC" if scenario_data.get("is_sfc") == 'true' else "MET"
+                ret_val = meteo_wgt_avg_value_from_timeseries(param_data, param_type)
                 if isinstance(ret_val, dict) and "wt_av_Rain" in ret_val.keys():
                     param_value = ret_val["wt_av_Rain"]
                 elif isinstance(ret_val, dict) and "wt_av_CumulativeRain" in ret_val.keys():
@@ -715,12 +716,12 @@ def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
     df_met['Month'] = pd.to_numeric(df_met['Month'], errors='coerce')
     df_met['Day'] = pd.to_numeric(df_met['Day'], errors='coerce')
     df_met['Year'] = pd.to_numeric(df_met['Year'], errors='coerce')
-    hour_col_name = 'xHour' if param_type == "MET" else 'Hour'
+    hour_col_name = 'xHour' if param_type in ["MET", "SFC"] else 'Hour'
     df_met['Hour'] = pd.to_numeric(df_met[hour_col_name], errors='coerce')
     df_met = df_met.loc[
         (df_met.Month < 13) & (df_met.Day < 32) & (df_met.Year < 2100)]  # drop faulty
 
-    if param_type == "MET":
+    if param_type in ["MET", "SFC"]:
         df_met = df_met.loc[(df_met.Hour < 25)]  # drop faulty
         metcol_dict = {'Rain': (0, 1), 'AirTemperature': (200, 373), 'HorizontalWindSpeed': (0, 100),
                        'WindDirection': (-360, 360), 'mixingHeight': (0, 10000), 'IsDay': (0, 1),
@@ -748,7 +749,7 @@ def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
 
     # Get time-weighted averages
     met_dict = {}
-    if param_type == "MET":
+    if param_type in ["MET", "SFC"]:
         for k, v in metcol_dict.items():
             if k in df_met.columns:
                 df_met['metcol'] = pd.to_numeric(df_met[k], errors='coerce')
@@ -762,6 +763,15 @@ def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
             df_met['RainTime'] = df_met['is_Rain'] * df_met['time_delta']
             rain_frac_time = df_met['RainTime'].sum() / df_met['time_delta'].sum()
             met_dict['frac_time_rain'] = rain_frac_time
+
+        if param_type == "SFC":
+            avg_wind_speed = met_dict.get("wt_av_HorizontalWindSpeed")
+            avg_mixing_height = met_dict.get("wt_av_mixingHeight")
+            if avg_wind_speed:
+                met_dict["wt_av_HorizontalWindSpeed"] = max(avg_wind_speed, 0.75)     
+            if avg_mixing_height:
+                met_dict["wt_av_mixingHeight"] = max(avg_mixing_height, 20)
+
     if param_type == "AE":
         # process AE.
         df_met['ae'] = pd.to_numeric(df_met['AllowExchange'], errors='coerce')

@@ -297,7 +297,7 @@
             return param_info
         }
 
-        function submit_meteo_value(elem) {
+        function submit_meteo_value(elem, is_sfc=false) {
             let param_info = get_form_data(elem)
             if ($(elem).get(0).tagName == "INPUT") {
                 ErrorValidation.isPositiveValue(elem, $(elem).parent());
@@ -310,6 +310,18 @@
                 }
             }
             if (elementIsValid($(elem).parent())){
+                if (is_sfc) {
+                    param_info = param_info.concat(
+                    [{
+                        'type': 'data',
+                        'name': 'field',
+                        'value': 'is_sfc'
+                    },{
+                        'type': 'input',
+                        'name': 'is_sfc',
+                        'value': is_sfc
+                    }]);
+                }
                 console.log(param_info);
                 LoadingScreen.show("meteo_update_value")
                 let resp = TRIM.api.updateScenario(param_info).on('load',function(rsp){
@@ -476,7 +488,7 @@
                 });
                 sel.attr('data-meteo',JSON.stringify(this_sel_data))
 
-                submit_meteo_value(sel)
+                submit_meteo_value(sel, extension.endsWith(".sfc"))
             })
 
             var staticPrecip = $('#precipitation_static_value_rate');
