@@ -70,6 +70,10 @@ def merge_formulas(f1, f2):
                 continue
             merged[k].append(x)
 
+    # Make sure ternaries are ordered so that more specific conditions
+    # are hit first, if possible (i.e., object id > media id > other)
+    ternary_condition_order = ['.id', '.media.id']
+
     merged_ternary = []
     default = None
     for v, cond in merged.items():
@@ -80,18 +84,21 @@ def merge_formulas(f1, f2):
             continue
         old = cond
         cond = merge_conditions(cond)
-        # Make sure ternaries are ordered so that more specific conditions
-        # are hit first, if possible (i.e., object id > media id > other)
-        cond = order_condition_types(cond, ['.id', '.media.id'])
-        if len(cond) > 1:
-            cond = '((' + ') or ('.join(cond) + '))'
-        else:
-            cond = cond[0]
-        merged_ternary.append(f'{v} if {cond} else')
+        ordered_conds = order_condition_types(
+            cond, ternary_condition_order, as_dict=True
+        )
+        for cond in ordered_conds.values():
+            if not cond:
+                continue
+            if len(cond) > 1:
+                cond = '((' + ') or ('.join(cond) + '))'
+            else:
+                cond = cond[0]
+            merged_ternary.append(f'{v} if {cond} else')
 
-    # Make sure ternaries are ordered so that more specific conditions
-    # are hit first, if possible (i.e., object id > media id > other)
-    merged_ternary = order_condition_types(merged_ternary, ['.id', '.media.id'])
+    merged_ternary = order_condition_types(
+        merged_ternary, ternary_condition_order
+    )
 
     merged = '(' + ' ('.join(merged_ternary) + f' {default}' + ')'
     while merged.count(')') < merged.count('('):
@@ -197,7 +204,7 @@ def merge_conditions(conditions):
     return merged_conditions
 
 
-def order_condition_types(conditions, condition_checks):
+def order_condition_types(conditions, condition_checks, as_dict=False):
     OTHER_TYPE = '__other__'
 
     cond_types = {x: [] for x in condition_checks}
@@ -207,7 +214,9 @@ def order_condition_types(conditions, condition_checks):
         checks = x.split(' or ')  # split into sub-conditions
         had_x_condition = {txt: False for txt in condition_checks}
         for check in checks:
-            for txt in reversed(sorted(condition_checks, key=lambda s: len(s))):
+            for txt in reversed(sorted(
+                condition_checks, key=lambda s: len(s)
+            )):
                 if txt in check:
                     had_x_condition[txt] = True
                     break
@@ -218,7 +227,10 @@ def order_condition_types(conditions, condition_checks):
         else:
             cond_types[OTHER_TYPE].append(x)
 
+    if as_dict:
+        return cond_types
+
     ordered_conditions = []
-    for x in condition_checks:
+    for x in cond_types:
         ordered_conditions += cond_types[x]
     return ordered_conditions

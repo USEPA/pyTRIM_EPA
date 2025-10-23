@@ -74,6 +74,7 @@ class ChemicalService(GenericService):
     def update_mercury_transformation_rate(
         cls, parcel, rate_name, media_type, value, unit='1/day'
     ):
+        # print(f'Set {parcel}[{rate_name}] = "{value} {unit}" for "{media_type}"')
         param_map = dict(cls.mercury_transformation_parameters)
         comps = parcel.get_compartment(media=media_type)
         if not comps:
@@ -82,6 +83,7 @@ class ChemicalService(GenericService):
             if rate_name not in rates:
                 continue
             chem = cls.get(name=chem_name)
+            chem.current_scenario(parcel.scenario)
             if not chem:
                 continue  # Shouldn't happen, but still...
             for compartment in comps:
