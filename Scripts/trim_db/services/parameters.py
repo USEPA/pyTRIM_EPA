@@ -4,6 +4,7 @@ from ..schema.parameters.models import *
 from ..schema.parameters.utils import as_quantity, NoneParameter
 from ..schema.utils.caching import CacheManager
 from .generic import GenericService
+from .utils import *
 
 __all__ = ['FormulaService', 'ParameterService']
 
@@ -147,37 +148,6 @@ class ParameterService(GenericService):
         return query.all()
 
 
-class classproperty:
-    def __init__(self, f):
-        self._f = f
-
-    def __get__(self, obj, owner):
-        return self._f(owner, obj)
-
-
-# class CallableQuantity():
-#     def __init__(self, quantity):
-#         self.__quantity__ = quantity
-
-#     def __getattr__(self, name):
-#         if name == '__quantity__':
-#             raise AttributeError()
-#         return getattr(self.__quantity__, name)
-
-#     def __call__(self, *args, **kwargs):
-#         return self.__quantity__
-
-#     def __repr__(self, *args, **kwargs):
-#         return self.__quantity__.__repr__(*args, **kwargs)
-
-#     def __str__(self, *args, **kwargs):
-#         return self.__quantity__.__str__(*args, **kwargs)
-
-
-def strip_spaces(s):
-    return ''.join(s.split(' '))
-
-
 def matches_parameter_def(param, **kwargs):
     characteristics = get_parameter_characteristics(param)
     for k, v in characteristics.items():
@@ -191,159 +161,6 @@ def matches_parameter_def(param, **kwargs):
         if v != d_v:
             return False
     return True
-
-
-def merge_formulas(f1, f2):
-    if f1 is None:
-        return f2
-    if f2 is None:
-        return f1
-
-    def is_ternary(formula):
-        if ' if ' not in formula:
-            return False
-        if ' else ' not in formula:
-            return False
-        # Contains a ternary ... but is the ternary at the ROOT?
-        check = formula.split(' if ')
-        if '(' in check[0] and check[0].split('(')[0].strip():
-            # Something was before the ternary (e.g., "2 * (1 if False else 0)")
-            return False
-        check = formula.split(' else ')
-        if ')' in check[-1] and check[-1].split(')')[-1].strip():
-            # Something was after the ternary (e.g., "(1 if False else 0) * 2")
-            return False
-        # Looks like the root was a ternary!
-        return True
-
-    def break_down_ternary(formula):
-        def split_or_conditions(cond):
-            if ' or ' not in cond:
-                return cond
-            parts = []
-            for x in cond.split(' or '):
-                while x.count('(') > x.count(')'):
-                    if not x.startswith('('):
-                        return cond  # Unable to break this down
-                    x = x[1:]
-                while x.count(')') > x.count('('):
-                    if not x.endswith(')'):
-                        return cond  # Unable to break this down
-                    x = x[:-1]
-                parts.append(x)
-            return parts
-
-        f = formula.split(' else ')
-        cases = {}
-        for s in f:
-            while s.count('(') > s.count(')'):
-                if not s.startswith('('):
-                    break
-                s = s[1:]
-            while s.count(')') > s.count('('):
-                if not s.endswith(')'):
-                    break
-                s = s[:-1]
-            s = s.split(' if ')
-            v = s[0]
-            while v.startswith('(') and v.endswith(')'):
-                v = v[1:-1]
-            if len(s) > 1:
-                cond = s[1]
-            else:
-                cond = None
-            if cond:
-                cond = split_or_conditions(cond)
-            if not isinstance(cond, list):
-                cond = [cond]
-            cases.setdefault(v, []).extend(cond)
-        return cases
-
-    def merge_conditions(conditions):
-        def parse_val(v):
-            v = v.strip()
-            try:
-                v = int(v)
-            except ValueError:
-                try:
-                    v = float(v)
-                except ValueError:
-                    pass
-            return v
-
-        merged_conditions = []
-        check_in = {}
-        for cond in conditions:
-            while cond[0] in '(' and cond[-1] in ')':
-                cond = cond[1:-1]
-            c = cond.split(' in ')
-            if len(c) != 2:
-                merged_conditions.append(cond)
-                continue
-            expression = c[0]
-            contained_by = c[1]
-            if not ((contained_by[0] in '{[') and (contained_by[-1] in ']}')):
-                merged_conditions.append(cond)
-                continue
-            contained_by = contained_by[1:-1]
-            contained_by = [parse_val(x) for x in contained_by.split(',')]
-            check_in.setdefault(expression, []).extend(contained_by)
-        for k, v in check_in.items():
-            merged_conditions.append(f'{k} in {set(v)}')
-        return merged_conditions
-
-    if not (is_ternary(f1) and is_ternary(f2)):
-        raise AssertionError('Can only merge ternary expressions!')
-
-    f1 = break_down_ternary(f1)
-    f2 = break_down_ternary(f2)
-
-    merged = {}
-    for k, v in f1.items():
-        merged[k] = []
-        merged[k].extend(v)
-    for k, v in f2.items():
-        merged.setdefault(k, [])
-        for x in v:
-            if x in merged[k]:
-                continue
-            merged[k].append(x)
-
-    merged_ternary = []
-    default = None
-    for v, cond in merged.items():
-        if None in cond:
-            default = v
-            cond = [x for x in cond if x is not None]
-        if not cond:
-            continue
-        old = cond
-        cond = merge_conditions(cond)
-        if len(cond) > 1:
-            cond = '((' + ') or ('.join(cond) + '))'
-        else:
-            cond = cond[0]
-        merged_ternary.append(f'{v} if {cond} else')
-
-    # Make sure ternaries are ordered so that more specific conditions
-    # are hit first, if possible (i.e., object id > media id > other)
-    cond_types = {'id': [], 'media': [], 'other': []}
-    for x in merged_ternary:
-        if '.media.id' in x:
-            cond_types['media'].append(x)
-        elif '.id' in x:
-            cond_types['id'].append(x)
-        else:
-            cond_types['other'].append(x)
-    merged_ternary = (
-        cond_types['id'] + cond_types['media'] + cond_types['other']
-    )
-
-    merged = '(' + ' ('.join(merged_ternary) + f' {default}' + ')'
-    while merged.count(')') < merged.count('('):
-        merged += ')'
-
-    return merged
 
 
 def get_parameter_characteristics(param):
@@ -478,6 +295,7 @@ def evaluate_parameter(
         return val
     return default
 
+
 def parameterize(cls, globalize_custom_parameters=False, default_scenario=None):
     cls_name = cls.__name__
     globalize_custom_parameters = globalize_custom_parameters or False
@@ -565,19 +383,38 @@ def parameterize(cls, globalize_custom_parameters=False, default_scenario=None):
             # If called on an instance
             # (e.g., Entity().parameters),
             # return custom implementations of each definition,
-            # or the definition itself
-            # if no specific version applies
+            # or the definition itself if no specific version applies
+
+            # Get definitions
             pds = ParameterService(entity).get_own_parameter_definitions()
-            if globalize_custom_parameters:
-                cps = ParameterService(entity).get_own_custom_parameters(any_scenario=True)
-            else:
-                scenario = _get_current_scenario(entity)
-                cps = ParameterService(entity).get_own_custom_parameters(scenario=scenario)
             # Sort to make sure sub-domains override parents
-            pds = list(sorted(pds, key=lambda x: len(str(x.domain.requirements or ''))))
-            cps = list(sorted(cps, key=lambda x: len(str(x.definition.domain.requirements or ''))))
+            pds = list(sorted(  # We'll want subdomains LAST for these
+                pds, key=lambda x: len(str(x.domain.requirements or ''))
+            ))
+
+            # Get custom implementations
+            current_scenario = _get_current_scenario(entity)
+            if globalize_custom_parameters:
+                cps = ParameterService(entity).get_own_custom_parameters(
+                    any_scenario=True
+                )
+            else:
+                cps = ParameterService(entity).get_own_custom_parameters(
+                    scenario=current_scenario
+                )
+            # Sort to make sure sub-domains override parents
+            cps = list(reversed(sorted(  # We'll want subdomains FIRST for these
+                cps, key=lambda x: len(str(x.definition.domain.requirements or ''))
+            )))
+
+            # Construct dict
             p = {pd.name: pd for pd in pds}
-            p.update({cp.definition.name: cp for cp in cps})
+            cp_update = {}
+            for cp in cps:
+                pd_nm = cp.definition.name
+                if pd_nm not in cp_update or cp.scenario_id == current_scenario.id:
+                    cp_update[pd_nm] = cp
+            p.update(cp_update)
             return p
 
     # A class that allows you to get/set parameter definitions
@@ -735,7 +572,6 @@ def parameterize(cls, globalize_custom_parameters=False, default_scenario=None):
                         merged = None
                     if merged is not None:
                         # We figured out how to merge them!
-                        old = formula
                         formula = merged or formula
 
                 new_def = {
@@ -843,7 +679,20 @@ def parameterize(cls, globalize_custom_parameters=False, default_scenario=None):
                         pd.default_formula = f
 
             ParameterService.commit()
-            self._params[name] = pd
+
+        def set(
+            self, name, domain=None,
+            value=None, unit=None, formula=None,
+            full_name=None, description=None,
+            requirements=None, domain_name=None
+        ):
+            return self.add(
+                name, domain=domain,
+                value=value, unit=unit, formula=formula,
+                full_name=full_name, description=description,
+                requirements=requirements, domain_name=domain_name,
+                force_update=True
+            )
 
         def keys(self):
             return self._params.keys()

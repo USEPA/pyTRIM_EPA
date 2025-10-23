@@ -123,6 +123,34 @@
       "default": "0.19",
       "tooltip": "volume [water]/volume [compartment]",
       "help": "Enter the volume fraction of water in the soil layer (volumetric pore space occupied by water). Valid values are 0 to 1. The default value of 0.19 is the U.S. average in Table 15 of McKone, T.E., A. Bodnar, and E. Hertwich. 2001. Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models. University of California at Berkeley. Supported by U.S. Environmental Protection Agency (Sustainable Technology Division, National Risk Management Research Laboratory) and Environmental Defense Fund. July. LBNL-43722. Available online at: https://escholarship.org/uc/item/9f1164rk. Typical sources of site-specific values include the U.S. Department of Agriculture's Web Soil Survey (Soil Survey Staff, Natural Resources Conservation Service, United States Department of Agriculture. Web Soil Survey. Available online at https://websoilsurvey.nrcs.usda.gov/.). For wetland parcels, a value of 0.6 might be appropriate (professional judgment)."
+    },
+    {
+      "id": "MethylationRate_SurfSoil",
+      "label": "Hg Methylation Rate",
+      "data_type": "float",
+      "default": 0,
+      "help": "See the TRIM User Guide Appendix for full reference information."
+    },
+    {
+      "id": "ReductionRate_SurfSoil",
+      "label": "Hg Reduction Rate",
+      "data_type": "float",
+      "default": 0,
+      "help": "See the TRIM User Guide Appendix for full reference information."
+    },
+    {
+      "id": "OxidationRate_SurfSoil",
+      "label": "Hg Oxidation Rate",
+      "data_type": "float",
+      "default": 0,
+      "help": "See the TRIM User Guide Appendix for full reference information."
+    },
+    {
+      "id": "DemethylationRate_SurfSoil",
+      "label": "Hg Demethylation Rate",
+      "data_type": "float",
+      "default": 0,
+      "help": "See the TRIM User Guide Appendix for full reference information."
     }
   ]
 }

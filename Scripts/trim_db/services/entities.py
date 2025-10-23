@@ -1,3 +1,4 @@
+import pandas as pd
 from sqlalchemy import or_
 from sqlalchemy.orm import selectinload, joinedload
 from ..schema.scenarios.models import Scenario
@@ -6,6 +7,7 @@ from ..schema.entities.environment import DummyLink
 from ..schema.utils.caching import CacheManager
 from .generic import GenericService
 from .parameters import parameterize
+from .utils import classproperty
 
 __all__ = [
     'ChemicalService',
@@ -21,6 +23,73 @@ class ChemicalService(GenericService):
         globalize_custom_parameters=True,
         default_scenario=lambda x: x._scenarios[0]
     )
+
+    @classproperty
+    def mercury_transformation_parameters(cls):
+        return {
+            'Divalent Mercury': ['MethylationRate', 'ReductionRate'],
+            'Elemental Mercury': ['OxidationRate'],
+            'MethylMercury': ['DemethylationRate']
+        }
+
+    @classmethod
+    def get_mercury_transformation_rates(cls, parcel):
+        mercuries = parcel.scenario.get_chemicals(category='Mercury')
+        if not mercuries:
+            raise AssertionError('Scenario Does Not Include Mercury Emissions')
+
+        def safe_eval(chem, comp, param_name):
+            try:
+                val = getattr(chem, param_name)(comp)
+                if not pd.isna(val):
+                    return val
+            except Exception:
+                pass
+            return None
+
+        target_rates = dict(cls.mercury_transformation_parameters)
+
+        mtr_params = {}
+        for comp in parcel.compartments:
+            if not (
+                comp.media.isa('Air')
+                or comp.media.isa('Soil')
+                or comp.media.isa('Groundwater')
+            ):
+                continue
+            mtr_params[comp.media.name] = {chem_name: {} for chem_name in target_rates}
+            media_params = mtr_params[comp.media.name]
+            for chem in mercuries:
+                for rate in target_rates[chem.name]:
+                    try:
+                        v = safe_eval(chem, comp, rate)
+                        if v is not None:
+                            # print(f'Got {rate}="{v}" for {chem} from {comp}')
+                            media_params[chem.name][rate] = v
+                    except Exception:
+                        pass
+        return mtr_params
+
+    @classmethod
+    def update_mercury_transformation_rate(
+        cls, parcel, rate_name, media_type, value, unit='1/day'
+    ):
+        # print(f'Set {parcel}[{rate_name}] = "{value} {unit}" for "{media_type}"')
+        param_map = dict(cls.mercury_transformation_parameters)
+        comps = parcel.get_compartment(media=media_type)
+        if not comps:
+            return
+        for chem_name, rates in param_map.items():
+            if rate_name not in rates:
+                continue
+            chem = cls.get(name=chem_name)
+            chem.current_scenario(parcel.scenario)
+            if not chem:
+                continue  # Shouldn't happen, but still...
+            for compartment in comps:
+                formula = f'({value}) if compartment.id in {{{compartment.id}}} else 0'
+                chem.parameters.set(rate_name, formula=formula, unit=unit)
+        ChemicalService.commit()
 
 
 class ParcelService(GenericService):
