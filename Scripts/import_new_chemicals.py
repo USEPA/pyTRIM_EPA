@@ -25,7 +25,7 @@ DEFAULT_IMPORT_RULES = \
         "1,2,3,4,6,7,8-HpCDF",
         "1,2,3,4,7,8,9-HpCDF",
         "1,2,3,4,7,8-HxCDD",
-        "1,2,3,4,7,8-HxCDF"
+        "1,2,3,4,7,8-HxCDF",
         "1,2,3,6,7,8-HxCDD",
         "1,2,3,6,7,8-HxCDF",
         "1,2,3,7,8,9-HxCDD",
@@ -35,7 +35,7 @@ DEFAULT_IMPORT_RULES = \
         "2,3,4,6,7,8-HxCDF",
         "2,3,4,7,8-PeCDF",
         "2,3,7,8-TCDF",
-        "2-Methylnaphthalene"
+        "2-Methylnaphthalene",
         "7,12-Dimethylbenz(a)anthracene",
         "Acenaphthene",
         "Acenaphthylene",
