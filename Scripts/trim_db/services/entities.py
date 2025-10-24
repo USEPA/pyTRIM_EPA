@@ -55,6 +55,8 @@ class ChemicalService(GenericService):
                 comp.media.isa('Air')
                 or comp.media.isa('Soil')
                 or comp.media.isa('Groundwater')
+                or comp.media.isa('Surface_Water')
+                or comp.media.isa('Sediment')
             ):
                 continue
             mtr_params[comp.media.name] = {chem_name: {} for chem_name in target_rates}
