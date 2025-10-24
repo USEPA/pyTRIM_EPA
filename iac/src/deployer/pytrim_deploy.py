@@ -1,3 +1,4 @@
+import boto3
 import getopt, json, sys
 from common import die, whoami_aws, loggy
 from helpers.cloudformation_helper import CloudFormationHelper
@@ -14,7 +15,8 @@ from helpers.ssh_keypair_helper import SshKeypairHelper
 #* before deploying call e.g. "aws_sso_login pytrim_dev" (if you're tfeiler) or assume valid credentials some other way (if you're not)
 
 class PyTrimDeployer(object):
-    def __init__(self, config_file):
+    def __init__(self, config_file, whoami):
+        self.whoami = whoami
         with open(config_file, "r") as f:
             self.cfg = json.load(f)
             loggy(f"Stack: '{self.get_cfg_val('environment_name')}'")
@@ -71,11 +73,19 @@ class PyTrimDeployer(object):
 
     def do_cf_stack_work(self):
         eip_name = self.get_cfg_val("aws.eip_name")
+        cert_id = self.get_cfg_val("aws.webserver_certificate_id")
         env_name = self.get_cfg_val("environment_name")
         short_env_profile = self.get_cfg_val("short_env_profile")
         ssh_keypair_name = self.get_cfg_val("aws.ssh_keypair_name")
         vpc_seg = self.get_cfg_val("aws.cidr_segment_vpc")
         loggy(f"building AWS cloudformation stack named '{env_name}' / {vpc_seg}")
+
+        # go from simple cert_id to fully qualified cert arn;
+        # the config file gets something like "6f39535c-f167-4048-9304-6af9803a2498"
+        # and we want:
+        # "arn:aws:acm:us-east-1:426714360284:certificate/6f39535c-f167-4048-9304-6af9803a2498"
+        sess = boto3.session.Session()
+        web_server_cert_arn = f"arn:aws:acm:{sess.region_name}:{self.whoami['account']}:certificate/{cert_id}"
 
         # get the elastic allocation id
         eip_helper = ElasticIpHelper()
@@ -90,6 +100,7 @@ class PyTrimDeployer(object):
             "EnvironmentName": env_name,
             "ShortEnvironmentProfile": short_env_profile,
             "CidrSegmentVPC": vpc_seg,
+            "WebServerCertArn": web_server_cert_arn,
             "DatabaseName": self.get_cfg_val("aws.db.dbname"),
             "DatabaseMasterAccountUsername": self.get_cfg_val("aws.db.username"),
             "DatabaseMasterAccountPassword": self.get_cfg_val("aws.db.password"),
@@ -135,6 +146,7 @@ if __name__ == "__main__":
 
     config_file = None
     mode = None
+    profile = None
     for opt, arg in opts:
         if opt in ("-c", "--config"):
             config_file = arg
@@ -146,8 +158,6 @@ if __name__ == "__main__":
     if mode is None:
         mode = "full"
     if profile:
-        import boto3
-
         boto3.setup_default_session(profile_name=profile)
 
 
@@ -170,5 +180,5 @@ if __name__ == "__main__":
             proceed_or_not = input("Proceed [y/n]? ")
 
         if proceed_or_not[0].lower() == "y":
-            d = PyTrimDeployer(config_file)
+            d = PyTrimDeployer(config_file, whoami)
             d.run_deployment(mode)
