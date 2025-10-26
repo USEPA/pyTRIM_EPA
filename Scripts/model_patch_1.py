@@ -1,6 +1,6 @@
 import os
-#os.environ['TEST_DB_SERVERLESS'] = 'yes'  
-#os.environ['MYSQL_PASSWORD'] = 'root'  
+# os.environ['TEST_DB_SERVERLESS'] = 'yes'  
+# os.environ['MYSQL_PASSWORD'] = 'root'  
 
 from trim_db.utils.users_roles import implement_users_roles
 implement_users_roles()  
@@ -32,37 +32,39 @@ FORMULA_REPLACE = {
 
 CHEMS_TO_ADD = [
     # Dioxins
-    # # "1,2,3,4,6,7,8,9-OCDD",
-    # # "1,2,3,4,6,7,8,9-OCDF",
-    # # "1,2,3,4,6,7,8-HpCDD",
-    # # "1,2,3,4,6,7,8-HpCDF",
-    # # "1,2,3,4,7,8,9-HpCDF",
-    "1,2,3,4,7,8-HxCDD",
+    # "1,2,3,4,6,7,8,9-OCDD",
+    # "1,2,3,4,6,7,8,9-OCDF",
+    # "1,2,3,4,6,7,8-HpCDD",
+    # "1,2,3,4,6,7,8-HpCDF",
+    # "1,2,3,4,7,8,9-HpCDF",
+    # "1,2,3,4,7,8-HxCDD",
     # "1,2,3,4,7,8-HxCDF",
     # "1,2,3,6,7,8-HxCDD",
-    "1,2,3,6,7,8-HxCDF",
-    "1,2,3,7,8,9-HxCDD",
-    "1,2,3,7,8,9-HxCDF",
-    "1,2,3,7,8-PeCDD",
-    "1,2,3,7,8-PeCDF",
-    "2,3,4,6,7,8-HxCDF",
-    "2,3,4,7,8-PeCDF",
-    # # "2,3,7,8-TCDF",
+    # "1,2,3,6,7,8-HxCDF",
+    # "1,2,3,7,8,9-HxCDD",
+    # "1,2,3,7,8,9-HxCDF",
+    # "1,2,3,7,8-PeCDD",
+    # "1,2,3,7,8-PeCDF",
+    # "2,3,4,6,7,8-HxCDF",
+    # "2,3,4,7,8-PeCDF",
+    # "2,3,7,8-TCDF",
 
-    # PAHs (?)
-    # "2-Methylnaphthalene",
-    # "7,12-Dimethylbenz(a)anthracene",
-    # "Acenaphthene",
-    # "Acenaphthylene",
-    # "Benz(a)anthracene",
-    # "Benzo(b)fluoranthene",
-    # "Benzo(g,h,i)perylene",
-    # "Benzo(k)fluoranthene",
-    # "Chrysene",
-    # "Dibenz(a,h)anthracene",
-    # "Fluoranthene",
-    # "Fluorene",
-    # "Indeno(1,2,3-cd)pyrene"
+    # PAHs
+    "2-Methylnaphthalene",
+    "7,12-Dimethylbenz(a)anthracene",
+    "Acenaphthene",
+    "Acenaphthylene",
+
+    "Benz(a)anthracene",
+    "Benzo(b)fluoranthene",
+    "Benzo(g,h,i)perylene",
+    "Benzo(k)fluoranthene",
+
+    "Chrysene",
+    "Dibenz(a,h)anthracene",
+    "Fluoranthene",
+    "Fluorene",
+    "Indeno(1,2,3-cd)pyrene"
 ]
 
 # FIX ALGORITHM PROBLEMS
@@ -393,10 +395,10 @@ def fix_unit():
 
 
 def fix_formula():
-    f = [f for f in FormulaService.get_all() if f.equation == "(((10 ** (- 1.5 + 0.4 * math.log10(self.K_ow))) if (math.log10(self.K_ow) < 3 else ((0.5) if (math.log10(self.K_ow) >= 3) and (math.log10(self.K_ow) < 6) else (10 ** (1.2 - 0.25 * math.log10(self.K_ow)))))) if compartment.BW > 0.1 else ((10 ** (- 2.6 + 0.5 * math.log10(self.K_ow))) if (math.log10(self.K_ow) < 5 else ((0.8) if (math.log10(self.K_ow) >= 5) and (math.log10(self.K_ow) < 6) else (10 ** (2.9 - 0.5 * math.log10(self.K_ow))))))) if compartment.media.id in {33 , 32 , 29 , 27 , 28} else 0"]
-    if len(f) > 0:
-        f = f[0]
-        FormulaService.get(f.id).equation = '(((10 ** (- 1.5 + 0.4 * math.log10(self.K_ow)) if math.log10(self.K_ow) < 3 else (0.5 if (math.log10(self.K_ow) >= 3 and math.log10(self.K_ow) < 6) else 10 ** (1.2 - 0.25 * math.log10(self.K_ow)))) if compartment.BW.magnitude > 0.1 else (10 ** (- 2.6 + 0.5 * math.log10(self.K_ow)) if math.log10(self.K_ow) < 5 else (0.8 if (math.log10(self.K_ow) >= 5 and math.log10(self.K_ow) < 6) else 10 ** (2.9 - 0.5 * math.log10(self.K_ow))))) if compartment.media.id in {32 , 33 , 27 , 28 , 29} else 0)'
+    formulas = [f for f in FormulaService.get_all() if f.equation == "(((10 ** (- 1.5 + 0.4 * math.log10(self.K_ow))) if (math.log10(self.K_ow) < 3 else ((0.5) if (math.log10(self.K_ow) >= 3) and (math.log10(self.K_ow) < 6) else (10 ** (1.2 - 0.25 * math.log10(self.K_ow)))))) if compartment.BW > 0.1 else ((10 ** (- 2.6 + 0.5 * math.log10(self.K_ow))) if (math.log10(self.K_ow) < 5 else ((0.8) if (math.log10(self.K_ow) >= 5) and (math.log10(self.K_ow) < 6) else (10 ** (2.9 - 0.5 * math.log10(self.K_ow))))))) if compartment.media.id in {33 , 32 , 29 , 27 , 28} else 0"]
+    if len(formulas) > 0:
+        for formula in formulas:
+            FormulaService.get(formula.id).equation = '(((10 ** (- 1.5 + 0.4 * math.log10(self.K_ow)) if math.log10(self.K_ow) < 3 else (0.5 if (math.log10(self.K_ow) >= 3 and math.log10(self.K_ow) < 6) else 10 ** (1.2 - 0.25 * math.log10(self.K_ow)))) if compartment.BW.magnitude > 0.1 else (10 ** (- 2.6 + 0.5 * math.log10(self.K_ow)) if math.log10(self.K_ow) < 5 else (0.8 if (math.log10(self.K_ow) >= 5 and math.log10(self.K_ow) < 6) else 10 ** (2.9 - 0.5 * math.log10(self.K_ow))))) if compartment.media.id in {32 , 33 , 27 , 28 , 29} else 0)'
 
     # f = [f for f in FormulaService.get_all() if
     #      f.equation == '0.3262149134948966 * chemical.ParticleVolumetricDRYDepositionRate(receiver) * sender.linked_compartments(media="$Leaf" , same_parcel=True)[0].DryDepInterceptionFraction * sender.interface_with(receiver) / sender.Volume']
