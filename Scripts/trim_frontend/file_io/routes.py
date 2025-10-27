@@ -27,6 +27,7 @@ from ..utils.logging import make_logger
 from ..utils.spatial import determine_location, determine_nearest_neighbor_distance, ensure_closed_polygon, is_utm_zone_valid, translate_coordinates, translate_position
 from shapely.geometry import Polygon
 from pint import UnitRegistry
+from collections import OrderedDict
 
 file_api = Blueprint('file_api', __name__)
 api.use_api_errors(file_api)
@@ -423,16 +424,22 @@ def parse_parcel_upload():
             lines = ""
             line_num = 0
             reader = json.loads(geojson)
+            rows_to_process = reader  # GeoJSON is already in correct format
         else: # assume csv
             fpn = [f.stream for n, f in files.items()][0]
             fpn.seek(0)
             lines = fpn.read().decode("utf-8")
             line_num = 2
             reader = csv.DictReader(io.StringIO(lines))
+            
+            #process csv with format detection and normalization
+            csv_rows = list(reader)
+            rows_to_process = process_csv_parcels(csv_rows)
+            
     except Exception:
         errors.append("Unable to open file")
-
-    for row in reader:
+        
+    for row in rows_to_process:
         try:
             if geojson:
                 row_data = get_parcel_row_geojson(row)
@@ -618,14 +625,21 @@ def get_parcel_row_csv(row, coord_system, utm_zone):
     #
     # ...or we'll allow the user to optionally omit the outermost list; we'll add it for them after we check depth
     raw_coords = row.get("coordinates")
-    parsed_coords = json.loads(raw_coords)
+    # Add null/empty check
+    if not raw_coords:
+        raise ValueError(f"Missing coordinates for parcel: {row.get('ParcelName', 'Unknown')}")
+    
+    try:
+        parsed_coords = json.loads(raw_coords)
+    except json.JSONDecodeError as e:
+        raise ValueError(f"Invalid JSON in coordinates for parcel {row.get('ParcelName', 'Unknown')}: {e}")
+    
     if calculate_list_depth(parsed_coords) == 2:
         parsed_coords = [parsed_coords]
 
     # now parsed coords is definitely nested3 lists
     fixed_coords = []
     for polygon_definition in parsed_coords:
-        # print(f"CHECKING POLYGON: {polygon_definition}")
         polygon_definition = ensure_closed_polygon(polygon_definition)
 
         if coord_system == "WGS84 Longitude/Latitude":
@@ -646,6 +660,157 @@ def get_parcel_row_csv(row, coord_system, utm_zone):
         "hasFishFoodWeb": "Yes" if has_fish_food_web else "No",
         "coordinates": fixed_coords[0],
     }
+
+
+def detect_csv_format(csv_rows):
+    if not csv_rows:
+        raise ValueError("CSV file is empty")
+    
+    first_row = csv_rows[0]
+    
+    #checking for Format 1 - multiple rows with X/Y coordinates
+    if 'Xcoordinate' in first_row and 'Ycoordinate' in first_row:
+        return 'multi_row'
+    
+    # check for Format 2 - Single row with coordinates JSON
+    if 'coordinates' in first_row:
+        return 'single_row'
+    
+    raise ValueError(
+        "Unknown CSV format. Expected either:\n"
+        "- Format 1: ParcelName, Xcoordinate, Ycoordinate (multiple rows per parcel)\n"
+        "- Format 2: ParcelName, coordinates (JSON array, single row per parcel)"
+    )
+
+
+def aggregate_parcel_vertices_from_csv(csv_rows):
+    """
+    smaple input:
+        ParcelName,Air,LandUse,FarmFoodChain,FishFoodWeb,Wetland,Xcoordinate,Ycoordinate
+        Upload01,Land & Air,deciduous forest,No,No,No,-78.919926,35.987667
+        Upload01,Land & Air,deciduous forest,No,No,No,-78.919279,35.976736
+        
+    output:
+        {
+            'ParcelName': 'Upload01',
+            'ParcelType': 'Land & Air',
+            'LandUse': 'deciduous forest',
+            ...
+            'coordinates': '[[-78.919926,35.987667],[-78.919279,35.976736],...]'
+        }
+    """
+    parcels = OrderedDict()
+    
+    for row in csv_rows:
+        parcel_name = row.get('ParcelName')
+        
+        if not parcel_name or parcel_name.strip() == '':
+            continue
+        
+        parcelType = None
+        if "Air" in row:
+            parcelType = row.get("Air")
+        if "Water" in row:
+            parcelType = row.get("Water")
+        if "Land" in row:
+            parcelType = row.get("Land")
+        
+        if parcel_name not in parcels:
+            parcels[parcel_name] = {
+                'ParcelName': parcel_name,
+                'ParcelType': parcelType,
+                'LandUse': row.get('LandUse', ''),
+                'FarmFoodChain': row.get('FarmFoodChain', ''),
+                'FishFoodWeb': row.get('FishFoodWeb', ''),
+                'Wetland': row.get('Wetland', ''),
+                'Description': row.get('Description', ''),
+                'vertices': []
+            }
+        
+        x_coord = row.get('Xcoordinate')
+        y_coord = row.get('Ycoordinate')
+        
+        
+        if x_coord is not None and y_coord is not None and x_coord != '' and y_coord != '':
+            try:
+                # [x, y] pair
+                parcels[parcel_name]['vertices'].append([float(x_coord), float(y_coord)])
+            except (ValueError, TypeError) as e:
+                print(f"Warning: Invalid coordinates for {parcel_name}: x={x_coord}, y={y_coord} - {e}")
+        
+        print(f'checking if the info for parcel is saved correctly : {parcels}')
+    result = []
+    for parcel_name, parcel_data in parcels.items():
+        if len(parcel_data['vertices']) < 3:
+            print(f"Warning: Parcel '{parcel_name}' has fewer than 3 vertices ({len(parcel_data['vertices'])}). Skipping.")
+            continue
+        
+        parcel_data['coordinates'] = json.dumps(parcel_data['vertices'])
+        del parcel_data['vertices']
+        
+        result.append(parcel_data)
+    print(f'\n\n\n checking result  : {result}\n\n')
+    return result
+
+
+def normalize_single_row_parcels(csv_rows):
+    result = []
+    
+    for row in csv_rows:
+        parcel_name = row.get('ParcelName')
+        
+        if not parcel_name or parcel_name.strip() == '':
+            continue
+        
+        #get coordinates - might already be a string or need conversion
+        coordinates = row.get('coordinates', '')
+        
+        #if not lucky coordinates is empty or None, skip
+        if not coordinates or coordinates.strip() == '':
+            print(f"Warning: Parcel '{parcel_name}' has no coordinates. Skipping.")
+            continue
+        
+        # Validate that coordinates is valid JSON
+        try:
+            parsed = json.loads(coordinates)
+            coordinates = json.dumps(parsed)
+        except (json.JSONDecodeError, TypeError) as e:
+            print(f"Warning: Invalid JSON coordinates for {parcel_name}: {e}. Skipping.")
+            continue
+        
+        normalized = {
+            'ParcelName': parcel_name,
+            'ParcelType': row.get("ParcelType"),
+            'LandUse': row.get('LandUse', ''),
+            'FarmFoodChain': row.get('FarmFoodChain', ''),
+            'FishFoodWeb': row.get('FishFoodWeb', ''),
+            'Wetland': row.get('Wetland', ''),
+            'FishFoodWeb': row.get('Description', ''),
+            'Description': row.get('Description', ''),
+            'coordinates': coordinates
+        }
+        
+        result.append(normalized)
+    
+    return result
+
+
+def process_csv_parcels(csv_rows):
+    if not csv_rows:
+        raise ValueError("No data in CSV file")
+    
+    #check format
+    csv_format = detect_csv_format(csv_rows)
+    print(f"Detected CSV format: {csv_format}")
+    
+    if csv_format == 'multi_row':
+        return aggregate_parcel_vertices_from_csv(csv_rows)
+    elif csv_format == 'single_row':
+        return normalize_single_row_parcels(csv_rows)
+    else:
+        raise ValueError(f"Unsupported CSV format: {csv_format}")
+
+
 
 
 def get_parcel_row_geojson(row):
