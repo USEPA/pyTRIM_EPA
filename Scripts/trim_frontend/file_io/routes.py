@@ -785,7 +785,6 @@ def normalize_single_row_parcels(csv_rows):
             'FarmFoodChain': row.get('FarmFoodChain', ''),
             'FishFoodWeb': row.get('FishFoodWeb', ''),
             'Wetland': row.get('Wetland', ''),
-            'FishFoodWeb': row.get('Description', ''),
             'Description': row.get('Description', ''),
             'coordinates': coordinates
         }
