@@ -1193,28 +1193,35 @@
                 setTimeout(function() { updateLakeProps(); }, 1000);
                 return;
             }
-            let parcels = TRIM.store.currentScenario.parcels;
-            let water_data = []
-            let sed_data = []
-            let water_properties = Object.keys(default_water_data)
-            let sed_properties = Object.keys(default_sed_data)
+            const parcels = TRIM.store.currentScenario.parcels;
+            const water_data = []
+            const sed_data = []
+            const water_properties = Object.keys(default_water_data)
+            const sed_properties = Object.keys(default_sed_data)
             if (parcels.length > 0) {
-                let mercuryTransformations = [
+                const mercuryTransformations = [
                     'MethylationRate', 'OxidationRate', 'ReductionRate', 'DemethylationRate'
                 ];
+                const hasHg = (parcels[0]['mercury_transformation_rates'] != undefined);
                 water_properties.forEach(function (p, i) {
-                    let this_water_property = {}
+                    const shortName = default_water_data[p]['short_name'];
+                    const isHg = (mercuryTransformations.indexOf(shortName.split('.')[0]) > -1);
+                    if (isHg && !hasHg) {
+                        return;
+                    }
+
+                    const this_water_property = {};
                     this_water_property["min"] = default_water_data[p]['min'];
                     this_water_property["max"] = default_water_data[p]['max'];
+                    this_water_property["shortProperty"] = shortName;
+                    this_water_property["isEditable"] = default_water_data[p]['is_editable'];
+                    this_water_property["helpText"] = default_water_data[p]['helpText'] || undefined;
+                    let defaultVal = default_water_data[p]['default_value'];
+                    let defaultUnit = default_water_data[p]['unit'];
                     parcels.forEach(function (e, i) {
                         if (e.parcelType == "Water Only" || e.parcelType == "Water & Air") {
                             this_water_property['Property'] = p;
-                            let shortName = default_water_data[p]['short_name'];
-                            let defaultVal = default_water_data[p]['default_value'];
-                            let defaultUnit = default_water_data[p]['unit'];
-                            if (mercuryTransformations.indexOf(
-                                shortName.split('.')[0]
-                            ) > -1) {
+                            if (isHg) {
                                 const rateName = shortName.split('.')[0];
                                 let src = e['mercury_transformation_rates']['Surface_Water'];
                                 for (const chem in src) {
@@ -1240,27 +1247,30 @@
                             }
                             this_water_property[e.name] = defaultVal;
                             this_water_property["unit"] = (defaultUnit != undefined ? defaultUnit : "unitless").replace('/', ' / ').replace(/\s/g, ' ').replace(/< \/ /g, '</');
-                            this_water_property["shortProperty"] = shortName;
-                            this_water_property["isEditable"] = default_water_data[p]['is_editable'];
-                            this_water_property["helpText"] = default_water_data[p]['helpText'] || undefined;
                         }
-                    })
+                    });
                     water_data.push(this_water_property)
                 })
                 TableRedraw(water_data, "lake")
                 sed_properties.forEach(function (p, i) {
-                    let this_sed_property = {}
+                    const shortName = default_sed_data[p]['short_name'];
+                    const isHg = (mercuryTransformations.indexOf(shortName.split('.')[0]) > -1);
+                    if (isHg && !hasHg) {
+                        return;
+                    }
+
+                    const this_sed_property = {}
                     this_sed_property["min"] = default_sed_data[p]['min'];
                     this_sed_property["max"] = default_sed_data[p]['max'];
+                    this_sed_property["shortProperty"] = shortName;
+                    this_sed_property["isEditable"] = default_sed_data[p]['is_editable'];
+                    this_sed_property["helpText"] = default_sed_data[p]['helpText'] || undefined;
+                    let defaultVal = default_sed_data[p]['default_value'];
+                    let defaultUnit = default_sed_data[p]['unit'];
                     parcels.forEach(function (e, i) {
                         if (e.parcelType == "Water Only" || e.parcelType == "Water & Air") {
                             this_sed_property['Property'] = p
-                            let shortName = default_sed_data[p]['short_name'];
-                            let defaultVal = default_sed_data[p]['default_value'];
-                            let defaultUnit = default_sed_data[p]['unit'];
-                            if (mercuryTransformations.indexOf(
-                                shortName.split('.')[0]
-                            ) > -1) {
+                            if (isHg) {
                                 const rateName = shortName.split('.')[0];
                                 let src = e['mercury_transformation_rates']['Sediment'];
                                 for (const chem in src) {
@@ -1281,9 +1291,6 @@
                             }
                             this_sed_property[e.name] = defaultVal;
                             this_sed_property["unit"] = (defaultUnit != undefined ? defaultUnit : "unitless").replace('/', ' / ').replace(/\s/g, ' ').replace(/< \/ /g, '</');
-                            this_sed_property["shortProperty"] = shortName;
-                            this_sed_property["isEditable"] = default_sed_data[p]['is_editable'];
-                            this_sed_property["helpText"] = default_sed_data[p]['helpText'] || undefined;
                         }
                     })
                     sed_data.push(this_sed_property)
