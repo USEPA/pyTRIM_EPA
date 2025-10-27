@@ -303,6 +303,16 @@
                 updateAllErosionData(tbl, currentData, 'S', ['K', 'L']); // ['R', 'K', 'L']);
             }
 
+            $(".export-erosion-table").on('click', (e) => {
+                const optionNum = $(e.target).closest('.col-md')[0].id.split('_opt').pop();
+
+                let filename = TRIM.store.currentScenario.name + "_Erosion Settings_";
+                filename += moment(new Date()).format('YYYY_MM_DD-HH_MM') + ".csv";
+
+                let cleanedTable = $('#erosionTable_opt' + optionNum).clone();
+                exportTableToCSV.apply(e.target, [cleanedTable, filename]);
+            });
+
             LoadingScreen.hide('erosion_settings_init');
         }
 

@@ -12,6 +12,20 @@
             </h6>
         </div>
     </div>
+    {% if optionNum == 3 %}
+    <div class="row pb-3 pt-0">
+        <div class="col-sm">
+            <button id="SoilData_btn_opt3" class="btn btn-secondary">
+                Get USDA Soil Data
+            </button>
+        </div>
+    </div>
+    <div class="row pb-3 pt-0">
+        <div class="col-sm">
+            <i>Or</i>
+        </div>
+    </div>
+    {% endif %}
     <div class="row mb-1">
         <div class="col-sm">
             <div data-slot="true" data-target="{{ file_input }}"></div>
@@ -63,18 +77,32 @@
     <div>
         {% if optionNum == 1 %}
         <div id="tableDiv_opt1" class="col-md">
-            <div><small><strong><u>Click on the table cells to edit properties.</u> </strong></small></div>
+            <div class="mb-3">
+                <small><strong><u>Click on the table cells to edit properties.</u> </strong></small>
+                <a class="btn btn-sm btn-warning float-right export-erosion-table" style="cursor: pointer;">
+                    <i class="fa fa-file-download"></i>&nbsp;Export Current Settings
+                </a>
+            </div>
             <table data-slot="true" data-target="erosionTable_opt1" class="hover" id="erosionTable_opt1"></table>
         </div>
         {% elif optionNum == 2 %}
         <div id="tableDiv_opt2" class="col-md">
-            <div class="pill pill-alert"><small><strong><u>Click on the table cells to edit properties.</u> </strong></small></div>
+            <div class="mb-3">
+                <small><strong><u>Click on the table cells to edit properties.</u> </strong></small>
+                <a class="btn btn-sm btn-warning float-right export-erosion-table" style="cursor: pointer;">
+                    <i class="fa fa-file-download"></i>&nbsp;Export Current Settings
+                </a>
+            </div>
             <table data-slot="true" data-target="erosionTable_opt2" class="hover" id="erosionTable_opt2"></table>
         </div>
         {% else %}
         <div id="tableDiv_opt3" class="col-md">
-            <div class="pill pill-alert"><small><strong><u>Click on the table cells to edit properties.</u> </strong></small></div>
-            <button id="SoilData_btn_opt3" class="btn btn-secondary mt-2">Get USDA Soil Data</button>
+            <div class="mb-3">
+                <small><strong><u>Click on the table cells to edit properties.</u> </strong></small>
+                <a class="btn btn-sm btn-warning float-right export-erosion-table" style="cursor: pointer;">
+                    <i class="fa fa-file-download"></i>&nbsp;Export Current Settings
+                </a>
+            </div>
             <table data-slot="true" data-target="erosionTable_opt3" class="hover" id="erosionTable_opt3"></table>
         </div>
         {% endif %}
