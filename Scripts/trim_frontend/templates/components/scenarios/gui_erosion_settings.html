@@ -980,7 +980,7 @@
                     bAutoWidth: false,
                     scrollX: true,
                     scrollY: 500,
-                    columns: setDynamicColumnWidths(tbl.attr('id'), tblColDefs[`opt${optionNum}`], tblData),
+                    columns: setDynamicColumnWidths('#' + tbl.attr('id'), tblColDefs[`opt${optionNum}`], tblData),
                     fnCreatedRow: function (row, data, index) {
                         $(row).attr('data-parcel-id', data.parcel_id);
                     },
