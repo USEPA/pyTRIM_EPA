@@ -91,6 +91,8 @@ class ChemicalService(GenericService):
             for compartment in comps:
                 formula = f'({value}) if compartment.id in {{{compartment.id}}} else 0'
                 chem.parameters.set(rate_name, formula=formula, unit=unit)
+                # cp = chem.parameters.get(rate_name)
+                # print(f'Got {parcel}[{rate_name}] = "{cp}" ({cp.formula.eval(compartment)})')
         ChemicalService.commit()
 
 
