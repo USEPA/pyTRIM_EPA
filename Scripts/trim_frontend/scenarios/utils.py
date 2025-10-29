@@ -7,7 +7,7 @@ import pandas as pd
 import pint
 from numpy import timedelta64
 from pathlib import Path
-from trim_frontend.external_API.routes import SoilData
+from trim_frontend.external_API.routes import SoilData, get_soil_boundaries
 from trim_db.schema import CustomParameter, ParameterDefinition
 from trim_db.services import *
 from trim_db.services.parameters import get_or_create_custom_param, update_custom_param_value
@@ -789,7 +789,6 @@ def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
 
 
 def update_soil_from_api(s, logger):
-    logger.info("Obtaining parcel soil data from USDA.gov")
     def calculate_layer_vals(pcl, data, layer):
         idx = [k for k,v in data['layer'].items() if v == layer][0]
         param_map = {
@@ -818,16 +817,20 @@ def update_soil_from_api(s, logger):
             )
             update_custom_param_value(param, val)
 
+    logger.info("Obtaining parcel soil data from USDA.gov")
     if not s.parcels:
         return
     
     parcels = {}
+    parcel_layers = {}
     parcel_tillage = {}
     for this_p in s.parcels:
         this_parcel_data = this_p.as_serializable()
         parcels[this_parcel_data['name']] = [(t[1], t[0]) for t in this_parcel_data['vertices']]
+        parcel_layers[this_parcel_data['name']] = get_soil_boundaries(this_p)
         parcel_tillage[this_parcel_data['name']] = (this_parcel_data['soilTillage'] == 'Yes')
-    sd = SoilData(vert_dict=parcels)
+
+    sd = SoilData(vert_dict=parcels, pcl_layers=parcel_layers)
     sd.run()
     
     for pcl_name, is_tilled in parcel_tillage.items():
@@ -838,6 +841,6 @@ def update_soil_from_api(s, logger):
         else:
             soil_data = json.loads(sd.scenario_no_till_results[pcl_name])
 
-        calculate_layer_vals(pcl, soil_data, "surface")       
+        calculate_layer_vals(pcl, soil_data, "surface")
         calculate_layer_vals(pcl, soil_data, "root")
         calculate_layer_vals(pcl, soil_data, "vadose")

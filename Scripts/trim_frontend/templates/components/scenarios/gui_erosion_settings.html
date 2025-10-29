@@ -260,6 +260,7 @@
                     updateUsdaSoilData(JSON.parse(this.responseText));
                     usdaBtn.find('.lds-dual-ring').remove();
                     usdaBtn.attr('disabled', false);
+                    $('#save-btn').click();
                 });
             }
 

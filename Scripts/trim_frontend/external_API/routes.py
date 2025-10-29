@@ -34,13 +34,16 @@ def get_soil_data(tillage):
         this_scenario_id = int(re.findall('/scenario/(\d+)/', from_url)[0])
         if not this_scenario_id:
             raise ApiException("No Scenario defined")
+
         p = ParcelService.get_all(scenario_id=this_scenario_id)
         parcels = {}
-        if p is not None:
-            for this_p in p:
-                this_parcel_data = this_p.as_serializable()
-                parcels[this_parcel_data['name']] = [(t[1], t[0]) for t in this_parcel_data['vertices']]
-        sd = SoilData(vert_dict=parcels)
+        parcel_layers = {}
+        for this_p in p:
+            this_parcel_data = this_p.as_serializable()
+            parcels[this_parcel_data['name']] = [(t[1], t[0]) for t in this_parcel_data['vertices']]
+            parcel_layers[this_parcel_data['name']] = get_soil_boundaries(this_p)
+
+        sd = SoilData(vert_dict=parcels, pcl_layers=parcel_layers)
         # no_till_soil_data_json, tilled_soil_data_json = sd.run()
         sd.run()
         no_till_soil_data_json = sd.scenario_no_till_results
@@ -64,6 +67,24 @@ def get_soil_data(tillage):
                                  "no_till_data": no_till_soil_data_json}
     return result_soil_data_json
 
+def get_soil_boundaries(pcl):
+    layer_map = {
+        "SurfSoil": "surface",
+        "RootSoil": "root",
+        "VadoseSoil": "vadose",
+        "GW": "gw",
+    }
+    pcl_boundaries = {}
+    for ve in pcl.volume_elements:
+        if ve.name not in layer_map.keys():
+            continue
+        top = int(abs(ve.top) * 100) # m to cm
+        bottom = int(abs(ve.bottom) * 100)
+        pcl_boundaries[layer_map[ve.name]] = {'bounds':[top, bottom]}
+    ordered_boundaries = {v: pcl_boundaries[v] for v in layer_map.values() if v in pcl_boundaries}
+    return ordered_boundaries
+
+
 class SoilData:
     no_tilled_layers = {'surface': {'bounds': [0, 1]},
                         'root': {'bounds': [1, 80]},
@@ -81,7 +102,7 @@ class SoilData:
 
     scenario_no_till_results = {}
 
-    def __init__(self, vert_file_name=None, vert_dict=None, no_till_layers=no_tilled_layers, tilled_layers=tilled_layers):
+    def __init__(self, vert_file_name=None, vert_dict=None, pcl_layers=None, no_till_layers=no_tilled_layers, tilled_layers=tilled_layers):
         if vert_file_name is not None:
             # with open(vert_file_name, 'r') as file:
             #     self.parcel_vertices = file.read()
@@ -91,6 +112,11 @@ class SoilData:
         elif vert_dict is not None:
             self.parcel_vertices = vert_dict
         self.parcel_vertices = self.get_parcel_vertices()
+
+        if pcl_layers:
+            self.pcl_layers = pcl_layers
+        else:
+            self.pcl_layers = {}
 
         self.no_tilled_layers = no_till_layers
         self.tilled_layers = tilled_layers
@@ -132,9 +158,9 @@ class SoilData:
                (pd.NA if pd.DataFrame.sum(df[wgt_col][~pd.isna(df[val_col])]) == 0
                 else pd.DataFrame.sum(df[wgt_col][~pd.isna(df[val_col])]))
 
-    def compute_layer_averages(self, horizons, tilled=False):
+    def compute_layer_averages(self, pcl_name, horizons, tilled=False):
         """computes layer thickness weighted average for each column of soil parameters"""
-        layers = self.no_tilled_layers if not tilled else SoilData.tilled_layers
+        layers = self.get_layer_boundaries(pcl_name, tilled)
         horizons = horizons.sort_values(by=['hzdept_r', 'hzdepb_r', 'compname'])
         mu_averages_df = pd.DataFrame(columns=['mukey', 'area', 'layer', 'slope_r', 'kwfact', 'ph1to1h2o_r', 'om_r',
                                                'awc_r', 'sandtotal_r', 'slopelenusle_r'])
@@ -230,7 +256,7 @@ class SoilData:
 
         return mu_averages_df
 
-    def compute_parcel_averages(self, mu_df, total_area, tilled=False):
+    def compute_parcel_averages(self, pcl_name, mu_df, total_area, tilled=False):
         df = pd.DataFrame(mu_df)
 
         df['wgt_mu_area'] = df['area'] / total_area
@@ -239,7 +265,7 @@ class SoilData:
         parcel_averages_df = pd.DataFrame(columns=list(df.columns))
         parcel_averages_df = parcel_averages_df.drop(['mukey', 'wgt_mu_area', 'area'], axis=1)
 
-        t_layers = self.no_tilled_layers if not tilled else self.tilled_layers
+        t_layers = self.get_layer_boundaries(pcl_name, tilled)
         for t_layer in t_layers:
             this_layer_df = df[df['layer'] == t_layer]
             average_df = pd.DataFrame(this_layer_df.head(n=1))
@@ -256,6 +282,11 @@ class SoilData:
             average_df['slopelenusle_r'] = self.calc_weighted_avg(this_layer_df, 'slopelenusle_r', 'wgt_mu_area')
             parcel_averages_df = pd.concat([parcel_averages_df, average_df], ignore_index=True)
         return parcel_averages_df
+
+    def get_layer_boundaries(self, pcl_name=None, is_tilled=False):
+        if len(self.pcl_layers.get(pcl_name, {}).keys()) == 4:
+            return self.pcl_layers[pcl_name]
+        return self.no_tilled_layers if not is_tilled else self.tilled_layers
 
     def get_parcel_vertices(self):
         str_vert_list = {}
@@ -275,7 +306,7 @@ class SoilData:
 
     def compute_parameters(self, parcel_data):
         r = parcel_data["pd"]
-        this_parcel_vertices = parcel_data["pn"]
+        this_parcel_name = parcel_data["pn"]
         tilled_results = {}
         no_till_results = {}
         r_dict = \
@@ -302,18 +333,18 @@ class SoilData:
         for mu in unique_mu:
             df_mu = df.query(f'mukey=="{mu}"')
             total_area = total_area + list(df_mu['area'])[0]
-            this_mu_nt_df = pd.DataFrame(self.compute_layer_averages(df_mu))
-            this_mu_t_df = pd.DataFrame(self.compute_layer_averages(df_mu, True))
+            this_mu_nt_df = pd.DataFrame(self.compute_layer_averages(this_parcel_name, df_mu))
+            this_mu_t_df = pd.DataFrame(self.compute_layer_averages(this_parcel_name, df_mu, tilled=True))
             nt_df = pd.concat([nt_df, this_mu_nt_df])
             t_df = pd.concat([t_df, this_mu_t_df])
 
         # Calculate map unit averages for tilled case for given layer
-        parcel_averages_df = self.compute_parcel_averages(t_df, total_area, tilled=True)
+        parcel_averages_df = self.compute_parcel_averages(this_parcel_name, t_df, total_area, tilled=True)
         # Calculate map unit averages for not tilled case for given layer
-        no_till_parcel_averages_df = self.compute_parcel_averages(nt_df, total_area, tilled=False)
+        no_till_parcel_averages_df = self.compute_parcel_averages(this_parcel_name, nt_df, total_area, tilled=False)
 
-        tilled_results[this_parcel_vertices] = parcel_averages_df.to_json()
-        no_till_results[this_parcel_vertices] = no_till_parcel_averages_df.to_json()
+        tilled_results[this_parcel_name] = parcel_averages_df.to_json()
+        no_till_results[this_parcel_name] = no_till_parcel_averages_df.to_json()
         return tilled_results, no_till_results
 
     def run(self):
