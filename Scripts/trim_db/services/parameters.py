@@ -450,12 +450,6 @@ def parameterize(cls, globalize_custom_parameters=False, default_scenario=None):
             requirements=None, domain_name=None,
             force_update=False
         ):
-            # if (
-            #     str(formula).endswith('.Volume')
-            #     or '.Volume ' in str(formula)
-            #     or '.Volume)' in str(formula)
-            # ):
-            #     raise AssertionError(formula)
             requirements = (requirements or '').strip()
 
             if domain is None:

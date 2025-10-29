@@ -25,10 +25,11 @@
                         <br><span style='color: firebrick;'>*</span> All editable cells are required.
                     </small>
                 </div>
-                <table data-slot="true" data-target="AquaticTable" class="hover wrap-text" id="AquaticTable">
+                <table data-slot="true" data-target="AquaticTable" data-pivot="true" class="hover wrap-text" id="AquaticTable">
                     <thead>
                         <tr>
                             <th>Property</th>
+                            <th>Default Value</th>
                         </tr>
                     </thead>
                 </table>
@@ -206,6 +207,7 @@
                     tblHandle.clear().draw();
                     tblHandle.destroy();
                 }
+                $(tblId).find('thead tr th:not(:first-child)').remove();
                 tblHandle = $(tblId).removeAttr('width').DataTable({
                     destroy: true,
                     data : table_data,

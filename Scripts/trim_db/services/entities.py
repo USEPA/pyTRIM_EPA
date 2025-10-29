@@ -55,6 +55,8 @@ class ChemicalService(GenericService):
                 comp.media.isa('Air')
                 or comp.media.isa('Soil')
                 or comp.media.isa('Groundwater')
+                or comp.media.isa('Surface_Water')
+                or comp.media.isa('Sediment')
             ):
                 continue
             mtr_params[comp.media.name] = {chem_name: {} for chem_name in target_rates}
@@ -89,6 +91,8 @@ class ChemicalService(GenericService):
             for compartment in comps:
                 formula = f'({value}) if compartment.id in {{{compartment.id}}} else 0'
                 chem.parameters.set(rate_name, formula=formula, unit=unit)
+                # cp = chem.parameters.get(rate_name)
+                # print(f'Got {parcel}[{rate_name}] = "{cp}" ({cp.formula.eval(compartment)})')
         ChemicalService.commit()
 
 

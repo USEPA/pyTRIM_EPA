@@ -16,82 +16,76 @@
                         <br><span style='color: firebrick;'>*</span> All editable cells are required.
                     </small>
                 </div>
-                <div class = "row">
-                    <div class="col-md mt-3">
-                    </div>
-                    <div class="col-md mt-3">
-                        <button id="abiotic-usda-soil-btn" class="btn btn-secondary">Get data from USDA Soil DataMart</button>
-                    </div>
-                    <div class="col-md mt-3">
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md m-2 text-center">
-                        <h4>What Happens to Precipitation on the Surface</h4>
-                    </div>
-                </div>
-                {{ table_static_value(table_id='SurfacePrecipitationAbioticTable', columns=[]) }}
-                <div class ="row">
-                    <div class="col-md">
-                        <table data-slot="true" data-target="SurfacePrecipitationAbioticTable" class="hover wrap-text" id="SurfacePrecipitationAbioticTable">
-                        </table>
-                    </div>
-                </div>
-                <div class = "row">
-                    <div class="col-md mt-4 text-center">
-                        <h4>Air Properties</h4>
-                    </div>
-                </div>
-                {{ table_static_value(table_id='AirAbioticTable', columns=[]) }}
-                <div class ="row">
-                    <div class="col-md">
-                        <table data-slot="true" data-target="AirAbioticTable" class="hover wrap-text" id="AirAbioticTable"></table>
-                    </div>
-                </div>
-                <div class = "row">
-                    <div class="col-md mt-4 text-center">
-                        <h4>Surface Soil Properties</h4>
-                    </div>
-                </div>
-                {{ table_static_value(table_id='SurfaceSoilAbioticTable', columns=[]) }}
-                <div class ="row">
-                    <div class="col-md">
-                        <table data-slot="true" data-target="SurfaceSoilAbioticTable" class="hover wrap-text" id="SurfaceSoilAbioticTable"></table>
-                    </div>
-                </div>
-                <div class = "row">
-                    <div class="col-md mt-4 text-center">
-                        <h4>Root Soil Properties</h4>
-                    </div>
-                </div>
-                {{ table_static_value(table_id='RootSoilAbioticTable', columns=[]) }}
-                <div class ="row">
-                    <div class="col-md">
-                        <table data-slot="true" data-target="RootSoilAbioticTable" class="hover wrap-text" id="RootSoilAbioticTable"></table>
-                    </div>
-                </div>
-                <div class = "row">
-                    <div class="col-md mt-4 text-center">
-                        <h4>Vadose Zone Properties</h4>
-                    </div>
-                </div>
-                {{ table_static_value(table_id='VadoseSoilAbioticTable', columns=[]) }}
-                <div class ="row">
-                    <div class="col-md">
-                        <table data-slot="true" data-target="VadoseSoilAbioticTable" class="hover wrap-text" id="VadoseSoilAbioticTable"></table>
-                    </div>
-                </div>
-                <div class = "row">
-                    <div class="col-md mt-4 text-center">
-                        <h4>Groundwater Zone Properties</h4>
-                    </div>
-                </div>
-                {{ table_static_value(table_id='GWSoilAbioticTable', columns=[]) }}
-                <div class ="row">
-                    <div class="col-md">
-                        <table data-slot="true" data-target="GWSoilAbioticTable" class="hover wrap-text" id="GWSoilAbioticTable"></table>
-                    </div>
-                </div>
+            </div>
+            <div class="col-md text-right">
+                <button id="abiotic-usda-soil-btn" class="btn btn-secondary">Get data from USDA Soil DataMart</button>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md m-2 text-center">
+                <h4>What Happens to Precipitation on the Surface</h4>
+            </div>
+        </div>
+        {{ table_static_value(table_id='SurfacePrecipitationAbioticTable', columns=[]) }}
+        <div class ="row">
+            <div class="col-md">
+                <table data-slot="true" data-target="SurfacePrecipitationAbioticTable" class="hover wrap-text" id="SurfacePrecipitationAbioticTable">
+                </table>
+            </div>
+        </div>
+        <div class = "row">
+            <div class="col-md mt-4 text-center">
+                <h4>Air Properties</h4>
+            </div>
+        </div>
+        {{ table_static_value(table_id='AirAbioticTable', columns=[]) }}
+        <div class ="row">
+            <div class="col-md">
+                <table data-slot="true" data-target="AirAbioticTable" class="hover wrap-text" id="AirAbioticTable"></table>
+            </div>
+        </div>
+        <div class = "row">
+            <div class="col-md mt-4 text-center">
+                <h4>Surface Soil Properties</h4>
+            </div>
+        </div>
+        {{ table_static_value(table_id='SurfaceSoilAbioticTable', columns=[]) }}
+        <div class ="row">
+            <div class="col-md">
+                <table data-slot="true" data-target="SurfaceSoilAbioticTable" class="hover wrap-text" id="SurfaceSoilAbioticTable"></table>
+            </div>
+        </div>
+        <div class = "row">
+            <div class="col-md mt-4 text-center">
+                <h4>Root Soil Properties</h4>
+            </div>
+        </div>
+        {{ table_static_value(table_id='RootSoilAbioticTable', columns=[]) }}
+        <div class ="row">
+            <div class="col-md">
+                <table data-slot="true" data-target="RootSoilAbioticTable" class="hover wrap-text" id="RootSoilAbioticTable"></table>
+            </div>
+        </div>
+        <div class = "row">
+            <div class="col-md mt-4 text-center">
+                <h4>Vadose Zone Properties</h4>
+            </div>
+        </div>
+        {{ table_static_value(table_id='VadoseSoilAbioticTable', columns=[]) }}
+        <div class ="row">
+            <div class="col-md">
+                <table data-slot="true" data-target="VadoseSoilAbioticTable" class="hover wrap-text" id="VadoseSoilAbioticTable"></table>
+            </div>
+        </div>
+        <div class = "row">
+            <div class="col-md mt-4 text-center">
+                <h4>Groundwater Zone Properties</h4>
+            </div>
+        </div>
+        {{ table_static_value(table_id='GWSoilAbioticTable', columns=[]) }}
+        <div class ="row">
+            <div class="col-md">
+                <table data-slot="true" data-target="GWSoilAbioticTable" class="hover wrap-text" id="GWSoilAbioticTable"></table>
             </div>
         </div>
     </section>
