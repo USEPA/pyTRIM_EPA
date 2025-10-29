@@ -874,6 +874,7 @@
                     LoadingScreen.show(ls_info)
                     TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', (rsp)=>{
                         update_data_store_callback(rsp, elm, parcel_info, param_store_key, data, old_data)
+                        updateMercuryTransformRate(parcel_info)
                         LoadingScreen.hide(ls_info)
                     })
                     // table_data = get_Data_from_table(tblId)
@@ -975,6 +976,37 @@
                     TableRedraw(sed_table_data, "sed")
                 }
             })
+        }
+
+        function isMercuryTransformation(field) {
+            const hgRates = [
+                'MethylationRate',
+                'OxidationRate',
+                'ReductionRate',
+                'DemethylationRate'
+            ];
+            const rateField = field.split('.')[0];
+            return hgRates.indexOf(rateField) > -1;
+        }
+
+        function updateMercuryTransformRate(parcel_info) {
+            const field = parcel_info[2].name;
+            if (!isMercuryTransformation(field)) {
+                return;
+            }
+            const pcl = getParcelByKey('id', parcel_info[0].value);
+            const media = field.split('.')[1];
+            const rate = field.split('.')[0];
+            const val = parcel_info[2].value;
+            const mtrs = (pcl.mercury_transformation_rates[media] || {});
+            for (const chem in mtrs) {
+                for (const targetRate in mtrs[chem]) {
+                    if (targetRate == rate) {
+                        mtrs[chem][rate].value = Number(val);
+                        break;
+                    }
+                }
+            }
         }
 
         var form = document.getElementById('lake-props-gui');

@@ -713,11 +713,44 @@
                 let param_store_key = "soil_params"
                 TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', (rsp)=>{
                     update_data_store_callback(rsp, cell, parcel_info, param_store_key, data, old_data)
-                    if (parcel_info[2].name == 'surfaceSoilThickness')
+                    if (parcel_info[2].name == 'surfaceSoilThickness') {
                         getParcelByKey('id', parcel_info[0].value).surfaceSoilThickness = parseFloat(data);
+                    }
+                    updateMercuryTransformRate(parcel_info)
                     LoadingScreen.hide(ls_info)
                 })
                 table_data = get_Data_from_table(`#${focusTblId}`)
+            }
+        }
+
+        function isMercuryTransformation(field) {
+            const hgRates = [
+                'MethylationRate',
+                'OxidationRate',
+                'ReductionRate',
+                'DemethylationRate'
+            ];
+            const rateField = field.split('.')[0];
+            return hgRates.indexOf(rateField) > -1;
+        }
+
+        function updateMercuryTransformRate(parcel_info) {
+            const field = parcel_info[2].name;
+            if (!isMercuryTransformation(field)) {
+                return;
+            }
+            const pcl = getParcelByKey('id', parcel_info[0].value);
+            const media = field.split('.')[1];
+            const rate = field.split('.')[0];
+            const val = parcel_info[2].value;
+            const mtrs = (pcl.mercury_transformation_rates[media] || {});
+            for (const chem in mtrs) {
+                for (const targetRate in mtrs[chem]) {
+                    if (targetRate == rate) {
+                        mtrs[chem][rate].value = Number(val);
+                        break;
+                    }
+                }
             }
         }
 
@@ -735,15 +768,17 @@
                         if (rsp.target.status === 200) {
                             let field = parcel_info[2];
                             let pcl = getParcelByKey('id', parcel_info[0].value);
-                            if (field.name == "EvapotranspirationFractions")
+                            if (field.name == "EvapotranspirationFractions") {
                                 pcl.evapotrans_frac = Number(field.value);
-                            else if (field.name == "GroundwaterSeepageFractions")
+                            }
+                            else if (field.name == "GroundwaterSeepageFractions") {
                                 pcl.seepage_frac = Number(field.value);
+                            }
                             else if (field.name == "RunoffFractions") {
                                 pcl.runoff_fraction = Number(field.value);
                                 pcl.soil_params.Soil_Surface.TotalRunoffRate = JSON.parse(rsp.target.responseJSON).TotalRunoffRate;
                                 updateAbioticData();
-                            }  
+                            }
                         }
                         LoadingScreen.hide(ls_info);
                     })
