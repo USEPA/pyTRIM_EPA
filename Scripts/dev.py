@@ -3,7 +3,7 @@ import subprocess
 import sys
 import time
 
-os.environ['TEST_DB_SERVERLESS'] = ''  # Always false when running the webapp
+os.environ['TEST_DB_SERVERLESS'] = ''  # Must always be false when running the webapp
 
 EXPOSE = False
 
