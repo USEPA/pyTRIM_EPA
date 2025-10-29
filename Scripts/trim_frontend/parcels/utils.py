@@ -506,8 +506,8 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
 
             eq = src_par.formula.equation
             # We have the chemical in the formula
-            if f'chemical.id == {str(chem.id)}' in eq:
-                formula_parts = eq.split(f"if chemical.id == {chem.id}")
+            if f'chemical.id == {chem.id} ' in eq:
+                formula_parts = eq.split(f"if chemical.id == {chem.id} ")
                 formula_part = formula_parts[0]
                 if "else" in formula_part:
                     arr = formula_part.split("else")[:-1]
@@ -515,7 +515,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                 else:
                     formula_part = f'{src_val} '
                 formula_parts[0] = formula_part
-                new_formula = f"if chemical.id == {chem.id}".join(formula_parts)
+                new_formula = f"if chemical.id == {chem.id} ".join(formula_parts)
                 print(new_formula)
             # We do not have the chemical in the formula. We need to add it...
             else:
@@ -541,8 +541,8 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
 
             eq = ic_par.formula.equation
             # We have the chemical in the formula
-            if f'chemical.id == {str(chem.id)}' in eq:
-                formula_parts = eq.split(f"if chemical.id == {chem.id}")
+            if f'chemical.id == {chem.id} ' in eq:
+                formula_parts = eq.split(f"if chemical.id == {chem.id} ")
                 formula_part = formula_parts[0]
                 if "else" in formula_part:
                     arr = formula_part.split("else")[:-1]
@@ -550,7 +550,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                 else:
                     formula_part = f'{ic_val} '
                 formula_parts[0] = formula_part
-                new_formula = f"if chemical.id == {chem.id}".join(formula_parts)
+                new_formula = f"if chemical.id == {chem.id} ".join(formula_parts)
                 print(new_formula)
             # We do not have the chemical in the formula. We need to add it...
             else:
