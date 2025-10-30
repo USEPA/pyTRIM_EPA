@@ -95,9 +95,38 @@ class PyTrimDeployer(object):
 
         ingress_data = self.get_cfg_val("aws.ec2_ingress")
 
+        # create mysql secret? We did this by hand on old PyTRIM account
+        # but now it's part of the stack...but CF can be weird about bringing
+        # in something that wasn't initially part of the stack. So we have this
+        # KludgeDoSecret param we pass in that controls creation.
+        #
+        # logic is basically if the secret needs creating or is already part of
+        # this stack, set it to true. Otherwise, set it to false.
+        secret_client = boto3.client("secretsmanager")
+        secret_kludge = "???"
+        try:
+            secret_probe = secret_client.describe_secret(SecretId="pytrim/mysql")
+            stack_name_tag = next((x for x in secret_probe.get("Tags", []) if x["Key"] == "aws:cloudformation:stack-name"), None)
+            stack_name = stack_name_tag["Value"] if stack_name_tag is not None else None
+
+            if stack_name is not None:
+                if stack_name == env_name:
+                    # it's part of THIS stack 
+                    secret_kludge = "true"
+                else:
+                    # it's part of ANOTHER stack (maybe we spun up a couple; hope they don't want separate passwords!)
+                    secret_kludge = "false"
+            else:
+                # it's not part of any stack
+                secret_kludge = "false"
+        except:
+            # secret doesn't exist at all
+            secret_kludge = "true"
+
         cf_helper = CloudFormationHelper()
         cf_helper.create_or_update_stack(env_name, {
             "EnvironmentName": env_name,
+            "KludgeDoSecret": secret_kludge,
             "ShortEnvironmentProfile": short_env_profile,
             "CidrSegmentVPC": vpc_seg,
             "WebServerCertArn": web_server_cert_arn,
