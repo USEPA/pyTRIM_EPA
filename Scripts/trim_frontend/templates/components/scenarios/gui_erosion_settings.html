@@ -306,7 +306,7 @@
             $(".export-erosion-table").on('click', (e) => {
                 const optionNum = $(e.target).closest('.col-md')[0].id.split('_opt').pop();
 
-                let filename = TRIM.store.currentScenario.name + "_Erosion Settings_";
+                let filename = TRIM.store.currentScenario.name + `_Option ${optionNum}`+ "_Erosion Settings_";
                 filename += moment(new Date()).format('YYYY_MM_DD-HH_MM') + ".csv";
 
                 let cleanedTable = $('#erosionTable_opt' + optionNum).clone();
