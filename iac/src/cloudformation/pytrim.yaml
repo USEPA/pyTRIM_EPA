@@ -1520,6 +1520,14 @@ Resources:
           OptionName: ConnectionDrainingEnabled
           Value: true
         -
+          Namespace: 'aws:elb:policies'
+          OptionName: ConnectionDrainingTimeout
+          Value: 300
+        -
+          Namespace: 'aws:elb:policies'
+          OptionName: ConnectionSettingIdleTimeout
+          Value: 600
+        -
           Namespace: 'aws:elb:listener'
           OptionName: ListenerEnabled
           Value: false
