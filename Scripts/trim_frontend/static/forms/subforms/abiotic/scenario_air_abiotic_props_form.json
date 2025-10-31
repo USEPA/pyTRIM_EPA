@@ -41,6 +41,34 @@
       "data_type": "float",
       "default": 0.2,
       "help": "Enter the fraction organic matter of dust particles in the air compartments. Valid values are 0 to 1. The default value of 0.2 (20%) is from page 1601 of Harner and Bidleman 1998 (Octanol-air partition coefficient for describing particle/gas partitioning of aromatic compounds in urban air). See the TRIM User Guide Appendix for full reference information."
+    },
+    {
+      "id": "MethylationRate_Air",
+      "label": "Hg Methylation Rate",
+      "data_type": "float",
+      "default": 0,
+      "help": "See the TRIM User Guide Appendix for full reference information."
+    },
+    {
+      "id": "ReductionRate_Air",
+      "label": "Hg Reduction Rate",
+      "data_type": "float",
+      "default": 0,
+      "help": "See the TRIM User Guide Appendix for full reference information."
+    },
+    {
+      "id": "OxidationRate_Air",
+      "label": "Hg Oxidation Rate",
+      "data_type": "float",
+      "default": 0,
+      "help": "See the TRIM User Guide Appendix for full reference information."
+    },
+    {
+      "id": "DemethylationRate_Air",
+      "label": "Hg Demethylation Rate",
+      "data_type": "float",
+      "default": 0,
+      "help": "See the TRIM User Guide Appendix for full reference information."
     }
   ]
 }

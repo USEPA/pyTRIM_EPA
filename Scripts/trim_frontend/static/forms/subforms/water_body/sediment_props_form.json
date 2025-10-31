@@ -1,0 +1,121 @@
+{
+  "title": "Sediment Properties",
+  "table_id": "SedimentTable",
+  "render": true,
+  "fields": [
+    {
+      "id": "bed_thickness",
+      "label": "Bed Thickness",
+      "data_type": "float",
+      "default": 0.05,
+      "tooltip": "m",
+      "help": "Enter the average thickness of the water body sediment bed (i.e., the unburied sediment). Valid values are > 0. The default value of 0.05 is from Table 3 of McKone et al. 2001 (Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models). There is no typical source of site-specific values. See the TRIM User Guide Appendix for full reference information."
+    },
+    {
+      "id": "bed_density",
+      "label": "Bed Density",
+      "data_type": "float",
+      "default": 2600,
+      "tooltip": "kg [sediment particles] / m<sup>3</sup> [sediment particles]",
+      "help": "Enter the density of dry sediment in the water bodys sediment bed (i.e., the unburied sediment). Valid values are > 0. The default value of 2600 is from Table 3 of McKone et al. 2001 (Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models). There is no typical source of site-specific values. See the TRIM User Guide Appendix for full reference information."
+    },
+    {
+      "id": "bed_pH",
+      "label": "Bed pH",
+      "data_type": "float",
+      "default": 7.3,
+      "min": 0,
+      "max": 14,
+      "tooltip": "unitless",
+      "help": "Enter the pH of the water body sediment bed (i.e., the unburied sediment). Valid values are 0 to 14. The default value of 7.3 assumes equilibrium with the overlying surface water and is the midpoint of the optimal pH range for most aquatic organisms (6.5 to 8.0, a range provided by the U.S. EPA Casual Analysis/Diagnosis Decision Information System (CADDIS; available online at: https://www.epa.gov/caddis-vol2/caddis-volume-2-sources-stressors-responses-ph). Typical sources of site-specific values of water column pH include the Water Quality Portal of the National Water Quality Monitoring Council (available online at: http://www.waterqualitydata.us/; includes data from U.S. Geological Survey National Water Information System and U.S. Environmental Protection Agency STORET data warehouses), state department of environment or natural resources, and state or local watershed watch or lake stewardship programs."
+    },
+    {
+      "id": "organic_carbon_frac",
+      "label": "Organic Carbon Fraction in Bed",
+      "data_type": "float",
+      "default": 0.02,
+      "min": 0,
+      "max": 1,
+      "tooltip": "unitless",
+      "help": "Enter the organic carbon fraction in sediments in the sediment bed (i.e., the unburied sediment). Valid values are 0 to 1. The default value of 0.02 is from Table 3 of McKone et al. 2001 (Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models). Also, approximately the lowest value obtained from surface sediments in 46 Minnesota lakes (range: 0.029 to 28.6), from Dean et al. 2006 (Characterization of organic matter in lake sediments from Minnesota and Yellowstone National Park). Many contaminants will sorb to organic carbon, so it is health-protective to assume a lower value. Sources of site-specific data might include state departments of natural resources or environmental protection: organic carbon content is measured when sediment samples are analyzed for organic contaminants. See the TRIM User Guide Appendix for full reference information."
+    },
+    {
+      "id": "bed_porosity",
+      "label": "Bed Porosity",
+      "data_type": "float",
+      "default": 0.6,
+      "min": 0,
+      "max": 1,
+      "tooltip": "unitless",
+      "help": "Enter the porosity of the sediment bed (i.e., the ratio of the volume of the pore space in the sediment bed to the overall volume of the sediment bed). Valid values are 0 to 1. The default value of 0.6 is based on the value of 0.2 used in Table 3 of McKone et al. 2001 (Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models). Screening scenarios with TRIM have shown that higher values generally lead to higher concentrations in fish. As such, we utilize a more conservative default value of 0.6 (midpoint between 0.2 and 1.0; professional judgment). See the TRIM User Guide Appendix for full reference information. There are no typical sources of site-specific values."
+    },
+    {
+      "id": "sed_resuspension_vel",
+      "label": "Resuspension Velocity",
+      "readonly": true,
+      "data_type": "float",
+      "default": 0,
+      "tooltip": "m / d",
+      "help": "Velocity of sediment returning to the water column (as suspended sediment) from the sediment bed. Ratio of the difference between the Water Body Sediment Deposition Volumetric Rate and the Water Body Sediment Burial Volumetric Rate to the difference between 1 and the Water Body Sediment Bed Porosity<strong><p>= (Water Body Sediment Deposition Volumetric Rate - Water Body Sediment Burial Volumetric Rate) / (1 - Water Body Sediment Bed Porosity)</p></strong>"
+    },
+    {
+      "id": "sed_deposition_vol_rate",
+      "label": "Deposition Volumetric Rate",
+      "readonly": true,
+      "data_type": "float",
+      "default": 0,
+      "tooltip": "m<sup>3</sup> [sediment] / m<sup>2</sup> [sediment bed interface] / d",
+      "help": "Volume of sediment received per day by the water body’s sediment bed (per unit area) from the suspended sediment in the water column. Ratio of the product of the Water Column Sediment Deposition Velocity and the Water Column Suspended Sediment Concentration to the Sediment Bed Density.<strong><p>= (Water Column Sediment Deposition Velocity * Water Column Suspended Sediment Concentration / Sediment Bed Density)</p></strong>"
+    },
+    {
+      "id": "sed_soil_erosion_to_sw",
+      "label": "Soil Erosion Rate to Water Body",
+      "readonly": true,
+      "data_type": "float",
+      "default": 0,
+      "tooltip": "kg [soil] / d",
+      "help": "Mass of soil per day eroding into the water body. Sum-product of the runoff fractions from parcel to water body, the parcel erosion rates, and the parcel surface areas, for the parcels directly adjacent to the water body. For example: If Parcel A sends 100% of its runoff directly to the water body, then that sending parcel&apos;s whole surface area is multiplied by that parcel&#39;s erosion rate. If Parcel B sends 10% of its runoff the water body, then 10% of that sending parcel&apos;s surface area is multiplied by that parcel&#39;s erosion rate."
+    },
+    {
+      "id": "sed_burial_vol_rate",
+      "label": "Sediment Burial Volumetric Rate",
+      "readonly": true,
+      "data_type": "float",
+      "default": 0,
+      "tooltip": "m<sup>3</sup> [sediment] / m<sup>2</sup> [sediment bed interface] / d",
+      "help": "Volume of sediment buried per day into the sediment bed (per unit area) from the suspended sediment in the water column. Ratio of the difference between the sum (across all contributing water bodies) of the Water Column External Sediment Inflow from Other Water Bodies and the Soil Erosion Rate to Water Body and the Water Column Sediment Discharge Rate (converted from kg/y to kg/d) to the product of the Water Body Sediment Bed Density and water body surface area.<strong><p>= (Water Column External Sediment Inflow from Other Water Bodies + Soil Erosion Rate to Water Body - [Water Column Sediment Discharge Rate]/365) / (Sediment Bed Density* water body surface area)</p></strong>"
+    },
+    {
+      "id": "MethylationRate.Sediment",
+      "label": "Hg Methylation Rate",
+      "data_type": "float",
+      "default": 0,
+      "tooltip": "1 / day",
+      "help": "See the TRIM User Guide Appendix for full reference information."
+    },
+    {
+      "id": "ReductionRate.Sediment",
+      "label": "Hg Reduction Rate",
+      "data_type": "float",
+      "default": 0,
+      "tooltip": "1 / day",
+      "help": "See the TRIM User Guide Appendix for full reference information."
+    },
+    {
+      "id": "OxidationRate.Sediment",
+      "label": "Hg Oxidation Rate",
+      "data_type": "float",
+      "default": 0,
+      "tooltip": "1 / day",
+      "help": "See the TRIM User Guide Appendix for full reference information."
+    },
+    {
+      "id": "DemethylationRate.Sediment",
+      "label": "Hg Demethylation Rate",
+      "data_type": "float",
+      "default": 0,
+      "tooltip": "1 / day",
+      "help": "See the TRIM User Guide Appendix for full reference information."
+    }
+  ]
+}
