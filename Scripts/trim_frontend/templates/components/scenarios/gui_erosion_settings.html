@@ -917,6 +917,8 @@
                 tbl.find(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
                 tbl.find(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
                 tbl.find(".dataTables_scrollHead").addClass('wrap-text-scrollhead');
+                
+                tbl.removeClass("wrap-text"); // dynamic cols a bit buggy with erosion opts 2/3
 
                 tbl.find("[data-toggle=popover]").popover();
                 tbl.find('[data-toggle="tooltip"]').tooltip();
@@ -981,7 +983,7 @@
                     bAutoWidth: false,
                     scrollX: true,
                     scrollY: 500,
-                    columns: setDynamicColumnWidths('#' + tbl.attr('id'), tblColDefs[`opt${optionNum}`], tblData),
+                    columns: tblColDefs[`opt${optionNum}`], //setDynamicColumnWidths('#' + tbl.attr('id'), tblColDefs[`opt${optionNum}`], tblData),
                     fnCreatedRow: function (row, data, index) {
                         $(row).attr('data-parcel-id', data.parcel_id);
                     },
