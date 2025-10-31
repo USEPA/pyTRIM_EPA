@@ -963,23 +963,20 @@ def delete_parcel_contents(del_parcel):
     # Delete associated HACKY params at the scenario level
     print('deleting erosion-table parameters')
     
-    # add null check for scenario
-    if del_parcel.scenario is not None:
-        for param in list(del_parcel.scenario.parameters.values()):
-            if not isinstance(param, CustomParameter):
-                continue
-            if not param.requirements == f'(self.id == {del_parcel.id})':
-                continue
-            if not(
-                param.variable_name.startswith('erosion1-')
-                or param.variable_name.startswith('erosion2-')
-                or param.variable_name.startswith('erosion3-')
-            ):
-                continue
-            ParameterService.delete(param, no_commit=True)
-    else:
-        print(f'Warning: parcel {del_parcel.id} has no scenario, skipping erosion parameter deletion')
-
+    
+    for param in list(del_parcel.scenario.parameters.values()):
+        if not isinstance(param, CustomParameter):
+            continue
+        if not param.requirements == f'(self.id == {del_parcel.id})':
+            continue
+        if not(
+            param.variable_name.startswith('erosion1-')
+            or param.variable_name.startswith('erosion2-')
+            or param.variable_name.startswith('erosion3-')
+        ):
+            continue
+        ParameterService.delete(param, no_commit=True)
+            
     # Delete Volume Elements
     print('deleting parcel volume elements')
     for ve in del_parcel.volume_elements:
