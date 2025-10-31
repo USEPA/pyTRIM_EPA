@@ -79,7 +79,7 @@ Metadata:
           default: Beanstalk (web tiers)
         Parameters:
           - NotificationEmail
-          - WebServerCertId
+          - WebServerCertArn
           - WebTierInstanceType
           - WebTierMinNumOfInstances
           - WebTierMaxNumOfInstances
@@ -197,7 +197,7 @@ Parameters:
     Description: 'email address for AWS-related notifications'
     Type: String
     Default: 'tom.feiler@icf.com'
-  WebServerCertId:
+  WebServerCertArn:
     Description: The Amazon Resource Name (ARN) of an SSL certificate to bind to the web tier listener. Visit ACM to find the appropriate value.
     Type: String
     # default dev one for testing
@@ -1364,7 +1364,7 @@ Resources:
       ApplicationName: !Ref BeanstalkApp
       Description: !Sub 'web tier for ${EnvironmentName}'
       EnvironmentName: !Sub '${EnvironmentName}-web'
-      SolutionStackName: '64bit Amazon Linux 2023 v4.0.11 running Python 3.11' # see https://docs.aws.amazon.com/elasticbeanstalk/latest/platforms/platforms-supported.html#platforms-supported.python
+      SolutionStackName: '64bit Amazon Linux 2023 v4.7.3 running Python 3.11' # see https://docs.aws.amazon.com/elasticbeanstalk/latest/platforms/platforms-supported.html#platforms-supported.python
       OptionSettings: 
         -
           Namespace: 'aws:autoscaling:launchconfiguration'
@@ -1520,6 +1520,14 @@ Resources:
           OptionName: ConnectionDrainingEnabled
           Value: true
         -
+          Namespace: 'aws:elb:policies'
+          OptionName: ConnectionDrainingTimeout
+          Value: 300
+        -
+          Namespace: 'aws:elb:policies'
+          OptionName: ConnectionSettingIdleTimeout
+          Value: 600
+        -
           Namespace: 'aws:elb:listener'
           OptionName: ListenerEnabled
           Value: false
@@ -1542,7 +1550,7 @@ Resources:
         -
           Namespace: 'aws:elb:listener:443'
           OptionName: SSLCertificateId
-          Value: !Ref WebServerCertId
+          Value: !Ref WebServerCertArn
         -
           Namespace: 'aws:elasticbeanstalk:command'
           OptionName: DeploymentPolicy

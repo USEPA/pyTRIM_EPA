@@ -260,6 +260,7 @@
                     updateUsdaSoilData(JSON.parse(this.responseText));
                     usdaBtn.find('.lds-dual-ring').remove();
                     usdaBtn.attr('disabled', false);
+                    $('#save-btn').click();
                 });
             }
 
@@ -302,6 +303,16 @@
                 // since they're all in calculations that depend on S
                 updateAllErosionData(tbl, currentData, 'S', ['K', 'L']); // ['R', 'K', 'L']);
             }
+
+            $(".export-erosion-table").on('click', (e) => {
+                const optionNum = $(e.target).closest('.col-md')[0].id.split('_opt').pop();
+
+                let filename = TRIM.store.currentScenario.name + `_Option ${optionNum}`+ "_Erosion Settings_";
+                filename += moment(new Date()).format('YYYY_MM_DD-HH_MM') + ".csv";
+
+                let cleanedTable = $('#erosionTable_opt' + optionNum).clone();
+                exportTableToCSV.apply(e.target, [cleanedTable, filename]);
+            });
 
             LoadingScreen.hide('erosion_settings_init');
         }
@@ -904,6 +915,11 @@
             function globalDrawCallback(tbl) {
                 // General table formatting / features
                 tbl.find(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
+                tbl.find(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
+                tbl.find(".dataTables_scrollHead").addClass('wrap-text-scrollhead');
+                
+                tbl.removeClass("wrap-text"); // dynamic cols a bit buggy with erosion opts 2/3
+
                 tbl.find("[data-toggle=popover]").popover();
                 tbl.find('[data-toggle="tooltip"]').tooltip();
 
@@ -956,7 +972,7 @@
                 const optionNum = x.id.split('_opt').pop();
                 const tbl = $(x);
                 const tblData = tblsData[`opt${optionNum}`];
-
+                tbl.addClass('wrap-text')
                 tbl.DataTable({
                     destroy: true,
                     data: tblData,
@@ -967,7 +983,7 @@
                     bAutoWidth: false,
                     scrollX: true,
                     scrollY: 500,
-                    columns: tblColDefs[`opt${optionNum}`],
+                    columns: tblColDefs[`opt${optionNum}`], //setDynamicColumnWidths('#' + tbl.attr('id'), tblColDefs[`opt${optionNum}`], tblData),
                     fnCreatedRow: function (row, data, index) {
                         $(row).attr('data-parcel-id', data.parcel_id);
                     },

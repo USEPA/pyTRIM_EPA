@@ -54,6 +54,12 @@ class ParameterDomain(Model):
         )
 
 
+sa.Index(
+    'idx_parameter_domain_requirements',
+    sa.sql.func.substr(ParameterDomain.requirements, 1, 255)
+)
+
+
 class Formula(Model):
     _equation = sa.Column('equation', sa.String(), nullable=False)
 
@@ -432,6 +438,12 @@ class CustomParameter(Model):
         )
 
 
+sa.Index(
+    'idx_custom_parameter_requirements',
+    sa.sql.func.substr(CustomParameter.requirements, 1, 255)
+)
+
+
 @register_serializer(CustomParameter)
 def serialize_custom_parameter(cp: CustomParameter):
     s = {
@@ -441,3 +453,14 @@ def serialize_custom_parameter(cp: CustomParameter):
         'formula': cp.formula.equation if cp.formula else None
     }
     return s
+
+
+@register_serializer(ureg.Quantity)
+def _ts_quantity(q: ureg.Quantity):
+    if q.units in ['dimensionless', '']:
+        return q.magnitude
+    else:
+        return {
+            'value': q.magnitude,
+            'unit': q.units
+        }

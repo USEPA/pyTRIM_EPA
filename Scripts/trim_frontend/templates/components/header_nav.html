@@ -1,9 +1,13 @@
-{% from 'macros/nav_macros.html' import render_nav_home,
+{% from 'macros/nav_macros.html' import render_nav_env_banner,
+                                        render_nav_home,
                                         render_nav_item,
                                         render_nav_toggle %}
 
+{{ render_nav_env_banner(config["TRIM_ENV_PROFILE"]) }}
+
 <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
     <div class="container">
+
         {{ render_nav_home(site_name) }}
 
         <ul class="navbar-nav navbar-right ml-auto">

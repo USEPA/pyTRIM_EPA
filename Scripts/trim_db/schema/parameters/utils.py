@@ -194,7 +194,7 @@ def safe_div_quantity(a, b):
             return EMPERICAL_ZERO_DIVISION
         raise
 
-simpleeval.MAX_POWER = 100_000_000
+simpleeval.MAX_POWER = 1_000_000_000
 
 
 def safe_power_quantity(a, b):

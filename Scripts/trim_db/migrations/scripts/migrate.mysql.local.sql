@@ -239,3 +239,8 @@ CREATE TABLE `scenario_permissions` (
 
 INSERT INTO `alembic_version` (`version_num`) VALUES ('81e92f9ff252');
 
+CREATE INDEX idx_custom_parameter_requirements ON custom_parameter (requirements(255));
+CREATE INDEX idx_parameter_domain_requirements ON parameter_domain (requirements(255));
+
+INSERT INTO `alembic_version` (`version_num`) VALUES ('4416c27f2844');
+
