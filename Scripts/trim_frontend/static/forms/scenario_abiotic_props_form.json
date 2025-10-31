@@ -2,10 +2,10 @@
     "title": "Abiotic Properties",
     "fields": [
         {
-            "id": "spatially_varying_table",
+            "id": "SurfacePrecipitationAbioticTable",
             "label": "",
             "data_type": "form",
-            "form_definition": "subforms/abiotic/scenario_spatially_varying_props_form.json"
+            "form_definition": "subforms/abiotic/scenario_surface_precipitation_abiotic_props_form.json"
         },
         {
             "id": "AirAbioticTable",

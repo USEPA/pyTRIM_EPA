@@ -1,4 +1,6 @@
 import argparse
+import os
+os.environ['TEST_DB_SERVERLESS'] = ''  # Must always be false when running the webapp
 from trim_frontend import create_app
 
 application = create_app()

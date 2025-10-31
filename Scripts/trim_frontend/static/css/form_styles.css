@@ -7,9 +7,9 @@ legend {
     width: inherit;
     padding: 2px;
 }
-table {
+/* table {
     white-space: nowrap;
-}
+} */
 td.rightBorder {
     text-align: right;
     border-right: 1px solid black;
@@ -85,6 +85,41 @@ th.rotated > div {
 
 th.rotated > div > span {
   padding: 10px 0px;
+}
+
+/* For dataTables with dynamic cols */
+
+table.wrap-text {
+  table-layout: fixed;
+  width: 100%;
+}
+
+table.wrap-text th {
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+table.wrap-text td {
+  /* box-sizing: border-box; */
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+
+.wrap-text-scrollbody {
+  overflow-x: auto;
+  overflow-y: auto;
+  width: 100% !important;
+}
+
+.wrap-text-scrollhead {
+  width: 100% !important;
+}
+
+.wrap-text table {
+  width: 100% !important;
+  min-width: 100% !important;
 }
 
 /*Legend specific*/

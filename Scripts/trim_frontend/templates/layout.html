@@ -81,5 +81,18 @@
     {% include 'components/api_scripts.html' %}
 
     {% block scripts %}{% endblock %}
+
+    <style>
+        /* hotfix */
+        .custom-switch .custom-control-label::after {
+            top: calc(0.25rem + 2px);
+            left: calc(-2.25rem + 2px);
+            width: calc(1rem - 4px);
+            height: calc(1rem - 4px);
+            background-color: #adb5bd;
+            border-radius: .5rem;
+            transition: transform .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out
+        }
+    </style>
 </body>
 </html>
