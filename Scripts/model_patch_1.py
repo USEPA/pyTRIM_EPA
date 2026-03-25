@@ -1,21 +1,25 @@
-import json
 import os
-import sys
+# os.environ['TEST_DB_SERVERLESS'] = 'yes'  
+# os.environ['MYSQL_PASSWORD'] = 'root'  
+
+from trim_db.utils.users_roles import implement_users_roles
+implement_users_roles()  
+
+import sys  
+# sys.path.append('C:/Users/55586/Desktop/tools/pyTRIM/trim-builder/Scripts')  
+
+import time  
+from pathlib import Path
+from trim_db.porting import *  
+from trim_db.schema import *  
+from trim_db.services import *
+from sqlalchemy.exc import IntegrityError
+
+import json
 import time
 from trim_db.porting import *
 from trim_db.schema import *
 import time
-from trim_db.utils.users_roles import implement_users_roles
-try:
-    from trim_db.services import *
-except Exception as e:
-    time.sleep(5)
-    print(e)
-    from trim_db.services import *
-finally:
-    implement_users_roles()
-
-
 
 from datetime import datetime as dt
 
@@ -27,35 +31,40 @@ FORMULA_REPLACE = {
 }
 
 CHEMS_TO_ADD = [
-        "1,2,3,4,6,7,8,9-OCDD",
-        "1,2,3,4,6,7,8,9-OCDF",
-        "1,2,3,4,6,7,8-HpCDD",
-        "1,2,3,4,6,7,8-HpCDF",
-        "1,2,3,4,7,8,9-HpCDF",
-        "1,2,3,4,7,8-HxCDD",
-        "1,2,3,4,7,8-HxCDF",
-        "1,2,3,6,7,8-HxCDD",
-        "1,2,3,6,7,8-HxCDF",
-        "1,2,3,7,8,9-HxCDD",
-        "1,2,3,7,8,9-HxCDF",
-        "1,2,3,7,8-PeCDD",
-        "1,2,3,7,8-PeCDF",
-        "2,3,4,6,7,8-HxCDF",
-        "2,3,4,7,8-PeCDF",
-        "2,3,7,8-TCDF",
-        "2-Methylnaphthalene",
-        "7,12-Dimethylbenz(a)anthracene",
-        "Acenaphthene",
-        "Acenaphthylene",
-        "Benz(a)anthracene",
-        "Benzo(b)fluoranthene",
-        "Benzo(g,h,i)perylene",
-        "Benzo(k)fluoranthene",
-        "Chrysene",
-        "Dibenz(a,h)anthracene",
-        "Fluoranthene",
-        "Fluorene",
-        "Indeno(1,2,3-cd)pyrene"
+    # Dioxins
+    # "1,2,3,4,6,7,8,9-OCDD",
+    # "1,2,3,4,6,7,8,9-OCDF",
+    # "1,2,3,4,6,7,8-HpCDD",
+    # "1,2,3,4,6,7,8-HpCDF",
+    # "1,2,3,4,7,8,9-HpCDF",
+    # "1,2,3,4,7,8-HxCDD",
+    # "1,2,3,4,7,8-HxCDF",
+    # "1,2,3,6,7,8-HxCDD",
+    # "1,2,3,6,7,8-HxCDF",
+    # "1,2,3,7,8,9-HxCDD",
+    # "1,2,3,7,8,9-HxCDF",
+    # "1,2,3,7,8-PeCDD",
+    # "1,2,3,7,8-PeCDF",
+    # "2,3,4,6,7,8-HxCDF",
+    # "2,3,4,7,8-PeCDF",
+    # "2,3,7,8-TCDF",
+
+    # PAHs
+    "2-Methylnaphthalene",
+    "7,12-Dimethylbenz(a)anthracene",
+    "Acenaphthene",
+    "Acenaphthylene",
+
+    "Benz(a)anthracene",
+    "Benzo(b)fluoranthene",
+    "Benzo(g,h,i)perylene",
+    "Benzo(k)fluoranthene",
+
+    "Chrysene",
+    "Dibenz(a,h)anthracene",
+    "Fluoranthene",
+    "Fluorene",
+    "Indeno(1,2,3-cd)pyrene"
 ]
 
 # FIX ALGORITHM PROBLEMS
@@ -200,7 +209,7 @@ PS_ALG_PARS = [
     },
     {
         'name': 'TransferFractionToSoilConiferousLeaf',
-        'formula': '(self.volume_element.agg("sum" , "AllowExchange_forAir" , compartment_media="$Leaf") * (self.volume_element.parcel.area * 2 * self.volume_element.agg("sum" , "LeafAreaIndex" , compartment_media="$Leaf") * self.volume_element.agg("sum" , "TotalCuticularConductance" , chemical=chemical , compartment_media="$Leaf")) + (self.volume_element.parcel.area * 2 * self.volume_element.agg("sum" , "LeafAreaIndex" , compartment_media="$Leaf") * (self.volume_element.agg("sum" , "isDay_forAir" , compartment_media="$Leaf") * self.volume_element.agg("sum" , "TotalStomatalConductance" , chemical=chemical , compartment_media="$Leaf"))))',
+        'formula': '(self.volume_element.agg("sum" , "AllowExchange_forAir" , compartment_media="$Leaf") * (self.volume_element.parcel.area * 2 * self.volume_element.agg("sum" , "LeafAreaIndex" , compartment_media="$Leaf") * self.volume_element.agg("sum" , "TotalCuticularConductance" , chemical=chemical , compartment_media="$Leaf")) + (self.volume_element.parcel.area * self.volume_element.agg("sum" , "LeafAreaIndex" , compartment_media="$Leaf") * (self.volume_element.agg("sum" , "isDay_forAir" , compartment_media="$Leaf") * self.volume_element.agg("sum" , "TotalStomatalConductance" , chemical=chemical , compartment_media="$Leaf"))))',
         'unit': 'm^3/day',
         'domain_ids': [28, 39, 40]
     },
@@ -356,7 +365,8 @@ def fix_custom_links():
 def run_chem_migrations(ch, mode="check"):
     # RUN CHEMICAL PROPERTY MIGRATIONS
     loggy(f"Importing chem params for {ch} now ...")
-    os.system(f"python import_new_chemicals.py --runtype='{mode}' --chemical='{ch}'")
+    import_script = os.path.join(Path(__file__).parent.resolve(), "import_new_chemicals.py")
+    os.system(f"python {import_script} --runtype={mode} --chemical={ch}")
 
 
 def do_formula_replacements():
@@ -385,10 +395,10 @@ def fix_unit():
 
 
 def fix_formula():
-    f = [f for f in FormulaService.get_all() if f.equation == "(((10 ** (- 1.5 + 0.4 * math.log10(self.K_ow))) if (math.log10(self.K_ow) < 3 else ((0.5) if (math.log10(self.K_ow) >= 3) and (math.log10(self.K_ow) < 6) else (10 ** (1.2 - 0.25 * math.log10(self.K_ow)))))) if compartment.BW > 0.1 else ((10 ** (- 2.6 + 0.5 * math.log10(self.K_ow))) if (math.log10(self.K_ow) < 5 else ((0.8) if (math.log10(self.K_ow) >= 5) and (math.log10(self.K_ow) < 6) else (10 ** (2.9 - 0.5 * math.log10(self.K_ow))))))) if compartment.media.id in {33 , 32 , 29 , 27 , 28} else 0"]
-    if len(f) > 0:
-        f = f[0]
-        FormulaService.get(f.id).equation = '(((10 ** (- 1.5 + 0.4 * math.log10(self.K_ow)) if math.log10(self.K_ow) < 3 else (0.5 if (math.log10(self.K_ow) >= 3 and math.log10(self.K_ow) < 6) else 10 ** (1.2 - 0.25 * math.log10(self.K_ow)))) if compartment.BW.magnitude > 0.1 else (10 ** (- 2.6 + 0.5 * math.log10(self.K_ow)) if math.log10(self.K_ow) < 5 else (0.8 if (math.log10(self.K_ow) >= 5 and math.log10(self.K_ow) < 6) else 10 ** (2.9 - 0.5 * math.log10(self.K_ow))))) if compartment.media.id in {32 , 33 , 27 , 28 , 29} else 0)'
+    formulas = [f for f in FormulaService.get_all() if f.equation == "(((10 ** (- 1.5 + 0.4 * math.log10(self.K_ow))) if (math.log10(self.K_ow) < 3 else ((0.5) if (math.log10(self.K_ow) >= 3) and (math.log10(self.K_ow) < 6) else (10 ** (1.2 - 0.25 * math.log10(self.K_ow)))))) if compartment.BW > 0.1 else ((10 ** (- 2.6 + 0.5 * math.log10(self.K_ow))) if (math.log10(self.K_ow) < 5 else ((0.8) if (math.log10(self.K_ow) >= 5) and (math.log10(self.K_ow) < 6) else (10 ** (2.9 - 0.5 * math.log10(self.K_ow))))))) if compartment.media.id in {33 , 32 , 29 , 27 , 28} else 0"]
+    if len(formulas) > 0:
+        for formula in formulas:
+            FormulaService.get(formula.id).equation = '(((10 ** (- 1.5 + 0.4 * math.log10(self.K_ow)) if math.log10(self.K_ow) < 3 else (0.5 if (math.log10(self.K_ow) >= 3 and math.log10(self.K_ow) < 6) else 10 ** (1.2 - 0.25 * math.log10(self.K_ow)))) if compartment.BW.magnitude > 0.1 else (10 ** (- 2.6 + 0.5 * math.log10(self.K_ow)) if math.log10(self.K_ow) < 5 else (0.8 if (math.log10(self.K_ow) >= 5 and math.log10(self.K_ow) < 6) else 10 ** (2.9 - 0.5 * math.log10(self.K_ow))))) if compartment.media.id in {32 , 33 , 27 , 28 , 29} else 0)'
 
     # f = [f for f in FormulaService.get_all() if
     #      f.equation == '0.3262149134948966 * chemical.ParticleVolumetricDRYDepositionRate(receiver) * sender.linked_compartments(media="$Leaf" , same_parcel=True)[0].DryDepInterceptionFraction * sender.interface_with(receiver) / sender.Volume']
@@ -423,7 +433,7 @@ def add_ps_algs():
             for d in p['domain_ids']:
                 new_formula = FormulaService.get_or_create(equation=p['formula'])
                 # Fix self as chemical for the new formula Arguments where applies
-                self_arr = [fa for fa in new_formula._arguments.all() if fa.name == "self"]
+                self_arr = [fa for fa in new_formula._arguments if fa.name == "self"]
                 if len(self_arr) > 0:
                     self_arr[0].domain_id = d
                 if p['unit']:
@@ -454,12 +464,15 @@ def add_ps_algs():
             continue
     # Now add the algorithm
     for alg in PS_ALGS:
-        new_formula = FormulaService.get_or_create(equation=alg['eqn'])
-        TransportProcessService.get_or_create(name=alg['name'], algorithm_id=new_formula.id, category=alg['type'],
-                                              requirements=alg['reqs'])
-        loggy(f'Added new Transport Algorithm parameter {alg["name"]}')
-        TransportProcessService.commit()
-        FormulaService.commit()
+        try:
+            new_formula = FormulaService.get_or_create(equation=alg['eqn'])
+            TransportProcessService.get_or_create(name=alg['name'], algorithm_id=new_formula.id, category=alg['type'],
+                                                requirements=alg['reqs'])
+            loggy(f'Added new Transport Algorithm parameter {alg["name"]}')
+            TransportProcessService.commit()
+            FormulaService.commit()
+        except IntegrityError as e:
+            loggy(f'Duplicate Transport Algorithm entry found: {alg["name"]}')
 
 
 def update_ps_algs():
@@ -477,14 +490,17 @@ def update_ps_algs():
 
 def fix_requirements_for_ps_algs_organics():
     for psa in PS_ALGS:
-        tp = TransportProcessService.get(name=psa["name"])
-        if '(chemical.isa("Organic"))' in tp.requirements:
-            loggy(f"REQUIREMENT ALREADY EXISTS FOR {tp.name}. Skipping...")
-            continue
-        else:
-            tp.requirements = tp.requirements.replace("(chemical.id == 24)", '(chemical.isa("Organic"))')
-            loggy(f"FIXED REQUIREMENT FOR {tp.name}. Continuing...")
-            TransportProcessService.commit()
+        try:
+            tp = TransportProcessService.get(name=psa["name"])
+            if '(chemical.isa("Organic"))' in tp.requirements:
+                loggy(f"REQUIREMENT ALREADY EXISTS FOR {tp.name}. Skipping...")
+                continue
+            else:
+                tp.requirements = tp.requirements.replace("(chemical.id == 24)", '(chemical.isa("Organic"))')
+                loggy(f"FIXED REQUIREMENT FOR {tp.name}. Continuing...")
+                TransportProcessService.commit()
+        except IntegrityError as e:
+            loggy(f'Duplicate Transport Algorithm entry found: {psa["name"]}')
 
 
 def update_parameter_def():
@@ -503,7 +519,7 @@ def add_new_parameter_defs():
             if len(nf) == 0:
                 # No existing formula so create
                 nf = FormulaService.create(equation=pd["default_formula"])
-                self_arr = [fa for fa in nf._arguments.all() if fa.name == "self" and not fa.domain_id]
+                self_arr = [fa for fa in nf._arguments if fa.name == "self" and not fa.domain_id]
                 if len(self_arr) > 0:
                     self_arr[0].domain_id = pd["domain_id"]
                 ParameterService.definitions.get_or_create(variable_name=pd["variable_name"], full_name=pd["full_name"],
@@ -529,7 +545,7 @@ def fix_chem_formula_arguments():
     ff = [f for f in FormulaService.get_all() if f.arguments.get("chemical")]
     nf = [f for f in ff if not f.arguments.get("chemical").domain_id]
     for f in nf:
-        chem_arr = [fa for fa in f._arguments.all() if fa.name == "chemical" and not fa.domain_id]
+        chem_arr = [fa for fa in f._arguments if fa.name == "chemical" and not fa.domain_id]
         if len(chem_arr) > 0:
             chem_arr[0].domain_id = 2
 
@@ -705,10 +721,8 @@ if __name__ == '__main__':
     # transfer_custom_param_domain_to_chem()
 
     # NEW TERM FOR PYTRIM ----->
-    # add_more_chemicals()
-    # do_formula_replacements()
-    # fix_formula()
-    # fix_unit()
-    # transfer_custom_param_domain_to_chem(CHEMS_TO_ADD)
-
-    add_new_parameter_defs()
+    add_more_chemicals()
+    do_formula_replacements()
+    fix_formula()
+    fix_unit()
+    transfer_custom_param_domain_to_chem(CHEMS_TO_ADD)

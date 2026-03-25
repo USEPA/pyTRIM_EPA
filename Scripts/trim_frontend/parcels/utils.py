@@ -108,6 +108,12 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         "FractionofAreaAvailableforVerticalDiffusion", "TotalRunoffRate"
     ]
 
+    mercury_transform_rate_params = [
+        x
+        for rates in ChemicalService.mercury_transformation_parameters.values()
+        for x in rates
+    ]
+
     # Update the specified property
     field_name = parcels_data["field"]
 
@@ -489,6 +495,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
     elif field_name == "emission":
         src_comp = p.get_compartment(name=parcels_data["compartment_name"])
         src_par = src_comp.parameters.get('surfaceDepositionRate')
+        src_val = float(parcels_data["emission_value"])
         chem = ChemicalService.get(name=parcels_data["chemical_name"])
         if src_par:
             src_par = get_or_create_custom_param(
@@ -499,28 +506,30 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
 
             eq = src_par.formula.equation
             # We have the chemical in the formula
-            if f'chemical.id == {str(chem.id)}' in eq:
-                formula_parts = eq.split(f"if chemical.id == {chem.id}")
+            if f'chemical.id == {chem.id} ' in eq:
+                formula_parts = eq.split(f"if chemical.id == {chem.id} ")
                 formula_part = formula_parts[0]
                 if "else" in formula_part:
                     arr = formula_part.split("else")[:-1]
-                    formula_part = "else".join(arr + [f' {parcels_data["emission_value"]} '])
+                    formula_part = "else".join(arr + [f' {src_val} '])
                 else:
-                    formula_part = f'{parcels_data["emission_value"]} '
+                    formula_part = f'{src_val} '
                 formula_parts[0] = formula_part
-                new_formula = f"if chemical.id == {chem.id}".join(formula_parts)
+                new_formula = f"if chemical.id == {chem.id} ".join(formula_parts)
                 print(new_formula)
             # We do not have the chemical in the formula. We need to add it...
             else:
                 eq_arr = eq.split("else")
-                eq_arr.insert(-2, f' {parcels_data["emission_value"]} if chemical.id == {chem.id} ')
+                eq_arr.insert(-2, f' {src_val} if chemical.id == {chem.id} ')
                 new_formula = "else".join(eq_arr)
                 print(new_formula)
             FormulaService.get(src_par.formula.id).equation = new_formula
             FormulaService.commit()
+
     elif field_name == "initial concentration":
         ic_comp = p.get_compartment(name=parcels_data["compartment_name"])
         ic_par = ic_comp.parameters.get('initialConcentration')
+        ic_val = float(parcels_data["initial_concentration_value"])
         chem = ChemicalService.get(name=parcels_data["chemical_name"])
         if ic_par:
             unit = "g / m^3" if ic_comp.media.id in [2, 5, 7, 56, 55, 8, 9] else "g / kg" if ic_comp.media.id in [23, 24, 27, 28, 29, 31, 32, 33, 37, 39, 41, 43, 44, 45, 46, 47, 48, 49, 50, 51] else "g / L" if ic_comp.media.id in [10, 4] else ""
@@ -532,25 +541,26 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
 
             eq = ic_par.formula.equation
             # We have the chemical in the formula
-            if f'chemical.id == {str(chem.id)}' in eq:
-                formula_parts = eq.split(f"if chemical.id == {chem.id}")
+            if f'chemical.id == {chem.id} ' in eq:
+                formula_parts = eq.split(f"if chemical.id == {chem.id} ")
                 formula_part = formula_parts[0]
                 if "else" in formula_part:
                     arr = formula_part.split("else")[:-1]
-                    formula_part = "else".join(arr + [f' {parcels_data["initial_concentration_value"]} '])
+                    formula_part = "else".join(arr + [f' {ic_val} '])
                 else:
-                    formula_part = f'{parcels_data["initial_concentration_value"]} '
+                    formula_part = f'{ic_val} '
                 formula_parts[0] = formula_part
-                new_formula = f"if chemical.id == {chem.id}".join(formula_parts)
+                new_formula = f"if chemical.id == {chem.id} ".join(formula_parts)
                 print(new_formula)
             # We do not have the chemical in the formula. We need to add it...
             else:
                 eq_arr = eq.split("else")
-                eq_arr.insert(-2, f' {parcels_data["initial_concentration_value"]} if chemical.id == {chem.id} ')
+                eq_arr.insert(-2, f' {ic_val} if chemical.id == {chem.id} ')
                 new_formula = "else".join(eq_arr)
                 print(new_formula)
             FormulaService.get(ic_par.formula.id).equation = new_formula
             FormulaService.commit()
+
     elif field_name == "runoff_matrix_value":
         scn = ScenarioService.get(id=p.scenario.id)
         sender_parcel_name = parcels_data["sender"].replace("ro_", "")
@@ -614,6 +624,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                 eq = new_formula
             FormulaService.get(sender_par.formula.id).equation = new_formula
             FormulaService.commit()
+
     elif field_name == "receptor_spacing":
         submitted_spacing_val = parcels_data.get("receptor_spacing")
 
@@ -641,6 +652,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             raise Exception("unexpected param_obj type...")
 
         ParameterService.commit()
+
     elif field_name == "vertices":
         print(f"save vertices change FOR {p.id} / {p.name}...")
         coords_data = json.loads(parcels_data.get("vertices", []))
@@ -650,6 +662,14 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             long_lat = [ [x[1], x[0]] for x in coords_data ]
             p.vertices = long_lat
 
+    elif field_name.split('.', 1)[0] in mercury_transform_rate_params:
+        val = float(parcels_data[field_name])
+        field_name = field_name.split('.', 1)
+        rate_name = field_name[0]
+        media_type = field_name[1]
+        ChemicalService.update_mercury_transformation_rate(
+            p, rate_name, media_type, val
+        )
 
     # Update record
     ParcelService.update(p)
@@ -962,6 +982,8 @@ def delete_parcel_contents(del_parcel):
 
     # Delete associated HACKY params at the scenario level
     print('deleting erosion-table parameters')
+    
+    
     for param in list(del_parcel.scenario.parameters.values()):
         if not isinstance(param, CustomParameter):
             continue
@@ -974,7 +996,7 @@ def delete_parcel_contents(del_parcel):
         ):
             continue
         ParameterService.delete(param, no_commit=True)
-
+            
     # Delete Volume Elements
     print('deleting parcel volume elements')
     for ve in del_parcel.volume_elements:

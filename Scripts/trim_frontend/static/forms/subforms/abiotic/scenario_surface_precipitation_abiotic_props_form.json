@@ -1,6 +1,6 @@
 {
     "title": "",
-    "table_id": "spatially_varying_table",
+    "table_id": "SurfacePrecipitationAbioticTable",
     "fields": [
         {
             "id": "name",

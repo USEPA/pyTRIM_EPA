@@ -1,9 +1,9 @@
-import boto3, getopt, os, sys
+import boto3, getopt, os, re, sys
 from common import await_stack_completion, figure_home_dir, whoami_aws, die, loggy
 
 class CloudFormationHelper(object):
     def __init__(self):
-        pass
+        self.beanstalk_client = boto3.client("elasticbeanstalk")
 
     def prep_params(self, params):
         return [ {"ParameterKey": t[0], "ParameterValue": str(t[1]) } for t in [ (k, v) for k, v in params.items() ] ]
@@ -38,11 +38,13 @@ class CloudFormationHelper(object):
         # first load the template as-is...
         template_file_location = f"{PROJECT_HOME_DIR}src{sep}cloudformation{sep}{template_name}"
 
+        hardcoded_solution_stacks_checked = 0
         with open(template_file_location, "r") as f:
             input_lines = f.readlines()
 
             dynamic_section_tracker = []
             fixed_lines = []
+            line_num = 1
             for l in input_lines:
                 if l.startswith("#START_DYNAMIC_SECTION"):
                     dynamic_section_name = l.replace("#START_DYNAMIC_SECTION", "").strip().replace("\n", "")
@@ -62,6 +64,13 @@ class CloudFormationHelper(object):
                 if len(dynamic_section_tracker) == 0 and not l.startswith("#END_DYNAMIC_SECTION"):
                     fixed_lines.append(l)
 
+                hardcoded_solution_stacks_checked += self.check_hardcoded_solution_stack_name(l, line_num)
+                line_num += 1
+
+            if hardcoded_solution_stacks_checked == 0:
+                die("No hardcoded SolutionStackName to check; update template/script...")
+
+
         # uncomment these if you want to view the transformed template...
         """
         i = 1
@@ -71,6 +80,51 @@ class CloudFormationHelper(object):
         """
 
         return "".join(fixed_lines)
+
+    def check_hardcoded_solution_stack_name(self, l, file_line_num):
+        """
+        What's this all about -- our CF template has a hardcoded SolutionStackName
+        for the beanstalk environment. However, AWS often upgrades these and they
+        become unavailable; if they do this, the stack creation fails.
+
+        Quick band-aid - verify that the SolutionStackName is still valid at runtime.
+
+        Annoyance - SolutionStackName in the CF template looks like e.g.:
+
+          SolutionStackName: "64bit Amazon Linux 2023 v4.7.3 running Python 3.11"
+
+        But when we query it with boto3 we want:
+            PlatformBranchName == "Python 3.11 running on 64bit Amazon Linux 2023"
+            PlatformVersion == "4.7.3"
+
+        So we gotta parse it.
+        """
+        match_probe = re.match("([^#]*SolutionStackName: *)['\"]([^#]*)['\"]", l)
+        if match_probe:
+            groups = match_probe.groups()
+            hardcoded_solution_stack_name = groups[1]
+            stack_elements = re.match("(.*) v([^ ]*) running (.*)", hardcoded_solution_stack_name)
+            groups = stack_elements.groups()
+            platform_branch_name = f"{groups[2]} running on {groups[0]}"
+            platform_version = groups[1]
+
+            response = self.beanstalk_client.list_platform_versions(
+                Filters=[{
+                        'Type': 'PlatformBranchName', 'Operator': '=',
+                        'Values': [ platform_branch_name ]
+                }, {
+                        'Type': 'PlatformVersion', 'Operator': '=',
+                        'Values': [ platform_version ]
+                }]
+            )
+
+            if len(response.get("PlatformSummaryList")) != 1:
+                die(f"SolutionStackName '{hardcoded_solution_stack_name}' in the CloudFormation template (line {file_line_num} in iac/src/cloudformation/pytrim.yaml) was not found in current AWS offerings. Check https://docs.aws.amazon.com/elasticbeanstalk/latest/platforms/platforms-supported.html#platforms-supported.python for an up to date list and update the template.")
+            else:
+                return 1
+
+        # not an error; this line just didn't match
+        return 0
 
     # returns tuple - (does-stack-exist, if-so-whats-the-status)
     def check_stack(self, stack_name):

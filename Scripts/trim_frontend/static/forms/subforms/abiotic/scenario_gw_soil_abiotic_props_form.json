@@ -57,6 +57,34 @@
       "default": 0.2,
       "tooltip": "volume [total pore space]/volume [compartment]",
       "help": "Enter the volume fraction of pore space in the groundwater layer. Valid values are 0 to 1. The default value of 0.2 is the value used for the sediment zone for California residential sites by version 1.5 of the CalTOX model (see Table VI of: CalEPA (California Environmental Protection Agency), Department of Toxic Substances Control. 1993. Parameter Values and Ranges for CalTOX. Draft (July)."
+    },
+    {
+      "id": "MethylationRate_Groundwater",
+      "label": "Hg Methylation Rate",
+      "data_type": "float",
+      "default": 0,
+      "help": "See the TRIM User Guide Appendix for full reference information."
+    },
+    {
+      "id": "ReductionRate_Groundwater",
+      "label": "Hg Reduction Rate",
+      "data_type": "float",
+      "default": 0,
+      "help": "See the TRIM User Guide Appendix for full reference information."
+    },
+    {
+      "id": "OxidationRate_Groundwater",
+      "label": "Hg Oxidation Rate",
+      "data_type": "float",
+      "default": 0,
+      "help": "See the TRIM User Guide Appendix for full reference information."
+    },
+    {
+      "id": "DemethylationRate_Groundwater",
+      "label": "Hg Demethylation Rate",
+      "data_type": "float",
+      "default": 0,
+      "help": "See the TRIM User Guide Appendix for full reference information."
     }
   ]
 }

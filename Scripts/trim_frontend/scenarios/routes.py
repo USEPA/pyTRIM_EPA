@@ -686,12 +686,14 @@ def clear_old_result(scenario_id):
 @scenario_api.route('/api/scenario/<int:scenario_id>/run/', methods=['POST'])
 @login_required
 def run_result_scenario(scenario_id):
-    clear_old_result(scenario_id)
     try:
         s = ScenarioService.get(scenario_id)
         if not current_user.can('edit', s):
             abort(403)
+        if len(s.chemicals) == 0:
+            return ApiException("The scenario does not have any chemicals.")
         start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        clear_old_result(scenario_id)
         try:
             s.latest_proc_status.run_status = 'run tm 0'
             s.latest_proc_status.run_datetime = start_time
@@ -791,7 +793,7 @@ def run_getflow(scenario_id):
         # unlike runmodel, here we use ECS even when running locally. (getting a working qgis
         # install is non-trivial, but if you wanted to run local you'd need to do that, then
         # modify this section of code to do something like "run_result_scenario".
-        if True or trim_env_profile in [ "dev", "devgetflow", "prod" ]:
+        if True or trim_env_profile in [ "test", "dev", "devgetflow", "prod" ]:
             sfn_client = boto3.client("stepfunctions")
             state_machine_arn = os.environ.get("TRIM_DOCKERIZED_GETFLOW_STATEMACHINE_ARN")
 

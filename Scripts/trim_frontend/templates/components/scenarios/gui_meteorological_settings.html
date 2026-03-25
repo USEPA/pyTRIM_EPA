@@ -297,7 +297,7 @@
             return param_info
         }
 
-        function submit_meteo_value(elem) {
+        function submit_meteo_value(elem, is_sfc=false) {
             let param_info = get_form_data(elem)
             if ($(elem).get(0).tagName == "INPUT") {
                 ErrorValidation.isPositiveValue(elem, $(elem).parent());
@@ -310,6 +310,18 @@
                 }
             }
             if (elementIsValid($(elem).parent())){
+                if (is_sfc) {
+                    param_info = param_info.concat(
+                    [{
+                        'type': 'data',
+                        'name': 'field',
+                        'value': 'is_sfc'
+                    },{
+                        'type': 'input',
+                        'name': 'is_sfc',
+                        'value': is_sfc
+                    }]);
+                }
                 console.log(param_info);
                 LoadingScreen.show("meteo_update_value")
                 let resp = TRIM.api.updateScenario(param_info).on('load',function(rsp){
@@ -436,6 +448,7 @@
                 let sel = $(this);
                 let section = sel.closest('section');
                 var globalFileFiled = section.find('[type="file"][name^="default_"]');
+                let extension = globalFileFiled[0].files[0].name;
                 let data = globalFileFiled.attr('data-filedata');
 
                 let scenario = TRIM.store.currentScenario;
@@ -455,11 +468,14 @@
                     let d = new Date(inputFormat)
                     return [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/')
                 }
+                
+                let new_data = data.file_data;
+                if (!extension.endsWith(".sfc")) {
+                    // Restrict file data date range to the simulation period
+                    new_data = new_data.filter(e=>Date.parse(e['Date'])>=sim_start & Date.parse(e['Date'])<=sim_end)
+                    ErrorValidation.isInSimulationTimeSpan(sel, new_data)
+                }
 
-                // Restrict file data date range to the simulation period
-                let new_data = data.file_data.filter(e=>Date.parse(e['Date'])>=sim_start & Date.parse(e['Date'])<=sim_end)
-                // make sure we have data in the time window of simulation
-                ErrorValidation.isInSimulationTimeSpan(sel, new_data)
                 // Get only the column for this select
                 let this_sel_data = new_data.map((e,i) => {
                     let this_row = {
@@ -472,7 +488,7 @@
                 });
                 sel.attr('data-meteo',JSON.stringify(this_sel_data))
 
-                submit_meteo_value(sel)
+                submit_meteo_value(sel, extension.endsWith(".sfc"))
             })
 
             var staticPrecip = $('#precipitation_static_value_rate');

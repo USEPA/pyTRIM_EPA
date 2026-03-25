@@ -1,7 +1,6 @@
 {
     "title": "Aquatic Diet Properties",
     "table_id": "DietTables",
-    "pivot": true,
     "render": false,
     "fields": [
         {

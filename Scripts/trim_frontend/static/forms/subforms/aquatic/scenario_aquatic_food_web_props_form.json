@@ -1,7 +1,6 @@
 {
     "title": "Aquatic Food Web Properties",
     "table_id": "AquaticTable",
-    "pivot": true,
     "render": true,
     "fields": [
         {
