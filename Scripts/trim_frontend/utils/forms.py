@@ -6,12 +6,12 @@ from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired
 from wtforms import BooleanField, StringField, FloatField, IntegerField, \
     FormField, FieldList, SelectField, SelectMultipleField
-from wtforms.fields import DateField, DateTimeLocalField  # html5 is removed from wtforms 3.0 and later
+from wtforms.fields import DateField, DateTimeLocalField
 from wtforms.validators import DataRequired, NumberRange
-from wtforms.widgets import TextArea, ListWidget, CheckboxInput  # HTMLString is replaced by Markup starting wtforms 2.4 and later
+from wtforms.widgets import TextArea, ListWidget, CheckboxInput
 from markupsafe import Markup
 from wtforms.widgets.core import html_params
-from wtforms.widgets import NumberInput  # html5 is removed from wtforms 3.0 and later
+from wtforms.widgets import NumberInput
 
 
 root = os.path.dirname(os.path.abspath(__file__))

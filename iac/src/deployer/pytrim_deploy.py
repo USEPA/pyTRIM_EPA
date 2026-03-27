@@ -105,7 +105,7 @@ class PyTrimDeployer(object):
         secret_client = boto3.client("secretsmanager")
         secret_kludge = "???"
         try:
-            secret_probe = secret_client.describe_secret(SecretId="pytrim/mysql")
+            secret_probe = secret_client.describe_secret(SecretId="pytrim/database/credentials")
             stack_name_tag = next((x for x in secret_probe.get("Tags", []) if x["Key"] == "aws:cloudformation:stack-name"), None)
             stack_name = stack_name_tag["Value"] if stack_name_tag is not None else None
 

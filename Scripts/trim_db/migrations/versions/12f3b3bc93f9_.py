@@ -79,13 +79,15 @@ def upgrade():
     sa.Column('company_name', sa.String(length=255), nullable=True),
     sa.Column('password_hash', sa.String(length=128), nullable=True),
     sa.Column('confirmed_at', sa.DateTime(), nullable=True),
+    sa.Column('fs_uniquifier', sa.String(length=65), nullable=False),
     sa.Column('last_login_at', sa.DateTime(), nullable=True),
     sa.Column('current_login_at', sa.DateTime(), nullable=True),
     sa.Column('last_login_ip', sa.String(length=40), nullable=True),
     sa.Column('current_login_ip', sa.String(length=40), nullable=True),
     sa.Column('login_count', sa.Integer(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('email')
+    sa.UniqueConstraint('email'),
+    sa.UniqueConstraint('fs_uniquifier')
     )
     op.create_table('formula_argument',
     sa.Column('formula_id', sa.Integer(), nullable=False),
