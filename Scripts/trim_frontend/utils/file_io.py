@@ -273,8 +273,8 @@ def convert_sfc_to_meteo(sfc_df):
         return datetime.strptime(f"{month}/{day}/{year}", "%m/%d/%y").strftime('%m/%d/%Y')
     
     def construct_winddirection(wd):
-        if wd == 0: # calm winds, no direction
-            return 999
+        #if wd == 0: # calm winds, no direction
+        #    return 999
         return wd
 
     def construct_mixingheight(heat_flux, zic, zim):

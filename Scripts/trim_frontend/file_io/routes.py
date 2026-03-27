@@ -532,7 +532,7 @@ def parse_parcel_upload():
 @file_api.route('/api/misc_scen_file', methods=['GET', 'POST', 'DELETE'])
 @login_required
 def manage_misc_scenario_file():
-    return ApiResult({})
+
     # this is a generic endpoint for handling storage (upload/deletion/retrieval) on S3 of miscellaneous files
     # associated with a scenario. Pass in a 'misc_file_type'==x and you'll get:
     # a file /{scenarioId}/x/data* and /{scenarioId}/x/_metadata.json in the appropriate
