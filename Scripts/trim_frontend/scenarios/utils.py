@@ -724,10 +724,10 @@ def true_wind_wt_ave(df_met, col, fallback=None):
 
     try:
         df_met['u'] = vset(df_met, u_calc, ["HorizontalWindSpeed", "WindDirection"])
-        u_bar = (df_met['u'] * df_met['time_delta']).sum() / df_met['time_delta'].sum()
+        u_bar = df_met['u'].mean()
 
         df_met['v'] = vset(df_met, v_calc, ["HorizontalWindSpeed", "WindDirection"])
-        v_bar = (df_met['v'] * df_met['time_delta']).sum() / df_met['time_delta'].sum()
+        v_bar = df_met['v'].mean()
 
         if col == "HorizontalWindSpeed":
             return np.sqrt(u_bar**2 + v_bar**2)
