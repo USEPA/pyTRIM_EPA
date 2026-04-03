@@ -791,8 +791,12 @@ def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
         for k, v in metcol_dict.items():
             if k in df_met.columns:
                 df_met['metcol'] = pd.to_numeric(df_met[k], errors='coerce')
-                df_met['prod'] = df_met['metcol'] * df_met['time_delta']
-                wt_ave = df_met['prod'].sum() / df_met['time_delta'].sum()
+                
+                if param_type == "MET":
+                    df_met['prod'] = df_met['metcol'] * df_met['time_delta']
+                    wt_ave = df_met['prod'].sum() / df_met['time_delta'].sum()
+                elif param_type == "SFC":
+                    wt_ave = df_met['metcol'].mean()
                 
                 if k in ["HorizontalWindSpeed", "WindDirection"]:
                     if k == par_dat[0].get("_selected"):
