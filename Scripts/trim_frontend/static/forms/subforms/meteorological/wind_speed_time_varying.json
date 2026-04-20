@@ -9,7 +9,7 @@
         {
             "id": "static_value",
             "data_type": "float",
-            "min": 0,
+            "min": 0.75,
             "max": 100,
             "step": 0.1,
             "default": 1.6,

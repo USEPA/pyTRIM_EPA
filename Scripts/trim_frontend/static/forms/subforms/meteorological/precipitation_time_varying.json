@@ -18,7 +18,7 @@
             "label": "Static Value for Precipitation Rate (m/day)",
             "data_type": "float",
             "min": 0,
-            "max": 2,
+            "max": 1,
             "step": 0.0001,
             "default": 0.0041,
             "required": true,

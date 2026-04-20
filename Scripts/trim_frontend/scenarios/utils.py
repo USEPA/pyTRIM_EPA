@@ -761,8 +761,8 @@ def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
 
     if param_type in ["MET", "SFC"]:
         df_met = df_met.loc[(df_met.Hour < 25)]  # drop faulty
-        metcol_dict = {'Rain': (0, 1), 'AirTemperature': (200, 373), 'HorizontalWindSpeed': (0, 100),
-                       'WindDirection': (-360, 360), 'mixingHeight': (0, 10000), 'IsDay': (0, 1),
+        metcol_dict = {'Rain': (0, 1), 'AirTemperature': (200, 350), 'HorizontalWindSpeed': (0, 100),
+                       'WindDirection': (0, 360), 'mixingHeight': (0, 10000), 'IsDay': (0, 1),
                        'CumulativeRain': (0, 1.6)}  # k, v represent name and min-max
         for k, v in metcol_dict.items():
             if k in df_met.columns:
@@ -782,8 +782,9 @@ def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
     df_met['time_delta'] = df_met['time_delta'].shift(-1)
 
     # Clean up non sequential dates
-    df_met['DT_Check'] = df_met.DT >= (df_met.DT.shift())
-    df_met = df_met[df_met['DT_Check']]
+    df_met['DT_Check1'] = df_met.DT >= df_met.DT.shift()
+    df_met['DT_Check2'] = df_met.DT <= df_met.DT.shift(-1) # avoid incorrectly dropping first row
+    df_met = df_met[df_met['DT_Check1'] | df_met['DT_Check2']]
 
     # Get time-weighted averages
     met_dict = {}
@@ -811,13 +812,13 @@ def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
             rain_frac_time = df_met['RainTime'].sum() / df_met['time_delta'].sum()
             met_dict['frac_time_rain'] = rain_frac_time
 
-        if param_type == "SFC":
-            avg_wind_speed = met_dict.get("wt_av_HorizontalWindSpeed")
-            avg_mixing_height = met_dict.get("wt_av_mixingHeight")
-            if avg_wind_speed:
-                met_dict["wt_av_HorizontalWindSpeed"] = max(avg_wind_speed, 0.75)     
-            if avg_mixing_height:
-                met_dict["wt_av_mixingHeight"] = max(avg_mixing_height, 20)
+       # if param_type == "SFC":
+        avg_wind_speed = met_dict.get("wt_av_HorizontalWindSpeed")
+        avg_mixing_height = met_dict.get("wt_av_mixingHeight")
+        if avg_wind_speed:
+            met_dict["wt_av_HorizontalWindSpeed"] = max(avg_wind_speed, 0.75)     
+        if avg_mixing_height:
+            met_dict["wt_av_mixingHeight"] = max(avg_mixing_height, 20)
 
     if param_type == "AE":
         # process AE.
