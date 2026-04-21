@@ -18,3 +18,6 @@ def init_routes(app):
     app.register_blueprint(chemicals_api)
     app.register_blueprint(parcels_api)
     app.register_blueprint(external_api_soil)
+
+    from ..mirc.simulations.api import mirc_simulation_api
+    app.register_blueprint(mirc_simulation_api)

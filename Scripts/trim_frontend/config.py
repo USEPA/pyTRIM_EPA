@@ -11,6 +11,8 @@ if not os.getenv('SQLALCHEMY_DATABASE_URI'):
 
 
 class AppConfig:
+    ENVIRONMENT_TYPE = 'development'
+
     # Template config
     TEMPLATES_AUTO_RELOAD = True
 
@@ -66,17 +68,19 @@ class AppConfig:
 
 
 class ProdConfig(AppConfig):
+    ENVIRONMENT_TYPE = 'production'
     SECRET_KEY = os.getenv('SECRET_KEY', '')
     SECURITY_PASSWORD_SALT = os.getenv('SECURITY_PASSWORD_SALT', '')
 
 
 class DevConfig(AppConfig):
     SECRET_KEY = os.getenv('SECRET_KEY', 'dcf917c34aec178987494a853bffa479')
-    SECURITY_PASSWORD_SALT = ''
+    SECURITY_PASSWORD_SALT = 'd3v0NLYs@1t'
     # SQLALCHEMY_ECHO = True
 
 
 class TestConfig(DevConfig):
+    ENVIRONMENT_TYPE = 'testing'
     TESTING = True
     LOGIN_DISABLED = False
     WTF_CSRF_ENABLED = False

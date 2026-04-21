@@ -110,6 +110,11 @@ def require_permissions(*args, **kwargs):
 
         cls.grant = grant
 
+        custom_allow = kwargs.get('custom_allow')
+        if custom_allow is None:
+            def custom_allow(s, u):
+                return False
+
         def allows(s, user, action):
             if isinstance(action, str):
                 action = PermissionsEnum[action].value
@@ -117,6 +122,8 @@ def require_permissions(*args, **kwargs):
                 action = action.value
             if not isinstance(action, int):
                 raise ValueError(f'Invalid action: {action}')
+            if custom_allow(s, user):
+                return True
             if allow_keys:
                 for key, level in allow_keys.items():
                     try:

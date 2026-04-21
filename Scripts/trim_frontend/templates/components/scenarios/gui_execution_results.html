@@ -809,8 +809,11 @@
             if (!TRIM.store.latestRunInfo?.has_run) {
                 // Nothing to draw
                 // console.log('Done! No run results')
+                btnRunModel.text('Run Model');
                 return;
             }
+
+            btnRunModel.text('Re-run Model');
 
             const runStats = parseRunStatus(TRIM.store.latestRunInfo.run_status);
             updateRunStatusDisplay(runStats.status, runStats.stage, runStats.percent);

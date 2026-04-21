@@ -9,6 +9,9 @@ CREATE TABLE alembic_version (
 CREATE TABLE chemical (
     name VARCHAR(120) NOT NULL, 
     cas_number VARCHAR(120) NOT NULL, 
+    hap_number VARCHAR(255), 
+    hap_name VARCHAR(255), 
+    epa_evidence_weight VARCHAR(255), 
     category VARCHAR(240), 
     id SERIAL PRIMARY KEY, 
     UNIQUE (cas_number)
@@ -22,7 +25,7 @@ CREATE TABLE formula (
 
 CREATE TABLE transport_process (
     name VARCHAR(240) NOT NULL, 
-    algorithm_id SERIAL PRIMARY KEY, 
+    algorithm_id INTEGER NOT NULL, 
     category VARCHAR(240) NOT NULL, 
     requirements VARCHAR, 
     output_chemical_id INTEGER, 
@@ -87,12 +90,12 @@ CREATE TABLE formula_argument (
 );
 
 CREATE TABLE parameter_definition (
-    variable_name VARCHAR(60) NOT NULL, 
+    variable_name VARCHAR(150) NOT NULL, 
     full_name VARCHAR(120) NOT NULL, 
     description VARCHAR(240), 
     domain_id INTEGER NOT NULL, 
     default_value FLOAT, 
-    default_unit VARCHAR(60), 
+    default_unit VARCHAR(150), 
     default_formula_id INTEGER, 
     id SERIAL PRIMARY KEY, 
     FOREIGN KEY(default_formula_id) REFERENCES formula (id), 
@@ -120,7 +123,6 @@ CREATE TABLE scenario (
 --     scenario_id INTEGER NOT NULL, 
 --     member_id INTEGER NOT NULL, 
 --     id SERIAL PRIMARY KEY, 
-, 
 --     FOREIGN KEY(member_id) REFERENCES "user" (id), 
 --     FOREIGN KEY(scenario_id) REFERENCES scenario (id), 
 --     UNIQUE (scenario_id, member_id)
@@ -131,7 +133,7 @@ CREATE TABLE custom_parameter (
     scenario_id INTEGER NOT NULL, 
     requirements VARCHAR, 
     value FLOAT, 
-    unit VARCHAR(60), 
+    unit VARCHAR(150), 
     formula_id INTEGER, 
     id SERIAL PRIMARY KEY, 
     FOREIGN KEY(definition_id) REFERENCES parameter_definition (id), 
@@ -144,7 +146,7 @@ CREATE TABLE parcel (
     description VARCHAR(250),
     scenario_id INTEGER NOT NULL,
     vertices JSON NOT NULL,
-    id INTEGER NOT NUL,
+    id SERIAL PRIMARY KEY, 
     FOREIGN KEY(scenario_id) REFERENCES scenario (id),
     UNIQUE (scenario_id, name)
 );
@@ -193,6 +195,7 @@ CREATE TABLE scenario_load_run_proc (
     run_datetime TIMESTAMP, 
     result_file_nt VARCHAR(255), 
     result_file_conc VARCHAR(255), 
+    result_file_tm VARCHAR(255),
     result_nt VARCHAR, 
     result_conc VARCHAR, 
     execution_arn VARCHAR(255), 
@@ -222,6 +225,45 @@ CREATE TABLE scenario_permissions (
 -- Now handled in the full_db backup script
 INSERT INTO alembic_version (version_num) VALUES ('81e92f9ff252');
 
+CREATE INDEX idx_custom_parameter_requirements ON custom_parameter (LEFT(requirements, 255));
+CREATE INDEX idx_parameter_domain_requirements ON parameter_domain (LEFT(requirements, 255));
+
+INSERT INTO alembic_version (version_num) VALUES ('4416c27f2844');
+
+
+CREATE TABLE mirc_scenario (
+    id SERIAL PRIMARY KEY, 
+    name VARCHAR(255) NOT NULL, 
+    is_builtin BOOLEAN NOT NULL, 
+    notes VARCHAR(800), 
+    parent_id INTEGER,  
+    FOREIGN KEY(parent_id) REFERENCES mirc_scenario (id), 
+    UNIQUE (name)
+);
+
+CREATE TABLE mirc_scenario_permissions (
+    user_id INTEGER NOT NULL, 
+    mirc_scenario_id INTEGER NOT NULL, 
+    level INTEGER NOT NULL, 
+    id SERIAL PRIMARY KEY, 
+    FOREIGN KEY(mirc_scenario_id) REFERENCES mirc_scenario (id), 
+    FOREIGN KEY(user_id) REFERENCES "user" (id), 
+    UNIQUE (user_id, mirc_scenario_id)
+);
+
+CREATE TABLE mirc_simulation (
+    created TIMESTAMP NOT NULL, 
+    updated TIMESTAMP, 
+    name VARCHAR(120) NOT NULL, 
+    trim_scenario_id INTEGER NOT NULL, 
+    mirc_scenario_id INTEGER NOT NULL, 
+    chemical_id INTEGER NOT NULL, 
+    use_baf BOOLEAN NOT NULL, 
+    id SERIAL PRIMARY KEY, 
+    FOREIGN KEY(trim_scenario_id) REFERENCES scenario (id), 
+    FOREIGN KEY(mirc_scenario_id) REFERENCES mirc_scenario (id), 
+    FOREIGN KEY(chemical_id) REFERENCES chemical (id)
+);
 
 CREATE TABLE mirc_life_stage (
     name VARCHAR(255) NOT NULL, 
@@ -272,7 +314,7 @@ CREATE TABLE mirc_parameter (
     FOREIGN KEY(life_stage_id) REFERENCES mirc_life_stage (id), 
     FOREIGN KEY(media_id) REFERENCES mirc_product (id), 
     FOREIGN KEY(percentile_id) REFERENCES mirc_percentile (id), 
-    FOREIGN KEY(scenario_id) REFERENCES scenario (id), 
+    FOREIGN KEY(scenario_id) REFERENCES mirc_scenario (id), 
     UNIQUE (scenario_id, chemical_id, media_id, life_stage_id, percentile_id, food_id, name)
 );
 
@@ -281,29 +323,6 @@ CREATE TABLE mirc_parameter_toxicity (
     toxicity_effect_id INTEGER, 
     FOREIGN KEY(parameter_id) REFERENCES mirc_parameter (id), 
     FOREIGN KEY(toxicity_effect_id) REFERENCES mirc_toxicity_effect (id)
-);
-
-CREATE TABLE mirc_assessment (
-    created TIMESTAMP NOT NULL, 
-    updated TIMESTAMP, 
-    name VARCHAR(120) NOT NULL, 
-    description VARCHAR(800), 
-    scenario_id INTEGER NOT NULL, 
-    id SERIAL PRIMARY KEY,  
-    FOREIGN KEY(scenario_id) REFERENCES scenario (id), 
-);
-
-CREATE TABLE mirc_simulation (
-    created TIMESTAMP NOT NULL, 
-    updated TIMESTAMP, 
-    name VARCHAR(120) NOT NULL, 
-    assessment_id INTEGER NOT NULL, 
-    chemical_id INTEGER NOT NULL, 
-    trim_scenario VARCHAR(255), 
-    use_baf BOOLEAN NOT NULL, 
-    id SERIAL PRIMARY KEY,  
-    FOREIGN KEY(assessment_id) REFERENCES mirc_assessment (id), 
-    FOREIGN KEY(chemical_id) REFERENCES chemical (id)
 );
 
 CREATE TABLE mirc_simulation_consumption_breakdown (

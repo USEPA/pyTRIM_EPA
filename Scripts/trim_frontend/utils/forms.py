@@ -262,6 +262,7 @@ class InlineButtonWidget(object):
              self.html % (self.html_params(**kwargs), field.label.text)
         )
 
+
 class InlineSubmitField(BooleanField):
     """
     Represents an ``<button type="submit">``.

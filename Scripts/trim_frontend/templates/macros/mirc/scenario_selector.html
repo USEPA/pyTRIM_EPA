@@ -1,0 +1,41 @@
+{% macro render_scenario_picker(
+    scenarios, id="scenario_picker", name="scenario_picker",
+    default=None, allow_none=True
+) %}
+    <select id="{{ id }}" name="{{ name }}"
+        class="form-control form-control-sm"
+        style="max-width: 100%;"
+    >
+        {% if allow_none %}
+            <option value="">None</option>
+        {% endif %}
+        <optgroup label="Built-in Scenarios">
+            {% for scenario in scenarios|selectattr('is_builtin') %}
+                <option value="{{ scenario.id }}"
+                    {% if scenario.id == default %} selected="selected"{% endif %}
+                >
+                    {{ scenario.name }}
+                    {% if scenario.notes %}
+                    - {{ scenario.notes|abbrev(length=50) }}
+                    {% endif %}
+                </option>
+            {% endfor %}
+        </optgroup>
+        <optgroup label="Custom Scenarios">
+            {% for scenario in scenarios|selectattr('is_builtin', 'false') %}
+                <option value="{{ scenario.id }}"
+                    {% if scenario.id == default %} selected="selected"{% endif %}
+                >
+                    {{ scenario.name }}
+                    {% if scenario.notes %}
+                    - {{ scenario.notes|abbrev(length=50) }}
+                    {% endif %}
+                </option>
+            {% else %}
+                <option value="" disabled="disabled">
+                    (None defined)
+                </option>
+            {% endfor %}
+        </optgroup>
+    </select>
+{% endmacro %}

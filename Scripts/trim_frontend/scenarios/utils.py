@@ -321,12 +321,12 @@ def compile_mirc_data(scen, latest_model_run, logger=None):
 
         logger.info(f"Model run found, using run with id [{latest_model_run.id}]...")
 
-        chems = {c.name : c for c in scen.chemicals}
+        chems = {c.name: c for c in scen.chemicals}
         timestamps = [f"01/01/{year} 00:00:00 EST" for year in mass['year'].values()]
 
         trim_data = {
             'scenario_name': scen.name,
-            'chemicals': list(chems.keys()),
+            'chemicals': {c.id: c.name for c in scen.chemicals},
             'timestamps': timestamps,
         }
         trim_data["parcels"] = compile_mirc_parcel_data(scen, chems, conc, timestamps, logger)
@@ -358,23 +358,18 @@ def compile_mirc_parcel_data(scen, chems, conc, timestamps, logger):
                 # properties not relevant for a given compartment can be skipped
                 for chem_name in chems.keys():
                     props = {}
-                    filtered_key = f'{chem_name}_{compartment.standard_name}'
-                    if filtered_key not in conc:
-                        continue
-                    filtered_conc = list(conc[filtered_key].values())
-                    filtered_conc_units = list(conc[filtered_key+"_units"].values())
 
                     # constants
                     if "air" in c["name"].lower():
                         props["rho_a"] = {
                             "value": compartment.rho.magnitude,
-                            "unit": str(compartment.rho.units), # "g/cm^3"
+                            "unit": str(compartment.rho.units),  # "g/cm^3"
                         }
 
                     chem_kd = chems[chem_name].Kd(compartment=compartment)
                     props["Kd"] = {
                         "value": chem_kd.magnitude,
-                        "unit": str(chem_kd.units), # "L/kg"
+                        "unit": str(chem_kd.units),  # "L/kg"
                     }
 
                     chem_fmd = chems[chem_name].FractionMass_Dissolved(compartment=compartment)
@@ -391,30 +386,34 @@ def compile_mirc_parcel_data(scen, chems, conc, timestamps, logger):
                         else:
                             props["Fv"] = chem_fv
 
-                    # timestamp values
-                    props["C"] = {}  # concentration
+                    filtered_key = f'{chem_name}_{compartment.standard_name}'
+                    if filtered_key in conc:
+                        filtered_conc = list(conc[filtered_key].values())
+                        filtered_conc_units = list(conc[filtered_key+"_units"].values())
 
-                    chem_wet = chems[chem_name].ParticleVolumetricWetDepositionRate(compartment=compartment)
-                    props["Drwp"] = {}  # deposition rate wet particle
+                        # timestamp values
+                        props["C"] = {}  # concentration
+                        props["Drwp"] = {}  # deposition rate wet particle
+                        chem_wet = chems[chem_name].ParticleVolumetricWetDepositionRate(compartment=compartment)
+                        props["Drdp"] = {}  # deposition rate dry particle
+                        chem_dry = chems[chem_name].ParticleVolumetricDRYDepositionRate(compartment=compartment)
 
-                    chem_dry = chems[chem_name].ParticleVolumetricDRYDepositionRate(compartment=compartment)
-                    props["Drdp"] = {}  # deposition rate dry particle
-                    for i, timestamp in enumerate(timestamps):
-                        if isinstance(filtered_conc_units[0], str):
-                            props["C"][timestamp] = {
-                                "value": filtered_conc[i],
-                                "unit": filtered_conc_units[i] # "ug/g"
+                        for i, timestamp in enumerate(timestamps):
+                            if isinstance(filtered_conc_units[0], str):
+                                props["C"][timestamp] = {
+                                    "value": filtered_conc[i],
+                                    "unit": filtered_conc_units[i]  # "ug/g"
+                                }
+                            props["Drwp"][timestamp] = {
+                                "value": chem_wet.magnitude,
+                                "unit": str(chem_wet.units)  # "g/day/m^2"
                             }
-                        props["Drwp"][timestamp] = {
-                            "value": chem_wet.magnitude,
-                            "unit": str(chem_wet.units) # "g/day/m^2"
-                        }
-                        props["Drdp"][timestamp] = {
-                            "value": chem_dry.magnitude,
-                            "unit": str(chem_dry.units) # "g/day/m^2"
-                        }
-
-                    c["properties"][chem_name] = props
+                            props["Drdp"][timestamp] = {
+                                "value": chem_dry.magnitude,
+                                "unit": str(chem_dry.units)  # "g/day/m^2"
+                            }
+                    if props:
+                        c["properties"][chem_name] = props
                 ve["compartments"].append(c)
             p["volume_elements"].append(ve)
         parcels.append(p)

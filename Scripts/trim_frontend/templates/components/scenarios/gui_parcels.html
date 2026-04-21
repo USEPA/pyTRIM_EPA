@@ -838,7 +838,12 @@
 				LoadingScreen.hide('check_overlay_status');
 
 				if (!success) {
-					alert('An error occurred while fetching overlay data');
+                    if ('{{env_type}}' == 'production') {
+					    alert('An error occurred while fetching overlay data');
+                    }
+                    else {
+					    console.log('An error occurred while fetching overlay data');
+                    }
 				} else {
 					if (success) {
 						installDepositionOverlayOntoMap(responseData)
@@ -853,7 +858,12 @@
 				LoadingScreen.hide('check_aermod_receptors_file');
 
 				if (!success) {
-					alert('An error occurred while fetching aermod receptors');
+                    if ('{{env_type}}' == 'production') {
+					    alert('An error occurred while fetching aermod receptors');
+                    }
+                    else {
+                        console.log('An error occurred while fetching aermod receptors');
+                    }
 				} else {
 					if (success) {
 						// installDepositionOverlayOntoMap(responseData)
