@@ -193,6 +193,7 @@ CREATE TABLE scenario_load_run_proc (
     run_datetime TIMESTAMP, 
     result_file_nt VARCHAR(255), 
     result_file_conc VARCHAR(255), 
+    result_file_tm VARCHAR(255),
     result_nt VARCHAR, 
     result_conc VARCHAR, 
     execution_arn VARCHAR(255), 
@@ -223,118 +224,7 @@ CREATE TABLE scenario_permissions (
 INSERT INTO alembic_version (version_num) VALUES ('81e92f9ff252');
 
 
-CREATE TABLE mirc_life_stage (
-    name VARCHAR(255) NOT NULL, 
-    duration FLOAT, 
-    duration_unit VARCHAR(255), 
-    id SERIAL PRIMARY KEY,  
-    UNIQUE (name)
-);
+CREATE INDEX idx_custom_parameter_requirements ON custom_parameter (LEFT(requirements, 255));
+CREATE INDEX idx_parameter_domain_requirements ON parameter_domain (LEFT(requirements, 255));
 
-CREATE TABLE mirc_percentile (
-    name VARCHAR(255) NOT NULL, 
-    id SERIAL PRIMARY KEY,  
-    UNIQUE (name)
-);
-
-CREATE TABLE mirc_product (
-    name VARCHAR(255) NOT NULL, 
-    category_id INTEGER, 
-    is_food BOOLEAN NOT NULL, 
-    is_feed BOOLEAN NOT NULL, 
-    id SERIAL PRIMARY KEY,  
-    FOREIGN KEY(category_id) REFERENCES mirc_product (id), 
-    UNIQUE (name)
-);
-
-CREATE TABLE mirc_toxicity_effect (
-    description VARCHAR(255), 
-    id SERIAL PRIMARY KEY,  
-    UNIQUE (description)
-);
-
-CREATE TABLE mirc_parameter (
-    scenario_id INTEGER NOT NULL, 
-    name VARCHAR(255) NOT NULL, 
-    variable VARCHAR(36), 
-    value FLOAT NOT NULL, 
-    unit VARCHAR(36), 
-    source VARCHAR(255), 
-    notes VARCHAR(255), 
-    chemical_id INTEGER, 
-    media_id INTEGER, 
-    food_id INTEGER, 
-    life_stage_id INTEGER, 
-    percentile_id INTEGER, 
-    id SERIAL PRIMARY KEY,  
-    FOREIGN KEY(chemical_id) REFERENCES chemical (id), 
-    FOREIGN KEY(food_id) REFERENCES mirc_product (id), 
-    FOREIGN KEY(life_stage_id) REFERENCES mirc_life_stage (id), 
-    FOREIGN KEY(media_id) REFERENCES mirc_product (id), 
-    FOREIGN KEY(percentile_id) REFERENCES mirc_percentile (id), 
-    FOREIGN KEY(scenario_id) REFERENCES scenario (id), 
-    UNIQUE (scenario_id, chemical_id, media_id, life_stage_id, percentile_id, food_id, name)
-);
-
-CREATE TABLE mirc_parameter_toxicity (
-    parameter_id INTEGER, 
-    toxicity_effect_id INTEGER, 
-    FOREIGN KEY(parameter_id) REFERENCES mirc_parameter (id), 
-    FOREIGN KEY(toxicity_effect_id) REFERENCES mirc_toxicity_effect (id)
-);
-
-CREATE TABLE mirc_assessment (
-    created TIMESTAMP NOT NULL, 
-    updated TIMESTAMP, 
-    name VARCHAR(120) NOT NULL, 
-    description VARCHAR(800), 
-    scenario_id INTEGER NOT NULL, 
-    id SERIAL PRIMARY KEY,  
-    FOREIGN KEY(scenario_id) REFERENCES scenario (id), 
-);
-
-CREATE TABLE mirc_simulation (
-    created TIMESTAMP NOT NULL, 
-    updated TIMESTAMP, 
-    name VARCHAR(120) NOT NULL, 
-    assessment_id INTEGER NOT NULL, 
-    chemical_id INTEGER NOT NULL, 
-    trim_scenario VARCHAR(255), 
-    use_baf BOOLEAN NOT NULL, 
-    id SERIAL PRIMARY KEY,  
-    FOREIGN KEY(assessment_id) REFERENCES mirc_assessment (id), 
-    FOREIGN KEY(chemical_id) REFERENCES chemical (id)
-);
-
-CREATE TABLE mirc_simulation_consumption_breakdown (
-    simulation_id INTEGER NOT NULL, 
-    subfood_id INTEGER NOT NULL, 
-    fraction FLOAT NOT NULL, 
-    source VARCHAR(255), 
-    id SERIAL PRIMARY KEY,  
-    FOREIGN KEY(simulation_id) REFERENCES mirc_simulation (id), 
-    FOREIGN KEY(subfood_id) REFERENCES mirc_product (id)
-);
-
-CREATE TABLE mirc_simulation_parameter (
-    simulation_id INTEGER NOT NULL, 
-    variable VARCHAR(60) NOT NULL, 
-    name VARCHAR(255), 
-    value FLOAT NOT NULL, 
-    unit VARCHAR(36), 
-    source VARCHAR(255), 
-    id SERIAL PRIMARY KEY,  
-    FOREIGN KEY(simulation_id) REFERENCES mirc_simulation (id)
-);
-
-CREATE TABLE mirc_simulation_percentile (
-    simulation_id INTEGER NOT NULL, 
-    food_id INTEGER, 
-    percentile_id INTEGER NOT NULL, 
-    id SERIAL PRIMARY KEY,  
-    FOREIGN KEY(food_id) REFERENCES mirc_product (id), 
-    FOREIGN KEY(percentile_id) REFERENCES mirc_percentile (id), 
-    FOREIGN KEY(simulation_id) REFERENCES mirc_simulation (id)
-);
-
-INSERT INTO alembic_version (version_num) VALUES ('e5524555573a');
+INSERT INTO alembic_version (version_num) VALUES ('4416c27f2844');
