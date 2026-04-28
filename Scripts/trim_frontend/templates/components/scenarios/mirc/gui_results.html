@@ -519,7 +519,29 @@ onDomLoad(function() {
 
         // Initialize breakout options
         ageSelect.empty();
-        $.each(results.total.risk, function(age, etc) {
+        var sortedAges = Object.keys(results.total.risk).sort((a, b) => {
+            if (a.indexOf('Lifetime') == 0) {
+                return 1; // Lifetime comes after everything
+            }
+            if (a.indexOf('Adult') == 0) {
+                return b.indexOf('Lifetime') == 0 ? -1 : 1; // Adult comes after everything except Lifetime
+            }
+            if (a.indexOf('Child') == 0) {
+                if (a.indexOf('<') > -1) {
+                    return -1; // Child<* comes before anything
+                }
+                if (b.indexOf('Child') < 0) {
+                    return -1; // Child* comes before anything that isn't Child*
+                }
+                // Else check if Child[a] is younger than Child[b]
+                var aAgeStart = parseInt(a.split(' ')[1].split('-')[0]);
+                var bAgeStart = parseInt(b.split(' ')[1].split('-')[0])
+                return aAgeStart < bAgeStart ? -1 : 1;
+            }
+            return 0; // else no opinion
+        });
+        $.each(sortedAges, function(i, age) {
+            var etc = results.total.risk[age];
             ageSelect.append($('<option />').val(age).text(age));
         });
         ageSelect.val('Lifetime').off('change').change(function() {

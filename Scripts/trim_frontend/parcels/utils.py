@@ -12,13 +12,13 @@ from flask_api import ApiResult
 from pyproj import Transformer
 
 from trim_frontend.scenarios.utils import update_dynamic_params
-from trim_db.schema import ureg, CustomParameter, ParameterDefinition, Parcel
+from trim_db.schema import CustomParameter, ParameterDefinition, Parcel
 from trim_db.services import ChemicalService, CompartmentService, FormulaService, \
     ParameterService, ParcelService, ScenarioService, VolumeElementService
 from trim_db.services.parameters import get_or_create_custom_param, update_custom_param_value
-from .defaults import get_watershed_area, \
+from .defaults import \
      Air_Parcel_VolElem_defaults, Aquatic_Biota_SW_Compartment_defaults, \
-     Aquatic_Biota_Sed_Compartment_defaults, Farm_Biota_SurfSoil_Compartment_defaults, \
+     Aquatic_Biota_Sed_Compartment_defaults, \
      LAND_USE_TYPES, AQUATIC_DIET, Land_Parcel_VolElem_defaults, Water_Parcel_VolElem_defaults, \
      Wet_Dry_Source_VolElem_defaults, EROSION_DEFAULTS, make_self_requirements
 from .forms import ScenarioParcelsForm

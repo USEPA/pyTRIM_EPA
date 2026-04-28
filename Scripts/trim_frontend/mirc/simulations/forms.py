@@ -1,6 +1,6 @@
 import os
 from flask_wtf import FlaskForm
-from ..utils.json_forms import json_form
+from ...utils.forms import json_form
 
 
 __all__ = [

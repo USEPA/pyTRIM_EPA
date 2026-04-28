@@ -191,7 +191,9 @@
         </div>
     </div>
 
-    <div class="form-row">
+    {{ render_form_group(form.use_aermod) }}
+
+    <div id="air-fields" class="form-row" style="display: none;">
         <div class="col-sm">
             {{ render_form_group(
                 form.trim_air_compartment,
@@ -712,6 +714,9 @@ onDomLoad(function() {
 });
 
 function initSimulationForm() {
+    if (TRIM.store.mirc_data.includes_aermod) {
+        $('[name="use_aermod"]').prop('checked', true);
+    }
     updateSimulationTrimFields();
 
     $('[name$="ingestion_percentile_preset"]').prop('checked', false);
@@ -873,8 +878,18 @@ function getSelectedValue(select) {
     const val = (select.options[select.selectedIndex] || {}).value;
     return val;
 }
+function getCheckedValues(name) {
+    return Array.from(document.querySelectorAll(`[name="${name}"]`))
+        .filter(x => x.checked)
+        .map(x => x.value);
+}
 
 function updateSimulationMircFields() {
+    const simulationForm = document.getElementById('simulation-form');
+
+    const airFields = document.getElementById('air-fields');
+    airFields.style.display = 'none';
+
     const data = TRIM.store.mirc_data;
     if (!data || !data.chemicals || $.isEmptyObject(data.chemicals)) {
         return;
@@ -886,9 +901,17 @@ function updateSimulationMircFields() {
         if (field.tagName == 'SELECT') {
             return getSelectedValue(field);
         }
+        else if (field.type?.toLowerCase() === 'checkbox') {
+            return getCheckedValues(name);
+        }
         else {
             return field.value;
         }
+    }
+
+    const useAermod = getCheckedValues('use_aermod').length > 0;
+    if (useAermod && data.includes_aermod === true) {
+        airFields.style.display = '';
     }
 
     const chem = data.chemicals[getVal('chemical')];
@@ -942,6 +965,19 @@ function updateSimulationMircFields() {
         return info;
     };
 
+    const getParcel = (compartmentName) => {
+        if (!compartmentName) {
+            return null;
+        }
+        const parsed = parseCompartmentName(compartmentName);
+
+        const p = data.parcels.filter(x => x.name == parsed.parcel)[0];
+        if (!p) {
+            return null;
+        }
+        return p;
+    };
+
     const getCompartment = (name) => {
         if (!name) {
             return null;
@@ -971,13 +1007,26 @@ function updateSimulationMircFields() {
         return c;
     };
 
-    const airSrc = getVal('trim_air_compartment');
-    const airProps = getCompartment(airSrc).properties;
-    setField('Ca', airProps[chem].C?.[dt].value, airSrc);
-    setField('Fv', airProps[chem].Fv, airSrc);
-    setField(
-        'rho_a', airProps[chem].rho_a.value, airSrc
-    );
+    if (useAermod) {
+        const airSrc = getVal('trim_air_compartment');
+        const aermodProps = getParcel(airSrc).aermod;
+        if (aermodProps) {
+            setField('Ca', aermodProps.C_avg, airSrc);
+        }
+        const airProps = getCompartment(airSrc).properties;
+        // setField('Ca', airProps[chem].C?.[dt].value, airSrc);
+        setField('Fv', airProps[chem].Fv, airSrc);
+        setField(
+            'rho_a', airProps[chem].rho_a.value, airSrc
+        );
+    }
+    else {
+        // Zero-out air props by default
+        setField('Ca', 0, 'default');
+        setField('Fv', 0, 'default');
+        // Default for rho is 1 because it is used as the denominator of an equation
+        setField('rho_a', 1, 'default');
+    }
 
     const waterSrc = getVal('trim_water_compartment');
     const water = getCompartment(waterSrc);

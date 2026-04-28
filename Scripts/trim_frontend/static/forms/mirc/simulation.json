@@ -73,17 +73,24 @@
         },
 
         {
+            "id": "use_aermod",
+            "label": "Use AERMOD Air Concentration?",
+            "data_type": "boolean",
+            "required": true
+        },
+
+        {
             "id": "trim_air_compartment",
             "label": "Compartment for Air Concentration",
             "data_type": "string",
             "widget": "select",
             "class": "air-compartment-field",
             "choices": [],
-            "help": "Select the compartment to retrieve air concentration results from. This is typically in the farm or garden parcel. This is used for vapor-phase chemical uptake into fruits, vegetables, and livestock feed. If you chose to run TRIM with AERMOD, then the air concentrations in this compartment will be from chemical resuspension after initial deposition, and they will be added to the AERMOD air concentration results. If you did not choose to run TRIM with AERMOD, then the air concentrations in this compartment will be entirely from TRIM air transfer and resuspension calculations."
+            "help": "Select the compartment to retrieve air concentration results from. This is typically in the farm or garden parcel. This is used for vapor-phase chemical uptake into fruits, vegetables, and livestock feed."
         },
         {
             "id": "Ca",
-            "label": "Average Concentration in Air (&mu;g/m<sup>3</sup>)",
+            "label": "AERMOD Average Concentration in Air (&mu;g/m<sup>3</sup>)",
             "data_type": "float",
             "min": 0,
             "step": "any"
@@ -99,7 +106,8 @@
             "label": "",
             "data_type": "string",
             "readonly": true,
-            "default": "manual input"
+            "default": "manual input",
+            "hidden": true
         },
         {
             "id": "Fv",
@@ -114,7 +122,8 @@
             "label": "",
             "data_type": "string",
             "readonly": true,
-            "default": "manual input"
+            "default": "manual input",
+            "hidden": true
         },
         {
             "id": "rho_a",
@@ -134,7 +143,8 @@
             "label": "",
             "data_type": "string",
             "readonly": true,
-            "default": "manual input"
+            "default": "manual input",
+            "hidden": true
         },
 
         {
@@ -164,7 +174,8 @@
             "label": "",
             "data_type": "string",
             "readonly": true,
-            "default": "manual input"
+            "default": "manual input",
+            "hidden": true
         },
 
         {
@@ -194,7 +205,8 @@
             "label": "",
             "data_type": "string",
             "readonly": true,
-            "default": "manual input"
+            "default": "manual input",
+            "hidden": true
         },
 
         {
@@ -224,7 +236,8 @@
             "label": "",
             "data_type": "string",
             "readonly": true,
-            "default": "manual input"
+            "default": "manual input",
+            "hidden": true
         },
         {
             "id": "Kd",
@@ -245,7 +258,8 @@
             "label": "",
             "data_type": "string",
             "readonly": true,
-            "default": "manual input"
+            "default": "manual input",
+            "hidden": true
         },
 
         {
@@ -275,7 +289,8 @@
             "label": "",
             "data_type": "string",
             "readonly": true,
-            "default": "manual input"
+            "default": "manual input",
+            "hidden": true
         },
 
         {
@@ -305,7 +320,8 @@
             "label": "",
             "data_type": "string",
             "readonly": true,
-            "default": "manual input"
+            "default": "manual input",
+            "hidden": true
         },
         {
             "id": "Kd_feed",
@@ -326,7 +342,8 @@
             "label": "",
             "data_type": "string",
             "readonly": true,
-            "default": "manual input"
+            "default": "manual input",
+            "hidden": true
         },
 
         {
@@ -356,7 +373,8 @@
             "label": "",
             "data_type": "string",
             "readonly": true,
-            "default": "manual input"
+            "default": "manual input",
+            "hidden": true
         },
 
         {
@@ -386,7 +404,8 @@
             "label": "",
             "data_type": "string",
             "readonly": true,
-            "default": "manual input"
+            "default": "manual input",
+            "hidden": true
         },
 
         {
@@ -432,7 +451,8 @@
             "label": "",
             "data_type": "string",
             "readonly": true,
-            "default": "default"
+            "default": "default",
+            "hidden": true
         },
         {
             "id": "C_tl35",
@@ -452,7 +472,8 @@
             "label": "",
             "data_type": "string",
             "readonly": true,
-            "default": "manual input"
+            "default": "manual input",
+            "hidden": true
         },
 
         {
@@ -479,7 +500,8 @@
             "label": "",
             "data_type": "string",
             "readonly": true,
-            "default": "default"
+            "default": "default",
+            "hidden": true
         },
         {
             "id": "C_tl4",
@@ -499,7 +521,8 @@
             "label": "",
             "data_type": "string",
             "readonly": true,
-            "default": "manual input"
+            "default": "manual input",
+            "hidden": true
         },
 
         {
@@ -529,7 +552,8 @@
             "label": "",
             "data_type": "string",
             "readonly": true,
-            "default": "manual input"
+            "default": "manual input",
+            "hidden": true
         },
 
         {
@@ -559,7 +583,8 @@
             "label": "",
             "data_type": "string",
             "readonly": true,
-            "default": "manual input"
+            "default": "manual input",
+            "hidden": true
         },
         {
             "id": "FMD",
@@ -574,7 +599,8 @@
             "label": "",
             "data_type": "string",
             "readonly": true,
-            "default": "manual input"
+            "default": "manual input",
+            "hidden": true
         }
     ]
 }

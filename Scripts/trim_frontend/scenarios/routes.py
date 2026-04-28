@@ -17,6 +17,7 @@ from trim_frontend import api, db
 from .defaults import *
 from .forms import *
 from .utils import *
+from ..mirc.trim_bridge import compile_mirc_data
 from ..mirc.simulations.forms import MircSimulationForm
 from ..utils.logging import make_logger
 from ..utils.file_io import MiscAssociatedFileVariety, associated_file_helper

@@ -36,7 +36,7 @@
             "label": "File for Deposition Overlay Data",
             "data_type": "file",
             "required": true,
-            "help": "Indicate the .PLT file for data to overlay on the map; e.g., output form AERMOD."
+            "help": "Indicate the .PLT file for data to overlay on the map; e.g., output from AERMOD."
         },
         {
             "id": "deposition_overlay_upload_coordinates_system",

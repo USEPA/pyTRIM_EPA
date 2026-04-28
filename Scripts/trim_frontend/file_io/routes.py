@@ -14,14 +14,13 @@ from flask_security import login_required, current_user
 from werkzeug.utils import secure_filename
 from flask_api import ApiException, ApiResult
 from trim_db.schema import *
-from trim_db.schema.entities.environment import Parcel
 from trim_db.services import *
 from trim_db.services.parameters import get_or_create_custom_param
 from trim_db.services.entities import ParcelService
 from trim_frontend import api
-from ..parcels.utils import delete_parcel_contents, get_canonical_land_use_type, get_canonical_parcel_type, get_ve_defaults_for_parcel_type, handle_parcel_update, initialize_parcel_contents
+from ..parcels.utils import delete_parcel_contents, get_canonical_land_use_type, get_canonical_parcel_type, handle_parcel_update
 from ..utils.data_structures import calculate_list_depth
-from ..utils.file_io import csv_to_df, MiscAssociatedFileVariety, associated_file_helper, convert_sfc_to_meteo, parse_sfc_file_as_dataframe
+from ..utils.file_io import csv_to_df, associated_file_helper, convert_sfc_to_meteo, parse_sfc_file_as_dataframe
 from ..utils.forms import assemble_json_form
 from ..utils.logging import make_logger
 from ..utils.spatial import determine_location, determine_nearest_neighbor_distance, ensure_closed_polygon, is_utm_zone_valid, translate_coordinates, translate_position
@@ -161,7 +160,6 @@ def parse_aermod():
     # Convert the aermod X and Y to the default utm coordinates that pyTRIM uses. We need users input for the
     # coordinate system and UTM zone (if UTM coordiantes) for the given file.
 
-
     df_aermod = pd.DataFrame(df[df['NET ID'] != 'POLGRID1'])
     df_aermod['NUM HRS'] = pd.to_numeric(df_aermod['NUM HRS'])
     df_aermod['DRY DEPO'] = pd.to_numeric(df_aermod['DRY DEPO'])
@@ -287,7 +285,6 @@ def upload_background_conc():
         abort(403)
 
     chem = ChemicalService.get(name=chem_name)
-    ureg = UnitRegistry()
     # First check if there are any existing CustomParameters
     custom_pars = [c.parameters.get("initialConcentration") for c in scenario.compartments if not isinstance(c.parameters.get("initialConcentration"), ParameterDefinition)]
     # We are going to reset all existing custom background conc values and start clean for file uploads. We do not want
