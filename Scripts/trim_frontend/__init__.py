@@ -13,7 +13,7 @@ from .utils.hotfix import patch_flask
 from .utils.routes import init_routes
 
 # Create module instances
-admin = Admin(template_mode='bootstrap3')
+admin = Admin()
 api = FlaskApi()
 assets = Environment()
 bcrypt = Bcrypt()
@@ -56,17 +56,15 @@ def create_app(testing=False):
     def inject_template_globals():
         return dict(site_name="TRIM.Builder")
 
-    @app.before_first_request
-    def init_app():
-        if testing:
-            return
-
+    if not testing:
         from .utils.auth import define_superusers
         app.logger.info("Initializing default superusers")
-        define_superusers(app, security)
+        with app.app_context():
+            define_superusers(app, security)
 
         from .utils.assets import register_assets
         app.logger.info("Building static assets")
-        register_assets(assets)
+        with app.app_context():
+            register_assets(assets)
 
     return app

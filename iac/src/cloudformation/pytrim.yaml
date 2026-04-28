@@ -70,9 +70,10 @@ Metadata:
       - Label:
           default: MySQL Database
         Parameters:
+          - DatabaseEngine
           - DatabaseInstanceType
           - DatabaseName
-          - DatabaseMySQLEngineVersion
+          - DatabaseEngineVersion
           - DatabaseMasterAccountUsername
           - DatabaseMasterAccountPassword
       - Label:
@@ -459,6 +460,10 @@ Parameters:
     Type: 'AWS::EC2::KeyPair::KeyName'
       
   ## RDS-related
+  DatabaseEngine:
+    Description: engine for the database
+    Type: String
+    Default: mysql
   DatabaseName:
     Description: name for the database
     Type: String
@@ -505,7 +510,7 @@ Parameters:
       - db.t3.xlarge
       - db.t3.2xlarge
     ConstraintDescription: must be a valid RDS instance type for this region.
-  DatabaseMySQLEngineVersion:
+  DatabaseEngineVersion:
     Description: version number to use; see DescribeDBEngineVersions for up-to-date values
     # e.g.
     # aws rds describe-db-engine-versions --engine "mysql" | jq -r '.DBEngineVersions[].EngineVersion'
@@ -1062,13 +1067,15 @@ Resources:
           Environment:
             - Name: STORAGE_BUCKET_NAME
               Value: !Ref ModelRunOutputStorageBucket
-            - Name: RDS_HOSTNAME
+            - Name: DB_ENGINE
+              Value: !Ref DatabaseEngine
+            - Name: DB_HOSTNAME
               Value: !GetAtt DatabaseInstance.Endpoint.Address
-            - Name: RDS_PORT
+            - Name: DB_PORT
               Value: !GetAtt DatabaseInstance.Endpoint.Port
-            - Name: RDS_DB_NAME
+            - Name: DB_NAME
               Value: !Ref DatabaseName
-            # RDS_USERNAME, RDS_PASSWORD, SQLALCHEMY_DATABASE_URI get set on-the-fly by the Docker image...
+            # SQLALCHEMY_DATABASE_URI gets set on-the-fly by the Docker image...
 
           Essential: true
           Interactive: false
@@ -1119,13 +1126,15 @@ Resources:
           Environment:
             - Name: STORAGE_BUCKET_NAME
               Value: !Ref GetFlowOutputStorageBucket
-            - Name: RDS_HOSTNAME
+            - Name: DB_ENGINE
+              Value: !Ref DatabaseEngine
+            - Name: DB_HOSTNAME
               Value: !GetAtt DatabaseInstance.Endpoint.Address
-            - Name: RDS_PORT
+            - Name: DB_PORT
               Value: !GetAtt DatabaseInstance.Endpoint.Port
-            - Name: RDS_DB_NAME
+            - Name: DB_NAME
               Value: !Ref DatabaseName
-            # RDS_USERNAME, RDS_PASSWORD, SQLALCHEMY_DATABASE_URI get set on-the-fly by the Docker image...
+            # SQLALCHEMY_DATABASE_URI gets set on-the-fly by the Docker image...
 
           Essential: true
           Interactive: false
@@ -1302,13 +1311,13 @@ Resources:
       AutoMinorVersionUpgrade: true
       BackupRetentionPeriod: 7
       DBInstanceClass: !Ref DatabaseInstanceType
-      DBInstanceIdentifier: !Sub '${EnvironmentName}-mysql'
+      DBInstanceIdentifier: !Sub '${EnvironmentName}-${DatabaseEngine}'
       DBName: !Ref DatabaseName
       VPCSecurityGroups:
         - !Ref DatabaseSecurityGroup
       DBSubnetGroupName: !Ref DatabaseSubnetGroup
-      Engine: "mysql"
-      EngineVersion: !Ref DatabaseMySQLEngineVersion
+      Engine: "${DatabaseEngine}"
+      EngineVersion: !Ref DatabaseEngineVersion
       MasterUsername: !Ref DatabaseMasterAccountUsername
       MasterUserPassword: !Ref DatabaseMasterAccountPassword
       PubliclyAccessible: false
@@ -1324,7 +1333,7 @@ Resources:
     Type: AWS::SecretsManager::Secret
     Properties: 
       Description: !Sub 'MySQL credentials for ${EnvironmentName}'
-      Name: !Sub 'pytrim/mysql'
+      Name: !Sub 'pytrim/database/credentials'
       SecretString: !Sub '{"username":"${DatabaseMasterAccountUsername}","password":"${DatabaseMasterAccountPassword}"}'
 
     
@@ -1440,11 +1449,19 @@ Resources:
           Value: 11
         -
           Namespace: 'aws:elasticbeanstalk:application:environment'
-          OptionName: RDS_HOSTNAME
+          OptionName: DB_ENGINE
+          Value: !Ref DatabaseEngine
+        -
+          Namespace: 'aws:elasticbeanstalk:application:environment'
+          OptionName: DB_HOSTNAME
           Value: !GetAtt DatabaseInstance.Endpoint.Address
         -
           Namespace: 'aws:elasticbeanstalk:application:environment'
-          OptionName: RDS_DB_NAME
+          OptionName: DB_PORT
+          Value: !GetAtt DatabaseInstance.Endpoint.Port
+        -
+          Namespace: 'aws:elasticbeanstalk:application:environment'
+          OptionName: DB_NAME
           Value: !Ref DatabaseName
         -
           Namespace: 'aws:elasticbeanstalk:application:environment'
@@ -1468,36 +1485,8 @@ Resources:
           Value: "us-east-1"
         -
           Namespace: 'aws:elasticbeanstalk:application:environment'
-          OptionName: RDS_USERNAME
-          Value: !Ref DatabaseMasterAccountUsername
-        -
-          Namespace: 'aws:elasticbeanstalk:application:environment'
-          OptionName: RDS_PORT
-          Value: !GetAtt DatabaseInstance.Endpoint.Port
-        -
-          Namespace: 'aws:elasticbeanstalk:application:environment'
           OptionName: SECRET_KEY
           Value: xxxxfromcf
-        -
-          Namespace: 'aws:elasticbeanstalk:application:environment'
-          OptionName: SQLALCHEMY_DATABASE_URI
-          Value: !Join
-            - ''
-            -
-              - 'mysql+pymysql://'
-              - !Ref DatabaseMasterAccountUsername
-              - ':'
-              - !Ref DatabaseMasterAccountPassword
-              - '@'
-              - !GetAtt DatabaseInstance.Endpoint.Address
-              - ':'
-              - !GetAtt DatabaseInstance.Endpoint.Port
-              - '/'
-              - !Ref DatabaseName
-        -
-          Namespace: 'aws:elasticbeanstalk:application:environment'
-          OptionName: RDS_PASSWORD
-          Value: !Ref DatabaseMasterAccountPassword
         -
           # I can't get this setting to work...
           Namespace: 'aws:elasticbeanstalk:environment:process:default'

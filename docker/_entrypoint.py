@@ -13,19 +13,23 @@ secrets_client = boto3.client('secretsmanager')
 print(f"got if: {secrets_client}")
 
 response = secrets_client.get_secret_value(
-    SecretId='pytrim/mysql'
+    SecretId='pytrim/database/credentials'
 )
 
 print(f"secrets response: {response}")
 secret_data = json.loads(response['SecretString'])
 
-sqlalchemy_uri = f"mysql+pymysql://{secret_data['username']}:{secret_data['password']}@{os.environ.get('RDS_HOSTNAME')}:{os.environ.get('RDS_PORT')}/{os.environ.get('RDS_DB_NAME')}"
+engine = os.getenv('DB_ENGINE')
+if engine == 'mysql':
+    engine = 'mysql+pymysql'
 
 # put stuff into environment variables...
-os.environ["RDS_USERNAME"] = secret_data["username"]
-os.environ["RDS_PASSWORD"] = secret_data["password"]
-os.environ["SQLALCHEMY_DATABASE_URI"] = sqlalchemy_uri
-
+os.environ["SQLALCHEMY_DATABASE_URI"] = (
+    f"{engine}://"
+    + f"{secret_data['username']}:{secret_data['password']}"
+    + f"@{os.getenv('DB_HOSTNAME')}:{os.getenv('DB_PORT')}"
+    + f"/{os.getenv('DB_NAME')}"
+)
 
 
 """
@@ -102,8 +106,8 @@ class DockerEntryPoint:
         for key in os.environ:
             print(f"\t'{key}' == '{os.environ[key]}'")
         print("##### FULL ENVIRONMENT (END) #####")
-        print(f"just the tasktoken ({INCOMING_TOKEN_ENV_KEY}): '{os.environ.get(INCOMING_TOKEN_ENV_KEY)}'")
-        print(f"just the scenarioid ({SCENARIO_ID_KEY}): '{os.environ.get(SCENARIO_ID_KEY)}'")
+        print(f"just the tasktoken ({INCOMING_TOKEN_ENV_KEY}): '{os.getenv(INCOMING_TOKEN_ENV_KEY)}'")
+        print(f"just the scenarioid ({SCENARIO_ID_KEY}): '{os.getenv(SCENARIO_ID_KEY)}'")
     """
 
     def attempt_task_conclusion(self, output_data):
@@ -123,14 +127,14 @@ class DockerEntryPoint:
     # to replicate that in local testing. So we search for both.
     def get_input_data_from_environment(self):
         global FAKE_THE_RESULTS
-        self.task_token = os.environ.get(INCOMING_TOKEN_ENV_KEY)
-        self.scenario_id = os.environ.get(SCENARIO_ID_KEY, None)
+        self.task_token = os.getenv(INCOMING_TOKEN_ENV_KEY)
+        self.scenario_id = os.getenv(SCENARIO_ID_KEY, None)
         if self.scenario_id is None:
             loggy(f"(unable to find scenario id using key '{SCENARIO_ID_KEY}'; attempting local $-less version. If you are running locally, this is not an error)")
-            self.scenario_id = os.environ.get(SCENARIO_ID_KEY[0:-2])
+            self.scenario_id = os.getenv(SCENARIO_ID_KEY[0:-2])
         self.scenario_id = int(self.scenario_id)
 
-        test_data_probe = os.environ.get(FAKE_KEY)
+        test_data_probe = os.getenv(FAKE_KEY)
         if test_data_probe is not None and str(test_data_probe).lower() == "true":
             FAKE_THE_RESULTS = True
 
@@ -201,7 +205,7 @@ class DockerEntryPoint:
         global FAKE_THE_RESULTS
         loggy(f"DockerEntryPoint.launch(); back to real data")
         uuid = str(uuidlib.uuid1())
-        storage_bucket_name = os.environ.get(STORAGE_BUCKET_NAME_KEY)
+        storage_bucket_name = os.getenv(STORAGE_BUCKET_NAME_KEY)
         # self.print_environment()
         loggy(f"uuid for this run is '{uuid}'; bucket is '{storage_bucket_name}'")
 

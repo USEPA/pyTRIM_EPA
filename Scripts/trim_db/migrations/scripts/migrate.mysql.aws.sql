@@ -80,6 +80,7 @@ CREATE TABLE `user` (
     `company_name` VARCHAR(255), 
     `password_hash` VARCHAR(128), 
     `confirmed_at` DATETIME, 
+    `fs_uniquifier` VARCHAR(65), 
     `last_login_at` DATETIME, 
     `current_login_at` DATETIME, 
     `last_login_ip` VARCHAR(40), 

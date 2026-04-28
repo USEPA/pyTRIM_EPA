@@ -11,7 +11,7 @@ def define_superusers(app, security):
         app.logger.warning('No default superuser specified')
     else:
         default_superuser_pwd = os.getenv('DEFAULT_SUPERUSER_PWD', '@dm1nUs3r')
-        u = security.datastore.get_user(default_superuser)
+        u = security.datastore.find_user(email=default_superuser)
         pwd = hash_password(default_superuser_pwd)
         if not u:
             security.datastore.create_user(
@@ -19,7 +19,7 @@ def define_superusers(app, security):
                 confirmed_at=datetime.utcnow()
             )
             security.datastore.commit()
-            u = security.datastore.get_user(default_superuser)
+            u = security.datastore.find_user(email=default_superuser)
         # u.password = pwd
         security.datastore.add_role_to_user(u, r)
     security.datastore.commit()

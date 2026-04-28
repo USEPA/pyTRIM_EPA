@@ -21,24 +21,29 @@ secrets_client = boto3.client('secretsmanager')
 print(f"got if: {secrets_client}")
 
 response = secrets_client.get_secret_value(
-    SecretId='pytrim/mysql'
+    SecretId='pytrim/database/credentials'
 )
 
 print(f"secrets response: {response}")
 secret_data = json.loads(response['SecretString'])
 
-sqlalchemy_uri = f"mysql+pymysql://{secret_data['username']}:{secret_data['password']}@{os.environ.get('RDS_HOSTNAME')}:{os.environ.get('RDS_PORT')}/{os.environ.get('RDS_DB_NAME')}"
+engine = os.getenv('DB_ENGINE')
+if engine == 'mysql':
+    engine = 'mysql+pymysql'
 
 # put stuff into environment variables...
-os.environ["RDS_USERNAME"] = secret_data["username"]
-os.environ["RDS_PASSWORD"] = secret_data["password"]
-os.environ["SQLALCHEMY_DATABASE_URI"] = sqlalchemy_uri
+os.environ["SQLALCHEMY_DATABASE_URI"] = (
+    f"{engine}://"
+    + f"{secret_data['username']}:{secret_data['password']}"
+    + f"@{os.getenv('DB_HOSTNAME')}:{os.getenv('DB_PORT')}"
+    + f"/{os.getenv('DB_NAME')}"
+)
 
 # verify what's in the environment
-print(f"ENVIRONMENT (start):")
-for key, value in os.environ.items():
-    print(f'{key}: {value}')
-print(f"ENVIRONMENT (end):")
+# print(f"ENVIRONMENT (start):")
+# for key, value in os.environ.items():
+#     print(f'{key}: {value}')
+# print(f"ENVIRONMENT (end):")
 
 from getflow import run_getflow_v13, run_getflow_v13_for_scenario_id
 from trim_db import ScenarioService
@@ -76,9 +81,9 @@ class DockerGetflowEntryPoint:
     # Additionally, inn the StepFunction the scenario id actually has a $ in the name; I cannot figure out a way
     # to replicate that in local testing. So we search for both.
     def get_input_data_from_environment(self):
-        self.task_token = os.environ.get(INCOMING_TOKEN_ENV_KEY)
-        self.storage_bucket_name = os.environ.get(STORAGE_BUCKET_NAME_KEY)
-        self.scenario_id = int(os.environ.get(SCENARIO_ID_KEY, -1))
+        self.task_token = os.getenv(INCOMING_TOKEN_ENV_KEY)
+        self.storage_bucket_name = os.getenv(STORAGE_BUCKET_NAME_KEY)
+        self.scenario_id = int(os.getenv(SCENARIO_ID_KEY, -1))
 
         print(f"@@@@@@@@@@ ALL ENVIRONMENT START @@@@@@@@@@@@@@")
         for key, value in os.environ.items():

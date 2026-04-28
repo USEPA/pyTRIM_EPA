@@ -46,14 +46,14 @@ def update_old_user_model(user, password=None):
 
 class UserLoginForm(LoginForm):
     def validate(self):
-        user = security.datastore.get_user(self.email.data)
+        user = security.datastore.find_user(email=self.email.data)
         update_old_user_model(user, self.password.data)
         return super().validate()
 
 
 class UserForgotPasswordForm(ForgotPasswordForm):
     def validate(self):
-        user = security.datastore.get_user(self.email.data)
+        user = security.datastore.find_user(email=self.email.data)
         update_old_user_model(user)
         return super().validate()
 

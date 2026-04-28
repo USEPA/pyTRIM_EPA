@@ -483,7 +483,14 @@
                         'xHour': e['xHour'],
                         'TimeZone': e['TimeZone']
                     }
-                    this_row[def_data_name] = e[selected_val];
+                    if (["HorizontalWindSpeed", "WindDirection"].includes(selected_val)) {
+                        this_row["HorizontalWindSpeed"] = e["HorizontalWindSpeed"];
+                        this_row["WindDirection"] = e["WindDirection"];
+                        this_row["_selected"] = selected_val;
+                    }
+                    else {
+                        this_row[def_data_name] = e[selected_val];
+                    }
                     return this_row;
                 });
                 sel.attr('data-meteo',JSON.stringify(this_sel_data))
