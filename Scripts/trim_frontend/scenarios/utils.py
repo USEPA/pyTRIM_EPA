@@ -812,7 +812,7 @@ def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
             rain_frac_time = df_met['RainTime'].sum() / df_met['time_delta'].sum()
             met_dict['frac_time_rain'] = rain_frac_time
 
-       # if param_type == "SFC":
+        # if param_type == "SFC":
         avg_wind_speed = met_dict.get("wt_av_HorizontalWindSpeed")
         avg_mixing_height = met_dict.get("wt_av_mixingHeight")
         if avg_wind_speed:
