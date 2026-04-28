@@ -40,10 +40,10 @@ os.environ["SQLALCHEMY_DATABASE_URI"] = (
 )
 
 # verify what's in the environment
-print(f"ENVIRONMENT (start):")
-for key, value in os.environ.items():
-    print(f'{key}: {value}')
-print(f"ENVIRONMENT (end):")
+# print(f"ENVIRONMENT (start):")
+# for key, value in os.environ.items():
+#     print(f'{key}: {value}')
+# print(f"ENVIRONMENT (end):")
 
 from getflow import run_getflow_v13, run_getflow_v13_for_scenario_id
 from trim_db import ScenarioService
