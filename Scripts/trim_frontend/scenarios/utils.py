@@ -4,7 +4,7 @@ import time
 from datetime import datetime
 import os
 import pandas as pd
-from numpy import timedelta64
+import numpy as np
 from pathlib import Path
 from trim_frontend.external_API.routes import SoilData, get_soil_boundaries
 from trim_db.schema import CustomParameter, ParameterDefinition
@@ -592,6 +592,44 @@ def update_assumed_all_comp_fixed_params(scen, comps, par_name, par_val):
     ParameterService.commit()
 
 
+def true_wind_wt_ave(df_met, col, fallback=None):
+    """
+    Break down WS/WD into its components
+        u = east-west wind speed
+        u_bar = average u across all u values in time
+        v = north-south wind speed
+        v_bar = average v across all v values in time
+    """
+    from trim_frontend.utils.file_io import vset
+    
+    def u_calc(WS, WD):
+        return -1 * WS * np.sin(np.radians(WD))
+
+    def v_calc(WS, WD):
+        return -1 * WS * np.cos(np.radians(WD))
+
+    try:
+        df_met['u'] = vset(df_met, u_calc, ["HorizontalWindSpeed", "WindDirection"])
+        u_bar = df_met['u'].mean()
+
+        df_met['v'] = vset(df_met, v_calc, ["HorizontalWindSpeed", "WindDirection"])
+        v_bar = df_met['v'].mean()
+
+        if col == "HorizontalWindSpeed":
+            return np.sqrt(u_bar**2 + v_bar**2)
+        elif col == "WindDirection":
+            if u_bar <= 0 and v_bar <= 0:
+                x_adjustment = 0
+            elif u_bar > 0 and v_bar < 0:
+                x_adjustment = 360
+            else:
+                x_adjustment = 180
+            return np.degrees(np.arctan(u_bar/v_bar)) + x_adjustment
+    except Exception as e:
+        print(e)
+        return fallback
+
+
 def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
     par_dat = json.loads(par_dat)
     df_met = pd.DataFrame.from_dict(par_dat, orient='columns')
@@ -609,8 +647,8 @@ def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
 
     if param_type in ["MET", "SFC"]:
         df_met = df_met.loc[(df_met.Hour < 25)]  # drop faulty
-        metcol_dict = {'Rain': (0, 1), 'AirTemperature': (200, 373), 'HorizontalWindSpeed': (0, 100),
-                       'WindDirection': (-360, 360), 'mixingHeight': (0, 10000), 'IsDay': (0, 1),
+        metcol_dict = {'Rain': (0, 1), 'AirTemperature': (200, 350), 'HorizontalWindSpeed': (0, 100),
+                       'WindDirection': (0, 360), 'mixingHeight': (0, 10000), 'IsDay': (0, 1),
                        'CumulativeRain': (0, 1.6)}  # k, v represent name and min-max
         for k, v in metcol_dict.items():
             if k in df_met.columns:
@@ -624,14 +662,15 @@ def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
         df_met['DT'] = list(pd.to_datetime(df_met[['Year', 'Month', 'Day']], errors='coerce'))
 
     df_met.sort_values(by='DT', inplace=True)
-    df_met['date_delta'] = (df_met['DT'] - df_met['DT'].min()) / timedelta64(1, 'D')
+    df_met['date_delta'] = (df_met['DT'] - df_met['DT'].min()) / np.timedelta64(1, 'D')
     df_met['time_delta'] = df_met['date_delta'].diff()
     # shift up the column 1 so that applicability of met condition is aligned to duration
     df_met['time_delta'] = df_met['time_delta'].shift(-1)
 
     # Clean up non sequential dates
-    df_met['DT_Check'] = df_met.DT >= (df_met.DT.shift())
-    df_met = df_met[df_met['DT_Check']]
+    df_met['DT_Check1'] = df_met.DT >= df_met.DT.shift()
+    df_met['DT_Check2'] = df_met.DT <= df_met.DT.shift(-1) # avoid incorrectly dropping first row
+    df_met = df_met[df_met['DT_Check1'] | df_met['DT_Check2']]
 
     # Get time-weighted averages
     met_dict = {}
@@ -639,9 +678,18 @@ def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
         for k, v in metcol_dict.items():
             if k in df_met.columns:
                 df_met['metcol'] = pd.to_numeric(df_met[k], errors='coerce')
-                df_met['prod'] = df_met['metcol'] * df_met['time_delta']
-                wt_ave = df_met['prod'].sum() / df_met['time_delta'].sum()
-                met_dict['wt_av_' + k] = wt_ave
+                
+                if param_type == "MET":
+                    df_met['prod'] = df_met['metcol'] * df_met['time_delta']
+                    wt_ave = df_met['prod'].sum() / df_met['time_delta'].sum()
+                elif param_type == "SFC":
+                    wt_ave = df_met['metcol'].mean()
+                
+                if k in ["HorizontalWindSpeed", "WindDirection"]:
+                    if k == par_dat[0].get("_selected"):
+                        met_dict['wt_av_' + k] = true_wind_wt_ave(df_met, k, fallback=wt_ave)
+                else:
+                    met_dict['wt_av_' + k] = wt_ave
 
         if 'Rain' in df_met.columns:
             df_met['Rain'] = pd.to_numeric(df_met['Rain'], errors='coerce')
@@ -650,13 +698,13 @@ def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
             rain_frac_time = df_met['RainTime'].sum() / df_met['time_delta'].sum()
             met_dict['frac_time_rain'] = rain_frac_time
 
-        if param_type == "SFC":
-            avg_wind_speed = met_dict.get("wt_av_HorizontalWindSpeed")
-            avg_mixing_height = met_dict.get("wt_av_mixingHeight")
-            if avg_wind_speed:
-                met_dict["wt_av_HorizontalWindSpeed"] = max(avg_wind_speed, 0.75)     
-            if avg_mixing_height:
-                met_dict["wt_av_mixingHeight"] = max(avg_mixing_height, 20)
+        # if param_type == "SFC":
+        avg_wind_speed = met_dict.get("wt_av_HorizontalWindSpeed")
+        avg_mixing_height = met_dict.get("wt_av_mixingHeight")
+        if avg_wind_speed:
+            met_dict["wt_av_HorizontalWindSpeed"] = max(avg_wind_speed, 0.75)     
+        if avg_mixing_height:
+            met_dict["wt_av_mixingHeight"] = max(avg_mixing_height, 20)
 
     if param_type == "AE":
         # process AE.

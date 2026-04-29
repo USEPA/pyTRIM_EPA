@@ -230,7 +230,6 @@ CREATE INDEX idx_parameter_domain_requirements ON parameter_domain (LEFT(require
 
 INSERT INTO alembic_version (version_num) VALUES ('4416c27f2844');
 
-
 CREATE TABLE mirc_scenario (
     id SERIAL PRIMARY KEY, 
     name VARCHAR(255) NOT NULL, 
@@ -263,14 +262,6 @@ CREATE TABLE mirc_simulation (
     FOREIGN KEY(trim_scenario_id) REFERENCES scenario (id), 
     FOREIGN KEY(mirc_scenario_id) REFERENCES mirc_scenario (id), 
     FOREIGN KEY(chemical_id) REFERENCES chemical (id)
-);
-
-CREATE TABLE mirc_life_stage (
-    name VARCHAR(255) NOT NULL, 
-    duration FLOAT, 
-    duration_unit VARCHAR(255), 
-    id SERIAL PRIMARY KEY,  
-    UNIQUE (name)
 );
 
 CREATE TABLE mirc_percentile (
