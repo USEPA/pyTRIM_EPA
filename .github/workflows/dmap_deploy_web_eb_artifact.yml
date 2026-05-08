@@ -95,18 +95,21 @@ jobs:
       - name: Store version name
         run: echo "APP_VERSION=PyTRIM_${{ env.TIMESTAMP }}" >> "$GITHUB_ENV"
 
-      # Upload the build artifact produced by the previous step to the
-      # EB deployments bucket, renaming it with the versioned label.
+      # Upload the build artifact to the AWS-account-level EB-managed bucket,
+      # under a key prefix matching the EB application name. The IAM role
+      # (foundation/iam.tf) is scoped to this prefix.
       - name: Upload zip archive to S3
         env:
           S3_BUCKET: ${{ secrets.DMAP_DEPLOY_S3_BUCKET }}
+          EB_APP: ${{ secrets.DMAP_DEPLOY_EB_APP_NAME }}
         run: |
           ARCHIVE=$(find ./iac/flask_temp_package_dir -maxdepth 1 -name '*.zip' | head -1)
           if [ -z "$ARCHIVE" ]; then
             echo "::error::No zip archive found in ./iac/flask_temp_package_dir/"
             exit 1
           fi
-          aws s3 cp "$ARCHIVE" "s3://${S3_BUCKET}/${APP_VERSION}.zip"
+          echo "S3_KEY=${EB_APP}/${APP_VERSION}.zip" >> "$GITHUB_ENV"
+          aws s3 cp "$ARCHIVE" "s3://${S3_BUCKET}/${EB_APP}/${APP_VERSION}.zip"
 
       - name: Create an app version from the archive on EB
         env:
@@ -117,7 +120,7 @@ jobs:
             --application-name "$EB_APP" \
             --version-label "$APP_VERSION" \
             --description "$CURRENT_COMMIT" \
-            --source-bundle S3Bucket="${S3_BUCKET}",S3Key="${APP_VERSION}.zip"
+            --source-bundle S3Bucket="${S3_BUCKET}",S3Key="${S3_KEY}"
 
       - name: Update the EB environment
         if: ${{ inputs.deploy_to_environment == true }}
@@ -145,5 +148,5 @@ jobs:
           echo "| Application | ${EB_APP} |" >> $GITHUB_STEP_SUMMARY
           echo "| Version | ${{ env.APP_VERSION }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Commit | ${{ env.CURRENT_COMMIT }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| S3 Location | s3://${S3_BUCKET}/${{ env.APP_VERSION }}.zip |" >> $GITHUB_STEP_SUMMARY
+          echo "| S3 Location | s3://${S3_BUCKET}/${{ env.S3_KEY }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Environment Updated | ${{ inputs.deploy_to_environment }} |" >> $GITHUB_STEP_SUMMARY
