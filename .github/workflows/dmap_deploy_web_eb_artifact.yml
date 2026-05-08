@@ -70,16 +70,19 @@ jobs:
         with:
           python-version: '3.11'
 
+      # Build is inlined (rather than calling a wrapper script) so all DMAP-specific
+      # changes stay confined to dmap_*.yml — no new files in the upstream source tree.
       - name: Build zip archive for deployment
+        working-directory: iac/src/deployer
         run: |
           python -m pip install --upgrade pip setuptools wheel
           pip install boto3
-          python ./iac/src/deployer/build_eb_archive.py
+          python -c 'from helpers.beanstalk_helper import BeanstalkHelper; BeanstalkHelper().build_flask_zip()'
 
       - name: Store version name
         run: echo "APP_VERSION=PyTRIM_${{ env.TIMESTAMP }}" >> "$GITHUB_ENV"
 
-      # Upload the build artifact produced by build_eb_archive.py to the
+      # Upload the build artifact produced by the previous step to the
       # EB deployments bucket, renaming it with the versioned label.
       - name: Upload zip archive to S3
         env:
