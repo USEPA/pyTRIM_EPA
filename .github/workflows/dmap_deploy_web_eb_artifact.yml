@@ -70,6 +70,19 @@ jobs:
         with:
           python-version: '3.11'
 
+      # Strip the aws:elbv2:loadbalancer option from Scripts/.ebextensions/pytrim.config.
+      # That namespace only applies when EB owns the LB. The DMAP env uses a shared
+      # ALB managed in terraform (dmap-infra/application/alb.tf), so EB rejects the
+      # option and fails the deploy. IdleTimeout is set on the ALB directly via the
+      # `idle_timeout` argument on aws_lb.application-lb. yq is preinstalled on
+      # ubuntu-latest runners.
+      - name: Strip shared-LB-incompatible .ebextensions setting
+        run: |
+          yq -i '.option_settings |= map(select(.namespace != "aws:elbv2:loadbalancer"))' \
+            Scripts/.ebextensions/pytrim.config
+          echo "Resulting pytrim.config:"
+          cat Scripts/.ebextensions/pytrim.config
+
       # Build is inlined (rather than calling a wrapper script) so all DMAP-specific
       # changes stay confined to dmap_*.yml — no new files in the upstream source tree.
       - name: Build zip archive for deployment
