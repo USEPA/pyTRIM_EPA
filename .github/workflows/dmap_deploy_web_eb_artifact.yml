@@ -9,16 +9,16 @@
 #
 # This workflow lives on the `dmap` branch and is namespaced separately from
 # the team's existing `deploy_web_eb_artifact.yml` so the two pipelines do not
-# collide. Configure the secrets below in the "dmap" GitHub Environment.
+# collide. Configure the secrets below in the "dmap-stage" GitHub Environment.
 #
-# Required GitHub Secrets (set under Settings → Environments → dmap):
+# Required GitHub Secrets (set under Settings → Environments → dmap-stage):
 #   DMAP_DEPLOY_IAM_ROLE    - ARN of the GitHub Actions OIDC IAM role
 #   DMAP_DEPLOY_S3_BUCKET   - S3 bucket for EB deployment archives
 #   DMAP_DEPLOY_EB_APP_NAME - Elastic Beanstalk application name
 #   DMAP_DEPLOY_EB_ENV_NAME - Elastic Beanstalk environment name
 #
 # Required GitHub Environment:
-#   dmap
+#   dmap-stage
 
 name: DMAP — Deploy webapp to Elastic Beanstalk
 
@@ -46,7 +46,7 @@ jobs:
     name: Deploy
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    environment: dmap
+    environment: dmap-stage
 
     steps:
       - name: Checkout repo

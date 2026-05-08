@@ -11,14 +11,14 @@
 #
 # This workflow lives on the `dmap` branch and is namespaced separately from
 # the team's existing `update_docker_model_run_img.yml`. Configure the secrets
-# below in the "dmap" GitHub Environment.
+# below in the "dmap-stage" GitHub Environment.
 #
-# Required GitHub Secrets (set under Settings → Environments → dmap):
+# Required GitHub Secrets (set under Settings → Environments → dmap-stage):
 #   DMAP_DEPLOY_IAM_ROLE          - ARN of the GitHub Actions OIDC IAM role
 #   DMAP_DEPLOY_MODELRUN_ECR_REPO - ECR repository URI for Model Runner
 #
 # Required GitHub Environment:
-#   dmap
+#   dmap-stage
 
 name: DMAP — Build & push Model Runner image to ECR
 
@@ -46,7 +46,7 @@ jobs:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    environment: dmap
+    environment: dmap-stage
 
     steps:
       - name: Checkout repo
