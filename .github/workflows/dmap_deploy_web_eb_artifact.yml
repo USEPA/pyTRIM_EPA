@@ -50,11 +50,11 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       # Authenticate to AWS via OIDC — no access keys required
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ secrets.DMAP_DEPLOY_IAM_ROLE }}
           aws-region: us-east-1
@@ -66,20 +66,23 @@ jobs:
           echo "CURRENT_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
 
+      # Build is inlined (rather than calling a wrapper script) so all DMAP-specific
+      # changes stay confined to dmap_*.yml — no new files in the upstream source tree.
       - name: Build zip archive for deployment
+        working-directory: iac/src/deployer
         run: |
           python -m pip install --upgrade pip setuptools wheel
           pip install boto3
-          python ./iac/src/deployer/build_eb_archive.py
+          python -c 'from helpers.beanstalk_helper import BeanstalkHelper; BeanstalkHelper().build_flask_zip()'
 
       - name: Store version name
         run: echo "APP_VERSION=PyTRIM_${{ env.TIMESTAMP }}" >> "$GITHUB_ENV"
 
-      # Upload the build artifact produced by build_eb_archive.py to the
+      # Upload the build artifact produced by the previous step to the
       # EB deployments bucket, renaming it with the versioned label.
       - name: Upload zip archive to S3
         env:
