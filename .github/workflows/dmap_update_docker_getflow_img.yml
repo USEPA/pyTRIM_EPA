@@ -20,7 +20,7 @@
 # Required GitHub Environment:
 #   dmap
 
-name: DMAP — Update the Docker Image on AWS ECR for Getflow
+name: DMAP — Build & push GetFlow image to ECR
 
 on:
   workflow_dispatch:

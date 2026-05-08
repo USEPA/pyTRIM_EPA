@@ -20,7 +20,7 @@
 # Required GitHub Environment:
 #   dmap
 
-name: DMAP — Deploy the TRIM Webapp to AWS ElasticBeanstalk
+name: DMAP — Deploy webapp to Elastic Beanstalk
 
 on:
   workflow_dispatch:

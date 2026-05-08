@@ -20,7 +20,7 @@
 # Required GitHub Environment:
 #   dmap
 
-name: DMAP — Update the Docker Image on AWS ECR for the TRIM Worker
+name: DMAP — Build & push Model Runner image to ECR
 
 on:
   workflow_dispatch:
