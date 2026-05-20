@@ -1,4 +1,8 @@
 -- Creating dummy User/Role ORM
+
+-- schema
+-- SET search_path TO trim;
+
 CREATE TABLE alembic_version (
     version_num VARCHAR(32) NOT NULL, 
     CONSTRAINT alembic_version_pkc PRIMARY KEY (version_num)
@@ -22,7 +26,7 @@ CREATE TABLE formula (
 
 CREATE TABLE transport_process (
     name VARCHAR(240) NOT NULL, 
-    algorithm_id SERIAL PRIMARY KEY, 
+    algorithm_id INTEGER NOT NULL, 
     category VARCHAR(240) NOT NULL, 
     requirements VARCHAR, 
     output_chemical_id INTEGER, 
@@ -78,7 +82,7 @@ CREATE TABLE "user" (
 
 CREATE TABLE formula_argument (
     formula_id INTEGER NOT NULL, 
-    name VARCHAR(60) NOT NULL, 
+    name VARCHAR(120) NOT NULL, 
     domain_id INTEGER, 
     id SERIAL PRIMARY KEY, 
     FOREIGN KEY(domain_id) REFERENCES parameter_domain (id), 
@@ -87,12 +91,12 @@ CREATE TABLE formula_argument (
 );
 
 CREATE TABLE parameter_definition (
-    variable_name VARCHAR(60) NOT NULL, 
+    variable_name VARCHAR(120) NOT NULL, 
     full_name VARCHAR(120) NOT NULL, 
     description VARCHAR(240), 
     domain_id INTEGER NOT NULL, 
     default_value FLOAT, 
-    default_unit VARCHAR(60), 
+    default_unit VARCHAR(120), 
     default_formula_id INTEGER, 
     id SERIAL PRIMARY KEY, 
     FOREIGN KEY(default_formula_id) REFERENCES formula (id), 
@@ -120,7 +124,6 @@ CREATE TABLE scenario (
 --     scenario_id INTEGER NOT NULL, 
 --     member_id INTEGER NOT NULL, 
 --     id SERIAL PRIMARY KEY, 
-, 
 --     FOREIGN KEY(member_id) REFERENCES "user" (id), 
 --     FOREIGN KEY(scenario_id) REFERENCES scenario (id), 
 --     UNIQUE (scenario_id, member_id)
@@ -131,7 +134,7 @@ CREATE TABLE custom_parameter (
     scenario_id INTEGER NOT NULL, 
     requirements VARCHAR, 
     value FLOAT, 
-    unit VARCHAR(60), 
+    unit VARCHAR(120), 
     formula_id INTEGER, 
     id SERIAL PRIMARY KEY, 
     FOREIGN KEY(definition_id) REFERENCES parameter_definition (id), 
@@ -144,7 +147,7 @@ CREATE TABLE parcel (
     description VARCHAR(250),
     scenario_id INTEGER NOT NULL,
     vertices JSON NOT NULL,
-    id INTEGER NOT NUL,
+    id SERIAL PRIMARY KEY,
     FOREIGN KEY(scenario_id) REFERENCES scenario (id),
     UNIQUE (scenario_id, name)
 );
