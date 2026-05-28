@@ -13,11 +13,16 @@
 						<small class="text-muted">
 							<a href="{{ url_for(
 								'static', filename='templates/parcels.csv'
-							) }}">Click here</a> to download the template for creating a CSV parcels file.
+							) }}">
+                                Click here
+                            </a>
+                            to download the template for creating a CSV parcels file.
+                            X/Y coordinates must be provided as WGS84 Longitude/Latitude
+                            in decimal degrees.
 						</small>
 					</div>
 
-					<div class="row mb-1 subform">
+					<div class="row mb-1 subform" style="display: none;">
 						<div class="col-md">
 							<div data-slot="true" data-target="upload_coordinates_system"></div>
 						</div>
@@ -38,7 +43,7 @@
 					<div data-slot="true" data-target="deposition_overlay_file"></div>
 
 					<div class="row mb-1 subform">
-						<div class="col-md">
+						<div class="col-md" style="display: none;">
 							<div data-slot="true" data-target="deposition_overlay_upload_coordinates_system"></div>
 						</div>
 						<div class="col-md" style="opacity:0">

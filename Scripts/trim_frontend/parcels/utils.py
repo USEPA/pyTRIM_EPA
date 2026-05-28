@@ -1331,7 +1331,8 @@ def geojson_to_aermod_receptors(geojson_contents, utm_zone=None, northern_hemisp
     - AERMOD receptor file text (to be written to a file, returned to client, etc.)
     """
     # Set up transformer for lat/lon -> UTM
-    proj_str = f"+proj=utm +zone={utm_zone} +datum=WGS84 +units=m +no_defs"
+    proj_str = "+proj=utm +datum=WGS84 +units=m +no_defs"
+    # proj_str += " +zone={utm_zone}"
     if not northern_hemisphere:
         proj_str += " +south"
     transformer = Transformer.from_crs("EPSG:4326", proj_str, always_xy=True)
