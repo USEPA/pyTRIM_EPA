@@ -463,11 +463,11 @@ Parameters:
   DatabaseEngine:
     Description: engine for the database
     Type: String
-    Default: mysql
+    Default: postgres
   DatabaseName:
     Description: name for the database
     Type: String
-    Default: pytrim
+    Default: trimdb
   DatabaseInstanceType:
     Description: RDS instance type
     Type: String
@@ -515,7 +515,7 @@ Parameters:
     # e.g.
     # aws rds describe-db-engine-versions --engine "mysql" | jq -r '.DBEngineVersions[].EngineVersion'
     Type: String
-    Default: "8.0.43"
+    Default: "18.1"
   DatabaseMasterAccountUsername:
     Description: master user name
     Type: String
@@ -794,6 +794,9 @@ Resources:
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
+              - Effect: "Allow"
+                Action: "secretsmanager:*"
+                Resource: "*"
               - Effect: "Allow"
                 Action: "states:*"
                 Resource: !Ref DockerStateMachineWrapperModelRun
@@ -1316,7 +1319,7 @@ Resources:
       VPCSecurityGroups:
         - !Ref DatabaseSecurityGroup
       DBSubnetGroupName: !Ref DatabaseSubnetGroup
-      Engine: "${DatabaseEngine}"
+      Engine: !Ref DatabaseEngine
       EngineVersion: !Ref DatabaseEngineVersion
       MasterUsername: !Ref DatabaseMasterAccountUsername
       MasterUserPassword: !Ref DatabaseMasterAccountPassword
@@ -1373,7 +1376,7 @@ Resources:
       ApplicationName: !Ref BeanstalkApp
       Description: !Sub 'web tier for ${EnvironmentName}'
       EnvironmentName: !Sub '${EnvironmentName}-web'
-      SolutionStackName: '64bit Amazon Linux 2023 v4.7.3 running Python 3.11' # see https://docs.aws.amazon.com/elasticbeanstalk/latest/platforms/platforms-supported.html#platforms-supported.python
+      SolutionStackName: '64bit Amazon Linux 2023 v4.13.1 running Python 3.11' # see https://docs.aws.amazon.com/elasticbeanstalk/latest/platforms/platforms-supported.html#platforms-supported.python
       OptionSettings: 
         -
           Namespace: 'aws:autoscaling:launchconfiguration'
@@ -1487,6 +1490,10 @@ Resources:
           Namespace: 'aws:elasticbeanstalk:application:environment'
           OptionName: SECRET_KEY
           Value: xxxxfromcf
+        -
+          Namespace: 'aws:elasticbeanstalk:application:environment'
+          OptionName: SECURITY_PASSWORD_SALT
+          Value: 63794d1ad76d968f74aec38445
         -
           # I can't get this setting to work...
           Namespace: 'aws:elasticbeanstalk:environment:process:default'

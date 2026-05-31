@@ -62,9 +62,11 @@ def get_env_db_uri():
             try:
                 import boto3
                 sm_client = boto3.client('secretsmanager')
-                creds = json.loads(sm_client.get_secret_value(
-                    SecretId='pytrim/database/credentials'
-                ))
+                creds = sm_client.get_secret_value(SecretId='pytrim/database/credentials')
+                try:
+                    creds = json.loads(creds["SecretString"])
+                except:
+                    creds = json.loads(creds)
                 uname = creds['username']
                 pword = creds['password']
             except ModuleNotFoundError:
