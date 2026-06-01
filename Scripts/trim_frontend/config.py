@@ -72,7 +72,7 @@ class ProdConfig(AppConfig):
 
 class DevConfig(AppConfig):
     SECRET_KEY = os.getenv('SECRET_KEY', 'dcf917c34aec178987494a853bffa479')
-    SECURITY_PASSWORD_SALT = ''
+    SECURITY_PASSWORD_SALT = os.getenv('SECURITY_PASSWORD_SALT', '63794d1ad76d968f74aec38445')
     # SQLALCHEMY_ECHO = True
 
 
