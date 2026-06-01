@@ -40,8 +40,8 @@
             "label": "Coordinate System",
             "data_type": "string",
             "widget": "select",
-            "choices": ["WGS84 Longitude/Latitude", "UTM"],
-            "default": "WGS84 Longitude/Latitude",
+            "choices": ["UTM"],
+            "default": "UTM",
             "required": true,
             "help": "Select the system for coordinate value pairs provided in your PLT file.",
             "if_true": ["have_AERMOD_file"]
