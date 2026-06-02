@@ -774,7 +774,7 @@ def run_getflow(scenario_id):
       /api/scenario/{id}/run_getflow
     * that's this function! This now kicks off a Step Function and returns the execution arn or whatever
     """
-    trim_env_profile = os.environ.get("TRIM_ENV_PROFILE", "").lower()
+    trim_env_profile = os.environ.get("TRIM_ENV_PROFILE", "local").lower()
 
     print(f"TOM in run_getflow within routes.py, env==[{trim_env_profile}]...")
     print(f"scenario id is [{scenario_id}] / {type(scenario_id)}")
@@ -793,7 +793,7 @@ def run_getflow(scenario_id):
         # unlike runmodel, here we use ECS even when running locally. (getting a working qgis
         # install is non-trivial, but if you wanted to run local you'd need to do that, then
         # modify this section of code to do something like "run_result_scenario".
-        if True or trim_env_profile in [ "test", "dev", "devgetflow", "prod" ]:
+        if True or trim_env_profile != "local":
             sfn_client = boto3.client("stepfunctions")
             state_machine_arn = os.environ.get("TRIM_DOCKERIZED_GETFLOW_STATEMACHINE_ARN")
 
