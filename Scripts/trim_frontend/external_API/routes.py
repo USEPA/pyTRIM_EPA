@@ -153,10 +153,10 @@ class SoilData:
 
     @staticmethod
     def calc_weighted_avg(df, val_col, wgt_col):
-        return pd.DataFrame.sum(
+        return pd.Series.sum(
             df[val_col] * (df[wgt_col]), min_count=1) / \
-               (pd.NA if pd.DataFrame.sum(df[wgt_col][~pd.isna(df[val_col])]) == 0
-                else pd.DataFrame.sum(df[wgt_col][~pd.isna(df[val_col])]))
+               (pd.NA if pd.Series.sum(df[wgt_col][~pd.isna(df[val_col])]) == 0
+                else pd.Series.sum(df[wgt_col][~pd.isna(df[val_col])]))
 
     def compute_layer_averages(self, pcl_name, horizons, tilled=False):
         """computes layer thickness weighted average for each column of soil parameters"""
