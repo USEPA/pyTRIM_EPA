@@ -482,7 +482,9 @@
             let diet_properties = Object.keys(default_diet_data)
             if (parcels.length > 0) {
                 let aquatic_data = load_aquatic_parcels(parcels);
-                TableRedraw(aquatic_data, "aquatic");
+                if (aquatic_data.length > 0) {
+                    TableRedraw(aquatic_data, "aquatic");
+                }
                 divDietTables.empty();
                 ////////////////////////////////////////////////////////////////////////////////
                 parcels.forEach(function (e, i) {
