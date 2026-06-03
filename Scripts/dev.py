@@ -78,7 +78,10 @@ if __name__ == '__main__':
     if is_main:
         print_header("Running Dev Environment")
         try:
-            from pipenv.vendor.dotenv import load_dotenv
+            try:
+                from pipenv.vendor.dotenv import load_dotenv
+            except:
+                from dotenv import load_dotenv
             root = os.path.abspath(os.path.dirname(__file__))
             load_dotenv(os.path.join(root, '.env'))
         except Exception as e:
