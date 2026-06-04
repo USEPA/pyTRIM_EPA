@@ -9,6 +9,9 @@ has_mail = os.getenv('MAIL_USERNAME') is not None
 if not os.getenv('SQLALCHEMY_DATABASE_URI'):
     os.environ['SQLALCHEMY_DATABASE_URI'] = get_env_db_uri()
 
+if os.getenv('LOCAL_AWS_PROFILE'):
+    import boto3
+    boto3.setup_default_session(profile_name=os.getenv('LOCAL_AWS_PROFILE'))
 
 class AppConfig:
     # Template config
@@ -61,6 +64,9 @@ class AppConfig:
     BOTO_S3_BUCKET = ''
     BOTO_AWS_REGION = 'us-east-1'
 
+    # Request payload config
+    MAX_FORM_MEMORY_SIZE = 24 * (2 ** 10) ** 2 # 24 MB
+
     TRIM_ENV_PROFILE = os.getenv('TRIM_ENV_PROFILE', 'local')
     print(f"LOADED TRIM_ENV_PROFILE: {TRIM_ENV_PROFILE}")
 
@@ -72,7 +78,7 @@ class ProdConfig(AppConfig):
 
 class DevConfig(AppConfig):
     SECRET_KEY = os.getenv('SECRET_KEY', 'dcf917c34aec178987494a853bffa479')
-    SECURITY_PASSWORD_SALT = ''
+    SECURITY_PASSWORD_SALT = os.getenv('SECURITY_PASSWORD_SALT', '63794d1ad76d968f74aec38445')
     # SQLALCHEMY_ECHO = True
 
 
