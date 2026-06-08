@@ -47,28 +47,32 @@
       "label": "Hg Methylation Rate",
       "data_type": "float",
       "default": 0,
-      "help": "See the TRIM User Guide Appendix for full reference information."
+      "tooltip": "1/day",
+      "help": "Enter the methylation rate for divalent mercury (Hg) in the air compartments. Valid values are ≥ 0. The default value of 0 is from the observation that methylation typically does not occur at significant levels in air, as it requires moist environments with microbial activity."
     },
     {
       "id": "ReductionRate_Air",
       "label": "Hg Reduction Rate",
       "data_type": "float",
       "default": 0,
-      "help": "See the TRIM User Guide Appendix for full reference information."
+      "tooltip": "1/day",
+      "help": "Enter the reduction rate for divalent mercury in the air compartments. Valid values are ≥ 0. The default value of 0 is from professional judgment."
     },
     {
       "id": "OxidationRate_Air",
       "label": "Hg Oxidation Rate",
       "data_type": "float",
       "default": 0,
-      "help": "See the TRIM User Guide Appendix for full reference information."
+      "tooltip": "1/day",
+      "help": "Enter the oxidation rate for elemental mercury in the air compartments. Valid values are ≥ 0. The default value of 0.00385 is the low end of the range of half-life values for elemental mercury (6 months to 2 years) from Lindquist and Rodhe 1985 (Atmospheric Mercury: A Review), as reported on page 2-7 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information."
     },
     {
       "id": "DemethylationRate_Air",
       "label": "Hg Demethylation Rate",
       "data_type": "float",
       "default": 0,
-      "help": "See the TRIM User Guide Appendix for full reference information."
+      "tooltip": "1/day",
+      "help": "Enter the demethylation rate for methyl mercury in the air compartments. Valid values are ≥ 0. The default value of 0 is from the observation that methyl mercury is not expected to be at significant amounts in air."
     }
   ]
 }

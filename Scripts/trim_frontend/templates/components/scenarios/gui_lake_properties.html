@@ -96,8 +96,12 @@
         const lkTblId = '#WaterColumnTable';
         const sedTblId = '#SedimentTable';
 
-        let lkTable = $(lkTblId).removeAttr('width').DataTable()
-        let sdTable = $(sedTblId).removeAttr('width').DataTable()
+        let lkTable = $(lkTblId).removeAttr('width').DataTable({
+            language: { emptyTable: 'No data available in table' }
+        })
+        let sdTable = $(sedTblId).removeAttr('width').DataTable({
+            language: { emptyTable: 'No data available in table' }
+        })
         let default_water_data = {
             'Water pH':{
                 'short_name':'water_ph',
@@ -422,6 +426,7 @@
                 paging: false,
                 bFilter: false,
                 info: false,
+                language: { emptyTable: 'No data available in table' },
                 bAutoWidth: false,
                 scrollX: true,
                 scrollY: 500,
@@ -1014,8 +1019,9 @@
         form.addEventListener('form:visible', function() {
             console.log('lake props form visible')
             LoadingScreen.show('lake_props_loading');
+            document.body.removeEventListener('parcels:ready', updateLakeProps);
+            document.body.addEventListener('parcels:ready', updateLakeProps);
             TRIM.refreshParcels();
-            document.body.addEventListener('parcels:ready', updateLakeProps());
         });
 
         function get_pivoted_columns(tblId) {
@@ -1220,7 +1226,7 @@
         }
 
         function updateLakeProps() {
-            if (!TRIM.store.currentScenario.parcels) {
+            if (!TRIM.store.currentScenario || !TRIM.store.currentScenario.parcels) {
                 // Parcels haven't loaded yet; wait a bit and try again
                 setTimeout(function() { updateLakeProps(); }, 1000);
                 return;
@@ -1230,7 +1236,9 @@
             const sed_data = []
             const water_properties = Object.keys(default_water_data)
             const sed_properties = Object.keys(default_sed_data)
-            if (parcels.length > 0) {
+            const waterParcels = parcels.filter(e => e.parcelType == "Water Only" || e.parcelType == "Water & Air");
+            try {
+            if (parcels.length > 0 && waterParcels.length > 0) {
                 const mercuryTransformations = [
                     'MethylationRate', 'OxidationRate', 'ReductionRate', 'DemethylationRate'
                 ];
@@ -1329,9 +1337,12 @@
                 })
                 TableRedraw(sed_data, "sed")
             }
-
             console.log('populated lake props form!')
-            LoadingScreen.hide('lake_props_loading');
+            } catch(e) {
+                console.error('updateLakeProps error:', e);
+            } finally {
+                LoadingScreen.hide('lake_props_loading');
+            }
         }
     });
 </script>

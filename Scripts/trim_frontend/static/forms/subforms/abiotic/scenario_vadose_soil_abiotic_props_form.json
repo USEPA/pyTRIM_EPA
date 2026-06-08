@@ -79,28 +79,32 @@
       "label": "Hg Methylation Rate",
       "data_type": "float",
       "default": 0,
-      "help": "See the TRIM User Guide Appendix for full reference information."
+      "tooltip": "1/day",
+      "help": "Enter the methylation rate for divalent mercury (Hg) in the soil layer. Valid values are ≥ 0. The default value of 0.001 is the maximum potential rate in flooded soils (humus and peat) under anaerobic conditions from Porvari and Verta 1995 (Methylmercury Production in Flooded Soils: a Laboratory Study), as reported on page B-21 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information."
     },
     {
       "id": "ReductionRate_Vadose",
       "label": "Hg Reduction Rate",
       "data_type": "float",
       "default": 0,
-      "help": "See the TRIM User Guide Appendix for full reference information."
+      "tooltip": "1/day",
+      "help": "Enter the reduction rate for divalent mercury in the soil layer. Valid values are ≥ 0. The default value of 3.25E-06 is the value for soils at a depth of 20 cm and a water content of 10%, calculated based on information from Lindberg 1996 (Forests and the Global Biogeochemical Cycle of Mercury: The Importance of Understanding Air/Vegetation Exchange Processes), and Carpi and Lindberg 1997 (Sunlight-Mediated Emission of Elemental Mercury from Soil Amended with Municipal Sewage Sludge), as reported on page B-20 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information."
     },
     {
       "id": "OxidationRate_Vadose",
       "label": "Hg Oxidation Rate",
       "data_type": "float",
       "default": 0,
-      "help": "See the TRIM User Guide Appendix for full reference information."
+      "tooltip": "1/day",
+      "help": "Enter the oxidation rate for elemental mercury in the soil layer. Valid values are ≥ 0. The default value of 0 is from Table B-2 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information."
     },
     {
       "id": "DemethylationRate_Vadose",
       "label": "Hg Demethylation Rate",
       "data_type": "float",
       "default": 0,
-      "help": "See the TRIM User Guide Appendix for full reference information."
+      "tooltip": "1/day",
+      "help": "Enter the demethylation rate for methyl mercury in the soil layer. Valid values are ≥ 0. The default value of 0.06 is the maximum potential rate in flooded soils (humus) under anaerobic conditions from Porvari and Verta 1995 (Methylmercury Production in Flooded Soils: a Laboratory Study), as reported on page B-22 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information."
     }
   ]
 }
