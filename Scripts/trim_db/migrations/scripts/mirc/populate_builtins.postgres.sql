@@ -197,16 +197,19 @@ WHERE "cas_number" = '602 - 87 - 9';
 UPDATE "chemical" SET "hap_number" = '187', "hap_name" = '6-Nitrochrysene', "epa_evidence_weight" = NULL
 WHERE "cas_number" = '7496 - 02 - 8';
 
-UPDATE "chemical" SET "hap_number" = '187', "hap_name" = '7,12-Dimethylbenz[a]Anthracene', "epa_evidence_weight" = NULL
+UPDATE "chemical" SET "hap_number" = '187', "hap_name" = '7,12-Dimethylbenz[a]Anthracene', "epa_evidence_weight" = NULL,
+"category" = 'Organic | PAH | Mutagenic | 7 , 12 - Dimethylbenz(a) anthracene'
 WHERE "cas_number" = '57 - 97 - 6';
 
 UPDATE "chemical" SET "hap_number" = '187', "hap_name" = '7H-Dibenzo[c,g]carbazole', "epa_evidence_weight" = NULL
 WHERE "cas_number" = '194 - 59 - 2';
 
-UPDATE "chemical" SET "hap_number" = '187', "hap_name" = 'Acenaphthene', "epa_evidence_weight" = 'D'
+UPDATE "chemical" SET "hap_number" = '187', "hap_name" = 'Acenaphthene', "epa_evidence_weight" = 'D',
+"category" = 'Organic | PAH | Mutagenic | Acenaphthene'
 WHERE "cas_number" = '83 - 32 - 9';
 
-UPDATE "chemical" SET "hap_number" = '187', "hap_name" = 'Acenaphthylene', "epa_evidence_weight" = 'D'
+UPDATE "chemical" SET "hap_number" = '187', "hap_name" = 'Acenaphthylene', "epa_evidence_weight" = 'D',
+"category" = 'Organic | PAH | Mutagenic | Acenaphthylene'
 WHERE "cas_number" = '208 - 96 - 8';
 
 UPDATE "chemical" SET "hap_number" = '1', "hap_name" = 'Acetaldehyde', "epa_evidence_weight" = NULL
@@ -344,25 +347,31 @@ WHERE "cas_number" = '71 - 43 - 2';
 UPDATE "chemical" SET "hap_number" = '16', "hap_name" = 'Benzidine', "epa_evidence_weight" = NULL
 WHERE "cas_number" = '92 - 87 - 5';
 
-UPDATE "chemical" SET "hap_number" = '187', "hap_name" = 'Benz[a]anthracene', "epa_evidence_weight" = 'B2'
+UPDATE "chemical" SET "hap_number" = '187', "hap_name" = 'Benz[a]anthracene', "epa_evidence_weight" = 'B2',
+"category" = 'Organic | PAH | Mutagenic | Benz(a) anthracene'
 WHERE "cas_number" = '56 - 55 - 3';
 
-UPDATE "chemical" SET "hap_number" = '187', "hap_name" = 'Benzo[a]pyrene', "epa_evidence_weight" = 'B2'
+UPDATE "chemical" SET "hap_number" = '187', "hap_name" = 'Benzo[a]pyrene', "epa_evidence_weight" = 'B2',
+"category" = 'Organic | PAH | Mutagenic | Benzo(A) Pyrene'
 WHERE "cas_number" = '50 - 32 - 8';
 
-UPDATE "chemical" SET "hap_number" = '187', "hap_name" = 'Benzo[b]fluoranthene', "epa_evidence_weight" = 'B2'
+UPDATE "chemical" SET "hap_number" = '187', "hap_name" = 'Benzo[b]fluoranthene', "epa_evidence_weight" = 'B2',
+"category" = 'Organic | PAH | Mutagenic | Benzo(b) fluoranthene'
 WHERE "cas_number" = '205 - 99 - 2';
 
 UPDATE "chemical" SET "hap_number" = '187', "hap_name" = 'Benzo(e)pyrene', "epa_evidence_weight" = NULL
 WHERE "cas_number" = '192 - 97 - 2';
 
-UPDATE "chemical" SET "hap_number" = '187', "hap_name" = 'Benzo(ghi)perylene', "epa_evidence_weight" = 'D'
+UPDATE "chemical" SET "hap_number" = '187', "hap_name" = 'Benzo(ghi)perylene', "epa_evidence_weight" = 'D',
+"category" = 'Organic | PAH | Mutagenic | Benzo(g , h , i) perylene'
 WHERE "cas_number" = '191 - 24 - 2';
 
-UPDATE "chemical" SET "hap_number" = '187', "hap_name" = 'Benzo[k]fluoranthene', "epa_evidence_weight" = 'B2'
+UPDATE "chemical" SET "hap_number" = '187', "hap_name" = 'Benzo[k]fluoranthene', "epa_evidence_weight" = 'B2',
+"category" = 'Organic | PAH | Mutagenic | Benzo(k) fluoranthene'
 WHERE "cas_number" = '207 - 08 - 9';
 
-UPDATE "chemical" SET "hap_number" = '187', "hap_name" = 'Benzo[j]fluoranthene', "epa_evidence_weight" = NULL
+UPDATE "chemical" SET "hap_number" = '187', "hap_name" = 'Benzo[j]fluoranthene', "epa_evidence_weight" = NULL,
+"category" = 'Organic | PAH | Mutagenic | Benzo(j) fluoranthene'
 WHERE "cas_number" = '205 - 82 - 3';
 
 UPDATE "chemical" SET "hap_number" = NULL, "hap_name" = 'Benzoic acid', "epa_evidence_weight" = NULL
@@ -566,7 +575,8 @@ WHERE "cas_number" = '11115 - 74 - 5';
 UPDATE "chemical" SET "hap_number" = '177', "hap_name" = 'Chromium(VI)', "epa_evidence_weight" = NULL
 WHERE "cas_number" = '18540 - 29 - 9';
 
-UPDATE "chemical" SET "hap_number" = '187', "hap_name" = 'Chrysene', "epa_evidence_weight" = 'B2'
+UPDATE "chemical" SET "hap_number" = '187', "hap_name" = 'Chrysene', "epa_evidence_weight" = 'B2',
+"category" = 'Organic | PAH | Mutagenic | Chrysene'
 WHERE "cas_number" = '218 - 01 - 9';
 
 UPDATE "chemical" SET "hap_number" = NULL, "hap_name" = 'cis-1,4-Dimethylcyclohexane', "epa_evidence_weight" = NULL
@@ -659,7 +669,8 @@ WHERE "cas_number" = '333 - 41 - 5';
 UPDATE "chemical" SET "hap_number" = '187', "hap_name" = 'Dibenz[a,h]acridine', "epa_evidence_weight" = NULL
 WHERE "cas_number" = '226 - 36 - 8';
 
-UPDATE "chemical" SET "hap_number" = '187', "hap_name" = 'Dibenzo[a,h]anthracene', "epa_evidence_weight" = 'B2'
+UPDATE "chemical" SET "hap_number" = '187', "hap_name" = 'Dibenzo[a,h]anthracene', "epa_evidence_weight" = 'B2',
+"category" = 'Organic | PAH | Mutagenic | Dibenz(a , h) anthracene'
 WHERE "cas_number" = '53 - 70 - 3';
 
 UPDATE "chemical" SET "hap_number" = '187', "hap_name" = 'Dibenz[a,j]acridine', "epa_evidence_weight" = NULL
@@ -905,10 +916,12 @@ WHERE "cas_number" = '117 - 81 - 7';
 UPDATE "chemical" SET "hap_number" = NULL, "hap_name" = 'Ethylphenol, 4-', "epa_evidence_weight" = NULL
 WHERE "cas_number" = '123 - 07 - 9';
 
-UPDATE "chemical" SET "hap_number" = '187', "hap_name" = 'Fluoranthene', "epa_evidence_weight" = 'D'
+UPDATE "chemical" SET "hap_number" = '187', "hap_name" = 'Fluoranthene', "epa_evidence_weight" = 'D',
+"category" = 'Organic | PAH | Mutagenic | Fluoranthene'
 WHERE "cas_number" = '206 - 44 - 0';
 
-UPDATE "chemical" SET "hap_number" = '187', "hap_name" = 'Fluorene', "epa_evidence_weight" = 'D'
+UPDATE "chemical" SET "hap_number" = '187', "hap_name" = 'Fluorene', "epa_evidence_weight" = 'D',
+"category" = 'Organic | PAH | Mutagenic | Fluorene'
 WHERE "cas_number" = '86 - 73 - 7';
 
 UPDATE "chemical" SET "hap_number" = '87', "hap_name" = 'Formaldehyde', "epa_evidence_weight" = NULL
@@ -1034,7 +1047,8 @@ WHERE "cas_number" = '123 - 31 - 9';
 UPDATE "chemical" SET "hap_number" = NULL, "hap_name" = 'Hydroxy-4-methyl-2-pentanone, 4-', "epa_evidence_weight" = NULL
 WHERE "cas_number" = '123 - 42 - 2';
 
-UPDATE "chemical" SET "hap_number" = '187', "hap_name" = 'Indeno[1,2,3-c,d]pyrene', "epa_evidence_weight" = 'B2'
+UPDATE "chemical" SET "hap_number" = '187', "hap_name" = 'Indeno[1,2,3-c,d]pyrene', "epa_evidence_weight" = 'B2',
+"category" = 'Organic | PAH | Mutagenic | Indeno(1 , 2 , 3 - cd) pyrene'
 WHERE "cas_number" = '193 - 39 - 5';
 
 UPDATE "chemical" SET "hap_number" = NULL, "hap_name" = 'Iodomethane', "epa_evidence_weight" = NULL
@@ -1166,7 +1180,8 @@ WHERE "cas_number" = '101 - 61 - 1';
 UPDATE "chemical" SET "hap_number" = '187', "hap_name" = 'Methylnaphthalene, 1-', "epa_evidence_weight" = NULL
 WHERE "cas_number" = '90 - 12 - 0';
 
-UPDATE "chemical" SET "hap_number" = '187', "hap_name" = '2-Methylnaphthalene', "epa_evidence_weight" = 'InI'
+UPDATE "chemical" SET "hap_number" = '187', "hap_name" = '2-Methylnaphthalene', "epa_evidence_weight" = 'InI',
+"category" = 'Organic | PAH | Mutagenic | 2 - Methylnaphthalene'
 WHERE "cas_number" = '91 - 57 - 6';
 
 UPDATE "chemical" SET "hap_number" = NULL, "hap_name" = 'methylphenol, 4-Chloro-3-', "epa_evidence_weight" = NULL

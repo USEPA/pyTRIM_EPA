@@ -4,7 +4,7 @@
     "fields": [
         {
             "id": "mirc_scenario",
-            "label": "Base Scenario",
+            "label": "Risk Scenario",
             "data_type": "int",
             "widget": "select",
             "choices": {
@@ -70,13 +70,6 @@
             "choices": [],
             "required": true,
             "help": "TRIM outputs modeled data at various simulation timesteps. Select the timestep of data you want to base this simulation on. Typically this is December 31 of the final full simulation year."
-        },
-
-        {
-            "id": "use_aermod",
-            "label": "Use AERMOD Air Concentration?",
-            "data_type": "boolean",
-            "required": true
         },
 
         {

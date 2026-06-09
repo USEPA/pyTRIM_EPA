@@ -4,13 +4,13 @@ from ..generic import GenericService
 __all__ = ['MircProductService', 'MircLifeStageService', 'MircPercentileService']
 
 
-class MircProductService(GenericService):
+class MircProductService(GenericService[MircProduct]):
     __model__ = MircProduct
 
 
-class MircLifeStageService(GenericService):
+class MircLifeStageService(GenericService[MircLifeStage]):
     __model__ = MircLifeStage
 
 
-class MircPercentileService(GenericService):
+class MircPercentileService(GenericService[MircPercentile]):
     __model__ = MircPercentile

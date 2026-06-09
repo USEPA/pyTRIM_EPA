@@ -23,24 +23,27 @@
                                 <div class="row mb-1">
                                     <div class="col-sm">
                                         <div data-slot="true" data-target="have_AERMOD_file"></div>
-                                        <div data-slot="true" data-target="emissions_source_file"></div>
-                                        <div class="form-text mb-2">
-                                            <small class="text-muted" style="display: none">
-                                                <a href="{{ url_for(
-                                                    'static', filename='templates/source_definitions.csv'
-                                                ) }}">Click here</a> to download the template for creating a CSV file containing emissions sources.
-                                            </small>
+                                        <div class="aermod-settings-fields">
+                                            <div data-slot="true" data-target="emissions_source_file"></div>
+                                            <div class="form-text mb-2">
+                                                <small class="text-muted" style="display: none">
+                                                    <a href="{{ url_for(
+                                                        'static', filename='templates/source_definitions.csv'
+                                                    ) }}">Click here</a> to download the template for creating a CSV file containing emissions sources.
+                                                </small>
+                                            </div>
+                                            <div class="row mb-1 subform">
+                                                <div class="col-md" style="display: none;">
+                                                    <div data-slot="true" data-target="emission_upload_coordinates_system"></div>
+                                                </div>
+                                                <div class="col-md" style="display: none;">
+                                                    <div data-slot="true" data-target="emission_upload_utm_zone"></div>
+                                                </div>
+                                            </div>
+                                            <div data-slot="true" data-target="zflag_restriction"></div>
+                                            <div data-slot="true" data-target="spacing"></div>
+                                            <div data-slot="true" data-target="emission_upload_button"></div>
                                         </div>
-                                        <div class="row mb-1 subform">
-                                            <div class="col-md">
-                                                <div data-slot="true" data-target="emission_upload_coordinates_system"></div>
-                                            </div>
-                                            <div class="col-md" style="opacity:0">
-                                                <div data-slot="true" data-target="emission_upload_utm_zone"></div>
-                                            </div>
-					                    </div>
-                                        <div data-slot="true" data-target="emission_upload_button"></div>
-                                        <div data-slot="true" data-target="spacing"></div>
                                     </div>
                                 </div>
                                 <div class="row mb-1">
@@ -278,33 +281,50 @@
         }
 
 
-		// zones are 1A-60Z with no I/O. case/whitespace insensitive.
+		// zones are 1A-60Z with no A/B/I/O/Y/Z. case/whitespace insensitive.
 		function isValidUtmZone(z) {
 			let cleanedZone = z.trim().replaceAll(" ", "").toUpperCase();
-			const regex = /^([1-9]|[1-5][0-9]|60)([A-HJ-NP-Z])$/gm;
+			const regex = /^([1-9]|[1-5][0-9]|60)([C-HJ-NP-X])$/gm;
 			return (regex.exec(cleanedZone) != null);
 		}
 
 		function enableEmissionFileUploadUi() {
-			let emissionGui = $("#emissions-settings-gui");
+			$(form).find('[type="file"]').each(function(i, ef) {
+                const me = $(ef);
+                const aermodSettings = me.closest('.aermod-settings-fields');
 
-			let EmissionFiles = emissionGui.find('[type="file"]');
-            EmissionFiles.toArray().forEach(function(ef,i){
-                let coordsSystem = $(ef).closest("div.form-group").next("div").next("div").find("select[id*=upload_coordinates_system]");
-                let utmZone = $(coordsSystem).closest("div.subform").find("input[id*=upload_utm_zone]");
-                let parcelUploader = $(coordsSystem).closest("div.subform").closest("div.col-sm").find("a[id*=upload_button]");
-                [coordsSystem, utmZone].forEach(el => $(el).attr('disabled',true))
-                $(parcelUploader).addClass('disabled')
-                coordsSystem.on('change', function(){
-                    $(utmZone).parents("div[class='col-md']").css("opacity", ($(coordsSystem).val() === 'UTM' ? 1 : 0));
+                const parcelUploader = aermodSettings.find("a[id*=_upload_button]");
+
+                const coordsSystem = aermodSettings.find("select[id*=_upload_coordinates_system]");
+                const utmZone = aermodSettings.find("input[id*=_upload_utm_zone]");
+                const zflag = aermodSettings.find("input[id*=_zflag_restriction]");
+                const spacing = aermodSettings.find("select[id*=_spacing]");
+                const aermodFields = [coordsSystem, utmZone, zflag, spacing];
+
+                me.on('change', function() {
+                    const parcelFileData = me.prop('files')[0];
+                    if (parcelFileData != undefined) {
+                        aermodFields.forEach(el => $(el).removeAttr('disabled', true));
+                        parcelUploader.removeClass('disabled');
+                    }
+                    else {
+                        aermodFields.forEach(el => $(el).attr('disabled', true));
+                        parcelUploader.addClass('disabled');
+                    }
+                }).change();
+
+                coordsSystem.on('change', function() {
+                    utmZone.parents("div[class='col-md']").hide();
+                    if (coordsSystem.val() === 'UTM') {
+                        utmZone.parents("div[class='col-md']").show();
+                    }
+                }).change();
+
+                parcelUploader.on('click', function() {
+                    upload_AERMOD_file(aermodSettings);
                 });
-                $(utmZone).parents("div[class='col-md']").css("opacity", ($(coordsSystem).val() === 'UTM' ? 1 : 0));
-                parcelUploader.on('click', function(){
-                    let this_btn = this
-                    let this_file_elem = $(this_btn).closest("div.form-group").closest("div.col-sm").find("input[type='file']")[0]
-                    upload_AERMOD_file(this_file_elem)
-                })
-            })
+
+            });
         }
 
         function toggle_expand_icon(tr, dir){
@@ -462,152 +482,81 @@
                     submit_emission_value(this, parcel_info);
                 }
             })
-
-
-            let gui = $('#emissions-settings-gui');
-            let fileFields = gui.find('[type="file"]');
-
-            fileFields.change(function(e) {
-                let me = $(this);
-                let coordsSystem = $(me).closest("div.form-group").next("div").next("div").find("select[id*=upload_coordinates_system]");
-                let utmZone = $(coordsSystem).closest("div.subform").find("input[id*=upload_utm_zone]");
-                let parcelUploader = $(coordsSystem).closest("div.subform").closest("div.col-sm").find("a[id*=upload_button]");
-                let parcelFileData = $(me).prop('files')[0];
-                if (parcelFileData != undefined) {
-                    [coordsSystem, utmZone].forEach(el => $(el).removeAttr('disabled'))
-                    $(parcelUploader).removeClass('disabled')
-                } else {
-                    [coordsSystem, utmZone].forEach(el => $(el).attr('disabled',true))
-                    $(parcelUploader).addClass('disabled')
-                }
-
-                // let loadingRequest = 'load_' + this.id;
-                // let this_chem_prop =  me.closest("div.tab-pane").data("tab-name").split(" (")
-                // let this_chem = this_chem_prop[0]
-                // let this_spec = this_chem_prop[1].split(")")[0] == "Gaseous" ? "Vapor" : "Particle"
-                // let this_cmap = me.closest("div.tab-pane").find("table.compMap")
-                // LoadingScreen.show(loadingRequest);
-                // let field_data = this
-                // if (!Array.isArray(field_data)) {
-                //     field_data = [field_data];
-                // }
-                // let selected_spacing = me.closest("div.tab-pane").find('select').find(':selected').val()
-                // scenario_data = {
-                //     'type': 'input',
-                //     'name': 'scenario_id',
-                //     'value': TRIM.store.currentScenario.id
-                // }
-                // spacing_data = {
-                //     'type': 'input',
-                //     'name': 'spacing',
-                //     'value': selected_spacing
-                // }
-                // chem_data = {
-                //     'type': 'input',
-                //     'name': 'chemical',
-                //     'value': this_chem
-                // }
-                // spec_data = {
-                //     'type': 'input',
-                //     'name': 'species',
-                //     'value': this_spec
-                // }
-                // field_data.push(scenario_data)
-                // field_data.push(spacing_data)
-                // field_data.push(chem_data)
-                // field_data.push(spec_data)
-                // me.removeAttr('data-filedata');
-                // TRIM.api.parseAERMODFile(field_data).on('load', function() {
-                //     try {
-                //         let src_data = JSON.parse(this.responseText);
-                //         parcels.forEach(function(p,i){
-                //             let dryval = src_data.aermod_result[p.name]['DrySource']
-                //             let wetval = src_data.aermod_result[p.name]['WetSource']
-                //             parcels[i].sources[this_chem]["Dry"+this_spec+"Source"]["Dry"+this_spec+"Source"]=dryval
-                //             parcels[i].sources[this_chem]["Wet"+this_spec+"Source"]["Wet"+this_spec+"Source"]=wetval
-                //         })
-                //     }
-                //     finally {
-                //         populate_values(this_cmap)
-                //         LoadingScreen.hide(loadingRequest);
-                //     }
-                // });
-            });
         }
 
-        function upload_AERMOD_file(file_elem) {
-            let me = $(file_elem);
-            let coordsSystem = $(me).closest("div.form-group").next("div").next("div").find("select[id*=upload_coordinates_system]");
-            let utmZone = $(coordsSystem).closest("div.subform").find("input[id*=upload_utm_zone]");
+        function upload_AERMOD_file(aermodSettingsSection) {
+            const fileElem = aermodSettingsSection.find('[type="file"]');
+            const coordsSystem = aermodSettingsSection.find("select[id*=_upload_coordinates_system]");
+            const utmZone = aermodSettingsSection.find("input[id*=_upload_utm_zone]");
+            const zflag = aermodSettingsSection.find("input[id*=_zflag_restriction]");
+            const spacing = aermodSettingsSection.find("select[id*=_spacing]");
 
             // Get projection
-            let coord_sys = $(coordsSystem).val();
-            let proj_is_utm = coord_sys == 'UTM' ? true : false;
-            let utm_zone = ''
+            const coord_sys = $(coordsSystem).val();
+            const proj_is_utm = coord_sys == 'UTM' ? true : false;
+            let utm_zone = '';
             if (proj_is_utm) {
                 utm_zone = $(utmZone).val();
                 if (!isValidUtmZone(utm_zone)) {
-                    alert('Please enter a valid UTM zone (e.g. 16T, 32A, etc.).');
+                    alert('Please enter a valid UTM zone (e.g. 16T, 13R, etc.).');
                     return false;
                 }
             }
 
-            let loadingRequest = 'load_' + this.id;
-            let this_chem_prop =  me.closest("div.tab-pane").data("tab-name").split(" (")
-            let this_chem = this_chem_prop[0]
-            let this_spec = this_chem_prop[1].split(")")[0] == "Gaseous" ? "Vapor" : "Particle"
-            let this_cmap = me.closest("div.tab-pane").find("table.compMap")
+            const loadingRequest = 'load_' + fileElem[0].id;
             LoadingScreen.show(loadingRequest);
-            let field_data = file_elem
-            if (!Array.isArray(field_data)) {
-                field_data = [field_data];
-            }
-            let selected_spacing = me.closest("div.tab-pane").find("select[id*=_spacing]").find(':selected').val()
-            scenario_data = {
-                'type': 'input',
-                'name': 'scenario_id',
-                'value': TRIM.store.currentScenario.id
-            }
-            spacing_data = {
-                'type': 'input',
-                'name': 'spacing',
-                'value': selected_spacing
-            }
-            chem_data = {
-                'type': 'input',
-                'name': 'chemical',
-                'value': this_chem
-            }
-            spec_data = {
-                'type': 'input',
-                'name': 'species',
-                'value': this_spec
-            }
-            proj_data = {
-                'type': 'input',
-                'name': 'proj',
-                'value': coord_sys
-            }
-            utm_data = {
-                'type': 'input',
-                'name': 'utm_zone',
-                'value': utm_zone
-            }
-            field_data.push(scenario_data)
-            field_data.push(spacing_data)
-            field_data.push(chem_data)
-            field_data.push(spec_data)
-            field_data.push(proj_data)
-            field_data.push(utm_data)
-            me.removeAttr('data-filedata');
+
+            const this_chem_prop =  aermodSettingsSection.closest("div.tab-pane").data("tab-name").split(" (");
+            const this_chem = this_chem_prop[0];
+            const this_spec = this_chem_prop[1].split(")")[0] == "Gaseous" ? "Vapor" : "Particle";
+
+            const field_data = [
+                fileElem[0],
+                {
+                    'type': 'input',
+                    'name': 'scenario_id',
+                    'value': TRIM.store.currentScenario.id
+                },
+                {
+                    'type': 'input',
+                    'name': 'chemical',
+                    'value': this_chem
+                },
+                {
+                    'type': 'input',
+                    'name': 'species',
+                    'value': this_spec
+                },
+                {
+                    'type': 'input',
+                    'name': 'coord_sys',
+                    'value': coord_sys
+                },
+                {
+                    'type': 'input',
+                    'name': 'utm_zone',
+                    'value': utm_zone
+                },
+                {
+                    'type': 'input',
+                    'name': 'zflag_restriction',
+                    'value': zflag.val()
+                },
+                {
+                    'type': 'input',
+                    'name': 'spacing',
+                    'value': spacing.val()
+                },
+            ];
+            const this_cmap = aermodSettingsSection.closest("div.tab-pane").find("table.compMap");
             TRIM.api.parseAERMODFile(field_data).on('load', function() {
                 try {
                     let src_data = JSON.parse(this.responseText);
-                    parcels.forEach(function(p,i){
-                        let dryval = src_data.aermod_result[p.name]['DrySource']
-                        let wetval = src_data.aermod_result[p.name]['WetSource']
-                        parcels[i].sources[this_chem]["Dry"+this_spec+"Source"]["Dry"+this_spec+"Source"]=dryval
-                        parcels[i].sources[this_chem]["Wet"+this_spec+"Source"]["Wet"+this_spec+"Source"]=wetval
+                    parcels.forEach(function(p, i) {
+                        let dryval = src_data.aermod_results[p.id]['Dry_Deposition_Avg']
+                        let wetval = src_data.aermod_results[p.id]['Wet_Deposition_Avg']
+                        p.sources[this_chem][`Dry${this_spec}Source`][`Dry${this_spec}Source`] = dryval
+                        p.sources[this_chem][`Wet${this_spec}Source`][`Wet${this_spec}Source`] = wetval
                     })
                 }
                 finally {

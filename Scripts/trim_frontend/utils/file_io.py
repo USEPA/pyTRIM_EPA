@@ -9,7 +9,7 @@ from datetime import datetime
 from flask import url_for
 from io import StringIO, TextIOWrapper
 from pathlib import Path
-from .spatial import translate_position
+from trim_core.coordinates import CoordinateMapper
 from ..parcels.utils import geojson_to_aermod_receptors
 
 
@@ -379,7 +379,7 @@ class MiscAssociatedFileDepositionOverlay(MiscAssociatedFileVariety):
     def apply_ZFLAG_logic(self, df, input_file_errors, metadata):
         try:
             zflag_restriction = float(metadata.get("zflag_restriction"))
-        except:
+        except Exception:
             zflag_restriction = None
 
         if "ZFLAG" in df.columns.to_list():
@@ -448,8 +448,9 @@ class MiscAssociatedFileDepositionOverlay(MiscAssociatedFileVariety):
                 if translation_needed:
                     # translate X/Y to lat/lng
                     utm_zone = metadata.get("utm_zone")
-                    df["wgs84_long"] = df.apply(lambda row: translate_position(row.X, row.Y, "UTM", "WGS84_LONGLAT", utm_zone=utm_zone)[0], axis = 1)
-                    df["wgs84_lat"] = df.apply(lambda row: translate_position(row.X, row.Y, "UTM", "WGS84_LONGLAT", utm_zone=utm_zone)[1], axis = 1)
+                    mapper = CoordinateMapper('UTM', 'WGS84_LONGLAT', utm_zone=utm_zone)
+                    df["wgs84_long"] = df.apply(lambda row: mapper.translate(row.X, row.Y)[0], axis=1)
+                    df["wgs84_lat"] = df.apply(lambda row: mapper.translate(row.X, row.Y)[1], axis=1)
                 else:
                     # just use X/Y as-is
                     df["wgs84_long"] = df["X"]
@@ -497,6 +498,7 @@ class MiscAssociatedFileDepositionOverlay(MiscAssociatedFileVariety):
 class MiscAssociatedFileAERMODGeneratedReceptors(MiscAssociatedFileVariety):
     MIME_TYPE = "application/geojson"
     STORAGE_EXTENSION = "geojson"
+    WGS_TO_UTM_MAPPER = CoordinateMapper('WGS84_LONGLAT', 'UTM')
 
     # we already have this data in memory, no need to open it
     # like w/ MiscAssociatedFileDepositionOverlay custom code.
@@ -554,22 +556,20 @@ class MiscAssociatedFileAERMODGeneratedReceptors(MiscAssociatedFileVariety):
         # return reformatted
         return json.dumps(reformatted).encode("utf-8")
 
-
     def perform_custom_upload_behavior(self, **kwargs):
-        if "uploaded_contents" in kwargs and "metadata" in kwargs:
-            metadata = kwargs.get("metadata")
-            uploaded_contents = kwargs.get("uploaded_contents")
+        if "uploaded_contents" in kwargs:
+            uploaded_contents = kwargs["uploaded_contents"]
 
             decoded = json.loads(uploaded_contents)
 
-            # we need a UTM zone to call Samuel's aermod receptor generation code; just grab any
-            # single point from the geojson and go with that.
-            # (do we need to worry if 
+            # we need a UTM zone to call Samuel's aermod receptor generation code;
+            # just grab any single point from the geojson and go with that.
+            # (do we need to worry if
             first_feature = decoded["features"][0]
             point_in_feature = first_feature["geometry"]["coordinates"]
             point_longitude = point_in_feature[0]
             point_latitude = point_in_feature[1]
-            utm_pos = translate_position(point_longitude, point_latitude, "WGS84_LONGLAT", "UTM")
+            utm_pos = self.WGS_TO_UTM_MAPPER.translate(point_longitude, point_latitude)
             just_zone = int(utm_pos[-1][0:-1])
             in_northern_hemisphere = point_latitude > 0
 
@@ -577,12 +577,21 @@ class MiscAssociatedFileAERMODGeneratedReceptors(MiscAssociatedFileVariety):
                 raise Exception("southern hemisphere unsupported")
 
             return ({
-                "data.geojson": { "contents": uploaded_contents, "mime": self.MIME_TYPE },
-                # "temp_foo.aermod": { "contents": json.dumps(fake_placeholder), "mime": "application/text" },
-                "aermod_receptors.txt": { "contents": geojson_to_aermod_receptors(uploaded_contents, just_zone, in_northern_hemisphere), "mime": "application/text" }
+                "data.geojson": {
+                    "contents": uploaded_contents,
+                    "mime": self.MIME_TYPE
+                },
+                # "temp_foo.aermod": {
+                #     "contents": json.dumps(fake_placeholder),
+                #     "mime": "application/text"
+                # },
+                "aermod_receptors.txt": {
+                    "contents": geojson_to_aermod_receptors(uploaded_contents, just_zone, in_northern_hemisphere),
+                    "mime": "application/text"
+                }
             }, None)
         else:
-            raise Exception(f"{self.__class__}.perform_custom_upload_behavior expected 'uploaded_contents' and 'metadata' in kwargs but was missing one or more of them")
+            raise Exception(f"{self.__class__}.perform_custom_upload_behavior expected 'uploaded_contents' in kwargs but was missing one or more of them")
 
 
 def use_local_misc_files():

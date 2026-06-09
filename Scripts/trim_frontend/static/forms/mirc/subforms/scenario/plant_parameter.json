@@ -1,0 +1,83 @@
+{
+    "title": "Plant Parameter",
+    "fields": [
+        {
+            "id": "product_id",
+            "data_type": "int",
+            "hidden": true
+        },
+        {
+            "id": "product",
+            "label": "Product",
+            "data_type": "string",
+            "readonly": true
+        },
+        {
+            "id": "MAF",
+            "label": "Moisture Adjustment Factor",
+            "data_type": "float",
+            "min": 0,
+            "max": 1,
+            "step": "any",
+            "allow_empty": true,
+            "help": "Moisture adjustment factor for aboveground produce to convert the chemical concentration estimated for dry-weight produce to the corresponding chemical concentration for full-weight fresh produce"
+        },
+        {
+            "id": "Rp",
+            "label": "Interception Fraction",
+            "data_type": "float",
+            "min": 0,
+            "max": 1,
+            "step": "any",
+            "allow_empty": true,
+            "help": "Plant-specific interception fraction for the edible portion of above-ground exposed produce or animal forage and silage"
+        },
+        {
+            "id": "kp",
+            "label": "Surface Loss Coefficient",
+            "data_type": "float",
+            "min": 0,
+            "step": "any",
+            "allow_empty": true,
+            "help": "The fraction of each food product consumed that is contaminated by the chemical at a level consistent with environmental concentrations in the area of concern"
+        },
+        {
+            "id": "kp_unit",
+            "label": "kp Unit",
+            "data_type": "string"
+        },
+        {
+            "id": "Tp",
+            "label": "Exposure Length",
+            "data_type": "float",
+            "min": 0,
+            "step": "any",
+            "allow_empty": true,
+            "help": "Length of plant exposure to deposition per harvest of the edible portion of aboveground exposed produce or animal forage and silage"
+        },
+        {
+            "id": "Tp_unit",
+            "label": "Tp Unit",
+            "data_type": "string"
+        },
+        {
+            "id": "Yp",
+            "label": "Standing Biomass",
+            "data_type": "float",
+            "min": 0,
+            "step": "any",
+            "allow_empty": true,
+            "help": "Plant-specific yield or standing crop biomass of the edible portion of produce or animal feed"
+        },
+        {
+            "id": "Yp_unit",
+            "label": "Yp Unit",
+            "data_type": "string"
+        },
+        {
+            "id": "notes",
+            "label": "Notes",
+            "data_type": "string"
+        }
+    ]
+}

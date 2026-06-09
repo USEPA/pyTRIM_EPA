@@ -56,7 +56,12 @@ def get_results(trim_scenario_id, simulation_id):
 
     simulation = simulation[0]
 
-    results = MircSimulationService(simulation).run_pathways()
+    try:
+        results = MircSimulationService(simulation).run_pathways()
+    except Exception:
+        import traceback
+        traceback.print_exc()
+        raise
 
     f = request.args.get('format', 'json')
     if f == 'xlsx':

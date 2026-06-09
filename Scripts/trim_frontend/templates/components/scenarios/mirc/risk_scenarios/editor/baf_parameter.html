@@ -1,0 +1,105 @@
+{% from 'macros/mirc/form_macros.html' import render_input %}
+
+<h4>
+    <button type="button"
+        class="btn btn-lg btn-block px-0 text-primary text-left border-light border-top-0 border-left-0 border-right-0 rounded-0"
+        data-toggle="collapse" aria-expanded="true"
+        data-target="#baf-collapse" aria-controls="baf-collapse"
+        style="font-weight: 500;"
+    >
+        {{ form.baf_parameters.label.text }}&nbsp;
+        <small class="text-muted">
+            <i class="fa fa-eye-slash"></i>
+        </small>
+    </button>
+</h4>
+
+<div id="baf-collapse" class="collapse show">
+    <div class="form-row mb-3">
+        <div class="col-sm-auto">
+            <label for="baf-chemical-filter">
+                Chemical
+            </label>
+            <select id="baf-chemical-filter" class="form-control form-control-sm">
+                {% for c in chemicals %}
+                    <option value="{{ c.id }}">{{ (c.hap_name or c.name)|title }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+    <table id="baf-parameters" class="table table-sm table-bordered">
+        <thead>
+            <tr class="text-center">
+                <th scope="col" class="table-primary border-primary align-middle">
+                    Aquatic Type
+                </th>
+                <th scope="col" class="table-primary border-primary align-middle">
+                    Value
+                </th>
+                <th scope="col" class="table-primary border-primary align-middle">
+                    Unit
+                </th>
+                <th scope="col" class="table-primary border-primary align-middle">
+                    Notes
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th colspan="4" class="table-light align-middle text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </th>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var tbl = $('#baf-parameters tbody');
+        $('#baf-chemical-filter').change(function() {
+            var c = $(this).val();
+
+            var filter = '.chemical-' + c;
+
+            var rows = tbl.find('tr');
+            var relevant = rows.filter(filter);
+
+            if (!relevant.length) {
+                if (rows.length > 1) {
+                    LoadingScreen.show('baf_params');
+                }
+                $.ajax({
+                    url: '{{ url_for("mirc_scenario.get_form_fragment") }}',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        name: 'baf_parameter',
+                        chemical: c,
+                        parent: '{{ form.parent.data or "" }}',
+                        scenario_id: '{{ form.scenario_id.data or "" }}',
+                        i: rows.length
+                    })
+                }).then(function(data) {
+                    tbl.append(data);
+                    rows = tbl.find('tr').hide();
+                    rows.filter(filter).show();
+                    // Enable popups
+                    $('[data-toggle="popover"]').popover();
+                }).always(function() {
+                    LoadingScreen.hide('baf_params');
+                });
+            }
+            else {
+                rows.hide();
+                relevant.show();
+            }
+        }).change();
+    });
+    </script>
+</div>
+
+<hr />

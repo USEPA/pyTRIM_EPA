@@ -1,0 +1,73 @@
+{
+    "title": "Plant-Specific Chemical Parameter",
+    "fields": [
+        {
+            "id": "chemical_id",
+            "data_type": "int",
+            "hidden": true
+        },
+        {
+            "id": "chemical",
+            "label": "Chemical",
+            "data_type": "string",
+            "readonly": true
+        },
+        {
+            "id": "product_id",
+            "data_type": "int",
+            "hidden": true
+        },
+        {
+            "id": "product",
+            "label": "Product",
+            "data_type": "string",
+            "readonly": true
+        },
+        {
+            "id": "Br",
+            "label": "Plant-Soil Bioconcentration Factor",
+            "data_type": "float",
+            "min": 0,
+            "step": "any",
+            "allow_empty": true,
+            "help": "Plant-soil bioconcentration factor (above-ground produce)"
+        },
+        {
+            "id": "VG",
+            "label": "Empirical Correction Factor",
+            "data_type": "float",
+            "min": 0,
+            "step": "any",
+            "allow_empty": true,
+            "help": "This parameter (empirical correction factor for above-ground exposed to address possible overestimate of the diffusive transfer of chemical from the outside to the inside of bulky produce) does not apply to protected plant parts."
+        },
+        {
+            "id": "Bv_ag",
+            "label": "Air-Plant Biotransfer Factor",
+            "data_type": "float",
+            "min": 0,
+            "step": "any",
+            "allow_empty": true,
+            "help": "Chemical-specific air-to-plant biotransfer factor for above-ground produce for vapor-phase chemical in air"
+        },
+        {
+            "id": "RCF",
+            "label": "Root Concentration Factor",
+            "data_type": "float",
+            "min": 0,
+            "step": "any",
+            "allow_empty": true,
+            "help": "Chemical-specific root concentration factor for tubers and root produce on a wet-weight basis"
+        },
+        {
+            "id": "RCF_unit",
+            "label": "RCF Unit",
+            "data_type": "string"
+        },
+        {
+            "id": "notes",
+            "label": "Notes",
+            "data_type": "string"
+        }
+    ]
+}

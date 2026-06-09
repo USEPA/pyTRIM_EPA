@@ -1,0 +1,45 @@
+{
+    "title": "Bio-Accumulation Parameter",
+    "fields": [
+        {
+            "id": "chemical_id",
+            "data_type": "int",
+            "hidden": true
+        },
+        {
+            "id": "chemical",
+            "label": "Chemical",
+            "data_type": "string",
+            "readonly": true
+        },
+        {
+            "id": "aquatic_type_id",
+            "data_type": "int",
+            "hidden": true
+        },
+        {
+            "id": "aquatic_type",
+            "label": "Aquatic Type",
+            "data_type": "string",
+            "readonly": true
+        },
+        {
+            "id": "value",
+            "label": "Value",
+            "data_type": "float",
+            "min": 0,
+            "step": "any",
+            "allow_empty": true
+        },
+        {
+            "id": "unit",
+            "label": "Unit",
+            "data_type": "string"
+        },
+        {
+            "id": "notes",
+            "label": "Notes",
+            "data_type": "string"
+        }
+    ]
+}

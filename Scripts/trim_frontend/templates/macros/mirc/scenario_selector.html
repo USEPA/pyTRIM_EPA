@@ -1,10 +1,11 @@
 {% macro render_scenario_picker(
     scenarios, id="scenario_picker", name="scenario_picker",
-    default=None, allow_none=True
+    default=None, allow_none=True, disabled=False
 ) %}
     <select id="{{ id }}" name="{{ name }}"
         class="form-control form-control-sm"
         style="max-width: 100%;"
+        {% if disabled %}disabled="disabled"{% endif %}
     >
         {% if allow_none %}
             <option value="">None</option>

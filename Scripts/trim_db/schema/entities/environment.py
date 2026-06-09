@@ -2,9 +2,11 @@ import json
 import pandas as pd
 import re
 import sqlalchemy as sa
-from shapely.geometry import Polygon
-from pyproj import CRS, Transformer
-from shapely import wkt
+from pyproj import Geod
+from shapely.geometry import Point, Polygon
+from sqlalchemy.orm import Mapped
+from typing import Self
+from trim_core.coordinates import CoordinateMapper
 from ..parameters.utils import ureg
 from ..parameters.models import ParameterDefinition, CustomParameter
 from ..utils.base import Model
@@ -19,34 +21,8 @@ __all__ = [
 
 GLOBAL_WILDCARD = "$"
 
-
-class UtmTransformer:
-    # Initializes default UTM Transformer settings
-    # so we don't have to do this every time we need a transformer
-    from_crs = CRS.from_epsg(4326)
-    to_crs = CRS.from_wkt(  # CAREFUL: we assume ellipsoid is WGS84 ..
-        'PROJCS['
-        '"WGS_1984_UTM_Zone_16N",'
-        'GEOGCS['
-        '"GCS_WGS_1984",'
-        'DATUM["D_WGS_1984",SPHEROID["WGS_1984",6378137.0,298.257223563]],'
-        'PRIMEM["Greenwich",0.0],'
-        'UNIT["Degree",0.0174532925199433]'
-        '],'
-        'PROJECTION["Transverse_Mercator"],'
-        'PARAMETER["False_Easting",500000.0],'
-        'PARAMETER["False_Northing",0.0],'
-        'PARAMETER["Central_Meridian",-87.0],'
-        'PARAMETER["Scale_Factor",0.9996],'
-        'PARAMETER["Latitude_Of_Origin",0.0],'
-        'UNIT["Meter",1.0]'
-        ']'
-    )
-    transformer = Transformer.from_crs(from_crs, to_crs)
-
-    @classmethod
-    def transform(cls, *args, **kwargs):
-        return cls.transformer.transform(*args, **kwargs)
+WGS_TO_UTM_MAPPER = CoordinateMapper('WGS84_LONGLAT', 'UTM')
+WGS_GEOD = Geod(ellps='WGS84')
 
 
 class Parcel(Model):
@@ -60,12 +36,7 @@ class Parcel(Model):
         'Scenario', backref=sa.orm.backref('parcels')
     )
 
-    # Store as a string, but make a property to access as an array
     _vertices = sa.Column('vertices', sa.JSON(), nullable=False)
-
-    _utm_polygon = None
-    _polygon = None
-    _area = None
 
     @property
     def vertices(self):
@@ -81,45 +52,97 @@ class Parcel(Model):
                 raise
         else:
             self._vertices = value
-        self._utm_polygon = None
+        self._reset_vertices_dependents()
+
+    def _reset_vertices_dependents(self):
+        self._utm_vertices = None
+        self._utm_zone = None
         self._polygon = None
+        self._utm_polygon = None
         self._area = None
 
-    @property
-    def utm_vertices(self):
-        utm_vert = [UtmTransformer.transform(pt[1], pt[0]) for pt in self.vertices]
-        return utm_vert
+    _utm_vertices = None
 
-    def polygon(self, utm=True):
-        if utm:
-            if self._utm_polygon is None:
-                self._utm_polygon = Polygon(self.utm_vertices)
-            return self._utm_polygon
+    @property
+    def utm_vertices(self) -> list[list | tuple]:
+        if self._utm_vertices is None:
+            self._utm_vertices = [
+                WGS_TO_UTM_MAPPER.translate(*pt) for pt in self.vertices
+            ]
+        return self._utm_vertices
+
+    _utm_zone = None
+
+    @property
+    def utm_zone(self) -> str | list[str]:
+        if self._utm_zone is None:
+            uz = list(set([pt[-1] for pt in self.utm_vertices]))
+            if len(uz) == 1:
+                self._utm_zone = uz[0]
+            else:
+                self.utm_zone = uz
+        return self._utm_zone
+
+    _polygon = None
+
+    @property
+    def polygon(self) -> Polygon:
+        """
+        A polygon representation of the parcel with long/lat coordinates for vertices
+        """
         if self._polygon is None:
             self._polygon = Polygon(self.vertices)
         return self._polygon
 
+    _utm_polygon = None
+
+    @property
+    def utm_polygon(self) -> Polygon | ValueError:
+        """
+        A polygon representation of the parcel with UTM coordinates for vertices
+        """
+        if self._utm_polygon is None:
+            if isinstance(self.utm_zone, list) and len(self.utm_zone) > 1:
+                raise ValueError(
+                    'Parcel spans multiple UTM zones'
+                    f' ({", ".join(self.utm_zone)});'
+                    ' no valid UTM polygon can be constructed.'
+                )
+            self._utm_polygon = Polygon([pt[:2] for pt in self.utm_vertices])
+        return self._utm_polygon
+
+    def contains_point(self, *args):
+        """
+        Only accepts long/lat coordinates
+        """
+        if len(args) > 1:
+            return self.polygon.contains(Point(*args))
+        return self.polygon.contains(Point(args))
+
+    _area = None
+
     @property
     def area(self):
-        # CAREFUL: we assume dimensions are in meters ...
         if self._area is None:
-            self._area = self.polygon().area * ureg('m^2')
+            self._area = abs(
+                WGS_GEOD.geometry_area_perimeter(self.polygon)[0]
+            ) * ureg('m^2')
         return self._area
 
-    def get_volume_element(self, name):
+    def get_volume_element(self, name) -> 'VolumeElement':
         for ve in self.volume_elements:
             if ve.name == name or ve.standard_name == name:
                 return ve
         return None
 
     @property
-    def compartments(self):
+    def compartments(self) -> list['Compartment']:
         return list(sorted(
             (c for ve in self.volume_elements for c in ve.compartments),
             key=lambda x: x.name
         ))
 
-    def get_compartment(self, name=None, media=None):
+    def get_compartment(self, name=None, media=None, or_child=True):
         if media is None:
             if name is None:
                 raise ValueError(
@@ -127,7 +150,7 @@ class Parcel(Model):
                 )
             check = self.compartments
         else:
-            check = [c for c in self.compartments if c.media.isa(media)]
+            check = [c for c in self.compartments if c.media.isa(media, or_child=or_child)]
             if name is None:
                 return check
         for x in check:
@@ -166,7 +189,7 @@ class VolumeElement(Model):
     parcel_id = sa.Column(
         sa.Integer(), sa.ForeignKey('parcel.id'), nullable=False
     )
-    parcel = sa.orm.relationship(
+    parcel: Mapped[Parcel] = sa.orm.relationship(
         'Parcel', backref=sa.orm.backref('volume_elements')
     )
 
@@ -183,7 +206,6 @@ class VolumeElement(Model):
 
     @property
     def height(self):
-        # CAREFUL: we assume dimensions are in meters ...
         return (self.top - self.bottom) * ureg('m')
 
     @property
@@ -192,6 +214,7 @@ class VolumeElement(Model):
 
     @property
     def volume(self):
+        # FIXME: Is this correct now that we use geodesic area?
         return self.parcel.area * self.height
 
     def agg(
@@ -248,13 +271,27 @@ class VolumeElement(Model):
         raise AssertionError('Unknown function!')
 
     def midpoint_distance(self, volume_element):
+        """
+        Calculates the distance between volume elements
+        using the centroid of their parcel footprint.
+        If possible, uses polygons projected into UTM space
+        to determine the centroid distance between parcels.
+        If not possible, estimates the centroid distance
+        using polygons drawn in long/lat space
+        """
         if isinstance(volume_element, Compartment):
             volume_element = volume_element.volume_element
 
-        polygon_a = self.parcel.polygon()
-        polygon_b = volume_element.parcel.polygon()
+        try:
+            polygon_a = self.parcel.utm_polygon
+            polygon_b = volume_element.parcel.utm_polygon
+        except ValueError as e:
+            if 'multiple utm' not in str(e).lower():
+                raise
+            polygon_a = self.parcel.polygon
+            polygon_b = volume_element.parcel.polygon
 
-        # CAREFUL: we assume dimensions are in meters ...
+        # FIXME: This is probably not strictly accurate, though it may be fine on the scale of our modeling
         return polygon_a.centroid.distance(polygon_b.centroid) * ureg('m^2')
 
     def get_compartment(self, name=None, media=None):
@@ -402,14 +439,14 @@ class Compartment(Model):
     volume_element_id = sa.Column(
         sa.Integer(), sa.ForeignKey('volume_element.id'), nullable=False
     )
-    volume_element = sa.orm.relationship(
+    volume_element: Mapped[VolumeElement] = sa.orm.relationship(
         'VolumeElement', backref=sa.orm.backref('compartments')
     )
 
     media_id = sa.Column(
         sa.Integer(), sa.ForeignKey('media.id'), nullable=False
     )
-    media = sa.orm.relationship(
+    media: Mapped[Media] = sa.orm.relationship(
         'Media', backref=sa.orm.backref('compartments')
     )
 
@@ -492,7 +529,7 @@ class Compartment(Model):
                 return c.media.id
         return None
 
-    def connects_to(self, compartment):
+    def connects_to(self, compartment: Self):
         if self.volume_element == compartment.volume_element:
             return True  # We're in the same "space"!
 
@@ -505,18 +542,31 @@ class Compartment(Model):
         # To bad, we just didn't connect
         return False
 
-    # CAREFUL: we assume dimensions are in meters ...
-    def interface_with(self, compartment):
+    def interface_with(self, compartment: Self):
+        """
+        Calculates the 2D interface between compartments.
+        If possible, uses polygons projected into UTM space
+        to determine the XY interface between compartment parcels.
+        If not possible, estimates the XY interface
+        using polygons drawn in long/lat space
+        """
         sender_ve = self.volume_element
         receiver_ve = compartment.volume_element
 
-        polygon_a = sender_ve.parcel.polygon()
-        polygon_b = receiver_ve.parcel.polygon()
+        try:
+            polygon_a = sender_ve.parcel.utm_polygon
+            polygon_b = receiver_ve.parcel.utm_polygon
+        except ValueError as e:
+            if 'multiple utm' not in str(e).lower():
+                raise
+            polygon_a = sender_ve.parcel.polygon
+            polygon_b = receiver_ve.parcel.polygon
 
         if not polygon_a.intersects(polygon_b):
             # Not horizontally contiguous
             return 0 * ureg('m^2')
 
+        # FIXME: This is probably not strictly accurate, though it may be fine on the scale of our modeling
         intersection = polygon_a.intersection(polygon_b)
 
         # if sender_ve.parcel.id == receiver_ve.parcel.id:

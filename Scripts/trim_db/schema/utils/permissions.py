@@ -99,6 +99,11 @@ def require_permissions(*args, **kwargs):
         def grant(s, user, permission):
             if not isinstance(user, int):
                 user = user.id
+            if permission is None:
+                s._permissions = [  # Clear existing permissions
+                    x for x in s._permissions if x.user_id != user
+                ]
+                return None
             if not isinstance(permission, Enum):
                 permission = PermissionsEnum[permission]
             p = [x for x in s._permissions if x.user_id == user]
@@ -109,6 +114,13 @@ def require_permissions(*args, **kwargs):
             return perm
 
         cls.grant = grant
+
+        def revoke(s, user, permission=None):
+            if permission is None:
+                return s.grant(user, None)
+            raise NotImplementedError()
+
+        cls.revoke = revoke
 
         custom_allow = kwargs.get('custom_allow')
         if custom_allow is None:

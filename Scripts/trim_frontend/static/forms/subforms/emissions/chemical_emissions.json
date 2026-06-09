@@ -26,22 +26,12 @@
             "if_true": ["have_AERMOD_file"]
         },
         {
-            "id": "spacing",
-            "label": "Spacing",
-            "data_type": "string",
-            "widget": "select",
-            "choices": ["Uniform", "Non-Uniform"],
-            "required": true,
-            "help": "For the receptors in the AERMOD deposition file, indicate whether they are uniformly spaced or non-uniformly spaced.",
-            "if_true": ["have_AERMOD_file"]
-        },
-        {
             "id": "emission_upload_coordinates_system",
             "label": "Coordinate System",
             "data_type": "string",
             "widget": "select",
-            "choices": ["WGS84 Longitude/Latitude", "UTM"],
-            "default": "WGS84 Longitude/Latitude",
+            "choices": ["UTM"],
+            "default": "UTM",
             "required": true,
             "help": "Select the system for coordinate value pairs provided in your PLT file.",
             "if_true": ["have_AERMOD_file"]
@@ -51,7 +41,25 @@
             "label": "UTM Zone",
             "data_type": "string",
             "required": true,
-            "help": "Enter the UTM zone number/letter for the coordinate values in your PLT file; e.g., \"16N\".",
+            "help": "Enter the UTM zone number/letter for the coordinate values in your PLT file; e.g., \"16T\".",
+            "if_true": ["have_AERMOD_file"]
+        },
+        {
+            "id": "zflag_restriction",
+            "label": "ZFLAG Restriction",
+            "data_type": "float",
+            "required": false,
+            "help": "ZFLAG is the receptor height (meters) above ground level. Deposition typically is modeled at 0. If your PLT file contains multiple ZFLAG values, enter the ZFLAG value you want to plot the results of in the deposition overlay. If you do not enter a value, the lowest ZFLAG value will be used by default.",
+            "if_true": ["have_AERMOD_file"]
+        },
+        {
+            "id": "spacing",
+            "label": "Spacing",
+            "data_type": "string",
+            "widget": "select",
+            "choices": ["Uniform", "Non-Uniform"],
+            "required": true,
+            "help": "For the receptors in the AERMOD deposition file, indicate whether they are uniformly spaced or non-uniformly spaced.",
             "if_true": ["have_AERMOD_file"]
         },
         {

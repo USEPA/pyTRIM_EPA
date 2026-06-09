@@ -21,6 +21,14 @@
                 default=form.mirc_scenario.data, allow_none=False
             ) }}
             {{ render_feedback(form.mirc_scenario) }}
+            <div class="form-text">
+                <small>
+                    <a href="{{ url_for('mirc_scenario.view_risk_scenarios') }}" target="_blank">
+                        <i class="fa fa-edit mr-1"></i>
+                        Create or Edit Risk Scenarios
+                    </a>
+                </small>
+            </div>
         </div>
     </div>
 
@@ -190,8 +198,6 @@
             {{ render_form_group(form.trim_timestamp) }}
         </div>
     </div>
-
-    {{ render_form_group(form.use_aermod) }}
 
     <div id="air-fields" class="form-row" style="display: none;">
         <div class="col-sm">
@@ -714,9 +720,6 @@ onDomLoad(function() {
 });
 
 function initSimulationForm() {
-    if (TRIM.store.mirc_data.includes_aermod) {
-        $('[name="use_aermod"]').prop('checked', true);
-    }
     updateSimulationTrimFields();
 
     $('[name$="ingestion_percentile_preset"]').prop('checked', false);
@@ -907,14 +910,26 @@ function updateSimulationMircFields() {
         else {
             return field.value;
         }
-    }
+    };
 
-    const useAermod = getCheckedValues('use_aermod').length > 0;
-    if (useAermod && data.includes_aermod === true) {
+    const chem = data.chemicals[getVal('chemical')];
+
+    const useAermod = data.parcels.filter(
+        pcl => pcl.volume_elements.filter(
+            ve => ve.compartments.filter(
+                comp => (
+                    comp.name.toLowerCase() == 'air'
+                    && Object.entries(comp.properties).filter(
+                        ([chem, props]) => props.C_aermod?.value != null
+                    ).length
+                )
+            ).length
+        ).length
+    ).length > 0;
+    if (useAermod) {
         airFields.style.display = '';
     }
 
-    const chem = data.chemicals[getVal('chemical')];
     const dt = getVal('trim_timestamp');
 
     const setField = (name, val, comp, conversion) => {
@@ -1009,12 +1024,8 @@ function updateSimulationMircFields() {
 
     if (useAermod) {
         const airSrc = getVal('trim_air_compartment');
-        const aermodProps = getParcel(airSrc).aermod;
-        if (aermodProps) {
-            setField('Ca', aermodProps.C_avg, airSrc);
-        }
         const airProps = getCompartment(airSrc).properties;
-        // setField('Ca', airProps[chem].C?.[dt].value, airSrc);
+        setField('Ca', airProps[chem].C_aermod?.value, airSrc);
         setField('Fv', airProps[chem].Fv, airSrc);
         setField(
             'rho_a', airProps[chem].rho_a.value, airSrc
