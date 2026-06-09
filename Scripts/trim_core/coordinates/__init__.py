@@ -37,7 +37,6 @@ class CoordinateMapper:
             raise ValueError(f'Invalid UTM Zone Number: "{zone_number}"')
         if zone_number < 1 or zone_number > 60:
             raise ValueError(f'Invalid UTM Zone Number: "{zone_number}"')
-
         return (zone_number, zone_letter)
 
     _COORDINATE_MAPPINGS = {

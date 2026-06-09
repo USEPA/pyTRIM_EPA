@@ -1,0 +1,152 @@
+# DMAP variant: Deploy TRIM Webapp to AWS Elastic Beanstalk
+#
+# Builds the TRIM web application, uploads a versioned zip to S3, creates an
+# Elastic Beanstalk application version, and optionally deploys it to the
+# target EB environment.
+#
+# Authentication uses GitHub OIDC federation — no stored AWS credentials.
+# The IAM role trust policy is defined in dmap-infra foundation/iam.tf:182-205.
+#
+# This workflow lives on the `dmap` branch and is namespaced separately from
+# the team's existing `deploy_web_eb_artifact.yml` so the two pipelines do not
+# collide. Configure the secrets below in the "dmap-stage" GitHub Environment.
+#
+# Required GitHub Secrets (set under Settings → Environments → dmap-stage):
+#   DMAP_DEPLOY_IAM_ROLE    - ARN of the GitHub Actions OIDC IAM role
+#   DMAP_DEPLOY_S3_BUCKET   - S3 bucket for EB deployment archives
+#   DMAP_DEPLOY_EB_APP_NAME - Elastic Beanstalk application name
+#   DMAP_DEPLOY_EB_ENV_NAME - Elastic Beanstalk environment name
+#
+# Required GitHub Environment:
+#   dmap-stage
+
+name: DMAP — Deploy webapp to Elastic Beanstalk
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_to_environment:
+        description: 'Deploy to EB environment after creating version'
+        type: boolean
+        required: false
+        default: true
+
+# Minimum permissions for OIDC authentication and code checkout
+permissions:
+  id-token: write   # Required for requesting the OIDC JWT
+  contents: read    # Required for actions/checkout
+
+# Prevent overlapping deploys from clobbering each other
+concurrency:
+  group: dmap-deploy-eb-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: dmap-stage
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v6
+
+      # Authenticate to AWS via OIDC — no access keys required
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.DMAP_DEPLOY_IAM_ROLE }}
+          aws-region: us-east-1
+
+      - name: Store build timestamp and current commit SHA
+        run: |
+          # Use colon-free timestamp to avoid issues in version labels and S3 keys
+          echo "TIMESTAMP=$(date +'%Y-%m-%dT%H%M%S')" >> "$GITHUB_ENV"
+          echo "CURRENT_COMMIT=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      # Strip the aws:elbv2:loadbalancer option from Scripts/.ebextensions/pytrim.config.
+      # That namespace only applies when EB owns the LB. The DMAP env uses a shared
+      # ALB managed in terraform (dmap-infra/application/alb.tf), so EB rejects the
+      # option and fails the deploy. IdleTimeout is set on the ALB directly via the
+      # `idle_timeout` argument on aws_lb.application-lb. yq is preinstalled on
+      # ubuntu-latest runners.
+      - name: Strip shared-LB-incompatible .ebextensions setting
+        run: |
+          yq -i '.option_settings |= map(select(.namespace != "aws:elbv2:loadbalancer"))' \
+            Scripts/.ebextensions/pytrim.config
+          echo "Resulting pytrim.config:"
+          cat Scripts/.ebextensions/pytrim.config
+
+      # Build is inlined (rather than calling a wrapper script) so all DMAP-specific
+      # changes stay confined to dmap_*.yml — no new files in the upstream source tree.
+      - name: Build zip archive for deployment
+        working-directory: iac/src/deployer
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          pip install boto3
+          python -c 'from helpers.beanstalk_helper import BeanstalkHelper; BeanstalkHelper().build_flask_zip()'
+
+      - name: Store version name
+        run: echo "APP_VERSION=PyTRIM_${{ env.TIMESTAMP }}" >> "$GITHUB_ENV"
+
+      # Upload the build artifact to the AWS-account-level EB-managed bucket,
+      # under a key prefix matching the EB application name. The IAM role
+      # (foundation/iam.tf) is scoped to this prefix.
+      - name: Upload zip archive to S3
+        env:
+          S3_BUCKET: ${{ secrets.DMAP_DEPLOY_S3_BUCKET }}
+          EB_APP: ${{ secrets.DMAP_DEPLOY_EB_APP_NAME }}
+        run: |
+          ARCHIVE=$(find ./iac/flask_temp_package_dir -maxdepth 1 -name '*.zip' | head -1)
+          if [ -z "$ARCHIVE" ]; then
+            echo "::error::No zip archive found in ./iac/flask_temp_package_dir/"
+            exit 1
+          fi
+          echo "S3_KEY=${EB_APP}/${APP_VERSION}.zip" >> "$GITHUB_ENV"
+          aws s3 cp "$ARCHIVE" "s3://${S3_BUCKET}/${EB_APP}/${APP_VERSION}.zip"
+
+      - name: Create an app version from the archive on EB
+        env:
+          EB_APP: ${{ secrets.DMAP_DEPLOY_EB_APP_NAME }}
+          S3_BUCKET: ${{ secrets.DMAP_DEPLOY_S3_BUCKET }}
+        run: |
+          aws elasticbeanstalk create-application-version \
+            --application-name "$EB_APP" \
+            --version-label "$APP_VERSION" \
+            --description "$CURRENT_COMMIT" \
+            --source-bundle S3Bucket="${S3_BUCKET}",S3Key="${S3_KEY}"
+
+      - name: Update the EB environment
+        if: ${{ inputs.deploy_to_environment == true }}
+        env:
+          EB_APP: ${{ secrets.DMAP_DEPLOY_EB_APP_NAME }}
+          EB_ENV: ${{ secrets.DMAP_DEPLOY_EB_ENV_NAME }}
+        run: |
+          aws elasticbeanstalk update-environment \
+            --application-name "$EB_APP" \
+            --environment-name "$EB_ENV" \
+            --version-label "$APP_VERSION"
+
+      # Render a summary table visible in the Actions run UI.
+      # Secrets are passed through env vars so values display in the summary
+      # instead of being masked as "***".
+      - name: Deployment Summary
+        env:
+          EB_APP: ${{ secrets.DMAP_DEPLOY_EB_APP_NAME }}
+          S3_BUCKET: ${{ secrets.DMAP_DEPLOY_S3_BUCKET }}
+        run: |
+          echo "## Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Application | ${EB_APP} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Version | ${{ env.APP_VERSION }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit | ${{ env.CURRENT_COMMIT }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| S3 Location | s3://${S3_BUCKET}/${{ env.S3_KEY }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Environment Updated | ${{ inputs.deploy_to_environment }} |" >> $GITHUB_STEP_SUMMARY

@@ -53,6 +53,7 @@ def get_env_db_uri():
         db_host = os.environ['DB_HOSTNAME']
         db_port = os.environ['DB_PORT']
         db_name = os.environ['DB_NAME']
+        db_schema = os.getenv('DB_SCHEMA', '')
 
         if 'DB_PASSWORD' in os.environ:
             uname = os.environ['DB_USERNAME']
@@ -61,9 +62,11 @@ def get_env_db_uri():
             try:
                 import boto3
                 sm_client = boto3.client('secretsmanager')
-                creds = json.loads(sm_client.get_secret_value(
-                    SecretId='pytrim/database/credentials'
-                ))
+                creds = sm_client.get_secret_value(SecretId='pytrim/database/credentials')
+                try:
+                    creds = json.loads(creds["SecretString"])
+                except:
+                    creds = json.loads(creds)
                 uname = creds['username']
                 pword = creds['password']
             except ModuleNotFoundError:
@@ -72,7 +75,13 @@ def get_env_db_uri():
         print(f'-- Connecting to {engine.upper()} DB')
         if engine == 'mysql':
             engine = 'mysql+pymysql'
-        db_uri = f'{engine}://{uname}:{pword}@{db_host}:{db_port}/{db_name}'
+        elif engine == 'postgres':
+            engine = 'postgresql+psycopg2'
+
+        if db_schema:
+            db_schema = f'?options=-csearch_path={db_schema}'
+
+        db_uri = f'{engine}://{uname}:{pword}@{db_host}:{db_port}/{db_name}{db_schema}'
 
     else:
         print('-- Connecting to local SQLite db')

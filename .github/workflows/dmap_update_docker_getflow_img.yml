@@ -1,0 +1,102 @@
+# DMAP variant: Update Docker Image on AWS ECR for GetFlow
+#
+# Builds the GetFlow Docker image (linux/amd64) and pushes it to the
+# project's ECR repository. GetFlow is the streamflow data retrieval
+# service used by the TRIM pipeline.
+#
+# Authentication uses GitHub OIDC federation — no stored AWS credentials.
+# The IAM role trust policy is defined in dmap-infra foundation/iam.tf:182-205.
+# ECR push permissions come from the "EcrFullRepoAccess" statement (iam.tf:214-218)
+# which grants ecr:* on arn:aws:ecr:...:repository/trim/*.
+#
+# This workflow lives on the `dmap` branch and is namespaced separately from
+# the team's existing `update_docker_getflow_img.yml`. Configure the secrets
+# below in the "dmap-stage" GitHub Environment.
+#
+# Required GitHub Secrets (set under Settings → Environments → dmap-stage):
+#   DMAP_DEPLOY_IAM_ROLE         - ARN of the GitHub Actions OIDC IAM role
+#   DMAP_DEPLOY_GETFLOW_ECR_REPO - ECR repository URI for GetFlow
+#
+# Required GitHub Environment:
+#   dmap-stage
+
+name: DMAP — Build & push GetFlow image to ECR
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        type: string
+        description: 'Tag Value for Docker Image'
+        required: true
+        default: 'latest'
+
+# Minimum permissions for OIDC authentication and code checkout
+permissions:
+  id-token: write   # Required for requesting the OIDC JWT
+  contents: read    # Required for actions/checkout
+
+# Prevent overlapping pushes to the same ECR tag
+concurrency:
+  group: dmap-deploy-getflow-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: dmap-stage
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v6
+
+      # Authenticate to AWS via OIDC — no access keys required
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.DMAP_DEPLOY_IAM_ROLE }}
+          aws-region: us-east-1
+
+      # ecr:GetAuthorizationToken is granted on * (iam.tf:223)
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      # Runs the project script that stages source code for the Docker build
+      - name: Prepare code for containerization
+        run: |
+          python -m pip install --upgrade pip setuptools wheel
+          python ./docker/getflow/prepare_dockerized.py -q
+
+      # Build for linux/amd64 to match the ECS Fargate runtime
+      - name: Build Docker image
+        run: |
+          docker build --platform linux/amd64 -t pytrim_getflow -f ./docker/getflow/Dockerfile_getflow ./docker/getflow
+
+      - name: Tag and push image to Amazon ECR
+        env:
+          ECR_REPO: ${{ secrets.DMAP_DEPLOY_GETFLOW_ECR_REPO }}
+          IMAGE_TAG: ${{ inputs.image_tag }}
+        run: |
+          docker tag pytrim_getflow:latest ${ECR_REPO}:${IMAGE_TAG}
+          docker push ${ECR_REPO}:${IMAGE_TAG}
+
+      - name: Deployment Summary
+        env:
+          ECR_REPO: ${{ secrets.DMAP_DEPLOY_GETFLOW_ECR_REPO }}
+        run: |
+          echo "## Docker Image Push Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Repository | ${ECR_REPO} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tag | ${{ inputs.image_tag }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit | ${{ github.sha }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Platform | linux/amd64 |" >> $GITHUB_STEP_SUMMARY

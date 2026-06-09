@@ -825,7 +825,7 @@ def parse_runoff_matrix_upload():
                         if k == "parcels" or k == 'sink' or v == 0: continue
                         before = v
                         after = round(row_diff + Decimal(v), precision)
-                        df.at[row_counter-1, k] = after
+                        df.at[row_counter-1, k] = float(after)
                         row[k] = after
                         break
 

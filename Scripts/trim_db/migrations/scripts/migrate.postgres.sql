@@ -1,4 +1,8 @@
 -- Creating dummy User/Role ORM
+
+-- schema
+-- SET search_path TO trim;
+
 CREATE TABLE alembic_version (
     version_num VARCHAR(32) NOT NULL, 
     CONSTRAINT alembic_version_pkc PRIMARY KEY (version_num)
@@ -81,7 +85,7 @@ CREATE TABLE "user" (
 
 CREATE TABLE formula_argument (
     formula_id INTEGER NOT NULL, 
-    name VARCHAR(60) NOT NULL, 
+    name VARCHAR(120) NOT NULL, 
     domain_id INTEGER, 
     id SERIAL PRIMARY KEY, 
     FOREIGN KEY(domain_id) REFERENCES parameter_domain (id), 

@@ -1,0 +1,38 @@
+name: Sync EPA Changes Back to ICF
+on: [push, workflow_dispatch]
+concurrency:
+  group: backsync
+env:
+  SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+jobs:
+  backsync:
+    runs-on: ubuntu-latest
+    if: ${{ github.repository == 'USEPA/pyTRIM_EPA' }}
+    environment: dev
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh/
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null 
+
+      - name: Add SSH Key for EPA
+        run: |
+          echo "${{ secrets.TRIM_MIRROR_SSH_PRIVATE_KEY }}" > ~/.ssh/trim_mirror_key
+          chmod 600 ~/.ssh/trim_mirror_key
+          ssh-add ~/.ssh/trim_mirror_key
+
+      - name: Clone from EPA
+        run: cd ~ && git clone --bare git@github.com:USEPA/pyTRIM_EPA.git
+
+      - name: Add SSH Key for ICF
+        run: |
+          ssh-add -D
+          echo "${{ secrets.TRIM_SOURCE_SSH_PRIVATE_KEY }}" > ~/.ssh/trim_src_key
+          chmod 600 ~/.ssh/trim_src_key
+          ssh-add ~/.ssh/trim_src_key
+
+      - name: Push to ICF
+        run: cd ~/pyTRIM_EPA.git && git push --force --mirror git@github.com:ICF-Corp/trim-builder.git

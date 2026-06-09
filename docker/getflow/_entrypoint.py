@@ -30,6 +30,8 @@ secret_data = json.loads(response['SecretString'])
 engine = os.getenv('DB_ENGINE')
 if engine == 'mysql':
     engine = 'mysql+pymysql'
+elif engine == 'postgres':
+    engine = 'postgresql+psycopg2'
 
 # put stuff into environment variables...
 os.environ["SQLALCHEMY_DATABASE_URI"] = (
