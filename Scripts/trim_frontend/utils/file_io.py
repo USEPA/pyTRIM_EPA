@@ -495,10 +495,10 @@ class MiscAssociatedFileDepositionOverlay(MiscAssociatedFileVariety):
     def get_files_to_suppress_from_download(self):
         return []  # ["original.plt"]
 
+
 class MiscAssociatedFileAERMODGeneratedReceptors(MiscAssociatedFileVariety):
     MIME_TYPE = "application/geojson"
     STORAGE_EXTENSION = "geojson"
-    WGS_TO_UTM_MAPPER = CoordinateMapper('WGS84_LONGLAT', 'UTM')
 
     # we already have this data in memory, no need to open it
     # like w/ MiscAssociatedFileDepositionOverlay custom code.
@@ -559,34 +559,13 @@ class MiscAssociatedFileAERMODGeneratedReceptors(MiscAssociatedFileVariety):
     def perform_custom_upload_behavior(self, **kwargs):
         if "uploaded_contents" in kwargs:
             uploaded_contents = kwargs["uploaded_contents"]
-
-            decoded = json.loads(uploaded_contents)
-
-            # we need a UTM zone to call Samuel's aermod receptor generation code;
-            # just grab any single point from the geojson and go with that.
-            # (do we need to worry if
-            first_feature = decoded["features"][0]
-            point_in_feature = first_feature["geometry"]["coordinates"]
-            point_longitude = point_in_feature[0]
-            point_latitude = point_in_feature[1]
-            utm_pos = self.WGS_TO_UTM_MAPPER.translate(point_longitude, point_latitude)
-            just_zone = int(utm_pos[-1][0:-1])
-            in_northern_hemisphere = point_latitude > 0
-
-            if not in_northern_hemisphere:
-                raise Exception("southern hemisphere unsupported")
-
             return ({
                 "data.geojson": {
                     "contents": uploaded_contents,
                     "mime": self.MIME_TYPE
                 },
-                # "temp_foo.aermod": {
-                #     "contents": json.dumps(fake_placeholder),
-                #     "mime": "application/text"
-                # },
                 "aermod_receptors.txt": {
-                    "contents": geojson_to_aermod_receptors(uploaded_contents, just_zone, in_northern_hemisphere),
+                    "contents": geojson_to_aermod_receptors(uploaded_contents),
                     "mime": "application/text"
                 }
             }, None)
@@ -611,7 +590,7 @@ def get_local_misc_file_loc():
 # non-api-specific utility function that retrieves/uploads/deletes a
 # MiscAssociatedFileVariety file. refactored from the "manage_misc_scenario_file"
 # endpoint/route handler
-def associated_file_helper(scenario_id, misc_file_type:str, operation:str, file_obj = None, file_metadata=None):
+def associated_file_helper(scenario_id, misc_file_type: str, operation: str, file_obj=None, file_metadata=None):
 
     # print(f"ASSOCIATED FILE HELPER REFACTORIZATION: {scenario_id=}, {misc_file_type=}, {operation=}")
     # this function leverages the MiscAssociatedFileVariety class hierarchy defined in ../utils/file_io.py; provides basic defaults as
@@ -697,7 +676,10 @@ def associated_file_helper(scenario_id, misc_file_type:str, operation:str, file_
                             ContentType=uploadable_mime
                         )
                     else:
-                        with open(os.path.join(file_storage_location, loop_file_path), 'w') as f:
+                        method = 'w'
+                        if isinstance(uploadable_item, bytes):
+                            method = 'wb'
+                        with open(os.path.join(file_storage_location, loop_file_path), method) as f:
                             f.write(uploadable_item)
 
                 if additional_metadata is not None:
