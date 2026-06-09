@@ -1,3 +1,4 @@
+from sqlalchemy import or_
 from .models import MircParameter, ureg
 from ...utils.serialize import register_serializer
 
@@ -8,10 +9,26 @@ __all__ = [
 
 
 class NullParameter:
-    value = 0
-    unit = None
-    quantity = 0 * ureg('')
-    source = None
+    def __init__(self, unit=''):
+        self._value = 0
+        self._unit = unit
+        self._source = None
+
+    @property
+    def value(self):
+        return self._value
+
+    @property
+    def unit(self):
+        return self._unit
+
+    @property
+    def quantity(self):
+        return self._value * ureg(self._unit)
+
+    @property
+    def source(self):
+        return self._source
 
     def __bool__(self):
         return False
@@ -81,7 +98,9 @@ class ParameterManager:
             s = s.parent
 
         if not params:
-            return NullParameter()
+            return NullParameter(
+                unit=self._get_param_default_dimensionality(**kwargs)
+            )
 
         params = list(params.values())
         for param in params:
@@ -91,6 +110,18 @@ class ParameterManager:
             return params[0]
         else:
             return params
+
+    def _get_param_default_dimensionality(self, name=None, variable=None):
+        matching_params = MircParameter.query.filter(or_(
+            MircParameter.name == name,
+            MircParameter.variable == variable
+        )).all()
+        if not matching_params:
+            return ''  # don't know
+        matched_unit = matching_params[0].unit
+        if matched_unit is None:
+            return ''  # No unit
+        return str(ureg.get_base_units(matched_unit)[-1])  # convert to base units
 
     def __iter__(self):
         return iter(self._get_param())  # List of all possible parameters

@@ -12,7 +12,6 @@ def log_vals(log, **kwargs):
 
 def input_units(**arg_checks):
     def decorated(f):
-
         param_names = list(inspect.signature(f).parameters.keys())
 
         @wraps(f)
@@ -39,21 +38,22 @@ def check_units(name, val, *, dimensionality=None):
     if val is None:
         return  # This is ok
 
+    is_quantity = hasattr(val, 'dimensionality')
+
     if not dimensionality:
-        if hasattr(val, 'dimensionality') and not val.check(''):
+        if is_quantity and not val.check(''):
             raise TypeError(
                 f'{name} must be unitless, but the value passed was {val}'
             )
     else:
-        real_dimension = (
+        is_real_dimension = (
             len(dimensionality.split('/')) == 1 or  # i.e., not a relation
             len(set(dimensionality.split('/'))) > 1  # e.g., not mass/mass
         )
-
-        if not real_dimension and not hasattr(val, 'dimensionality'):
+        if not is_real_dimension and not is_quantity:
             return  # this is ok
 
-        if not hasattr(val, 'dimensionality') or not val.check(dimensionality):
+        if not is_quantity or not val.check(dimensionality):
             raise TypeError(
                 f'{name} must be a quantity of {dimensionality},'
                 f' but the value passed was {val}'

@@ -15,7 +15,7 @@
             {% if not scenario.mirc_simulations %}disabled="disabled"{% endif %}
         >
             {% for sim in scenario.mirc_simulations %}
-                <option value="{{ sim.id }}" class="font-weight-bold">
+                <option value="{{ sim.id }}">
                     {{
                         sim.name + ' - ' +
                         (sim.chemical.hap_name or sim.chemical.name) + ' (' +
@@ -223,7 +223,7 @@ onDomLoad(function() {
 
         if (chemical.hap_name || chemical.cas_number) {
             $('#chemical-name').val(
-                chemical.hap_name + ' (CAS ' + chemical.cas_number + ')'
+                (chemical.hap_name || chemical.name) + ' (CAS ' + chemical.cas_number + ')'
             );
         }
         else {
