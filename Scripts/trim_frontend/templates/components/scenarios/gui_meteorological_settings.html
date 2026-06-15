@@ -345,8 +345,7 @@
                             let sim_end = Date.parse(scenario["simulation_end_date"])
                             var diff = calculateDateDistance(sim_start, sim_end, ['days']);
                             var days = parseInt(diff[0].split(' ')[0]);
-                            var annualVal = days / 365.2425 * val;
-                            $('#precipitation_average_annual').val(annualVal);
+                            $('#precipitation_average_annual').val(val * 365);
                         }
                     }
                     else {
