@@ -381,7 +381,7 @@
             selects.attr('disabled', 'disabled');
 
             function updateFields(section) {
-                var globalFileFiled = section.find('[type="file"][name^="default_"]');
+                var globalFileField = section.find('[type="file"][name^="default_"]');
                 section.find('select').each(function() {
                     var me = $(this);
 
@@ -389,7 +389,7 @@
                     var customized = subform.find(
                         '[type="checkbox"][id$="use_custom_file"]');
 
-                    var data = globalFileFiled.attr('data-filedata');
+                    var data = globalFileField.attr('data-filedata');
                     if (customized.prop('checked')) {
                         data = subform.find('[type="file"]').attr('data-filedata');
                     }
@@ -446,16 +446,21 @@
             gui.find('select').on('change',function (){
                 let sel = $(this);
                 let section = sel.closest('section');
-                var globalFileFiled = section.find('[type="file"][name^="default_"]');
-                let extension = globalFileFiled[0].files[0].name;
-                let data = globalFileFiled.attr('data-filedata');
+                var globalFileField = section.find('[type="file"][name^="default_"]');
+                let data = globalFileField.attr('data-filedata');
+                let extension = '';
 
                 let scenario = TRIM.store.currentScenario;
                 let sim_start = Date.parse(scenario["simulation_start_date"])
                 let sim_end = Date.parse(scenario["simulation_end_date"])
                 let subform = sel.closest('.subform');
                 if (subform.find('[type="checkbox"][id$="use_custom_file"]').prop('checked')) {
-                    data = subform.find('[type="file"]').attr('data-filedata');
+                    let localFileField = subform.find('[type="file"]');
+                    data = localFileField.attr('data-filedata');
+                    extension = localFileField[0].files[0].name;
+                }
+                else {
+                    extension = globalFileField[0].files[0].name;
                 }
                 data = data || 'null';
                 data = JSON.parse(data);
