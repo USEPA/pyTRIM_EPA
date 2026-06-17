@@ -27,6 +27,12 @@
 
             <div data-slot="true" data-target="coniferous_forest_litterfall">
                 {{ dimensionally_varying_subform(
+                    is_varying_field='time_varying',
+                    use_custom_field='use_custom_file',
+                    custom_file_field='custom_file',
+                    var_name_fields=[
+                        'field_name'
+                    ],
                     static_value_fields=[
                         'static_value'
                     ]
@@ -98,6 +104,12 @@
 
             <div data-slot="true" data-target="coniferous_forest_allowexchange">
                 {{ dimensionally_varying_subform(
+                    is_varying_field='time_varying',
+                    use_custom_field='use_custom_file',
+                    custom_file_field='custom_file',
+                    var_name_fields=[
+                        'field_name'
+                    ],
                     static_value_fields=[
                         'static_value'
                     ]
@@ -216,6 +228,8 @@
                     submit_seasonal_dyn_value(this)
                 })
             })
+            $('#coniferous_forest_litterfall_time_varying').parent().hide();
+            $('#coniferous_forest_allowexchange_time_varying').parent().hide();
             console.log('populated seasonal form!')
             LoadingScreen.hide('seasonal_info_loading');
         }
@@ -409,7 +423,7 @@
                     // Get only the column for this select
                     let this_sel_data = new_data.map((e, i) => {
                         let this_row = {
-                            'Date': convertDate(e['Date']),
+                            'Date': e['Date'],
                             'Hour': e['Hour'],
                             'TimeZone': e['TimeZone']
                         }

@@ -134,9 +134,9 @@ def get_seasonal_dynamics_params(scen, sd_type, media_name, default=-1):
         if sd_type == 'lf':
             sd_data = c.LitterFallRate
         elif sd_type == 'ae':
-            # TODO is allowExchange_forAir correct? should we use _forOther instead?
-            #   or should we directly use _Dynamic (which these point to)
-            sd_data = c.AllowExchange_forAir
+            # NOTE may need to reconsider _forAir and _forOther if steady-state modeling
+            # becomes supported
+            sd_data = c.AllowExchange_Dynamic
         else:
             raise ValueError('Unknown SD_Data!')
         if sd_data is None:
