@@ -1,10 +1,9 @@
+from base import *
+
 import argparse
-import os
 import time
 from datetime import datetime
 from trim_core.algorithms.full_model_run import make_transition_matrix
-from trim_db.schema.scenarios.models import ScenarioLoadRunProc
-from trim_db.services import ScenarioService
 
 
 def generate_tm(scenario_name):
@@ -66,6 +65,5 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--scenario')
     args = parser.parse_args()
 
-    from trim_db.local import *  # Loads user/role tables
-
+    args.scenario = "dmap test local"
     generate_tm(args.scenario)

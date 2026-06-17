@@ -496,6 +496,7 @@ class MiscAssociatedFileDepositionOverlay(MiscAssociatedFileVariety):
         return []  # ["original.plt"]
 
 
+
 class MiscAssociatedFileAERMODGeneratedReceptors(MiscAssociatedFileVariety):
     MIME_TYPE = "application/geojson"
     STORAGE_EXTENSION = "geojson"

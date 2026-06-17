@@ -17,11 +17,12 @@ from ..scenarios.forms import ScenarioAbioticPropertiesForm
 from ..scenarios.utils import init_parameter_definitions
 from ..utils.logging import make_logger
 from .defaults import \
-     Air_Parcel_VolElem_defaults, Aquatic_Biota_SW_Compartment_defaults, \
-     Aquatic_Biota_Sed_Compartment_defaults, \
-     LAND_USE_TYPES, AQUATIC_DIET, Land_Parcel_VolElem_defaults, Water_Parcel_VolElem_defaults, \
-     Wet_Dry_Source_VolElem_defaults, EROSION_DEFAULTS, make_self_requirements, \
-     SURFACE_SOIL_SPECIFIC_MEDIA_PARAMS
+    Air_Parcel_VolElem_defaults, Aquatic_Biota_SW_Compartment_defaults, \
+    Aquatic_Biota_Sed_Compartment_defaults, \
+    LAND_USE_TYPES, AQUATIC_DIET, Land_Parcel_VolElem_defaults, \
+    Water_Parcel_VolElem_defaults, Wet_Dry_Source_VolElem_defaults, \
+    EROSION_DEFAULTS, make_self_requirements, \
+    SURFACE_SOIL_SPECIFIC_MEDIA_PARAMS
 from .forms import ScenarioParcelsForm
 
 
