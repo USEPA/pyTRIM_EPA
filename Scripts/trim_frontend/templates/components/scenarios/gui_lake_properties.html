@@ -48,7 +48,7 @@
         </div>
         <div class = "row">
             <div class="col-md mt-4 text-center">
-                <h4>Sediment Properties</h4>
+                <h4>Sediment Bed Properties</h4>
             </div>
         </div>
         <div class ="row">
@@ -228,7 +228,7 @@
                 'unit': 'm<sup>2</sup>',
                 'helpText': "Portion of the modeling domain whose runoff terminates in this water body. Matrix multiplication on the matrix of parcel-to-parcel runoff fractions and the parcel surface areas. For the parcels directly sending runoff to the water body, it follows the flow lines upstream through the parcels contributing to those sending parcels, multiplying parcel areas by aggregate runoff fractions. For example: If a parcel sends 100% of its runoff directly to the water body, then that sending parcel&apos;s whole surface area is included in this Precipitation Runoff Watershed Area calculation. If Parcel A sends 10% of its runoff to Parcel B which sends 50% of its runoff to the water body, then the Precipitation Runoff Watershed Area calculation incorporates 10% * 50% = 5% of Parcel A&apos;s surface area and 50% of Parcel B&apos;s surface area."
             },
-            'Precipitation Runoff Volumetric Rate from Land to Water Body':{
+            'Precipitation Runoff Volumetric Rate to Water Body':{
                 'short_name':'connected_runoff_to_this_sw',
                 'is_editable': false,
                 'default_value': 0,
@@ -1172,7 +1172,7 @@
                 return Number.parseFloat(res).toExponential(5)
             }
 
-            let runoff_gain = Number(data.find(e=>e.Property == "Precipitation Runoff Volumetric Rate from Land to Water Body")[parcel_name])
+            let runoff_gain = Number(data.find(e=>e.Property == "Precipitation Runoff Volumetric Rate to Water Body")[parcel_name])
             let precipitation_gain = Number(data.find(e=>e.Property == "Precipitation Volumetric Rate to Water Body")[parcel_name])
             let precipitation_gw_seepage_gain = Number(data.find(e=>e.Property == "Precipitation Seepage Volumetric Rate to Groundwater")[parcel_name])
             let external_inflow_gain = Number(data.find(e=>e.Property == "External Water Inflow from Other Water Bodies")[parcel_name])
@@ -1270,7 +1270,7 @@
                             }
                             else {
                                 let exceptions = ['Precipitation Runoff Watershed Area',
-                                    'Precipitation Runoff Volumetric Rate from Land to Water Body',
+                                    'Precipitation Runoff Volumetric Rate to Water Body',
                                     'Precipitation Volumetric Rate to Water Body',
                                     'Precipitation Seepage Volumetric Rate to Groundwater'
                                 ]

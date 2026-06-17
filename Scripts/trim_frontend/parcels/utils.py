@@ -778,7 +778,7 @@ def initialize_compartment_custom_parameters(nc):
         # (should be fixed value for that media across all parcels of the scenario for compartments with
         # that media
         search_comps = [c for c in this_parcel.scenario.compartments if c.media.isa(nc.media)]
-        ae_val = 0.5
+        ae_val = 1
         if len(search_comps) > 0:
             ae_vals = list(set([c.parameters.get("AllowExchange_Dynamic").value for c in search_comps if
                                 c.parameters.get("AllowExchange_Dynamic") is not None and
