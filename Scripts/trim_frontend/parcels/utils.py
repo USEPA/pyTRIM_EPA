@@ -1,29 +1,28 @@
-import re, json
+import geopandas as gpd
+import json
 import numpy as np
+import re
 from copy import deepcopy
 from pprint import pprint
-import geopandas as gpd
 from shapely.geometry import Polygon, Point
 from shapely.prepared import prep
-from ..scenarios.utils import init_parameter_definitions
-from .defaults import SURFACE_SOIL_SPECIFIC_MEDIA_PARAMS
-
 from flask_api import ApiResult
-from pyproj import Transformer
-
+from trim_core.coordinates import CoordinateMapper
 from trim_frontend.scenarios.utils import update_dynamic_params
 from trim_db.schema import ureg, CustomParameter, ParameterDefinition, Parcel
 from trim_db.services import ChemicalService, CompartmentService, FormulaService, \
     ParameterService, ParcelService, ScenarioService, VolumeElementService
 from trim_db.services.parameters import get_or_create_custom_param, update_custom_param_value
+from ..scenarios.forms import ScenarioAbioticPropertiesForm
+from ..scenarios.utils import init_parameter_definitions
+from ..utils.logging import make_logger
 from .defaults import get_watershed_area, \
      Air_Parcel_VolElem_defaults, Aquatic_Biota_SW_Compartment_defaults, \
      Aquatic_Biota_Sed_Compartment_defaults, Farm_Biota_SurfSoil_Compartment_defaults, \
      LAND_USE_TYPES, AQUATIC_DIET, Land_Parcel_VolElem_defaults, Water_Parcel_VolElem_defaults, \
-     Wet_Dry_Source_VolElem_defaults, EROSION_DEFAULTS, make_self_requirements
+     Wet_Dry_Source_VolElem_defaults, EROSION_DEFAULTS, make_self_requirements, \
+     SURFACE_SOIL_SPECIFIC_MEDIA_PARAMS
 from .forms import ScenarioParcelsForm
-from ..scenarios.forms import ScenarioAbioticPropertiesForm
-from ..utils.logging import make_logger
 
 
 # note - this is mainly just code relocated from routes.py with absolutely zero changes.
@@ -779,7 +778,7 @@ def initialize_compartment_custom_parameters(nc):
         # (should be fixed value for that media across all parcels of the scenario for compartments with
         # that media
         search_comps = [c for c in this_parcel.scenario.compartments if c.media.isa(nc.media)]
-        ae_val = 0.5
+        ae_val = 1
         if len(search_comps) > 0:
             ae_vals = list(set([c.parameters.get("AllowExchange_Dynamic").value for c in search_comps if
                                 c.parameters.get("AllowExchange_Dynamic") is not None and
@@ -1316,26 +1315,21 @@ def calculate_receptor_grid_points_for_parcel(pcl:Parcel):
         print(f"ERROR calculating grid points for parcel {pcl}: {e}")
         return None
 
-# this is an adapted version of Samuel's "geojson_to_aermod_receptors" function; minor
-# changes made to help it work within TRIM app
-def geojson_to_aermod_receptors(geojson_contents, utm_zone=None, northern_hemisphere=True):
+# this is an adapted version of Samuel's "geojson_to_aermod_receptors" function;
+# minor changes made to help it work within TRIM app
+def geojson_to_aermod_receptors(geojson_contents):
     """
-    Converts GeoJSON points to AERMOD receptor file format.
+    Converts GeoJSON points to AERMOD receptor file format,
+    including WGS84-to-UTM coordinate conversion.
 
     Parameters:
     - geojson_contents: str containing GeoJSON
-    - utm_zone: int, UTM zone number
-    - northern_hemisphere: bool, True if northern hemisphere, False for southern
 
     Output:
     - AERMOD receptor file text (to be written to a file, returned to client, etc.)
     """
     # Set up transformer for lat/lon -> UTM
-    proj_str = "+proj=utm +datum=WGS84 +units=m +no_defs"
-    # proj_str += " +zone={utm_zone}"
-    if not northern_hemisphere:
-        proj_str += " +south"
-    transformer = Transformer.from_crs("EPSG:4326", proj_str, always_xy=True)
+    mapper = CoordinateMapper('WGS84_LONGLAT', 'UTM')
 
     # Read GeoJSON
     parsed_geojson = json.loads(geojson_contents)
@@ -1346,15 +1340,13 @@ def geojson_to_aermod_receptors(geojson_contents, utm_zone=None, northern_hemisp
     for feature in parsed_geojson['features']:
         geom = feature['geometry']
         if geom['type'] == 'Point':
-            lon, lat = geom['coordinates']
-            x, y = transformer.transform(lon, lat)
-            receptors.append((x, y))
+            receptors.append(mapper.translate(*geom['coordinates'])[:2])
         else:
             print(f"Skipping non-point geometry: {geom['type']}")
 
     # generate output
     aermod_format = ""
-    for idx, (x, y) in enumerate(receptors, start=1):
+    for (x, y) in receptors:
         aermod_format += f"RE DISCCART {x:.2f} {y:.2f} 0.0\n"
     aermod_format += "END\n"
 

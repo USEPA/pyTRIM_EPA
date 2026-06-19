@@ -671,14 +671,14 @@ window.TRIM = (function(trim) {
 
             for (var i = 0, len = if_true.length; i < len; i++) {
                 var check = if_true[i];
-                if (!document.getElementById(check).checked) {
+                if (!document.getElementById(check)?.checked) {
                     group.style.display = 'none';
                     break;
                 }
             }
             for (var i = 0, len = if_false.length; i < len; i++) {
                 var check = if_false[i];
-                if (document.getElementById(check).checked) {
+                if (document.getElementById(check)?.checked) {
                     group.style.display = 'none';
                     break;
                 }

@@ -10,6 +10,7 @@
             "id": "static_value",
             "data_type": "float",
             "min": 20,
+            "max": 10000,
             "default": 226,
             "required": true,
             "readonly": false,

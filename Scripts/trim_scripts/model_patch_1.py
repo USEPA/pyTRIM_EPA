@@ -1,27 +1,7 @@
-import os
-# os.environ['TEST_DB_SERVERLESS'] = 'yes'  
-# os.environ['MYSQL_PASSWORD'] = 'root'  
-
-from trim_db.utils.users_roles import implement_users_roles
-implement_users_roles()  
-
-import sys  
-# sys.path.append('C:/Users/55586/Desktop/tools/pyTRIM/trim-builder/Scripts')  
-
-import time  
-from pathlib import Path
-from trim_db.porting import *  
-from trim_db.schema import *  
-from trim_db.services import *
 from sqlalchemy.exc import IntegrityError
-
-import json
-import time
-from trim_db.porting import *
-from trim_db.schema import *
-import time
-
 from datetime import datetime as dt
+
+from base import *
 
 # FIX Wrongly parsed formulas
 FORMULA_REPLACE = {

@@ -149,7 +149,7 @@
     },
     {
       "id": "connected_runoff_to_this_sw",
-      "label": "Precipitation Runoff Volumetric Rate from Land to Water Body",
+      "label": "Precipitation Runoff Volumetric Rate to Water Body",
       "readonly": true,
       "data_type": "float",
       "default": 0,

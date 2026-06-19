@@ -717,9 +717,13 @@ def true_wind_wt_ave(df_met, col, fallback=None):
     from trim_frontend.utils.file_io import vset
     
     def u_calc(WS, WD):
+        WS = float(WS)
+        WD = float(WD)
         return -1 * WS * np.sin(np.radians(WD))
 
     def v_calc(WS, WD):
+        WS = float(WS)
+        WD = float(WD)
         return -1 * WS * np.cos(np.radians(WD))
 
     try:
@@ -801,9 +805,10 @@ def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
                 
                 if k in ["HorizontalWindSpeed", "WindDirection"]:
                     if k == par_dat[0].get("_selected"):
-                        met_dict['wt_av_' + k] = true_wind_wt_ave(df_met, k, fallback=wt_ave)
+                        wt_ave = true_wind_wt_ave(df_met, k, fallback=wt_ave)
                 else:
-                    met_dict['wt_av_' + k] = wt_ave
+                    wt_ave = wt_ave
+                met_dict['wt_av_' + k] = wt_ave
 
         if 'Rain' in df_met.columns:
             df_met['Rain'] = pd.to_numeric(df_met['Rain'], errors='coerce')
@@ -833,6 +838,9 @@ def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
         wt_ave = df_met['prod_lf'].sum() / df_met['time_delta'].sum()
         met_dict['wt_av_litterfallrate'] = wt_ave
 
+    for k,v in met_dict.items():
+        if isinstance(v, np.float64):
+            met_dict[k] = float(v)
     return met_dict
 
 
