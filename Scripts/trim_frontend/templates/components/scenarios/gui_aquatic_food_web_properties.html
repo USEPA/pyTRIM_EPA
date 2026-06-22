@@ -544,8 +544,7 @@
                     TableRedraw(diet_data, "diet")
                 }
                 if (!$('#DietTables').children().length) {
-                    var emptyMsg = $('<div class="alert alert-light" />');
-                    emptyMsg.text('No data available in table');
+                    var emptyMsg = $('<table class="dataTable no-footer" style="width:100%"><tbody><tr class="odd"><td class="dataTables_empty">No data available in table</td></tr></tbody></table>');
                     divDietTables.append(emptyMsg);
                 }
                 console.log('populated aquatic food web form!')

@@ -1238,6 +1238,11 @@
             const sed_properties = Object.keys(default_sed_data)
             const waterParcels = parcels.filter(e => e.parcelType == "Water Only" || e.parcelType == "Water & Air");
             try {
+            if (waterParcels.length === 0) {
+                $(lkTblId + ' tbody:gt(0)').remove();
+                $(sedTblId + ' tbody:gt(0)').remove();
+                return;
+            }
             if (parcels.length > 0 && waterParcels.length > 0) {
                 const mercuryTransformations = [
                     'MethylationRate', 'OxidationRate', 'ReductionRate', 'DemethylationRate'
