@@ -352,7 +352,7 @@ class SoilData:
         tilled_results = {}
         no_till_results = {}
         parcel_vertices_names = list(parcel_dicts.keys())
-        with ThreadPoolExecutor(max_workers=50) as t_executor:
+        with ThreadPoolExecutor(max_workers=2) as t_executor:
             data_results = t_executor.map(self.get_soil_data, [{'pv': parcel_dicts[this_parcel_vertices],
                                                                 'pn': parcel_vertices_names[i]}
                                                                for i, this_parcel_vertices in enumerate(parcel_dicts)])
