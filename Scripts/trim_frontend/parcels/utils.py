@@ -1229,7 +1229,7 @@ def create_new_parameter_defs_for_domain(comp_name):
 
 
 # adapted from Samuel's "grid_points_in_polygon_meters" method
-def calculate_receptor_grid_points_for_parcel(pcl:Parcel):
+def calculate_receptor_grid_points_for_parcel(pcl: Parcel):
     """
     Calculate a rectangular grid of points inside the polygon defined by a parcel's
     vertices and spacing custom parameter.
@@ -1252,23 +1252,17 @@ def calculate_receptor_grid_points_for_parcel(pcl:Parcel):
     try:
 
         # EPSG:4326 is WGS84, which is what our parcel vertices are based on.
-        # Samuel's algorithm switches to 3857 for calculating the grid points
         CRS_FOR_WGS84 = 4326
-        CRS_FOR_GRID_CALCS = 3857
-        # note -- according to https://github.com/CityScope/CS_choiceModels/issues/4,
-        # CRS84 is also equvalent to EPSG:4326
 
-        def get_comp(p:Parcel, kwargs):
+        def get_comp(p: Parcel, **kwargs):
             comp = p.get_compartment(**kwargs)
-
             if kwargs.get("name") and isinstance(comp, list):
                 comp = comp[0]
-
             return comp
 
-        cdv = get_comp(pcl, {"name":"DryVaporSource"})
+        cdv = get_comp(pcl, name="DryVaporSource")
         spacing_param = cdv.parameters.get("ReceptorSpacing")
-        spacing_meters = spacing_param.default_value if type(spacing_param) is ParameterDefinition else spacing_param.value
+        spacing_meters = spacing_param.value
 
         if len(pcl.vertices) == 0:
             print(f"WARNING - {pcl} has no defined vertices; returning empty list")
@@ -1279,7 +1273,8 @@ def calculate_receptor_grid_points_for_parcel(pcl:Parcel):
         # (this dataframe is a single row with a single column; geometry contains all the points
 
         # Project to a CRS in meters (Web Mercator here; you could also use UTM for better accuracy)
-        gdf_proj = gdf.to_crs(epsg=CRS_FOR_GRID_CALCS)
+        utm_crs = gdf.estimate_utm_crs()
+        gdf_proj = gdf.to_crs(utm_crs)
         polygon = gdf_proj.geometry[0]
         prep_poly = prep(polygon)
 
@@ -1297,7 +1292,7 @@ def calculate_receptor_grid_points_for_parcel(pcl:Parcel):
                     points_inside.append(pt)
 
         # Convert list of Points to GeoDataFrame in EPSG:3857, then reproject back to EPSG:4326
-        points_gdf = gpd.GeoDataFrame(geometry=points_inside, crs=f"EPSG:{CRS_FOR_GRID_CALCS}")
+        points_gdf = gpd.GeoDataFrame(geometry=points_inside, crs=utm_crs)
         # return points_gdf.to_crs(epsg=CRS_FOR_WGS84)
         converted_points = points_gdf.to_crs(epsg=CRS_FOR_WGS84)
 
