@@ -805,7 +805,9 @@
             }]
             TRIM.api.updateScenario(scenario_info).on('load', function() {
                 LoadingScreen.hide('update_soil_data');
-                $('#save-btn').click();
+                setTimeout(() => {
+                    $('#save-btn').click();
+                }, 1000);
             });
         });
 
