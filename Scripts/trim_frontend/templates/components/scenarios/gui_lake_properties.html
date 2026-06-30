@@ -96,8 +96,14 @@
         const lkTblId = '#WaterColumnTable';
         const sedTblId = '#SedimentTable';
 
-        let lkTable = $(lkTblId).removeAttr('width').DataTable()
-        let sdTable = $(sedTblId).removeAttr('width').DataTable()
+        let lkTable = $(lkTblId).removeAttr('width').DataTable({
+            paging: false, bFilter: false, info: false,
+            language: { emptyTable: 'No data available in table' }
+        })
+        let sdTable = $(sedTblId).removeAttr('width').DataTable({
+            paging: false, bFilter: false, info: false,
+            language: { emptyTable: 'No data available in table' }
+        })
         let default_water_data = {
             'Water pH':{
                 'short_name':'water_ph',
@@ -258,28 +264,28 @@
                 'is_editable': true,
                 'default_value': 0,
                 'unit': '1/day',
-                'helpText': 'See the TRIM User Guide Appendix for full reference information.'
+                'helpText': 'Enter the methylation rate for divalent mercury (Hg) in the water column. Valid values are ≥ 0. The default value of 0.001 is for a shallow lake with little or no anoxia, reflecting observed non-microbial rate constants in oxic waters, as reported on page B-20 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information.'
             },
             'Hg Reduction Rate':{
                 'short_name':'ReductionRate.Surface_Water',
                 'is_editable': true,
                 'default_value': 0,
                 'unit': '1/day',
-                'helpText': 'See the TRIM User Guide Appendix for full reference information.'
+                'helpText': 'Enter the reduction rate for divalent mercury in the water column. Valid values are ≥ 0. The default value of 0.0075 is as discussed on pages B-18 and B-19 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information.'
             },
             'Hg Oxidation Rate':{
                 'short_name':'OxidationRate.Surface_Water',
                 'is_editable': true,
                 'default_value': 0,
                 'unit': '1/day',
-                'helpText': 'See the TRIM User Guide Appendix for full reference information.'
+                'helpText': 'Enter the oxidation rate for elemental mercury in the water column. Valid values are ≥ 0. The default value of 0 is from Table B-2 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information.'
             },
             'Hg Demethylation Rate':{
                 'short_name':'DemethylationRate.Surface_Water',
                 'is_editable': true,
                 'default_value': 0,
                 'unit': '1/day',
-                'helpText': 'See the TRIM User Guide Appendix for full reference information.'
+                'helpText': 'Enter the demethylation rate for methyl mercury in the water column. Valid values are ≥ 0. The default value of 0.013 is the average of the range of maximum potential rate constants (0.001 to 0.025) from Gilmour and Henry 1991 (Mercury Methylation in Aquatic Systems Affected by Acid Deposition), as reported on page B-21 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information.'
             }
         }
         let default_sed_data = {
@@ -362,28 +368,28 @@
                 'is_editable': true,
                 'default_value': 0,
                 'unit': '1/day',
-                'helpText': 'See the TRIM User Guide Appendix for full reference information.'
+                'helpText': 'Enter the methylation rate for divalent mercury (Hg) in the sediment bed. Valid values are ≥ 0. The default value of 0.0001 is as discussed on pages B-20 and B-21 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information.'
             },
             'Hg Reduction Rate':{
                 'short_name':'ReductionRate.Sediment',
                 'is_editable': true,
                 'default_value': 0,
                 'unit': '1/day',
-                'helpText': 'See the TRIM User Guide Appendix for full reference information.'
+                'helpText': 'Enter the reduction rate for divalent mercury in the sediment bed. Valid values are ≥ 0. The default value of 1E-06 is inferred based on model calibration to general observations of elemental mercury in pore water, as discussed on page B-19 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information.'
             },
             'Hg Oxidation Rate':{
                 'short_name':'OxidationRate.Sediment',
                 'is_editable': true,
                 'default_value': 0,
                 'unit': '1/day',
-                'helpText': 'See the TRIM User Guide Appendix for full reference information.'
+                'helpText': 'Enter the oxidation rate for elemental mercury in the sediment bed. Valid values are ≥ 0. The default value of 0 is from Table B-2 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information.'
             },
             'Hg Demethylation Rate':{
                 'short_name':'DemethylationRate.Sediment',
                 'is_editable': true,
                 'default_value': 0,
                 'unit': '1/day',
-                'helpText': 'See the TRIM User Guide Appendix for full reference information.'
+                'helpText': 'Enter the demethylation rate for methyl mercury in the sediment bed. Valid values are ≥ 0. The default value of 0.0501 is the average of the range of maximum potential rate constants (2E-04 to 1E-01) from Gilmour and Henry 1991 (Mercury Methylation in Aquatic Systems Affected by Acid Deposition), as reported on page B-22 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information.'
             }
         }
 
@@ -422,6 +428,7 @@
                 paging: false,
                 bFilter: false,
                 info: false,
+                language: { emptyTable: 'No data available in table' },
                 bAutoWidth: false,
                 scrollX: true,
                 scrollY: 500,
@@ -1014,8 +1021,9 @@
         form.addEventListener('form:visible', function() {
             console.log('lake props form visible')
             LoadingScreen.show('lake_props_loading');
+            document.body.removeEventListener('parcels:ready', updateLakeProps);
+            document.body.addEventListener('parcels:ready', updateLakeProps);
             TRIM.refreshParcels();
-            document.body.addEventListener('parcels:ready', updateLakeProps());
         });
 
         function get_pivoted_columns(tblId) {
@@ -1220,7 +1228,7 @@
         }
 
         function updateLakeProps() {
-            if (!TRIM.store.currentScenario.parcels) {
+            if (!TRIM.store.currentScenario || !TRIM.store.currentScenario.parcels) {
                 // Parcels haven't loaded yet; wait a bit and try again
                 setTimeout(function() { updateLakeProps(); }, 1000);
                 return;
@@ -1230,7 +1238,14 @@
             const sed_data = []
             const water_properties = Object.keys(default_water_data)
             const sed_properties = Object.keys(default_sed_data)
-            if (parcels.length > 0) {
+            const waterParcels = parcels.filter(e => e.parcelType == "Water Only" || e.parcelType == "Water & Air");
+            try {
+            if (waterParcels.length === 0) {
+                $(lkTblId + ' tbody:gt(0)').remove();
+                $(sedTblId + ' tbody:gt(0)').remove();
+                return;
+            }
+            if (parcels.length > 0 && waterParcels.length > 0) {
                 const mercuryTransformations = [
                     'MethylationRate', 'OxidationRate', 'ReductionRate', 'DemethylationRate'
                 ];
@@ -1329,9 +1344,12 @@
                 })
                 TableRedraw(sed_data, "sed")
             }
-
             console.log('populated lake props form!')
-            LoadingScreen.hide('lake_props_loading');
+            } catch(e) {
+                console.error('updateLakeProps error:', e);
+            } finally {
+                LoadingScreen.hide('lake_props_loading');
+            }
         }
     });
 </script>

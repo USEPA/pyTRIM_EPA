@@ -167,12 +167,13 @@
         form.addEventListener('form:visible', function() {
             console.log('seasonal form visible')
             LoadingScreen.show('seasonal_info_loading');
+            document.body.removeEventListener('parcels:ready', updateSeasonalData);
+            document.body.addEventListener('parcels:ready', updateSeasonalData);
             TRIM.refreshParcels();
-            document.body.addEventListener('parcels:ready', updateSeasonalData());
         });
 
         function updateSeasonalData() {
-            if (!TRIM.store.currentScenario.parcels) {
+            if (!TRIM.store.currentScenario || !TRIM.store.currentScenario.parcels) {
                 // Parcels haven't loaded yet; wait a bit and try again
                 setTimeout(function() { updateSeasonalData(); }, 1000);
                 return;
