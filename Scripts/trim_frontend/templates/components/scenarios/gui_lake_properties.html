@@ -187,7 +187,7 @@
                 'default_value': 2,
                 'unit': 'kg [sediment particles]/y',
                 'helpText': 'Volume of suspended sediment lost per year by the water column to discharge. Product of the Water Column Suspended Sediment Concentration and the Water Column Discharge Volumetric Rate\n' +
-                    '<p><strong>= (Water Column Suspended Sediment Concentration * Water Column Discharge Volumetric Rate)</strong></p>'
+                    '<p><strong>= (Suspended Sediment Concentration * Discharge Volumetric Rate)</strong></p>'
             },
             'Flush Rate':{
                 'short_name':'flush_rate',
@@ -203,7 +203,7 @@
                 'default_value': 2,
                 'unit': 'm<sup>3</sup> [water]/y',
                 'helpText': 'Volume of water lost per year by the water column to discharge. The Water Column Evaporation Volumetric Rate subtracted from the sum of the Precipitation Runoff Volumetric Rate from Land to Water Body, Precipitation Volumetric Rate to Water Body, Precipitation Seepage Volumetric Rate to Groundwater, and Water Column External Inflow from Other Water Bodies, assuming the lake maintains a constant volume (a simplifying assumption). That is, water inputs minus loss to evaporation.' +
-                    '<p><strong>= (Precipitation Runoff Volumetric Rate from Land to Water Body + Precipitation Volumetric Rate to Water Body + Precipitation Seepage Volumetric Rate to Groundwater + Water Column External Water Inflow from Other Water Bodies) - Water Column Evaporation Volumetric Rate.</strong></p>'
+                    '<p><strong>= (Precipitation Runoff Volumetric Rate to Water Body + Precipitation Volumetric Rate to Water Body + Precipitation Seepage Volumetric Rate to Groundwater + External Water Inflow from Other Water Bodies) - Evaporation Volumetric Rate.</strong></p>'
             },
             'Evaporation Rate':{
                 'short_name':'evaporation_rate',
@@ -218,7 +218,7 @@
                 'default_value': 0,
                 'unit': 'm<sup>3</sup> [water]/y',
                 'helpText': 'Volume of water lost per year by the water column to evaporation. Product of the Water Column Evaporation Rate and the water body surface area.' +
-                    '<p><strong>= (Water Column Evaporation Rate * water body surface area)</strong></p>'
+                    '<p><strong>= (Evaporation Rate * water body surface area)</strong></p>'
             },
             'External Water Inflow from Other Water Bodies':{
                 'short_name':'externalWaterInflow',
@@ -338,7 +338,7 @@
                 'default_value': 0,
                 'unit': 'm/d',
                 'helpText': 'Velocity of sediment returning to the water column (as suspended sediment) from the sediment bed. Ratio of the difference between the Water Body Sediment Deposition Volumetric Rate and the Water Body Sediment Burial Volumetric Rate to the difference between 1 and the Water Body Sediment Bed Porosity' +
-                    '<strong><p>= (Water Body Sediment Deposition Volumetric Rate - Water Body Sediment Burial Volumetric Rate) / (1 - Water Body Sediment Bed Porosity)</p></strong>'
+                    '<strong><p>= (Deposition Volumetric Rate - Sediment Burial Volumetric Rate) / (1 - Bed Porosity)</p></strong>'
             },
             'Deposition Volumetric Rate':{
                 'short_name': 'sed_deposition_vol_rate',
@@ -346,7 +346,7 @@
                 'default_value': 0,
                 'unit': 'm<sup>3</sup> [sediment] /m<sup>2</sup> [sediment bed interface] /d',
                 'helpText': 'Volume of sediment received per day by the water body’s sediment bed (per unit area) from the suspended sediment in the water column. Ratio of the product of the Water Column Sediment Deposition Velocity and the Water Column Suspended Sediment Concentration to the Sediment Bed Density.' +
-                    '<strong><p>= (Water Column Sediment Deposition Velocity * Water Column Suspended Sediment Concentration / Sediment Bed Density)</p></strong>'
+                    '<strong><p>= (Sediment Deposition Velocity * Suspended Sediment Concentration / Bed Density)</p></strong>'
             },
             'Soil Erosion Rate to Water Body':{
                 'short_name':'sed_soil_erosion_to_sw',
@@ -361,7 +361,7 @@
                 'default_value': 0,
                 'unit': 'm<sup>3</sup> [sediment] /m<sup>2</sup> [sediment bed interface] /d',
                 'helpText': 'Volume of sediment buried per day into the sediment bed (per unit area) from the suspended sediment in the water column. Ratio of the difference between the sum (across all contributing water bodies) of the Water Column External Sediment Inflow from Other Water Bodies and the Soil Erosion Rate to Water Body and the Water Column Sediment Discharge Rate (converted from kg/y to kg/d) to the product of the Water Body Sediment Bed Density and water body surface area.' +
-                    '<strong><p>= (Water Column External Sediment Inflow from Other Water Bodies + Soil Erosion Rate to Water Body - [Water Column Sediment Discharge Rate]/365) / (Sediment Bed Density* water body surface area)</p></strong>'                
+                    '<strong><p>= (External Sediment Inflow from Other Water Bodies + Soil Erosion Rate to Water Body - [Sediment Discharge Rate]/365) / (Bed Density * water body surface area)</p></strong>'                
             },
             'Hg Methylation Rate':{
                 'short_name':'MethylationRate.Sediment',
