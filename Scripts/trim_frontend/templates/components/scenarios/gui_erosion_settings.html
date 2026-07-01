@@ -260,9 +260,10 @@
                     updateUsdaSoilData(JSON.parse(this.responseText));
                     usdaBtn.find('.lds-dual-ring').remove();
                     usdaBtn.attr('disabled', false);
-                    setTimeout(() => {
-                        $('#save-btn').click();
-                    }, 1000);
+                    // Refreshing the page seems to be causing issues with save?
+                    //setTimeout(() => {
+                    //$('#save-btn').click();
+                    //}, 1000);
                 });
             }
 
