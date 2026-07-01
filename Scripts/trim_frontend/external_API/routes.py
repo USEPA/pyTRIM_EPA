@@ -6,6 +6,7 @@ import re
 import shapefile
 import traceback
 import subprocess
+import pint
 
 from flask import Blueprint, request
 from flask_security import login_required
@@ -15,7 +16,7 @@ from ..utils.logging import make_logger
 from .helpers import UsdaApi, UsleClimateApi, convert_to_geojson
 from pyproj import CRS, Transformer
 from trim_db import ParcelService
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 
 
 external_api_soil = Blueprint('external_api_soil', __name__)
@@ -393,10 +394,19 @@ class UsleRData:
             os.remove(parcels_fp)
 
     def insert_rusle_into_soil_data(self, rusle, soil):
-        # unpack string
+        # unpack string and convert slope length to feet
         for parcel in soil:
             soil[parcel] = json.loads(soil[parcel])
             if rusle.get(parcel, None):
                 soil[parcel]["R"] = rusle[parcel]
+            if "slopelenusle_r" in soil[parcel]:
+                for k,v in soil[parcel]["slopelenusle_r"].items():
+                    soil[parcel]["slopelenusle_r"][k] = self.to_ft(v)
             soil[parcel] = json.dumps(soil[parcel])
         return soil
+
+    def to_ft(self, value):
+        if value:
+            ureg = pint.UnitRegistry()
+            return (value * ureg.meter).to(ureg.feet).magnitude
+        return value
