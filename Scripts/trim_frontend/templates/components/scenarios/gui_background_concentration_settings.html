@@ -90,8 +90,9 @@
             }
             if (TRIM.store.currentScenario.chemicals) {
                 TRIM.forms.populate(form, TRIM.store.currentScenario.chemicals);
+                document.body.removeEventListener('parcels:ready', updateBackgroundConcentrations);
+                document.body.addEventListener('parcels:ready', updateBackgroundConcentrations);
                 TRIM.refreshParcels();
-                document.body.addEventListener('parcels:ready', updateBackgroundConcentrations());
             }
             else {
                 TRIM.api.getChemicals(TRIM.store.currentScenario).on('load', function () {
@@ -105,7 +106,7 @@
         }
 
         function updateBackgroundConcentrations() {
-            if (!TRIM.store.currentScenario.parcels) {
+            if (!TRIM.store.currentScenario || !TRIM.store.currentScenario.parcels) {
                 // Parcels haven't loaded yet; wait a bit and try again
                 setTimeout(function() { updateBackgroundConcentrations(); }, 1000);
                 return;

@@ -6,6 +6,7 @@ import re
 import shapefile
 import traceback
 import subprocess
+import pint
 
 from flask import Blueprint, request
 from flask_security import login_required
@@ -15,7 +16,7 @@ from ..utils.logging import make_logger
 from .helpers import UsdaApi, UsleClimateApi, convert_to_geojson
 from pyproj import CRS, Transformer
 from trim_db import ParcelService
-from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 
 
 external_api_soil = Blueprint('external_api_soil', __name__)
@@ -353,11 +354,11 @@ class SoilData:
         tilled_results = {}
         no_till_results = {}
         parcel_vertices_names = list(parcel_dicts.keys())
-        with ThreadPoolExecutor(max_workers=50) as t_executor:
+        with ThreadPoolExecutor(max_workers=3) as t_executor:
             data_results = t_executor.map(self.get_soil_data, [{'pv': parcel_dicts[this_parcel_vertices],
                                                                 'pn': parcel_vertices_names[i]}
                                                                for i, this_parcel_vertices in enumerate(parcel_dicts)])
-        with ProcessPoolExecutor(max_workers=10) as p_executor:
+        with ProcessPoolExecutor(max_workers=2) as p_executor:
             ave_results = p_executor.map(self.compute_parameters, [{'pd': data,
                                                                     'pn': parcel_vertices_names[i]}
                                                                    for i, data in enumerate(data_results)])
@@ -394,10 +395,19 @@ class UsleRData:
             os.remove(parcels_fp)
 
     def insert_rusle_into_soil_data(self, rusle, soil):
-        # unpack string
+        # unpack string and convert slope length to feet
         for parcel in soil:
             soil[parcel] = json.loads(soil[parcel])
             if rusle.get(parcel, None):
                 soil[parcel]["R"] = rusle[parcel]
+            if "slopelenusle_r" in soil[parcel]:
+                for k,v in soil[parcel]["slopelenusle_r"].items():
+                    soil[parcel]["slopelenusle_r"][k] = self.to_ft(v)
             soil[parcel] = json.dumps(soil[parcel])
         return soil
+
+    def to_ft(self, value):
+        if value:
+            ureg = pint.UnitRegistry()
+            return (value * ureg.meter).to(ureg.feet).magnitude
+        return value

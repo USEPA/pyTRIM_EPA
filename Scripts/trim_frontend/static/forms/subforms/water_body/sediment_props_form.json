@@ -1,5 +1,5 @@
 {
-  "title": "Sediment Properties",
+  "title": "Sediment Bed Properties",
   "table_id": "SedimentTable",
   "render": true,
   "fields": [
@@ -91,7 +91,7 @@
       "data_type": "float",
       "default": 0,
       "tooltip": "1 / day",
-      "help": "See the TRIM User Guide Appendix for full reference information."
+      "help": "Enter the methylation rate for divalent mercury (Hg) in the sediment bed. Valid values are ≥ 0. The default value of 0.0001 is as discussed on pages B-20 and B-21 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information."
     },
     {
       "id": "ReductionRate.Sediment",
@@ -99,7 +99,7 @@
       "data_type": "float",
       "default": 0,
       "tooltip": "1 / day",
-      "help": "See the TRIM User Guide Appendix for full reference information."
+      "help": "Enter the reduction rate for divalent mercury in the sediment bed. Valid values are ≥ 0. The default value of 1E-06 is inferred based on model calibration to general observations of elemental mercury in pore water, as discussed on page B-19 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information."
     },
     {
       "id": "OxidationRate.Sediment",
@@ -107,7 +107,7 @@
       "data_type": "float",
       "default": 0,
       "tooltip": "1 / day",
-      "help": "See the TRIM User Guide Appendix for full reference information."
+      "help": "Enter the oxidation rate for elemental mercury in the sediment bed. Valid values are ≥ 0. The default value of 0 is from Table B-2 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information."
     },
     {
       "id": "DemethylationRate.Sediment",
@@ -115,7 +115,7 @@
       "data_type": "float",
       "default": 0,
       "tooltip": "1 / day",
-      "help": "See the TRIM User Guide Appendix for full reference information."
+      "help": "Enter the demethylation rate for methyl mercury in the sediment bed. Valid values are ≥ 0. The default value of 0.0501 is the average of the range of maximum potential rate constants (2E-04 to 1E-01) from Gilmour and Henry 1991 (Mercury Methylation in Aquatic Systems Affected by Acid Deposition), as reported on page B-22 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information."
     }
   ]
 }

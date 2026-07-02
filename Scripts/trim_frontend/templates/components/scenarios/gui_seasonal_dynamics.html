@@ -167,12 +167,13 @@
         form.addEventListener('form:visible', function() {
             console.log('seasonal form visible')
             LoadingScreen.show('seasonal_info_loading');
+            document.body.removeEventListener('parcels:ready', updateSeasonalData);
+            document.body.addEventListener('parcels:ready', updateSeasonalData);
             TRIM.refreshParcels();
-            document.body.addEventListener('parcels:ready', updateSeasonalData());
         });
 
         function updateSeasonalData() {
-            if (!TRIM.store.currentScenario.parcels) {
+            if (!TRIM.store.currentScenario || !TRIM.store.currentScenario.parcels) {
                 // Parcels haven't loaded yet; wait a bit and try again
                 setTimeout(function() { updateSeasonalData(); }, 1000);
                 return;
@@ -228,6 +229,8 @@
                     submit_seasonal_dyn_value(this)
                 })
             })
+            $('#coniferous_forest_litterfall_time_varying').parent().hide();
+            $('#coniferous_forest_allowexchange_time_varying').parent().hide();
             console.log('populated seasonal form!')
             LoadingScreen.hide('seasonal_info_loading');
         }
@@ -421,7 +424,7 @@
                     // Get only the column for this select
                     let this_sel_data = new_data.map((e, i) => {
                         let this_row = {
-                            'Date': convertDate(e['Date']),
+                            'Date': e['Date'],
                             'Hour': e['Hour'],
                             'TimeZone': e['TimeZone']
                         }

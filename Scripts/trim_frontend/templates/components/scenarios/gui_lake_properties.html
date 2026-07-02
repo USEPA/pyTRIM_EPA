@@ -48,7 +48,7 @@
         </div>
         <div class = "row">
             <div class="col-md mt-4 text-center">
-                <h4>Sediment Properties</h4>
+                <h4>Sediment Bed Properties</h4>
             </div>
         </div>
         <div class ="row">
@@ -96,8 +96,14 @@
         const lkTblId = '#WaterColumnTable';
         const sedTblId = '#SedimentTable';
 
-        let lkTable = $(lkTblId).removeAttr('width').DataTable()
-        let sdTable = $(sedTblId).removeAttr('width').DataTable()
+        let lkTable = $(lkTblId).removeAttr('width').DataTable({
+            paging: false, bFilter: false, info: false,
+            language: { emptyTable: 'No data available in table' }
+        })
+        let sdTable = $(sedTblId).removeAttr('width').DataTable({
+            paging: false, bFilter: false, info: false,
+            language: { emptyTable: 'No data available in table' }
+        })
         let default_water_data = {
             'Water pH':{
                 'short_name':'water_ph',
@@ -181,7 +187,7 @@
                 'default_value': 2,
                 'unit': 'kg [sediment particles]/y',
                 'helpText': 'Volume of suspended sediment lost per year by the water column to discharge. Product of the Water Column Suspended Sediment Concentration and the Water Column Discharge Volumetric Rate\n' +
-                    '<p><strong>= (Water Column Suspended Sediment Concentration * Water Column Discharge Volumetric Rate)</strong></p>'
+                    '<p><strong>= (Suspended Sediment Concentration * Discharge Volumetric Rate)</strong></p>'
             },
             'Flush Rate':{
                 'short_name':'flush_rate',
@@ -197,7 +203,7 @@
                 'default_value': 2,
                 'unit': 'm<sup>3</sup> [water]/y',
                 'helpText': 'Volume of water lost per year by the water column to discharge. The Water Column Evaporation Volumetric Rate subtracted from the sum of the Precipitation Runoff Volumetric Rate from Land to Water Body, Precipitation Volumetric Rate to Water Body, Precipitation Seepage Volumetric Rate to Groundwater, and Water Column External Inflow from Other Water Bodies, assuming the lake maintains a constant volume (a simplifying assumption). That is, water inputs minus loss to evaporation.' +
-                    '<p><strong>= (Precipitation Runoff Volumetric Rate from Land to Water Body + Precipitation Volumetric Rate to Water Body + Precipitation Seepage Volumetric Rate to Groundwater + Water Column External Water Inflow from Other Water Bodies) - Water Column Evaporation Volumetric Rate.</strong></p>'
+                    '<p><strong>= (Precipitation Runoff Volumetric Rate to Water Body + Precipitation Volumetric Rate to Water Body + Precipitation Seepage Volumetric Rate to Groundwater + External Water Inflow from Other Water Bodies) - Evaporation Volumetric Rate.</strong></p>'
             },
             'Evaporation Rate':{
                 'short_name':'evaporation_rate',
@@ -212,7 +218,7 @@
                 'default_value': 0,
                 'unit': 'm<sup>3</sup> [water]/y',
                 'helpText': 'Volume of water lost per year by the water column to evaporation. Product of the Water Column Evaporation Rate and the water body surface area.' +
-                    '<p><strong>= (Water Column Evaporation Rate * water body surface area)</strong></p>'
+                    '<p><strong>= (Evaporation Rate * water body surface area)</strong></p>'
             },
             'External Water Inflow from Other Water Bodies':{
                 'short_name':'externalWaterInflow',
@@ -228,7 +234,7 @@
                 'unit': 'm<sup>2</sup>',
                 'helpText': "Portion of the modeling domain whose runoff terminates in this water body. Matrix multiplication on the matrix of parcel-to-parcel runoff fractions and the parcel surface areas. For the parcels directly sending runoff to the water body, it follows the flow lines upstream through the parcels contributing to those sending parcels, multiplying parcel areas by aggregate runoff fractions. For example: If a parcel sends 100% of its runoff directly to the water body, then that sending parcel&apos;s whole surface area is included in this Precipitation Runoff Watershed Area calculation. If Parcel A sends 10% of its runoff to Parcel B which sends 50% of its runoff to the water body, then the Precipitation Runoff Watershed Area calculation incorporates 10% * 50% = 5% of Parcel A&apos;s surface area and 50% of Parcel B&apos;s surface area."
             },
-            'Precipitation Runoff Volumetric Rate from Land to Water Body':{
+            'Precipitation Runoff Volumetric Rate to Water Body':{
                 'short_name':'connected_runoff_to_this_sw',
                 'is_editable': false,
                 'default_value': 0,
@@ -258,28 +264,28 @@
                 'is_editable': true,
                 'default_value': 0,
                 'unit': '1/day',
-                'helpText': 'See the TRIM User Guide Appendix for full reference information.'
+                'helpText': 'Enter the methylation rate for divalent mercury (Hg) in the water column. Valid values are ≥ 0. The default value of 0.001 is for a shallow lake with little or no anoxia, reflecting observed non-microbial rate constants in oxic waters, as reported on page B-20 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information.'
             },
             'Hg Reduction Rate':{
                 'short_name':'ReductionRate.Surface_Water',
                 'is_editable': true,
                 'default_value': 0,
                 'unit': '1/day',
-                'helpText': 'See the TRIM User Guide Appendix for full reference information.'
+                'helpText': 'Enter the reduction rate for divalent mercury in the water column. Valid values are ≥ 0. The default value of 0.0075 is as discussed on pages B-18 and B-19 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information.'
             },
             'Hg Oxidation Rate':{
                 'short_name':'OxidationRate.Surface_Water',
                 'is_editable': true,
                 'default_value': 0,
                 'unit': '1/day',
-                'helpText': 'See the TRIM User Guide Appendix for full reference information.'
+                'helpText': 'Enter the oxidation rate for elemental mercury in the water column. Valid values are ≥ 0. The default value of 0 is from Table B-2 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information.'
             },
             'Hg Demethylation Rate':{
                 'short_name':'DemethylationRate.Surface_Water',
                 'is_editable': true,
                 'default_value': 0,
                 'unit': '1/day',
-                'helpText': 'See the TRIM User Guide Appendix for full reference information.'
+                'helpText': 'Enter the demethylation rate for methyl mercury in the water column. Valid values are ≥ 0. The default value of 0.013 is the average of the range of maximum potential rate constants (0.001 to 0.025) from Gilmour and Henry 1991 (Mercury Methylation in Aquatic Systems Affected by Acid Deposition), as reported on page B-21 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information.'
             }
         }
         let default_sed_data = {
@@ -332,7 +338,7 @@
                 'default_value': 0,
                 'unit': 'm/d',
                 'helpText': 'Velocity of sediment returning to the water column (as suspended sediment) from the sediment bed. Ratio of the difference between the Water Body Sediment Deposition Volumetric Rate and the Water Body Sediment Burial Volumetric Rate to the difference between 1 and the Water Body Sediment Bed Porosity' +
-                    '<strong><p>= (Water Body Sediment Deposition Volumetric Rate - Water Body Sediment Burial Volumetric Rate) / (1 - Water Body Sediment Bed Porosity)</p></strong>'
+                    '<strong><p>= (Deposition Volumetric Rate - Sediment Burial Volumetric Rate) / (1 - Bed Porosity)</p></strong>'
             },
             'Deposition Volumetric Rate':{
                 'short_name': 'sed_deposition_vol_rate',
@@ -340,7 +346,7 @@
                 'default_value': 0,
                 'unit': 'm<sup>3</sup> [sediment] /m<sup>2</sup> [sediment bed interface] /d',
                 'helpText': 'Volume of sediment received per day by the water body’s sediment bed (per unit area) from the suspended sediment in the water column. Ratio of the product of the Water Column Sediment Deposition Velocity and the Water Column Suspended Sediment Concentration to the Sediment Bed Density.' +
-                    '<strong><p>= (Water Column Sediment Deposition Velocity * Water Column Suspended Sediment Concentration / Sediment Bed Density)</p></strong>'
+                    '<strong><p>= (Sediment Deposition Velocity * Suspended Sediment Concentration / Bed Density)</p></strong>'
             },
             'Soil Erosion Rate to Water Body':{
                 'short_name':'sed_soil_erosion_to_sw',
@@ -355,35 +361,35 @@
                 'default_value': 0,
                 'unit': 'm<sup>3</sup> [sediment] /m<sup>2</sup> [sediment bed interface] /d',
                 'helpText': 'Volume of sediment buried per day into the sediment bed (per unit area) from the suspended sediment in the water column. Ratio of the difference between the sum (across all contributing water bodies) of the Water Column External Sediment Inflow from Other Water Bodies and the Soil Erosion Rate to Water Body and the Water Column Sediment Discharge Rate (converted from kg/y to kg/d) to the product of the Water Body Sediment Bed Density and water body surface area.' +
-                    '<strong><p>= (Water Column External Sediment Inflow from Other Water Bodies + Soil Erosion Rate to Water Body - [Water Column Sediment Discharge Rate]/365) / (Sediment Bed Density* water body surface area)</p></strong>'                
+                    '<strong><p>= (External Sediment Inflow from Other Water Bodies + Soil Erosion Rate to Water Body - [Sediment Discharge Rate]/365) / (Bed Density * water body surface area)</p></strong>'                
             },
             'Hg Methylation Rate':{
                 'short_name':'MethylationRate.Sediment',
                 'is_editable': true,
                 'default_value': 0,
                 'unit': '1/day',
-                'helpText': 'See the TRIM User Guide Appendix for full reference information.'
+                'helpText': 'Enter the methylation rate for divalent mercury (Hg) in the sediment bed. Valid values are ≥ 0. The default value of 0.0001 is as discussed on pages B-20 and B-21 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information.'
             },
             'Hg Reduction Rate':{
                 'short_name':'ReductionRate.Sediment',
                 'is_editable': true,
                 'default_value': 0,
                 'unit': '1/day',
-                'helpText': 'See the TRIM User Guide Appendix for full reference information.'
+                'helpText': 'Enter the reduction rate for divalent mercury in the sediment bed. Valid values are ≥ 0. The default value of 1E-06 is inferred based on model calibration to general observations of elemental mercury in pore water, as discussed on page B-19 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information.'
             },
             'Hg Oxidation Rate':{
                 'short_name':'OxidationRate.Sediment',
                 'is_editable': true,
                 'default_value': 0,
                 'unit': '1/day',
-                'helpText': 'See the TRIM User Guide Appendix for full reference information.'
+                'helpText': 'Enter the oxidation rate for elemental mercury in the sediment bed. Valid values are ≥ 0. The default value of 0 is from Table B-2 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information.'
             },
             'Hg Demethylation Rate':{
                 'short_name':'DemethylationRate.Sediment',
                 'is_editable': true,
                 'default_value': 0,
                 'unit': '1/day',
-                'helpText': 'See the TRIM User Guide Appendix for full reference information.'
+                'helpText': 'Enter the demethylation rate for methyl mercury in the sediment bed. Valid values are ≥ 0. The default value of 0.0501 is the average of the range of maximum potential rate constants (2E-04 to 1E-01) from Gilmour and Henry 1991 (Mercury Methylation in Aquatic Systems Affected by Acid Deposition), as reported on page B-22 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information.'
             }
         }
 
@@ -422,6 +428,7 @@
                 paging: false,
                 bFilter: false,
                 info: false,
+                language: { emptyTable: 'No data available in table' },
                 bAutoWidth: false,
                 scrollX: true,
                 scrollY: 500,
@@ -1014,8 +1021,9 @@
         form.addEventListener('form:visible', function() {
             console.log('lake props form visible')
             LoadingScreen.show('lake_props_loading');
+            document.body.removeEventListener('parcels:ready', updateLakeProps);
+            document.body.addEventListener('parcels:ready', updateLakeProps);
             TRIM.refreshParcels();
-            document.body.addEventListener('parcels:ready', updateLakeProps());
         });
 
         function get_pivoted_columns(tblId) {
@@ -1172,7 +1180,7 @@
                 return Number.parseFloat(res).toExponential(5)
             }
 
-            let runoff_gain = Number(data.find(e=>e.Property == "Precipitation Runoff Volumetric Rate from Land to Water Body")[parcel_name])
+            let runoff_gain = Number(data.find(e=>e.Property == "Precipitation Runoff Volumetric Rate to Water Body")[parcel_name])
             let precipitation_gain = Number(data.find(e=>e.Property == "Precipitation Volumetric Rate to Water Body")[parcel_name])
             let precipitation_gw_seepage_gain = Number(data.find(e=>e.Property == "Precipitation Seepage Volumetric Rate to Groundwater")[parcel_name])
             let external_inflow_gain = Number(data.find(e=>e.Property == "External Water Inflow from Other Water Bodies")[parcel_name])
@@ -1220,7 +1228,7 @@
         }
 
         function updateLakeProps() {
-            if (!TRIM.store.currentScenario.parcels) {
+            if (!TRIM.store.currentScenario || !TRIM.store.currentScenario.parcels) {
                 // Parcels haven't loaded yet; wait a bit and try again
                 setTimeout(function() { updateLakeProps(); }, 1000);
                 return;
@@ -1230,7 +1238,14 @@
             const sed_data = []
             const water_properties = Object.keys(default_water_data)
             const sed_properties = Object.keys(default_sed_data)
-            if (parcels.length > 0) {
+            const waterParcels = parcels.filter(e => e.parcelType == "Water Only" || e.parcelType == "Water & Air");
+            try {
+            if (waterParcels.length === 0) {
+                $(lkTblId + ' tbody:gt(0)').remove();
+                $(sedTblId + ' tbody:gt(0)').remove();
+                return;
+            }
+            if (parcels.length > 0 && waterParcels.length > 0) {
                 const mercuryTransformations = [
                     'MethylationRate', 'OxidationRate', 'ReductionRate', 'DemethylationRate'
                 ];
@@ -1270,7 +1285,7 @@
                             }
                             else {
                                 let exceptions = ['Precipitation Runoff Watershed Area',
-                                    'Precipitation Runoff Volumetric Rate from Land to Water Body',
+                                    'Precipitation Runoff Volumetric Rate to Water Body',
                                     'Precipitation Volumetric Rate to Water Body',
                                     'Precipitation Seepage Volumetric Rate to Groundwater'
                                 ]
@@ -1329,9 +1344,12 @@
                 })
                 TableRedraw(sed_data, "sed")
             }
-
             console.log('populated lake props form!')
-            LoadingScreen.hide('lake_props_loading');
+            } catch(e) {
+                console.error('updateLakeProps error:', e);
+            } finally {
+                LoadingScreen.hide('lake_props_loading');
+            }
         }
     });
 </script>

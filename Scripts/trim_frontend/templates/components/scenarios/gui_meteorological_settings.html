@@ -76,14 +76,22 @@
         </div>
         
         <div data-slot="true" data-target="precipitation">
-            {{ dimensionally_varying_subform(
+            <!--{{ dimensionally_varying_subform(
                 is_varying_field='time_varying',
                 use_custom_field='use_custom_file',
                 custom_file_field='custom_file',
                 var_name_fields=['field_name_rate', 'field_name_cumulative'],
                 static_value_fields=['static_value_rate', 'static_value_cumulative'],
                 other_fields=['average_annual']
-            ) }}
+        ) }}-->
+            {{ dimensionally_varying_subform(
+                is_varying_field='time_varying',
+                use_custom_field='use_custom_file',
+                custom_file_field='custom_file',
+                var_name_fields=['field_name_rate'],
+                static_value_fields=['static_value_rate'],
+                other_fields=['average_annual']
+        ) }}
         </div>
 
     </section>
@@ -110,17 +118,17 @@
             </div>
             <div class="row mb-1 subform">
                 <div class="col-sm">
-                    <div data-slot="true" data-target="calculated_coniferous"></div>
+                    <!-- <div data-slot="true" data-target="calculated_coniferous"></div> -->
                     <div data-slot="true" data-target="static_coniferous"></div>
 
-                    <div data-slot="true" data-target="calculated_deciduous"></div>
+                    <!-- <div data-slot="true" data-target="calculated_deciduous"></div> -->
                     <div data-slot="true" data-target="static_deciduous"></div>
                 </div>
                 <div class="col-sm">
-                    <div data-slot="true" data-target="calculated_grass"></div>
+                    <!-- <div data-slot="true" data-target="calculated_grass"></div> -->
                     <div data-slot="true" data-target="static_grass"></div>
 
-                    <div data-slot="true" data-target="calculated_agriculture"></div>
+                    <!-- <div data-slot="true" data-target="calculated_agriculture"></div> -->
                     <div data-slot="true" data-target="static_agriculture"></div>
                 </div>
             </div>
@@ -181,19 +189,19 @@
                 let search_txt_str = `input[type="number"][id$="${e}"]`
                 let this_chkbx = $('#met-settings-gui').find(search_cbx_str)
                 let this_text =  $('#met-settings-gui').find(search_txt_str)
-                let is_calculated = met.wet_dep_interception[`calc_wet_dep_interception_frac_${e}_leaf`]
+                //let is_calculated = met.wet_dep_interception[`calc_wet_dep_interception_frac_${e}_leaf`]
                 let is_comp_exists = met.wet_dep_interception[`wet_dep_interception_frac_${e}_leaf`]
                 let val_user = met.wet_dep_interception[`wet_dep_interception_frac_${e}_leaf`]
                 let val_calc = met.wet_dep_interception[`wet_dep_interception_frac_${e}_leaf_calculated`]
-                if (is_calculated == 1) {
+                /*if (is_calculated == 1) {
                     this_chkbx.attr('checked','checked')
                     this_text.attr('disabled','disabled')
                     this_text.val(val_calc)
-                } else {
-                    this_chkbx.removeAttr('checked')
-                    this_text.removeAttr('disabled')
-                    this_text.val(val_user)
-                }
+                } else {*/
+                this_chkbx.removeAttr('checked')
+                this_text.removeAttr('disabled')
+                this_text.val(val_user)
+                //}
                 if (is_comp_exists == -1) {
                     this_chkbx.closest('div.form-group').css('display','none')
                     this_text.closest('div.form-group').css('display','none')
@@ -345,8 +353,7 @@
                             let sim_end = Date.parse(scenario["simulation_end_date"])
                             var diff = calculateDateDistance(sim_start, sim_end, ['days']);
                             var days = parseInt(diff[0].split(' ')[0]);
-                            var annualVal = days / 365.2425 * val;
-                            $('#precipitation_average_annual').val(annualVal);
+                            $('#precipitation_average_annual').val(val * 365);
                         }
                     }
                     else {
@@ -382,7 +389,7 @@
             selects.attr('disabled', 'disabled');
 
             function updateFields(section) {
-                var globalFileFiled = section.find('[type="file"][name^="default_"]');
+                var globalFileField = section.find('[type="file"][name^="default_"]');
                 section.find('select').each(function() {
                     var me = $(this);
 
@@ -390,7 +397,7 @@
                     var customized = subform.find(
                         '[type="checkbox"][id$="use_custom_file"]');
 
-                    var data = globalFileFiled.attr('data-filedata');
+                    var data = globalFileField.attr('data-filedata');
                     if (customized.prop('checked')) {
                         data = subform.find('[type="file"]').attr('data-filedata');
                     }
@@ -447,16 +454,21 @@
             gui.find('select').on('change',function (){
                 let sel = $(this);
                 let section = sel.closest('section');
-                var globalFileFiled = section.find('[type="file"][name^="default_"]');
-                let extension = globalFileFiled[0].files[0].name;
-                let data = globalFileFiled.attr('data-filedata');
+                var globalFileField = section.find('[type="file"][name^="default_"]');
+                let data = globalFileField.attr('data-filedata');
+                let extension = '';
 
                 let scenario = TRIM.store.currentScenario;
                 let sim_start = Date.parse(scenario["simulation_start_date"])
                 let sim_end = Date.parse(scenario["simulation_end_date"])
                 let subform = sel.closest('.subform');
                 if (subform.find('[type="checkbox"][id$="use_custom_file"]').prop('checked')) {
-                    data = subform.find('[type="file"]').attr('data-filedata');
+                    let localFileField = subform.find('[type="file"]');
+                    data = localFileField.attr('data-filedata');
+                    extension = localFileField[0].files[0].name;
+                }
+                else {
+                    extension = globalFileField[0].files[0].name;
                 }
                 data = data || 'null';
                 data = JSON.parse(data);
@@ -499,12 +511,12 @@
             })
 
             var staticPrecip = $('#precipitation_static_value_rate');
-            var staticCum = $('#precipitation_static_value_cumulative');
+            //var staticCum = $('#precipitation_static_value_cumulative');
             var precipVaries = $('#precipitation_time_varying');
             var annualPrecip = $('#precipitation_average_annual');
 
             staticPrecip.add(precipVaries).change(function() {
-                staticCum.val('');
+                //staticCum.val('');
                 annualPrecip.val('');
 
                 let sim_start = Date.parse(TRIM.store.currentScenario.simulation_start_date);
@@ -517,7 +529,7 @@
                 var days = parseInt(diff[0].split(' ')[0]);
 
                 var staticVal = days * staticPrecip.val()
-                staticCum.val(staticVal);
+                //staticCum.val(staticVal);
                 if (!precipVaries.prop('checked')) {
                     var annualVal = 365 * staticPrecip.val()
                     annualPrecip.val(annualVal);

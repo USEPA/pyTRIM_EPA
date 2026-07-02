@@ -106,18 +106,20 @@
         form.addEventListener('form:visible', function() {
             console.log('property summary form visible')
             LoadingScreen.show('property_summary_loading');
-            TRIM.refreshParcels();
             TRIM.api.getChemicalProperties('{{ scenario.id }}').on('load', function () {
                 TRIM.store.currentScenario.chemical_properties = this.responseJSON
             });
             TRIM.api.getMeteorology(TRIM.store.currentScenario).on('load', function () {
                 TRIM.store.currentScenario.meteorology = this.responseJSON.meteorology;
             });
-            document.body.addEventListener('parcels:ready', updateSummaryFields());
+            document.body.removeEventListener('parcels:ready', updateSummaryFields);
+            document.body.addEventListener('parcels:ready', updateSummaryFields);
+            TRIM.refreshParcels();
         });
 
         function updateSummaryFields() {
-            if (!TRIM.store.currentScenario.parcels 
+            if (!TRIM.store.currentScenario
+            || !TRIM.store.currentScenario.parcels
             || !TRIM.store.currentScenario.chemical_properties
             || !TRIM.store.currentScenario.meteorology) {
                 // Parcels haven't loaded yet; wait a bit and try again
