@@ -615,6 +615,10 @@ def run_full_model(scn):
                 {'abbr': 'conc', 'df': dfc_avg, 'split_chems': True},
                 {'abbr': 'tm', 'df': df_tm, 'testing_only': True}
             ], scn, filetype='excel')
+
+            outfile_nt = outfiles.get('nt', file_error_txt)
+            outfile_conc = outfiles.get('conc', file_error_txt)
+            outfile_tm = outfiles.get('tm', file_error_txt)
         except Exception as e:
             return model_err(scn, f"ERRORED WHILE MAKING CSV: {e}", 'err csv 0')
 
@@ -622,9 +626,9 @@ def run_full_model(scn):
             scn.latest_proc_status.run_status = 'run fin 0'
 
             file_error_txt = 'No File. There was an error while writing output...'
-            scn.latest_proc_status.result_file_nt = outfiles.get('nt', file_error_txt)
-            scn.latest_proc_status.result_file_conc = outfiles.get('conc', file_error_txt)
-            scn.latest_proc_status.result_file_tm = outfiles.get('tm', file_error_txt)
+            scn.latest_proc_status.result_file_nt = outfile_nt
+            scn.latest_proc_status.result_file_conc = outfile_conc
+            scn.latest_proc_status.result_file_tm = outfile_tm
 
             scn.latest_proc_status.result_nt = json.dumps(json_n_avg, default=str)
             scn.latest_proc_status.result_conc = json.dumps(json_c_avg, default=str)
