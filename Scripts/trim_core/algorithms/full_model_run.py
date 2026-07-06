@@ -616,6 +616,7 @@ def run_full_model(scn):
                 {'abbr': 'tm', 'df': df_tm, 'testing_only': True}
             ], scn, filetype='excel')
 
+            file_error_txt = 'No File. There was an error while writing output...'
             outfile_nt = outfiles.get('nt', file_error_txt)
             outfile_conc = outfiles.get('conc', file_error_txt)
             outfile_tm = outfiles.get('tm', file_error_txt)
@@ -625,7 +626,6 @@ def run_full_model(scn):
         try:
             scn.latest_proc_status.run_status = 'run fin 0'
 
-            file_error_txt = 'No File. There was an error while writing output...'
             scn.latest_proc_status.result_file_nt = outfile_nt
             scn.latest_proc_status.result_file_conc = outfile_conc
             scn.latest_proc_status.result_file_tm = outfile_tm
