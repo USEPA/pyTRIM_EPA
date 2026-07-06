@@ -13,13 +13,6 @@ from datetime import datetime
 
 __all__ = ['run_full_model']
 
-# os.environ.pop('TEST_DB_SERVERLESS')
-# s.environ['TEST_DB_SERVERLESS'] = 'True'
-# os.environ.pop('TRANSITION_MATRIX_COMPARTMENTS')
-# os.environ['TRANSITION_MATRIX_COMPARTMENTS'] = 'Leaf,DryVapor,WetVapor,DryParticle,WetParticle,Soil'
-# os.environ['DEBUG_TRANSITION_MATRIX'] = 'True'
-# print(os.environ)
-
 DEBUG = os.getenv('DEBUG_TRANSITION_MATRIX')
 RESTRICT_COMPARTMENTS = [
     x.strip()
@@ -27,8 +20,6 @@ RESTRICT_COMPARTMENTS = [
     if x.strip()
 ]
 
-sim_begin_date = "01/01/2020"
-sim_end_date = "01/01/2025"
 
 def is_compartment_of_interest(comp):
     if not RESTRICT_COMPARTMENTS:
@@ -55,19 +46,6 @@ def full_stack():
 
 
 def make_transition_matrix(scenario):
-    def full_stack():
-        import traceback, sys
-        exc = sys.exc_info()[0]
-        stack = traceback.extract_stack()[:-1]  # last one would be full_stack()
-        if exc is not None:  # i.e. an exception is present
-            del stack[-1]  # remove call of full_stack, the printed exception
-            # will contain the caught exception caller instead
-        trc = 'Traceback (most recent call last):\n'
-        stackstr = trc + ''.join(traceback.format_list(stack))
-        if exc is not None:
-            stackstr += '  ' + traceback.format_exc().lstrip(trc)
-        return stackstr
-
     chem_list = list(sorted(
         scenario.chemicals, key=lambda x: x.name
     ))
@@ -160,12 +138,15 @@ def make_transition_matrix(scenario):
                 mass = np.nan
 
             # if sending compartment has concentration output factor
+            is_soil = comp.media.isa('Soil')
             cof = comp.concentrationOutputFactor
             cou = ''
             if pd.isna(cof) or (not cof):
-                if comp.media.isa('Soil'):
+                if is_soil:
                     cof = chem.concentrationOutputFactor(comp)
-                    cou = 'g / g'  # HACKY
+                    if hasattr(cof, 'dimensionality'):
+                        cou = str(cof.units)
+                        cof = cof.magnitude
                 else:
                     cof = np.nan
                     cou = ''
@@ -173,8 +154,8 @@ def make_transition_matrix(scenario):
                 if hasattr(cof, 'dimensionality'):
                     cou = str(cof.units)
                     cof = cof.magnitude
-                if not cou and comp.media.isa('Soil'):
-                    cou = 'g / g'  # HACKY
+            if not cou and is_soil:
+                cou = 'g / g'  # HACKY
 
             # denominator in concentration calculation
             if (
@@ -407,7 +388,7 @@ def compute_initial_mass(df_c0, df_vmu):
     return df_n0
 
 
-def ode_sim(df_tm, df_sm, df_n0, scn):
+def ode_sim(df_tm, df_sm, df_n0, simulation_start_date, simulation_end_date):
     sm = df_sm['deposition_rate_g_day-1']
     tm = np.nan_to_num(
         df_tm.to_records(index=False).tolist(),
@@ -432,12 +413,10 @@ def ode_sim(df_tm, df_sm, df_n0, scn):
         n_prime = np.matmul(m(t), n) + s(t)
         return n_prime
 
-    simulation_start_date = scn.sim_begin_end_time[0]
-    simulation_end_date = scn.sim_begin_end_time[1]
     time_range_d = pd.date_range(  # date times series in days over the simulation period
         simulation_start_date, simulation_end_date, freq='D'
     )
-    ndays = len(time_range_d) - 1  # last day is not a full day
+    ndays = len(time_range_d)
     ts = np.linspace(0, ndays, ndays * 24)  # array of hours to be modelled (in units of days because TFs are in /d)
 
     n0 = np.array(df_n0['n0_g'], dtype='float64')  # get initial masses
@@ -465,12 +444,12 @@ def compute_concentration(df_nt, df_vmu):  # arguments are the chemical mass arr
         mass_conc_conv_factor = np.nan
         if conc_out_factor != np.nan:
             if 'mass' in row.denominator:
-                mass_conc_conv_factor = 1 / row.mass_kg * conc_out_factor
+                mass_conc_conv_factor = conc_out_factor / row.mass_kg
             if 'volume' in row.denominator:
-                mass_conc_conv_factor = 1 / row.volume_m3 * conc_out_factor
+                mass_conc_conv_factor = conc_out_factor / row.volume_m3
             # need to convert volume from m3 to L for these compartments (surface water and groundwater)
             if 'volume_L' in row.denominator:
-                mass_conc_conv_factor = 1 / (row.volume_m3 * 1000) * conc_out_factor
+                mass_conc_conv_factor = conc_out_factor / (row.volume_m3 * 1000)
 
         full_name = row.Index
         conc_data[full_name] = df_nt[full_name] * mass_conc_conv_factor
@@ -482,12 +461,19 @@ def compute_concentration(df_nt, df_vmu):  # arguments are the chemical mass arr
     df_conc.columns = conc_data.keys()
 
     df_conc = df_conc.replace(np.nan, 0)
+
+    # safe_save_output([
+    #     {'abbr': 'debug_nt', 'df': df_nt},
+    #     {'abbr': 'debug_vmu', 'df': df_vmu},
+    #     {'abbr': 'debug_conc', 'df': df_conc}
+    # ])
+
     return df_conc
 
 
-def gen_avg(df_nt, df_conc, inputs):
+def gen_avg(df_nt, df_conc, simulation_start_date):
     # get simulation start date and convert to datetime object
-    start_date = pd.to_datetime(inputs['simulation_start_date'], format='%Y-%m-%d')
+    start_date = pd.to_datetime(simulation_start_date, format='%Y-%m-%d')
 
     # convert the first col (time in d) to datetime objects
     df_nt['time'] = pd.to_datetime(df_nt['time'], origin=start_date, unit='d')
@@ -584,7 +570,7 @@ def run_full_model(scn):
             except Exception as e:
                 print(e)
         ScenarioService.commit()
-        scn = ScenarioService.get(id=scn.id)
+        scn = ScenarioService.get(scn.id)
         try:
             (df_tm, df_sm, df_vmu, df_c0) = make_transition_matrix(scn)
         except Exception as e:
@@ -600,9 +586,9 @@ def run_full_model(scn):
         # get result
         scn.latest_proc_status.run_status = 'run ode 0'
         ScenarioService.commit()
-        scn = ScenarioService.get(id=scn.id)
+        scn = ScenarioService.get(scn.id)
         try:
-            df_nt = ode_sim(df_tm, df_sm, df_n0, scn)
+            df_nt = ode_sim(df_tm, df_sm, df_n0, scn.start_date, scn.end_date)
             scn.latest_proc_status.run_status = 'run ode 50'
             ScenarioService.commit()
             # make concentration output
@@ -612,12 +598,8 @@ def run_full_model(scn):
             return model_err(scn, f"ERRORED WHILE MAKING CONCENTRATION OUTPUT: {e}", 'err ode 0')
 
         # compute annual average mass and conc time series
-        inputs = {
-            'simulation_start_date': scn.sim_begin_end_time[0],  # scn.simulationBeginDate,
-            'simulation_end_date': scn.sim_begin_end_time[1]  # scn.simulationEndDate
-        }
         try:
-            dfn_avg, dfc_avg = gen_avg(df_nt, df_conc, inputs)
+            dfn_avg, dfc_avg = gen_avg(df_nt, df_conc, scn.start_date)
             json_n_avg = dfn_avg.to_json(orient='columns')[1:-1].replace('},{', '} {')
             json_c_avg = dfc_avg.to_json(orient='columns')[1:-1].replace('},{', '} {')
         except Exception as e:
@@ -625,25 +607,30 @@ def run_full_model(scn):
 
         scn.latest_proc_status.run_status = 'run csv 0'
         ScenarioService.commit()
-        scn = ScenarioService.get(id=scn.id)
+        scn = ScenarioService.get(scn.id)
 
-        outfile_nt, outfile_conc = "", ""
         try:
-            outfile_nt, outfile_conc, outfile_tm = safe_save_output(
-                dfn_avg, dfc_avg, df_tm, scn, filetype='excel'
-            )
-            # safe_save_output(df_nt, df_conc, scn, filetype='excel')
+            outfiles = safe_save_output([
+                {'abbr': 'nt', 'df': dfn_avg, 'split_chems': True},
+                {'abbr': 'conc', 'df': dfc_avg, 'split_chems': True},
+                {'abbr': 'tm', 'df': df_tm, 'testing_only': True}
+            ], scn, filetype='excel')
         except Exception as e:
             return model_err(scn, f"ERRORED WHILE MAKING CSV: {e}", 'err csv 0')
 
         try:
             scn.latest_proc_status.run_status = 'run fin 0'
-            scn.latest_proc_status.result_file_nt = outfile_nt
-            scn.latest_proc_status.result_file_conc = outfile_conc
-            scn.latest_proc_status.result_file_tm = outfile_tm
+
+            file_error_txt = 'No File. There was an error while writing output...'
+            scn.latest_proc_status.result_file_nt = outfiles.get('nt', file_error_txt)
+            scn.latest_proc_status.result_file_conc = outfiles.get('conc', file_error_txt)
+            scn.latest_proc_status.result_file_tm = outfiles.get('tm', file_error_txt)
+
             scn.latest_proc_status.result_nt = json.dumps(json_n_avg, default=str)
             scn.latest_proc_status.result_conc = json.dumps(json_c_avg, default=str)
+
             scn.latest_proc_status.run_status = 'run fin 100'
+
             ScenarioService.commit()
         except Exception as e:
             return model_err(scn, f"ERRORED WHILE UPDATING DB: {e}", 'err fin 0')
@@ -676,62 +663,59 @@ def model_err(scn, err_msg, status):
     return {}, {}, "", "", ""
 
 
-def safe_save_output(df_nt, df_conc, df_tm, scn, filetype='csv'):
+def safe_save_output(output_data, scn=None, filetype='csv'):
+    outfiles = {}
     try:
         ts = datetime.now().strftime('%Y-%m-%d--%H_%M_%S')
-        sim_chems = [c.name for c in scn.chemicals]
-        if not os.path.isdir('./trim_frontend/static/.output'):
-            os.makedirs('./trim_frontend/static/.output')
-        if filetype == 'csv':
-            fname_nt = f'./trim_frontend/static/.output/nt_new_{scn.name}_{scn.creator_id}_{ts}.csv'
-            fname_conc = f'./trim_frontend/static/.output/conc_new_{scn.name}_{scn.creator_id}_{ts}.csv'
-            df_nt.to_csv(fname_nt)
-            df_conc.to_csv(fname_conc)
-            # ------- THIS IS FOR TESTER ROLED USER'S CHECKS -------
-            user_has_tester_role = True if len(
-                [r.name for r in scn.creator.roles if r.name == 'tester']) > 0 else False
-            user_has_tester_role = user_has_tester_role or scn.creator.email.endswith("@icf.com")
 
-            if user_has_tester_role:
-                ts = datetime.now().strftime('%Y-%m-%d--%H_%M_%S')
-                fname_tm = f'./trim_frontend/static/.output/TM_{scn.name}_{scn.creator_id}_{ts}.csv'
-                df_tm.to_csv(fname_tm)
-            else:
-                fname_tm = ""
-            # ----------- END TESTER ROLED USER'S CHECKS -----------
+        out_dir = './trim_frontend/static/.output'
+        if not os.path.isdir(out_dir):
+            os.makedirs(out_dir)
+
+        sim_chems = []
+        if filetype != 'csv':
+            if scn is not None:
+                sim_chems = [c.name for c in scn.chemicals]
+
+        user_has_tester_role = False
+        if scn is not None:
+            user_has_tester_role = (
+                len([r.name for r in scn.creator.roles if r.name == 'tester']) > 0
+                or scn.creator.email.endswith("@icf.com")
+            )
+
+        if scn is not None:
+            fname_suff = f'new_{scn.name}_{scn.creator_id}_{ts}'
         else:
-            path_output_nt = './trim_frontend/static/.output/'
-            just_name_nt = f'nt_new_{scn.name}_{scn.creator_id}_{ts}.xlsx'
-            fname_nt = os.path.join(path_output_nt, just_name_nt)
+            fname_suff = f'temp_{ts}'
 
-            path_output_conc = './trim_frontend/static/.output/'
-            just_name_conc = f'conc_new_{scn.name}_{scn.creator_id}_{ts}.xlsx'
-            fname_conc = os.path.join(path_output_conc, just_name_conc)
+        for data in output_data:
+            abbr = data['abbr']
+            if data.get('testing_only') and not user_has_tester_role:
+                outfiles[abbr] = ''
+                continue
 
-            split_write_files(df_nt, sim_chems, fname_nt)
-            split_write_files(df_conc, sim_chems, fname_conc)
-            # ------- THIS IS FOR TESTER ROLED USER'S CHECKS -------
-            user_has_tester_role = True if len(
-                [r.name for r in scn.creator.roles if r.name == 'tester']) > 0 else False
-            user_has_tester_role = user_has_tester_role or scn.creator.email.endswith("@icf.com")
-            
-            if user_has_tester_role:
-                ts = datetime.now().strftime('%Y-%m-%d--%H_%M_%S')
-                path_output_tm = './trim_frontend/static/.output/'
-                just_name_tm = f'tm_new_{scn.name}_{scn.creator_id}_{ts}.xlsx'
-                fname_tm = os.path.join(path_output_tm, just_name_tm)
-                writer = pd.ExcelWriter(fname_tm, engine='xlsxwriter')
-                df_tm.to_excel(writer)
-                writer.close()
-            else:
-                fname_tm = ""
-            # ----------- END TESTER ROLED USER'S CHECKS -----------
+            df = data['df']
+            fname = os.path.join(out_dir, f'{abbr}_{fname_suff}')
+            print(f'\t> Saving "{fname}" ...')
+            try:
+                if filetype == 'csv':
+                    fname += '.csv'
+                    df.to_csv(fname)
+                    outfiles[abbr] = fname
+                else:
+                    fname += '.xlsx'
+                    if data.get('split_chems'):
+                        split_write_files(df, sim_chems, fname)
+                    else:
+                        writer = pd.ExcelWriter(fname, engine='xlsxwriter')
+                        df.to_excel(writer)
+                        writer.close()
+            except Exception:
+                print(f'{20 * ">"} Output write exception writing {filetype} file for {abbr} data:\n{e}')
     except Exception as e:
         print(f'{20 * ">"} Output write exception writing {filetype} file:\n{e}')
-        fname_nt = "No File. There was an error while writing output..."
-        fname_conc = "No File. There was an error while writing output..."
-        fname_tm = "No File. There was an error while writing output..."
-    return fname_nt, fname_conc, fname_tm
+    return outfiles
 
 
 def split_write_files(df, sim_chems, of_pn):
