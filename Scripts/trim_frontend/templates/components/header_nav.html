@@ -20,6 +20,10 @@
                 {{ render_nav_item(
                     'Login', url_for('security.login'), icon='user-circle'
                 ) }}
+                {{ render_nav_item('or', class='font-italic') }}
+                {{ render_nav_item(
+                    'Login.gov', url_for('oauth2_login', provider_name='login_gov'), icon='exclamation-triangle'
+                ) }}
             {% endif %}
         </ul>
     </div>
