@@ -132,12 +132,14 @@
         }
 
         var PARCEL_REFRESH = false;
+        var chemicals = null
+        var parcels = null;
         try {
-            var chemicals = TRIM.store.currentScenario.chemicals.map(x => x.name);
-            var parcels = TRIM.store.currentScenario.parcels;
+            chemicals = TRIM.store.currentScenario.chemicals.map(x => x.name);
+            parcels = TRIM.store.currentScenario.parcels;
         } catch(e) {
-            var chemicals = null;
-            var parcels = null;
+            chemicals = null;
+            parcels = null;
         }
         var chem_spec = {}
 
@@ -480,58 +482,6 @@
                     [coordsSystem, utmZone].forEach(el => $(el).attr('disabled',true))
                     $(parcelUploader).addClass('disabled')
                 }
-
-                // let loadingRequest = 'load_' + this.id;
-                // let this_chem_prop =  me.closest("div.tab-pane").data("tab-name").split(" (")
-                // let this_chem = this_chem_prop[0]
-                // let this_spec = this_chem_prop[1].split(")")[0] == "Gaseous" ? "Vapor" : "Particle"
-                // let this_cmap = me.closest("div.tab-pane").find("table.compMap")
-                // LoadingScreen.show(loadingRequest);
-                // let field_data = this
-                // if (!Array.isArray(field_data)) {
-                //     field_data = [field_data];
-                // }
-                // let selected_spacing = me.closest("div.tab-pane").find('select').find(':selected').val()
-                // scenario_data = {
-                //     'type': 'input',
-                //     'name': 'scenario_id',
-                //     'value': TRIM.store.currentScenario.id
-                // }
-                // spacing_data = {
-                //     'type': 'input',
-                //     'name': 'spacing',
-                //     'value': selected_spacing
-                // }
-                // chem_data = {
-                //     'type': 'input',
-                //     'name': 'chemical',
-                //     'value': this_chem
-                // }
-                // spec_data = {
-                //     'type': 'input',
-                //     'name': 'species',
-                //     'value': this_spec
-                // }
-                // field_data.push(scenario_data)
-                // field_data.push(spacing_data)
-                // field_data.push(chem_data)
-                // field_data.push(spec_data)
-                // me.removeAttr('data-filedata');
-                // TRIM.api.parseAERMODFile(field_data).on('load', function() {
-                //     try {
-                //         let src_data = JSON.parse(this.responseText);
-                //         parcels.forEach(function(p,i){
-                //             let dryval = src_data.aermod_result[p.name]['DrySource']
-                //             let wetval = src_data.aermod_result[p.name]['WetSource']
-                //             parcels[i].sources[this_chem]["Dry"+this_spec+"Source"]["Dry"+this_spec+"Source"]=dryval
-                //             parcels[i].sources[this_chem]["Wet"+this_spec+"Source"]["Wet"+this_spec+"Source"]=wetval
-                //         })
-                //     }
-                //     finally {
-                //         populate_values(this_cmap)
-                //         LoadingScreen.hide(loadingRequest);
-                //     }
-                // });
             });
         }
 
@@ -599,7 +549,6 @@
             field_data.push(spec_data)
             field_data.push(proj_data)
             field_data.push(utm_data)
-            me.removeAttr('data-filedata');
             TRIM.api.parseAERMODFile(field_data).on('load', function() {
                 try {
                     let src_data = JSON.parse(this.responseText);

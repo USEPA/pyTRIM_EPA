@@ -247,16 +247,16 @@
             }
 
             $('a[id*=_concentration_upload_button]').click(function (){
-                let me = $(this);
-                let data = $(me).parent("div.form-group").parent("div.form-group").find('input[type="file"]').attr("data-filedata");
-                let my_data = JSON.parse(data);
+                const me = $(this);
+                const dataSource = $(me).parent("div.form-group").parent("div.form-group").find('input[type="file"]');
+                const my_data = TRIM.store.fileData.fromField(dataSource, 'name', 'bg_conc') || {};
 
                 // Validate file contents here
-                let expected_fields = ['Parcel Name', 'Compartment Name', 'Background Concentration Value', 'Unit']
-                let expected_parcel_names = TRIM.store.currentScenario.parcels.map(e=>e.name)
+                const expected_fields = ['Parcel Name', 'Compartment Name', 'Background Concentration Value', 'Unit']
+                const expected_parcel_names = TRIM.store.currentScenario.parcels.map(e=>e.name)
 
-                let has_all_required_fields = expected_fields.map(e=>my_data.fields.indexOf(e) > -1).every(e=>e);
-                let has_correct_parcel_names = my_data.file_data.map(e=>expected_parcel_names.indexOf(e["Parcel Name"]) > -1).every(e=>e)
+                const has_all_required_fields = expected_fields.map(e=>my_data.fields.indexOf(e) > -1).every(e=>e);
+                const has_correct_parcel_names = my_data.file_data.map(e=>expected_parcel_names.indexOf(e["Parcel Name"]) > -1).every(e=>e)
 
                 if (!has_all_required_fields) {
                     alert("File does  not have the required standard column names. Please use the provided template.")
@@ -266,8 +266,8 @@
                     alert("Some parcel names provided in the file cannot be found in scenario. Please check parcel names!")
                     return
                 }
-                let chem_name = $(me).closest("div.tab-pane").data("tab-name")
-                let background_conc_info = [{
+                const chem_name = $(me).closest("div.tab-pane").data("tab-name")
+                const background_conc_info = [{
                     'type': 'data',
                     'name': 'field',
                     'value': "initial concentration file upload"
@@ -282,7 +282,7 @@
                 },{
                     'type': 'input',
                     'name': 'file_data',
-                    'value': JSON.stringify(my_data["file_data"])
+                    'value': JSON.stringify(my_data["file_data"] || null)
                 }]
                 LoadingScreen.show("BC_upload")
                 TRIM.api.uploadBackgroundConcFile(background_conc_info).on('load', function() {
@@ -299,16 +299,16 @@
                     finally {
                         function populate_values(cmap, bc_data) {
                             bc_data.forEach(function(p,i){
-                                let pcl_find_str = "td[data-pcl-name='" + p["Parcel Name"] + "']"
-                                let ve_find_str = "td[data-ve-name='" + p["Volume Element Name"] + "']"
-                                let comp_find_str = "td[data-comp-name='" + p["Compartment Name"] + "']"
-                                let ic_cell = $(cmap).find(pcl_find_str).next(ve_find_str).next(comp_find_str).next("td.ic")
-                                let ic_val =  Number(p["Background Concentration Value"]).toExponential()
+                                const pcl_find_str = "td[data-pcl-name='" + p["Parcel Name"] + "']"
+                                const ve_find_str = "td[data-ve-name='" + p["Volume Element Name"] + "']"
+                                const comp_find_str = "td[data-comp-name='" + p["Compartment Name"] + "']"
+                                const ic_cell = $(cmap).find(pcl_find_str).next(ve_find_str).next(comp_find_str).next("td.ic")
+                                const ic_val =  Number(p["Background Concentration Value"]).toExponential()
                                 $(ic_cell).find("input").val(ic_val)
                                 $(ic_cell).find("label.editableCell").text(ic_val)
                             })
                         }
-                        let cmap = me.closest("div.tab-pane").find("table.compMap")
+                        const cmap = me.closest("div.tab-pane").find("table.compMap")
                         console.log(src_data)
                         populate_values(cmap, src_data.background_conc_file_data);
                         LoadingScreen.hide("BC_upload");
@@ -392,17 +392,17 @@
                 let loadingRequest = 'load_' + this.id;
                 LoadingScreen.show(loadingRequest);
 
-                me.removeAttr('data-filedata');
+                var myName = me.attr('name');
+                var fileKey = `bg_conc_${myName}`;
+                TRIM.store.fileData.remove(fileKey);
                 TRIM.api.parseFiles(this).on('load', function() {
                     try {
                         var data = JSON.parse(this.responseText);
-                        if (data.files[me.attr('name')]) {
-                            var myData = data.files[me.attr('name')];
-                            var filedata = data.files[me.attr('name')]['file_data'];
-                            me.attr(
-                                'data-filedata',
-                                JSON.stringify(myData)
-                            );
+                        if (data.files && data.files[myName]) {
+                            var myData = data.files[myName];
+                            TRIM.store.fileData.add(fileKey, myData);
+
+                            var filedata = myData.file_data;
                             let this_chem =  me.closest("div.tab-pane").data("tab-name")
                             scenario_data = {
                                 'type': 'input',

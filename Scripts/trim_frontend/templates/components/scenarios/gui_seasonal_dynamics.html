@@ -261,35 +261,37 @@
                 }
             }
 
-            let param_name = $(elem).attr("name")
+            let param_name = $(elem).attr("name");
             let param_info = [
                 {
                     'type': 'data',
                     'name': 'id',
                     'value': TRIM.store.currentScenario.id
-                }, {
+                },
+                {
                     'type': 'data',
                     'name': 'field',
                     'value': 'seasonal_' + param_name
-                }, {
+                },
+                {
                     'type': 'input',
                     'name': 'seasonal_' + param_name,
                     'value': ''
                 }
-            ]
-
-            let param_data = ""
+            ];
+            let param_data = "";
             if ($(elem).attr('type') == "number") {
-                param_data = $(elem).val()
-            } else if ($(elem).attr("name").includes("_field_name")) {
-                param_data = $(elem).attr("data-seasonal")
-                param_info[param_info.findIndex(e => e.name == 'field')].value += "_TS"
-                param_info[param_info.findIndex(e => e.type == 'input')].name += "_TS"
+                param_data = $(elem).val();
+            }
+            else if ($(elem).attr("name").includes("_field_name")) {
+                param_data = JSON.stringify(TRIM.store.fileData.fromField(elem, 'name', 'seasonal') || null);
+                param_info[param_info.findIndex(e => e.name == 'field')].value += "_TS";
+                param_info[param_info.findIndex(e => e.type == 'input')].name += "_TS";
             }
 
-            param_info[param_info.findIndex(e => e.type == 'input')].value =param_data
+            param_info[param_info.findIndex(e => e.type == 'input')].value = param_data;
             console.log(param_info)
-            return param_info
+            return param_info;
         }
 
         function submit_seasonal_dyn_value(elem) {
@@ -332,7 +334,7 @@
             static_allow_exchange_selects.removeAttr('disabled');
 
             function updateFields() {
-                var globalFileFiled = fileFields.filter('[name^="default_"]');
+                var globalFileField = fileFields.filter('[name^="default_"]');
                 selects.each(function() {
                     var me = $(this);
 
@@ -340,12 +342,11 @@
                     var customized = subform.find(
                         '[type="checkbox"][id$="use_custom_file"]');
 
-                    var data = globalFileFiled.attr('data-filedata');
+                    var dataSource = globalFileField;
                     if (customized.prop('checked')) {
-                        data = subform.find('[type="file"]').attr('data-filedata');
+                        dataSource = subform.find('[type="file"]');
                     }
-                    data = data || 'null';
-                    data = JSON.parse(data);
+                    var data = TRIM.store.fileData.fromField(dataSource, 'name', 'seasonal') || null;
 
                     me.html('');
                     if (data) {
@@ -368,21 +369,19 @@
                 var loadingRequest = 'load_' + this.id;
                 LoadingScreen.show(loadingRequest);
 
-                me.removeAttr('data-filedata');
+                var myName = me.attr('name');
+                var fileKey = `seasonal_${myName}`;
+                TRIM.store.fileData.remove(fileKey);
                 TRIM.api.parseFiles(this).on('load', function() {
                     try {
                         var data = JSON.parse(this.responseText);
-                        if (data.files[me.attr('name')]) {
-                            var myData = data.files[me.attr('name')];
-                            me.attr(
-                                'data-filedata',
-                                JSON.stringify(myData)
-                            );
-                        }
-                        // Make sure the file has the column with name "Date"
-                        var filedata = data.files[me.attr('name')]['file_data'];
-                        if (ErrorValidation.tsFileHasDateColumn(me.closest("div").siblings("label"),  filedata)) {
-                            updateFields(me);
+                        if (data.files && data.files[myName]) {
+                            var myData = data.files[myName];
+                            // Make sure the file has the column with name "Date"
+                            if (ErrorValidation.tsFileHasDateColumn(me.closest("div").siblings("label"),  myData.file_data)) {
+                                TRIM.store.fileData.add(fileKey, myData);
+                                updateFields(me);
+                            }
                         }
                     }
                     catch (err) {
@@ -395,11 +394,23 @@
             });
 
             gui.find('select').on('change',function (){
-                let sel = $(this);
-                let section = sel.closest('div.sd_subsection');
-                var globalFileFiled = section.find('[type="file"][name^="default_"]');
-                let data = globalFileFiled.attr('data-filedata');
-                let subform = sel.closest('.subform');
+                const sel = $(this);
+                const section = sel.closest('div.sd_subsection');
+
+                const globalFileField = section.find('[type="file"][name^="default_"]');
+                let dataSource = globalFileField;
+                const subform = sel.closest('.subform');
+                if (subform.find('[type="checkbox"][id$="use_custom_file"]').prop('checked')) {
+                    dataSource = subform.find('[type="file"]');
+                }
+                const data = TRIM.store.fileData.fromField(dataSource, 'name', 'meteo') || null;
+
+                const scenario = TRIM.store.currentScenario;
+                const sim_start = Date.parse(scenario["simulation_start_date"]);
+                const sim_end = Date.parse(scenario["simulation_end_date"]);
+
+                const selected_val = $(sel).val();
+                const def_data_name = $(sel).attr("data-default");
 
                 function convertDate(inputFormat) {
                     function pad(s) { return (s < 10) ? '0' + s : s; }
@@ -407,34 +418,23 @@
                     return [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/')
                 }
 
-                let sim_start = Date.parse(TRIM.store.currentScenario["simulation_start_date"])
-                let sim_end = Date.parse(TRIM.store.currentScenario["simulation_end_date"])
-                if (subform.find('[type="checkbox"][id$="use_custom_file"]').prop('checked')) {
-                    data = subform.find('[type="file"]').attr('data-filedata');
-                }
-                data = data || 'null';
-                data = JSON.parse(data);
-                let selected_val = $(sel).val();
-                let def_data_name = $(sel).attr("data-default")
                 // Restrict file data date range to the simulation period
-                let new_data = data.file_data.filter(e=>Date.parse(e['Date'])>=sim_start & Date.parse(e['Date'])<=sim_end)
+                let new_data = data.file_data.filter(e => Date.parse(e['Date']) >= sim_start & Date.parse(e['Date']) <= sim_end);
                 // make sure we have data in the time window of simulation
-                ErrorValidation.isInSimulationTimeSpan(sel, new_data)
-                // if (elementIsValid($(sel).parent())) {
-                    // Get only the column for this select
-                    let this_sel_data = new_data.map((e, i) => {
-                        let this_row = {
-                            'Date': e['Date'],
-                            'Hour': e['Hour'],
-                            'TimeZone': e['TimeZone']
-                        }
-                        this_row[def_data_name] = e[selected_val]
-                        return this_row
-                    });
-                    sel.attr('data-seasonal', JSON.stringify(this_sel_data))
+                ErrorValidation.isInSimulationTimeSpan(sel, new_data);
+                // Get only the column for this select
+                const this_sel_data = new_data.map((e, i) => {
+                    const this_row = {
+                        'Date': e['Date'],
+                        'Hour': e['Hour'],
+                        'TimeZone': e['TimeZone']
+                    }
+                    this_row[def_data_name] = e[selected_val]
+                    return this_row
+                });
+                TRIM.store.fileData.add(`seasonal_${sel.attr('name')}`, this_sel_data);
 
-                    submit_seasonal_dyn_value(sel)
-                //}
+                submit_seasonal_dyn_value(sel);
             })
         }
     });

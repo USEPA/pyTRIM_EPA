@@ -482,6 +482,29 @@ window.TRIM = (function(trim) {
         throw new Error('Unsupported Entity Type for `TRIM.api.updateParameter()`')
     }
 
+    internalStore.fileData = ((fileData) => {
+        const internalFileStore = {};
+
+        fileData.add = (name, data) => {
+            internalFileStore[name] = data;
+        };
+
+        fileData.get = (name) => {
+            return internalFileStore[name];
+        }
+
+        fileData.remove = (name) => {
+            internalFileStore[name] = undefined;
+        }
+
+        fileData.fromField = (el, attr, pref) => {
+            const fileKey = pref != undefined ? `${pref}_${el.attr(attr)}` : el.attr(attr);
+            return internalFileStore[fileKey];
+        }
+
+        return fileData;
+    })(internalStore.fileData || {});
+
     trim.api = api;
     trim.store = internalStore;
 

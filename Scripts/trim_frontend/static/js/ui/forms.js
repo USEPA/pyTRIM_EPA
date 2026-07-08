@@ -1026,6 +1026,6 @@ window.TRIM = (function(trim) {
     }
 
     trim.forms = forms;
-    trim.functions = functions
+    trim.functions = functions;
     return trim;
 })(window.TRIM || {});
