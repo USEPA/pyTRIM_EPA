@@ -524,7 +524,7 @@
             })
             let uniq_comp = [... new Set(comp_array)]
             uniq_comp.sort().forEach(function(e) {
-                let menu_item = "<a class='dropdown-item comp-item'>" + e + "</a>"
+                let menu_item = "<a href='#' class='dropdown-item comp-item'>" + e + "</a>"
                 $(menu_item).appendTo(dd_menu)
             })
             $("a.dropdown-item.comp-item").on("click",function (e){

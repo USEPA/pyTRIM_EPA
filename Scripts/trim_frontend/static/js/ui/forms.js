@@ -101,15 +101,14 @@ window.TRIM = (function(trim) {
         inner.style.maxWidth = '100%';
         field.appendChild(inner);
 
-        var innerLabel = document.createElement('label');
-        innerLabel.className = 'custom-file-label form-control-sm';
-        innerLabel.htmlFor = id;
-        innerLabel.innerText = 'Choose file';
-        field.appendChild(innerLabel);
+        var innerSpan = document.createElement('span');
+        innerSpan.className = 'custom-file-label form-control-sm';
+        innerSpan.innerText = 'Choose file';
+        field.appendChild(innerSpan);
 
         if (fieldDef.readonly) {
             inner.setAttribute('readonly', 'readonly');
-            innerLabel.setAttribute('readonly', 'readonly');
+            innerSpan.setAttribute('readonly', 'readonly');
         }
 
         return field;
