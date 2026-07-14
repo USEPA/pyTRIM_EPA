@@ -19,6 +19,7 @@ from trim_db.services import *
 from trim_db.services.parameters import get_or_create_custom_param
 from trim_db.services.entities import ParcelService
 from trim_frontend import api
+from ..scenarios.utils import meteo_wgt_avg_value_from_timeseries
 from ..parcels.utils import delete_parcel_contents, get_canonical_land_use_type, get_canonical_parcel_type, get_ve_defaults_for_parcel_type, handle_parcel_update, initialize_parcel_contents
 from ..utils.data_structures import calculate_list_depth
 from ..utils.file_io import csv_to_df, MiscAssociatedFileVariety, associated_file_helper, convert_sfc_to_meteo, parse_sfc_file_as_dataframe
@@ -33,7 +34,7 @@ file_api = Blueprint('file_api', __name__)
 api.use_api_errors(file_api)
 
 
-@file_api.route('/api/file', methods=['POST'])
+@file_api.route('/api/files', methods=['POST'])
 @login_required
 def parse():
     logger = make_logger('file_uploader')
@@ -99,7 +100,7 @@ def parse():
     return ApiResult({'files': data})
 
 
-@file_api.route('/api/AERMODfile', methods=['POST'])
+@file_api.route('/api/files/AERMODfile', methods=['POST'])
 @login_required
 def parse_aermod():
     logger = make_logger('file_uploader')
@@ -274,7 +275,7 @@ def parse_aermod():
     return ApiResult({'aermod_result': res_json})
 
 
-@file_api.route('/api/backgroundConc_file', methods=['POST'])
+@file_api.route('/api/files/backgroundConc_file', methods=['POST'])
 @login_required
 def upload_background_conc():
     data = json.loads(request.form["file_data"])
@@ -367,7 +368,8 @@ def upload_background_conc():
         print('background conc load error:', e)
     return ApiResult({'background_conc_file_data': data})
 
-@file_api.route('/api/parcel_file', methods=['POST'])
+
+@file_api.route('/api/files/parcel_file', methods=['POST'])
 @login_required
 def parse_parcel_upload():
     errors = []
@@ -528,8 +530,87 @@ def parse_parcel_upload():
         return ApiResult(return_data)
 
 
+@file_api.route('/api/files/met_file', methods=['POST'])
+@login_required
+def parse_met_file():
+    logger = make_logger('file_uploader')
 
-@file_api.route('/api/misc_scen_file', methods=['GET', 'POST', 'DELETE'])
+    files = request.files
+    if not files:
+        raise ApiException("No files were uploaded")
+
+    scenario_id = request.form["scenario_id"]
+    scenario = ScenarioService.get(scenario_id)
+    if not scenario:
+        return ApiException("Unknown Scenario")
+    if not current_user.can('edit', scenario):
+        abort(403)
+
+    data = {}
+    for n, f in files.items():
+        err = None
+        fields = []
+        entries = 0
+        preview = None
+        file_data = None
+        truncated = False
+        record_limit = 1_000_000
+        try:
+            df = None
+            fname = secure_filename(f.filename)
+
+            is_sfc = fname.lower().endswith('.sfc')
+
+            if is_sfc:
+                sfc_df = parse_sfc_file_as_dataframe(f)
+                df = convert_sfc_to_meteo(sfc_df)
+            elif fname.lower().endswith('.csv'):
+                df = csv_to_df(f, dtype=str)
+
+            if df is not None:
+                # Get rid of carriage returns b/c they mess up output
+                df = df.replace('\r', '', regex=True)
+
+                if 'Date' not in df.columns:
+                    raise AssertionError('"Date" column is required')
+
+                # Restrict file data date range to the simulation period
+                df['DateFilter'] = pd.to_datetime(df.Date)
+                df = df[df.DateFilter.between(scenario.start_date, scenario.end_date)]
+                df = df.drop(columns=['DateFilter'])
+
+                fields = list(df.columns.values)
+                entries = len(df.index)
+                print(f'NUMBER OF ENTRIES IS {entries} ')
+
+                met_type = "SFC" if is_sfc else "MET"
+                met_fields = meteo_wgt_avg_value_from_timeseries(df, met_type)
+
+                file_data = {
+                    (k[6:] if k.startswith('wt_av_') else k): v
+                    for k, v in met_fields.items()
+                }
+
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            err = e
+
+        if err:
+            raise ApiException(
+                f"Unable to upload file: {err}", 500
+            ) from err
+
+        data[n] = {
+            'filename': fname,
+            'fields': fields,
+            'entry_count': entries,
+            'file_data': file_data
+        }
+
+    return ApiResult({'files': data})
+
+
+@file_api.route('/api/files/misc_scen_file', methods=['GET', 'POST', 'DELETE'])
 @login_required
 def manage_misc_scenario_file():
 
@@ -816,8 +897,6 @@ def process_csv_parcels(csv_rows):
         raise ValueError(f"Unsupported CSV format: {csv_format}")
 
 
-
-
 def get_parcel_row_geojson(row):
     props = row["properties"]
     return {
@@ -831,7 +910,7 @@ def get_parcel_row_geojson(row):
         "coordinates": row["geometry"].get("coordinates")[0],
     }
 
-@file_api.route('/api/runoff_matrix_file', methods=['POST'])
+@file_api.route('/api/files/runoff_matrix_file', methods=['POST'])
 @login_required
 def parse_runoff_matrix_upload():
     scenario_id = request.form["scenario_id"]
@@ -1011,7 +1090,7 @@ root = os.path.dirname(os.path.abspath(__file__))
 static = os.path.abspath(os.path.join(root, '../static'))
 
 
-@file_api.route('/api/form', methods=['GET'])
+@file_api.route('/api/files/json_form', methods=['GET'])
 @login_required
 def load_json_form():
     forms = request.args.getlist('form')

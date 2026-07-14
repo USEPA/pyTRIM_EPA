@@ -300,20 +300,19 @@
                 param_data = $(elem).val();
             }
             else if ($(elem).attr("name").includes("_field_name")) {
-                param_data = JSON.stringify(TRIM.store.fileData.fromField(elem, 'name', 'meteo') || null);
-                param_info[param_info.findIndex(e => e.name == 'field')].value += "_TS";
-                param_info[param_info.findIndex(e => e.type == 'input')].name += "_TS";
+                param_info[1].value += "_TS";
+                param_info[2].name += "_TS";
+                param_data = TRIM.store.fileData.fromField(elem, 'name', 'meteo') || null;
             }
 
-            param_info[param_info.findIndex(e => e.type == 'input')].value = param_data;
-            return param_info
+            param_info[2].value = param_data;
+            return param_info;
         }
 
         function submit_meteo_value(elem, is_sfc=false) {
             let param_info = get_form_data(elem)
             if ($(elem).get(0).tagName == "INPUT") {
                 ErrorValidation.isPositiveValue(elem, $(elem).parent());
-                
                 if (elementIsValid($(elem).parent())) {
                     let min = parseFloat(elem.getAttribute('min')) || undefined;
                     let max = parseFloat(elem.getAttribute('max')) || undefined;
@@ -321,67 +320,58 @@
                         ErrorValidation.isWithinRange(elem, $(elem).parent(), min, max);
                 }
             }
-            if (elementIsValid($(elem).parent())){
-                if (is_sfc) {
-                    param_info = param_info.concat(
-                    [{
+            if (!elementIsValid($(elem).parent())) {
+                return;
+            }
+            if (is_sfc) {
+                param_info = param_info.concat(
+                [
+                    {
                         'type': 'data',
                         'name': 'field',
                         'value': 'is_sfc'
-                    },{
+                    },
+                    {
                         'type': 'input',
                         'name': 'is_sfc',
                         'value': is_sfc
-                    }]);
-                }
-                console.log(param_info);
-                LoadingScreen.show("meteo_update_value")
-                let resp = TRIM.api.updateScenario(param_info).on('load',function(rsp){
-                    let val_resp = this.responseJSON
-                    LoadingScreen.hide("meteo_update_value");
-                    if (val_resp?.success === false) {
-                        return;
                     }
-                    if (val_resp) {
-                        let val = val_resp[Object.keys(val_resp)[0]]
-                        let lb_static_val = $(elem).closest('div.form-group').find("label.wt_avg_val")
-                        if (lb_static_val.length > 0) {
-                            lb_static_val.text(`Time-weighted average from file: ${val}`)
-                        } else {
-                            let lb_static_val = `<label class=wt_avg_val>Time-weighted average from file: ${val}</label>`
-                            $(elem).closest('div.form-group').append(lb_static_val)
-                        }
-                        if (param_info[1].value == "meteo_precipitation_field_name_rate_TS") {
-                            let scenario = TRIM.store.currentScenario;
-                            let sim_start = Date.parse(scenario["simulation_start_date"])
-                            let sim_end = Date.parse(scenario["simulation_end_date"])
-                            var diff = calculateDateDistance(sim_start, sim_end, ['days']);
-                            var days = parseInt(diff[0].split(' ')[0]);
-                            $('#precipitation_average_annual').val(val * 365);
-                        }
+                ]);
+            }
+            LoadingScreen.show("meteo_update_value")
+            let resp = TRIM.api.updateScenario(param_info).on('load', function(rsp) {
+                let val_resp = this.responseJSON
+                LoadingScreen.hide("meteo_update_value");
+                if (val_resp?.success === false) {
+                    return;
+                }
+                if (val_resp) {
+                    let val = val_resp[Object.keys(val_resp)[0]]
+                    let lb_static_val = $(elem).closest('div.form-group').find("label.wt_avg_val")
+                    if (lb_static_val.length > 0) {
+                        lb_static_val.text(`Time-weighted average from file: ${val}`)
                     }
                     else {
-                        delete TRIM.store.currentScenario.meteorology;
-                        /*
-                        let meteo_store = TRIM.store.currentScenario.meteorology;
-                        property_name = param_info[2].name.replace("meteo_", "");
-                        if (meteo_store.hasOwnProperty(property_name)) {
-                            meteo_store[property_name] = param_info[2].value;
-                        }
-                        else if (property_name.substring('interception') && property_name.substring('static') ) {
-                            meteo_store = TRIM.store.currentScenario.meteorology.wet_dep_interception;
-                            property_name = "wet_dep_" + property_name;
-                            property_name = property_name.replace("fractions", "frac")
-                        }*/
+                        let lb_static_val = `<label class=wt_avg_val>Time-weighted average from file: ${val}</label>`
+                        $(elem).closest('div.form-group').append(lb_static_val)
                     }
-                    // need re-pull AverageVerticalVelocity soil param
-                    if (param_info[1].value.includes('_precipitation_')) {
-                        delete TRIM.store.currentScenario.parcels;
+                    if (param_info[1].value == "meteo_precipitation_field_name_rate_TS") {
+                        let scenario = TRIM.store.currentScenario;
+                        let sim_start = Date.parse(scenario["simulation_start_date"])
+                        let sim_end = Date.parse(scenario["simulation_end_date"])
+                        var diff = calculateDateDistance(sim_start, sim_end, ['days']);
+                        var days = parseInt(diff[0].split(' ')[0]);
+                        $('#precipitation_average_annual').val(val * 365);
                     }
-                })
-            } else {
-                return
-            }
+                }
+                else {
+                    delete TRIM.store.currentScenario.meteorology;
+                }
+                // need re-pull AverageVerticalVelocity soil param
+                if (param_info[1].value.includes('_precipitation_')) {
+                    delete TRIM.store.currentScenario.parcels;
+                }
+            });
         }
 
         function enableFieldUpdates() {
@@ -409,7 +399,7 @@
 
                     me.html('');
                     if (data) {
-                        var fields = data.fields;
+                        var fields = data.fields.filter(k => data.file_data[k] !== undefined);
                         TRIM.forms.updateSelect(this, fields, false);
                         me.removeAttr('disabled');
                     }
@@ -425,22 +415,23 @@
 
             fileFields.change(function(e) {
                 var me = $(this);
+                if (!me[0].files.length) {
+                    console.log('no file detected')
+                    return;
+                }
                 var loadingRequest = 'load_' + this.id;
                 LoadingScreen.show(loadingRequest);
 
                 var myName = me.attr('name');
                 var fileKey = `meteo_${myName}`;
                 TRIM.store.fileData.remove(fileKey);
-                TRIM.api.parseFiles(this).on('load', function() {
+                TRIM.api.uploadMetFile(TRIM.store.currentScenario.id, this).on('load', function() {
                     try {
                         var data = JSON.parse(this.responseText);
                         if (data.files && data.files[myName]) {
                             var myData = data.files[myName];
-                            // Make sure the file has the column with name "Date"
-                            if (ErrorValidation.tsFileHasDateColumn(me.closest("div").siblings("label"),  myData.file_data)) {
-                                TRIM.store.fileData.add(fileKey, myData);
-                                updateFields(me.closest('section'));
-                            }
+                            TRIM.store.fileData.add(fileKey, myData);
+                            updateFields(me.closest('section'));
                         }
                     }
                     catch (err) {
@@ -465,44 +456,9 @@
                 const extension = dataSource[0].files[0].name;
                 const data = TRIM.store.fileData.fromField(dataSource, 'name', 'meteo') || null;
 
-                const scenario = TRIM.store.currentScenario;
-                const sim_start = Date.parse(scenario["simulation_start_date"]);
-                const sim_end = Date.parse(scenario["simulation_end_date"]);
+                const selected_val = sel.val();
 
-                const selected_val = $(sel).val();
-                const def_data_name = $(sel).attr("data-default")
-
-                function convertDate(inputFormat) {
-                    function pad(s) { return (s < 10) ? '0' + s : s; }
-                    const d = new Date(inputFormat)
-                    return [pad(d.getMonth()+1), pad(d.getDate()), d.getFullYear()].join('/')
-                }
-                
-                let new_data = data.file_data;
-                if (!extension.endsWith(".sfc")) {
-                    // Restrict file data date range to the simulation period
-                    new_data = new_data.filter(e => Date.parse(e['Date']) >= sim_start & Date.parse(e['Date']) <= sim_end);
-                    ErrorValidation.isInSimulationTimeSpan(sel, new_data);
-                }
-
-                // Get only the column for this select
-                const this_sel_data = new_data.map((e,i) => {
-                    const this_row = {
-                        'Date': e['Date'],
-                        'xHour': e['xHour'],
-                        'TimeZone': e['TimeZone']
-                    }
-                    if (["HorizontalWindSpeed", "WindDirection"].includes(selected_val)) {
-                        this_row["HorizontalWindSpeed"] = e["HorizontalWindSpeed"];
-                        this_row["WindDirection"] = e["WindDirection"];
-                        this_row["_selected"] = selected_val;
-                    }
-                    else {
-                        this_row[def_data_name] = e[selected_val];
-                    }
-                    return this_row;
-                });
-                TRIM.store.fileData.add(`meteo_${sel.attr('name')}`, this_sel_data);
+                TRIM.store.fileData.add(`meteo_${sel.attr('name')}`, data.file_data[selected_val]);
 
                 submit_meteo_value(sel, extension.endsWith(".sfc"))
             })

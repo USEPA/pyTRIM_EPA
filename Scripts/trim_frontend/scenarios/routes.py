@@ -126,7 +126,23 @@ def update_scenario(scenario_id):
         s = ScenarioService.get(int(scenario_id))
         if not current_user.can('edit', s):
             abort(403)
+
         scenario_data = request.form.to_dict()
+
+        # Merge file data
+        for field_name, file_data in request.files.to_dict().items():
+            if file_data.filename.endswith('.api_blob'):
+                # If we auto-converted a string to filedata to help with POSTing it,
+                # convert it back into a string!
+                file_bytes = b''
+                while True:
+                    chunk = file_data.stream.read(4096)
+                    if not chunk:
+                        break
+                    file_bytes += chunk
+                file_data = file_bytes.decode('utf-8')
+            scenario_data[field_name] = file_data
+
         # print(f"updating with {scenario_data}")
 
         rv = None
