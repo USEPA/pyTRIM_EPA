@@ -268,6 +268,14 @@ CREATE TABLE mirc_simulation (
     FOREIGN KEY(chemical_id) REFERENCES chemical (id)
 );
 
+CREATE TABLE mirc_life_stage (
+    name VARCHAR(255) NOT NULL, 
+    duration FLOAT, 
+    duration_unit VARCHAR(255), 
+    id SERIAL PRIMARY KEY,  
+    UNIQUE (name)
+);
+
 CREATE TABLE mirc_percentile (
     name VARCHAR(255) NOT NULL, 
     id SERIAL PRIMARY KEY,  
