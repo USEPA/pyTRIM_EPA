@@ -109,31 +109,27 @@ class Scenario(Model, TrackUpdatesMixin):
         'User', backref=sa.orm.backref('created_scenarios', lazy='dynamic')
     )
 
-    # @property
-    # def erosion_rate_data_source(self):
-    #     opt = 1
-    #     try:
-    #         opt = self.erosionRateCalcSource
-    #     except Exception as ex:
-    #         print(f"Erosion rate calculation option not set??\n{ex}")
-    #     finally:
-    #         return opt
-
     @property
-    def sim_begin_end_time(self):
-        # get begin end time param names
+    def start_date(self):
         sim_beg = '2001-01-01'
-        sim_end = '2010-12-31'
         try:
             param_start = self.parameters.get('simulationBeginDateTime')
-            param_end = self.parameters.get("simulationEndDateTime")
             if param_start.value:
                 sim_beg = datetime.utcfromtimestamp(int(param_start.value)).strftime('%Y-%m-%d')
+        except Exception:
+            pass
+        return sim_beg
+
+    @property
+    def end_date(self):
+        sim_end = '2010-12-31'
+        try:
+            param_end = self.parameters.get("simulationEndDateTime")
             if param_end.value:
                 sim_end = datetime.utcfromtimestamp(int(param_end.value)).strftime('%Y-%m-%d')
-        except Exception as ex:
+        except Exception:
             pass
-        return sim_beg, sim_end
+        return sim_end
 
     @property
     def latest_proc_status(self):
@@ -158,7 +154,6 @@ class Scenario(Model, TrackUpdatesMixin):
 
 @register_serializer(Scenario)
 def serialize_scenario(scen: Scenario):
-    start_time, end_time = scen.sim_begin_end_time
     s = {
         'id': scen.id,
         'name': scen.name,
