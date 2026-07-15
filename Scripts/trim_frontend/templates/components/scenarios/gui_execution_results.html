@@ -783,32 +783,20 @@
 
             let m_file = run_results.mass_results_file;
             $('#btn_get_mass_results').attr({
-<<<<<<< HEAD
                 href: m_file.indexOf(".s3.amazonaws.com") > -1 ? m_file : (staticPath + "/" + encodeURIComponent(m_file)),
-=======
-                href: m_file.indexOf(".s3.amazonaws.com") > -1 ? m_file : staticPath + "/" + encodeURIComponent(m_file),
->>>>>>> development
                 download: "mass_results.xlsx"
             });
 
             let c_file = run_results.conc_results_file;
             $('#btn_get_conc_results').attr({
-<<<<<<< HEAD
                 href: c_file.indexOf(".s3.amazonaws.com") > -1 ? c_file : (staticPath + "/" + encodeURIComponent(c_file)),
-=======
-                href: c_file.indexOf(".s3.amazonaws.com") > -1 ? c_file : staticPath + "/" + encodeURIComponent(c_file),
->>>>>>> development
                 download: "concentration_results.xlsx"
             });
 
             if ($('#btn_get_tm_results').length > 0) {
                 let t_file = run_results.tm_results_file;
                 $('#btn_get_tm_results').attr({
-<<<<<<< HEAD
                     href: t_file.indexOf(".s3.amazonaws.com") > -1 ? t_file : (staticPath + "/" + encodeURIComponent(t_file)),
-=======
-                    href: t_file.indexOf(".s3.amazonaws.com") > -1 ? t_file : staticPath + "/" + encodeURIComponent(t_file),
->>>>>>> development
                     download: "transfer_matrix.xlsx"
                 });
             }
