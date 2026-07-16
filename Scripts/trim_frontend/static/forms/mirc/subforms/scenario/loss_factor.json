@@ -1,0 +1,35 @@
+{
+    "title": "Loss Factor",
+    "fields": [
+        {
+            "id": "product_id",
+            "data_type": "int",
+            "hidden": true
+        },
+        {
+            "id": "product",
+            "label": "Feed Type",
+            "data_type": "string",
+            "readonly": true
+        },
+        {
+            "id": "loss_description",
+            "label": "Description",
+            "data_type": "string",
+            "readonly": true
+        },
+        {
+            "id": "fraction_lost",
+            "label": "Fraction Lost",
+            "data_type": "float",
+            "min": 0,
+            "max": 1,
+            "step": "any"
+        },
+        {
+            "id": "source",
+            "label": "Source",
+            "data_type": "string"
+        }
+    ]
+}

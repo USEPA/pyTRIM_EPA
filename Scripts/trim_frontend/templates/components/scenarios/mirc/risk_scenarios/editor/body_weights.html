@@ -1,0 +1,96 @@
+
+<h4>
+    <button type="button"
+        class="btn btn-lg btn-block px-0 text-primary text-left border-light border-top-0 border-left-0 border-right-0 rounded-0"
+        data-toggle="collapse" aria-expanded="true"
+        data-target="#bw-collapse" aria-controls="bw-collapse"
+        style="font-weight: 500;"
+    >
+        {{ form.body_weight_parameters.label.text }}&nbsp;
+        <small class="text-muted">
+            <i class="fa fa-eye-slash"></i>
+        </small>
+    </button>
+</h4>
+
+<div id="bw-collapse" class="collapse show">
+    <div class="form-row mb-3">
+        <div class="col-sm-2">
+            <label for="body-weight-age-filter">
+                Life Stage
+            </label>
+            <select id="body-weight-age-filter" class="form-control form-control-sm">
+                {% for age in ages %}
+                    <option value="{{ age.id }}">{{ age.name|title }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+    <table id="body-weight-parameters" class="table table-sm table-bordered">
+        <thead>
+            <tr class="text-center">
+                <th scope="col" class="table-primary border-primary">Percentile</th>
+                <th scope="col" class="table-primary border-primary">Value</th>
+                <th scope="col" class="table-primary border-primary">Unit</th>
+                <th scope="col" class="table-primary border-primary">Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th colspan="4" class="table-light align-middle text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </th>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var tbl = $('#body-weight-parameters tbody');
+        $('#body-weight-age-filter').change(function() {
+            var age = $(this).val();
+
+            var filter = '.age-' + age;
+
+            var rows = tbl.find('tr');
+            var relevant = rows.filter(filter);
+
+            if (!relevant.length) {
+                if (rows.length > 1) {
+                    LoadingScreen.show('bw_params');
+                }
+                $.ajax({
+                    url: '{{ url_for("mirc_scenario.get_form_fragment") }}',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        name: 'body_weight',
+                        age: age,
+                        parent: '{{ form.parent.data or "" }}',
+                        scenario_id: '{{ form.scenario_id.data or "" }}',
+                        i: rows.length
+                    })
+                }).then(function(data) {
+                    tbl.append(data);
+                    rows = tbl.find('tr').hide();
+                    rows.filter(filter).show();
+                    // Enable popups
+                    $('[data-toggle="popover"]').popover();
+                }).always(function() {
+                    LoadingScreen.hide('bw_params');
+                });
+            }
+            else {
+                rows.hide();
+                relevant.show();
+            }
+        }).change();
+    });
+    </script>
+</div>
+
+<hr />

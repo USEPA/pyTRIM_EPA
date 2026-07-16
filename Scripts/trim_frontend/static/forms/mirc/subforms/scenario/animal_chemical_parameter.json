@@ -1,0 +1,76 @@
+{
+    "title": "Animal-Specific Chemical Parameter",
+    "fields": [
+        {
+            "id": "chemical_id",
+            "data_type": "int",
+            "hidden": true
+        },
+        {
+            "id": "chemical",
+            "label": "Chemical",
+            "data_type": "string",
+            "readonly": true
+        },
+        {
+            "id": "product_id",
+            "data_type": "int",
+            "hidden": true
+        },
+        {
+            "id": "product",
+            "label": "Product",
+            "data_type": "string",
+            "readonly": true
+        },
+        {
+            "id": "Bs",
+            "label": "Soil Bioavailability Factor",
+            "data_type": "float",
+            "min": 0,
+            "max": 1,
+            "step": "any",
+            "allow_empty": true,
+            "help": "Soil bioavailability factor for livestock"
+        },
+        {
+            "id": "MF",
+            "label": "Metabolism Factor",
+            "data_type": "float",
+            "min": 0,
+            "max": 1,
+            "step": "any",
+            "allow_empty": true,
+            "help": "Chemical-specific mammalian metabolism factor that accounts for endogenous degradation of the chemical"
+        },
+        {
+            "id": "cooking_adjustment",
+            "label": "Cooking Adjustment Factor",
+            "data_type": "float",
+            "min": 0,
+            "max": 1,
+            "step": "any",
+            "allow_empty": true,
+            "help": "Adjustment made to reflect the chemical concentrations after cooking"
+        },
+        {
+            "id": "Ba",
+            "label": "Biotransfer Factor",
+            "data_type": "float",
+            "min": 0,
+            "step": "any",
+            "allow_empty": true,
+            "help": "Chemical-specific biotransfer factor"
+        },
+        {
+            "id": "Ba_unit",
+            "label": "Ba Unit",
+            "data_type": "string"
+        },
+        {
+            "id": "notes",
+            "label": "Notes",
+            "data_type": "string"
+        }
+    ]
+}

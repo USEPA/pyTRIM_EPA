@@ -1,0 +1,55 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+
+    <div class="d-flex pb-1">
+        <h1>{{ mirc_scenario.name }}</h1>
+        {% if not mirc_scenario.is_builtin %}
+            <div class="ml-auto mt-2">
+                <button type="button" class="btn btn-primary btn-sm px-3 save-scenario-btn">
+                    <i class="fa fa-save mr-1"></i>&nbsp;Save
+                </button>
+            </div>
+        {% endif %}
+    </div>
+
+    {% with update_url = url_for('mirc_scenario_api.update_risk_scenario_permissions', id=mirc_scenario.id) %}
+        {% with access_object = mirc_scenario %}
+            {% include 'components/scenarios/mirc/access_models/permissions.html' %}
+        {% endwith %}
+    {% endwith %}
+
+    <div class="form-row px-1 mt-3">
+        {% if not mirc_scenario.is_builtin %}
+            <button type="button" class="btn btn-lg btn-block btn-primary py-1 save-scenario-btn">
+                <i class="fa fa-save mr-1"></i>&nbsp;Save
+            </button>
+        {% endif %}
+    </div>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var form = $('#permissions-form');
+
+        $('.save-scenario-btn').click(function(e) {
+            e.preventDefault();
+            // Forward this click to the ACTUAL submit button for the form
+            // (This lets us get nice browser-handled validation 
+            // for our required fields)
+            form.find('[type="submit"]').click();
+        });
+    });
+    </script>
+
+{% endblock content %}
+
+{% block scripts %}
+    <script src="{{url_for('static', filename='js/lib/jquery.dataTables.min.js')}}">
+    </script>
+    <script src="{{url_for('static', filename='js/lib/dataTables.bootstrap4.min.js')}}">
+    </script>
+
+    <link rel="stylesheet" type="text/css"
+        href="{{url_for('static', filename='css/lib/datatables/dataTables.bootstrap4.min.css')}}"
+    />
+{% endblock scripts %}

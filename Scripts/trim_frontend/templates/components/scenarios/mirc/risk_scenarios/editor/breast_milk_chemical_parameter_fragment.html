@@ -1,0 +1,119 @@
+{% from 'macros/mirc/form_macros.html' import render_input, render_label %}
+
+<tr class="chemical-{{ bmcp.chemical_id.data }}">
+    <th scope="row" class="table-primary border-primary align-middle text-center">
+        {{ render_label(bmcp.AE_inf, hover_help=True, class="mb-0") }}
+    </th>
+    <td>
+        {{ render_input(bmcp.chemical_id) }}
+
+        {{ render_input(bmcp.AE_inf) }}
+    </td>
+    <td>
+        <input type="text" class="form-control form-control-sm"
+            readonly="readonly" value="unitless" />
+    </td>
+</tr>
+<tr class="chemical-{{ bmcp.chemical_id.data }}">
+    <th scope="row" class="table-primary border-primary align-middle text-center">
+        {{ render_label(bmcp.AE_mat, hover_help=True, class="mb-0") }}
+    </th>
+    <td>
+        {{ render_input(bmcp.AE_mat) }}
+    </td>
+    <td>
+        <input type="text" class="form-control form-control-sm"
+            readonly="readonly" value="unitless" />
+    </td>
+</tr>
+<tr class="chemical-{{ bmcp.chemical_id.data }}">
+    <th scope="row" class="table-primary border-primary align-middle text-center">
+        {{ render_label(bmcp.f_bl, hover_help=True, class="mb-0") }}
+    </th>
+    <td>
+        {{ render_input(bmcp.f_bl) }}
+    </td>
+    <td>
+        <input type="text" class="form-control form-control-sm"
+            readonly="readonly" value="unitless" />
+    </td>
+</tr>
+<tr class="chemical-{{ bmcp.chemical_id.data }}">
+    <th scope="row" class="table-primary border-primary align-middle text-center">
+        {{ render_label(bmcp.f_f, hover_help=True, class="mb-0") }}
+    </th>
+    <td>
+        {{ render_input(bmcp.f_f) }}
+    </td>
+    <td>
+        <input type="text" class="form-control form-control-sm"
+            readonly="readonly" value="unitless" />
+    </td>
+</tr>
+<tr class="chemical-{{ bmcp.chemical_id.data }}">
+    <th scope="row" class="table-primary border-primary align-middle text-center">
+        {{ render_label(bmcp.f_pl, hover_help=True, class="mb-0") }}
+    </th>
+    <td>
+        {{ render_input(bmcp.f_pl) }}
+    </td>
+    <td>
+        <input type="text" class="form-control form-control-sm"
+            readonly="readonly" value="unitless" />
+    </td>
+</tr>
+<tr class="chemical-{{ bmcp.chemical_id.data }}">
+    <th scope="row" class="table-primary border-primary align-middle text-center">
+        {{ render_label(bmcp.h_bm, hover_help=True, class="mb-0") }}
+    </th>
+    <td>
+        {{ render_input(bmcp.h_bm) }}
+    </td>
+    <td>
+        {{ render_input(bmcp.h_bm_unit) }}
+    </td>
+</tr>
+<tr class="chemical-{{ bmcp.chemical_id.data }}">
+    <th scope="row" class="table-primary border-primary align-middle text-center">
+        {{ render_label(bmcp.k_elim, hover_help=True, class="mb-0") }}
+    </th>
+    <td>
+        {{ render_input(bmcp.k_elim) }}
+    </td>
+    <td>
+        {{ render_input(bmcp.k_elim_unit) }}
+    </td>
+</tr>
+<tr class="chemical-{{ bmcp.chemical_id.data }}">
+    <th scope="row" class="table-primary border-primary align-middle text-center">
+        {{ render_label(bmcp.k_aq_elac, hover_help=True, class="mb-0") }}
+    </th>
+    <td>
+        {{ render_input(bmcp.k_aq_elac) }}
+    </td>
+    <td>
+        {{ render_input(bmcp.k_aq_elac_unit) }}
+    </td>
+</tr>
+<tr class="chemical-{{ bmcp.chemical_id.data }}">
+    <th scope="row" class="table-primary border-primary align-middle text-center">
+        {{ render_label(bmcp.PC_pl_aq, hover_help=True, class="mb-0") }}
+    </th>
+    <td>
+        {{ render_input(bmcp.PC_pl_aq) }}
+    </td>
+    <td>
+        {{ render_input(bmcp.PC_pl_aq_unit) }}
+    </td>
+</tr>
+<tr class="chemical-{{ bmcp.chemical_id.data }}">
+    <th scope="row" class="table-primary border-primary align-middle text-center">
+        {{ render_label(bmcp.PC_rbc_pl, hover_help=True, class="mb-0") }}
+    </th>
+    <td>
+        {{ render_input(bmcp.PC_rbc_pl) }}
+    </td>
+    <td>
+        {{ render_input(bmcp.PC_rbc_pl_unit) }}
+    </td>
+</tr>

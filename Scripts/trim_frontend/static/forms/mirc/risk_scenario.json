@@ -1,0 +1,185 @@
+{
+    "title": "MIRC Scenario",
+    "fields": [
+        {
+            "id": "scenario_id",
+            "data_type": "int"
+        },
+        {
+            "id": "name",
+            "label": "Risk Scenario",
+            "data_type": "string",
+            "required": true
+        },
+        {
+            "id": "notes",
+            "label": "Notes",
+            "data_type": "string",
+            "widget": "textarea"
+        },
+        {
+            "id": "parent",
+            "label": "Parent Scenario",
+            "data_type": "int",
+            "widget": "select",
+            "choices": {
+                "source": "db",
+                "model": "Scenario",
+                "value": "id",
+                "label": "name"
+            },
+            "required": false,
+            "default": 2
+        },
+        {
+            "id": "body_weight_parameters",
+            "label": "Body Weights",
+            "data_type": "field_list",
+            "field": {
+                "id": "body_weight",
+                "label": "Body Weight",
+                "data_type": "form",
+                "form_definition": "mirc/subforms/scenario/body_weight.json"
+            },
+            "min_entries": 0
+        },
+        {
+            "id": "human_ingestion_parameters",
+            "label": "Ingestion Rates",
+            "data_type": "field_list",
+            "field": {
+                "id": "human_ingestion",
+                "label": "Ingestion Rate",
+                "data_type": "form",
+                "form_definition": "mirc/subforms/scenario/human_ingestion.json"
+            },
+            "min_entries": 0
+        },
+        {
+            "id": "product_parameters",
+            "label": "Human Food Parameters",
+            "data_type": "field_list",
+            "field": {
+                "id": "product_parameter",
+                "label": "Product Parameter",
+                "data_type": "form",
+                "form_definition": "mirc/subforms/scenario/product_parameter.json"
+            },
+            "min_entries": 0
+        },
+        {
+            "id": "breast_milk_parameters",
+            "label": "Breast Milk-Specific Parameters",
+            "data_type": "form",
+            "form_definition": "mirc/subforms/scenario/breast_milk_parameters.json"
+        },
+        {
+            "id": "plant_parameters",
+            "label": "Plant Parameters",
+            "data_type": "field_list",
+            "field": {
+                "id": "plant_parameter",
+                "label": "Plant Parameter",
+                "data_type": "form",
+                "form_definition": "mirc/subforms/scenario/plant_parameter.json"
+            },
+            "min_entries": 0
+        },
+        {
+            "id": "animal_ingestion_parameters",
+            "label": "Animal Ingestion Rates",
+            "data_type": "field_list",
+            "field": {
+                "id": "animal_ingestion",
+                "label": "Ingestion Rate",
+                "data_type": "form",
+                "form_definition": "mirc/subforms/scenario/animal_ingestion.json"
+            },
+            "min_entries": 0
+        },
+        {
+            "id": "product_loss_parameters",
+            "label": "Product Loss Factors",
+            "data_type": "field_list",
+            "field": {
+                "id": "loss_factor",
+                "label": "Loss Factor",
+                "data_type": "form",
+                "form_definition": "mirc/subforms/scenario/loss_factor.json"
+            },
+            "min_entries": 0
+        },
+        {
+            "id": "chemical_parameters",
+            "label": "General Chemical Parameters",
+            "data_type": "field_list",
+            "field": {
+                "id": "chemical_parameter",
+                "label": "Chemical Parameter",
+                "data_type": "form",
+                "form_definition": "mirc/subforms/scenario/chemical_parameter.json"
+            },
+            "min_entries": 0
+        },
+        {
+            "id": "mutagenic_parameters",
+            "label": "Mutagenic Adjustment Factors",
+            "data_type": "field_list",
+            "field": {
+                "id": "mutagenic_parameter",
+                "label": "Mutagenic Parameter",
+                "data_type": "form",
+                "form_definition": "mirc/subforms/scenario/mutagenic_parameter.json"
+            },
+            "min_entries": 0
+        },
+        {
+            "id": "baf_parameters",
+            "label": "Bio-Accumulation Parameters",
+            "data_type": "field_list",
+            "field": {
+                "id": "baf_parameter",
+                "label": "Bio-Accumulation Parameter",
+                "data_type": "form",
+                "form_definition": "mirc/subforms/scenario/baf_parameter.json"
+            },
+            "min_entries": 0
+        },
+        {
+            "id": "plant_chemical_parameters",
+            "label": "Plant-Specific Chemical Parameters",
+            "data_type": "field_list",
+            "field": {
+                "id": "plant_chemical_parameter",
+                "label": "Plant-Specific Chemical Parameter",
+                "data_type": "form",
+                "form_definition": "mirc/subforms/scenario/plant_chemical_parameter.json"
+            },
+            "min_entries": 0
+        },
+        {
+            "id": "animal_chemical_parameters",
+            "label": "Animal-Specific Chemical Parameters",
+            "data_type": "field_list",
+            "field": {
+                "id": "animal_chemical_parameter",
+                "label": "Animal-Specific Chemical Parameter",
+                "data_type": "form",
+                "form_definition": "mirc/subforms/scenario/animal_chemical_parameter.json"
+            },
+            "min_entries": 0
+        },
+        {
+            "id": "breast_milk_chemical_parameters",
+            "label": "Breast Milk-Specific Chemical Parameters",
+            "data_type": "field_list",
+            "field": {
+                "id": "breast_milk_chemical_parameter",
+                "label": "Breast Milk-Specific Chemical Parameter",
+                "data_type": "form",
+                "form_definition": "mirc/subforms/scenario/breast_milk_chemical_parameter.json"
+            },
+            "min_entries": 0
+        }
+    ]
+}

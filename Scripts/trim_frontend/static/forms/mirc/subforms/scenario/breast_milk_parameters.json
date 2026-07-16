@@ -1,0 +1,50 @@
+{
+    "title": "Breast Milk Parameters",
+    "fields": [
+        {
+            "id": "f_mbm",
+            "label": "Fraction Fat",
+            "data_type": "float",
+            "min": 0,
+            "max": 1,
+            "step": "any",
+            "allow_empty": true,
+            "help": ""
+        },
+        {
+            "id": "f_fm",
+            "label": "Fraction of Maternal Weight in Fat",
+            "data_type": "float",
+            "min": 0,
+            "max": 1,
+            "step": "any",
+            "allow_empty": true
+        },
+        {
+            "id": "f_pm",
+            "label": "Fraction of Maternal Weight in Plasma",
+            "data_type": "float",
+            "min": 0,
+            "max": 1,
+            "step": "any",
+            "allow_empty": true
+        },
+        {
+            "id": "t_pn",
+            "label": "Maternal Exposure Duration",
+            "data_type": "float",
+            "allow_empty": true,
+            "help": ""
+        },
+        {
+            "id": "t_pn_unit",
+            "label": "Maternal Exposure Duration Unit",
+            "data_type": "string"
+        },
+        {
+            "id": "notes",
+            "label": "Notes",
+            "data_type": "string"
+        }
+    ]
+}

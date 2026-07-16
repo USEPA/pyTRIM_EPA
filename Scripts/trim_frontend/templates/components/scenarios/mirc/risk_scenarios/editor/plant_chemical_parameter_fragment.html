@@ -1,0 +1,52 @@
+{% from 'macros/mirc/form_macros.html' import render_input, render_label %}
+
+<tr class="chemical-{{ pcp.chemical_id.data }} plant-{{ pcp.product_id.data }}">
+    <th scope="row" class="table-primary border-primary align-middle text-center">
+        {{ render_label(pcp.Br, hover_help=True, class="mb-0") }}
+    </th>
+    <td>
+        {{ render_input(pcp.chemical_id) }}
+        {{ render_input(pcp.product_id) }}
+
+        {{ render_input(pcp.Br) }}
+    </td>
+    <td>
+        <input type="text" class="form-control form-control-sm"
+            readonly="readonly" value="unitless" />
+    </td>
+</tr>
+<tr class="chemical-{{ pcp.chemical_id.data }} plant-{{ pcp.product_id.data }}">
+    <th scope="row" class="table-primary border-primary align-middle text-center">
+        {{ render_label(pcp.VG, hover_help=True, class="mb-0") }}
+    </th>
+    <td>
+        {{ render_input(pcp.VG) }}
+    </td>
+    <td>
+        <input type="text" class="form-control form-control-sm"
+            readonly="readonly" value="unitless" />
+    </td>
+</tr>
+<tr class="chemical-{{ pcp.chemical_id.data }} plant-{{ pcp.product_id.data }}">
+    <th scope="row" class="table-primary border-primary align-middle text-center">
+        {{ render_label(pcp.Bv_ag, hover_help=True, class="mb-0") }}
+    </th>
+    <td>
+        {{ render_input(pcp.Bv_ag) }}
+    </td>
+    <td>
+        <input type="text" class="form-control form-control-sm"
+            readonly="readonly" value="unitless" />
+    </td>
+</tr>
+<tr class="chemical-{{ pcp.chemical_id.data }} plant-{{ pcp.product_id.data }}">
+    <th scope="row" class="table-primary border-primary align-middle text-center">
+        {{ render_label(pcp.RCF, hover_help=True, class="mb-0") }}
+    </th>
+    <td>
+        {{ render_input(pcp.RCF) }}
+    </td>
+    <td>
+        {{ render_input(pcp.RCF_unit) }}
+    </td>
+</tr>

@@ -1,0 +1,37 @@
+{% from 'macros/mirc/form_macros.html' import render_input %}
+
+{% for lf in lfs %}
+    <tr class="product-{{ lf.product_id.data }}">
+        <td>
+            {{ render_input(lf.product_id) }}
+
+            {{ render_input(lf.loss_description) }}
+        </td>
+        <td>
+            {{ render_input(lf.fraction_lost) }}
+        </td>
+        <td>
+            {{ render_input(lf.source) }}
+        </td>
+        {% if not scenario.is_builtin %}
+            <td class="text-center align-middle">
+                <button type="button"
+                    class="btn py-0 px-1 text-primary border-0 rounded-circle rem-lf"
+                >
+                    <span>
+                        <i class="fa fa-times-circle"></i>
+                    </span>
+                </button>
+            </td>
+        {% endif %}
+    </tr>
+{% endfor %}
+<tr class="product-{{ p.id }} lf-none text-center table-light">
+    {% if not scenario.is_builtin %}<td colspan="3">{% else %}<td colspan="4">{% endif %}
+        <div style="display: none;">
+            {{ render_input(dummy.product_id) }}
+            {{ render_input(dummy.fraction_lost) }}
+        </div>
+        No loss factors have been defined for {{ p.name|title }}
+    </td>
+</tr>
