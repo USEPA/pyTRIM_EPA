@@ -30,6 +30,13 @@ def create_risk_scenario():
     s = MircScenarioService.from_form(form, owner=current_user)
     db.session.commit()
 
+    if s.id is None:
+        raise api.Exception({
+            'form_errors': {
+                'name': ['Invalid name (possibly a duplicate?)']
+            }
+        })
+
     return api.Result({'scenario': s.as_serializable()})
 
 
