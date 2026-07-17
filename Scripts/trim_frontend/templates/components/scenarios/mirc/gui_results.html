@@ -80,6 +80,12 @@
 <div id="results-chart" class="ct-chart mb-2">
 </div>
 
+<div id="results-download" class="text-right p-1" style="display: none;">
+    <button type="button" id="export-btn" class="btn btn-sm btn-dark">
+        <i class="fa fa-download mr-2"></i>Download Excel
+    </button>
+</div>
+
 <div class="table-responsive">
     <table id="results-table" class="table table-striped table-bordered">
         <thead>
@@ -116,12 +122,6 @@
             </tr>
         </tbody>
     </table>
-</div>
-
-<div class="text-right p-1 d-none">
-    <button type="button" id="export-btn" class="btn btn-outline-primary">
-        <i class="fa fa-download"></i>&nbsp;Download Single Simulation Results
-    </button>
 </div>
 
 {% if current_user.is_superuser %}
@@ -861,8 +861,12 @@ onDomLoad(function() {
 
     function loadResults(id, format) {
         LoadingScreen.show('getResults');
+        var downloader = $('#results-download');
+        if (format != 'xlsx') {
+            updateMeta({});
+            downloader.hide();
+        }
         var err = $('#simulation-error');
-        updateMeta({});
         err.hide();
         var legend = $('#results-chart-legend');
         var chart = $('#results-chart');
@@ -870,6 +874,8 @@ onDomLoad(function() {
 
         $('#results-log').empty();
         var logs = $('#logToggle').closest('.card');
+
+        var ans = $.Deferred();
 
         var header = $('#mirc-results-header');
         var desc = $('#mirc-results-desc');
@@ -881,22 +887,24 @@ onDomLoad(function() {
             tbl.hide();
             logs.hide();
             LoadingScreen.hide('getResults');
-            return;
+            ans.resolve();
+            return ans.promise();
         }
 
         format = format || 'json';
 
-        return $.ajax({
+        $.ajax({
             url: url.replace('/0', '/' + id) + '?format=' + format,
             method: 'GET',
             contentType: 'application/json'
         }).then(function(data) {
-            console.log(data)
+            // console.log(data)
             if (format == 'json') {
                 desc.show();
                 header.show();
                 legend.show();
                 chart.show();
+                downloader.show();
                 tbl.show();
                 logs.show();
                 updateMeta(data.meta);
@@ -904,6 +912,7 @@ onDomLoad(function() {
                 updateTable(data);
                 updateLog(data.logs);
             }
+            ans.resolve(data);
         }).fail(function(data, status, error) {
             // console.log(data)
             var msg = ['Error in simulation; unable to load results.']
@@ -917,13 +926,19 @@ onDomLoad(function() {
             desc.show();
             header.show();
             err.show();
-            legend.hide();
-            chart.hide();
-            tbl.hide();
-            logs.show();
+            if (format == 'json') {
+                legend.hide();
+                chart.hide();
+                downloader.hide();
+                tbl.hide();
+                logs.show();
+            }
+            ans.reject(data, status, error);
         }).always(function() {
             LoadingScreen.hide('getResults');
         });
+
+        return ans.promise();
     }
 
     $('#simulation-id').change(function() {
@@ -933,7 +948,6 @@ onDomLoad(function() {
 
     $('#export-btn').click(function(e) {
         e.preventDefault();
-
         var id = $('#simulation-id').val();
         loadResults(id, 'xlsx').then(function(data) {
             if (data.success) {

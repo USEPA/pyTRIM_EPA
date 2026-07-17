@@ -66,7 +66,12 @@ def get_results(trim_scenario_id, simulation_id):
     f = request.args.get('format', 'json')
     if f == 'xlsx':
         with tempfile.TemporaryDirectory() as tmpdir:
-            report = make_report(results)
+            try:
+                report = make_report(results)
+            except Exception:
+                import traceback
+                traceback.print_exc()
+                raise
 
             if not isinstance(report, list):
                 report = [report]
@@ -77,7 +82,7 @@ def get_results(trim_scenario_id, simulation_id):
                 for i, df in enumerate(report, start=1):
                     df.to_excel(writer, sheet_name=f'Sheet{i}', index=False)
 
-            return filepath
+            return api.FileResult(filepath)
     else:
         from trim_db.schema.utils.serialize import serialize
         return serialize(results)

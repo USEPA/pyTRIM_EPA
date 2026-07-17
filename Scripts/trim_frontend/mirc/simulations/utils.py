@@ -3,7 +3,7 @@ import pandas as pd
 
 
 def make_report(data):
-    df = pd.DataFrame.from_dict(data)
+    df = pd.DataFrame.from_dict({k: data[k] for k in ['results', 'meta']})
     df = df.reset_index()
 
     # Create two datatables one for metadata and the other for results
@@ -55,7 +55,7 @@ def make_report(data):
         except AttributeError:
             row['Intake Units'] = "-"
 
-    is_mutagenic = data['meta']['chemical'].mutagenic
+    is_mutagenic = data['meta']['chemical']['mutagenic']
     if is_mutagenic:
         df_results["Adjusted Intake"] = "-"
         df_results["Adjusted Intake Units"] = "-"
@@ -83,7 +83,7 @@ def make_report(data):
 
     # Add Chemical Name
     chemical = (df_meta.loc[df_meta['index'] == "chemical", "meta"])[1]
-    df_results["Chemical"] = str(chemical.name)
+    df_results["Chemical"] = str(chemical.get('hap_name') or chemical['name'])
 
     # Add Scenario Name
     scenario = df_meta.loc[
@@ -152,5 +152,7 @@ def make_report(data):
                 r[col] = r[col] + ' dry weight'
             elif r['Product'] not in ['Water']:
                 r[col] = r[col] + ' wet weight'
+
+    df = df.drop(columns=['TRIM Scenario'])  # No need to include this
 
     return df
