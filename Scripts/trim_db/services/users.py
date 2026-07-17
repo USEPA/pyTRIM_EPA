@@ -3,7 +3,6 @@ from ..schema.users.models import ApiKey
 from .generic import GenericService
 
 
-
 class UserService(GenericService):
     __model__ = None  # DEFINE IN APP
     __unique_on__ = ['email']
@@ -69,7 +68,7 @@ class UserService(GenericService):
             ApiKeyService.delete(k)
 
 
-class ApiKeyService(GenericService):
+class ApiKeyService(GenericService[ApiKey]):
     __model__ = ApiKey
 
     @classmethod

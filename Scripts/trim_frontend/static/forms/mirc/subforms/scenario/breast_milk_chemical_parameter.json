@@ -1,0 +1,141 @@
+{
+    "title": "Breast Milk-Specific Chemical Parameter",
+    "fields": [
+        {
+            "id": "chemical_id",
+            "data_type": "int",
+            "hidden": true
+        },
+        {
+            "id": "chemical",
+            "label": "Chemical",
+            "data_type": "string",
+            "readonly": true
+        },
+        {
+            "id": "AE_inf",
+            "label": "Infant Absorption Efficiency",
+            "data_type": "float",
+            "min": 0,
+            "max": 1,
+            "step": "any",
+            "allow_empty": true,
+            "help": "Infant absorption efficiency of the chemical by the oral route of exposure (i.e., fraction of ingested chemical that is absorbed by the infant). For PB-HAPs assessed for RTR multipathway exposure, only for dioxins/furans is it possible for a substantial proportion of an individual's total lifetime cancer risk to result from breast feeding in the first year of life."
+        },
+        {
+            "id": "AE_mat",
+            "label": "Maternal Absorption Efficiency",
+            "data_type": "float",
+            "min": 0,
+            "max": 1,
+            "step": "any",
+            "allow_empty": true,
+            "help": "Maternal absorption efficiency of the chemical by the oral route of exposure (i.e., fraction of ingested chemical that is absorbed by the mother). For PB-HAPs assessed for RTR multipathway exposure, only for dioxins/furans is it possible for a substantial proportion of an individual's total lifetime cancer risk to result from breast feeding in the first year of life."
+        },
+        {
+            "id": "f_bl",
+            "label": "Fraction in Maternal Blood",
+            "data_type": "float",
+            "min": 0,
+            "max": 1,
+            "step": "any",
+            "allow_empty": true,
+            "help": "Fraction of steady-state total body burden of hydrophilic chemical in mother that is in the mother’s whole blood compartment. For PB-HAPs assessed for RTR multipathway exposure, only for dioxins/furans is it possible for a substantial proportion of an individual's total lifetime cancer risk to result from breast feeding in the first year of life. Dioxins/furans are not hydrophilic, so this parameter does not apply to them."
+        },
+        {
+            "id": "f_f",
+            "label": "Fraction in Maternal Fat",
+            "data_type": "float",
+            "min": 0,
+            "max": 1,
+            "step": "any",
+            "allow_empty": true,
+            "help": "Fraction of steady-state lipophilic chemical body burden in mother that is stored in body fat. For PB-HAPs assessed for RTR multipathway exposure, only for dioxins/furans is it possible for a substantial proportion of an individual's total lifetime cancer risk to result from breast feeding in the first year of life."
+        },
+        {
+            "id": "f_pl",
+            "label": "Fraction in Maternal Plasma",
+            "data_type": "float",
+            "min": 0,
+            "max": 1,
+            "step": "any",
+            "allow_empty": true,
+            "help": ""
+        },
+        {
+            "id": "h_bm",
+            "label": "Half-Life in Blood",
+            "data_type": "float",
+            "min": 0,
+            "step": "any",
+            "allow_empty": true,
+            "help": "Biological half-life for chemical in non-lactating women. For PB-HAPs assessed for RTR multipathway exposure, only for dioxins/furans is it possible for a substantial proportion of an individual's total lifetime cancer risk to result from breast feeding in the first year of life."
+        },
+        {
+            "id": "h_bm_unit",
+            "label": "h_bm Unit",
+            "data_type": "string"
+        },
+        {
+            "id": "k_elim",
+            "label": "Non-Lactating Elimination Rate",
+            "data_type": "float",
+            "min": 0,
+            "step": "any",
+            "allow_empty": true,
+            "help": "Rate constant for elimination of chemical for non-lactating women. For PB-HAPs assessed for RTR multipathway exposure, only for dioxins/furans is it possible for a substantial proportion of an individual's total lifetime cancer risk to result from breast feeding in the first year of life."
+        },
+        {
+            "id": "k_elim_unit",
+            "label": "k_elim Unit",
+            "data_type": "string"
+        },
+        {
+            "id": "k_aq_elac",
+            "label": "Lactating Elimination Rate",
+            "data_type": "float",
+            "min": 0,
+            "step": "any",
+            "allow_empty": true,
+            "help": "Rate constant for total elimination of hydrophilic chemicals by lactating women. For PB-HAPs assessed for RTR multipathway exposure, only for dioxins/furans is it possible for a substantial proportion of an individual's total lifetime cancer risk to result from breast feeding in the first year of life. Dioxins/furans are not hydrophilic, so this parameter does not apply to them."
+        },
+        {
+            "id": "k_aq_elac_unit",
+            "label": "k_aq_elac Unit",
+            "data_type": "string"
+        },
+        {
+            "id": "PC_pl_aq",
+            "label": "Blood-Milk Partition Coefficient",
+            "data_type": "float",
+            "min": 0,
+            "step": "any",
+            "allow_empty": true,
+            "help": "Partition coefficient for chemical between maternal blood plasma and aqueous phase of breast milk. For PB-HAPs assessed for RTR multipathway exposure, only for dioxins/furans is it possible for a substantial proportion of an individual's total lifetime cancer risk to result form breast feeding in the first year of life. Dioxins/furans are not hydrophilic, so this parameter does not apply to them."
+        },
+        {
+            "id": "PC_pl_aq_unit",
+            "label": "PC_pl_aq Unit",
+            "data_type": "string"
+        },
+        {
+            "id": "PC_rbc_pl",
+            "label": "Blood Cell-Plasma Partition Coefficient",
+            "data_type": "float",
+            "min": 0,
+            "step": "any",
+            "allow_empty": true,
+            "help": "Partition coefficient for hydrophilic or protein-bound chemical between red blood cells (RBC) and plasma in maternal blood. For PB-HAPs assessed for RTR multipathway exposure, only for dioxins/furans is it possible for a substantial proportion of an individual's total lifetime cancer risk to result from breast feeding in the first year of life. Dioxins/furans are not hydrophilic, so this parameter does not apply to them."
+        },
+        {
+            "id": "PC_rbc_pl_unit",
+            "label": "PC_rbc_pl Unit",
+            "data_type": "string"
+        },
+        {
+            "id": "notes",
+            "label": "Notes",
+            "data_type": "string"
+        }
+    ]
+}

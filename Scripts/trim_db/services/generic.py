@@ -1,4 +1,5 @@
 import os
+from typing import TypeVar, Generic, Type
 from ..schema import Model
 from ..schema.utils.caching import CacheManager
 
@@ -52,8 +53,11 @@ class ServiceMetaClass(type):
         cls.__cache.clear()  # = {}
 
 
-class GenericService(metaclass=ServiceMetaClass):
-    __model__ = None
+T = TypeVar('T')
+
+
+class GenericService(Generic[T], metaclass=ServiceMetaClass):
+    __model__: Type[T] = None
     __unique_on__ = []
 
     auto_commit = True
@@ -228,6 +232,17 @@ class PermissionsMixin:
                 f'{model.__class__.__qualname__} does not support permissions'
             )
         model.grant(user, permission)
+        cls.db.session.add(model)
+        if not no_commit and cls.auto_commit:
+            cls.commit()
+
+    @classmethod
+    def revoke(cls, model, user, permission=None, no_commit=False):
+        if not hasattr(model, 'grant'):
+            raise TypeError(
+                f'{model.__class__.__qualname__} does not support permissions'
+            )
+        model.revoke(user, permission=permission)
         cls.db.session.add(model)
         if not no_commit and cls.auto_commit:
             cls.commit()

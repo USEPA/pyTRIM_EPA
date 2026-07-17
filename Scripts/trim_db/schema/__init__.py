@@ -10,3 +10,4 @@ from .scenarios.models import *  # noqa
 from .parameters.models import *  # noqa
 from .entities.chemicals import *  # noqa
 from .entities.environment import *  # noqa
+from .mirc import *  # noqa

@@ -1,0 +1,268 @@
+{% from 'macros/mirc/form_macros.html' import render_input %}
+
+<h4>
+    <button type="button"
+        class="btn btn-lg btn-block px-0 text-primary text-left border-light border-top-0 border-left-0 border-right-0 rounded-0"
+        data-toggle="collapse" aria-expanded="true"
+        data-target="#lf-collapse" aria-controls="lf-collapse"
+        style="font-weight: 500;"
+    >
+        {{ form.product_loss_parameters.label.text }}&nbsp;
+        <small class="text-muted">
+            <i class="fa fa-eye-slash"></i>
+        </small>
+    </button>
+</h4>
+
+<div id="lf-collapse" class="collapse show">
+    <div class="form-row mb-3">
+        <div class="col-sm-2">
+            <label for="lf-product-filter">
+                Product
+            </label>
+            <select id="lf-product-filter" class="form-control form-control-sm">
+                {% for p in products|selectattr('is_food') %}
+                    <option value="{{ p.id }}">{{ p.name|title }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+    <table id="loss-factor-parameters" class="table table-sm table-bordered">
+        <thead>
+            <tr class="text-center">
+                <th scope="col" class="table-primary border-primary">Loss Description</th>
+                <th scope="col" class="table-primary border-primary">Fraction Lost</th>
+                <th scope="col" class="table-primary border-primary">Source</th>
+                {% if not mirc_scenario.is_builtin %}
+                    <th scope="col" class="table-primary border-primary"></th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th colspan="4" class="table-light align-middle text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </th>
+            </tr>
+        </tbody>
+        {% if not mirc_scenario.is_builtin %}
+            <tfoot>
+                <tr class="table-light">
+                    <td>
+                        <input id="lf-product-id" type="hidden" />
+
+                        <input id="lf-description" type="text"
+                            class="form-control form-control-sm" />
+                    </td>
+                    <td>
+                        <input id="lf-fraction" type="number"
+                            min="0" max="1" step="any"
+                            class="form-control form-control-sm" />
+                    </td>
+                    <td>
+                        <input id="lf-source" type="text"
+                            class="form-control form-control-sm" />
+                    </td>
+                    <td class="text-center align-middle">
+                        <button type="button"
+                            class="btn py-0 px-1 text-secondary border-0 rounded-circle add-lf"
+                        >
+                            <span>
+                                <i class="fa fa-plus-circle"></i>
+                            </span>
+                        </button>
+                    </td>
+                </tr>
+            </tfoot>
+        {% endif %}
+    </table>
+    </div>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var tbl = $('#loss-factor-parameters');
+        var tbody = tbl.find('tbody');
+        var pFilter = $('#lf-product-filter').change(function() {
+            var p = $(this).val();
+
+            var filter = '.product-' + p;
+
+            var rows = tbody.find('tr');
+            var relevant = rows.filter(filter);
+
+            if (!relevant.length) {
+                if (rows.length > 1) {
+                    LoadingScreen.show('lf_params');
+                }
+                $.ajax({
+                    url: '{{ url_for("mirc_scenario.get_form_fragment") }}',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        name: 'loss_factor',
+                        product: p,
+                        parent: '{{ form.parent.data or "" }}',
+                        scenario_id: '{{ form.scenario_id.data or "" }}',
+                        i: rows.length
+                    })
+                }).then(function(data) {
+                    tbody.append(data);
+                    rows = tbody.find('tr').hide();
+                    relevant = rows.filter(filter)
+                    relevant.show();
+                    if (relevant.length > 1) {
+                        relevant.filter('.lf-none').hide();
+                    }
+                    // Enable popups
+                    $('[data-toggle="popover"]').popover();
+                }).always(function() {
+                    LoadingScreen.hide('lf_params');
+                });
+            }
+            else {
+                rows.hide();
+                relevant.show();
+                if (relevant.length > 1) {
+                    relevant.filter('.lf-none').hide();
+                }
+            }
+
+            $('#lf-product-id').val(p);
+        }).change();
+
+        tbody.on('click', '.rem-lf', function(e) {
+            e.preventDefault();
+            if (confirm("Are you sure you want to remove this Loss Factor?")) {
+                $(this).closest('tr').remove();
+
+                pFilter.change();
+            }
+        });
+
+        tbl.on('click', '.add-lf', function(e) {
+            e.preventDefault();
+
+            i = tbody.find('tr').length;
+
+            var lfForm = $(this).closest('tr');
+
+            var pId = $('#lf-product-id').val();
+
+            var factorField = lfForm.find('#lf-fraction');
+            var factor = factorField.val().trim();
+
+            var descField = lfForm.find('#lf-description');
+            var desc = descField.val().trim();
+
+            var srcField = lfForm.find('#lf-source');
+            var src = srcField.val().trim();
+
+            lfForm.find('.invalid-feedback').remove();
+
+            var otherDescs = $.map(
+                tbody.find('tr:visible [name$="-loss_description"]'),
+                function(field) { return field.value }
+            );
+
+            if (!desc) {
+                descField.addClass('is-invalid');
+                descField.parent().append(
+                    '<div class="invalid-feedback">This field is required.</div>');
+            }
+            else if (otherDescs.indexOf(desc) > -1) {
+                descField.addClass('is-invalid');
+                descField.parent().append(
+                    '<div class="invalid-feedback">Loss Description must be unique for this product.</div>');
+            }
+            else {
+                descField.removeClass('is-invalid');
+            }
+
+            if (!factor) {
+                factorField.addClass('is-invalid');
+                factorField.parent().append(
+                    '<div class="invalid-feedback">This field is required.</div>');
+            }
+            else if (factor > 1 || factor < 0) {
+                factorField.addClass('is-invalid');
+                factorField.parent().append(
+                    '<div class="invalid-feedback">Value must be between 0 and 1.</div>');
+            }
+            else {
+                factorField.removeClass('is-invalid');
+            }
+
+            if (lfForm.find('.is-invalid').length) {
+                return;
+            }
+
+            var rows = tbody.find('tr').length;
+            while (document.getElementById(
+                'product_loss_parameters-' + rows + '-product_id'
+            ) != null) {
+                rows++;
+            }
+            var next = 'product_loss_parameters-' + rows + '-';
+
+            var tr = $('<tr class="product-' + pId + '" />');
+
+            var td1 = $('<td />');
+            $('<input type="hidden" class="form-control form-control-sm" />')
+                .attr({
+                    id: next + 'product_id',
+                    name: next + 'product_id',
+                    value: pId
+                })
+                .css({'max-width': '100%'})
+                .appendTo(td1);
+            $('<input type="text" class="form-control form-control-sm" />')
+                .attr({
+                    id: next + 'loss_description',
+                    name: next + 'loss_description',
+                    value: desc,
+                    readonly: 'readonly'
+                })
+                .css({'max-width': '100%'})
+                .appendTo(td1);
+
+            var td2 = $('<td />');
+            $('<input type="number" class="form-control form-control-sm" />')
+                .attr({
+                    id: next + 'fraction_lost',
+                    name: next + 'fraction_lost',
+                    min: 0,
+                    max: 1,
+                    step: 'any',
+                    value: factor
+                })
+                .css({'max-width': '100%'})
+                .appendTo(td2);
+
+            var td3 = $('<td />');
+            $('<input type="text" class="form-control form-control-sm" />')
+                .attr({
+                    id: next + 'source',
+                    name: next + 'source',
+                    value: src
+                })
+                .css({'max-width': '100%'})
+                .appendTo(td3);
+
+            var td4 = $('<td class="text-center align-middle" />');
+            var btn = $('<button type="button" />')
+                .addClass('btn py-0 px-1 text-primary border-0 rounded-circle rem-lf');
+            $('<span />').append('<i class="fa fa-times-circle" />').appendTo(btn);
+            btn.appendTo(td4);
+
+            tr.append(td1).append(td2).append(td3).append(td4);
+
+            tbody.append(tr);
+        });
+    });
+    </script>
+</div>
+
+<hr />

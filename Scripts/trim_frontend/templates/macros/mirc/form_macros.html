@@ -1,0 +1,671 @@
+{% macro render_label(field, class=None, with_help=True, hover_help=False) %}
+    {% if field.label.text %}
+        <label for="{{field.id}}"{% if class %}class="{{ class }}"{% endif %}>
+            {% if field.flags.required %}
+                <span style="color: firebrick;">*</span>
+            {% endif %}
+            <span>{{ field.label.text|safe }}</span>
+            {% if with_help and field.help_text and not hover_help %}
+                {{ render_help_icon(field, hover_help=hover_help) }}
+            {% endif %}
+        </label>
+        {% if with_help and field.help_text and hover_help %}
+            {{ render_help_icon(field, hover_help=hover_help) }}
+        {% endif %}
+    {% endif %}
+{% endmacro %}
+
+
+{% macro render_help_icon(field, hover_help=False) %}
+    {% if not hover_help %}
+        <sup>
+            <a href="#help-{{ field.id }}"
+                role="button"
+                data-toggle="collapse"
+                aria-expanded="false"
+                aria-controls="help-{{ field.id }}"
+            >
+                <span title="Click here for additional instructions">
+                    <i class="fa fa-question"></i>
+                </span>
+            </a>
+        </sup>
+        <div class="collapse" id="help-{{ field.id }}">
+            <small class="form-text text-muted">
+                {{ field.help_text|safe }}
+            </small>
+        </div>
+    {% else %}
+        <sup>
+            <a role="button"
+                tabindex="0"
+                data-toggle="popover"
+                data-trigger="hover"
+                data-placement="right"
+                data-content="{{ field.help_text|safe }}"
+                data-html="true"
+            >
+                <span>
+                    <i class="fa fa-question"></i>
+                </span>
+            </a>
+        </sup>
+    {% endif %}
+{% endmacro %}
+
+
+{% set default_input_class = "form-control form-control-sm" %}
+
+{% macro render_input(field, class=None, style=None, with_help=True) %}
+    {% if field.type == 'BooleanField' %}
+        {{ render_checkbox(field, class=class, style=style, with_help=with_help) }}
+    {% elif field.type == 'RadioField' %}
+        {{ render_radio_list(field, class=class, style=style) }}
+    {% elif field.type == 'FileField' %}
+        {{ render_file_field(field) }}
+    {% else %}
+        {% set class = (class or '') %}
+        {% if 'form-control' not in class %}
+            {% set class = class + ' ' + default_input_class %}
+        {% endif %}
+        {% set style = style or "max-width: 100%;" %}
+        {{ field(class=class, style=style) }}
+    {% endif %}
+{% endmacro %}
+
+{% set default_checkbox_class = "custom-control custom-checkbox form-check-inline" %}
+{% macro render_checkbox(field, class=None, style=None, with_help=True) %}
+    {% set class = (class or '') + ' ' + default_checkbox_class %}
+    <div class="{{ class }}">
+        {{ field(class="custom-control-input") }}
+        {{ field.label(class="custom-control-label") }}
+    </div>
+{% endmacro %}
+
+{% set default_radio_class = "custom-control custom-radio" %}
+{% macro render_radio(field, class=None, style=None) %}
+    {% set class = (class or '') + ' ' + default_radio_class %}
+    <div class="{{ class }}">
+        {{ field(class="custom-control-input") }}
+        {{ field.label(class="custom-control-label") }}
+    </div>
+{% endmacro %}
+
+{% macro render_radio_list(field, class=None, style=None) %}
+    <div>
+        {% for opt in field %}
+            {{ render_radio(opt, class=class, style=style) }}
+        {% endfor %}
+    </div>
+{% endmacro %}
+
+{% set default_file_class = "custom-file" %}
+{% macro render_file_field(field, class=None, style=None) %}
+    {% set class = class or default_file_class %}
+    {% set style = style or "max-width: 100%;" %}
+    <div class="{{ class }}">
+        {{ field(class="custom-file-input", style=style) }}
+        <label class="custom-file-label form-control-sm" for="{{ field.name }}">
+            Choose file
+        </label>
+    </div>
+{% endmacro %}
+
+
+{% macro render_feedback(field, prepend=[], append=[]) %}
+    <div class="invalid-feedback">
+        {% for f in prepend %}
+            {% for error in f.errors %}
+                <span>{{ error }}</span>
+            {% endfor %}
+        {% endfor %}
+        {% for error in field.errors %}
+            <span>{{ error }}</span>
+        {% endfor %}
+        {% for f in append %}
+            {% for error in f.errors %}
+                <span>{{ error }}</span>
+            {% endfor %}
+        {% endfor %}
+    </div>
+{% endmacro %}
+
+
+{% macro render_desc(field, prepend=[], append=[]) %}
+    {% if field.description %}
+        <small class="form-text text-muted">
+            {{ field.description|safe }}
+        </small>
+    {% endif %}
+{% endmacro %}
+
+
+{% macro render_form_group(
+    field, label=True, feedback=True, desc=True, help=True, append=None,
+    input_class=None, label_class=None, class=None
+) %}
+    <div class="form-group{% if class %} {{ class }}{% endif %}">
+
+        {% if label and field.type != 'BooleanField' %}
+            {{ render_label(field, class=label_class, with_help=help) }}
+        {% endif %}
+
+        {{ render_input(field, class=input_class, with_help=help) }}
+
+        {% if feedback %}
+            {{ render_feedback(field) }}
+        {% endif %}
+
+        {% if desc %}
+            {{ render_desc(field) }}
+        {% endif %}
+
+        {% if append %}
+            {{ append }}
+        {% endif %}
+
+    </div>
+{% endmacro %}
+
+
+{% macro render_form_group_row(
+    field, label=True, feedback=True, desc=True, append=None,
+    label_col_size="sm-2", input_col_size="sm",
+    input_class=default_input_class, label_class=None, class=None
+) %}
+    <div class="form-group form-row{% if class %} {{ class }}{% endif %}">
+
+        {% set label_type = 'col-form-label' %}
+        {% if 'form-control-sm' in input_class %}
+            {% set label_type = 'col-form-label py-1' %}
+        {% elif 'form-control-lg' in input_class %}
+            {% set label_type = 'col-form-label-lg' %}
+        {% endif %}
+
+        {% set full_label_class = (
+            'col-' + label_col_size + ' ' + label_type + ' ' + (label_class or '')
+        ) %}
+
+        {% if label %}
+            {{ render_label(field, class=full_label_class) }}
+        {% endif %}
+
+        <div class="col-{{ input_col_size }}">
+            {{ render_input(field, class=input_class) }}
+
+            {% if feedback %}
+                {{ render_feedback(field) }}
+            {% endif %}
+
+            {% if desc %}
+                {{ render_desc(field) }}
+            {% endif %}
+
+            {% if append %}
+                {{ append }}
+            {% endif %}
+        </div>
+    </div>
+{% endmacro %}
+
+
+{% macro render_tabbed_list(field_list, tab_content) %}
+    {% if False %}{{ kwargs }}{% endif %} {# pass along any kwargs #}
+    {% set template = field_list|mirc_field_template %}
+
+    {% set dummy = None %}
+    {% if not field_list.entries|length %}
+        {% set dummy = field_list.append_entry() %}
+    {% endif %}
+
+    <fieldset id="{{ field_list.id }}" class="card field-list-tabs">
+        <div class="card-header d-flex py-2 pl-3 pr-2">
+            <span class="pt-1">{{ field_list.label }}</span>
+            <ul class="nav ml-auto">
+                <li class="nav-item">
+                    <button title="Add"
+                        class="btn btn-sm btn-outline-primary field-list-add"
+                    >
+                        <i class="fa fa-plus"></i>&nbsp;Add
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <div class="card-body p-2 pb-0" style="display: none;">
+            <nav class="tab-navigation px-2 pb-2">
+                <ul class="nav nav-pills">
+                    {% for entry in field_list.entries %}
+                        {% set i = loop.index - 1 %}
+                        {% set entry_pref = field_list.id + '-' + i|string %}
+
+                        <li class="nav-item">
+                            <a id="{{ entry_pref }}-pill"
+                                href="#{{ entry_pref }}-tab"
+                                class="nav-link p-2"
+                                data-toggle="pill"
+                                data-index="{{ i }}"
+                                aria-controls="{{ entry_pref }}-tab"
+                                aria-selected="false"
+                            >
+                                {{ entry.label.text }}
+                                <span>{{ loop.index }}</span>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </nav>
+            <div class="tab-actions pt-2 pb-1 border-top text-right">
+                <button title="Copy"
+                    class="btn btn-sm btn-outline-secondary field-list-copy"
+                >
+                    <i class="fa fa-copy"></i>&nbsp;Copy
+                </button>
+
+                <button title="Remove"
+                    class="btn btn-sm btn-outline-danger field-list-remove"
+                >
+                    <i class="fa fa-times"></i>&nbsp;Remove
+                </button>
+            </div>
+            <div class="tab-content px-2">
+                {% for entry in field_list.entries %}
+                    {% set i = loop.index - 1 %}
+                    {% set entry_pref = field_list.id + '-' + i|string %}
+
+                    <div id="{{ entry_pref }}-tab"
+                        class="tab-pane"
+                        role="tabpanel"
+                        aria-labelledby="{{ entry_pref }}-pill"
+                        data-index="{{ i }}"
+                    >
+                        {% with form = entry.form  %}
+                            {% include tab_content %}
+                        {% endwith %}
+                    </div>
+                {% endfor %}
+            </div>
+    </fieldset>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var template = JSON.parse('{{ template.data|tojson }}');
+        var entries = JSON.parse('{{ field_list.data|tojson }}');
+        var minEntries = parseInt('{{ field_list.min_entries }}');
+        var maxEntries = parseInt('{{ field_list.max_entries }}');
+
+        var fieldlist = $('#{{ field_list.id }}');
+
+        var hasDummy = JSON.parse('{{ dummy != None }}'.toLowerCase());
+
+        var handler = flask.FORMS.initFieldListTabs({
+            element: fieldlist[0], 
+            template: template,
+            startingEntries: entries,
+            minEntries: minEntries,
+            maxEntries: maxEntries
+        });
+
+        if (hasDummy) {
+            handler.removeTab();
+        }
+    });
+    </script>
+{% endmacro %}
+
+
+
+{#
+Everything below this point is old, deprecated, and should not be used!
+We want to phase these out.  If there's some functionality in them
+that we need; try to re-implement it to work with the functions above.
+#}
+
+{% macro render_field(
+    field, hide_errors=False, prepend_errors_for=None
+) %}
+    {% if field.type == "HiddenField" 
+        or field.type == "CSRFTokenField" %}
+
+        {{ field() }}
+
+    {% elif 'Submit' in field.type %}
+
+        {{ field(class="btn btn-primary") }}
+
+    {% elif field.type == "FormField" %}
+        {% for f in field %}
+            {{ render_field(f) }}
+        {% endfor %}
+
+    {% else %}
+        <div class="form-group">
+            {% if field.type == "FieldList" %}
+                {{ render_field_list(field) }}
+                
+            {% elif field.widget.__class__.__name__ == "ListWidget" %}
+
+                {% if field.unbound_field.field_class.__name__ == 'FormField' %}
+                    {{ render_field_list(field) }}
+                {% else %}
+                    <label for="{{field.id}}" class="mr-2 d-block">
+                        {% if field.flags.required %}
+                            <span style="color: firebrick;">*</span>
+                        {% endif %}
+                        <span>&nbsp;{{ field.label.text|safe }}:</span>
+                    </label>
+                    {% for f in field %}
+                        {{ render_inner_field(f) }}
+                    {% endfor %}
+                {% endif %}
+
+            {% else %}
+                {{ render_inner_field(field) }}
+            {% endif %}
+
+            {% if not hide_errors %}
+                <div class="invalid-feedback d-block">
+                    {% if prepend_errors_for %}
+                        {% for error in prepend_errors_for.errors %}
+                            <span>{{ error }}</span>
+                        {% endfor %}
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% if field.description %}
+                <small class="form-text text-muted">
+                    {{ field.description|safe }}
+                </small>
+            {% endif %}
+        </div>
+
+    {% endif %}
+{% endmacro %}
+
+
+{% macro render_field_list(field_list) %}
+    <fieldset class="card">
+        {% set add_id = field_list.id + '-add-btn' %}
+        {% set rem_cls = field_list.id + '-rem-btn' %}
+        {% set pills_id = field_list.id + '-pills' %}
+        {% set tabs_id = field_list.id + '-tabs' %}
+        <div class="card-header">
+            <span>{{ field_list.label.text|safe }}</span>
+        </div>
+
+        <div class="card-body p-2 pb-0">
+            <nav class="d-flex pb-2 mb-3 border-bottom">
+                <ul id="{{ pills_id }}" class="nav nav-pills">
+                    {% for f in field_list.entries %}
+                        <li class="nav-item">
+                            <a id="{{ f.id }}-pill"
+                                data-toggle="pill"
+                                href="#{{ f.id }}-tab"
+                                aria-controls="{{ f.id }}-tab"
+                                class="nav-link p-2{% if loop.index == 1 %} active{% endif %}"
+                                aria-selected="false"
+                            >
+                                {{ f.label.text }}
+                                <span class="pill-idx">{{ loop.index }}</span>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <ul class="nav ml-auto">
+                    <li class="nav-item">
+                        <a id="{{ add_id }}"
+                            href="#add"
+                            class="nav-link"
+                            title="Add"
+                        >
+                            <i class="fa fa-plus"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div id="{{ tabs_id }}" class="tab-content">
+                {% for f in field_list.entries %}
+                    <div id="{{ f.id }}-tab"
+                        class="tab-pane{% if loop.index == 1 %} show active{% endif %}"
+                        role="tabpanel"
+                        aria-labelledby="{{ f.id }}-pill"
+                    >
+                        {{ render_field(f) }}
+
+                        <div class="text-center">
+                            <a href="#remove"
+                                class="btn btn-sm btn-outline-danger {{ rem_cls }}"
+                            >
+                                Remove {{ f.label.text }}
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                var fieldId = '{{ field_list.id }}';
+                var add = $('#{{ add_id }}');
+                var pillList = $('#{{ pills_id }}');
+                var tabList = $('#{{ tabs_id }} ');
+
+                tabList.find('.tab-pane').first().find('.{{ rem_cls }}').hide();
+
+                add.click(function(e) {
+                    e.preventDefault();
+
+                    var pills = pillList.find('.nav-item');
+                    pills.find('a').removeClass('active');
+                    var tabs = tabList.find('.tab-pane');
+                    tabs.removeClass('show active');
+
+                    var lastPill = pills.last();
+                    var lastTab = tabs.last();
+
+                    var lastId = lastPill.find('a').attr('id');
+                    var lastIdx = parseInt(
+                        lastId.replace(fieldId + '-', '').replace('-pill', ''));
+
+                    var nextIdx = lastIdx + 1;
+
+                    var lastFieldId = fieldId + '-' + lastIdx;
+                    var nextFieldId = fieldId + '-' + nextIdx;
+
+                    var pillTemplate = lastPill[0].outerHTML;
+                    var newPill = $(pillTemplate.replace(
+                        new RegExp(lastFieldId, 'g'), nextFieldId));
+                    newPill.find('a').addClass('active');
+                    newPill.find('.pill-idx').html(nextIdx + 1);
+
+                    var tabTemplate = lastTab[0].outerHTML;
+                    var newTab = $(tabTemplate.replace(
+                        new RegExp(lastFieldId, 'g'), nextFieldId));
+                    newTab.addClass('show active');
+                    newTab.find('.{{ rem_cls }}').show();
+
+                    pillList.append(newPill);
+                    tabList.append(newTab);
+                });
+
+                $('body').on('click', '.{{ rem_cls }}', function(e) {
+                    e.preventDefault();
+
+                    var tab = $(this).closest('.tab-pane');
+                    var pill = $('#' + tab.attr('aria-labelledby'))
+                        .closest('.nav-item');
+
+                    pill.remove();
+                    tab.remove();
+                    pillList.find('.nav-item').first()
+                        .find('a').click();
+                });
+            });
+        </script>
+    </fieldset>
+{% endmacro %}
+
+
+{% macro render_inner_field(field) %}
+    {% if field.widget.__class__.__name__ == "FileInput" %}
+        {{ render_file_field(field) }}
+    {% elif field.widget.input_type == "checkbox" %}
+        {{ render_checkbox(field) }}
+    {% else %}
+        {{ render_other_field(field) }}
+    {% endif %}
+{% endmacro %}
+
+
+{% macro render_file_field_OLD(field) %}
+    <label for="{{ field.name }}">
+        {% if field.flags.required %}
+            <span style="color: firebrick;">*</span>
+        {% endif %}
+        <span>&nbsp;{{ field.label.text|safe }}:</span>
+        {% if field.help_text %}
+            {{ render_help_icon(field.help_text, id=field.id) }}
+        {% endif %}
+    </label>
+
+    <div class="custom-file">
+        {{ field(
+            class="custom-file-input",
+            style="max-width: 100%;"
+        ) }}
+        <label class="custom-file-label form-control-sm" for="{{ field.name }}">
+            Choose file
+        </label>
+        <script>
+            document.addEventListener("DOMContentLoaded", function(e) {
+                // When the field value changes, display the selected filename
+                $('#{{ field.id }}').change(function(e) {
+                    var val = $(this).val();
+                    if (val.toString().trim()) {
+                        val = val.toString().split('/');
+                        val = val[val.length - 1];
+                        val = val.toString().split('\\');
+                        val = val[val.length - 1];
+                        $('.custom-file > label[for="{{ field.name }}"]')
+                            .text(val);
+                    }
+                    else {
+                        $('.custom-file > label[for="{{ field.name }}"]')
+                            .text('Choose file');
+                    }
+                });
+            });
+        </script>
+    </div>
+{% endmacro %}
+
+
+{% macro render_checkbox_OLD(field) %}
+    {% if field.flags.required %}
+        <span class="mr-1" style="color: firebrick;">*</span>
+    {% endif %}
+    <div class="custom-control custom-checkbox form-check-inline">
+
+        {{ field(
+            class="custom-control-input",
+            style="max-width: 100%;"
+        ) }}
+        <label for="{{field.id}}" class="custom-control-label">
+            <span>&nbsp;{{ field.label.text|safe }}</span>
+            {% if field.help_text %}
+                {{ render_help_icon(field.help_text, id=field.id) }}
+            {% endif %}
+        </label>
+    </div>
+{% endmacro %}
+
+
+{% macro render_other_field(field) %}
+    <label for="{{ field.name }}">
+        {% if field.flags.required %}
+            <span style="color: firebrick;">*</span>
+        {% endif %}
+        <span>&nbsp;{{ field.label.text|safe }}:</span>
+        {% if field.help_text %}
+            {{ render_help_icon(field.help_text, id=field.id) }}
+        {% endif %}
+    </label>
+
+    {{ field(
+        class="form-control form-control-sm",
+        style="max-width: 100%;"
+    ) }}
+{% endmacro %}
+
+
+{% macro render_help_icon_OLD(text, id="") %}
+    <sup>
+        <a href="#help-{{ id }}"
+            role="button"
+            data-toggle="collapse"
+            aria-expanded="false"
+            aria-controls="help-{{ id }}"
+        >
+            <span title="Click here for additional instructions">
+                <i class="fa fa-question"></i>
+            </span>
+        </a>
+    </sup>
+    <div class="collapse" id="help-{{ id }}">
+        <small class="form-text text-muted">
+            {{ text|safe }}
+        </small>
+    </div>
+{% endmacro %}
+
+
+{% macro render_readonly(
+    id, label, value="", help_text=None, description=None
+) %}
+    <div class="form-group">
+        <label for="{{ id }}">
+            <span>{{ label }}:</span>
+            {% if help_text %}
+                {{ render_help_icon(help_text, id) }}
+            {% endif %}
+        </label>
+
+        <input type="text"
+            id="{{ id }}"
+            class="form-control form-control-sm"
+            style="max-width: 100%;"
+            value="{{ value }}"
+            readonly
+        />
+        {% if description %}
+            <small class="form-text text-muted">
+                {{ description|safe }}
+            </small>
+        {% endif %}
+    </div>
+{% endmacro %}
+
+
+{% macro render_standard_form(
+    form, method="POST", action="", form_class=""
+) %}
+    {% if form.title %}
+        <h3 class="text-secondary my-4">{{ form.title }}</h3>
+    {% endif %}
+
+    <form method="{{ method }}" action="{{ action }}"
+        enctype="multipart/form-data" class="w-75 {{ form_class }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+
+        {% for field in form %}
+            {% if field.name != 'remember' %}
+                {{ render_field(field) }}
+            {% endif %}
+        {% endfor %}
+    </form>
+{% endmacro %}

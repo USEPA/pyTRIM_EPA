@@ -3,3 +3,4 @@ from .parameters import *  # noqa
 from .users import *  # noqa
 from .entities import *  # noqa
 from .scenarios import *  # noqa
+from .mirc import *  # noqa

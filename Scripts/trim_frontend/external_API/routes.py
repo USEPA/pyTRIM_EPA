@@ -68,6 +68,7 @@ def get_soil_data(tillage):
                                  "no_till_data": no_till_soil_data_json}
     return result_soil_data_json
 
+
 def get_soil_boundaries(pcl):
     layer_map = {
         "SurfSoil": "surface",
