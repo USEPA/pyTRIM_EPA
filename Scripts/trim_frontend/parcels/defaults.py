@@ -252,7 +252,7 @@ def get_soil_abiotic_params(pcl):
 
     def get_magnitude(comp, param):
         val = comp.parameters.get(param)
-        if val is not None:
+        if val is not None and val.value is not None:
             return round(val.value, 5)
 
     soil_abiotic_params = {}
