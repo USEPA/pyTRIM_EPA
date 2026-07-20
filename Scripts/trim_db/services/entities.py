@@ -49,6 +49,11 @@ class ChemicalService(GenericService):
 
         target_rates = dict(cls.mercury_transformation_parameters)
 
+        def media_key(comp):
+            if comp.media.isa('Surface_Soil'):
+                return 'Surface_Soil'
+            return comp.media.name
+
         mtr_params = {}
         for comp in parcel.compartments:
             if not (
@@ -59,8 +64,9 @@ class ChemicalService(GenericService):
                 or comp.media.isa('Sediment')
             ):
                 continue
-            mtr_params[comp.media.name] = {chem_name: {} for chem_name in target_rates}
-            media_params = mtr_params[comp.media.name]
+            key = media_key(comp)
+            mtr_params[key] = {chem_name: {} for chem_name in target_rates}
+            media_params = mtr_params[key]
             for chem in mercuries:
                 for rate in target_rates[chem.name]:
                     try:
