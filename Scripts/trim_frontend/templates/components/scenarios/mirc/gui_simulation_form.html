@@ -510,6 +510,10 @@
 
 <script>
 onDomLoad(function() {
+    window.MIRC = (function(mirc) {
+        return mirc;
+    })(window.MIRC || {});
+
     var form = $('#simulation-form');
     form.on('change', 'input, select', function(e) {
         var me = $(this);
@@ -663,9 +667,7 @@ onDomLoad(function() {
         updateSimulationMircFields();
     });
 
-    form.submit(function(e) {
-        e.preventDefault();
-
+    window.MIRC.submitSimulationForm = function() {
         form.find('input, textarea').removeClass('is-invalid');
         form.find('.invalid-feedback').html('');
 
@@ -690,7 +692,8 @@ onDomLoad(function() {
             });
         }
 
-        LoadingScreen.show('saveSimulation');
+        LoadingScreen.show('submitSimulationForm');
+        var loading = $.Deferred();
         $.ajax({
             url: form.attr('action'),
             method: form.attr('method'),
@@ -700,12 +703,14 @@ onDomLoad(function() {
             data: new FormData(form[0])
         }).done(function(data) {
             // console.log(data);
+            loading.resolve(data);
         }).fail(function(data) {
             var error = data.responseJSON;
             form_errs = error.message.form_errors;
             if (form_errs) {
                 handleErrors(form_errs);
             }
+            loading.reject(data);
         }).always(function() {
             irs.each(function() {
                 var me = $(this);
@@ -714,8 +719,14 @@ onDomLoad(function() {
                     me.prop('disabled', true);
                 }
             });
-            LoadingScreen.hide('saveSimulation');
+            LoadingScreen.hide('submitSimulationForm');
         });
+        return loading.promise();
+    }
+
+    form.submit(function(e) {
+        e.preventDefault();
+        window.MIRC.submitSimulationForm();
     });
 });
 

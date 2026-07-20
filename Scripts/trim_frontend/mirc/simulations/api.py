@@ -39,6 +39,20 @@ def create_simulation(trim_scenario_id):
 
 
 @mirc_simulation_api.route(
+    '/api/scenario/<int:trim_scenario_id>/mirc/simulation'
+)
+@login_required
+def get_simulations(trim_scenario_id):
+    trim_scenario = ScenarioService.get(trim_scenario_id)
+    if not current_user.can('view', trim_scenario):
+        abort(403)
+
+    return api.Result({
+        'simulations': [s.as_serializable() for s in trim_scenario.mirc_simulations]
+    })
+
+
+@mirc_simulation_api.route(
     '/api/scenario/<int:trim_scenario_id>/mirc/simulation/<int:simulation_id>'
 )
 @login_required

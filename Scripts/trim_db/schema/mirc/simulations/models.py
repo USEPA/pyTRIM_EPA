@@ -121,7 +121,10 @@ def _ts_simulation(simulation: MircSimulation):
     return {
         'id': simulation.id,
         'name': simulation.name,
-        'chemical': simulation.chemical.hap_name
+        'chemical': {
+            'name': simulation.chemical.hap_name or simulation.chemical.name,
+            'cas_number': simulation.chemical.cas_number
+        }
     }
 
 

@@ -175,6 +175,10 @@
 
 <script>
 onDomLoad(function() {
+    window.MIRC = (function(mirc) {
+        return mirc;
+    })(window.MIRC || {});
+
     var tbl = $('#results-table');
     var riskTbody = $('#risk-results tbody');
 
@@ -941,7 +945,30 @@ onDomLoad(function() {
         return ans.promise();
     }
 
-    $('#simulation-id').change(function() {
+    var simulationSelector = $('#simulation-id');
+
+    function refreshSimulations(thenChangeTo) {
+        TRIM.api.hitUrl("{{ url_for('mirc_simulation_api.get_simulations', trim_scenario_id=scenario.id) }}").on('load', function() {
+            try {
+                var data = JSON.parse(this.responseText);
+                simulationSelector.empty();
+                for (var sim of data.simulations) {
+                    simulationSelector.append(
+                        `<option value="${sim.id}">${sim.name} - ${sim.chemical.name} (${sim.chemical.cas_number})</option>`
+                    );
+                }
+                if (thenChangeTo != undefined) {
+                    simulationSelector.val(thenChangeTo).change();
+                }
+            }
+            catch (err) {
+                console.log(this.responseText);
+                console.log(err);
+            }
+        });
+    }
+
+    simulationSelector.change(function() {
         var id = $(this).val();
         loadResults(id);
     }).change();
@@ -963,7 +990,17 @@ onDomLoad(function() {
 
     $('#submit-simulation-form').click(function(e) {
         e.preventDefault();
-        $('#simulation-form').submit();
+        LoadingScreen.show('saveSimulation');
+        window.MIRC.submitSimulationForm() // defined in gui_simulation_form.html
+            .done(function(data) {
+                // console.log(data)
+                if (data?.simulation_id != undefined) {
+                    refreshSimulations(data.simulation_id);
+                }
+            })
+            .always(function() {
+                LoadingScreen.hide('saveSimulation');
+            });
     });
 
     $('#add-simulation').click(function(e) {

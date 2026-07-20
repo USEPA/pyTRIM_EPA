@@ -85,7 +85,7 @@ def get_risk_scenarios():
     if s:
         s = [
             x.as_serializable() for x in s
-            if current_user.can('view', s)
+            if current_user.can('view', x)
         ]
 
     return api.Result({'scenarios': s})
