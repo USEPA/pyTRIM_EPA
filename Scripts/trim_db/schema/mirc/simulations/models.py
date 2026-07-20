@@ -189,9 +189,21 @@ class MircSimulationParameter(Model):
     def __repr__(self):
         return (
             f"{self.__class__.__qualname__}("
-            f"'{self.simulation.name}', {self.variable}, {self.quantity}"
+            f"'{self.simulation.name}', {self.variable}, {self.quantity}, source='{self.source or ''}'"
             ")"
         )
+
+
+@register_serializer(MircSimulationParameter)
+def _ts_simulation_parameter(param: MircSimulationParameter):
+    return {
+        'id': param.id,
+        'full_name': param.name or '',
+        'variable_name': param.variable,
+        'value': param.value,
+        'unit': param.unit or '',
+        'source': param.source or ''
+    }
 
 
 class MircSimulationConsumptionBreakdown(Model):

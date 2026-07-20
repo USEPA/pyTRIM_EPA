@@ -585,19 +585,21 @@ class MircSimulationService(GenericService[MircSimulation]):
                     f = form.f_tl35.data
                     src = form.f_tl35_src.data
                     sim.parameters.append(MircSimulationParameter(
+                        name=form.C_tl35.label.text,
                         variable=f'C_{p.name.replace(" ", "_")}',
                         value=form.C_tl35.data,
                         unit=form.C_tl35_unit.data,
-                        source=form.C_tl35_src.data
+                        source=form.trim_fish_tl35_compartment.data
                     ))
                 elif p.name == tl4_type:
                     f = form.f_tl4.data
                     src = form.f_tl4_src.data
                     sim.parameters.append(MircSimulationParameter(
+                        name=form.C_tl4.label.text,
                         variable=f'C_{p.name.replace(" ", "_")}',
                         value=form.C_tl4.data,
                         unit=form.C_tl4_unit.data,
-                        source=form.C_tl4_src.data
+                        source=form.trim_fish_tl4_compartment.data
                     ))
                 if f != 0:
                     sim.consumption_breakdowns.append(
@@ -611,7 +613,8 @@ class MircSimulationService(GenericService[MircSimulation]):
         for param in SIMULATION_PARAMETER_ABBRS:
             if not hasattr(form, param):
                 continue
-            val = getattr(form, param).data
+            field = getattr(form, param)
+            val = field.data
             if val is None:
                 if param in SIMULATION_PARAMETER_DEFAULTS:
                     val = SIMULATION_PARAMETER_DEFAULTS[param]
@@ -624,6 +627,7 @@ class MircSimulationService(GenericService[MircSimulation]):
             if hasattr(form, f'{param}_src'):
                 src = getattr(form, f'{param}_src').data
             sim.parameters.append(MircSimulationParameter(
+                name=field.label.text,
                 variable=param,
                 value=val,
                 unit=unit,
@@ -722,6 +726,8 @@ class MircSimulationService(GenericService[MircSimulation]):
             **simulation_breakdown
         }
 
+        print(simulation.parameters)
+
         return {
             'meta': {
                 'importSource': simulation.trim_scenario.name or 'N/A',
@@ -731,7 +737,8 @@ class MircSimulationService(GenericService[MircSimulation]):
                     p.food.name.replace(' ', '_') if p.food else 'body_weight':
                     p.percentile.name
                     for p in simulation.percentiles
-                }
+                },
+                'other_parameters': [p.as_serializable() for p in simulation.parameters]
             },
             'results': simulation_results,
             'logs': logs
