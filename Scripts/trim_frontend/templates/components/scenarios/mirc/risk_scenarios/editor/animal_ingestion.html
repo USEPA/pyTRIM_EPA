@@ -1,0 +1,104 @@
+
+<h4>
+    <button type="button"
+        class="btn btn-lg btn-block px-0 text-primary text-left border-light border-top-0 border-left-0 border-right-0 rounded-0"
+        data-toggle="collapse" aria-expanded="true"
+        data-target="#air-collapse" aria-controls="air-collapse"
+        style="font-weight: 500;"
+    >
+        {{ form.animal_ingestion_parameters.label.text }}&nbsp;
+        <small class="text-muted">
+            <i class="fa fa-eye-slash"></i>
+        </small>
+    </button>
+</h4>
+
+<div id="air-collapse" class="collapse show">
+    <div class="form-row mb-3">
+        <div class="col-sm-2">
+            <label for="animal-ir-consumer-filter">
+                Animal Product
+            </label>
+            <select id="animal-ir-consumer-filter" class="form-control form-control-sm">
+                {% for p in products|selectattr('is_food') %}
+                    {% if p.is_a('livestock') %}
+                        <option value="{{ p.id }}">{{ p.name|title }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+    <table id="animal-ingestion-parameters" class="table table-sm table-bordered">
+        <thead>
+            <tr class="text-center">
+                <th scope="col" class="table-primary border-primary">Feed Type</th>
+                <th scope="col" class="table-primary border-primary">Quantity</th>
+                <th scope="col" class="table-primary border-primary">Unit</th>
+                <th scope="col" class="table-primary border-primary">
+                    Fraction Contaminated
+                </th>
+                <th scope="col" class="table-primary border-primary">Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th colspan="5" class="table-light align-middle text-center">
+                    <div class="spinner-border" role="status">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                </th>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+    <small class="form-text text-muted">
+        All ingestion rates less than or equal to 0 will be ignored.
+    </small>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var tbl = $('#animal-ingestion-parameters tbody');
+        $('#animal-ir-consumer-filter').change(function() {
+            var p = $(this).val();
+
+            var filter = '.animal-' + p;
+
+            var rows = tbl.find('tr');
+            var relevant = rows.filter(filter);
+
+            if (!relevant.length) {
+                if (rows.length > 1) {
+                    LoadingScreen.show('air_params');
+                }
+                $.ajax({
+                    url: '{{ url_for("mirc_scenario.get_form_fragment") }}',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        name: 'animal_ingestion',
+                        consumer: p,
+                        parent: '{{ form.parent.data or "" }}',
+                        scenario_id: '{{ form.scenario_id.data or "" }}',
+                        i: rows.length
+                    })
+                }).then(function(data) {
+                    tbl.append(data);
+                    rows = tbl.find('tr').hide();
+                    rows.filter(filter).show();
+                    // Enable popups
+                    $('[data-toggle="popover"]').popover();
+                }).always(function() {
+                    LoadingScreen.hide('air_params');
+                });
+            }
+            else {
+                rows.hide();
+                relevant.show();
+            }
+        }).change();
+    });
+    </script>
+</div>
+
+<hr />

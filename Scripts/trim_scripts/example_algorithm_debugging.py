@@ -97,8 +97,49 @@ def equation_check_3():
     else:
         1
 
+def equation_check_4():
+    # REQUEST 2, Runoff from Surface Soil to Surface Soil, General(AlgInstID_2465)   
+    """
+    select * from trim.transport_process where name LIKE '%AlgInstID_2465%';
+    id = 2738
+
+    (sender.TotalRunoffRate.to("m^3 / m^2 / day")
+    * sender.FractionOfTotalRunoff(receiver))
+    * (chemical.FractionMass_Dissolved(sender)
+    / chemical.VolumeFraction_Liquid(sender))
+    * (sender.FractionofAreaAvailableforRunoff
+    * sender.volume_element.parcel.area)
+    / sender.Volume
+    """
+    s = ScenarioService.get(example_scenario_id)
+    chem = [chem for chem in s.chemicals if chem.name =="Benzo(A)Pyrene"][0]
+
+    pcl_n1 = [pcl for pcl in s.parcels if pcl.name == "N1"][0]
+    pcl_n6 = [pcl for pcl in s.parcels if pcl.name == "N6"][0]
+
+    sender_n1 = pcl_n1.get_compartment(media="Abiotic|Soil|Surface_Soil")[0]
+    receiver_n6 = pcl_n6.get_compartment(media="Abiotic|Soil|Surface_Soil")[0]
+
+    tp = TransportProcessService.get(algorithm_id=2738)
+    eq = tp.algorithm.equation
+
+    print("\n\n>>>>>>>>>>>>>>>>")
+    print(f"Chemical: {chem.name}")
+    print(f"Sender: {sender_n1.standard_name}")
+    print(f"Receiver: {receiver_n6.standard_name}")
+    print(f"{tp.name}: {eq}")
+    print("")
+    print(f'sender.TotalRunoffRate.to("m^3 / m^2 / day") = {sender_n1.TotalRunoffRate.to("m^3 / m^2 / day")}')
+    print(f'sender.FractionOfTotalRunoff(receiver) = {sender_n1.FractionOfTotalRunoff(receiver_n6)}')
+    print(f'chemical.FractionMass_Dissolved(sender) = {chem.FractionMass_Dissolved(sender_n1)}')
+    print(f'chemical.VolumeFraction_Liquid(sender) = {chem.VolumeFraction_Liquid(sender_n1)}')
+    print(f'sender.FractionofAreaAvailableforRunoff = {sender_n1.FractionofAreaAvailableforRunoff}')
+    print(f'sender.volume_element.parcel.area = {sender_n1.volume_element.parcel.area}')
+    print(f'sender.Volume = {sender_n1.Volume}')
+    print("\n\n<<<<<<<<<<<<<<<<")
 
 if __name__ == "__main__":
     equation_check_1()
     equation_check_2()
-    equation_check_1()
+    equation_check_3()
+    equation_check_4()
