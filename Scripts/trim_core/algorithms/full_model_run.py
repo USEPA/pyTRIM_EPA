@@ -480,8 +480,6 @@ def gen_avg(df_nt, df_conc, simulation_start_date):
     df_nt['year'] = df_nt['time'].dt.year   # create year column
     # group the data by year and calculate the annual averages
     dfn_avg = df_nt.groupby('year').mean().reset_index()
-    # drop last line (just one day)
-    dfn_avg = dfn_avg.head(len(dfn_avg)-1)
 
     # convert the first col (time in d) to datetime objects
     df_conc['time'] = pd.to_datetime(df_conc['time'], origin=start_date, unit='d')
@@ -495,8 +493,6 @@ def gen_avg(df_nt, df_conc, simulation_start_date):
         for c in df_conc.columns.values if c != 'year'
     }
     dfc_avg = df_conc.groupby('year').agg(conc_agg).reset_index()
-    # drop last line (just one day)
-    dfc_avg = dfc_avg.head(len(dfc_avg)-1)
     return dfn_avg, dfc_avg
 
 
