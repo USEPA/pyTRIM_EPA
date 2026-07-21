@@ -307,7 +307,12 @@ def parse_parcel_upload():
                 errors.append(f"Exception deleting parcel {del_parcel_description}: {e}")
 
     if len(errors) > 0:
-        raise ApiException("; ".join(errors))
+        if len(scenario.parcels) > 0:
+            raise ApiException("; ".join(errors))
+        else:
+            # Just move along ... it worked, at any rate
+            print('Encountered errors during parcel deletion, but all parcels were deleted:')
+            print('\t' + '\n\t'.join(errors))
 
     try:
         if geojson:
