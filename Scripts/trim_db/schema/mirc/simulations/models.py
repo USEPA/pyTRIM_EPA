@@ -22,7 +22,7 @@ class MircScenario(Model):
     """Represents an ingestion scenario, and provides access
     to all parameters for performing MIRC calculations.
     """
-    name = sa.Column(sa.String(255), unique=True, nullable=False)
+    name = sa.Column(sa.String(255), unique=False, nullable=False)
     is_builtin = sa.Column(sa.Boolean(), nullable=False, default=False)
     notes = sa.Column(sa.String(800))
 

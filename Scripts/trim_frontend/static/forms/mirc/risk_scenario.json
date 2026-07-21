@@ -24,11 +24,11 @@
             "widget": "select",
             "choices": {
                 "source": "db",
-                "model": "Scenario",
+                "model": "MircScenario",
                 "value": "id",
                 "label": "name"
             },
-            "required": false,
+            "allow_empty": true,
             "default": 2
         },
         {

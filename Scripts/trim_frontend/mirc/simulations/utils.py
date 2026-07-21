@@ -82,13 +82,13 @@ def make_report(data):
             row['risk_factor'] = "-"
 
     # Add Chemical Name
-    chemical = (df_meta.loc[df_meta['index'] == "chemical", "meta"])[1]
+    chemical = (df_meta.loc[df_meta['index'] == "chemical", "meta"]).values[0]
     df_results["Chemical"] = str(chemical.get('hap_name') or chemical['name'])
 
     # Add Scenario Name
     scenario = df_meta.loc[
         df_meta['index'] == "importSource", "meta"
-    ][0].split("|")[0]
+    ].values[0].split("|")[0]
     df_results["scenario"] = scenario
 
     # Order Columns and Clean-up

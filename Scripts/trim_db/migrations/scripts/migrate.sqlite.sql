@@ -252,7 +252,6 @@ CREATE TABLE mirc_scenario (
     parent_id INTEGER,  
     PRIMARY KEY (id), 
     FOREIGN KEY(parent_id) REFERENCES mirc_scenario (id), 
-    UNIQUE (name)
 );
 
 CREATE TABLE mirc_scenario_permissions (
