@@ -726,12 +726,13 @@ class MircSimulationService(GenericService[MircSimulation]):
             **simulation_breakdown
         }
 
-        print(simulation.parameters)
-
         return {
             'meta': {
+                '_id': simulation.id,
+                'name': simulation.name,
                 'importSource': simulation.trim_scenario.name or 'N/A',
                 'chemical': simulation.chemical.as_serializable(),
+                'usesAermod': len([p for p in simulation.parameters if p.variable == 'Ca' and p.value != 0]) > 0,
                 'fishPathway': 'B(S)AF' if simulation.use_baf else 'Direct',
                 'percentiles': {
                     p.food.name.replace(' ', '_') if p.food else 'body_weight':

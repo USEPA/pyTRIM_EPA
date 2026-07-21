@@ -31,7 +31,7 @@
     <div id="mirc-results-desc">
         <div class="form-group form-row mb-1">
             <label class="col-3 col-form-label col-form-label py-0 font-weight-bold">
-                <span>&nbsp;Chemical</span>
+                <span>Chemical</span>
             </label>
             <div class="col">
                 <input id="chemical-name" readonly="readonly"
@@ -41,21 +41,9 @@
                 />
             </div>
         </div>
-        <div class="form-group form-row mb-1 d-none">
-            <label class="col-3 col-form-label py-0 font-weight-bold">
-                <span>&nbsp;Import Source</span>
-            </label>
-            <div class="col">
-                <input id="import-name" readonly="readonly"
-                    class="form-control-plaintext py-0"
-                    style="max-width: 100%;"
-                    value="Loading ..."
-                />
-            </div>
-        </div>
         <div class="form-group form-row mb-1">
             <label class="col-3 col-form-label py-0 font-weight-bold">
-                <span>&nbsp;Fish Calculation Type</span>
+                <span>Fish Calculation Type</span>
             </label>
             <div class="col">
                 <input id="fish-pathway" readonly="readonly"
@@ -63,6 +51,32 @@
                     style="max-width: 100%;"
                     value="Loading ..."
                 />
+            </div>
+        </div>
+        <div class="accordion mb-3">
+            <div id="simulationInputsHeading" class="border-bottom">
+                <h2 class="mb-0">
+                    <button class="btn btn-link btn-block pl-1 pt-0 text-left text-decoration-none" style="color: #212529;"
+                        type="button" data-toggle="collapse" data-target="#simulationInputsDisplay"
+                        aria-expanded="false" aria-controls="simulationInputsDisplay"
+                    >
+                        Other Input Values<i class="fa fa-chevron-down ml-2"></i>
+                    </button>
+                </h2>
+            </div>
+            <div id="simulationInputsDisplay" class="collapse" aria-labelledby="simulationInputsHeading">
+                <div class="table-responsive">
+                    <table id="simulation-inputs-table" class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">Name</th>
+                                <th scope="col">Value</th>
+                                <th scope="col">Source</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -182,7 +196,11 @@ onDomLoad(function() {
     var tbl = $('#results-table');
     var riskTbody = $('#risk-results tbody');
 
-    $('#logAccordion').collapse()
+    $('#logAccordion').collapse();
+
+    $('#simulationInputsHeading button').on('click', function() {
+        $(this).find('i.fa').toggleClass('fa-chevron-up fa-chevron-down')
+    });
 
     function simplifyUnit(unit, timeLast) {
         var simple = unit
@@ -220,7 +238,6 @@ onDomLoad(function() {
     }
 
     function updateMeta(meta) {
-        $('#import-name').val(meta.importSource);
         $('#fish-pathway').val(meta.fishPathway);
 
         var chemical = meta.chemical || {};
@@ -238,6 +255,82 @@ onDomLoad(function() {
         }
         else {
             $('#adaf-header').hide();
+        }
+
+        meta.fishPathway = meta.fishPathway || '';
+        meta.other_parameters = meta.other_parameters || [];
+
+        function getInput(name) {
+            var param = meta.other_parameters.filter(x => x.variable_name == name);
+            if (param.length) {
+                return param[0];
+            }
+            return undefined;
+        }
+
+        function findFish(trophicLevel) {
+            var param = meta.other_parameters
+                .filter(x => x.full_name.indexOf(`Average Concentration in Trophic Level ${trophicLevel}`) == 0);
+            if (param.length) {
+                return param[0];
+            }
+            return undefined;
+        }
+
+        var otherInputs = $('#simulation-inputs-table tbody').empty();
+
+        function addInput(name) {
+            var param = getInput(name);
+            if (param == undefined) {
+                return;
+            }
+
+            var tr = $('<tr />').appendTo(otherInputs);
+
+            $('<th scope="row" />').html(param.full_name || param.variable_name).appendTo(tr);
+
+            var val = param.value;
+            try {
+                if (
+                    (val > 0 && (val < 0.0001 || val > 1_000_000))
+                    || (val < 0 && (val > -0.0001 || val < -1_000_000))
+                ) {
+                    val = val.toExponential(2);
+                }
+            }
+            catch (err) {
+                // console.log(err)
+                val = param.value; // don't worry
+            }
+            $('<td />').text(val == 0 ? val : val || '').appendTo(tr);
+
+            $('<td />').text(param.source || '').appendTo(tr);
+        }
+
+        if (meta.usesAermod) {
+            addInput('Ca');
+            addInput('Fv');
+            addInput('rho_a');
+        }
+        addInput('C_water');
+        addInput('C_soil');
+        addInput('C_root_veg');
+        addInput('C_root_veg');
+        addInput('Kd');
+        addInput('Cs_s');
+        addInput('Kd_feed');
+        addInput('Drdp');
+        addInput('Drwp');
+        if (meta.fishPathway.toLowerCase() == 'direct') {
+            var fishParam = findFish(3.5);
+            addInput(fishParam?.variable_name);
+            var fishParam = findFish(4);
+            addInput(fishParam?.variable_name);
+        }
+        else {
+            addInput('C_sed');
+            addInput('C_surf_water');
+            addInput('FMD');
         }
     }
 

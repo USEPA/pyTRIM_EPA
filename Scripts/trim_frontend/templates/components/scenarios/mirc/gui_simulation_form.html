@@ -944,18 +944,7 @@ function updateSimulationMircFields(fromElement) {
 
     const chem = data.chemicals[getVal('chemical')];
 
-    const useAermod = data.parcels.filter(
-        pcl => pcl.volume_elements.filter(
-            ve => ve.compartments.filter(
-                comp => (
-                    comp.name.toLowerCase() == 'air'
-                    && Object.entries(comp.properties).filter(
-                        ([chem, props]) => props.C_aermod?.value != null
-                    ).length
-                )
-            ).length
-        ).length
-    ).length > 0;
+    const useAermod = data.uses_aermod;
     if (useAermod) {
         airFields.style.display = '';
     }
