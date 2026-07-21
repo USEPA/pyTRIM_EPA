@@ -65,12 +65,20 @@
     {
         'id': 'summary-tab',
         'title': "Summary of Properties",
-        'gui': 'gui_property_summary.html'
+        'gui': 'gui_property_summary.html',
+        'hide-save-btn': 1
     },
     {
         'id': 'results-tab',
-        'title': "Run Model",
-        'gui': 'gui_execution_results.html'
+        'title': "Run Transport Model",
+        'gui': 'gui_execution_results.html',
+        'hide-save-btn': 1
+    },
+    {
+        'id': 'mirc-tab',
+        'title': "Calculate Risk",
+        'gui': 'mirc/gui_results.html',
+        'hide-save-btn': 1
     }
 ] %}
 
@@ -99,6 +107,7 @@
                             aria-controls="{{ tab['id'] }}"
                             class="nav-link"
                             aria-selected="true"
+                            data-no-save-btn="{{ tab.get('hide-save-btn') or 0 }}"
                         >{{ tab['title'] }}</a>
 
                     {% endfor %}
@@ -168,6 +177,16 @@
             }
         });
 
+        // some tabs hide the save button
+        $('#editor-nav [data-toggle="pill"].nav-link').on('show.bs.tab', function(e) {
+            if (e.target.getAttribute('data-no-save-btn') == '1') {
+                $('#save-btn').hide();
+            }
+            else {
+                $('#save-btn').show();
+            }
+        });
+
         // Make tabs linkable in url
         (function enableHashPills() {
             var defaultHash = '#{{ tabs[0]["id"] }}';
@@ -215,4 +234,11 @@
 {% block scripts %}
     <script src="{{url_for('static', filename='js/ui/forms.js')}}">
     </script>
+    <script src="{{url_for('static', filename='js/lib/chartist.min.js')}}">
+    </script>
+    <script src="{{url_for('static', filename='js/lib/chartist-hover.js')}}">
+    </script>
+    <link rel="stylesheet" type="text/css"
+        href="{{url_for('static', filename='css/lib/chartist/chartist.css')}}"
+    />
 {% endblock scripts %}

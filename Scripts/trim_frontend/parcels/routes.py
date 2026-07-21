@@ -1,4 +1,4 @@
-from flask import Blueprint, request, render_template, abort
+from flask import Blueprint, request, abort
 from flask_security import login_required, current_user
 from flask_api import ApiResult,  ApiException
 from trim_db.services import *
@@ -11,7 +11,6 @@ from ..scenarios.forms import *
 from ..utils.logging import make_logger
 
 import traceback
-import re
 import json
 import time
 
@@ -73,9 +72,6 @@ def get_parcels(scenario_id):
         abort(403)
     logger = make_logger('parcels_api_get')
     try:
-        #s = ScenarioService.get(scenario_id)
-        #if not s:
-        #    raise ApiException("Unknown Scenario")
         p = ParcelService.get_all(scenario_id=scenario_id)
         m = LAND_USE_TYPES
         parcels = []
@@ -84,7 +80,7 @@ def get_parcels(scenario_id):
         if p:
             s = p[0].scenario
             start_time_s = time.time()
-            #sh = s.as_serializable()
+            # sh = s.as_serializable()
             logger.info(f"Acquired scenario {s.name} in {time.time() - start_time_s} seconds")
             total_start = time.time()
             for this_p in p:

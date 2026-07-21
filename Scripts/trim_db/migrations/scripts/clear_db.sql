@@ -15,3 +15,4 @@ DELETE FROM chemical;
 DELETE FROM scenario_load_run_proc;
 DELETE FROM scenario_permissions;
 DELETE FROM scenario;
+-- DELETE FROM user WHERE id != 1;

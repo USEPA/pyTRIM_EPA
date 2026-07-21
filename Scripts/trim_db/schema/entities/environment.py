@@ -129,20 +129,20 @@ class Parcel(Model):
             ) * ureg('m^2')
         return self._area
 
-    def get_volume_element(self, name):
+    def get_volume_element(self, name) -> 'VolumeElement':
         for ve in self.volume_elements:
             if ve.name == name or ve.standard_name == name:
                 return ve
         return None
 
     @property
-    def compartments(self):
+    def compartments(self) -> list['Compartment']:
         return list(sorted(
             (c for ve in self.volume_elements for c in ve.compartments),
             key=lambda x: x.name
         ))
 
-    def get_compartment(self, name=None, media=None):
+    def get_compartment(self, name=None, media=None, or_child=True):
         if media is None:
             if name is None:
                 raise ValueError(
@@ -150,7 +150,7 @@ class Parcel(Model):
                 )
             check = self.compartments
         else:
-            check = [c for c in self.compartments if c.media.isa(media)]
+            check = [c for c in self.compartments if c.media.isa(media, or_child=or_child)]
             if name is None:
                 return check
         for x in check:

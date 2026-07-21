@@ -1,11 +1,9 @@
 import csv
 import io
 import os
-import boto3
 import pandas as pd
 import traceback
 import re
-import numpy as np
 import json
 import requests as pyRequest
 from decimal import Decimal
@@ -13,8 +11,8 @@ from flask import Blueprint, request, abort
 from flask_security import login_required, current_user
 from werkzeug.utils import secure_filename
 from flask_api import ApiException, ApiResult
+from trim_core.coordinates import CoordinateMapper, ensure_closed_polygon
 from trim_db.schema import *
-from trim_db.schema.entities.environment import Parcel
 from trim_db.services import *
 from trim_db.services.parameters import get_or_create_custom_param
 from trim_db.services.entities import ParcelService
@@ -22,12 +20,9 @@ from trim_frontend import api
 from ..scenarios.utils import meteo_wgt_avg_value_from_timeseries
 from ..parcels.utils import delete_parcel_contents, get_canonical_land_use_type, get_canonical_parcel_type, get_ve_defaults_for_parcel_type, handle_parcel_update, initialize_parcel_contents
 from ..utils.data_structures import calculate_list_depth
-from ..utils.file_io import csv_to_df, MiscAssociatedFileVariety, associated_file_helper, convert_sfc_to_meteo, parse_sfc_file_as_dataframe
+from ..utils.file_io import csv_to_df, associated_file_helper, convert_sfc_to_meteo, parse_sfc_file_as_dataframe
 from ..utils.forms import assemble_json_form
 from ..utils.logging import make_logger
-from ..utils.spatial import determine_location, determine_nearest_neighbor_distance, ensure_closed_polygon, is_utm_zone_valid, translate_coordinates, translate_position
-from shapely.geometry import Polygon
-from pint import UnitRegistry
 from collections import OrderedDict
 
 file_api = Blueprint('file_api', __name__)
@@ -106,173 +101,61 @@ def parse_aermod():
     logger = make_logger('file_uploader')
 
     files = request.files
-    scenario_id = [v for k, v in request.form.items() if k == 'scenario_id'][0]
+    if not files:
+        raise ApiException("No files were uploaded")
+
+    scenario_id = request.form['scenario_id']
     scenario = ScenarioService.get(id=scenario_id)
     if not scenario:
         return ApiException("Unknown Scenario")
     if not current_user.can('edit', scenario):
         abort(403)
 
-    this_chem = [v for k, v in request.form.items() if k == 'chemical'][0]
-    this_spec = [v for k, v in request.form.items() if k == 'species'][0]
-    spacing = [v for k, v in request.form.items() if k == 'spacing'][0]
-    coord_sys = [v for k, v in request.form.items() if k == 'proj'][0]
-    utm_zone = [v for k, v in request.form.items() if k == 'utm_zone'][0]
+    this_chem = request.form['chemical']
+    this_spec = request.form['species']
+    coord_sys = request.form['coord_sys']
+    utm_zone = request.form.get('utm_zone') or None
+    zflag_restriction = request.form.get('zflag_restriction') or None
+    spacing = request.form['spacing']
 
-    logger.info(f'Parsed AERMOD file: {list(files.items())[0][1].filename} for scenario id {scenario_id}, chemical {this_chem} with'
-                f' coordinate system {coord_sys} {"and utm zone of " + utm_zone if utm_zone else ""}.')
+    fileField = list(files.values())[0]
+
+    if zflag_restriction is not None:
+        try:
+            zflag_restriction = float(zflag_restriction)
+        except TypeError:
+            zflag_restriction = None
+
+    logger.info(
+        f'Parsing AERMOD file "{fileField.filename}"'
+        f' for scenario id {scenario_id}, chemical {this_chem}, with coordinate system {coord_sys}'
+        f'{" and utm zone of " + utm_zone if utm_zone else ""},'
+        f' {"and ZFLAG restriction of " + str(zflag_restriction) if (zflag_restriction is not None) else "and no ZFLAG restriction"}.'
+    )
 
     chem = ChemicalService.get(name=this_chem)
 
-    if not files:
-        raise ApiException("No files were uploaded")
-
-    fpn = [f.stream for n, f in files.items()][0]
     try:
-        # with open(fpn.stream) as f:
-        #     lines = f.readlines()
+        fpn = fileField.stream
         fpn.seek(0)
-        lines = fpn.read().decode("utf-8")
-        lines = lines.split("\r\n")
+        aermod_results = ScenarioService(scenario).import_aermod(
+            fpn,
+            for_chemical=chem,
+            metadata={
+                'coordinate_system': coord_sys,
+                'utm_zone': utm_zone,
+                'zflag_restriction': zflag_restriction,
+                'spacing': spacing,
+                'chemical_species': this_spec,
+            }
+        )
     except Exception as e:
-        print('parse airmod lines error:', e)
+        print('Import error:', e)
+        import traceback
+        traceback.print_exc()
+        raise
 
-    row_ind = 0
-    for line in lines:
-        cols = re.split("  +", line)[1:]  # assumes header row starts with an asterisk that must be dropped
-        cols = [x.replace('\n', '') for x in cols]  # assumes the line ends with a new line symbol
-        # the ideal header
-        if cols == ['X', 'Y', 'DRY DEPO', 'WET DEPO', 'ZELEV', 'ZHILL', 'ZFLAG', 'AVE', 'GRP', 'NUM HRS', 'NET ID']:
-            break
-        else:
-            row_ind += 1
-
-    skip_rows = row_ind+1+1  # one for zero index, one for blank line under header
-    # df = pd.read_csv(fpn, delimiter=r"\s+", skiprows=skip_rows, header=None)
-    arr = [re.split(r"\s+", ll.lstrip()) for ll in lines[skip_rows:]]
-    df = pd.DataFrame(arr)
-    df.columns = cols
-    df = df[df['X'] != '']
-
-    # drop collocated X,Y receptors while keeping the lowest elevation point
-    df = df.sort_values(['X', 'Y', 'ZELEV']).drop_duplicates(['X', 'Y'], keep='first')
-    # remove if NET ID = POLGRID. This does not always work. We will also need a user restriction to limit
-    # receptors intended for TRIM modeling – i.e., Cartesian grid with no overlapping receptors
-
-    # Convert the aermod X and Y to the default utm coordinates that pyTRIM uses. We need users input for the
-    # coordinate system and UTM zone (if UTM coordiantes) for the given file.
-
-
-    df_aermod = pd.DataFrame(df[df['NET ID'] != 'POLGRID1'])
-    df_aermod['NUM HRS'] = pd.to_numeric(df_aermod['NUM HRS'])
-    df_aermod['DRY DEPO'] = pd.to_numeric(df_aermod['DRY DEPO'])
-    df_aermod['WET DEPO'] = pd.to_numeric(df_aermod['WET DEPO'])
-
-    # make a dictionary of shapely polygon objects based on TRIM layout
-    # dict_poly = {p.name: p.polygon() for p in scenario.parcels}
-    dict_poly = {p.name: Polygon(p.vertices) for p in scenario.parcels}
-    dict_area = {p.name: p.area.magnitude for p in scenario.parcels}
-
-    try:
-        df_aermod['newX'] = df_aermod.apply(
-            lambda z: translate_position(float(z.X), float(z.Y), 'UTM', 'WGS84_LONGLAT', utm_zone=utm_zone)[0], axis=1)
-        df_aermod['newY'] = df_aermod.apply(
-            lambda z: translate_position(float(z.X), float(z.Y), 'UTM', 'WGS84_LONGLAT', utm_zone=utm_zone)[1], axis=1)
-    except Exception as e:
-        print('parse airmod newX/newY error:', e)
-
-    try:
-        # add parcel location to each receptor in aermod file
-        # df_aermod['Parcel'] = df_aermod.apply(lambda z: determine_location(dict_poly=dict_poly, x=z.X, y=z.Y), axis=1)
-        df_aermod['Parcel'] = df_aermod.apply(lambda z: determine_location(dict_poly=dict_poly, x=z.newX, y=z.newY), axis=1)
-        df_aermod = df_aermod[df_aermod['Parcel'] != ""]  # drop any receptors that are not mapped to layout
-        df_aermod['ParcelArea'] = df_aermod.apply(lambda z: dict_area.get(z.Parcel), axis=1)
-        df_aermod = df_aermod.reset_index(drop=True)
-        ndays = df_aermod['NUM HRS'].loc[1] / 24  # compute number of days of cumulative deposition
-    except Exception as e:
-        print(f"Error finding parcels corresponding to sources: {e}")
-    df_aermod['ParcelArea'] = pd.to_numeric(df_aermod['ParcelArea'])
-
-    try:
-        if spacing == r'Uniform':  # compute flat averages of all receptors in the parcel
-            # Calculate average deposition for each person (g/m2)
-            aggdep = df_aermod.groupby(['Parcel', 'ParcelArea'])[['DRY DEPO', 'WET DEPO']].mean().reset_index()
-            # Calculate flux by correcting deposition (g/m2) by number of days in AERMOD modeling period
-            aggdep['DRY DEPO'] = (aggdep['DRY DEPO'] / ndays) * aggdep['ParcelArea']  # g/m2/d * m2
-            aggdep['WET DEPO'] = (aggdep['WET DEPO'] / ndays) * aggdep['ParcelArea']  # g/m2/d * m2
-
-        elif spacing == r'Non-Uniform':  # computes weighted average of receptors in the parcel using distance of influence of each receptor as weight
-            df_aermod['Spacing'] = df_aermod.apply(
-                lambda z: determine_nearest_neighbor_distance(df_aermod=df_aermod, point_x=z.newX, point_y=z.newY),
-                axis=1)  # compute distance to nearest receptor
-            # Calculate receptor area (m2)
-            dft = df_aermod  # temp file
-            # area of influence of the receptor computed as a square with side equal to distance of nearest receptor
-            dft['RepArea'] = (dft['Spacing']) ** 2
-            # Calculate deposition (g) for each receptor area (m2)
-            dft['DRY DEPO'] = dft['DRY DEPO'] * dft['RepArea']  # first step of weighting by square of area of influence
-            dft['WET DEPO'] = dft['WET DEPO'] * dft['RepArea']
-            # Sum deposition (g) by parcel
-            aggdep = dft.groupby(['Parcel', 'ParcelArea'])[['DRY DEPO', 'WET DEPO', 'Spacing', 'RepArea']].sum().reset_index()
-            # Calculate flux by correcting deposition (g) by parcel area (m2) & number of days in AERMOD modeling period
-            # second step of weighting (divide by sum of weights in parcel)
-            aggdep['DRY DEPO'] = (aggdep['DRY DEPO'] / aggdep['RepArea']) / ndays
-            aggdep['WET DEPO'] = (aggdep['WET DEPO'] / aggdep['RepArea']) / ndays
-    except Exception as e:
-        print(f'Possible Grouping Error: {e}')
-
-    aermod_result_json = json.loads(aggdep.to_json(orient='index'))
-    res_json = None
-    try:
-        res_json = {aermod_result_json.get(str(k)).get('Parcel'): {'DrySource': v["DRY DEPO"],
-                                                                   'WetSource': v["WET DEPO"]}
-                    for k, v in aermod_result_json.items()}
-    except Exception as e:
-        print('parse airmod res_json error:', e)
-
-    source_comps = ["DryVaporSource", "WetVaporSource"] if this_spec == "Vapor" \
-        else ["DryParticleSource", "WetParticleSource"]
-    try:
-        if res_json:
-            for k, v in aermod_result_json.items():
-                parcel = [p for p in scenario.parcels if p.name == v["Parcel"]][0]
-                src_comp = [c for c in parcel.compartments if c.name in source_comps]
-                for comp in src_comp:
-                    src_par = [par for parn, par in comp.parameters.items() if parn == "surfaceDepositionRate"]
-                    if len(src_par) > 0:
-                        src_par = src_par[0]
-                        src_par = get_or_create_custom_param(
-                            src_par,
-                            {"requirements": f"(self.id == {comp.id})", "scenario_id": scenario.id},
-                            new_formula=True
-                        )
-                        prefix = "DRY" if comp.name.startswith("Dry") else "WET"
-                        stype = f'{prefix} DEPO'
-                        eq = src_par.formula.equation
-                        # We have the chemical in the formula
-                        if f'chemical.id == {str(chem.id)}' in eq:
-                            formula_parts = eq.split(f"if chemical.id == {chem.id}")
-                            formula_part = formula_parts[0]
-                            if "else" in formula_part:
-                                arr = formula_part.split("else")[:-1]
-                                formula_part = "else".join(arr + [f' {v[stype]} '])
-                            else:
-                                formula_part = f'{v[stype]} '
-                            formula_parts[0] = formula_part
-                            new_formula = f"if chemical.id == {chem.id}".join(formula_parts)
-                            print(new_formula)
-                        # We do not have the chemical in the formula. We need to add it...
-                        else:
-                            eq_arr = eq.split("else")
-                            eq_arr.insert(-2, f' {v[stype]} if chemical.id == {chem.id} ')
-                            new_formula = "else".join(eq_arr)
-                            print(new_formula)
-                        FormulaService.get(src_par.formula.id).equation = new_formula
-                FormulaService.commit()
-    except Exception as e:
-        print('parse airmod formulas error:', e)
-
-    return ApiResult({'aermod_result': res_json})
+    return ApiResult({'aermod_results': aermod_results})
 
 
 @file_api.route('/api/files/backgroundConc_file', methods=['POST'])
@@ -288,7 +171,6 @@ def upload_background_conc():
         abort(403)
 
     chem = ChemicalService.get(name=chem_name)
-    ureg = UnitRegistry()
     # First check if there are any existing CustomParameters
     custom_pars = [c.parameters.get("initialConcentration") for c in scenario.compartments if not isinstance(c.parameters.get("initialConcentration"), ParameterDefinition)]
     # We are going to reset all existing custom background conc values and start clean for file uploads. We do not want
@@ -405,8 +287,10 @@ def parse_parcel_upload():
     files = request.files
 
     if coord_system == "UTM":
-        valid_zone, default_utm_zone = is_utm_zone_valid(raw_utm_zone)
-        if not valid_zone:
+        try:
+            zone_number, zone_letter = CoordinateMapper.decompose_utm_zone(raw_utm_zone)
+            default_utm_zone = f'{zone_number}{zone_letter}'
+        except Exception:
             errors.append(f"Invalid default utm zone '{raw_utm_zone}' supplied.")
 
     if not files and not geojson:
@@ -424,28 +308,33 @@ def parse_parcel_upload():
                 errors.append(f"Exception deleting parcel {del_parcel_description}: {e}")
 
     if len(errors) > 0:
-        raise ApiException("; ".join(errors))
-    
+        if len(scenario.parcels) > 0:
+            raise ApiException("; ".join(errors))
+        else:
+            # Just move along ... it worked, at any rate
+            print('Encountered errors during parcel deletion, but all parcels were deleted:')
+            print('\t' + '\n\t'.join(errors))
+
     try:
         if geojson:
             lines = ""
             line_num = 0
             reader = json.loads(geojson)
             rows_to_process = reader  # GeoJSON is already in correct format
-        else: # assume csv
+        else:  # assume csv
             fpn = [f.stream for n, f in files.items()][0]
             fpn.seek(0)
             lines = fpn.read().decode("utf-8")
             line_num = 2
             reader = csv.DictReader(io.StringIO(lines))
-            
-            #process csv with format detection and normalization
+
+            # process csv with format detection and normalization
             csv_rows = list(reader)
             rows_to_process = process_csv_parcels(csv_rows)
-            
+
     except Exception:
         errors.append("Unable to open file")
-        
+
     for row in rows_to_process:
         try:
             if geojson:
@@ -461,7 +350,7 @@ def parse_parcel_upload():
             wetland = row_data["hasWetland"]
             fish_food_web = row_data["hasFishFoodWeb"]
             coordinates = row_data["coordinates"]
-        
+
             # TODO - reload page after upload (done; but we could do better...)
             p = ParcelService.create(name=parcel_name, description=parcel_description, scenario_id=scenario_id, vertices=coordinates)
             handle_parcel_update(p, {
@@ -715,12 +604,12 @@ def get_parcel_row_csv(row, coord_system, utm_zone):
     # Add null/empty check
     if not raw_coords:
         raise ValueError(f"Missing coordinates for parcel: {row.get('ParcelName', 'Unknown')}")
-    
+
     try:
         parsed_coords = json.loads(raw_coords)
     except json.JSONDecodeError as e:
         raise ValueError(f"Invalid JSON in coordinates for parcel {row.get('ParcelName', 'Unknown')}: {e}")
-    
+
     if calculate_list_depth(parsed_coords) == 2:
         parsed_coords = [parsed_coords]
 
@@ -731,8 +620,9 @@ def get_parcel_row_csv(row, coord_system, utm_zone):
 
         if coord_system == "WGS84 Longitude/Latitude":
             fixed_coords.append(polygon_definition)
-        else:
-            longlat_poly = translate_coordinates(polygon_definition, coord_system, "WGS84_LONGLAT", default_utm_zone=utm_zone)
+        elif 'UTM' in coord_system.upper():
+            mapper = CoordinateMapper('UTM', 'WGS84_LONGLAT', utm_zone=utm_zone)
+            longlat_poly = [mapper.translate(*pt) for pt in polygon_definition]
             fixed_coords.append(longlat_poly)
 
     # now fixed_coords is definitely nested3 lists of long/lat pairs

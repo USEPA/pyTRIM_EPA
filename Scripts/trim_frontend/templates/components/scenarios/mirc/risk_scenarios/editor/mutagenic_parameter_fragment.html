@@ -1,0 +1,36 @@
+{% from 'macros/mirc/form_macros.html' import render_input %}
+
+{% for adaf in adafs %}
+    <tr class="chemical-{{ adaf.chemical_id.data }}">
+        <th scope="row">
+            {{ render_input(adaf.chemical_id) }}
+            {{ render_input(adaf.life_stage_id) }}
+
+            {{ render_input(adaf.life_stage) }}
+        </th>
+        <td>
+            {{ render_input(adaf.value) }}
+        </td>
+        <td class="align-middle text-center">
+            <button type="button" tabindex="0"
+                data-toggle="popover" data-trigger="hover"
+                data-placement="left"
+                data-content="{{ adaf.notes.data or '<i>None</i>' }}"
+                data-src="{{ adaf.notes.id }}"
+                data-html="true"
+                {% if scenario.is_builtin %}
+                    class="btn py-0 border-0 notes-modal-btn" disabled="disabled" style="cursor: default;"
+                {% else %}
+                    class="btn py-0 text-primary border-0 notes-modal-btn"
+                {% endif %}
+            >
+                <i class="fa fa-file"></i>
+            </button>
+        </td>
+    </tr>
+    <tr style="display: none;">
+        <td colspan="4">
+            {{ render_input(adaf.notes) }}
+        </td>
+    </tr>
+{% endfor %}

@@ -1,0 +1,65 @@
+{
+    "title": "Human Ingestion Rate",
+    "fields": [
+        {
+            "id": "life_stage_id",
+            "data_type": "int",
+            "hidden": true
+        },
+        {
+            "id": "life_stage",
+            "label": "Life Stage",
+            "data_type": "string",
+            "readonly": true
+        },
+        {
+            "id": "percentile_id",
+            "data_type": "int",
+            "hidden": true
+        },
+        {
+            "id": "percentile",
+            "label": "Percentile",
+            "data_type": "string",
+            "readonly": true
+        },
+        {
+            "id": "product_id",
+            "data_type": "int",
+            "hidden": true
+        },
+        {
+            "id": "product",
+            "label": "Product",
+            "data_type": "string",
+            "readonly": true
+        },
+        {
+            "id": "rate",
+            "label": "Value",
+            "data_type": "float",
+            "min": 0,
+            "step": "any",
+            "allow_empty": true
+        },
+        {
+            "id": "unit",
+            "label": "Unit",
+            "data_type": "string"
+        },
+        {
+            "id": "fraction_contaminated",
+            "label": "Fraction Contaminated",
+            "data_type": "float",
+            "min": 0,
+            "max": 1,
+            "step": "any",
+            "allow_empty": true
+        },
+        {
+            "id": "notes",
+            "label": "Notes",
+            "data_type": "string"
+        }
+    ]
+}

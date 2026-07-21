@@ -8,6 +8,10 @@ __all__ = ['Chemical']
 class Chemical(Model):
     name = sa.Column(sa.String(120), nullable=False)
     cas_number = sa.Column(sa.String(120), nullable=False, unique=True)
+    hap_number = sa.Column(sa.String(255))
+    hap_name = sa.Column(sa.String(255))
+
+    epa_evidence_weight = sa.Column(sa.String(255))
 
     category = sa.Column(sa.String(240))
 
@@ -38,6 +42,22 @@ class Chemical(Model):
 
         return False
 
+    @property
+    def organic(self):
+        return self.isa('Organic')
+
+    @property
+    def inorganic(self):
+        return not self.organic
+
+    @property
+    def mutagenic(self):
+        return self.isa('Mutagenic')
+
+    @property
+    def epa_woe(self):
+        return self.epa_evidence_weight
+
     def __repr__(self):
         return (
             f'{self.__class__.__qualname__}('
@@ -52,7 +72,12 @@ def serialize_chemical(chem: Chemical):
         'id': chem.id,
         'name': chem.name,
         'cas_number': chem.cas_number,
-        'category': chem.category
+        'hap_number': chem.hap_number,
+        'hap_name': chem.hap_name,
+        'category': chem.category,
+        'inorganic': chem.inorganic,
+        'mutagenic': chem.mutagenic,
+        'EPA_WOE': chem.epa_woe
     }
     return s
 

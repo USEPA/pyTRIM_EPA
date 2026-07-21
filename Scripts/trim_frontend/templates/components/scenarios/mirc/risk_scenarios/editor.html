@@ -1,0 +1,318 @@
+{% from 'macros/mirc/form_macros.html' import
+    render_form_group, render_label, render_input, render_feedback
+%}
+{% from 'macros/mirc/scenario_selector.html' import
+    render_scenario_picker
+%}
+
+{% set notes_modal_name = 'notes-form-modal' %}
+
+<form id="scenario-form"
+    action="{{ url_for('mirc_scenario_api.update_risk_scenario', id=mirc_scenario.id) }}"
+    method="POST"
+>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+    <div class="d-flex pb-1">
+        <h3 class="pb-1">
+            {{ render_label(form.name, class="mb-0") }}
+        </h3>
+        {% if not mirc_scenario.is_builtin %}
+        <div class="ml-auto mt-2 d-none">
+            <button type="button" class="btn btn-primary btn-sm px-3 save-scenario-btn">
+                <i class="fa fa-save mr-1"></i>&nbsp;Save
+            </button>
+        </div>
+        {% endif %}
+        {% if not mirc_scenario.is_builtin and current_user.can('manage', mirc_scenario) %}
+            <div class="ml-auto">
+                <a href="{{ url_for('mirc_scenario.risk_scenario_permissions', id=mirc_scenario.id) }}"
+                    class="btn btn-outline-primary mr-1"
+                >
+                    <i class="fa fa-users"></i>&nbsp;
+                    Grant/Revoke Access
+                </a>
+            </div>
+            <div>
+                <a id="delete-btn"
+                    href="{{
+                        url_for('mirc_scenario_api.delete_risk_scenario', id=mirc_scenario.id)
+                    }}"
+                    class="btn btn-outline-primary"
+                >
+                    <i class="fa fa-times mx-1"></i>&nbsp;
+                    Delete
+                </a>
+            </div>
+        {% endif %}
+    </div>
+    {{ render_input(form.name, class="form-control form-control-lg mb-4") }}
+
+    <div class="form-group">
+        {{ render_label(form.parent) }}
+        {{ render_scenario_picker(
+            mirc_scenarios,
+            id=form.parent.id, name=form.parent.name,
+            default=form.parent.data,
+            disabled=form.parent.render_kw['disabled']
+        ) }}
+        {{ render_feedback(form.parent) }}
+    </div>
+
+    <h3 class="pb-1">
+        Parameters
+    </h3>
+
+    <nav class="pb-1">
+        <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
+            <a id="human-parameters-tab" role="tab" class="nav-item nav-link active"
+                data-toggle="tab" href="#human-parameters"
+                aria-controls="human-parameters" aria-selected="true"
+            >
+                Human
+            </a>
+            <a id="product-parameters-tab" role="tab" class="nav-item nav-link"
+                data-toggle="tab" href="#product-parameters"
+                aria-controls="product-parameters" aria-selected="false"
+            >
+                Products
+            </a>
+            <a id="chemical-parameters-tab" role="tab" class="nav-item nav-link"
+                data-toggle="tab" href="#chemical-parameters"
+                aria-controls="chemical-parameters" aria-selected="false"
+            >
+                Chemicals
+            </a>
+        </div>
+    </nav>
+    <div id="parameter-tabs" class="tab-content px-2">
+        <div role="tabpanel" id="human-parameters" class="tab-pane show active"
+            aria-labelledby="human-parameters-tab"
+        >
+            {% include 'components/scenarios/mirc/risk_scenarios/editor/human_parameters.html' %}
+        </div>
+        <div role="tabpanel" id="product-parameters" class="tab-pane"
+            aria-labelledby="product-parameters-tab"
+        >
+            {% include 'components/scenarios/mirc/risk_scenarios/editor/product_parameters.html' %}
+        </div>
+        <div role="tabpanel" id="chemical-parameters" class="tab-pane"
+            aria-labelledby="chemical-parameters-tab"
+        >
+            {% include 'components/scenarios/mirc/risk_scenarios/editor/chemical_parameters.html' %}
+        </div>
+    </div>
+    {% if not mirc_scenario.is_builtin %}
+        <div class="form-row px-1 mt-3">
+            <button type="button" class="btn btn-lg btn-block btn-primary py-1 save-scenario-btn">
+                <i class="fa fa-save mr-1"></i>&nbsp;Save
+            </button>
+            <button type="submit" style="display: none;"></button>
+        </div>
+    {% endif %}
+</form>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    function toggleCollapse() {
+        var controller = $('[aria-controls="' + this.id + '"]');
+        var chevron = controller.find('i');
+        chevron.toggleClass('fa-eye');
+        chevron.toggleClass('fa-eye-slash');
+    }
+
+    $('.collapse').on('show.bs.collapse', toggleCollapse);
+    $('.collapse').on('hide.bs.collapse', toggleCollapse);
+
+    // Make tabs linkable in url
+    (function enableHashTabs() {
+        var defaultHash = '#human-parameters';
+        $('[data-toggle="tab"]')
+            .on('shown.bs.tab', function (e) {
+                var current = document.location.hash;
+                var next = e.target.hash;
+
+                if (!current && next == defaultHash) {
+                    history.replaceState({}, '', next);
+                }
+                else if (current != next) {
+                    history.pushState({}, '', next);
+                }
+            });
+        var update = function(e) {
+            var hash = document.location.hash;
+            if (!hash) {
+                hash = defaultHash;
+            }
+            $('a[href="' + hash + '"]').tab('show');
+        };
+        update();
+        $(window).on('hashchange', update);
+    })();
+
+    var form = $('#scenario-form');
+    $('.save-scenario-btn').click(function(e) {
+        e.preventDefault();
+        // Forward this click to the ACTUAL submit button for the form
+        // (This lets us get nice browser-handled validation 
+        // for our required fields)
+        form.find('[type="submit"]').click();
+    });
+        form.submit(function(e) {
+            e.preventDefault();
+
+            form.find('input, textarea').removeClass('is-invalid');
+            form.find('.invalid-feedback').html('');
+
+            function handleErrors(errors, pref) {
+                pref = pref || '';
+                $.each(errors, function(name, err) {
+                    if (Array.isArray(err)) {
+                        if (typeof err[0] == typeof {}) {
+                            $.each(err, function(i, subErrors) {
+                                handleErrors(subErrors, name + '-' + i + '-');
+                            });
+                        }
+                        else {
+                            form.find('[name="' + pref + name + '"]')
+                                .addClass('is-invalid')
+                                .next('.invalid-feedback').html(
+                                    err.join('<br />')
+                                );
+                        }
+                    }
+                    else if (typeof err == typeof {}) {
+                        $.each(err, function(subName, subErrors) {
+                            handleErrors(subErrors, name + '-' + subName + '-');
+                        });
+                    }
+                    else {
+                        form.find('[name="' + pref + name + '"]')
+                            .addClass('is-invalid')
+                            .next('.invalid-feedback').html(
+                                err
+                            );
+                    }
+                });
+            }
+
+            function saveScenario(formData) {
+                LoadingScreen.show('saveScenario');
+                formData.set('scenario_id', '{{ mirc_scenario.id }}');
+                $.ajax({
+                    url: form.attr('action'),
+                    method: form.attr('method'),
+                    processData: false,
+                    contentType: false,
+                    dataType: 'json',
+                    data: formData
+                }).done(function(data) {
+                    // console.log(data);
+                    window.location.reload(); // Refresh the page
+                }).fail(function(data) {
+                    var error = data.responseJSON;
+                    form_errs = error.message.form_errors;
+                    if (form_errs) {
+                        if (JSON.stringify(form_errs).indexOf('"csrf_token":') > -1) {
+                            $.when(flask.API.call({
+                                endpoint: 'auth_api.get_csrf'
+                            })).then(function(csrf) {
+                                $('[name="csrf_token"]').val(csrf.token);
+                                saveScenario(new FormData(form[0]));
+                            });
+                        }
+                        else {
+                            handleErrors(form_errs);
+                        }
+                    }
+                }).always(function() {
+                    LoadingScreen.hide('saveScenario');
+                });
+            }
+            saveScenario(new FormData(form[0]));
+        });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    $('body').on('click', '#delete-btn', function(e) {
+        e.preventDefault();
+        if (confirm("Are you sure you want to delete this scenario?\nThis action cannot be undone!")) {
+            LoadingScreen.show('deleteScenario');
+            $.ajax({
+                url: this.getAttribute('href'),
+                method: 'DELETE',
+                contentType: 'application/json'
+            }).done(function() {
+                window.location.href = "{{ url_for('mirc_scenario.view_risk_scenarios') }}";
+            }).fail(function() {
+                LoadingScreen.hide('deleteScenario');
+            });
+        }
+    });
+});
+</script>
+
+{% from 'macros/modal_macros.html' import render_modal %}
+
+{% set modal_body %}
+    <form>
+        <textarea class="form-control" style="max-width: 100%"></textarea>
+    </form>
+{% endset %}
+{% set modal_footer %}
+    <div class="text-right">
+        <button class="btn btn-light" id="close-notes">Cancel</button>
+        <button class="btn btn-primary" id="save-notes">Done</button>
+    </div>
+{% endset %}
+{{ render_modal(
+    id=notes_modal_name, title='Notes',
+    body=modal_body, footer=modal_footer
+) }}
+{% if not mirc_scenario.is_builtin %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var form = $('#scenario-form');
+    var modal = $('#{{ notes_modal_name }}');
+    form.on('click', '.notes-modal-btn', function(e) {
+        e.preventDefault();
+
+        var btn = $(this);
+
+        var notes = btn.attr('data-content');
+        // console.log(notes);
+        if (notes == '<i>None</i>') {
+            notes = '';
+        }
+
+        var notesField = modal.find('textarea');
+        notesField.val(notes);
+        notesField.attr('data-target', btn.attr('data-src'));
+
+        modal.modal('show');
+    });
+
+    modal.find('#close-notes').click(function(e) {
+        modal.modal('hide');
+    });
+
+    modal.find('#save-notes').click(function(e) {
+        var notesField = modal.find('textarea');
+        var target = notesField.attr('data-target');
+
+        var notes = notesField.val().trim();
+
+        var field = $('#' + target);
+        field.text(notes);
+        field.val(notes);
+
+        var btn = $('[data-src="' + target + '"]');
+        if (!notes) {
+            notes = '<i>None</i>';
+        }
+        btn.attr('data-content', notes);
+
+        modal.modal('hide');
+    });
+});
+</script>
+{% endif %}
