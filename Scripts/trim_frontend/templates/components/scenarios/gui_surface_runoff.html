@@ -137,6 +137,7 @@
                 },
                 initComplete: function (settings, json) {
                     // $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    this.api().columns().header().to$().attr('scope', 'col');
                     $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
                     $(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
                     $(".dataTables_scrollHead").addClass('wrap-text-scrollhead');

@@ -14,11 +14,11 @@
             {% if current_user.is_authenticated %}
                 {{ render_nav_item(
                     'Logout', url_for('security.logout'), icon='user-circle',
-                    title=("Logout " + current_user.get_preferred_name())
+                    title=("Logout " + current_user.get_preferred_name()), active=True
                 ) }}
             {% else %}
                 {{ render_nav_item(
-                    'Login', url_for('security.login'), icon='user-circle'
+                    'Login', url_for('security.login'), icon='user-circle', active=True
                 ) }}
             {% endif %}
         </ul>

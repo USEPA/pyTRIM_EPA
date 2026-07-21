@@ -1192,6 +1192,9 @@
                     $(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
                     $(".dataTables_scrollHead").addClass('wrap-text-scrollhead');
 
+                    $('table[aria-describedby="mapTable_info"]').removeAttr("aria-describedby");
+                    this.api().columns().header().to$().attr('scope', 'col');
+
                     $("[data-toggle=popover]").popover();
                     $('[data-toggle="tooltip"]').tooltip();
                     $('#mapTable tbody').on('change', 'select.landuse_ddl', function () {

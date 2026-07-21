@@ -961,10 +961,14 @@ window.TRIM = (function(trim) {
         let marker = create_element("sup", node);
 
         let toggle = create_element("a", marker);
+        let toggle_id = "help-" + title.toLowerCase().replaceAll(" ", "-")
         toggle.href = 'javascript:void(0);';
+        toggle.setAttribute('role', 'tooltip');
         toggle.setAttribute('data-toggle', 'popover');
         toggle.setAttribute('data-html', 'true');
         toggle.setAttribute('data-trigger', 'focus');
+        toggle.setAttribute('id', toggle_id);
+        toggle.setAttribute('aria-label', title);
         toggle.setAttribute('data-original-title', title);
         toggle.setAttribute('data-content', note);
 

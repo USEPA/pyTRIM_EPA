@@ -990,6 +990,9 @@
                     fnCreatedRow: function (row, data, index) {
                         $(row).attr('data-parcel-id', data.parcel_id);
                     },
+                    initComplete: function (settings, json) {
+                        this.api().columns().header().to$().attr('scope', 'col');
+                    },
                     drawCallback: (settings) => {
                         globalDrawCallback(tbl);
                     }
