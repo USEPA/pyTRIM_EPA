@@ -320,5 +320,14 @@ onDomLoad(function() {
                 e.preventDefault();
             }
         }
+
+        if (e.target.tagName === 'INPUT') {
+            // file inputs should clear their content when clicked again,
+            // so that we can re-process target files even if the name doesn't change
+            // (e.g., if a user edits the file locally and re-uploads with the same name)
+            if (e.target.type === 'file') {
+                e.target.value = '';
+            }
+        }
     });
 });
