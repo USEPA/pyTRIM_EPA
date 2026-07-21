@@ -14,6 +14,8 @@ if os.getenv('LOCAL_AWS_PROFILE'):
     boto3.setup_default_session(profile_name=os.getenv('LOCAL_AWS_PROFILE'))
 
 class AppConfig:
+    ENVIRONMENT_TYPE = 'development'
+
     # Template config
     TEMPLATES_AUTO_RELOAD = True
 
@@ -72,6 +74,7 @@ class AppConfig:
 
 
 class ProdConfig(AppConfig):
+    ENVIRONMENT_TYPE = 'production'
     SECRET_KEY = os.getenv('SECRET_KEY', '')
     SECURITY_PASSWORD_SALT = os.getenv('SECURITY_PASSWORD_SALT', '')
 
@@ -83,6 +86,7 @@ class DevConfig(AppConfig):
 
 
 class TestConfig(DevConfig):
+    ENVIRONMENT_TYPE = 'testing'
     TESTING = True
     LOGIN_DISABLED = False
     WTF_CSRF_ENABLED = False

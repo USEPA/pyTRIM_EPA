@@ -1,3 +1,4 @@
+import json
 import utm
 
 
@@ -16,7 +17,7 @@ class CoordinateMapper:
     @classmethod
     def decompose_utm_zone(cls, zone_name):
         """
-        Valid zones are 1A-60Z with no I/O. Case/whitespace insensitive.
+        Valid zones are 1A-60Z with no A/B/I/O/Y/Z. Case/whitespace insensitive.
         """
         if not zone_name:
             raise ValueError(f'Invalid UTM Zone: "{zone_name}"')
@@ -26,8 +27,8 @@ class CoordinateMapper:
             zone_number = cleaned[:-1]
         except IndexError:
             raise ValueError(f'Invalid UTM Zone: "{cleaned}"')
-        
-        if (not zone_letter.isalpha()) or (zone_letter in 'IO'):
+
+        if (not zone_letter.isalpha()) or (zone_letter in 'ABIOYZ'):
             raise ValueError(f'Invalid UTM Zone Letter: "{zone_letter}"')
 
         try:
@@ -36,7 +37,6 @@ class CoordinateMapper:
             raise ValueError(f'Invalid UTM Zone Number: "{zone_number}"')
         if zone_number < 1 or zone_number > 60:
             raise ValueError(f'Invalid UTM Zone Number: "{zone_number}"')
-        
         return (zone_number, zone_letter)
 
     _COORDINATE_MAPPINGS = {
@@ -86,3 +86,17 @@ class CoordinateMapper:
             zone_letter=self._utm_zone_letter
         )
         return CoordinateMapper._RETURN_FORMAT[self._to](converted)
+
+
+# given list of x/y (+utm maybe?) points, ensure that the polygon closes
+def ensure_closed_polygon(points: list[list]):
+    if len(points) >= 3:
+        first_point = json.dumps(points[0])
+        last_point = json.dumps(points[-1])
+        if first_point != last_point:
+            points.append(list(points[0]))
+            return points
+        else:
+            return points
+    else:
+        return points

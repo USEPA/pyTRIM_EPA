@@ -1,0 +1,54 @@
+{
+    "title": "Animal Ingestion Rate",
+    "fields": [
+        {
+            "id": "consumer_id",
+            "data_type": "int",
+            "hidden": true
+        },
+        {
+            "id": "consumer",
+            "label": "Consumer",
+            "data_type": "string",
+            "readonly": true
+        },
+        {
+            "id": "product_id",
+            "data_type": "int",
+            "hidden": true
+        },
+        {
+            "id": "product",
+            "label": "Feed Type",
+            "data_type": "string",
+            "readonly": true
+        },
+        {
+            "id": "rate",
+            "label": "Quantity",
+            "data_type": "float",
+            "min": 0,
+            "step": "any",
+            "allow_empty": true
+        },
+        {
+            "id": "unit",
+            "label": "Unit",
+            "data_type": "string"
+        },
+        {
+            "id": "fraction_contaminated",
+            "label": "Fraction Contaminated",
+            "data_type": "float",
+            "min": 0,
+            "max": 1,
+            "step": "any",
+            "allow_empty": true
+        },
+        {
+            "id": "notes",
+            "label": "Notes",
+            "data_type": "string"
+        }
+    ]
+}

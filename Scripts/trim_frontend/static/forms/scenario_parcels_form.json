@@ -23,7 +23,7 @@
             "label": "UTM Zone",
             "data_type": "string",
             "required": true,
-            "help": "Enter the UTM zone number/letter for the coordinate values in your PLT file; e.g., \"16N\"."
+            "help": "Enter the UTM zone number/letter for the coordinate values in your PLT file; e.g., \"16T\"."
         },
         {
             "id": "parcel_coordinates_description",
@@ -36,7 +36,7 @@
             "label": "File for Deposition Overlay Data",
             "data_type": "file",
             "required": true,
-            "help": "Indicate the .PLT file for data to overlay on the map; e.g., output form AERMOD."
+            "help": "Indicate the .PLT file for data to overlay on the map; e.g., output from AERMOD."
         },
         {
             "id": "deposition_overlay_upload_coordinates_system",
@@ -100,7 +100,7 @@
             "choices": [],
             "default": "FarmFoodChain",
             "required": true,
-            "help": "Indicate the field name showing whether a parcel will eventually be evaluated with exposure from a farm food chain (a Yes/No field). Note: this is not used in TRIM.FaTE. Also note: farm food chains are only allowed for land uses of tilled soil and untilled soil (where later processing after TRIM.FaTE will use soil-to-plant chemical uptake factors; agriculture land uses are treated like any other vegetative parcel and are not where ingestion exposures should occur)."
+            "help": "Indicate the field name showing whether a parcel will eventually be evaluated with exposure from a farm food chain (a Yes/No field). Note: this is not used in TRIM. Also note: farm food chains are only allowed for land uses of tilled soil and untilled soil (where later processing after TRIM will use soil-to-plant chemical uptake factors; agriculture land uses are treated like any other vegetative parcel and are not where ingestion exposures should occur)."
         },
         {
             "id": "parcel_fish_food_field",

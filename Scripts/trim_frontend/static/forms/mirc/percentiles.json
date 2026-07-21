@@ -1,0 +1,201 @@
+{
+    "title": "Percentiles",
+    "fields": [
+        {
+            "id": "human_body_weight_percentile",
+            "label": "Body Weight Percentile",
+            "data_type": "int",
+            "widget": "select",
+            "choices": {
+                "source": "db",
+                "model": "MircPercentile",
+                "value": "id",
+                "label": "name",
+                "exclude": [8]
+            },
+            "default": 7
+        },
+        {
+            "id": "beef_percentile",
+            "label": "Beef",
+            "data_type": "int",
+            "widget": "select",
+            "choices": {
+                "source": "db",
+                "model": "MircPercentile",
+                "value": "id",
+                "label": "name"
+            },
+            "default": 7
+        },
+        {
+            "id": "dairy_percentile",
+            "label": "Dairy",
+            "data_type": "int",
+            "widget": "select",
+            "choices": {
+                "source": "db",
+                "model": "MircPercentile",
+                "value": "id",
+                "label": "name"
+            },
+            "default": 7
+        },
+        {
+            "id": "eggs_percentile",
+            "label": "Eggs",
+            "data_type": "int",
+            "widget": "select",
+            "choices": {
+                "source": "db",
+                "model": "MircPercentile",
+                "value": "id",
+                "label": "name"
+            },
+            "default": 7
+        },
+        {
+            "id": "pork_percentile",
+            "label": "Pork",
+            "data_type": "int",
+            "widget": "select",
+            "choices": {
+                "source": "db",
+                "model": "MircPercentile",
+                "value": "id",
+                "label": "name"
+            },
+            "default": 7
+        },
+        {
+            "id": "poultry_percentile",
+            "label": "Poultry",
+            "data_type": "int",
+            "widget": "select",
+            "choices": {
+                "source": "db",
+                "model": "MircPercentile",
+                "value": "id",
+                "label": "name"
+            },
+            "default": 7
+        },
+        {
+            "id": "exposed_fruit_percentile",
+            "label": "Exposed Fruit",
+            "data_type": "int",
+            "widget": "select",
+            "choices": {
+                "source": "db",
+                "model": "MircPercentile",
+                "value": "id",
+                "label": "name"
+            },
+            "default": 7
+        },
+        {
+            "id": "protected_fruit_percentile",
+            "label": "Protected Fruit",
+            "data_type": "int",
+            "widget": "select",
+            "choices": {
+                "source": "db",
+                "model": "MircPercentile",
+                "value": "id",
+                "label": "name"
+            },
+            "default": 7
+        },
+        {
+            "id": "exposed_vegetable_percentile",
+            "label": "Exposed Vegetable",
+            "data_type": "int",
+            "widget": "select",
+            "choices": {
+                "source": "db",
+                "model": "MircPercentile",
+                "value": "id",
+                "label": "name"
+            },
+            "default": 7
+        },
+        {
+            "id": "protected_vegetable_percentile",
+            "label": "Protected Vegetable",
+            "data_type": "int",
+            "widget": "select",
+            "choices": {
+                "source": "db",
+                "model": "MircPercentile",
+                "value": "id",
+                "label": "name"
+            },
+            "default": 7
+        },
+        {
+            "id": "root_percentile",
+            "label": "Root Vegetable",
+            "data_type": "int",
+            "widget": "select",
+            "choices": {
+                "source": "db",
+                "model": "MircPercentile",
+                "value": "id",
+                "label": "name"
+            },
+            "default": 7
+        },
+        {
+            "id": "fish_percentile",
+            "label": "Fish",
+            "data_type": "int",
+            "widget": "select",
+            "choices": {
+                "source": "db",
+                "model": "MircPercentile",
+                "value": "id",
+                "label": "name"
+            },
+            "default": 7
+        },
+        {
+            "id": "soil_percentile",
+            "label": "Soil",
+            "data_type": "int",
+            "widget": "select",
+            "choices": {
+                "source": "db",
+                "model": "MircPercentile",
+                "value": "id",
+                "label": "name"
+            },
+            "default": 7
+        },
+        {
+            "id": "water_percentile",
+            "label": "Water",
+            "data_type": "int",
+            "widget": "select",
+            "choices": {
+                "source": "db",
+                "model": "MircPercentile",
+                "value": "id",
+                "label": "name"
+            },
+            "default": 7
+        },
+        {
+            "id": "breast_milk_percentile",
+            "label": "Breast Milk",
+            "data_type": "int",
+            "widget": "select",
+            "choices": {
+                "source": "db",
+                "model": "MircPercentile",
+                "value": "id",
+                "label": "name"
+            },
+            "default": 7
+        }
+    ]
+}

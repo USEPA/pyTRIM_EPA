@@ -1,0 +1,216 @@
+
+<form id="permissions-form" action="{{ update_url }}" method="POST" class="mt-3 mb-4">
+    <table class="table table-striped">
+        <thead>
+            <tr class="headers">
+                <th>User</th>
+                <th>Access Level</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <input type="submit" class="d-none" />
+</form>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    var form = $('#permissions-form');
+    var dt = null;
+
+    LoadingScreen.show('loadingPermissions');
+    try {
+        var data = [
+        {% for u in users|sort(attribute='email') %}
+            {% set perm = 'none' %}
+            {% if u.can('manage', access_object) %}
+                {% set perm = 'manage' %}
+            {% elif u.can('edit', access_object) %}
+                {% set perm = 'edit' %}
+            {% elif u.can('view', access_object) %}
+                {% set perm = 'view' %}
+            {% endif %}
+            {user: '{{ u.email }}', permission: '{{ perm }}'},
+        {% endfor %}
+        ];
+
+        function makeRadioBtn(idx, lbl, val, checked, readonly) {
+            var d = document.createElement('div');
+            d.className = 'custom-control custom-radio d-inline-block mr-2';
+
+            var i = document.createElement('input');
+            i.type = 'radio';
+            i.className = 'custom-control-input';
+            i.id = 'access_level-' + idx + '-' + val;
+            i.name = 'access_level-' + idx;
+            i.setAttribute('value', val);
+            i.value = val;
+            if (checked) {
+                i.setAttribute('checked', 'checked');
+                i.checked = true;
+            }
+            if (readonly) {
+                i.disabled = true;
+            }
+            d.appendChild(i);
+
+            var l = document.createElement('label');
+            l.className = 'custom-control-label';
+            l.htmlFor = 'access_level-' + idx + '-' + val;
+            l.innerText = lbl;
+            d.appendChild(l);
+
+            return d;
+        }
+
+        // Initialize base data
+        var dt = form.find('table').DataTable({
+            destroy: true, // override previous initialization
+            dom: 'tp', // only show the table and paging controls
+            data: data,
+            order: [[0, 'asc']],
+            columns: [
+                {
+                    title: 'User',
+                    data: 'user',
+                    render: function(data, type, row, meta) {
+                        if (type == "sort" || type == 'type') {
+                            return data; // so we can sort properly
+                        }
+                        var i = document.createElement('input');
+                        i.type = 'text';
+                        i.readOnly = true;
+                        i.className = 'form-control-plaintext p-0';
+                        i.setAttribute('value', data);
+                        i.value = data;
+
+                        return i.outerHTML;
+                    }
+                },
+                {
+                    title: 'Access Level',
+                    orderable: false,
+                    data: 'permission',
+                    render: function(data, type, row, meta) {
+                        if (type == "sort" || type == 'type') {
+                            return data; // so we can sort properly
+                        }
+                        var d = document.createElement('div');
+
+                        var r = makeRadioBtn(
+                            meta.row, 'None', 'none',
+                            'none' == data,
+                            row.user == '{{ current_user.email }}'
+                        );
+                        d.appendChild(r);
+
+                        r = makeRadioBtn(
+                            meta.row, 'View', 'view',
+                            'view' == data,
+                            row.user == '{{ current_user.email }}'
+                        );
+                        d.appendChild(r);
+
+                        r = makeRadioBtn(
+                            meta.row, 'Edit', 'edit',
+                            'edit' == data,
+                            row.user == '{{ current_user.email }}'
+                        );
+                        d.appendChild(r);
+
+                        r = makeRadioBtn(
+                            meta.row, 'Manage', 'manage',
+                            'manage' == data,
+                            row.user == '{{ current_user.email }}'
+                        );
+                        d.appendChild(r);
+
+                        return d.outerHTML;
+                    }
+                }
+            ]
+        });
+    }
+    finally {
+        LoadingScreen.hide('loadingPermissions');
+    }
+
+    form.submit(function(e) {
+        e.preventDefault();
+
+        var data = {};
+        $.each(dt.data(), function(i, val) {
+            if (val.user != '{{ current_user.email }}') {
+                data[val.user] = val.permission;
+            }
+        });
+
+        form.find('input').removeClass('is-invalid');
+        form.find('.invalid-feedback').html('');
+
+        function handleErrors(errors, pref) {
+            pref = pref || '';
+            $.each(errors, function(name, err) {
+                if (Array.isArray(err) && typeof err[0] == typeof {}) {
+                    $.each(err, function(i, subErrors) {
+                        handleErrors(subErrors, name + '-' + i + '-');
+                    });
+                }
+                else {
+                    form.find('[name="' + pref + name + '"]')
+                        .addClass('is-invalid')
+                        .next('.invalid-feedback').html(
+                            err.join('<br />')
+                        );
+                }
+            });
+        }
+
+        function updateAccessModel() {
+            LoadingScreen.show('updateAccessModel');
+            $.ajax({
+                url: form.attr('action'),
+                method: form.attr('method'),
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    'permissions': data
+                })
+            }).done(function(data) {
+                // console.log(data)
+            }).fail(function(data) {
+                var error = data.responseJSON;
+                form_errs = error.message.form_errors;
+                if (form_errs) {
+                    if (JSON.stringify(form_errs).indexOf('"csrf_token":') > -1) {
+                        $.when(flask.API.call({
+                            endpoint: 'auth_api.get_csrf'
+                        })).then(function(csrf) {
+                            $('[name="csrf_token"]').val(csrf.token);
+                            updateAccessModel();
+                        });
+                    }
+                    else {
+                        handleErrors(form_errs);
+                    }
+                }
+            }).always(function() {
+                LoadingScreen.hide('updateAccessModel');
+            });
+        }
+        updateAccessModel();
+    });
+
+    form.on('change', '[type="radio"]', function() {
+        var me = $(this);
+        var tr = me.closest('tr');
+        var row = dt.row(tr);
+
+        var data = row.data();
+        data.permission = $('[name="' + me.attr('name') + '"]:checked').val();
+
+        row.invalidate();
+        dt.draw();
+    });
+});
+</script>

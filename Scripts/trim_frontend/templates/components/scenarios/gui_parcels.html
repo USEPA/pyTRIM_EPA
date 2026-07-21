@@ -197,18 +197,19 @@
         window.receptorOverlayGroup = L.layerGroup();
 
 		if (presignedGeojsonUrl !== undefined) {
-			if (responseData.file_metadata.errors === undefined || responseData.file_metadata.errors.length == 0) {
+			if (responseData.file_metadata?.errors === undefined || responseData.file_metadata?.errors.length == 0) {
 				// fetch the data
 				TRIM.api.hitUrl(presignedGeojsonUrl, function(presignedSuccess, presignedResponse) {
 					let overlayGridPoints = [];
-					for (let i = 0 ; i < presignedResponse.features.length; i++) {
-						let el = presignedResponse.features[i];
-						let point = [ el.geometry.coordinates[1], el.geometry.coordinates[0] ];
-						overlayGridPoints.push(point);
-						let colorForDisplay = "#000000"; // black
-						var marker = L.circleMarker(point, { pmIgnore: true, radius: .2, stroke: true, color: colorForDisplay}).addTo(receptorOverlayGroup);
-					}
-
+                    if (presignedResponse != null) {
+                        for (let i = 0 ; i < presignedResponse.features.length; i++) {
+                            let el = presignedResponse.features[i];
+                            let point = [ el.geometry.coordinates[1], el.geometry.coordinates[0] ];
+                            overlayGridPoints.push(point);
+                            let colorForDisplay = "#000000"; // black
+                            var marker = L.circleMarker(point, { pmIgnore: true, radius: .2, stroke: true, color: colorForDisplay}).addTo(receptorOverlayGroup);
+                        }
+                    }
 
 					receptorOverlayGroup.on("add", function() { receptorOverlayShowing = true; });
 					receptorOverlayGroup.on("remove", function() { receptorOverlayShowing = false; });
@@ -220,12 +221,15 @@
 				});
 
 				mapLayers.addOverlay(receptorOverlayGroup, "AERMOD Receptors");
-			} else {
+			}
+            else {
 				// I don't think this'll ever actually happen
 				$("<h4/>").html("Errors with generated file:").appendTo(errorDisplayArea);
-				for (let i = 0 ; i < responseData.file_metadata.errors.length ; i++) {
-					$("<li/>").html(responseData.file_metadata.errors[i]).appendTo(errorDisplayArea);
-				}
+                if (responseData.file_metadata?.errors != undefined) {
+                    for (let i = 0 ; i < responseData.file_metadata.errors.length ; i++) {
+                        $("<li/>").html(responseData.file_metadata.errors[i]).appendTo(errorDisplayArea);
+                    }
+                }
 			}
 		}
 	};
@@ -658,10 +662,10 @@
 			}
 		}
 
-		// zones are 1A-60Z with no I/O. case/whitespace insensitive.
+		// zones are 1A-60Z with no A/B/I/O/Y/Z. case/whitespace insensitive.
 		function isValidUtmZone(z) {
 			let cleanedZone = z.trim().replaceAll(" ", "").toUpperCase();
-			const regex = /^([1-9]|[1-5][0-9]|60)([A-HJ-NP-Z])$/gm;
+			const regex = /^([1-9]|[1-5][0-9]|60)([C-HJ-NP-X])$/gm;
 
 			return (regex.exec(cleanedZone) != null);
 		}
@@ -693,7 +697,7 @@
 					return false;
 				} else if (coordsSystem.val() == "UTM") {
 					if (!isValidUtmZone(utmZone.val())) {
-						alert('Please enter a valid UTM zone (e.g. 16T, 32A, etc.).');
+						alert('Please enter a valid UTM zone (e.g. 16T, 13R, etc.).');
 						return false;
 					}
 				}
@@ -764,7 +768,7 @@
 					return false;
 				} else if (depoOverlayCoordsSystem.val() == "UTM") {
 					if (!isValidUtmZone(depoOverlayUtmZone.val())) {
-						alert('Please enter a valid UTM zone (e.g. 16T, 32A, etc.).');
+						alert('Please enter a valid UTM zone (e.g. 16T, 13R, etc.).');
 						return false;
 					}
 				}
@@ -847,7 +851,12 @@
 				LoadingScreen.hide('check_overlay_status');
 
 				if (!success) {
-					alert('An error occurred while fetching overlay data');
+                    if ('{{env_type}}' == 'production') {
+					    alert('An error occurred while fetching overlay data');
+                    }
+                    else {
+					    console.log('An error occurred while fetching overlay data');
+                    }
 				} else {
 					if (success) {
 						installDepositionOverlayOntoMap(responseData)
@@ -862,7 +871,12 @@
 				LoadingScreen.hide('check_aermod_receptors_file');
 
 				if (!success) {
-					alert('An error occurred while fetching aermod receptors');
+                    if ('{{env_type}}' == 'production') {
+					    alert('An error occurred while fetching aermod receptors');
+                    }
+                    else {
+                        console.log('An error occurred while fetching aermod receptors');
+                    }
 				} else {
 					if (success) {
 						// installDepositionOverlayOntoMap(responseData)

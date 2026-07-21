@@ -11,6 +11,7 @@ __all__ = ['ureg', 'as_quantity', 'is_number', 'NoneParameter']
 
 
 ureg = pint.UnitRegistry(autoconvert_offset_to_baseunit=True)
+pint.set_application_registry(ureg)
 
 EMPERICALLY_DIMENSIONLESS = [
     '[length] ** 3 / [mass]',
