@@ -704,7 +704,6 @@ def safe_save_output(output_data, scn=None, filetype='csv'):
                 if filetype == 'csv':
                     fname += '.csv'
                     df.to_csv(fname)
-                    outfiles[abbr] = fname
                 else:
                     fname += '.xlsx'
                     if data.get('split_chems'):
@@ -713,6 +712,7 @@ def safe_save_output(output_data, scn=None, filetype='csv'):
                         writer = pd.ExcelWriter(fname, engine='xlsxwriter')
                         df.to_excel(writer)
                         writer.close()
+                outfiles[abbr] = fname
             except Exception:
                 print(f'{20 * ">"} Output write exception writing {filetype} file for {abbr} data:\n{e}')
     except Exception as e:
