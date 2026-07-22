@@ -107,14 +107,6 @@ def json_form(src):
 
 def create_dynamic_form(src, cls):
     class DynamicForm(cls):
-        @classmethod
-        def build_class(d_cls):
-            if not hasattr(d_cls, '_json_data') or current_app.debug:
-                setattr(d_cls, '_json_data', assemble_json_form(src))
-            if d_cls._json_data is None:
-                return None
-            return create_dynamic_form_from_json(d_cls._json_data, cls)
-
         def __new__(d_cls, *args, **kwargs):
             if not hasattr(d_cls, '_json_data') or current_app.debug:
                 current_app.logger.info(
@@ -316,6 +308,13 @@ def create_dynamic_field_from_json(field_def):
     opt = field_def.get('allow_empty', False)
     if opt:
         field_props['validators'].append(Optional())
+    if ((not req) and opt):
+        empty_vals = [None, '', 'None']
+        if 'coerce' in field_props:
+            base_coerce = field_props['coerce']
+            field_props['coerce'] = lambda val: None if (val in empty_vals) else base_coerce(val)
+        if 'choices' in field_props:
+            field_props['choices'].extend([(c, c) for c in empty_vals])
 
     # Field description text
     d = field_def.get('description', '')

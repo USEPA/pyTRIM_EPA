@@ -27,8 +27,20 @@ def create_risk_scenario():
             'form_errors': form.errors
         }, 400)
 
-    s = MircScenarioService.from_form(form, owner=current_user)
-    db.session.commit()
+    try:
+        s = MircScenarioService.from_form(form, owner=current_user)
+        db.session.commit()
+    except Exception:
+        import traceback
+        traceback.print_exc()
+        raise
+
+    if s.id is None:
+        raise api.Exception({
+            'form_errors': {
+                'name': ['Invalid name (possibly a duplicate?)']
+            }
+        })
 
     return api.Result({'scenario': s.as_serializable()})
 
@@ -52,11 +64,14 @@ def update_risk_scenario(id):
             "You don't have permission to edit this scenario", 403
         )
 
-    if request.json is not None:
-        form = ScenarioForm(
-            formdata=MultiDict(dict(request.json))
-        )
-    else:
+    try:
+        if request.json is not None:
+            form = ScenarioForm(
+                formdata=MultiDict(dict(request.json))
+            )
+        else:
+            form = ScenarioForm()
+    except Exception:
         form = ScenarioForm()
 
     if not form.validate_on_submit():
@@ -64,8 +79,13 @@ def update_risk_scenario(id):
             'form_errors': form.errors
         }, 400)
 
-    MircScenarioService(scenario).update_from_form(form)
-    db.session.commit()
+    try:
+        MircScenarioService(scenario).update_from_form(form)
+        db.session.commit()
+    except Exception:
+        import traceback
+        traceback.print_exc()
+        raise
 
     return api.Result({})
 
@@ -78,7 +98,7 @@ def get_risk_scenarios():
     if s:
         s = [
             x.as_serializable() for x in s
-            if current_user.can('view', s)
+            if current_user.can('view', x)
         ]
 
     return api.Result({'scenarios': s})

@@ -26,7 +26,6 @@ def upgrade():
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.ForeignKeyConstraint(['parent_id'], ['mirc_scenario.id'], ),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('name')
     )
     op.create_table('mirc_scenario_permissions',
     sa.Column('user_id', sa.Integer(), nullable=False),

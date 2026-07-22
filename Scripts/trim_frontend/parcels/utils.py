@@ -1008,20 +1008,23 @@ def delete_parcel_contents(del_parcel):
 # initialization/creation of the entity (i.e. compartment). In these cases we can get the default values from
 # the relevant flask form template (json) from the frontend.
 def get_default_value_from_json_form(form_name, parameter_name):
-    abiotic = ScenarioAbioticPropertiesForm.build_class()
-    parcels = ScenarioParcelsForm.build_class()
+    abiotic_form = ScenarioAbioticPropertiesForm()
+    parcels_form = ScenarioParcelsForm()
     json_forms = {
-        'Abiotic_Air': getattr(abiotic, "AirAbioticTable"),
-        'Abiotic_Surface_Soil': getattr(abiotic, "SurfaceSoilAbioticTable"),
-        'Abiotic_Tilled_Soil': getattr(abiotic, "SurfaceSoilAbioticTable"),
-        'Abiotic_Root_Zone': getattr(abiotic, "RootSoilAbioticTable"),
-        'Abiotic_Vadose_Zone': getattr(abiotic, "VadoseSoilAbioticTable"),
-        'Abiotic_Groundwater': getattr(abiotic, "GWSoilAbioticTable"),
-        'Parcels_Props': getattr(parcels, "mapTable"),
+        'Abiotic_Air': getattr(abiotic_form, "AirAbioticTable"),
+        'Abiotic_Surface_Soil': getattr(abiotic_form, "SurfaceSoilAbioticTable"),
+        'Abiotic_Tilled_Soil': getattr(abiotic_form, "SurfaceSoilAbioticTable"),
+        'Abiotic_Root_Zone': getattr(abiotic_form, "RootSoilAbioticTable"),
+        'Abiotic_Vadose_Zone': getattr(abiotic_form, "VadoseSoilAbioticTable"),
+        'Abiotic_Groundwater': getattr(abiotic_form, "GWSoilAbioticTable"),
+        'Parcels_Props': getattr(parcels_form, "mapTable")
     }
     form_obj = json_forms[form_name]
-    form_class = form_obj.kwargs['form_class']
-    def_val = getattr(form_class, parameter_name).kwargs["default"]
+    try:
+        def_val = getattr(form_obj, parameter_name).default
+    except Exception as e:
+        print(e)
+        def_val = None
     return def_val
 
 

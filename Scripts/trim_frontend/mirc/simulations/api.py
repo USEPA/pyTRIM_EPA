@@ -39,6 +39,20 @@ def create_simulation(trim_scenario_id):
 
 
 @mirc_simulation_api.route(
+    '/api/scenario/<int:trim_scenario_id>/mirc/simulation'
+)
+@login_required
+def get_simulations(trim_scenario_id):
+    trim_scenario = ScenarioService.get(trim_scenario_id)
+    if not current_user.can('view', trim_scenario):
+        abort(403)
+
+    return api.Result({
+        'simulations': [s.as_serializable() for s in trim_scenario.mirc_simulations]
+    })
+
+
+@mirc_simulation_api.route(
     '/api/scenario/<int:trim_scenario_id>/mirc/simulation/<int:simulation_id>'
 )
 @login_required
@@ -66,7 +80,12 @@ def get_results(trim_scenario_id, simulation_id):
     f = request.args.get('format', 'json')
     if f == 'xlsx':
         with tempfile.TemporaryDirectory() as tmpdir:
-            report = make_report(results)
+            try:
+                report = make_report(results)
+            except Exception:
+                import traceback
+                traceback.print_exc()
+                raise
 
             if not isinstance(report, list):
                 report = [report]
@@ -77,7 +96,7 @@ def get_results(trim_scenario_id, simulation_id):
                 for i, df in enumerate(report, start=1):
                     df.to_excel(writer, sheet_name=f'Sheet{i}', index=False)
 
-            return filepath
+            return api.FileResult(filepath)
     else:
         from trim_db.schema.utils.serialize import serialize
         return serialize(results)

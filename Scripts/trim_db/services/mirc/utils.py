@@ -1,4 +1,4 @@
-from ...schema.mirc.simulations.models import MircSimulationParameter
+from ...schema.mirc.parameters.models import MircParameter
 
 
 def update_parameter(
@@ -63,9 +63,10 @@ def update_parameter(
 
     if (
         not hasattr(parameter, 'scenario')
+        or parameter.scenario == None
         or parameter.scenario.id != scenario.id
     ):
-        parameter = MircSimulationParameter(
+        parameter = MircParameter(
             scenario=scenario,
             chemical=params.chemical,
             media=params.media,
