@@ -107,6 +107,14 @@ def json_form(src):
 
 def create_dynamic_form(src, cls):
     class DynamicForm(cls):
+        @classmethod
+        def build_class(d_cls):
+            if not hasattr(d_cls, '_json_data') or current_app.debug:
+                setattr(d_cls, '_json_data', assemble_json_form(src))
+            if d_cls._json_data is None:
+                return None
+            return create_dynamic_form_from_json(d_cls._json_data, cls)
+
         def __new__(d_cls, *args, **kwargs):
             if not hasattr(d_cls, '_json_data') or current_app.debug:
                 current_app.logger.info(

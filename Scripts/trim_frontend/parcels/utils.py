@@ -1008,31 +1008,22 @@ def delete_parcel_contents(del_parcel):
 # initialization/creation of the entity (i.e. compartment). In these cases we can get the default values from
 # the relevant flask form template (json) from the frontend.
 def get_default_value_from_json_form(form_name, parameter_name):
+    abiotic = ScenarioAbioticPropertiesForm.build_class()
+    parcels = ScenarioParcelsForm.build_class()
     json_forms = {
-        'Abiotic_Air': ScenarioAbioticPropertiesForm.__getattribute__(
-            ScenarioAbioticPropertiesForm, "AirAbioticTable"
-        ),
-        'Abiotic_Surface_Soil': ScenarioAbioticPropertiesForm.__getattribute__(
-            ScenarioAbioticPropertiesForm, "SurfaceSoilAbioticTable"
-        ),
-        'Abiotic_Tilled_Soil': ScenarioAbioticPropertiesForm.__getattribute__(
-            ScenarioAbioticPropertiesForm, "SurfaceSoilAbioticTable"
-        ),
-        'Abiotic_Root_Zone': ScenarioAbioticPropertiesForm.__getattribute__(
-            ScenarioAbioticPropertiesForm, "RootSoilAbioticTable"
-        ),
-        'Abiotic_Vadose_Zone': ScenarioAbioticPropertiesForm.__getattribute__(
-            ScenarioAbioticPropertiesForm, "VadoseSoilAbioticTable"
-        ),
-        'Abiotic_Groundwater': ScenarioAbioticPropertiesForm.__getattribute__(
-            ScenarioAbioticPropertiesForm, "GWSoilAbioticTable"
-        ),
-        'Parcels_Props': getattr(ScenarioParcelsForm, "mapTable")
+        'Abiotic_Air': getattr(abiotic, "AirAbioticTable"),
+        'Abiotic_Surface_Soil': getattr(abiotic, "SurfaceSoilAbioticTable"),
+        'Abiotic_Tilled_Soil': getattr(abiotic, "SurfaceSoilAbioticTable"),
+        'Abiotic_Root_Zone': getattr(abiotic, "RootSoilAbioticTable"),
+        'Abiotic_Vadose_Zone': getattr(abiotic, "VadoseSoilAbioticTable"),
+        'Abiotic_Groundwater': getattr(abiotic, "GWSoilAbioticTable"),
+        'Parcels_Props': getattr(parcels, "mapTable"),
     }
     form_obj = json_forms[form_name]
     form_class = form_obj.kwargs['form_class']
-    def_val = form_class.__getattribute__(form_class, parameter_name).kwargs["default"]
+    def_val = getattr(form_class, parameter_name).kwargs["default"]
     return def_val
+
 
 
 def update_soil_thickness(p, comp_name, layer_name, thickness):
