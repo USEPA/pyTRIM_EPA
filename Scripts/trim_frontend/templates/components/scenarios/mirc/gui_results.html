@@ -1,31 +1,37 @@
 
 <div id="mirc-results-gui">
-    <div class="container-fluid px-0">
-        <button type="button" id="add-simulation" class="btn btn-secondary py-1 mb-2 float-right"
-        >
-            <i class="fa fa-plus"></i>&nbsp;
-            New Risk Simulation
-        </button>
+    <div class="container-fluid px-0 text-right mb-3">
+        <a href="{{ url_for('mirc_scenario.view_risk_scenarios') }}" target="_blank">
+            <i class="fa fa-eye mr-1"></i>
+            View Exposure Profiles
+        </a>
     </div>
 
-    <div class="form-group mb-3">
-        <select id="simulation-id"
-            class="form-control"
-            style="max-width: 100%;"
-            {% if not scenario.mirc_simulations %}disabled="disabled"{% endif %}
-        >
-            {% for sim in scenario.mirc_simulations %}
-                <option value="{{ sim.id }}">
-                    {{
-                        sim.name + ' - ' +
-                        (sim.chemical.hap_name or sim.chemical.name) + ' (' +
-                        sim.chemical.cas_number + ')'
-                    }}
-                </option>
-            {% else %}
-                <option value="">No Simulations Created</option>
-            {% endfor %}
-        </select>
+    <div class="form-group mb-4">
+        <div class="input-group">
+            <select id="simulation-id"
+                class="form-control custom-select"
+                style="max-width: 100%;"
+                {% if not scenario.mirc_simulations %}disabled="disabled"{% endif %}
+            >
+                {% for sim in scenario.mirc_simulations|sort(attribute='id') %}
+                    <option value="{{ sim.id }}">
+                        {{
+                            sim.name + ' - ' +
+                            (sim.chemical.hap_name or sim.chemical.name) + ' (' +
+                            sim.chemical.cas_number + ')'
+                        }}
+                    </option>
+                {% else %}
+                    <option value="">No Simulations Created</option>
+                {% endfor %}
+            </select>
+            <div class="input-group-append">
+                <button type="button" id="add-simulation" class="btn btn-secondary" title="Add Simulation">
+                    <i class="fa fa-plus"></i>
+                </button>
+            </div>
+        </div>
     </div>
 
     <div id="mirc-results-desc">
@@ -39,6 +45,11 @@
                     style="max-width: 100%;"
                     value="Loading ..."
                 />
+            </div>
+            <div class="col-auto pr-2">
+                <a id="delete-simulation" class="btn btn-sm btn-outline-danger" title="Delete">
+                    <i class="fa fa-trash mr-1"></i> Delete Simulation
+                </a>
             </div>
         </div>
         <div class="form-group form-row mb-1">
@@ -238,6 +249,16 @@ onDomLoad(function() {
     }
 
     function updateMeta(meta) {
+        if (meta._id == undefined) {
+            $('#delete-simulation').attr('href', '');
+        }
+        else {
+            $('#delete-simulation').attr(
+                'href',
+                "{{ url_for('mirc_simulation_api.delete_simulation', trim_scenario_id=scenario.id, id=0) }}"
+                    .replace('/0', '/' + meta._id)
+            );
+        }
         $('#fish-pathway').val(meta.fishPathway);
 
         var chemical = meta.chemical || {};
@@ -433,7 +454,7 @@ onDomLoad(function() {
                 td.innerText = 'N/A';
             }
             else {
-                td.innerText = asScientific(hq.value, 4);
+                td.innerText = asScientific(hq, 4);
             }
             tr.appendChild(td);
 
@@ -445,7 +466,7 @@ onDomLoad(function() {
                 td.innerText = 'N/A';
             }
             else {
-                td.innerText = asScientific(r.value, 4);
+                td.innerText = asScientific(r, 4);
             }
             tr.appendChild(td);
 
@@ -593,7 +614,7 @@ onDomLoad(function() {
                         if (hq == null) {
                             return 'N/A';
                         }
-                        return asScientific(hq.value, 4);
+                        return asScientific(hq, 4);
                     }
                 },
                 {
@@ -608,7 +629,7 @@ onDomLoad(function() {
                         if (risk == null) {
                             return 'N/A';
                         }
-                        return asScientific(risk.value, 4);
+                        return asScientific(risk, 4);
                     }
                 }
             ]
@@ -729,6 +750,7 @@ onDomLoad(function() {
             }
 
             i = info.risk[age].adjusted_intake;
+            iu = '';
             if (i == null) {
                 i = info.risk[age].intake;
             }
@@ -736,6 +758,7 @@ onDomLoad(function() {
                 i = 0;
             }
             else {
+                // iu = ' ' + i.unit;
                 i = i.value;
             }
 
@@ -744,7 +767,7 @@ onDomLoad(function() {
                 hq = 0;
             }
             else {
-                hq = hq.value;
+                hq = hq;
             }
 
             rf = info.risk[age].risk_factor;
@@ -752,11 +775,12 @@ onDomLoad(function() {
                 rf = 0;
             }
             else {
-                rf = rf.value;
+                rf = rf;
             }
 
             return {
                 intake: i,
+                intakeUnits: iu,
                 hazard: hq,
                 risk: rf
             };
@@ -912,7 +936,7 @@ onDomLoad(function() {
                         addName = 'LADD';
                     }
                     content = (
-                        '<b>' + addName + ':</b>&nbsp;' + asScientific(pData.intake, 4)
+                        '<b>' + addName + ':</b>&nbsp;' + asScientific(pData.intake, 4) + pData.intakeUnits
                         + '<br/><b>Hazard Quotient:</b>&nbsp;' +  asScientific(pData.hazard, 4)
                         + '<br/><b>Cancer Risk:</b>&nbsp;' +  asScientific(pData.risk, 4)
                     );
@@ -1045,10 +1069,14 @@ onDomLoad(function() {
             try {
                 var data = JSON.parse(this.responseText);
                 simulationSelector.empty();
-                for (var sim of data.simulations) {
+                var simulations = (data.simulations || []).sort((a, b) => a.id - b.id);
+                for (var sim of simulations) {
                     simulationSelector.append(
                         `<option value="${sim.id}">${sim.name} - ${sim.chemical.name} (${sim.chemical.cas_number})</option>`
                     );
+                }
+                if (thenChangeTo == undefined && simulations.length > 0) {
+                    thenChangeTo = simulations[0].id;
                 }
                 if (thenChangeTo != undefined) {
                     simulationSelector.val(thenChangeTo).change();
@@ -1090,6 +1118,9 @@ onDomLoad(function() {
                 if (data?.simulation_id != undefined) {
                     refreshSimulations(data.simulation_id);
                 }
+                else if (data?.simulation_ids != undefined) {
+                    refreshSimulations(data.simulation_ids[0]);
+                }
             })
             .always(function() {
                 LoadingScreen.hide('saveSimulation');
@@ -1113,6 +1144,16 @@ onDomLoad(function() {
             initSimulationForm();
             $('#simulation-form-modal').modal('show');
         }
+    });
+
+    $('#delete-simulation').on('click', function(e) {
+        e.preventDefault();
+        $.ajax({
+            url: this.href,
+            method: 'DELETE'
+        }).then(function() {
+            refreshSimulations();
+        });
     });
 });
 </script>

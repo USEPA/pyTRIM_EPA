@@ -21,6 +21,7 @@
             "label": "Chemical",
             "data_type": "int",
             "widget": "select",
+            "multiselect": true,
             "choices": {
                 "source": "db",
                 "model": "Chemical",

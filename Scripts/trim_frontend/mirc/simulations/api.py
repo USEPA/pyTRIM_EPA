@@ -30,12 +30,15 @@ def create_simulation(trim_scenario_id):
     except Exception:
         form = SimulationForm()
 
-    sim = MircSimulationService.from_form(trim_scenario, form)
+    simulations = MircSimulationService.from_form(trim_scenario, form)
     db.session.commit()
 
-    return {
-        "simulation_id": sim.id
-    }
+    MircSimulationService.update_simulation_names(trim_scenario)  # make sure numbering is correct
+
+    if len(simulations) == 1:
+        return {'simulation_id': simulations[0].id}
+    else:
+        return {'simulation_ids': [s.id for s in simulations]}
 
 
 @mirc_simulation_api.route(
@@ -100,3 +103,26 @@ def get_results(trim_scenario_id, simulation_id):
     else:
         from trim_db.schema.utils.serialize import serialize
         return serialize(results)
+
+
+@mirc_simulation_api.route(
+    '/api/scenario/<int:trim_scenario_id>/mirc/simulation/<int:id>', methods=['DELETE']
+)
+@login_required
+def delete_simulation(trim_scenario_id, id):
+    trim_scenario = ScenarioService.get(trim_scenario_id)
+    if not current_user.can('view', trim_scenario):
+        abort(403)
+
+    simulation = MircSimulationService.get(id)
+    if not simulation:
+        return api.Result({
+            'success': True
+        })
+
+    MircSimulationService.delete(simulation)
+    MircSimulationService.update_simulation_names(trim_scenario)  # make sure numbering is correct
+
+    return api.Result({
+        'success': True
+    })

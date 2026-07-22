@@ -43,7 +43,8 @@
                 priority=(
                     [] if 'assessment' not in kwargs
                     else kwargs['assessment'].scenario.priority_chemicals
-                )
+                ),
+                allow_multiple=True
             ) }}
             {{ render_feedback(form.chemical) }}
         </div>
