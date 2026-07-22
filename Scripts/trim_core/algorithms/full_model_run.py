@@ -154,19 +154,17 @@ def make_transition_matrix(scenario):
                 if hasattr(cof, 'dimensionality'):
                     cou = str(cof.units)
                     cof = cof.magnitude
-            if not cou and is_soil:
-                cou = 'g / g'  # HACKY
 
             # denominator in concentration calculation
-            if (
+            if comp.media.isa("Surface_Water") or comp.media.isa("Groundwater"):
+                # note that denom must be in L
+                denom = "volume_L"
+            elif (
                 comp.media.isa("Abiotic")
                 or comp.media.isa("$Leaf")
                 or comp.media.isa("$Leaf_Particle")
             ):
                 denom = "volume"
-            elif comp.media.isa("Surface_Water") or comp.media.isa("Groundwater"):
-                # note that denom must be in L
-                denom = "volume_L"
             else:
                 denom = "mass"  # default denom is mass
 
@@ -702,7 +700,6 @@ def safe_save_output(output_data, scn=None, filetype='csv'):
                 if filetype == 'csv':
                     fname += '.csv'
                     df.to_csv(fname)
-                    outfiles[abbr] = fname
                 else:
                     fname += '.xlsx'
                     if data.get('split_chems'):
@@ -711,6 +708,7 @@ def safe_save_output(output_data, scn=None, filetype='csv'):
                         writer = pd.ExcelWriter(fname, engine='xlsxwriter')
                         df.to_excel(writer)
                         writer.close()
+                outfiles[abbr] = fname
             except Exception:
                 print(f'{20 * ">"} Output write exception writing {filetype} file for {abbr} data:\n{e}')
     except Exception as e:
