@@ -1028,7 +1028,6 @@ def get_default_value_from_json_form(form_name, parameter_name):
     return def_val
 
 
-
 def update_soil_thickness(p, comp_name, layer_name, thickness):
     soil_ve = p.get_compartment(comp_name).volume_element
 
