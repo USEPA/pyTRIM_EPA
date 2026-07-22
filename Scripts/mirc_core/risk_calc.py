@@ -103,6 +103,12 @@ def assess_risk(
                 logs.append(
                     f"Got body_weight = {body_weight} for {age} in scenario"
                 )
+                if body_weight == 0:
+                    raise ValueError(
+                        f'Invalid Parameter: {body_weight_percentile.name} Body Weight'
+                        f' for "{age.name}" = 0'
+                        f' in Exposure Profile "{scenario.name}"'
+                    )
 
                 IR = IR / body_weight
                 logs.append(f"Adjusted IR = {IR}")
@@ -167,10 +173,10 @@ def assess_risk(
             i = adj if adj is not None else val
             hq = i / RfD
 
-        elcr = None
+        # elcr = None  # We are not reporting risk_factor for individual life stages
         if CSF:
             i = adj if adj is not None else val
-            elcr = i * CSF
+            # elcr = i * CSF
 
         risk_data[age] = {
             'intake': val,

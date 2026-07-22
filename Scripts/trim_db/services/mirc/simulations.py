@@ -687,62 +687,65 @@ class MircSimulationService(GenericService[MircSimulation]):
         else:
             bw = Pmean
 
-        simulation_breakdown = {}
+        try:
+            simulation_breakdown = {
+                p.name.replace(' ', '_'): self._run_single_pathway(p, bw, logs)
+                for p in products
+            }
 
-        simulation_breakdown = {
-            p.name.replace(' ', '_'): self._run_single_pathway(p, bw, logs)
-            for p in products
-        }
+            if with_breast_milk:
+                cumulative_ladd = 0
+                # loop to computed cumulative LADD
+                # that is used to estimate BM concentrations
+                for product, result in simulation_breakdown.items():
+                    r = result['risk']
+                    life_risk = r['Lifetime']
+                    if life_risk:
+                        cumulative_ladd += life_risk.get('intake', 0)
 
-        if with_breast_milk:
-            cumulative_ladd = 0
-            # loop to computed cumulative LADD
-            # that is used to estimate BM concentrations
-            for product, result in simulation_breakdown.items():
-                r = result['risk']
-                life_risk = r['Lifetime']
-                if life_risk:
-                    cumulative_ladd += life_risk.get('intake', 0)
+                simulation_breakdown[bm.name.replace(' ', '_')] = self._run_single_pathway(
+                    bm, bw, logs, maternal_cumulative_ladd=cumulative_ladd
+                )
 
-            simulation_breakdown[bm.name.replace(' ', '_')] = self._run_single_pathway(
-                bm, bw, logs, maternal_cumulative_ladd=cumulative_ladd
-            )
-
-        total = {}
-        for product, results in simulation_breakdown.items():
-            if not results.get('risk'):
-                continue
-            for age, risk_data in results['risk'].items():
-                if not total.get(age):
-                    ureg = scenario.parameters.unit_registry
-                    total[age] = {
-                        'intake': 0 * ureg('mg/day/kg')
-                    }
-                total[age]['intake'] += (risk_data.get('intake') or 0)
-                adj = risk_data.get('adjusted_intake')
-                if adj is not None:
-                    if not total[age].get('adjusted_intake'):
+            total = {}
+            for product, results in simulation_breakdown.items():
+                if not results.get('risk'):
+                    continue
+                for age, risk_data in results['risk'].items():
+                    if not total.get(age):
                         ureg = scenario.parameters.unit_registry
-                        total[age]['adjusted_intake'] = 0 * ureg('mg/day/kg')
-                    total[age]['adjusted_intake'] += adj
+                        total[age] = {
+                            'intake': 0 * ureg('mg/day/kg')
+                        }
+                    total[age]['intake'] += (risk_data.get('intake') or 0)
+                    adj = risk_data.get('adjusted_intake')
+                    if adj is not None:
+                        if not total[age].get('adjusted_intake'):
+                            ureg = scenario.parameters.unit_registry
+                            total[age]['adjusted_intake'] = 0 * ureg('mg/day/kg')
+                        total[age]['adjusted_intake'] += adj
 
-        RfD = scenario.parameters.for_chemical(c).RfD.quantity
-        CSF = scenario.parameters.for_chemical(c).CSF.quantity
-        for age, risk in total.items():
-            if c.mutagenic:
-                i = risk['adjusted_intake']
-            else:
-                i = risk['intake']
+            RfD = scenario.parameters.for_chemical(c).RfD.quantity
+            CSF = scenario.parameters.for_chemical(c).CSF.quantity
+            for age, risk in total.items():
+                if c.mutagenic:
+                    i = risk['adjusted_intake']
+                else:
+                    i = risk['intake']
 
-            if RfD:
-                risk['hazard_quotient'] = i / RfD
-            if CSF and age == 'Lifetime':
-                risk['risk_factor'] = i * CSF
+                if RfD:
+                    risk['hazard_quotient'] = i / RfD
+                if CSF and age == 'Lifetime':
+                    risk['risk_factor'] = i * CSF
 
-        simulation_results = {
-            'total': {'risk': total},
-            **simulation_breakdown
-        }
+            simulation_results = {
+                'total': {'risk': total},
+                **simulation_breakdown
+            }
+        except Exception as e:
+            simulation_results = {
+                'error': str(e)
+            }
 
         return {
             'meta': {

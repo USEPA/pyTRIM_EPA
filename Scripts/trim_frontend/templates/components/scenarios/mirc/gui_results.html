@@ -1023,14 +1023,26 @@ onDomLoad(function() {
             if (format == 'json') {
                 desc.show();
                 header.show();
-                legend.show();
-                chart.show();
-                downloader.show();
-                tbl.show();
                 logs.show();
                 updateMeta(data.meta);
-                updateChart(data);
-                updateTable(data);
+                if (data.results == undefined || data.results.error) {
+                    legend.hide();
+                    chart.hide();
+                    downloader.hide();
+                    tbl.hide();
+                    showErrors([
+                        'Error in simulation; unable to load results.',
+                        (data.results?.error || '')
+                    ]);
+                }
+                else {
+                    legend.show();
+                    chart.show();
+                    downloader.show();
+                    tbl.show();
+                    updateChart(data);
+                    updateTable(data);
+                }
                 updateLog(data.logs);
             }
             ans.resolve(data);
@@ -1040,13 +1052,9 @@ onDomLoad(function() {
             if (data && data.responseJSON && data.responseJSON.message) {
                 msg.push(data.responseJSON.message);
             }
-            var msgDiv = err.find('.text-danger').empty();
-            for (var i = 0; i < msg.length; i++) {
-                msgDiv.append($('<div/>').text(msg[i]));
-            }
+            showErrors(msg);
             desc.show();
             header.show();
-            err.show();
             if (format == 'json') {
                 legend.hide();
                 chart.hide();
@@ -1058,6 +1066,17 @@ onDomLoad(function() {
         }).always(function() {
             LoadingScreen.hide('getResults');
         });
+
+        function showErrors(msg) {
+            var msgDiv = err.find('.text-danger').empty();
+            for (var i = 0; i < msg.length; i++) {
+                if (!msg[i]) {
+                    continue;
+                }
+                msgDiv.append($('<div/>').text(msg[i]));
+            }
+            err.show();
+        }
 
         return ans.promise();
     }
