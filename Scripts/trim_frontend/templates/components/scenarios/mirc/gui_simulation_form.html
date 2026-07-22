@@ -47,6 +47,9 @@
                 allow_multiple=True
             ) }}
             {{ render_feedback(form.chemical) }}
+            <small class="form-text text-muted ml-2">
+                * Note: Selecting multiple chemicals will create one new simulation per selected chemical.
+            </small>
         </div>
     </div>
 
