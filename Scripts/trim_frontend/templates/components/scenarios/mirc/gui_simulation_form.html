@@ -25,7 +25,7 @@
                 <small>
                     <a href="{{ url_for('mirc_scenario.view_risk_scenarios') }}" target="_blank">
                         <i class="fa fa-edit mr-1"></i>
-                        Create or Edit Risk Scenarios
+                        Create or Edit Exposure Profiles
                     </a>
                 </small>
             </div>
@@ -43,9 +43,13 @@
                 priority=(
                     [] if 'assessment' not in kwargs
                     else kwargs['assessment'].scenario.priority_chemicals
-                )
+                ),
+                allow_multiple=True
             ) }}
             {{ render_feedback(form.chemical) }}
+            <small class="form-text text-muted ml-2">
+                * Note: Selecting multiple chemicals will create one new simulation per selected chemical.
+            </small>
         </div>
     </div>
 
@@ -517,6 +521,30 @@ onDomLoad(function() {
     })(window.MIRC || {});
 
     function initFormEvents(form) {
+        var getParamsUrl = '{{ url_for("mirc_scenario_api.get_risk_scenario_parameters", id=0) }}';
+
+        // Filter valid BW by Exposure Profile
+        $('#mirc_scenario').on('change', function(e) {
+            var id = $(this).val();
+            $.ajax({
+                url: getParamsUrl.replace('/0', '/' + id) + '?variable=BW'
+            }).then(function(data) {
+                var bwpField = $('#human_body_weight_percentile');
+                var currentBWP = bwpField.val();
+                bwpField.find('option').prop('selected', false).hide();
+                validBWPs = Array.from(new Set(data.filter(x => x.value != 0).map(x => x.percentile)));
+                bwpField.find('option').each(function(i, el) {
+                    el = $(el);
+                    if (validBWPs.indexOf(el.text()) > -1) {
+                        el.show();
+                        if (el.attr('value') == currentBWP) {
+                            el.prop('selected', true);
+                        }
+                    }
+                });
+            });
+        }).change();
+
         // Handle change to numeric inputs
         form.on('change', 'input', function(e) {
             var me = $(this);

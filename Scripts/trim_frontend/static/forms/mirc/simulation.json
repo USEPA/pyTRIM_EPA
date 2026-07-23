@@ -4,7 +4,7 @@
     "fields": [
         {
             "id": "mirc_scenario",
-            "label": "Risk Scenario",
+            "label": "Exposure Profile",
             "data_type": "int",
             "widget": "select",
             "choices": {
@@ -21,6 +21,7 @@
             "label": "Chemical",
             "data_type": "int",
             "widget": "select",
+            "multiselect": true,
             "choices": {
                 "source": "db",
                 "model": "Chemical",

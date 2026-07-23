@@ -10,7 +10,7 @@
         {% if allow_none %}
             <option value="">None</option>
         {% endif %}
-        <optgroup label="Built-in Scenarios">
+        <optgroup label="Built-in Profiles">
             {% for scenario in scenarios|selectattr('is_builtin') %}
                 <option value="{{ scenario.id }}"
                     {% if scenario.id == default %} selected="selected"{% endif %}
@@ -22,7 +22,7 @@
                 </option>
             {% endfor %}
         </optgroup>
-        <optgroup label="Custom Scenarios">
+        <optgroup label="Custom Profiles">
             {% for scenario in scenarios|selectattr('is_builtin', 'false') %}
                 <option value="{{ scenario.id }}"
                     {% if scenario.id == default %} selected="selected"{% endif %}

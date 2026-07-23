@@ -1,10 +1,10 @@
 {% macro render_chemical_picker(
     chemicals, id="chemical_picker", name="chemical_picker",
     priority=[],
-    default=None, allow_none=False
+    default=None, allow_none=False, allow_multiple=False
 ) %}
     <select id="{{ id }}" name="{{ name }}"
-        class="form-control form-control-sm"
+        class="form-control form-control-sm custom-select custom-select-sm" {% if allow_multiple %}multiple="multiple"{% endif %}
         style="max-width: 100%;"
     >
         {% if allow_none %}
