@@ -1089,16 +1089,26 @@ onDomLoad(function() {
                 var data = JSON.parse(this.responseText);
                 simulationSelector.empty();
                 var simulations = (data.simulations || []).sort((a, b) => a.id - b.id);
-                for (var sim of simulations) {
+                if (simulations.length) {
+                    simulationSelector.prop('disabled', false);
+                    for (var sim of simulations) {
+                        simulationSelector.append(
+                            `<option value="${sim.id}">${sim.name} - ${sim.chemical.name} (${sim.chemical.cas_number})</option>`
+                        );
+                    }
+                    if (thenChangeTo == undefined) {
+                        thenChangeTo = simulations[0].id;
+                    }
+                    if (thenChangeTo != undefined) {
+                        simulationSelector.val(thenChangeTo).change();
+                    }
+                }
+                else {
+                    simulationSelector.prop('disabled', true);
                     simulationSelector.append(
-                        `<option value="${sim.id}">${sim.name} - ${sim.chemical.name} (${sim.chemical.cas_number})</option>`
+                        '<option value="">No Simulations Created</option>'
                     );
-                }
-                if (thenChangeTo == undefined && simulations.length > 0) {
-                    thenChangeTo = simulations[0].id;
-                }
-                if (thenChangeTo != undefined) {
-                    simulationSelector.val(thenChangeTo).change();
+                    loadResults(); // clear page
                 }
             }
             catch (err) {
@@ -1167,12 +1177,14 @@ onDomLoad(function() {
 
     $('#delete-simulation').on('click', function(e) {
         e.preventDefault();
-        $.ajax({
-            url: this.href,
-            method: 'DELETE'
-        }).then(function() {
-            refreshSimulations();
-        });
+        if (confirm('Are you sure you want to delete this simulation?\nThis action cannot be undone!')) {
+            $.ajax({
+                url: this.href,
+                method: 'DELETE'
+            }).then(function() {
+                refreshSimulations();
+            });
+        }
     });
 });
 </script>
