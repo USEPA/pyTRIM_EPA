@@ -133,8 +133,15 @@ def get_risk_scenario_parameters(id):
             "You don't have permission to view this exposure profile", 403
         )
 
+    if 'name' in request.args:
+        s_params = s.parameters.get_by_name(request.args['name'])
+    elif 'variable' in request.args:
+        s_params = s.parameters.get_by_variable(request.args['variable'])
+    else:
+        s_params = s.parameters
+
     params = []
-    for param in s.parameters:
+    for param in s_params:
         param = param.as_serializable()
         param.pop('scenario')
         params.append(param)

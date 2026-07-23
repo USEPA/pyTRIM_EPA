@@ -521,6 +521,30 @@ onDomLoad(function() {
     })(window.MIRC || {});
 
     function initFormEvents(form) {
+        var getParamsUrl = '{{ url_for("mirc_scenario_api.get_risk_scenario_parameters", id=0) }}';
+
+        // Filter valid BW by Exposure Profile
+        $('#mirc_scenario').on('change', function(e) {
+            var id = $(this).val();
+            $.ajax({
+                url: getParamsUrl.replace('/0', '/' + id) + '?variable=BW'
+            }).then(function(data) {
+                var bwpField = $('#human_body_weight_percentile');
+                var currentBWP = bwpField.val();
+                bwpField.find('option').prop('selected', false).hide();
+                validBWPs = Array.from(new Set(data.filter(x => x.value != 0).map(x => x.percentile)));
+                bwpField.find('option').each(function(i, el) {
+                    el = $(el);
+                    if (validBWPs.indexOf(el.text()) > -1) {
+                        el.show();
+                        if (el.attr('value') == currentBWP) {
+                            el.prop('selected', true);
+                        }
+                    }
+                });
+            });
+        }).change();
+
         // Handle change to numeric inputs
         form.on('change', 'input', function(e) {
             var me = $(this);
