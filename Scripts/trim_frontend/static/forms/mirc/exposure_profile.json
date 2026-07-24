@@ -1,5 +1,5 @@
 {
-    "title": "MIRC Scenario",
+    "title": "MIRC Exposure Profile",
     "fields": [
         {
             "id": "scenario_id",
@@ -7,7 +7,7 @@
         },
         {
             "id": "name",
-            "label": "Risk Scenario",
+            "label": "Exposure Profile",
             "data_type": "string",
             "required": true
         },
@@ -19,16 +19,16 @@
         },
         {
             "id": "parent",
-            "label": "Parent Scenario",
+            "label": "Parent Profile",
             "data_type": "int",
             "widget": "select",
             "choices": {
                 "source": "db",
-                "model": "Scenario",
+                "model": "MircScenario",
                 "value": "id",
                 "label": "name"
             },
-            "required": false,
+            "allow_empty": true,
             "default": 2
         },
         {
@@ -39,7 +39,7 @@
                 "id": "body_weight",
                 "label": "Body Weight",
                 "data_type": "form",
-                "form_definition": "mirc/subforms/scenario/body_weight.json"
+                "form_definition": "mirc/subforms/exposure_profile/body_weight.json"
             },
             "min_entries": 0
         },
@@ -51,7 +51,7 @@
                 "id": "human_ingestion",
                 "label": "Ingestion Rate",
                 "data_type": "form",
-                "form_definition": "mirc/subforms/scenario/human_ingestion.json"
+                "form_definition": "mirc/subforms/exposure_profile/human_ingestion.json"
             },
             "min_entries": 0
         },
@@ -63,7 +63,7 @@
                 "id": "product_parameter",
                 "label": "Product Parameter",
                 "data_type": "form",
-                "form_definition": "mirc/subforms/scenario/product_parameter.json"
+                "form_definition": "mirc/subforms/exposure_profile/product_parameter.json"
             },
             "min_entries": 0
         },
@@ -71,7 +71,7 @@
             "id": "breast_milk_parameters",
             "label": "Breast Milk-Specific Parameters",
             "data_type": "form",
-            "form_definition": "mirc/subforms/scenario/breast_milk_parameters.json"
+            "form_definition": "mirc/subforms/exposure_profile/breast_milk_parameters.json"
         },
         {
             "id": "plant_parameters",
@@ -81,7 +81,7 @@
                 "id": "plant_parameter",
                 "label": "Plant Parameter",
                 "data_type": "form",
-                "form_definition": "mirc/subforms/scenario/plant_parameter.json"
+                "form_definition": "mirc/subforms/exposure_profile/plant_parameter.json"
             },
             "min_entries": 0
         },
@@ -93,7 +93,7 @@
                 "id": "animal_ingestion",
                 "label": "Ingestion Rate",
                 "data_type": "form",
-                "form_definition": "mirc/subforms/scenario/animal_ingestion.json"
+                "form_definition": "mirc/subforms/exposure_profile/animal_ingestion.json"
             },
             "min_entries": 0
         },
@@ -105,7 +105,7 @@
                 "id": "loss_factor",
                 "label": "Loss Factor",
                 "data_type": "form",
-                "form_definition": "mirc/subforms/scenario/loss_factor.json"
+                "form_definition": "mirc/subforms/exposure_profile/loss_factor.json"
             },
             "min_entries": 0
         },
@@ -117,7 +117,7 @@
                 "id": "chemical_parameter",
                 "label": "Chemical Parameter",
                 "data_type": "form",
-                "form_definition": "mirc/subforms/scenario/chemical_parameter.json"
+                "form_definition": "mirc/subforms/exposure_profile/chemical_parameter.json"
             },
             "min_entries": 0
         },
@@ -129,7 +129,7 @@
                 "id": "mutagenic_parameter",
                 "label": "Mutagenic Parameter",
                 "data_type": "form",
-                "form_definition": "mirc/subforms/scenario/mutagenic_parameter.json"
+                "form_definition": "mirc/subforms/exposure_profile/mutagenic_parameter.json"
             },
             "min_entries": 0
         },
@@ -141,7 +141,7 @@
                 "id": "baf_parameter",
                 "label": "Bio-Accumulation Parameter",
                 "data_type": "form",
-                "form_definition": "mirc/subforms/scenario/baf_parameter.json"
+                "form_definition": "mirc/subforms/exposure_profile/baf_parameter.json"
             },
             "min_entries": 0
         },
@@ -153,7 +153,7 @@
                 "id": "plant_chemical_parameter",
                 "label": "Plant-Specific Chemical Parameter",
                 "data_type": "form",
-                "form_definition": "mirc/subforms/scenario/plant_chemical_parameter.json"
+                "form_definition": "mirc/subforms/exposure_profile/plant_chemical_parameter.json"
             },
             "min_entries": 0
         },
@@ -165,7 +165,7 @@
                 "id": "animal_chemical_parameter",
                 "label": "Animal-Specific Chemical Parameter",
                 "data_type": "form",
-                "form_definition": "mirc/subforms/scenario/animal_chemical_parameter.json"
+                "form_definition": "mirc/subforms/exposure_profile/animal_chemical_parameter.json"
             },
             "min_entries": 0
         },
@@ -177,7 +177,7 @@
                 "id": "breast_milk_chemical_parameter",
                 "label": "Breast Milk-Specific Chemical Parameter",
                 "data_type": "form",
-                "form_definition": "mirc/subforms/scenario/breast_milk_chemical_parameter.json"
+                "form_definition": "mirc/subforms/exposure_profile/breast_milk_chemical_parameter.json"
             },
             "min_entries": 0
         }

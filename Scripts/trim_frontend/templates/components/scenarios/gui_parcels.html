@@ -4,70 +4,93 @@
     data-form-src="scenario_parcels_form"
 >
     <section class="container px-0">
-		<fieldset>
-			<legend>Parcel Upload</legend>
-			<div class="row mb-1">
-				<div class="col-sm">
-					<div data-slot="true" data-target="parcels_file"></div>
-					<div class="form-text mb-2">
-						<small class="text-muted">
-							<a href="{{ url_for(
-								'static', filename='templates/parcels.csv'
-							) }}">
-                                Click here
-                            </a>
-                            to download the template for creating a CSV parcels file.
-                            X/Y coordinates must be provided as WGS84 Longitude/Latitude
-                            in decimal degrees.
-						</small>
-					</div>
+        <div class="accordion mb-3">
+            <div id="parcelUploadHeading" class="border-bottom">
+                <h2 class="mb-0">
+                    <button class="btn btn-link btn-block text-right text-decoration-none"
+                        type="button" data-toggle="collapse" data-target="#parcelUploadForm"
+                        aria-expanded="false" aria-controls="parcelUploadForm"
+                    >
+                        <i class="fa fa-chevron-down mr-2"></i>Load Parcels from File
+                    </button>
+                </h2>
+            </div>
 
-					<div class="row mb-1 subform" style="display: none;">
-						<div class="col-md">
-							<div data-slot="true" data-target="upload_coordinates_system"></div>
-						</div>
-						<div class="col-md" style="opacity:0">
-							<div data-slot="true" data-target="upload_utm_zone"></div>
-						</div>
-					</div>
+            <div id="parcelUploadForm" class="collapse" aria-labelledby="parcelUploadHeading">
+                <div class="row mt-3">
+                    <div class="col-sm">
+                        <div data-slot="true" data-target="parcels_file"></div>
+                        <div class="form-text mb-2">
+                            <small class="text-muted">
+                                <a href="{{ url_for(
+                                    'static', filename='templates/parcels.csv'
+                                ) }}">
+                                    Click here
+                                </a>
+                                to download the template for creating a CSV parcels file.
+                                X/Y coordinates must be provided as WGS84 Longitude/Latitude
+                                in decimal degrees.
+                            </small>
+                        </div>
 
-					<!-- <div data-slot="true" data-target="parcel_coordinates_description"></div> -->
-					<a id="upload-btn" href="#" class="btn btn-secondary"><i class="fas fa-upload mr-1"></i>Upload</a>
-				</div>
-			</div>
-		</fieldset>
-		<fieldset>
-			<legend>Deposition Overlay</legend>
-			<div class="row mb-1">
-				<div class="col-sm">
-					<div data-slot="true" data-target="deposition_overlay_file"></div>
+                        <div class="row mb-1 subform" style="display: none;">
+                            <div class="col-md">
+                                <div data-slot="true" data-target="upload_coordinates_system"></div>
+                            </div>
+                            <div class="col-md" style="opacity:0">
+                                <div data-slot="true" data-target="upload_utm_zone"></div>
+                            </div>
+                        </div>
 
-					<div class="row mb-1 subform">
-						<div class="col-md" style="display: none;">
-							<div data-slot="true" data-target="deposition_overlay_upload_coordinates_system"></div>
-						</div>
-						<div class="col-md" style="opacity:0">
-							<div data-slot="true" data-target="deposition_overlay_upload_utm_zone"></div>
-						</div>
-					</div>
+                        <!-- <div data-slot="true" data-target="parcel_coordinates_description"></div> -->
+                        <a id="upload-btn" href="#" class="btn btn-secondary"><i class="fas fa-upload mr-1"></i>Upload</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="accordion mb-3">
+            <div id="depositionOverlayHeading" class="border-bottom">
+                <h2 class="mb-0">
+                    <button class="btn btn-link btn-block text-right text-decoration-none"
+                        type="button" data-toggle="collapse" data-target="#depositionOverlayForm"
+                        aria-expanded="false" aria-controls="depositionOverlayForm"
+                    >
+                        <i class="fa fa-chevron-down mr-2"></i>Deposition Overlay
+                    </button>
+                </h2>
+            </div>
 
-					<div data-slot="true" data-target="deposition_overlay_zflag_restriction"></div>
+            <div id="depositionOverlayForm" class="collapse" aria-labelledby="depositionOverlayHeading">
+                <div class="row mt-3">
+                    <div class="col-sm">
+                        <div data-slot="true" data-target="deposition_overlay_file"></div>
 
-					<!-- <div data-slot="true" data-target="parcel_coordinates_description"></div> -->
-					<a id="deposition-overlay-upload-btn" href="#" class="btn btn-secondary"><i class="fas fa-upload mr-1"></i>Upload</a>
-				</div>
-			</div>
+                        <div class="row mb-1 subform">
+                            <div class="col-md" style="display: none;">
+                                <div data-slot="true" data-target="deposition_overlay_upload_coordinates_system"></div>
+                            </div>
+                            <div class="col-md" style="opacity:0">
+                                <div data-slot="true" data-target="deposition_overlay_upload_utm_zone"></div>
+                            </div>
+                            <div class="col-md">
+                                <div data-slot="true" data-target="deposition_overlay_zflag_restriction"></div>
+                            </div>
+                        </div>
 
-			<div class="row mb-1" id="deposition-overlay-current-file" style="display:none; margin-top: 20px">
-				<div class="errors">
-				</div>
+                        <!-- <div data-slot="true" data-target="parcel_coordinates_description"></div> -->
+                        <a id="deposition-overlay-upload-btn" href="#" class="btn btn-secondary"><i class="fas fa-upload mr-1"></i>Upload</a>
+                    </div>
+                </div>
+                <div class="row mt-2" id="deposition-overlay-current-file" style="display:none; margin-top: 20px">
+                    <div class="errors">
+                    </div>
 
-				<div class="col-sm">
-					<a id="deposition-overlay-delete-btn" href="#" class="btn btn-secondary"><i class="fas fa-trash mr-1"></i>Delete <span id="deposition-overlay-current-filename"></span></a>
-				</div>
-			</div>
-
-		</fieldset>
+                    <div class="col-sm">
+                        <a id="deposition-overlay-delete-btn" href="#" class="btn btn-secondary"><i class="fas fa-trash mr-1"></i>Delete <span id="deposition-overlay-current-filename"></span></a>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div id="parcel_file_fields_div">
             <div class="row">
                 <div class="col-sm">
@@ -117,31 +140,36 @@
             </div>
         </div>
 		<div class="row">
-			<fieldset>
+			<fieldset class="mt-2">
 				<legend>AERMOD Receptors</legend>
 				<div class="row mb-1">
 					<div class="col-sm">
-						Select the Generate AERMOD Receptors button to generate grids of AERMOD receptors, using the Receptor Spacing you entered in the editable table above. Select either Download button to download a GeoJSON or AERMOD input file of the receptor grids. You can view the generated receptors in the map by turning on the display in the map’s basemap selection box. If you subsequently change receptor spacing, you must again select Generate AERMOD Receptors. If the display in the map does not refresh, select the Recalculate button at the bottom right of the page and again turn on the display in the map’s basemap selection box.
-						<p/>
+                        <p>
+                            Generate grids of AERMOD receptors using the Receptor Spacing you entered in the editable table above.
+                        </p>
+                        <p>
+                            Once receptors have been generated, select one of the Download buttons
+                            to download a GeoJSON or AERMOD input file of the receptor grids.
+                            You can view the generated receptors in the map by turning on the display in the map’s basemap selection box.
+                            If you subsequently change receptor spacing, you must again select Generate AERMOD Receptors.
+                            If the display in the map does not refresh, select the Recalculate button at the bottom right of the page
+                            and again turn on the display in the map’s basemap selection box.
+                        </p>
 						<a id="generate_aermod_receptors_btn" style="cursor:pointer" class="btn btn-secondary">Generate AERMOD Receptors</a>
-
 					</div>
 				</div>
-
-				<div class="row mb-1" id="aermod-receptors-current-file" style="display:none; margin-top: 20px">
+				<div class="row mb-1 mt-3" id="aermod-receptors-current-file" style="display: none;">
 					<div class="errors">
 					</div>
-
 					<div class="col-sm">
-						<a id="aermod-receptors-download-geojson-btn" target="_blank" href="#" class="btn btn-secondary">
+						<a id="aermod-receptors-download-geojson-btn" target="_blank" href="#" class="btn btn-dark">
                             <i class="fas fa-download mr-1"></i>Download geojson
                         </a>
-						<a id="aermod-receptors-download-aermod-btn" target="_blank" href="#" class="btn btn-secondary">
+						<a id="aermod-receptors-download-aermod-btn" target="_blank" href="#" class="btn btn-dark">
                             <i class="fas fa-download mr-1"></i>Download AERMOD input
                         </a>
 					</div>
 				</div>
-
 			</fieldset>
 		</div>
     </section>
@@ -587,6 +615,9 @@
         attributes: true
     });
     onDomLoad(function() {
+        $('.accordion h2 button').on('click', function() {
+            $(this).find('i.fa').toggleClass('fa-chevron-up fa-chevron-down')
+        });
 
         // FIXME hacky way to refresh all parcels when leaving the parcels tab
         let requires_reload = false;

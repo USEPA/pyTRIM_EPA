@@ -308,6 +308,13 @@ def create_dynamic_field_from_json(field_def):
     opt = field_def.get('allow_empty', False)
     if opt:
         field_props['validators'].append(Optional())
+    if ((not req) and opt):
+        empty_vals = [None, '', 'None']
+        if 'coerce' in field_props:
+            base_coerce = field_props['coerce']
+            field_props['coerce'] = lambda val: None if (val in empty_vals) else base_coerce(val)
+        if 'choices' in field_props:
+            field_props['choices'].extend([(c, c) for c in empty_vals])
 
     # Field description text
     d = field_def.get('description', '')

@@ -154,19 +154,17 @@ def make_transition_matrix(scenario):
                 if hasattr(cof, 'dimensionality'):
                     cou = str(cof.units)
                     cof = cof.magnitude
-            if not cou and is_soil:
-                cou = 'g / g'  # HACKY
 
             # denominator in concentration calculation
-            if (
+            if comp.media.isa("Surface_Water") or comp.media.isa("Groundwater"):
+                # note that denom must be in L
+                denom = "volume_L"
+            elif (
                 comp.media.isa("Abiotic")
                 or comp.media.isa("$Leaf")
                 or comp.media.isa("$Leaf_Particle")
             ):
                 denom = "volume"
-            elif comp.media.isa("Surface_Water") or comp.media.isa("Groundwater"):
-                # note that denom must be in L
-                denom = "volume_L"
             else:
                 denom = "mass"  # default denom is mass
 
@@ -480,8 +478,6 @@ def gen_avg(df_nt, df_conc, simulation_start_date):
     df_nt['year'] = df_nt['time'].dt.year   # create year column
     # group the data by year and calculate the annual averages
     dfn_avg = df_nt.groupby('year').mean().reset_index()
-    # drop last line (just one day)
-    dfn_avg = dfn_avg.head(len(dfn_avg)-1)
 
     # convert the first col (time in d) to datetime objects
     df_conc['time'] = pd.to_datetime(df_conc['time'], origin=start_date, unit='d')
@@ -495,8 +491,6 @@ def gen_avg(df_nt, df_conc, simulation_start_date):
         for c in df_conc.columns.values if c != 'year'
     }
     dfc_avg = df_conc.groupby('year').agg(conc_agg).reset_index()
-    # drop last line (just one day)
-    dfc_avg = dfc_avg.head(len(dfc_avg)-1)
     return dfn_avg, dfc_avg
 
 
@@ -706,7 +700,6 @@ def safe_save_output(output_data, scn=None, filetype='csv'):
                 if filetype == 'csv':
                     fname += '.csv'
                     df.to_csv(fname)
-                    outfiles[abbr] = fname
                 else:
                     fname += '.xlsx'
                     if data.get('split_chems'):
@@ -715,6 +708,7 @@ def safe_save_output(output_data, scn=None, filetype='csv'):
                         writer = pd.ExcelWriter(fname, engine='xlsxwriter')
                         df.to_excel(writer)
                         writer.close()
+                outfiles[abbr] = fname
             except Exception:
                 print(f'{20 * ">"} Output write exception writing {filetype} file for {abbr} data:\n{e}')
     except Exception as e:

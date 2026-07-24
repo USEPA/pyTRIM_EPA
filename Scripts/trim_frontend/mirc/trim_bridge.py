@@ -25,7 +25,9 @@ def compile_mirc_data(scen, latest_model_run, logger=None):
             'chemicals': {c.id: c.name for c in scen.chemicals},
             'timestamps': timestamps,
         }
-        trim_data["parcels"] = compile_mirc_parcel_data(scen, chems, conc, timestamps, logger)
+        parcels, uses_aermod = compile_mirc_parcel_data(scen, chems, conc, timestamps, logger)
+        trim_data['parcels'] = parcels
+        trim_data['uses_aermod'] = uses_aermod
 
         return {"trim_data": trim_data}
     else:
@@ -33,6 +35,7 @@ def compile_mirc_data(scen, latest_model_run, logger=None):
 
 
 def compile_mirc_parcel_data(scen, chems, conc, timestamps, logger):
+    uses_aermod = False
     parcels = []
     for parcel in scen.parcels:
         logger.debug(f"Compiling parcel data for {parcel.name}...")
@@ -70,6 +73,8 @@ def compile_mirc_parcel_data(scen, chems, conc, timestamps, logger):
                                 "value": aermod_Ca.magnitude,
                                 "unit": str(aermod_Ca.units),  # "ug/m^3"
                             }
+                            if aermod_Ca.magnitude > 0:
+                                uses_aermod = True
                         except (KeyError, AttributeError):
                             props["C_aermod"] = {
                                 "value": None,
@@ -127,4 +132,4 @@ def compile_mirc_parcel_data(scen, chems, conc, timestamps, logger):
                 ve["compartments"].append(c)
             p["volume_elements"].append(ve)
         parcels.append(p)
-    return parcels
+    return parcels, uses_aermod

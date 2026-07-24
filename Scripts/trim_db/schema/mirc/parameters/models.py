@@ -48,7 +48,7 @@ class MircParameter(Model):
 
     scenario = sa.orm.relationship(
         'MircScenario',
-        backref=sa.orm.backref("_parameters", lazy='joined')
+        backref=sa.orm.backref("_parameters", lazy='joined', cascade='all, delete-orphan')
     )
 
     name = sa.Column(sa.String(255), nullable=False)

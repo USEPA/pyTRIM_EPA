@@ -22,7 +22,7 @@ class MircScenario(Model):
     """Represents an ingestion scenario, and provides access
     to all parameters for performing MIRC calculations.
     """
-    name = sa.Column(sa.String(255), unique=True, nullable=False)
+    name = sa.Column(sa.String(255), unique=False, nullable=False)
     is_builtin = sa.Column(sa.Boolean(), nullable=False, default=False)
     notes = sa.Column(sa.String(800))
 
@@ -121,7 +121,10 @@ def _ts_simulation(simulation: MircSimulation):
     return {
         'id': simulation.id,
         'name': simulation.name,
-        'chemical': simulation.chemical.hap_name
+        'chemical': {
+            'name': simulation.chemical.hap_name or simulation.chemical.name,
+            'cas_number': simulation.chemical.cas_number
+        }
     }
 
 
@@ -186,9 +189,21 @@ class MircSimulationParameter(Model):
     def __repr__(self):
         return (
             f"{self.__class__.__qualname__}("
-            f"'{self.simulation.name}', {self.variable}, {self.quantity}"
+            f"'{self.simulation.name}', {self.variable}, {self.quantity}, source='{self.source or ''}'"
             ")"
         )
+
+
+@register_serializer(MircSimulationParameter)
+def _ts_simulation_parameter(param: MircSimulationParameter):
+    return {
+        'id': param.id,
+        'full_name': param.name or '',
+        'variable_name': param.variable,
+        'value': param.value,
+        'unit': param.unit or '',
+        'source': param.source or ''
+    }
 
 
 class MircSimulationConsumptionBreakdown(Model):

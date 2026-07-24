@@ -89,17 +89,17 @@
         <div role="tabpanel" id="human-parameters" class="tab-pane show active"
             aria-labelledby="human-parameters-tab"
         >
-            {% include 'components/scenarios/mirc/risk_scenarios/editor/human_parameters.html' %}
+            {% include 'components/scenarios/mirc/exposure_profiles/editor/human_parameters.html' %}
         </div>
         <div role="tabpanel" id="product-parameters" class="tab-pane"
             aria-labelledby="product-parameters-tab"
         >
-            {% include 'components/scenarios/mirc/risk_scenarios/editor/product_parameters.html' %}
+            {% include 'components/scenarios/mirc/exposure_profiles/editor/product_parameters.html' %}
         </div>
         <div role="tabpanel" id="chemical-parameters" class="tab-pane"
             aria-labelledby="chemical-parameters-tab"
         >
-            {% include 'components/scenarios/mirc/risk_scenarios/editor/chemical_parameters.html' %}
+            {% include 'components/scenarios/mirc/exposure_profiles/editor/chemical_parameters.html' %}
         </div>
     </div>
     {% if not mirc_scenario.is_builtin %}

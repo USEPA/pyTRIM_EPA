@@ -3,7 +3,7 @@ import pandas as pd
 
 
 def make_report(data):
-    df = pd.DataFrame.from_dict(data)
+    df = pd.DataFrame.from_dict({k: data[k] for k in ['results', 'meta']})
     df = df.reset_index()
 
     # Create two datatables one for metadata and the other for results
@@ -25,15 +25,23 @@ def make_report(data):
         var_name="Age Group", value_name="results"
     )
 
-    # Break Concentration into Units and Unitless columns
-    df_results["Concentration Units"] = "-"
+    # Break Concentration into Units and Magnitude
+    def get_attr(attr, default='-', return_original_on_fail=False):
+        def inner_get(obj):
+            try:
+                return getattr(obj, attr)
+            except AttributeError:
+                if return_original_on_fail:
+                    return obj
+                return default
+        return inner_get
 
-    for index, row in df_results.iterrows():
-        try:
-            row['Concentration Units'] = (row["concentration"].units)
-            row['concentration'] = (row["concentration"].magnitude)
-        except AttributeError:
-            row['Concentration Units'] = "-"
+    df_results['Concentration Units'] = df_results.concentration.apply(
+        get_attr('units')
+    )
+    df_results['concentration'] = df_results.concentration.apply(
+        get_attr('magnitude', return_original_on_fail=True)
+    )
 
     # Break Result Dictionaries into Pandas Columns
     df_results_series = df_results['results'].apply(pd.Series)
@@ -47,48 +55,40 @@ def make_report(data):
     df_results = df_results.rename(columns={"index": "Product"})
 
     # Divide Intake into Units and Magnitude
-    df_results["Intake Units"] = "-"
-    for index, row in df_results.iterrows():
-        try:
-            row['Intake Units'] = (row["intake"].units)
-            row['intake'] = (row["intake"].magnitude)
-        except AttributeError:
-            row['Intake Units'] = "-"
+    df_results['Intake Units'] = df_results.intake.apply(
+        get_attr('units')
+    )
+    df_results['intake'] = df_results.intake.apply(
+        get_attr('magnitude', return_original_on_fail=True)
+    )
 
-    is_mutagenic = data['meta']['chemical'].mutagenic
+    is_mutagenic = data['meta']['chemical']['mutagenic']
     if is_mutagenic:
-        df_results["Adjusted Intake"] = "-"
-        df_results["Adjusted Intake Units"] = "-"
-        for index, row in df_results.iterrows():
-            try:
-                row['Adjusted Intake Units'] = (row["adjusted_intake"].units)
-                row['Adjusted Intake'] = (row["adjusted_intake"].magnitude)
-            except AttributeError:
-                row['Adjusted Intake Units'] = "-"
-                row['Adjusted Intake'] = "-"
+        df_results['Adjusted Intake Units'] = df_results.adjusted_intake.apply(
+            get_attr('units')
+        )
+        df_results['Adjusted Intake'] = df_results.adjusted_intake.apply(
+            get_attr('magnitude')
+        )
 
     # Remove Hazard Quotient Units (dimensionless)
-    for index, row in df_results.iterrows():
-        try:
-            row['hazard_quotient'] = (row["hazard_quotient"].magnitude)
-        except AttributeError:
-            row['hazard_quotient'] = "-"
+    df_results['hazard_quotient'] = df_results.hazard_quotient.apply(
+        get_attr('magnitude')
+    )
 
     # Remove Risk Factor Units (dimensionless)
-    for index, row in df_results.iterrows():
-        try:
-            row['risk_factor'] = (row["risk_factor"].magnitude)
-        except AttributeError:
-            row['risk_factor'] = "-"
+    df_results['risk_factor'] = df_results.risk_factor.apply(
+        get_attr('magnitude')
+    )
 
     # Add Chemical Name
-    chemical = (df_meta.loc[df_meta['index'] == "chemical", "meta"])[1]
-    df_results["Chemical"] = str(chemical.name)
+    chemical = (df_meta.loc[df_meta['index'] == "chemical", "meta"]).values[0]
+    df_results["Chemical"] = str(chemical.get('hap_name') or chemical['name'])
 
     # Add Scenario Name
     scenario = df_meta.loc[
         df_meta['index'] == "importSource", "meta"
-    ][0].split("|")[0]
+    ].values[0].split("|")[0]
     df_results["scenario"] = scenario
 
     # Order Columns and Clean-up
@@ -152,5 +152,7 @@ def make_report(data):
                 r[col] = r[col] + ' dry weight'
             elif r['Product'] not in ['Water']:
                 r[col] = r[col] + ' wet weight'
+
+    df = df.drop(columns=['TRIM Scenario'])  # No need to include this
 
     return df

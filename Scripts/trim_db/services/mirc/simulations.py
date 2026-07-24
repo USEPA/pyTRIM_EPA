@@ -551,86 +551,108 @@ class MircSimulationService(GenericService[MircSimulation]):
 
     @classmethod
     def from_form(cls, trim_scenario, form):
-        i = len(trim_scenario.mirc_simulations) + 1
-        sim = cls.create(
-            name=f'Simulation {i}',
-            trim_scenario_id=trim_scenario.id,
-            mirc_scenario=MircScenarioService.get(form.mirc_scenario.data),
-            chemical=ChemicalService.get(form.chemical.data),
-            use_baf=(form.fish_factor.data == 'baf')
-        )
+        chems = form.chemical.data
+        if not isinstance(chems, list):
+            chems = [chems]
 
-        sim.percentiles.append(MircSimulationPercentile(
-            percentile_id=form.human_body_weight_percentile.data
-        ))
+        simulations = []
 
-        sim.parameters.append(MircSimulationParameter(
-            variable='percentile_preset',
-            value=SIMULATION_PERCENTILE_PRESETS.index(form.ingestion_percentile_preset.data)
-        ))
+        i = len(trim_scenario.mirc_simulations)
+        for chem_id in chems:
+            i += 1
+            sim = cls.create(
+                name=f'Simulation {i}',
+                trim_scenario_id=trim_scenario.id,
+                mirc_scenario=MircScenarioService.get(form.mirc_scenario.data),
+                chemical=ChemicalService.get(chem_id),
+                use_baf=(form.fish_factor.data == 'baf')
+            )
 
-        for p in MircProductService.get_all():
-            attr = f'{p.name.lower().replace(" ", "_")}_percentile'
-            if hasattr(form, attr):
-                sim.percentiles.append(MircSimulationPercentile(
-                    food=p,
-                    percentile_id=getattr(form, attr).data
-                ))
-            if p.is_a('fish') and p.name != 'fish':
-                f = 0
-                src = ''
-                tl35_type = form.trim_fish_tl35_compartment.data.split(' in ')[0].replace('_', ' ').lower()
-                tl4_type = form.trim_fish_tl4_compartment.data.split(' in ')[0].replace('_', ' ').lower()
-                if p.name == tl35_type:
-                    f = form.f_tl35.data
-                    src = form.f_tl35_src.data
-                    sim.parameters.append(MircSimulationParameter(
-                        variable=f'C_{p.name.replace(" ", "_")}',
-                        value=form.C_tl35.data,
-                        unit=form.C_tl35_unit.data,
-                        source=form.C_tl35_src.data
-                    ))
-                elif p.name == tl4_type:
-                    f = form.f_tl4.data
-                    src = form.f_tl4_src.data
-                    sim.parameters.append(MircSimulationParameter(
-                        variable=f'C_{p.name.replace(" ", "_")}',
-                        value=form.C_tl4.data,
-                        unit=form.C_tl4_unit.data,
-                        source=form.C_tl4_src.data
-                    ))
-                if f != 0:
-                    sim.consumption_breakdowns.append(
-                        MircSimulationConsumptionBreakdown(
-                            subfood=p,
-                            fraction=f,
-                            source=src
-                        )
-                    )
-
-        for param in SIMULATION_PARAMETER_ABBRS:
-            if not hasattr(form, param):
-                continue
-            val = getattr(form, param).data
-            if val is None:
-                if param in SIMULATION_PARAMETER_DEFAULTS:
-                    val = SIMULATION_PARAMETER_DEFAULTS[param]
-                else:
-                    continue
-            unit = None
-            if hasattr(form, f'{param}_unit'):
-                unit = getattr(form, f'{param}_unit').data
-            src = None
-            if hasattr(form, f'{param}_src'):
-                src = getattr(form, f'{param}_src').data
-            sim.parameters.append(MircSimulationParameter(
-                variable=param,
-                value=val,
-                unit=unit,
-                source=src
+            sim.percentiles.append(MircSimulationPercentile(
+                percentile_id=form.human_body_weight_percentile.data
             ))
 
-        return sim
+            sim.parameters.append(MircSimulationParameter(
+                variable='percentile_preset',
+                value=SIMULATION_PERCENTILE_PRESETS.index(form.ingestion_percentile_preset.data)
+            ))
+
+            for p in MircProductService.get_all():
+                attr = f'{p.name.lower().replace(" ", "_")}_percentile'
+                if hasattr(form, attr):
+                    sim.percentiles.append(MircSimulationPercentile(
+                        food=p,
+                        percentile_id=getattr(form, attr).data
+                    ))
+                if p.is_a('fish') and p.name != 'fish':
+                    f = 0
+                    src = ''
+                    tl35_type = form.trim_fish_tl35_compartment.data.split(' in ')[0].replace('_', ' ').lower()
+                    tl4_type = form.trim_fish_tl4_compartment.data.split(' in ')[0].replace('_', ' ').lower()
+                    if p.name == tl35_type:
+                        f = form.f_tl35.data
+                        src = form.f_tl35_src.data
+                        sim.parameters.append(MircSimulationParameter(
+                            name=form.C_tl35.label.text,
+                            variable=f'C_{p.name.replace(" ", "_")}',
+                            value=form.C_tl35.data,
+                            unit=form.C_tl35_unit.data,
+                            source=form.trim_fish_tl35_compartment.data
+                        ))
+                    elif p.name == tl4_type:
+                        f = form.f_tl4.data
+                        src = form.f_tl4_src.data
+                        sim.parameters.append(MircSimulationParameter(
+                            name=form.C_tl4.label.text,
+                            variable=f'C_{p.name.replace(" ", "_")}',
+                            value=form.C_tl4.data,
+                            unit=form.C_tl4_unit.data,
+                            source=form.trim_fish_tl4_compartment.data
+                        ))
+                    if f != 0:
+                        sim.consumption_breakdowns.append(
+                            MircSimulationConsumptionBreakdown(
+                                subfood=p,
+                                fraction=f,
+                                source=src
+                            )
+                        )
+
+            for param in SIMULATION_PARAMETER_ABBRS:
+                if not hasattr(form, param):
+                    continue
+                field = getattr(form, param)
+                val = field.data
+                if val is None:
+                    if param in SIMULATION_PARAMETER_DEFAULTS:
+                        val = SIMULATION_PARAMETER_DEFAULTS[param]
+                    else:
+                        continue
+                unit = None
+                if hasattr(form, f'{param}_unit'):
+                    unit = getattr(form, f'{param}_unit').data
+                src = None
+                if hasattr(form, f'{param}_src'):
+                    src = getattr(form, f'{param}_src').data
+                sim.parameters.append(MircSimulationParameter(
+                    name=field.label.text,
+                    variable=param,
+                    value=val,
+                    unit=unit,
+                    source=src
+                ))
+
+            simulations.append(sim)
+
+        return simulations
+
+    @classmethod
+    def update_simulation_names(cls, trim_scenario):
+        for i, sim in enumerate(sorted(
+            trim_scenario.mirc_simulations, key=lambda s: s.id
+        ), start=1):
+            sim.name = f'Simulation {i}'
+        cls.db.session.commit()
 
     def __init__(self, model, *args, **kwargs):
         self.__instance = model
@@ -665,73 +687,80 @@ class MircSimulationService(GenericService[MircSimulation]):
         else:
             bw = Pmean
 
-        simulation_breakdown = {}
+        try:
+            simulation_breakdown = {
+                p.name.replace(' ', '_'): self._run_single_pathway(p, bw, logs)
+                for p in products
+            }
 
-        simulation_breakdown = {
-            p.name.replace(' ', '_'): self._run_single_pathway(p, bw, logs)
-            for p in products
-        }
+            if with_breast_milk:
+                cumulative_ladd = 0
+                # loop to computed cumulative LADD
+                # that is used to estimate BM concentrations
+                for product, result in simulation_breakdown.items():
+                    r = result['risk']
+                    life_risk = r['Lifetime']
+                    if life_risk:
+                        cumulative_ladd += life_risk.get('intake', 0)
 
-        if with_breast_milk:
-            cumulative_ladd = 0
-            # loop to computed cumulative LADD
-            # that is used to estimate BM concentrations
-            for product, result in simulation_breakdown.items():
-                r = result['risk']
-                life_risk = r['Lifetime']
-                if life_risk:
-                    cumulative_ladd += life_risk.get('intake', 0)
+                simulation_breakdown[bm.name.replace(' ', '_')] = self._run_single_pathway(
+                    bm, bw, logs, maternal_cumulative_ladd=cumulative_ladd
+                )
 
-            simulation_breakdown[bm.name.replace(' ', '_')] = self._run_single_pathway(
-                bm, bw, logs, maternal_cumulative_ladd=cumulative_ladd
-            )
-
-        total = {}
-        for product, results in simulation_breakdown.items():
-            if not results.get('risk'):
-                continue
-            for age, risk_data in results['risk'].items():
-                if not total.get(age):
-                    ureg = scenario.parameters.unit_registry
-                    total[age] = {
-                        'intake': 0 * ureg('mg/day/kg')
-                    }
-                total[age]['intake'] += (risk_data.get('intake') or 0)
-                adj = risk_data.get('adjusted_intake')
-                if adj is not None:
-                    if not total[age].get('adjusted_intake'):
+            total = {}
+            for product, results in simulation_breakdown.items():
+                if not results.get('risk'):
+                    continue
+                for age, risk_data in results['risk'].items():
+                    if not total.get(age):
                         ureg = scenario.parameters.unit_registry
-                        total[age]['adjusted_intake'] = 0 * ureg('mg/day/kg')
-                    total[age]['adjusted_intake'] += adj
+                        total[age] = {
+                            'intake': 0 * ureg('mg/day/kg')
+                        }
+                    total[age]['intake'] += (risk_data.get('intake') or 0)
+                    adj = risk_data.get('adjusted_intake')
+                    if adj is not None:
+                        if not total[age].get('adjusted_intake'):
+                            ureg = scenario.parameters.unit_registry
+                            total[age]['adjusted_intake'] = 0 * ureg('mg/day/kg')
+                        total[age]['adjusted_intake'] += adj
 
-        RfD = scenario.parameters.for_chemical(c).RfD.quantity
-        CSF = scenario.parameters.for_chemical(c).CSF.quantity
-        for age, risk in total.items():
-            if c.mutagenic:
-                i = risk['adjusted_intake']
-            else:
-                i = risk['intake']
+            RfD = scenario.parameters.for_chemical(c).RfD.quantity
+            CSF = scenario.parameters.for_chemical(c).CSF.quantity
+            for age, risk in total.items():
+                if c.mutagenic:
+                    i = risk['adjusted_intake']
+                else:
+                    i = risk['intake']
 
-            if RfD:
-                risk['hazard_quotient'] = i / RfD
-            if CSF and age == 'Lifetime':
-                risk['risk_factor'] = i * CSF
+                if RfD:
+                    risk['hazard_quotient'] = i / RfD
+                if CSF and age == 'Lifetime':
+                    risk['risk_factor'] = i * CSF
 
-        simulation_results = {
-            'total': {'risk': total},
-            **simulation_breakdown
-        }
+            simulation_results = {
+                'total': {'risk': total},
+                **simulation_breakdown
+            }
+        except Exception as e:
+            simulation_results = {
+                'error': str(e)
+            }
 
         return {
             'meta': {
+                '_id': simulation.id,
+                'name': simulation.name,
                 'importSource': simulation.trim_scenario.name or 'N/A',
                 'chemical': simulation.chemical.as_serializable(),
+                'usesAermod': len([p for p in simulation.parameters if p.variable == 'Ca' and p.value != 0]) > 0,
                 'fishPathway': 'B(S)AF' if simulation.use_baf else 'Direct',
                 'percentiles': {
                     p.food.name.replace(' ', '_') if p.food else 'body_weight':
                     p.percentile.name
                     for p in simulation.percentiles
-                }
+                },
+                'other_parameters': [p.as_serializable() for p in simulation.parameters]
             },
             'results': simulation_results,
             'logs': logs
