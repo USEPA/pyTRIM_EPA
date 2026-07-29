@@ -1,3 +1,6 @@
+import os
+import pandas as pd
+import tempfile
 from flask import request
 from flask_security import login_required, current_user
 from werkzeug.datastructures import MultiDict
@@ -5,6 +8,7 @@ from trim_db.services import MircScenarioService
 from trim_frontend import api, db
 from ...users.models import User
 from .forms import MircScenarioForm as ScenarioForm
+from .utils import make_report
 
 mirc_scenario_api = api.Blueprint('mirc_scenario_api', __name__)
 
@@ -132,6 +136,24 @@ def get_risk_scenario_parameters(id):
         raise api.Exception(
             "You don't have permission to view this exposure profile", 403
         )
+
+    f = request.args.get('format', 'json')
+    if f == 'xlsx':
+        with tempfile.TemporaryDirectory() as tmpdir:
+            try:
+                report = make_report(s)
+            except Exception:
+                import traceback
+                traceback.print_exc()
+                raise
+
+            n = f'{s.name}_parameters.xlsx'.replace(' ', '_')
+            filepath = os.path.join(tmpdir, n)
+            with pd.ExcelWriter(filepath) as writer:
+                for sheet_name, df in report.items():
+                    df.to_excel(writer, sheet_name=sheet_name, index=False)
+
+            return api.FileResult(filepath)
 
     if 'name' in request.args:
         s_params = s.parameters.get_by_name(request.args['name'])

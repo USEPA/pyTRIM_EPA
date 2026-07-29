@@ -38,7 +38,7 @@
                     href="{{
                         url_for('mirc_scenario_api.delete_risk_scenario', id=mirc_scenario.id)
                     }}"
-                    class="btn btn-outline-primary"
+                    class="btn btn-outline-danger"
                 >
                     <i class="fa fa-times mx-1"></i>&nbsp;
                     Delete
@@ -59,9 +59,16 @@
         {{ render_feedback(form.parent) }}
     </div>
 
-    <h3 class="pb-1">
-        Parameters
-    </h3>
+    <div class="d-flex justify-content-between pb-1">
+        <h3>
+            Parameters
+        </h3>
+        <a id="export-scenario-params" href="#export-parameters" class="text-decoration-none"
+            style="color: rgb(33, 37, 41)" title="Export Parameters"
+        >
+            <i class="fa fa-download mr-2"></i>Export
+        </a>
+    </div>
 
     <nav class="pb-1">
         <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
@@ -157,79 +164,101 @@ document.addEventListener('DOMContentLoaded', function() {
         // for our required fields)
         form.find('[type="submit"]').click();
     });
-        form.submit(function(e) {
-            e.preventDefault();
+    form.submit(function(e) {
+        e.preventDefault();
 
-            form.find('input, textarea').removeClass('is-invalid');
-            form.find('.invalid-feedback').html('');
+        form.find('input, textarea').removeClass('is-invalid');
+        form.find('.invalid-feedback').html('');
 
-            function handleErrors(errors, pref) {
-                pref = pref || '';
-                $.each(errors, function(name, err) {
-                    if (Array.isArray(err)) {
-                        if (typeof err[0] == typeof {}) {
-                            $.each(err, function(i, subErrors) {
-                                handleErrors(subErrors, name + '-' + i + '-');
-                            });
-                        }
-                        else {
-                            form.find('[name="' + pref + name + '"]')
-                                .addClass('is-invalid')
-                                .next('.invalid-feedback').html(
-                                    err.join('<br />')
-                                );
-                        }
-                    }
-                    else if (typeof err == typeof {}) {
-                        $.each(err, function(subName, subErrors) {
-                            handleErrors(subErrors, name + '-' + subName + '-');
+        function handleErrors(errors, pref) {
+            pref = pref || '';
+            $.each(errors, function(name, err) {
+                if (Array.isArray(err)) {
+                    if (typeof err[0] == typeof {}) {
+                        $.each(err, function(i, subErrors) {
+                            handleErrors(subErrors, name + '-' + i + '-');
                         });
                     }
                     else {
                         form.find('[name="' + pref + name + '"]')
                             .addClass('is-invalid')
                             .next('.invalid-feedback').html(
-                                err
+                                err.join('<br />')
                             );
                     }
-                });
-            }
+                }
+                else if (typeof err == typeof {}) {
+                    $.each(err, function(subName, subErrors) {
+                        handleErrors(subErrors, name + '-' + subName + '-');
+                    });
+                }
+                else {
+                    form.find('[name="' + pref + name + '"]')
+                        .addClass('is-invalid')
+                        .next('.invalid-feedback').html(
+                            err
+                        );
+                }
+            });
+        }
 
-            function saveScenario(formData) {
-                LoadingScreen.show('saveScenario');
-                formData.set('scenario_id', '{{ mirc_scenario.id }}');
-                $.ajax({
-                    url: form.attr('action'),
-                    method: form.attr('method'),
-                    processData: false,
-                    contentType: false,
-                    dataType: 'json',
-                    data: formData
-                }).done(function(data) {
-                    // console.log(data);
-                    window.location.reload(); // Refresh the page
-                }).fail(function(data) {
-                    var error = data.responseJSON;
-                    form_errs = error.message.form_errors;
-                    if (form_errs) {
-                        if (JSON.stringify(form_errs).indexOf('"csrf_token":') > -1) {
-                            $.when(flask.API.call({
-                                endpoint: 'auth_api.get_csrf'
-                            })).then(function(csrf) {
-                                $('[name="csrf_token"]').val(csrf.token);
-                                saveScenario(new FormData(form[0]));
-                            });
-                        }
-                        else {
-                            handleErrors(form_errs);
-                        }
+        function saveScenario(formData) {
+            LoadingScreen.show('saveScenario');
+            formData.set('scenario_id', '{{ mirc_scenario.id }}');
+            $.ajax({
+                url: form.attr('action'),
+                method: form.attr('method'),
+                processData: false,
+                contentType: false,
+                dataType: 'json',
+                data: formData
+            }).done(function(data) {
+                // console.log(data);
+                window.location.reload(); // Refresh the page
+            }).fail(function(data) {
+                var error = data.responseJSON;
+                form_errs = error.message.form_errors;
+                if (form_errs) {
+                    if (JSON.stringify(form_errs).indexOf('"csrf_token":') > -1) {
+                        $.when(flask.API.call({
+                            endpoint: 'auth_api.get_csrf'
+                        })).then(function(csrf) {
+                            $('[name="csrf_token"]').val(csrf.token);
+                            saveScenario(new FormData(form[0]));
+                        });
                     }
-                }).always(function() {
-                    LoadingScreen.hide('saveScenario');
-                });
+                    else {
+                        handleErrors(form_errs);
+                    }
+                }
+            }).always(function() {
+                LoadingScreen.hide('saveScenario');
+            });
+        }
+        saveScenario(new FormData(form[0]));
+    });
+
+    $('#export-scenario-params').on('click', function(e) {
+        e.preventDefault();
+
+        LoadingScreen.show('mircScenarioExport')
+        $.ajax({
+            url: '{{ url_for("mirc_scenario_api.get_risk_scenario_parameters", id=mirc_scenario.id) }}?format=xlsx',
+            method: 'GET',
+            contentType: 'application/json'
+        }).then(function(data) {
+            if (data.success) {
+                var link = $('<a href="' + data.url + '">Download</a>');
+                link.attr('download', data.attachment_name);
+                link.css({'display': 'none'});
+                link.appendTo('body');
+                link[0].click();
+                link.remove();
             }
-            saveScenario(new FormData(form[0]));
+        }).always(function() {
+            LoadingScreen.hide('mircScenarioExport')
         });
+    });
 });
 
 document.addEventListener('DOMContentLoaded', function() {
