@@ -118,6 +118,8 @@
         </div>
     {% endif %}
 </form>
+<script src="{{url_for('static', filename='js/mirc.js')}}">
+</script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     function toggleCollapse() {
@@ -220,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 form_errs = error.message.form_errors;
                 if (form_errs) {
                     if (JSON.stringify(form_errs).indexOf('"csrf_token":') > -1) {
-                        $.when(flask.API.call({
+                        $.when(window.MIRC.API.call({
                             endpoint: 'auth_api.get_csrf'
                         })).then(function(csrf) {
                             $('[name="csrf_token"]').val(csrf.token);
