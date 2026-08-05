@@ -58,6 +58,7 @@ window.TRIM = (function(trim) {
             var toggle = document.createElement('a');
             toggle.href = '#help-' + id;
             toggle.setAttribute('role', 'button');
+            toggle.setAttribute('tabindex', '0');
             toggle.setAttribute('data-toggle', 'collapse');
             toggle.setAttribute('aria-expanded', 'false');
             toggle.setAttribute('aria-controls', 'help-' + id);
@@ -964,6 +965,7 @@ window.TRIM = (function(trim) {
         let toggle_id = "help-" + title.toLowerCase().replaceAll(" ", "-")
         toggle.href = 'javascript:void(0);';
         toggle.setAttribute('role', 'tooltip');
+        toggle.setAttribute('tabindex', '0');
         toggle.setAttribute('data-toggle', 'popover');
         toggle.setAttribute('data-html', 'true');
         toggle.setAttribute('data-trigger', 'focus');

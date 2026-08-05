@@ -77,6 +77,11 @@
 <script src="{{ url_for('static', filename='js/lib/dataTables/dataTables.bootstrap4.min.js') }}">
 </script>
 <link rel="stylesheet" href="{{url_for('static', filename='css/form_styles.css')}}"/>
+<style>
+    .text-muted {
+        color: #626262 !important;
+    }
+</style>
 <script>
     onDomLoad(function() {
         var form = document.getElementById('surface-runoff-gui');

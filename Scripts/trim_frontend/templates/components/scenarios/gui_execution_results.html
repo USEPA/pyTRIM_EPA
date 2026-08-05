@@ -179,13 +179,12 @@
                 <div id="div_visuals">
                     <h6 class="mt-2 mb-3" id="res_version"></h6>
                     <div class="mb-0">
-                        <label class="switch mb-0">
-                            <input type="checkbox" id="switch_res_conc">
-                            <span class="slider round"></span>
-                        </label>
-                        <label for="switch_res_conc" class="mb-0" style="user-select: none;">
-                            Plot results in Concentrations
-                        </label>
+                        <div class="custom-control custom-switch">
+                            <input type="checkbox" id="switch_res_conc" class="custom-control-input">
+                            <label for="switch_res_conc" class="mb-0 custom-control-label">
+                                Plot results in Concentrations
+                            </label>
+                        </div>
                     </div>
                     <div id="units-warning" class="text-danger mt-1" style="display: none;">
                         <div>
@@ -241,7 +240,7 @@
                         <div class="mt-3" id="model_progress_debug_zone">
                             <div><b>Model run debug output will appear here.</b></div>
                             <div><b>This info only appears for @icf.com accounts.</b></div>
-                            <textarea rows=15 cols=103></textarea>
+                            <textarea rows=15 cols=103 aria-label="admin-debug"></textarea>
                             <div class="mt-1 mb-2">
                                 <button type="button" id="btn-load-debug" disabled="disabled"
                                     class="btn btn-sm btn-outline-info"

@@ -74,6 +74,11 @@
         </div>
     </section>
 </form>
+<style>
+    .ems {
+        background-color: white !important;
+    }
+</style>
 <script>
     onDomLoad(function(e) {
         var form = document.getElementById('property-summary-gui');
@@ -470,7 +475,7 @@
                     for (const [property_key, property_value] of Object.entries(entity_value)) {
                         map_html = map_html + "<tr data-depth='1' tabindex='0' class='level1 colps'><td></td><td class='comp'>" 
                             + property_key + 
-                            "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted'>"
+                            "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted' style='color:black;'>"
                             + property_value +
                             "</label></td><td></td></tr>"
                     }

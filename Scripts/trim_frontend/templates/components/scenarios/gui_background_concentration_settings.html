@@ -24,7 +24,7 @@
                                                 <small class="text-muted">
                                                     <a href="{{ url_for(
                                                         'static', filename='templates/background_concentrations.csv'
-                                                    ) }}">Click here</a> to download the template for creating a CSV file containing initial concentrations.
+                                                    ) }}" title="Click here to download template">Click here</a> to download the template for creating a CSV file containing initial concentrations.
                                                 </small>
                                             </div>
                                             <div data-slot="true" data-target="concentration_upload_button"></div>
@@ -103,6 +103,10 @@
                 return;
             }
             $(form).find("a[id*=_concentration_upload_button]").addClass("disabled")
+            $(form).find("a[id*=_concentration_upload_button]").attr({
+                'tabindex': '0',
+                'role': 'link'
+            });
         }
 
         function updateBackgroundConcentrations() {

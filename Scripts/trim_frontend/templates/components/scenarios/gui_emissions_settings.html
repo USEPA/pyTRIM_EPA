@@ -138,6 +138,10 @@
                 });
                 return;
             }
+            $(form).find("a[id*=_emission_upload_button]").attr({
+                'tabindex': '0',
+                'role': 'link'
+            });
             console.log('populated emissions form!')
             LoadingScreen.hide('emissions_loading');
         }
