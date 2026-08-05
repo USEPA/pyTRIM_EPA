@@ -93,15 +93,19 @@
 </form>
 <style>
     tr.level0 td:first-child, tr.level0 td:nth-child(2), tr.level0 td:nth-child(3) {
+        color: black;
         background-color: lightgray;
     }
     tr.level1 td:nth-child(2), tr.level1 td:nth-child(3){
+        color: black;
         background-color: darkgray;
     }
     tr.level2 td:nth-child(3) {
+        color: black;
         background-color: #818181;
     }
     tr.level0 td:last-child, tr.level1 td:last-child, tr.level2 td:last-child{
+        color: black;
         background-color: white;
     }
 
@@ -378,6 +382,12 @@
                 }
             });
 
+            $('tr.colps').not('tr.level2').on('keydown', (e) => {
+                if (e.key === 'Enter' || e.which === 13) {
+                    $(e.target).click();
+                }
+            });
+
             $('button.comp_show_all').on('click', function(e) {
                 e.preventDefault()
                 let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap")
@@ -612,10 +622,10 @@
             let skip_comps = ['Degradation_Reaction_Sink', 'Soil_Advection_Sink', 'Flush_Rate_Sink']
             let exclude = spec == "Particulate" ? "VaporSource" : "ParticleSource"
             parcels.forEach( function(e,i){
-                map_html = map_html + "<tr data-depth='0' class='level0 colps'><td data-pcl-name='" + e.name + "'>" + e.name + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
+                map_html = map_html + "<tr data-depth='0' tabindex='0' class='level0 colps'><td data-pcl-name='" + e.name + "'>" + e.name + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
                 for (ve in e.compartment_map) {
                     if (ve.indexOf(exclude) == -1) {
-                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td data-pcl-name='" + e.name + "'></td><td data-ve-name='" + ve + "'>" + ve + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td></tr>"
+                        map_html = map_html + "<tr data-depth='1'tabindex='0' class='level1 colps'><td data-pcl-name='" + e.name + "'></td><td data-ve-name='" + ve + "'>" + ve + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td></tr>"
                     }
                     for (comp in e.compartment_map[ve]) {
                         if (skip_comps.map(el => el + '_' + ve).indexOf(e.compartment_map[ve][comp]) > -1 ||
@@ -623,7 +633,7 @@
                             continue
                         }
                         if (e.compartment_map[ve][comp].indexOf(exclude) == -1){
-                            map_html = map_html + "<tr data-depth='2' class='level2 colps'><td data-pcl-name='" + e.name + "'></td><td data-ve-name='" + ve + "'></td><td class='comp' data-comp-name='" + e.compartment_map[ve][comp] + "'>" + e.compartment_map[ve][comp] + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='editableCell badge badge-light'>0</label></td></tr>"
+                            map_html = map_html + "<tr data-depth='2' tabindex='0' class='level2 colps'><td data-pcl-name='" + e.name + "'></td><td data-ve-name='" + ve + "'></td><td class='comp' data-comp-name='" + e.compartment_map[ve][comp] + "'>" + e.compartment_map[ve][comp] + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='editableCell badge badge-light'>0</label></td></tr>"
                         }
                     }
                 }

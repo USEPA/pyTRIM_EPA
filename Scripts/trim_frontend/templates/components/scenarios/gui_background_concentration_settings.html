@@ -155,6 +155,12 @@
                 }
             });
 
+            $('tr.colps').on('keydown', (e) => {
+                if (e.key === 'Enter' || e.which === 13) {
+                    $(e.target).click();
+                }
+            });
+
             $('button.comp_show_all').on('click', function(e) {
                 e.preventDefault()
                 let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap")
@@ -434,10 +440,10 @@
             var map_html = "<tbody>"
             let exclude = ["WetVaporSource", "DryVaporSource", "WetParticleSource", "DryParticleSource"] // + Sinks
             TRIM.store.currentScenario.parcels.forEach( function(e,i){
-                map_html = map_html + "<tr data-depth='0' class='level0 colps'><td data-pcl-name='" + e.name + "'>" + e.name + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td><td></td></tr>"
+                map_html = map_html + "<tr data-depth='0' tabindex='0' class='level0 colps'><td data-pcl-name='" + e.name + "'>" + e.name + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td><td></td></tr>"
                 for (ve in e.compartment_map) {
                     if (exclude.indexOf(ve) == -1) {
-                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td data-pcl-name='" + e.name + "'></td><td data-ve-name='" + ve + "'>" + ve + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
+                        map_html = map_html + "<tr data-depth='1' tabindex='0' class='level1 colps'><td data-pcl-name='" + e.name + "'></td><td data-ve-name='" + ve + "'>" + ve + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
                     }
                     for (comp in e.compartment_map[ve]) {
                         if (exclude.map(el => el + '_' + ve).indexOf(e.compartment_map[ve][comp]) > -1
@@ -446,7 +452,7 @@
                             continue;
                         }
                         if (exclude.indexOf(e.compartment_map[ve][comp]) == -1){
-                            map_html = map_html + "<tr data-depth='2' class='level2 colps'><td data-pcl-name='" + e.name + "'><td data-ve-name='" + ve + "'><td class='comp' data-comp-name='" + e.compartment_map[ve][comp] + "'>" + e.compartment_map[ve][comp]+ "</td><td class='ic'><input class='editableCell' style='width: 50px; display:none'/><label class='editableCell badge badge-light'>0</label></td><td class='ic_unit'></td></tr>"
+                            map_html = map_html + "<tr data-depth='2' tabindex='0' class='level2 colps'><td data-pcl-name='" + e.name + "'><td data-ve-name='" + ve + "'><td class='comp' data-comp-name='" + e.compartment_map[ve][comp] + "'>" + e.compartment_map[ve][comp]+ "</td><td class='ic'><input class='editableCell' style='width: 50px; display:none'/><label class='editableCell badge badge-light'>0</label></td><td class='ic_unit'></td></tr>"
                         }
                     }
                 }

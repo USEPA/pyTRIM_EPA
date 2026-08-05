@@ -164,6 +164,12 @@
                 }
             });
 
+            $('tr.colps').on('keydown', (e) => {
+                if (e.key === 'Enter' || e.which === 13) {
+                    $(e.target).click();
+                }
+            });
+
             $('button.scenario_show_all').on('click', function(e) {
                 let this_table =$(this).closest("div[role=tabpanel]").find("table.scenarioMap")
                 $(this_table).find("tr.colps").show();
@@ -457,12 +463,12 @@
             // catch {}
             if (type == "general") {
                 for (const [entity_key, entity_value] of Object.entries(map)) {
-                    map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>"
+                    map_html = map_html + "<tr data-depth='0' tabindex='0' class='level0 colps'><td>"
                         + entity_key +
                         "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td></tr>"
 
                     for (const [property_key, property_value] of Object.entries(entity_value)) {
-                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td class='comp'>" 
+                        map_html = map_html + "<tr data-depth='1' tabindex='0' class='level1 colps'><td></td><td class='comp'>" 
                             + property_key + 
                             "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted'>"
                             + property_value +
@@ -475,12 +481,12 @@
                 let prop_unit_style = "style='max-width:10rem;text-wrap: wrap;'";
 
                 for (const [entity_key, entity_value] of Object.entries(map)) {
-                    map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>"
+                    map_html = map_html + "<tr data-depth='0' tabindex='0' class='level0 colps'><td>"
                         + entity_key +
                         "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td><td></td><td></td></tr>"
 
                     for (const [cat_key, cat_value] of Object.entries(entity_value)) {
-                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td class='comp'>"
+                        map_html = map_html + "<tr data-depth='1' tabindex='0' class='level1 colps'><td></td><td class='comp'>"
                             + cat_key +
                             "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
 
@@ -496,7 +502,7 @@
                                 `;
                             }
 
-                            map_html = map_html + `<tr data-depth='2' class='level2 colps'><td></td><td></td><td class='comp' ${prop_style}>`
+                            map_html = map_html + `<tr data-depth='2' tabindex='0' class='level2 colps'><td></td><td></td><td class='comp' ${prop_style}>`
                                 + property_key +
                                 `</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted' ${prop_value_style}>`
                                 + (prop_value == null ? '-' : prop_value) +
