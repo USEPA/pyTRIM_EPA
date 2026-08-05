@@ -411,11 +411,12 @@ def get_animal_chemical_parameters(scenario, chemical_id=None, product_id=None):
             data.update({
                 'Bs': ca_props.Bs.value,
                 'MF': ca_props.MF.value,
-                'cooking_adjustment': ca_props.FishAdjFactor.value,
                 'Ba': ca_props.Ba.value,
                 'Ba_unit': ca_props.Ba.unit,
                 'notes': ca_props.notes
             })
+            if p.is_a('fish'):
+                data['cooking_adjustment'] = ca_props.FishAdjFactor.value
 
             acps.append(data)
 
@@ -764,7 +765,7 @@ def make_report(scenario):
         ).rename(columns={
             'Bs': 'Soil Bioavailability Factor',
             'MF': 'Metabolism Factor',
-            'cooking_adjustment': 'Cooking Adjustment Factor',
+            'cooking_adjustment': 'Fish Cooking Adjustment Factor',
             'Ba': 'Biotransfer Factor'
         })
         acps = multi_melt(
@@ -773,7 +774,7 @@ def make_report(scenario):
             value_vars=[
                 ('Soil Bioavailability Factor', None),
                 ('Metabolism Factor', None),
-                ('Cooking Adjustment Factor', None),
+                ('Fish Cooking Adjustment Factor', None),
                 ('Biotransfer Factor', 'Ba_unit')
             ]
         ).drop(
@@ -785,7 +786,9 @@ def make_report(scenario):
             'value_1': 'Value',
             'value_2': 'Unit',
             'notes': 'Notes'
-        })
+        }).dropna(
+            how='all', subset=['Value', 'Unit']
+        )
         acps.Animal = acps.Animal.str.title()
         return acps
 

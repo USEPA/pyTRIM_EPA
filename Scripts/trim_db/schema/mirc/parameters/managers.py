@@ -8,6 +8,13 @@ __all__ = [
 ]
 
 
+DEFAULT_PARAMETER_UNITS = {
+    'CSF': '(mg/kg/day)^-1',
+    'RfD': 'mg/kg/day',
+    'RCF': 'L/kg',
+}
+
+
 class NullParameter:
     def __init__(self, unit=''):
         self._value = 0
@@ -122,6 +129,8 @@ class ParameterManager:
             return params
 
     def _get_param_default_dimensionality(self, name=None, variable=None, **kwargs):
+        if variable in DEFAULT_PARAMETER_UNITS:
+            return DEFAULT_PARAMETER_UNITS[variable]
         matching_params = MircParameter.query.filter(or_(
             MircParameter.name == name,
             MircParameter.variable == variable
