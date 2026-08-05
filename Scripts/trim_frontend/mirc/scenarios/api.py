@@ -147,7 +147,9 @@ def get_risk_scenario_parameters(id):
                 traceback.print_exc()
                 raise
 
-            n = f'{s.name}_parameters.xlsx'.replace(' ', '_')
+            safe_name = s.name.replace('/', '_').replace('\\', '_')
+
+            n = f'{safe_name}_parameters.xlsx'.replace(' ', '_')
             filepath = os.path.join(tmpdir, n)
             with pd.ExcelWriter(filepath) as writer:
                 for sheet_name, df in report.items():
