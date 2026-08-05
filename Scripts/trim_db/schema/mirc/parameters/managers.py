@@ -4,7 +4,7 @@ from ...utils.serialize import register_serializer
 
 
 __all__ = [
-    'ParameterManager'
+    'ParameterManager', 'NullParameter'
 ]
 
 
@@ -47,6 +47,13 @@ class NullParameter:
         else:
             raise AttributeError
 
+    def __repr__(self):
+        return (
+            f"{self.__class__.__qualname__}("
+            f"{self.value} {self.unit}"
+            ")"
+        )
+
 
 @register_serializer(NullParameter)
 def _ts_null_param(n: NullParameter):
@@ -73,6 +80,9 @@ class ParameterManager:
 
     def get_by_name(self, name):
         return self._get_param(name=name)
+
+    def get_matching(self, **kwargs):
+        return self._get_param(**kwargs)
 
     def _get_param(self, **kwargs):
         s = self.scenario
@@ -111,7 +121,7 @@ class ParameterManager:
         else:
             return params
 
-    def _get_param_default_dimensionality(self, name=None, variable=None):
+    def _get_param_default_dimensionality(self, name=None, variable=None, **kwargs):
         matching_params = MircParameter.query.filter(or_(
             MircParameter.name == name,
             MircParameter.variable == variable
