@@ -19,7 +19,7 @@
                 <div class="row">
                     <div class="col-md align-content-center justify-content-center">
                         <div class="text-center">
-                            <a id="surface-runoff-upload-btn" class="btn btn-warning" style="cursor: pointer;"><i class="fas fa-upload mr-1"></i>Import Matrix</a>
+                            <a href="#" id="surface-runoff-upload-btn" class="btn btn-warning" style="cursor: pointer;"><i class="fas fa-upload mr-1"></i>Import Matrix</a>
                         </div>
                     </div>
                 </div>
@@ -28,7 +28,7 @@
                 <div class="row">
                     <div class="col-md align-content-center justify-content-center">
                         <div class="text-center">
-                            <a id="export_runoff_matrix" class="btn btn-warning" style="cursor: pointer;"><i class="fa fa-file-download"></i>&nbsp;Export Matrix</a>
+                            <a href="#" id="export_runoff_matrix" class="btn btn-warning" style="cursor: pointer;"><i class="fa fa-file-download"></i>&nbsp;Export Matrix</a>
                         </div>
                     </div>
                 </div>
@@ -77,6 +77,11 @@
 <script src="{{ url_for('static', filename='js/lib/dataTables/dataTables.bootstrap4.min.js') }}">
 </script>
 <link rel="stylesheet" href="{{url_for('static', filename='css/form_styles.css')}}"/>
+<style>
+    .text-muted {
+        color: #626262 !important;
+    }
+</style>
 <script>
     onDomLoad(function() {
         var form = document.getElementById('surface-runoff-gui');
@@ -137,6 +142,7 @@
                 },
                 initComplete: function (settings, json) {
                     // $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    this.api().columns().header().to$().attr('scope', 'col');
                     $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
                     $(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
                     $(".dataTables_scrollHead").addClass('wrap-text-scrollhead');

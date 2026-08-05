@@ -33,13 +33,13 @@
                 <small class="text-muted">
                     {% if optionNum == 1 %}
                         <a href="{{ url_for('static', filename='templates/erosion_Total_Effective_Rate.csv'
-                                   ) }}">Click here</a> to download the template CSV file containing effective erosion rate parameter.
+                                   ) }}" title="Click here to download Opt 1 template">Click here</a> to download the template CSV file containing effective erosion rate parameter.
                     {% elif optionNum == 2 %}
                          <a href="{{ url_for('static', filename='templates/erosion_USL_SDR.csv'
-                                   ) }}">Click here</a> to download the template CSV file containing unit soil loss and sediment-delivery ratio parameters.
+                                   ) }}" title="Click here to download Opt 2 template">Click here</a> to download the template CSV file containing unit soil loss and sediment-delivery ratio parameters.
                     {% else %}
                          <a href="{{ url_for('static', filename='templates/erosion_USLE_parameters.csv'
-                                   ) }}">Click here</a> to download the template CSV file containing universal soil loss equation parameters and sediment-delivery ratio.
+                                   ) }}" title="Click here to download Opt 3 template">Click here</a> to download the template CSV file containing universal soil loss equation parameters and sediment-delivery ratio.
                     {% endif %}
                 </small>
             </div>
@@ -79,7 +79,8 @@
         <div id="tableDiv_opt1" class="col-md">
             <div class="mb-3">
                 <small><strong><u>Click on the table cells to edit properties.</u> </strong></small>
-                <a class="btn btn-sm btn-warning float-right export-erosion-table" style="cursor: pointer;">
+                <a class="btn btn-sm btn-warning float-right export-erosion-table" style="cursor: pointer;"
+                    tabindex="0" role="link">
                     <i class="fa fa-file-download"></i>&nbsp;Export Current Settings
                 </a>
             </div>
@@ -89,7 +90,8 @@
         <div id="tableDiv_opt2" class="col-md">
             <div class="mb-3">
                 <small><strong><u>Click on the table cells to edit properties.</u> </strong></small>
-                <a class="btn btn-sm btn-warning float-right export-erosion-table" style="cursor: pointer;">
+                <a class="btn btn-sm btn-warning float-right export-erosion-table" style="cursor: pointer;"
+                    tabindex="0" role="link">
                     <i class="fa fa-file-download"></i>&nbsp;Export Current Settings
                 </a>
             </div>
@@ -99,7 +101,8 @@
         <div id="tableDiv_opt3" class="col-md">
             <div class="mb-3">
                 <small><strong><u>Click on the table cells to edit properties.</u> </strong></small>
-                <a class="btn btn-sm btn-warning float-right export-erosion-table" style="cursor: pointer;">
+                <a class="btn btn-sm btn-warning float-right export-erosion-table" style="cursor: pointer;"
+                    tabindex="0" role="link">
                     <i class="fa fa-file-download"></i>&nbsp;Export Current Settings
                 </a>
             </div>

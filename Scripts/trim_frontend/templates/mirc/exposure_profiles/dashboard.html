@@ -15,7 +15,7 @@
                     <a href="{{ url_for('mirc_scenario.view_risk_scenario', id=scenario.id) }}"
                         class="text-primary float-right"
                     >
-                        <i class="fa fa-eye" title="View"></i>
+                        <i class="fa fa-eye" role="img" title="View {{ scenario.name }}"></i>
                     </a>
                     <h5 class="card-title mb-0">{{ scenario.name }}</h5>
                 </div>
@@ -64,9 +64,9 @@
                         class="text-primary float-right"
                     >
                         {% if not current_user.can('edit', scenario) %}
-                            <i class="fa fa-eye" title="View"></i>
+                            <i class="fa fa-eye" role="img" title="View {{ scenario.name }}"></i>
                         {% else %}
-                            <i class="fa fa-edit" title="Edit"></i>
+                            <i class="fa fa-edit" role="img" title="Edit {{ scenario.name }}"></i>
                         {% endif %}
                     </a>
                     <h5 class="card-title mb-0">{{ scenario.name }}</h5>

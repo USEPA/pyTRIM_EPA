@@ -7,7 +7,8 @@
         {% endfor %}
     </select> 
     <br>
-    Value: <input id="{{table_id}}_sv_val" type="text"> <button id="{{table_id}}_sv_btn" class="btn btn-warning" style="height:1.8em;padding:2px;">Update</button>
+    <label for="{{table_id}}_sv_val">Value:</label>
+    <input id="{{table_id}}_sv_val" type="text" name="{{table_id}}_sv_val" title="Uniform value"> <button id="{{table_id}}_sv_btn" class="btn btn-warning" style="height:1.8em;padding:2px;">Update</button>
 </div>
 
 <style>
