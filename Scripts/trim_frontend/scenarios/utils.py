@@ -359,6 +359,7 @@ def handle_scenario_update(s, scenario_data):
                     else:
                         param_value = list(ret_val.values())[0]
                 else:
+                    ret_val = {'value': param_data}
                     param_value = param_data
                 update_custom_param(s, s, param_name, param_value, create_if_dne=True)
 

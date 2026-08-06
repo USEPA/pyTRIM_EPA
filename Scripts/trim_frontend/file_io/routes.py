@@ -471,6 +471,11 @@ def parse_met_file():
                 fields = list(df.columns.values)
                 entries = len(df.index)
                 print(f'NUMBER OF ENTRIES IS {entries} ')
+                if entries < 1:
+                    raise AssertionError(
+                        'No entries were found matching the scenario timeframe of'
+                        f' {scenario.start_date.replace("-", "/")} - {scenario.end_date.replace("-", "/")}'
+                    )
 
                 met_type = "SFC" if is_sfc else "MET"
                 met_fields = meteo_wgt_avg_value_from_timeseries(df, met_type)
@@ -486,7 +491,7 @@ def parse_met_file():
 
         if err:
             raise ApiException(
-                f"Unable to upload file: {err}", 500
+                f"Unable to process file: {err}", 500
             ) from err
 
         data[n] = {

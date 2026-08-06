@@ -313,12 +313,12 @@
         }
 
         function submit_meteo_value(elem, is_sfc=false) {
-            let param_info = get_form_data(elem)
+            const param_info = get_form_data(elem)
             if ($(elem).get(0).tagName == "INPUT") {
                 ErrorValidation.isPositiveValue(elem, $(elem).parent());
                 if (elementIsValid($(elem).parent())) {
-                    let min = parseFloat(elem.getAttribute('min')) || undefined;
-                    let max = parseFloat(elem.getAttribute('max')) || undefined;
+                    const min = parseFloat(elem.getAttribute('min')) || undefined;
+                    const max = parseFloat(elem.getAttribute('max')) || undefined;
                     if (min || max)
                         ErrorValidation.isWithinRange(elem, $(elem).parent(), min, max);
                 }
@@ -342,28 +342,28 @@
                 ]);
             }
             LoadingScreen.show("meteo_update_value")
-            let resp = TRIM.api.updateScenario(param_info).on('load', function(rsp) {
-                let val_resp = this.responseJSON
+            const resp = TRIM.api.updateScenario(param_info).on('load', function(rsp) {
+                const val_resp = this.responseJSON
                 LoadingScreen.hide("meteo_update_value");
                 if (val_resp?.success === false) {
                     return;
                 }
                 if (val_resp) {
-                    let val = val_resp[Object.keys(val_resp)[0]]
-                    let lb_static_val = $(elem).closest('div.form-group').find("label.wt_avg_val")
+                    const val = parseFloat(val_resp[Object.keys(val_resp)[0]]);
+                    let lb_static_val = $(elem).closest('div.form-group').find("div.wt_avg_val")
                     if (lb_static_val.length > 0) {
-                        lb_static_val.text(`Time-weighted average from file: ${val}`)
+                        lb_static_val.text(`Time-weighted Average: ${val}`)
                     }
                     else {
-                        let lb_static_val = `<label class=wt_avg_val>Time-weighted average from file: ${val}</label>`
+                        lb_static_val = `<div class="wt_avg_val mt-2 text-muted">Time-weighted Average: ${val}</div>`
                         $(elem).closest('div.form-group').append(lb_static_val)
                     }
                     if (param_info[1].value == "meteo_precipitation_field_name_rate_TS") {
-                        let scenario = TRIM.store.currentScenario;
-                        let sim_start = Date.parse(scenario["simulation_start_date"])
-                        let sim_end = Date.parse(scenario["simulation_end_date"])
-                        var diff = calculateDateDistance(sim_start, sim_end, ['days']);
-                        var days = parseInt(diff[0].split(' ')[0]);
+                        const scenario = TRIM.store.currentScenario;
+                        const sim_start = Date.parse(scenario["simulation_start_date"])
+                        const sim_end = Date.parse(scenario["simulation_end_date"])
+                        const diff = calculateDateDistance(sim_start, sim_end, ['days']);
+                        const days = parseInt(diff[0].split(' ')[0]);
                         $('#precipitation_average_annual').val(val * 365);
                     }
                 }
