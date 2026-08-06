@@ -464,9 +464,10 @@ def parse_met_file():
                     raise AssertionError('"Date" column is required')
 
                 # Restrict file data date range to the simulation period
-                df['DateFilter'] = pd.to_datetime(df.Date)
-                df = df[df.DateFilter.between(scenario.start_date, scenario.end_date)]
-                df = df.drop(columns=['DateFilter'])
+                if not is_sfc:
+                    df['DateFilter'] = pd.to_datetime(df.Date)
+                    df = df[df.DateFilter.between(scenario.start_date, scenario.end_date)]
+                    df = df.drop(columns=['DateFilter'])
 
                 fields = list(df.columns.values)
                 entries = len(df.index)

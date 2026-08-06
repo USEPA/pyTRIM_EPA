@@ -13,16 +13,20 @@
         <div class="row">
             <div class="col-sm">
                 <div data-slot="true" data-target="default_time_varying_file"></div>
-                <div class="form-text mb-2">
-                    <small class="text-muted">
-                        <a href="{{ url_for(
-                            'static',
-                            filename='templates/meteorology_time_varying_inputs.csv'
-                        ) }}"
-                            title="Click here to download template">
-                            Click here
-                        </a> to download the template for creating a time-varying inputs file.
-                        <br><span>Values in the date column are expected in MM/DD/YYYY format.</span>
+                <div class="form-text text-muted mb-2">
+                    <small class="d-block mb-1">
+                        Must be a CSV file (<a href="{{ url_for(
+                                'static',
+                                filename='templates/meteorology_time_varying_inputs.csv'
+                            ) }}"
+                            title="Click here to download template"
+                        >click here</a> to download the template) or an AERMOD SFC file
+                    </small>
+                    <small class="d-block">
+                        <span class="font-weight-bold">Note:</span> For a CSV file, only the data overlapping with your TRIM simulation period will be used,
+                        and the values in the date column are expected in <span class="font-italic">MM/DD/YYYY</span> format.
+                        For an SFC file, TRIM will use all the data you provide,
+                        even if they do not overlap with your TRIM simulation period.
                     </small>
                 </div>
             </div>
@@ -327,19 +331,16 @@
                 return;
             }
             if (is_sfc) {
-                param_info = param_info.concat(
-                [
-                    {
-                        'type': 'data',
-                        'name': 'field',
-                        'value': 'is_sfc'
-                    },
-                    {
-                        'type': 'input',
-                        'name': 'is_sfc',
-                        'value': is_sfc
-                    }
-                ]);
+                param_info.push({
+                    'type': 'data',
+                    'name': 'field',
+                    'value': 'is_sfc'
+                });
+                param_info.push({
+                    'type': 'input',
+                    'name': 'is_sfc',
+                    'value': is_sfc
+                });
             }
             LoadingScreen.show("meteo_update_value")
             const resp = TRIM.api.updateScenario(param_info).on('load', function(rsp) {
