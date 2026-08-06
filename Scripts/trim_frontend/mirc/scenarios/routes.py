@@ -12,7 +12,7 @@ from .utils import disable_form_fields, get_fragment_args
 mirc_scenario = Blueprint('mirc_scenario', __name__)
 
 
-@mirc_scenario.route('/mirc/risk_scenario', methods=['GET'])
+@mirc_scenario.route('/mirc/exposure_profile', methods=['GET'])
 @login_required
 def view_risk_scenarios():
     scenarios = [
@@ -21,13 +21,13 @@ def view_risk_scenarios():
     ]
 
     return render_template(
-        'mirc/risk_scenarios/dashboard.html', title='Risk Scenarios',
+        'mirc/exposure_profiles/dashboard.html', title='Exposure Profiles',
         mirc_scenarios=scenarios,
         scenario_form=MircScenarioForm()
     )
 
 
-@mirc_scenario.route('/mirc/risk_scenario/<int:id>/')
+@mirc_scenario.route('/mirc/exposure_profile/<int:id>/')
 @login_required
 def view_risk_scenario(id):
     ms = MircScenarioService.get(id)
@@ -56,14 +56,14 @@ def view_risk_scenario(id):
     ]
 
     return render_template(
-        'mirc/risk_scenarios/editor.html', mirc_scenario=ms, title=ms.name,
+        'mirc/exposure_profiles/editor.html', mirc_scenario=ms, title=ms.name,
         form=form, mirc_scenarios=mirc_scenarios,
         products=p, ages=ages, percentiles=pcts,
         chemicals=c
     )
 
 
-@mirc_scenario.route('/mirc/risk_scenario/form_fragment/', methods=['POST'])
+@mirc_scenario.route('/mirc/exposure_profile/form_fragment/', methods=['POST'])
 @login_required
 @api.csrf_exempt
 def get_form_fragment():
@@ -81,12 +81,12 @@ def get_form_fragment():
     params = get_fragment_args(name, ms, data)
 
     return render_template(
-        f'components/scenarios/mirc/risk_scenarios/editor/{name}_fragment.html',
+        f'components/scenarios/mirc/exposure_profiles/editor/{name}_fragment.html',
         scenario=ms, **(params or {})
     )
 
 
-@mirc_scenario.route('/mirc/risk_scenario/<int:id>/permissions/')
+@mirc_scenario.route('/mirc/exposure_profile/<int:id>/permissions/')
 @login_required
 def risk_scenario_permissions(id):
     ms = MircScenarioService.get(id)
@@ -102,5 +102,5 @@ def risk_scenario_permissions(id):
     users = UserService.get_all()
 
     return render_template(
-        'mirc/risk_scenarios/permissions.html', mirc_scenario=ms, users=users
+        'mirc/exposure_profiles/permissions.html', mirc_scenario=ms, users=users
     )

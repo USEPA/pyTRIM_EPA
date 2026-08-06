@@ -1086,7 +1086,10 @@ def get_chemical_properties(scenario_id):
                         logger.warning(f'Skipping parameter "{param_name}" ...')
                     continue
 
-                val = chem.parameters.evaluate(param)
+                try:
+                    val = chem.parameters.evaluate(param)
+                except Exception:
+                    continue  # Just skip it for now, probably a bad equation?
                 scope = None
                 if not isinstance(val, types.FunctionType):
                     # print('\t>', val)

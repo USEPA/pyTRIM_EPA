@@ -1,68 +1,95 @@
 
 <div id="mirc-results-gui">
-    <div class="container-fluid px-0">
-        <button type="button" id="add-simulation" class="btn btn-secondary py-1 mb-2 float-right"
-        >
-            <i class="fa fa-plus"></i>&nbsp;
-            New Risk Simulation
-        </button>
+    <div class="container-fluid px-0 text-right mb-3">
+        <a href="{{ url_for('mirc_scenario.view_risk_scenarios') }}" target="_blank" tabindex="0">
+            <i class="fa fa-pencil-alt mr-1"></i>
+            View/Edit Exposure Profiles
+        </a>
     </div>
 
-    <div class="form-group mb-3">
-        <select id="simulation-id"
-            class="form-control"
-            style="max-width: 100%;"
-            {% if not scenario.mirc_simulations %}disabled="disabled"{% endif %}
-        >
-            {% for sim in scenario.mirc_simulations %}
-                <option value="{{ sim.id }}">
-                    {{
-                        sim.name + ' - ' +
-                        (sim.chemical.hap_name or sim.chemical.name) + ' (' +
-                        sim.chemical.cas_number + ')'
-                    }}
-                </option>
-            {% else %}
-                <option value="">No Simulations Created</option>
-            {% endfor %}
-        </select>
+    <div class="form-group mb-4">
+        <div class="input-group">
+            <select id="simulation-id"
+                name="simulation-id"
+                title="Simulation picker"
+                class="form-control custom-select"
+                style="max-width: 100%;"
+                {% if not scenario.mirc_simulations %}disabled="disabled"{% endif %}
+            >
+                {% for sim in scenario.mirc_simulations|sort(attribute='id') %}
+                    <option value="{{ sim.id }}">
+                        {{
+                            sim.name + ' - ' +
+                            (sim.chemical.hap_name or sim.chemical.name) + ' (' +
+                            sim.chemical.cas_number + ')'
+                        }}
+                    </option>
+                {% else %}
+                    <option value="">No Simulations Created</option>
+                {% endfor %}
+            </select>
+            <div class="input-group-append">
+                <button type="button" id="add-simulation" class="btn btn-secondary" title="Add Simulation">
+                    <i class="fa fa-plus"></i>
+                </button>
+            </div>
+        </div>
     </div>
 
     <div id="mirc-results-desc">
         <div class="form-group form-row mb-1">
-            <label class="col-3 col-form-label col-form-label py-0 font-weight-bold">
-                <span>&nbsp;Chemical</span>
+            <label class="col-3 col-form-label col-form-label py-0 font-weight-bold" for="chemical-name">
+                <span>Chemical</span>
             </label>
             <div class="col">
-                <input id="chemical-name" readonly="readonly"
+                <input id="chemical-name" name="chemical-name" readonly="readonly"
                     class="form-control-plaintext py-0"
                     style="max-width: 100%;"
                     value="Loading ..."
                 />
             </div>
-        </div>
-        <div class="form-group form-row mb-1 d-none">
-            <label class="col-3 col-form-label py-0 font-weight-bold">
-                <span>&nbsp;Import Source</span>
-            </label>
-            <div class="col">
-                <input id="import-name" readonly="readonly"
-                    class="form-control-plaintext py-0"
-                    style="max-width: 100%;"
-                    value="Loading ..."
-                />
+            <div class="col-auto pr-2">
+                <a id="delete-simulation" class="btn btn-sm btn-outline-danger" title="Delete">
+                    <i class="fa fa-trash mr-1"></i> Delete Simulation
+                </a>
             </div>
         </div>
         <div class="form-group form-row mb-1">
-            <label class="col-3 col-form-label py-0 font-weight-bold">
-                <span>&nbsp;Fish Calculation Type</span>
+            <label class="col-3 col-form-label py-0 font-weight-bold" for="fish-pathway">
+                <span>Fish Calculation Type</span>
             </label>
             <div class="col">
-                <input id="fish-pathway" readonly="readonly"
+                <input id="fish-pathway" name="fish-pathway" readonly="readonly"
                     class="form-control-plaintext py-0"
                     style="max-width: 100%;"
                     value="Loading ..."
                 />
+            </div>
+        </div>
+        <div class="accordion mb-3">
+            <div id="simulationInputsHeading" class="border-bottom">
+                <h2 class="mb-0">
+                    <button class="btn btn-link btn-block pl-1 pt-0 text-left text-decoration-none" style="color: #212529;"
+                        type="button" data-toggle="collapse" data-target="#simulationInputsDisplay"
+                        aria-expanded="false" aria-controls="simulationInputsDisplay"
+                    >
+                        Other Input Values<i class="fa fa-chevron-down ml-2"></i>
+                    </button>
+                </h2>
+            </div>
+            <div id="simulationInputsDisplay" class="collapse" aria-labelledby="simulationInputsHeading">
+                <div class="table-responsive">
+                    <table id="simulation-inputs-table" class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th scope="col">Name</th>
+                                <th scope="col">Value</th>
+                                <th scope="col">Source</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -80,18 +107,26 @@
 <div id="results-chart" class="ct-chart mb-2">
 </div>
 
+<div id="results-download" class="text-right p-1" style="display: none;">
+    <button type="button" id="export-btn" class="btn btn-sm btn-dark">
+        <i class="fa fa-download mr-2"></i>Download Excel
+    </button>
+</div>
+
 <div class="table-responsive">
     <table id="results-table" class="table table-striped table-bordered">
         <thead>
             <tr class="headers">
-                <th rowspan="2" style="display: none;">Fixed</th>
-                <th rowspan="2">Product</th>
-                <th rowspan="2">Concentration</th>
-                <th rowspan="2" class="cursor-default" title="Concentration Units">
+                <th scope="col" rowspan="2" style="display: none;">Fixed</th>
+                <th scope="col" rowspan="2">Product</th>
+                <th scope="col" rowspan="2">Concentration</th>
+                <th scope="col" rowspan="2" class="cursor-default" title="Concentration Units">
                     Units
                 </th>
-                <th colspan="4" class="text-center p-0">
+                <th scope="col" colspan="4" class="text-center p-0">
                     <select id="breakout-age"
+                        name="breakout-age"
+                        title="Age picker"
                         class="form-control font-weight-bold text-reset p-1 cursor-pointer"
                         style="text-align-last: center; text-align: center;"
                     >
@@ -100,12 +135,12 @@
                 </th>
             </tr>
             <tr class="headers">
-                <th title="Average Daily Dose">ADD</th>
-                <th class="cursor-default" title="Average Daily Dose Units">
+                <th scope="col" title="Average Daily Dose">ADD</th>
+                <th scope="col" class="cursor-default" title="Average Daily Dose Units">
                     ADD Units
                 </th>
-                <th title="Hazard Quotient">HQ</th>
-                <th>Cancer Risk</th>
+                <th scope="col" title="Hazard Quotient">HQ</th>
+                <th scope="col">Cancer Risk</th>
             </tr>
         </thead>
         <tbody>
@@ -116,12 +151,6 @@
             </tr>
         </tbody>
     </table>
-</div>
-
-<div class="text-right p-1 d-none">
-    <button type="button" id="export-btn" class="btn btn-outline-primary">
-        <i class="fa fa-download"></i>&nbsp;Download Single Simulation Results
-    </button>
 </div>
 
 {% if current_user.is_superuser %}
@@ -175,10 +204,18 @@
 
 <script>
 onDomLoad(function() {
+    window.MIRC = (function(mirc) {
+        return mirc;
+    })(window.MIRC || {});
+
     var tbl = $('#results-table');
     var riskTbody = $('#risk-results tbody');
 
-    $('#logAccordion').collapse()
+    $('#logAccordion').collapse();
+
+    $('#simulationInputsHeading button').on('click', function() {
+        $(this).find('i.fa').toggleClass('fa-chevron-up fa-chevron-down')
+    });
 
     function simplifyUnit(unit, timeLast) {
         var simple = unit
@@ -216,7 +253,16 @@ onDomLoad(function() {
     }
 
     function updateMeta(meta) {
-        $('#import-name').val(meta.importSource);
+        if (meta._id == undefined) {
+            $('#delete-simulation').attr('href', '');
+        }
+        else {
+            $('#delete-simulation').attr(
+                'href',
+                "{{ url_for('mirc_simulation_api.delete_simulation', trim_scenario_id=scenario.id, id=0) }}"
+                    .replace('/0', '/' + meta._id)
+            );
+        }
         $('#fish-pathway').val(meta.fishPathway);
 
         var chemical = meta.chemical || {};
@@ -234,6 +280,82 @@ onDomLoad(function() {
         }
         else {
             $('#adaf-header').hide();
+        }
+
+        meta.fishPathway = meta.fishPathway || '';
+        meta.other_parameters = meta.other_parameters || [];
+
+        function getInput(name) {
+            var param = meta.other_parameters.filter(x => x.variable_name == name);
+            if (param.length) {
+                return param[0];
+            }
+            return undefined;
+        }
+
+        function findFish(trophicLevel) {
+            var param = meta.other_parameters
+                .filter(x => x.full_name.indexOf(`Average Concentration in Trophic Level ${trophicLevel}`) == 0);
+            if (param.length) {
+                return param[0];
+            }
+            return undefined;
+        }
+
+        var otherInputs = $('#simulation-inputs-table tbody').empty();
+
+        function addInput(name) {
+            var param = getInput(name);
+            if (param == undefined) {
+                return;
+            }
+
+            var tr = $('<tr />').appendTo(otherInputs);
+
+            $('<th scope="row" />').html(param.full_name || param.variable_name).appendTo(tr);
+
+            var val = param.value;
+            try {
+                if (
+                    (val > 0 && (val < 0.0001 || val > 1_000_000))
+                    || (val < 0 && (val > -0.0001 || val < -1_000_000))
+                ) {
+                    val = val.toExponential(2);
+                }
+            }
+            catch (err) {
+                // console.log(err)
+                val = param.value; // don't worry
+            }
+            $('<td />').text(val == 0 ? val : val || '').appendTo(tr);
+
+            $('<td />').text(param.source || '').appendTo(tr);
+        }
+
+        if (meta.usesAermod) {
+            addInput('Ca');
+            addInput('Fv');
+            addInput('rho_a');
+        }
+        addInput('C_water');
+        addInput('C_soil');
+        addInput('C_root_veg');
+        addInput('C_root_veg');
+        addInput('Kd');
+        addInput('Cs_s');
+        addInput('Kd_feed');
+        addInput('Drdp');
+        addInput('Drwp');
+        if (meta.fishPathway.toLowerCase() == 'direct') {
+            var fishParam = findFish(3.5);
+            addInput(fishParam?.variable_name);
+            var fishParam = findFish(4);
+            addInput(fishParam?.variable_name);
+        }
+        else {
+            addInput('C_sed');
+            addInput('C_surf_water');
+            addInput('FMD');
         }
     }
 
@@ -336,7 +458,7 @@ onDomLoad(function() {
                 td.innerText = 'N/A';
             }
             else {
-                td.innerText = asScientific(hq.value, 4);
+                td.innerText = asScientific(hq, 4);
             }
             tr.appendChild(td);
 
@@ -348,7 +470,7 @@ onDomLoad(function() {
                 td.innerText = 'N/A';
             }
             else {
-                td.innerText = asScientific(r.value, 4);
+                td.innerText = asScientific(r, 4);
             }
             tr.appendChild(td);
 
@@ -412,6 +534,7 @@ onDomLoad(function() {
                     render: function(data, type, row, meta) {
                         var d = document.createElement('div');
                         d.className = 'd-flex';
+                        d.setAttribute("tabindex", "0");
                         d.innerText = standardProductName(data);
 
                         if (row.risk != null) {
@@ -496,7 +619,7 @@ onDomLoad(function() {
                         if (hq == null) {
                             return 'N/A';
                         }
-                        return asScientific(hq.value, 4);
+                        return asScientific(hq, 4);
                     }
                 },
                 {
@@ -511,7 +634,7 @@ onDomLoad(function() {
                         if (risk == null) {
                             return 'N/A';
                         }
-                        return asScientific(risk.value, 4);
+                        return asScientific(risk, 4);
                     }
                 }
             ]
@@ -557,6 +680,7 @@ onDomLoad(function() {
             .find('th').each(function(i) {
                 var th = $(this);
                 th.addClass('p-0');
+                th.attr("scope", "col");
                 th.html('<input type="text" class="form-control form-control-sm" placeholder="filter" />');
 
                 var last = undefined;
@@ -588,8 +712,12 @@ onDomLoad(function() {
         );
 
         // Initialize child rows
-        tbl.off('click', 'td.cursor-pointer');
-        tbl.on('click', 'td.cursor-pointer', function() {
+        tbl.off('click keydown', 'td.cursor-pointer');
+        tbl.on('click keydown', 'td.cursor-pointer', function(e) {
+            if (e.type !== 'click' && (e.key !== 'Enter' && e.which !== 13)) {
+                return;
+            }
+
             var td = $(this);
             var fa = td.find('.fa');
 
@@ -632,6 +760,7 @@ onDomLoad(function() {
             }
 
             i = info.risk[age].adjusted_intake;
+            iu = '';
             if (i == null) {
                 i = info.risk[age].intake;
             }
@@ -639,6 +768,7 @@ onDomLoad(function() {
                 i = 0;
             }
             else {
+                // iu = ' ' + i.unit;
                 i = i.value;
             }
 
@@ -647,7 +777,7 @@ onDomLoad(function() {
                 hq = 0;
             }
             else {
-                hq = hq.value;
+                hq = hq;
             }
 
             rf = info.risk[age].risk_factor;
@@ -655,11 +785,12 @@ onDomLoad(function() {
                 rf = 0;
             }
             else {
-                rf = rf.value;
+                rf = rf;
             }
 
             return {
                 intake: i,
+                intakeUnits: iu,
                 hazard: hq,
                 risk: rf
             };
@@ -815,7 +946,7 @@ onDomLoad(function() {
                         addName = 'LADD';
                     }
                     content = (
-                        '<b>' + addName + ':</b>&nbsp;' + asScientific(pData.intake, 4)
+                        '<b>' + addName + ':</b>&nbsp;' + asScientific(pData.intake, 4) + pData.intakeUnits
                         + '<br/><b>Hazard Quotient:</b>&nbsp;' +  asScientific(pData.hazard, 4)
                         + '<br/><b>Cancer Risk:</b>&nbsp;' +  asScientific(pData.risk, 4)
                     );
@@ -861,8 +992,12 @@ onDomLoad(function() {
 
     function loadResults(id, format) {
         LoadingScreen.show('getResults');
+        var downloader = $('#results-download');
+        if (format != 'xlsx') {
+            updateMeta({});
+            downloader.hide();
+        }
         var err = $('#simulation-error');
-        updateMeta({});
         err.hide();
         var legend = $('#results-chart-legend');
         var chart = $('#results-chart');
@@ -870,6 +1005,8 @@ onDomLoad(function() {
 
         $('#results-log').empty();
         var logs = $('#logToggle').closest('.card');
+
+        var ans = $.Deferred();
 
         var header = $('#mirc-results-header');
         var desc = $('#mirc-results-desc');
@@ -881,59 +1018,123 @@ onDomLoad(function() {
             tbl.hide();
             logs.hide();
             LoadingScreen.hide('getResults');
-            return;
+            ans.resolve();
+            return ans.promise();
         }
 
         format = format || 'json';
 
-        return $.ajax({
+        $.ajax({
             url: url.replace('/0', '/' + id) + '?format=' + format,
             method: 'GET',
             contentType: 'application/json'
         }).then(function(data) {
-            console.log(data)
+            // console.log(data)
             if (format == 'json') {
                 desc.show();
                 header.show();
-                legend.show();
-                chart.show();
-                tbl.show();
                 logs.show();
                 updateMeta(data.meta);
-                updateChart(data);
-                updateTable(data);
+                if (data.results == undefined || data.results.error) {
+                    legend.hide();
+                    chart.hide();
+                    downloader.hide();
+                    tbl.hide();
+                    showErrors([
+                        'Error in simulation; unable to load results.',
+                        (data.results?.error || '')
+                    ]);
+                }
+                else {
+                    legend.show();
+                    chart.show();
+                    downloader.show();
+                    tbl.show();
+                    updateChart(data);
+                    updateTable(data);
+                }
                 updateLog(data.logs);
             }
+            ans.resolve(data);
         }).fail(function(data, status, error) {
             // console.log(data)
             var msg = ['Error in simulation; unable to load results.']
             if (data && data.responseJSON && data.responseJSON.message) {
                 msg.push(data.responseJSON.message);
             }
-            var msgDiv = err.find('.text-danger').empty();
-            for (var i = 0; i < msg.length; i++) {
-                msgDiv.append($('<div/>').text(msg[i]));
-            }
+            showErrors(msg);
             desc.show();
             header.show();
-            err.show();
-            legend.hide();
-            chart.hide();
-            tbl.hide();
-            logs.show();
+            if (format == 'json') {
+                legend.hide();
+                chart.hide();
+                downloader.hide();
+                tbl.hide();
+                logs.show();
+            }
+            ans.reject(data, status, error);
         }).always(function() {
             LoadingScreen.hide('getResults');
         });
+
+        function showErrors(msg) {
+            var msgDiv = err.find('.text-danger').empty();
+            for (var i = 0; i < msg.length; i++) {
+                if (!msg[i]) {
+                    continue;
+                }
+                msgDiv.append($('<div/>').text(msg[i]));
+            }
+            err.show();
+        }
+
+        return ans.promise();
     }
 
-    $('#simulation-id').change(function() {
+    var simulationSelector = $('#simulation-id');
+
+    function refreshSimulations(thenChangeTo) {
+        TRIM.api.hitUrl("{{ url_for('mirc_simulation_api.get_simulations', trim_scenario_id=scenario.id) }}").on('load', function() {
+            try {
+                var data = JSON.parse(this.responseText);
+                simulationSelector.empty();
+                var simulations = (data.simulations || []).sort((a, b) => a.id - b.id);
+                if (simulations.length) {
+                    simulationSelector.prop('disabled', false);
+                    for (var sim of simulations) {
+                        simulationSelector.append(
+                            `<option value="${sim.id}">${sim.name} - ${sim.chemical.name} (${sim.chemical.cas_number})</option>`
+                        );
+                    }
+                    if (thenChangeTo == undefined) {
+                        thenChangeTo = simulations[0].id;
+                    }
+                    if (thenChangeTo != undefined) {
+                        simulationSelector.val(thenChangeTo).change();
+                    }
+                }
+                else {
+                    simulationSelector.prop('disabled', true);
+                    simulationSelector.append(
+                        '<option value="">No Simulations Created</option>'
+                    );
+                    loadResults(); // clear page
+                }
+            }
+            catch (err) {
+                console.log(this.responseText);
+                console.log(err);
+            }
+        });
+    }
+
+    simulationSelector.change(function() {
         var id = $(this).val();
         loadResults(id);
     }).change();
 
     $('#export-btn').click(function(e) {
         e.preventDefault();
-
         var id = $('#simulation-id').val();
         loadResults(id, 'xlsx').then(function(data) {
             if (data.success) {
@@ -949,7 +1150,20 @@ onDomLoad(function() {
 
     $('#submit-simulation-form').click(function(e) {
         e.preventDefault();
-        $('#simulation-form').submit();
+        LoadingScreen.show('saveSimulation');
+        window.MIRC.submitSimulationForm() // defined in gui_simulation_form.html
+            .done(function(data) {
+                // console.log(data)
+                if (data?.simulation_id != undefined) {
+                    refreshSimulations(data.simulation_id);
+                }
+                else if (data?.simulation_ids != undefined) {
+                    refreshSimulations(data.simulation_ids[0]);
+                }
+            })
+            .always(function() {
+                LoadingScreen.hide('saveSimulation');
+            });
     });
 
     $('#add-simulation').click(function(e) {
@@ -968,6 +1182,18 @@ onDomLoad(function() {
         else {
             initSimulationForm();
             $('#simulation-form-modal').modal('show');
+        }
+    });
+
+    $('#delete-simulation').on('click', function(e) {
+        e.preventDefault();
+        if (confirm('Are you sure you want to delete this simulation?\nThis action cannot be undone!')) {
+            $.ajax({
+                url: this.href,
+                method: 'DELETE'
+            }).then(function() {
+                refreshSimulations();
+            });
         }
     });
 });

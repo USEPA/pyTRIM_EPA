@@ -253,7 +253,6 @@ CREATE TABLE `mirc_scenario` (
     `notes` VARCHAR(800), 
     `parent_id` INTEGER,  
     FOREIGN KEY(`parent_id`) REFERENCES `mirc_scenario` (`id`), 
-    UNIQUE (`name`)
 );
 
 CREATE TABLE `mirc_scenario_permissions` (

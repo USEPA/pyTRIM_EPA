@@ -648,7 +648,7 @@
                     .appendTo(td);
                 if (!isActive) {
                     lbl.css({
-                        color: 'gray',
+                        color: '#626262',
                         'text-decoration': 'line-through'
                     });
                 }
@@ -990,6 +990,9 @@
                     columns: tblColDefs[`opt${optionNum}`], //setDynamicColumnWidths('#' + tbl.attr('id'), tblColDefs[`opt${optionNum}`], tblData),
                     fnCreatedRow: function (row, data, index) {
                         $(row).attr('data-parcel-id', data.parcel_id);
+                    },
+                    initComplete: function (settings, json) {
+                        this.api().columns().header().to$().attr('scope', 'col');
                     },
                     drawCallback: (settings) => {
                         globalDrawCallback(tbl);

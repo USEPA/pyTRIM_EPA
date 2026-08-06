@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
 
 {% block content %}
-<h1 class="text-center">Built-in Risk Scenarios</h1>
+<h1 class="text-center">Built-in Exposure Profiles</h1>
 
 {% set create_modal_id = 'create-scenario-modal' %}
 
@@ -15,7 +15,7 @@
                     <a href="{{ url_for('mirc_scenario.view_risk_scenario', id=scenario.id) }}"
                         class="text-primary float-right"
                     >
-                        <i class="fa fa-eye" title="View"></i>
+                        <i class="fa fa-eye" role="img" title="View {{ scenario.name }}"></i>
                     </a>
                     <h5 class="card-title mb-0">{{ scenario.name }}</h5>
                 </div>
@@ -38,7 +38,7 @@
     {% endfor %}
 </div>
 
-<h1 class="text-center pt-3">Custom Risk Scenarios</h1>
+<h1 class="text-center pt-3">Custom Exposure Profiles</h1>
 
 {% set custom_scenarios = mirc_scenarios|selectattr('is_builtin', 'false')|list %}
 
@@ -50,7 +50,7 @@
             data-target="#{{ create_modal_id }}"
         >
             <i class="fa fa-plus"></i>&nbsp;
-            New<span class="d-none d-sm-inline"> Scenario</span>
+            New<span class="d-none d-sm-inline"> Profile</span>
         </button>
     </div>
 {% endif %}
@@ -64,9 +64,9 @@
                         class="text-primary float-right"
                     >
                         {% if not current_user.can('edit', scenario) %}
-                            <i class="fa fa-eye" title="View"></i>
+                            <i class="fa fa-eye" role="img" title="View {{ scenario.name }}"></i>
                         {% else %}
-                            <i class="fa fa-edit" title="Edit"></i>
+                            <i class="fa fa-edit" role="img" title="Edit {{ scenario.name }}"></i>
                         {% endif %}
                     </a>
                     <h5 class="card-title mb-0">{{ scenario.name }}</h5>
@@ -89,7 +89,7 @@
         </div>
     {% endfor %}
     <div class="col-sm-12 text-center no-scenarios" style="display: none;">
-        You don't have any custom risk scenarios. Would you like to
+        You don't have any custom exposure profiles. Would you like to
         <button type="button"
             class="btn btn-link p-0"
             data-toggle="modal"
@@ -108,7 +108,7 @@
     });
 </script>
 
-{% include 'components/scenarios/mirc/risk_scenarios/create_modal.html' %}
+{% include 'components/scenarios/mirc/exposure_profiles/create_modal.html' %}
 
 {% endblock content %}
 

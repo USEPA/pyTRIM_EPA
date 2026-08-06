@@ -1,14 +1,14 @@
 {% macro table_static_value(table_id, columns) %}
 <div class="form-inline mb-2">
     <label for="{{table_id}}_sv_val">Set uniform value</label>
-    <input id="{{table_id}}_sv_val" type="text" class="form-control form-control-sm mx-sm-1">
+    <input id="{{table_id}}_sv_val" type="text" name="{{table_id}}_sv_val" title="Uniform value" class="form-control form-control-sm mx-sm-1">
     <label for="{{table_id}}_columns">for column</label>
     <select id="{{table_id}}_columns" name="{{table_id}}_columns" class="form-control form-control-sm mx-sm-1">
         {% for column in columns %}
             <option value='{{column | replace(" ", "")}}'>{{column}}</option>
         {% endfor %}
     </select>
-    <button id="{{table_id}}_sv_btn" class="btn btn-secondary px-2 mt-2 mt-sm-0" style="height:1.8em;padding:2px;">Update</button>
+    <button id="{{table_id}}_sv_btn" class="btn btn-secondary px-2 mt-2 mt-sm-0" style="height:1.8em; padding:2px;">Update</button>
     <br>
 </div>
 

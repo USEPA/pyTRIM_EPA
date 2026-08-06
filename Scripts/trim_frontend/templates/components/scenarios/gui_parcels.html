@@ -24,7 +24,7 @@
                             <small class="text-muted">
                                 <a href="{{ url_for(
                                     'static', filename='templates/parcels.csv'
-                                ) }}">
+                                ) }}" title="Click here to download template">
                                     Click here
                                 </a>
                                 to download the template for creating a CSV parcels file.
@@ -155,7 +155,7 @@
                             If the display in the map does not refresh, select the Recalculate button at the bottom right of the page
                             and again turn on the display in the map’s basemap selection box.
                         </p>
-						<a id="generate_aermod_receptors_btn" style="cursor:pointer" class="btn btn-secondary">Generate AERMOD Receptors</a>
+						<a id="generate_aermod_receptors_btn" role="link" style="cursor:pointer" tabindex="0" class="btn btn-secondary">Generate AERMOD Receptors</a>
 					</div>
 				</div>
 				<div class="row mb-1 mt-3" id="aermod-receptors-current-file" style="display: none;">
@@ -1223,6 +1223,9 @@
                     $(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
                     $(".dataTables_scrollHead").addClass('wrap-text-scrollhead');
 
+                    $('table[aria-describedby="mapTable_info"]').removeAttr("aria-describedby");
+                    this.api().columns().header().to$().attr('scope', 'col');
+
                     $("[data-toggle=popover]").popover();
                     $('[data-toggle="tooltip"]').tooltip();
                     $('#mapTable tbody').on('change', 'select.landuse_ddl', function () {
@@ -1604,6 +1607,10 @@
 			}
 		};
 		*/
+
+        // Leaflet button 508c
+        $("a.leaflet-control-zoom-in, a.leaflet-control-zoom-out").attr("tabindex", "0");
+        $("a[class^='leaflet']").attr("aria-label", "Leaflet map button");
 
         // CREATING A NEW PARCEL //
         var shapes = L.geoJSON()

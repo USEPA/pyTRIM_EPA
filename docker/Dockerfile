@@ -47,6 +47,9 @@ RUN python3 -m venv /app/runmodel_venv
 # get a working setuptools
 RUN /app/runmodel_venv/bin/pip install --upgrade setuptools
 
+# need git for flask-api
+RUN apt-get update && apt-get install -y git
+
 # install TRIM specific packages
 RUN /app/runmodel_venv/bin/pip install -r /tmp/requirements.txt
 

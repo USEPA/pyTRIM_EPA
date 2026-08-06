@@ -62,7 +62,7 @@
                     })
                 }).done(function(data) {
                     var scenario = data.scenario;
-                    window.location.href = '/scenario/' + scenario.id + '/edit';
+                    window.location.href = '{{ url_for("mirc_scenario.view_risk_scenario", id=-1) }}'.replace('/-1/', `/${scenario.id}/`);
                 }).fail(function(data) {
                     var error = data.responseJSON;
                     if (error.message.form_errors) {
@@ -80,6 +80,6 @@
     </script>
 {% endset %}
 {{ render_modal(
-    id='create-scenario-modal', title='New Scenario',
+    id='create-scenario-modal', title='New Exposure Profile',
     body=modal_body, footer=modal_footer
 ) }}

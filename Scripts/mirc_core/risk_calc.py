@@ -17,6 +17,7 @@ def assess_risk(
         and concentration_fat is None
         and concentration_aq is None
     ):
+        logs.append(f"No concentrations > 0 for {product} in this scenario; moving on ...")
         return None
 
     chem_params = scenario.parameters.for_chemical(chemical)
@@ -77,6 +78,8 @@ def assess_risk(
         logs.append(f"\nGot IR = {IR} for {product} for {age} in scenario")
 
         if product.name == 'breast milk':
+            if IR == 0:
+                IR = 0 * ureg('kg/day')
             f_mbm = product_params.f_mbm.value
             AE_inf = chem_params.for_media(product).AE_inf.value
             BW_inf = scenario.parameters.at_percentile(
@@ -95,6 +98,8 @@ def assess_risk(
                 IR, AE_inf, EF, BW_inf
             )
         else:
+            if IR == 0:
+                IR = 0 * ureg('g/day/kg')
             # Check if the ingestion rate needs to be body-weight adjusted
             if not IR.check('[mass]/[time]/[mass]'):
                 body_weight = scenario.parameters.at_percentile(
@@ -103,6 +108,12 @@ def assess_risk(
                 logs.append(
                     f"Got body_weight = {body_weight} for {age} in scenario"
                 )
+                if body_weight == 0:
+                    raise ValueError(
+                        f'Invalid Parameter: {body_weight_percentile.name} Body Weight'
+                        f' for "{age.name}" = 0'
+                        f' in Exposure Profile "{scenario.name}"'
+                    )
 
                 IR = IR / body_weight
                 logs.append(f"Adjusted IR = {IR}")
@@ -167,10 +178,10 @@ def assess_risk(
             i = adj if adj is not None else val
             hq = i / RfD
 
-        elcr = None
+        # elcr = None  # We are not reporting risk_factor for individual life stages
         if CSF:
             i = adj if adj is not None else val
-            elcr = i * CSF
+            # elcr = i * CSF
 
         risk_data[age] = {
             'intake': val,

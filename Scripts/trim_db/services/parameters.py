@@ -275,10 +275,9 @@ def evaluate_parameter(
             if 'self.' in q.equation:
                 arguments['self'] = entity
             if 'environment.' in q.equation:
-                if scenario is not None:
-                    arguments['environment'] = scenario
-                else:
-                    arguments['environment'] = entity.current_scenario()
+                if scenario is None:
+                    scenario = entity.current_scenario()
+                arguments['environment'] = scenario
             arguments.update(kwargs)
             try:
                 val = q.eval(**arguments)

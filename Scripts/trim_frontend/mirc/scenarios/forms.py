@@ -12,6 +12,6 @@ root = os.path.dirname(os.path.abspath(__file__))
 forms = os.path.abspath(os.path.join(root, '../../static/forms/mirc'))
 
 
-@json_form(os.path.abspath(f'{forms}/risk_scenario.json'))
+@json_form(os.path.abspath(f'{forms}/exposure_profile.json'))
 class MircScenarioForm(FlaskForm):
     pass

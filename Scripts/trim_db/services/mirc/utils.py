@@ -1,7 +1,8 @@
-from ...schema.mirc.simulations.models import MircSimulationParameter
+from ...schema.mirc import MircParameter, NullParameter
+from ...schema import ureg
 
 
-def update_parameter(
+def get_updated_parameter(
     scenario, parameter_form,
     variable, parameter_name,
     chemical=None, media=None, food=None,
@@ -20,6 +21,9 @@ def update_parameter(
             unit = None
     except AttributeError:
         unit = None
+    if unit == 'dimensionless':
+        unit = ''
+    notes = None
     if with_notes:
         try:
             notes = parameter_form.notes.data
@@ -47,25 +51,51 @@ def update_parameter(
         else:
             raise TypeError(f'Found too many parameters: {parameter}')
 
-    if (
-        val == parameter.value
-        and unit == parameter.unit
-        and (not with_notes or notes == parameter.notes)
-    ):
-        return
-    elif (val is None and parameter.value is None):
+    def parameter_matches(param, v, u, n):
+        if isinstance(param, NullParameter):
+            if not (
+                v is None or v == 0 or str(v).strip() == ''
+                or v == param.value
+            ):
+                # New value wasn't null-ish
+                return False
+            if not (
+                u is None or str(u).strip() == ''
+                or ureg(u) == ureg(param.unit)
+            ):
+                # New unit wasn't null-ish
+                return False
+            if with_notes:
+                # New notes weren't null-ish
+                if param.notes != n:
+                    return False
+        else:
+            if param.value != v:
+                # New value didn't match
+                return False
+            if param.unit != u:
+                # New unit didn't match
+                return False
+            if with_notes:
+                if param.notes != n:
+                    # New notes didn't match
+                    return False
+        return True
+
+    if parameter_matches(parameter, val, unit, notes):
         return
 
-    print(f'Changed {parameter}')
+    print(f'Changed {parameter} ({parameter_name}) -> {val} {unit}, "{notes}"')
 
     if val is None:
         val = 0  # Blanks need to be saved as 0
 
     if (
         not hasattr(parameter, 'scenario')
+        or parameter.scenario is None
         or parameter.scenario.id != scenario.id
     ):
-        parameter = MircSimulationParameter(
+        parameter = MircParameter(
             scenario=scenario,
             chemical=params.chemical,
             media=params.media,
