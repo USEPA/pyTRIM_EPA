@@ -45,7 +45,7 @@
         },
         {
             "id": "cooking_adjustment",
-            "label": "Cooking Adjustment Factor",
+            "label": "Fish Cooking Adjustment Factor",
             "data_type": "float",
             "min": 0,
             "max": 1,

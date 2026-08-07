@@ -544,7 +544,8 @@ class MircSimulationService(GenericService[MircSimulation]):
 
             sim.parameters.append(MircSimulationParameter(
                 variable='percentile_preset',
-                value=SIMULATION_PERCENTILE_PRESETS.index(form.ingestion_percentile_preset.data)
+                value=SIMULATION_PERCENTILE_PRESETS.index(form.ingestion_percentile_preset.data),
+                source=form.trim_timestamp.data
             ))
 
             for p in MircProductService.get_all():
@@ -717,10 +718,11 @@ class MircSimulationService(GenericService[MircSimulation]):
                 'error': str(e)
             }
 
-        return {
+        results = {
             'meta': {
                 '_id': simulation.id,
                 'name': simulation.name,
+                'exposureProfile': simulation.mirc_scenario.as_serializable(),
                 'importSource': simulation.trim_scenario.name or 'N/A',
                 'chemical': simulation.chemical.as_serializable(),
                 'usesAermod': len([p for p in simulation.parameters if p.variable == 'Ca' and p.value != 0]) > 0,
@@ -735,6 +737,8 @@ class MircSimulationService(GenericService[MircSimulation]):
             'results': simulation_results,
             'logs': logs
         }
+
+        return results
 
     def _run_single_pathway(
         self, product, body_weight, logs,

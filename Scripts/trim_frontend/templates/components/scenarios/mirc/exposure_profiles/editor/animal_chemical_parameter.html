@@ -106,6 +106,10 @@
                     tbl.append(data);
                     rows = tbl.find('tr').hide();
                     rows.filter(filter).show();
+                    if (pFilter.find(':selected').text() != 'Fish') {
+                        // Hide Cooking Adjustment Factor for non-Fish
+                        tbl.find('[id$="cooking_adjustment"]').closest('tr').hide();
+                    }
                     // Enable popups
                     $('[data-toggle="popover"]').popover();
                 }).always(function() {

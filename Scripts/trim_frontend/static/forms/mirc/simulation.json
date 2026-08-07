@@ -152,7 +152,7 @@
         },
         {
             "id": "C_water",
-            "label": "Average Concentration in Drinking Water (g/L)",
+            "label": "Average Concentration in Drinking Water (mg/L)",
             "data_type": "float",
             "min": 0,
             "step": "any"
@@ -161,7 +161,7 @@
             "id": "C_water_unit",
             "label": "",
             "data_type": "string",
-            "default": "g/L"
+            "default": "mg/L"
         },
         {
             "id": "C_water_src",
