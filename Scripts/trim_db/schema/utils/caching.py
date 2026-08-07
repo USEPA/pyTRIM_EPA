@@ -1,4 +1,5 @@
 import threading
+import time
 from functools import wraps, partial
 from uuid import uuid4
 
@@ -132,3 +133,13 @@ class CacheManager:
             return CacheManager.subcache(base_key, keymaker=keymaker).cached(f)
 
         return partial(decorated, base_key)
+
+    @classmethod
+    def timeit(cls, func):
+        def decorated(*args, **kwargs):
+            st = time.time()
+            ret = func(*args, **kwargs)
+            et = time.time()
+            print(f'\t> Ran `{func.__name__}({args}, {kwargs})` in {et - st} seconds')
+            return ret
+        return decorated

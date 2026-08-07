@@ -36,7 +36,7 @@
 
     <div id="mirc-results-desc">
         <div class="form-group form-row mb-1">
-            <label class="col-3 col-form-label col-form-label py-0 font-weight-bold">
+            <label class="col-3 col-form-label col-form-label py-0 font-weight-bold" for="chemical-name">
                 <span>Chemical</span>
             </label>
             <div class="col">
@@ -53,7 +53,31 @@
             </div>
         </div>
         <div class="form-group form-row mb-1">
-            <label class="col-3 col-form-label py-0 font-weight-bold">
+            <label class="col-3 col-form-label py-0 font-weight-bold" for="exposure-profile">
+                <span>Exposure Profile</span>
+            </label>
+            <div class="col">
+                <input id="exposure-profile" readonly="readonly"
+                    class="form-control-plaintext py-0"
+                    style="max-width: 100%;"
+                    value="Loading ..."
+                />
+            </div>
+        </div>
+        <div class="form-group form-row mb-1">
+            <label class="col-3 col-form-label py-0 font-weight-bold" for="trim-timestamp">
+                <span>At Time</span>
+            </label>
+            <div class="col">
+                <input id="trim-timestamp" readonly="readonly"
+                    class="form-control-plaintext py-0"
+                    style="max-width: 100%;"
+                    value="Loading ..."
+                />
+            </div>
+        </div>
+        <div class="form-group form-row mb-2">
+            <label class="col-3 col-form-label py-0 font-weight-bold" for="fish-pathway">
                 <span>Fish Calculation Type</span>
             </label>
             <div class="col">
@@ -259,6 +283,9 @@ onDomLoad(function() {
                     .replace('/0', '/' + meta._id)
             );
         }
+
+        $('#exposure-profile').val(meta.exposureProfile?.name);
+
         $('#fish-pathway').val(meta.fishPathway);
 
         var chemical = meta.chemical || {};
@@ -279,6 +306,7 @@ onDomLoad(function() {
         }
 
         meta.fishPathway = meta.fishPathway || '';
+        meta.percentiles = meta.percentiles || {};
         meta.other_parameters = meta.other_parameters || [];
 
         function getInput(name) {
@@ -287,6 +315,14 @@ onDomLoad(function() {
                 return param[0];
             }
             return undefined;
+        }
+
+        var tt = $('#trim-timestamp').val(getInput('percentile_preset')?.source);
+        if (!(tt.val() || '').length) {
+            tt.closest('.form-group').hide();
+        }
+        else {
+            tt.closest('.form-group').show();
         }
 
         function findFish(trophicLevel) {
@@ -299,6 +335,27 @@ onDomLoad(function() {
         }
 
         var otherInputs = $('#simulation-inputs-table tbody').empty();
+
+        function addPercentile(name) {
+            var pct = meta.percentiles[name];
+            if (pct == undefined) {
+                return;
+            }
+
+            var tr = $('<tr />').appendTo(otherInputs);
+
+            if (name == 'body_weight') {
+                $('<th scope="row" />').text('Body Weight Percentile').appendTo(tr);
+            }
+            else {
+                function toTitleCase(s) {
+                    return s.toLowerCase().split(' ').map(x => x[0].toUpperCase() + x.slice(1)).join(' ')
+                }
+                $('<th scope="row" />').text(`${toTitleCase(name.replace(/_/g, ' '))} Ingestion Rate Percentile`).appendTo(tr);
+            }
+            $('<td />').text(pct).appendTo(tr);
+            $('<td />').appendTo(tr);
+        }
 
         function addInput(name) {
             var param = getInput(name);
@@ -328,6 +385,7 @@ onDomLoad(function() {
             $('<td />').text(param.source || '').appendTo(tr);
         }
 
+        addPercentile('body_weight');
         if (meta.usesAermod) {
             addInput('Ca');
             addInput('Fv');
@@ -352,6 +410,11 @@ onDomLoad(function() {
             addInput('C_sed');
             addInput('C_surf_water');
             addInput('FMD');
+        }
+        for (var pct in meta.percentiles) {
+            if (pct != 'body_weight' && pct != 'breast_milk') {
+                addPercentile(pct);
+            }
         }
     }
 
