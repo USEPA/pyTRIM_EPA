@@ -6,16 +6,26 @@ $icf-dark-teal: #007178;
 $icf-gray:      #d8e0e3;
 $icf-dark-gray: #768591;
 
+// 508c compliant contrast
+$success-508c: #0a8927;
+$info-508c: #008298;
+$gray-508c: #626262;
+$dark-508c: darken($icf-dark-gray, 20%);
+
+
 $theme-colors: (
   'primary': $icf-brown,
   'secondary': $icf-orange,
   'primary-accent': $icf-dark-teal,
   'secondary-accent': $icf-teal,
+  'success': $success-508c,
+  'info': $info-508c,
   'light': $icf-gray,
-  'dark': $icf-dark-gray
+  'dark': $dark-508c
 );
 
 $body-bg: rgba($icf-gray, 0.05);
+$navbar-light-color: $dark-508c;
 $nav-tabs-link-active-bg: #fff;
 
 $enable-rounded: true;

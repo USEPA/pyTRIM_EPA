@@ -22,8 +22,10 @@
             <a href="#help-{{ field.id }}"
                 role="button"
                 data-toggle="collapse"
+                tabindex="0"
                 aria-expanded="false"
                 aria-controls="help-{{ field.id }}"
+                aria-label="help-{{ field.id }}"
             >
                 <span title="Click here for additional instructions">
                     <i class="fa fa-question"></i>
@@ -38,6 +40,7 @@
     {% else %}
         <sup>
             <a role="button"
+                aria-label="help-{{ field.id }}"
                 tabindex="0"
                 data-toggle="popover"
                 data-trigger="hover"
@@ -608,6 +611,7 @@ that we need; try to re-implement it to work with the functions above.
         <a href="#help-{{ id }}"
             role="button"
             data-toggle="collapse"
+            tabindex="0"
             aria-expanded="false"
             aria-controls="help-{{ id }}"
         >

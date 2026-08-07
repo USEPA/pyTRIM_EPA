@@ -24,7 +24,7 @@
                         Show/Hide Non-Interactive Data
                     </label>
                     <sup>
-                        <a href="javascript:void(0);" title="" data-toggle="popover" data-html="true" data-placement="left" data-content="Select to show or hide properties which cannot be edited directly. These are property values which the model calculates from other property values. You have the option to see the calculated values, but you cannot change them except by changing the other property values they depend on. The help text on the non-interactive properties specifies the dependent properties, and when you click on one of the non-interactive properties then any dependent properties on this page will be highlighted in blue." data-original-title="Non-Interactive Data"><i class="fa fa-question"></i></a>
+                        <a href="javascript:void(0);" aria-label="Show/Hide Non-Interactive Data" title="" data-toggle="popover" data-html="true" data-placement="left" data-content="Select to show or hide properties which cannot be edited directly. These are property values which the model calculates from other property values. You have the option to see the calculated values, but you cannot change them except by changing the other property values they depend on. The help text on the non-interactive properties specifies the dependent properties, and when you click on one of the non-interactive properties then any dependent properties on this page will be highlighted in blue." data-original-title="Non-Interactive Data"><i class="fa fa-question"></i></a>
                     </sup>
                 </div>
             </div>
@@ -444,6 +444,7 @@
                 columns: setDynamicColumnWidths(tblId, get_pivoted_columns(tblId), table_data),
                 initComplete: function (settings, json) {
                     // $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    this.api().columns().header().to$().attr('scope', 'col');
                     $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
                     $(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
                     $(".dataTables_scrollHead").addClass('wrap-text-scrollhead');
@@ -1036,12 +1037,19 @@
                     'render': function (data, type, row){
                         let help_text = row.helpText;
                         let tooltip = row.unit || row.tooltip;
-                        return  "<label data-toggle='tooltip' data-placement='top' data-html='true' title='" + tooltip + "'>" + data + "</label>" +
-                        "<sup>" +
-                            "<a href='javascript:void(0);' title='"+ data +"' data-trigger='focus' data-toggle='popover' data-html='true' data-placement='left' data-content='" + help_text +"'>" +
-                                "<i class='fa fa-question'></i>" +
-                            "</a>" +
-                        "</sup>";
+                        return  `<label data-toggle='tooltip' data-placement='top' data-html='true' title='${tooltip}'>${data}</label>
+                        <sup>
+                            <a href='javascript:void(0);'
+                                title='${data}'
+                                aria-label='${data}'
+                                data-trigger='focus'
+                                data-toggle='popover'
+                                data-html='true'
+                                data-placement='left'
+                                data-content='${help_text}'>
+                                    <i class='fa fa-question'></i>
+                            </a>
+                        </sup>`;
                     }
                 }
             ];
@@ -1081,7 +1089,7 @@
                         })
                         let multi_select_html = "<div><div data-parcelname='"+ e.name +"' class='parcelMultiselect'>" +
                             "<div id='psl_" + e.name + "' class='parcelSelectLabel selectBox'>" +
-                            "<select class='form-select'>" +
+                            "<select class='form-select' aria-label='Parcels for external water inflow'>" +
                             "<option>Select Parcel(s)</option>" +
                             "</select>" +
                             "<div class='overSelect'>" +
