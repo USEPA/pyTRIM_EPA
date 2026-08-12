@@ -479,11 +479,16 @@ def parse_met_file():
                     )
 
                 met_type = "SFC" if is_sfc else "MET"
-                met_columns = [['Rain'], ['AirTemperature'], ['HorizontalWindSpeed', 'WindDirection'], ['MixingHeight']]
+                met_columns = [['Rain'], ['AirTemperature'], ['HorizontalWindSpeed', 'WindDirection'],
+                               ['MixingHeight'], ['IsDay'], ['CumulativeRain']]
 
                 met_fields = {}
                 for metcol in met_columns:
-                    othercol = [col for col_grp in met_columns for col in col_grp if col_grp != metcol]
+                    if not set(metcol).issubset(df.columns):
+                        continue
+
+                    othercol = [col for col_grp in met_columns for col in col_grp
+                                if col_grp != metcol and col in df.columns]
                     df_met = df.drop(columns=othercol)
                     print(f'Calculating timeseries average for {metcol}')
                     met_fields |= meteo_wgt_avg_value_from_timeseries(df_met, met_type)
