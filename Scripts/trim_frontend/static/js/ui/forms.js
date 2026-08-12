@@ -122,7 +122,7 @@ window.TRIM = (function(trim) {
             return;
         }
         var val = e.target.value;
-        var lbl = e.target.parentElement.getElementsByTagName('label')[0];
+        var lbl = e.target.parentElement.getElementsByClassName('custom-file-label')[0];
         if (val.toString().trim()) {
             val = val.toString().split('/');
             val = val[val.length - 1];
@@ -1031,6 +1031,6 @@ window.TRIM = (function(trim) {
     }
 
     trim.forms = forms;
-    trim.functions = functions
+    trim.functions = functions;
     return trim;
 })(window.TRIM || {});

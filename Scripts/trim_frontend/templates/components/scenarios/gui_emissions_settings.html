@@ -147,12 +147,14 @@
         }
 
         var PARCEL_REFRESH = false;
+        var chemicals = null
+        var parcels = null;
         try {
-            var chemicals = TRIM.store.currentScenario.chemicals.map(x => x.name);
-            var parcels = TRIM.store.currentScenario.parcels;
+            chemicals = TRIM.store.currentScenario.chemicals.map(x => x.name);
+            parcels = TRIM.store.currentScenario.parcels;
         } catch(e) {
-            var chemicals = null;
-            var parcels = null;
+            chemicals = null;
+            parcels = null;
         }
         var chem_spec = {}
 
