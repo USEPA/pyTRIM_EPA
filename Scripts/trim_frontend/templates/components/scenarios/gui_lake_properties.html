@@ -1139,10 +1139,10 @@
                 $cells.each(function(cellIndex) {
                     // Set the header text
                     if(headersText[cellIndex] === undefined) {
-                        headersText[cellIndex] = $($headers[cellIndex]).text();
+                        headersText[cellIndex] = $($headers[cellIndex]).text().trim();
                     }
                     // Update the row object with the header/cell combo
-                    myRows[index][headersText[cellIndex]] = $(this).find("label").first().text();
+                    myRows[index][headersText[cellIndex]] = $(this).find("label").first().text().trim();
                 });
             });
             return myRows
@@ -1215,7 +1215,8 @@
             let soil_erosion_rate_to_wc = Number(data_sed.find(e=>e.Property == "Soil Erosion Rate to Water Body")[parcel_name])
             let wc_sed_discharge_rate = Number(data_wc.find(e=>e.Property == "Sediment Discharge Rate")[parcel_name])
             let sed_bed_density = Number(data_sed.find(e=>e.Property == "Bed Density")[parcel_name])
-            let res = (wc_external_sed_inflow + soil_erosion_rate_to_wc - wc_sed_discharge_rate) / (sed_bed_density * area)
+            let res = (wc_external_sed_inflow + soil_erosion_rate_to_wc - (wc_sed_discharge_rate/365)) / (sed_bed_density * area)
+            res = Math.max(res, 0)
             return Number.parseFloat(res).toExponential(5)
         }
 
