@@ -108,6 +108,13 @@ class MircSimulation(Model, TrackUpdatesMixin):
                 return p
         return None
 
+    @property
+    def timestamp(self):
+        param = self.get_parameter('percentile_preset')
+        if param is None:
+            return None
+        return param.source
+
     def __repr__(self):
         return (
             f"{self.__class__.__qualname__}("
@@ -122,9 +129,12 @@ def _ts_simulation(simulation: MircSimulation):
         'id': simulation.id,
         'name': simulation.name,
         'chemical': {
-            'name': simulation.chemical.hap_name or simulation.chemical.name,
+            'name': simulation.chemical.name,
             'cas_number': simulation.chemical.cas_number
-        }
+        },
+        'exposureProfile': simulation.mirc_scenario.as_serializable(),
+        'timestamp': simulation.timestamp,
+        'fishPathway': 'B(S)AF' if simulation.use_baf else 'Direct'
     }
 
 

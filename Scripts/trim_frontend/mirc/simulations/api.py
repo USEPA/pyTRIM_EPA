@@ -50,6 +50,44 @@ def get_simulations(trim_scenario_id):
     if not current_user.can('view', trim_scenario):
         abort(403)
 
+    f = request.args.get('format', 'json')
+    if f == 'xlsx':
+        with tempfile.TemporaryDirectory() as tmpdir:
+            n = f'{trim_scenario.name}_Risk_Simulations.xlsx'
+            n = n.replace('/', '_').replace('\\', '_')
+            n = n.replace('(', '_').replace(')', ')')
+            n = n.replace(',', '-').replace(';', '-')
+            n = n.replace(' ', '_')
+            filepath = os.path.join(tmpdir, n)
+            with pd.ExcelWriter(filepath) as writer:
+                for simulation in trim_scenario.mirc_simulations:
+                    try:
+                        results = MircSimulationService(simulation).run_pathways()
+                    except Exception:
+                        import traceback
+                        traceback.print_exc()
+                        continue
+
+                    try:
+                        report = make_report(results)
+                    except Exception:
+                        import traceback
+                        traceback.print_exc()
+                        continue
+
+                    if not isinstance(report, list):
+                        report = [report]
+
+                    base_sheet_name = f'({simulation.name.replace("Simulation", "").strip()}) {simulation.chemical.name}'
+                    for i, df in enumerate(report, start=1):
+                        if i > 1:
+                            sheet_name = f'{base_sheet_name} (Metadata)'
+                        else:
+                            sheet_name = base_sheet_name
+                        df.to_excel(writer, sheet_name=sheet_name, index=False, header=(i < 2))
+
+            return api.FileResult(filepath)
+
     return api.Result({
         'simulations': [s.as_serializable() for s in trim_scenario.mirc_simulations]
     })
@@ -93,11 +131,19 @@ def get_results(trim_scenario_id, simulation_id):
             if not isinstance(report, list):
                 report = [report]
 
-            n = f'{trim_scenario.name}_{simulation.name}.xlsx'.replace(' ', '_')
+            n = f'{trim_scenario.name}_{simulation.name}_{simulation.chemical.name}.xlsx'
+            n = n.replace('/', '_').replace('\\', '_')
+            n = n.replace('(', '_').replace(')', ')')
+            n = n.replace(',', '-').replace(';', '-')
+            n = n.replace(' ', '_')
             filepath = os.path.join(tmpdir, n)
             with pd.ExcelWriter(filepath) as writer:
                 for i, df in enumerate(report, start=1):
-                    df.to_excel(writer, sheet_name=f'Sheet{i}', index=False)
+                    if i > 1:
+                        sheet_name = f'Metadata'
+                    else:
+                        sheet_name = 'Results'
+                    df.to_excel(writer, sheet_name=sheet_name, index=False, header=(i < 2))
 
             return api.FileResult(filepath)
     else:

@@ -83,7 +83,7 @@ def make_report(data):
 
     # Add Chemical Name
     chemical = (df_meta.loc[df_meta['index'] == "chemical", "meta"]).values[0]
-    df_results["Chemical"] = str(chemical.get('hap_name') or chemical['name'])
+    df_results["Chemical"] = str(chemical['name'])
 
     # Add Scenario Name
     scenario = df_meta.loc[
@@ -155,4 +155,17 @@ def make_report(data):
 
     df = df.drop(columns=['TRIM Scenario'])  # No need to include this
 
-    return df
+    metadata = {
+        'Exposure Profile': data['meta']['exposureProfile']['name'],
+        'Timestamp': data['meta']['timestamp'],
+        'Fish Calculation': data['meta']['fishPathway'],
+        'Includes AERMOD Data?': data['meta']['usesAermod']
+    }
+
+    df_meta = pd.DataFrame({
+        '': list(metadata.keys()),
+        'Value': list(metadata.values())
+    })
+    print(df_meta)
+
+    return [df, df_meta]

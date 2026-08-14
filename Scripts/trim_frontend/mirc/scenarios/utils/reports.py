@@ -266,7 +266,7 @@ def get_chemical_parameters(scenario, chemical_id=None):
 
         data = {
             'chemical_id': c.id,
-            'chemical': (c.hap_name or c.name).title(),
+            'chemical': c.name.title(),
             'Fw': chem_props.Fw.value,
             'soil_adjustment': chem_props.SoilAdjFactor.value,
             'CSF': chem_props.CSF.value,
@@ -299,7 +299,7 @@ def get_mutagenic_parameters(scenario, chemical_id=None):
 
             data = {
                 'chemical_id': c.id,
-                'chemical': (c.hap_name or c.name).title(),
+                'chemical': c.name.title(),
                 'life_stage_id': age.id,
                 'life_stage': age.name
             }
@@ -333,7 +333,7 @@ def get_baf_parameters(scenario, chemical_id=None):
             ft = 'BSAF' if 'benthic' in nm else 'BAF'
             data = {
                 'chemical_id': c.id,
-                'chemical': (c.hap_name or c.name).title(),
+                'chemical': c.name.title(),
                 'aquatic_type_id': at.id,
                 'aquatic_type': f'{nm.title()} ({ft})',
             }
@@ -367,7 +367,7 @@ def get_plant_chemical_parameters(scenario, chemical_id=None, product_id=None):
 
             data = {
                 'chemical_id': c.id,
-                'chemical': (c.hap_name or c.name).title(),
+                'chemical': c.name.title(),
                 'product_id': p.id,
                 'product': p.name
             }
@@ -403,7 +403,7 @@ def get_animal_chemical_parameters(scenario, chemical_id=None, product_id=None):
 
             data = {
                 'chemical_id': c.id,
-                'chemical': (c.hap_name or c.name).title(),
+                'chemical': c.name.title(),
                 'product_id': p.id,
                 'product': p.name
             }
@@ -436,7 +436,7 @@ def get_breast_milk_chemical_parameters(scenario, chemical_id=None):
 
         data = {
             'chemical_id': c.id,
-            'chemical': (c.hap_name or c.name).title(),
+            'chemical': c.name.title(),
             'product_id': p.id,
             'product': p.name
         }
