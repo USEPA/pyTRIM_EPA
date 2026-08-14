@@ -1930,9 +1930,7 @@
                 .closest('.form-group').hide();
 
             function updateFields() {
-                var data = fileField.attr('data-filedata');
-                data = data || 'null';
-                data = JSON.parse(data);
+                var data = TRIM.store.fileData.fromField(fileField, 'name', 'parcels') || null;
 
                 desc.attr('disabled', 'disabled');
                 selects.html('');
@@ -1961,19 +1959,18 @@
                 var loadingRequest = 'load_' + this.id;
                 LoadingScreen.show(loadingRequest);
 
-                me.removeAttr('data-filedata');
+                var myName = me.attr('name');
+                var fileKey = `parcels_${myName}`;
+                TRIM.store.fileData.remove(fileKey);
                 TRIM.api.parseFiles(this).on('load', function() {
                     try {
                         var data = JSON.parse(this.responseText);
                         if (data) {
                             if (!$('#parcel_file_fields_div').is(":visible")) {
-                                $('#parcel_file_fields_div').show()
+                                $('#parcel_file_fields_div').show();
                             }
-                            var myData = data.files[me.attr('name')];
-                            fileField.attr(
-                                'data-filedata',
-                                JSON.stringify(myData)
-                            );
+                            var myData = data.files[myName];
+                            TRIM.store.fileData.add(fileKey, myData);
                         }
                         updateFields();
                     }
