@@ -8,6 +8,7 @@ python_version = "3.11"
 
 [dev-packages]
 pipenv = "*"
+openpyxl = "*"
 
 [packages]
 alembic = "*"
@@ -56,3 +57,4 @@ wtforms-sqlalchemy = "*"
 xlsxwriter = "*"
 xmltodict = "*"
 zipp = "*"
+matplotlib = "*"

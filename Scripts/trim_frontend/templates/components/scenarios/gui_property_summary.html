@@ -12,9 +12,9 @@
                     <table class="scenarioMap" style="border-collapse: collapse" cellpadding="6">
                         <thead>
                             <tr>
-                                <th>Entity</th>
-                                <th>Property</th>
-                                <th>Property Value</th>
+                                <th scope="col">Entity</th>
+                                <th scope="col">Property</th>
+                                <th scope="col">Property Value</th>
                             </tr>
                         </thead>
                     </table>
@@ -32,11 +32,11 @@
                     <table class="chemMap" style="border-collapse: collapse" cellpadding="6">
                         <thead>
                             <tr>
-                                <th>Chemical</th>
-                                <th>Entity</th>
-                                <th>Property</th>
-                                <th>Property Value</th>
-                                <th>Property Unit</th>
+                                <th scope="col">Chemical</th>
+                                <th scope="col">Entity</th>
+                                <th scope="col">Property</th>
+                                <th scope="col">Property Value</th>
+                                <th scope="col">Property Unit</th>
                             </tr>
                         </thead>
                     </table>
@@ -61,11 +61,11 @@
                     <table class="compMap" style="border-collapse: collapse" cellpadding="6">
                         <thead>
                             <tr>
-                                <th>Parcel</th>
-                                <th>Entity</th>
-                                <th>Property</th>
-                                <th>Property Value</th>
-                                <th>Property Unit</th>
+                                <th scope="col">Parcel</th>
+                                <th scope="col">Entity</th>
+                                <th scope="col">Property</th>
+                                <th scope="col">Property Value</th>
+                                <th scope="col">Property Unit</th>
                             </tr>
                         </thead>
                     </table>
@@ -74,6 +74,11 @@
         </div>
     </section>
 </form>
+<style>
+    .ems {
+        background-color: white !important;
+    }
+</style>
 <script>
     onDomLoad(function(e) {
         var form = document.getElementById('property-summary-gui');
@@ -106,18 +111,20 @@
         form.addEventListener('form:visible', function() {
             console.log('property summary form visible')
             LoadingScreen.show('property_summary_loading');
-            TRIM.refreshParcels();
             TRIM.api.getChemicalProperties('{{ scenario.id }}').on('load', function () {
                 TRIM.store.currentScenario.chemical_properties = this.responseJSON
             });
             TRIM.api.getMeteorology(TRIM.store.currentScenario).on('load', function () {
                 TRIM.store.currentScenario.meteorology = this.responseJSON.meteorology;
             });
-            document.body.addEventListener('parcels:ready', updateSummaryFields());
+            document.body.removeEventListener('parcels:ready', updateSummaryFields);
+            document.body.addEventListener('parcels:ready', updateSummaryFields);
+            TRIM.refreshParcels();
         });
 
         function updateSummaryFields() {
-            if (!TRIM.store.currentScenario.parcels 
+            if (!TRIM.store.currentScenario
+            || !TRIM.store.currentScenario.parcels
             || !TRIM.store.currentScenario.chemical_properties
             || !TRIM.store.currentScenario.meteorology) {
                 // Parcels haven't loaded yet; wait a bit and try again
@@ -159,6 +166,12 @@
                         return $(e).data('depth') == next_level;
                     });
                     $(next_child).show()
+                }
+            });
+
+            $('tr.colps').on('keydown', (e) => {
+                if (e.key === 'Enter' || e.which === 13) {
+                    $(e.target).click();
                 }
             });
 
@@ -455,14 +468,14 @@
             // catch {}
             if (type == "general") {
                 for (const [entity_key, entity_value] of Object.entries(map)) {
-                    map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>"
+                    map_html = map_html + "<tr data-depth='0' tabindex='0' class='level0 colps'><td>"
                         + entity_key +
                         "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td></tr>"
 
                     for (const [property_key, property_value] of Object.entries(entity_value)) {
-                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td class='comp'>" 
+                        map_html = map_html + "<tr data-depth='1' tabindex='0' class='level1 colps'><td></td><td class='comp'>" 
                             + property_key + 
-                            "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted'>"
+                            "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted' style='color:black;'>"
                             + property_value +
                             "</label></td><td></td></tr>"
                     }
@@ -473,12 +486,12 @@
                 let prop_unit_style = "style='max-width:10rem;text-wrap: wrap;'";
 
                 for (const [entity_key, entity_value] of Object.entries(map)) {
-                    map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>"
+                    map_html = map_html + "<tr data-depth='0' tabindex='0' class='level0 colps'><td>"
                         + entity_key +
                         "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td><td></td><td></td></tr>"
 
                     for (const [cat_key, cat_value] of Object.entries(entity_value)) {
-                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td class='comp'>"
+                        map_html = map_html + "<tr data-depth='1' tabindex='0' class='level1 colps'><td></td><td class='comp'>"
                             + cat_key +
                             "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
 
@@ -494,7 +507,7 @@
                                 `;
                             }
 
-                            map_html = map_html + `<tr data-depth='2' class='level2 colps'><td></td><td></td><td class='comp' ${prop_style}>`
+                            map_html = map_html + `<tr data-depth='2' tabindex='0' class='level2 colps'><td></td><td></td><td class='comp' ${prop_style}>`
                                 + property_key +
                                 `</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted' ${prop_value_style}>`
                                 + (prop_value == null ? '-' : prop_value) +
@@ -522,7 +535,7 @@
             })
             let uniq_comp = [... new Set(comp_array)]
             uniq_comp.sort().forEach(function(e) {
-                let menu_item = "<a class='dropdown-item comp-item'>" + e + "</a>"
+                let menu_item = "<a href='#' class='dropdown-item comp-item'>" + e + "</a>"
                 $(menu_item).appendTo(dd_menu)
             })
             $("a.dropdown-item.comp-item").on("click",function (e){

@@ -1,0 +1,17 @@
+{% from 'macros/mirc/form_macros.html' import render_input, render_label %}
+
+<tr class="product-{{ pp.product_id.data }}">
+    <th scope="row" class="table-primary border-primary align-middle text-center">
+        {{ render_label(pp.EF, hover_help=True, class="mb-0") }}
+    </th>
+    <td>
+        {{ render_input(pp.product_id) }}
+        
+        {{ render_input(pp.EF) }}
+    </td>
+    <td>
+        <input type="text" class="form-control form-control-sm"
+            readonly="readonly" value="day(s)"
+            aria-label="Unit" />
+    </td>
+</tr>

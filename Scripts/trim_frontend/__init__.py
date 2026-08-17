@@ -7,6 +7,7 @@ from flask_security import Security
 from flask_api import FlaskApi
 from trim_db import db
 from .config import init_config
+from .mirc import init_app as init_mirc
 from .utils.admin_views import init_admin_views
 from .utils.auth import init_auth
 from .utils.hotfix import patch_flask
@@ -51,10 +52,13 @@ def create_app(testing=False):
 
     # Add global template functions & vars
     app.jinja_env.filters['dir'] = dir
+    app.jinja_env.globals['env_type'] = app.config['ENVIRONMENT_TYPE']
+
+    init_mirc(app)
 
     @app.context_processor
     def inject_template_globals():
-        return dict(site_name="TRIM.Builder")
+        return dict(site_name="TRIM")
 
     if not testing:
         from .utils.auth import define_superusers

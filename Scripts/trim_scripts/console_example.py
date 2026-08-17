@@ -1,5 +1,26 @@
-from trim_db.local import *
-from trim_db.services import *
+from base import *
+
+"""
+scenario = ScenarioService.get(name=SCENARIO_NAME) # scenario object
+
+p = ParcelService.get(id=1) # independent of scenario object
+
+# useful functions
+list(scenario.parcels)
+
+# list of compartments belonging to the parcel E1
+p.compartments
+
+# fetch compartment
+# iterate and filter for the comaprtment
+c = p.get_compartment(name = "Soil_Surface")
+
+# get the parameters
+c.parameters
+
+c.id # unique to this parcel/scenario
+c.FractionSand # this is the path taken to update/create a value
+"""
 
 s = ScenarioService.get(name='Foundries_SS')
 s

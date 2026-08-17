@@ -1,12 +1,15 @@
-import json, os, re
-from datetime import datetime
-from io import StringIO, TextIOWrapper
+import json
+import os
 import numpy as np
 import boto3
 import jenkspy
 import pandas as pd
 import tempfile
-from .spatial import translate_position
+from datetime import datetime
+from flask import url_for
+from io import StringIO, TextIOWrapper
+from pathlib import Path
+from trim_core.coordinates import CoordinateMapper
 from ..parcels.utils import geojson_to_aermod_receptors
 
 
@@ -159,14 +162,14 @@ def parse_plt_file(raw_data):
     def convert_data(col_name, raw_val):
         try:
             return pd.to_numeric(raw_val)
-        except:
+        except (TypeError, ValueError):
             return raw_val
 
     data_lines = 0
     for line in lines[header_underscore_line:]:
         if line.strip() == "":
             break
- 
+
         line_number_in_file = 1 + header_underscore_line + data_lines
         # print(f"[DATA LINE #{data_lines+1}] / [LINE NUMBER {line_number_in_file}]")
 
@@ -177,8 +180,11 @@ def parse_plt_file(raw_data):
         for col_name, col_start, col_end in cols:
             cell_data = (line[col_start:col_end+1]).strip()
             converted = convert_data(col_name, cell_data)
-            if " " in converted:
-                raise Exception(json.dumps({"user_facing_error_msg": "data rows in uploaded file do not conform to column widths"}))
+            try:
+                if " " in converted:
+                    raise Exception(json.dumps({"user_facing_error_msg": "data rows in uploaded file do not conform to column widths"}))
+            except TypeError:
+                pass  # Assume successful
             slotted_data[col_name] = converted
             original_data[col_name] = cell_data
 
@@ -373,7 +379,7 @@ class MiscAssociatedFileDepositionOverlay(MiscAssociatedFileVariety):
     def apply_ZFLAG_logic(self, df, input_file_errors, metadata):
         try:
             zflag_restriction = float(metadata.get("zflag_restriction"))
-        except:
+        except Exception:
             zflag_restriction = None
 
         if "ZFLAG" in df.columns.to_list():
@@ -442,8 +448,9 @@ class MiscAssociatedFileDepositionOverlay(MiscAssociatedFileVariety):
                 if translation_needed:
                     # translate X/Y to lat/lng
                     utm_zone = metadata.get("utm_zone")
-                    df["wgs84_long"] = df.apply(lambda row: translate_position(row.X, row.Y, "UTM", "WGS84_LONGLAT", utm_zone=utm_zone)[0], axis = 1)
-                    df["wgs84_lat"] = df.apply(lambda row: translate_position(row.X, row.Y, "UTM", "WGS84_LONGLAT", utm_zone=utm_zone)[1], axis = 1)
+                    mapper = CoordinateMapper('UTM', 'WGS84_LONGLAT', utm_zone=utm_zone)
+                    df["wgs84_long"] = df.apply(lambda row: mapper.translate(row.X, row.Y)[0], axis=1)
+                    df["wgs84_lat"] = df.apply(lambda row: mapper.translate(row.X, row.Y)[1], axis=1)
                 else:
                     # just use X/Y as-is
                     df["wgs84_long"] = df["X"]
@@ -485,9 +492,10 @@ class MiscAssociatedFileDepositionOverlay(MiscAssociatedFileVariety):
         else:
             raise Exception(f"{self.__class__}.perform_custom_upload_behavior expected 'uploaded_contents' and 'metadata' in kwargs but was missing one or more of them")
 
-
     def get_files_to_suppress_from_download(self):
-        return ["original.plt"]
+        return []  # ["original.plt"]
+
+
 
 class MiscAssociatedFileAERMODGeneratedReceptors(MiscAssociatedFileVariety):
     MIME_TYPE = "application/geojson"
@@ -549,42 +557,43 @@ class MiscAssociatedFileAERMODGeneratedReceptors(MiscAssociatedFileVariety):
         # return reformatted
         return json.dumps(reformatted).encode("utf-8")
 
-
     def perform_custom_upload_behavior(self, **kwargs):
-        if "uploaded_contents" in kwargs and "metadata" in kwargs:
-            metadata = kwargs.get("metadata")
-            uploaded_contents = kwargs.get("uploaded_contents")
-
-            decoded = json.loads(uploaded_contents)
-
-            # we need a UTM zone to call Samuel's aermod receptor generation code; just grab any
-            # single point from the geojson and go with that.
-            # (do we need to worry if 
-            first_feature = decoded["features"][0]
-            point_in_feature = first_feature["geometry"]["coordinates"]
-            point_longitude = point_in_feature[0]
-            point_latitude = point_in_feature[1]
-            utm_pos = translate_position(point_longitude, point_latitude, "WGS84_LONGLAT", "UTM")
-            just_zone = int(utm_pos[-1][0:-1])
-            in_northern_hemisphere = point_latitude > 0
-
-            if not in_northern_hemisphere:
-                raise Exception("southern hemisphere unsupported")
-
+        if "uploaded_contents" in kwargs:
+            uploaded_contents = kwargs["uploaded_contents"]
             return ({
-                "data.geojson": { "contents": uploaded_contents, "mime": self.MIME_TYPE },
-                # "temp_foo.aermod": { "contents": json.dumps(fake_placeholder), "mime": "application/text" },
-                "aermod_receptors.txt": { "contents": geojson_to_aermod_receptors(uploaded_contents, just_zone, in_northern_hemisphere), "mime": "application/text" }
+                "data.geojson": {
+                    "contents": uploaded_contents,
+                    "mime": self.MIME_TYPE
+                },
+                "aermod_receptors.txt": {
+                    "contents": geojson_to_aermod_receptors(uploaded_contents),
+                    "mime": "application/text"
+                }
             }, None)
         else:
-            raise Exception(f"{self.__class__}.perform_custom_upload_behavior expected 'uploaded_contents' and 'metadata' in kwargs but was missing one or more of them")
+            raise Exception(f"{self.__class__}.perform_custom_upload_behavior expected 'uploaded_contents' in kwargs but was missing one or more of them")
+
+
+def use_local_misc_files():
+    # in dev/prod, we store misc files in S3.
+    # Locally, we just run the model directly.
+    trim_env_profile = os.environ.get("TRIM_ENV_PROFILE", "").lower()
+    return (trim_env_profile not in ["test", "dev", "devgetflow", "prod"])
+
+
+def get_local_misc_file_loc():
+    dirname = os.path.abspath(os.path.join(os.path.dirname(__file__), '../static/.uploads'))
+    if not os.path.isdir(dirname):
+        os.makedirs(dirname)
+    return dirname
+
 
 # non-api-specific utility function that retrieves/uploads/deletes a
 # MiscAssociatedFileVariety file. refactored from the "manage_misc_scenario_file"
 # endpoint/route handler
-def associated_file_helper(scenario_id, misc_file_type:str, operation:str, file_obj = None, file_metadata=None):
+def associated_file_helper(scenario_id, misc_file_type: str, operation: str, file_obj=None, file_metadata=None):
 
-    print(f"ASSOCIATED FILE HELPER REFACTORIZATION: {scenario_id=}, {misc_file_type=}, {operation=}")
+    # print(f"ASSOCIATED FILE HELPER REFACTORIZATION: {scenario_id=}, {misc_file_type=}, {operation=}")
     # this function leverages the MiscAssociatedFileVariety class hierarchy defined in ../utils/file_io.py; provides basic defaults as
     # described above for "store this file on S3 and do nothing else" but can also provide custom behavior easily like preprocessing a file, setting
     # smarter MIME/content type, etc. For instance the "deposition_overlay" misc_file_type/variety:
@@ -598,26 +607,47 @@ def associated_file_helper(scenario_id, misc_file_type:str, operation:str, file_
     if operation not in ["DELETE", "CHECK", "UPLOAD"]:
         raise Exception(f"Unsupported file op '{operation}'")
 
-    print("REFACTORED ASSOCIATED_FILE_HELPER HERE WE GO!")
-    file_storage_bucket = os.getenv("SCENARIO_MISC_FILES_BUCKET_NAME")
+    # print("REFACTORED ASSOCIATED_FILE_HELPER HERE WE GO!")
 
-    s3_client = boto3.client("s3")
-    s3_resource = boto3.resource("s3")
+    is_local = use_local_misc_files()
 
     fv = MiscAssociatedFileVariety.construct_file_variety(misc_file_type)
+    metadata_path = f"{scenario_id}/{misc_file_type}/_metadata.json"
 
-    s3_metadata_path = f"{scenario_id}/{misc_file_type}/_metadata.json"
-
-    print(f"bucket={file_storage_bucket}; metadata {s3_metadata_path}")
+    if not is_local:
+        file_storage_bucket = os.getenv("SCENARIO_MISC_FILES_BUCKET_NAME")
+        # print(f"bucket={file_storage_bucket}; metadata={metadata_path}")
+        s3_resource = boto3.resource("s3")
+        s3_client = boto3.client("s3")
+    else:
+        file_storage_location = get_local_misc_file_loc()
+        # print(f"storage={file_storage_location}; metadata={metadata_path}")
 
     do_return_metadata_and_presigned_urls = False
     if operation == "DELETE":
-        bucket = s3_resource.Bucket(file_storage_bucket)
-        bucket.objects.filter(Prefix=f"{scenario_id}/{misc_file_type}/").delete()
+        if not is_local:
+            bucket = s3_resource.Bucket(file_storage_bucket)
+            bucket.objects.filter(Prefix=f"{scenario_id}/{misc_file_type}/").delete()
+        else:
+            for fname in get_files_under_dir(
+                file_storage_location, prefix=f"{scenario_id}/{misc_file_type}/"
+            ):
+                try:
+                    # print('deleting', os.path.join(file_storage_location, fname))
+                    os.remove(os.path.join(file_storage_location, fname))
+                except Exception:
+                    import traceback
+                    traceback.print_exc()
         rv["delete_operation"] = True
+
     elif operation == "CHECK":
         do_return_metadata_and_presigned_urls = True
+
     elif operation == "UPLOAD":
+        if is_local:
+            metadata_dir = os.path.join(file_storage_location, os.path.dirname(metadata_path))
+            if not os.path.isdir(metadata_dir):
+                os.makedirs(metadata_dir)
         try:
             if fv.has_custom_upload_behavior():
                 if type(file_obj) is bytes:
@@ -630,55 +660,90 @@ def associated_file_helper(scenario_id, misc_file_type:str, operation:str, file_
                     except Exception as e:
                         raise Exception(e)
 
-                upload_directives, additional_metadata = fv.perform_custom_upload_behavior(uploaded_contents=uploaded_file_content, metadata=file_metadata)
+                upload_directives, additional_metadata = fv.perform_custom_upload_behavior(
+                    uploaded_contents=uploaded_file_content, metadata=file_metadata
+                )
                 for upload_filename in upload_directives:
                     uploadable_dict = upload_directives[upload_filename]
                     uploadable_item = uploadable_dict.get("contents")
-                    uploadable_mime = uploadable_dict.get("mime", fv.get_storage_mime_type())
-                    loop_s3_file_path = f"{scenario_id}/{misc_file_type}/{upload_filename}"
+                    loop_file_path = f"{scenario_id}/{misc_file_type}/{upload_filename}"
 
-                    s3_client.put_object(
-                        Body=uploadable_item,
-                        Bucket=file_storage_bucket,
-                        Key=loop_s3_file_path,
-                        ContentType=uploadable_mime
-                    )
+                    if not is_local:
+                        uploadable_mime = uploadable_dict.get("mime", fv.get_storage_mime_type())
+                        s3_client.put_object(
+                            Body=uploadable_item,
+                            Bucket=file_storage_bucket,
+                            Key=loop_file_path,
+                            ContentType=uploadable_mime
+                        )
+                    else:
+                        method = 'w'
+                        if isinstance(uploadable_item, bytes):
+                            method = 'wb'
+                        with open(os.path.join(file_storage_location, loop_file_path), method) as f:
+                            f.write(uploadable_item)
 
                 if additional_metadata is not None:
                     file_metadata = file_metadata | additional_metadata
             else:
-                s3_file_path = f"{scenario_id}/{misc_file_type}/data{fv.get_storage_file_extension()}"
+                file_path = f"{scenario_id}/{misc_file_type}/data{fv.get_storage_file_extension()}"
 
-                s3_client.put_object(
-                    Body=file_obj,
-                    Bucket=file_storage_bucket,
-                    Key=s3_file_path,
-                    ContentType=fv.get_storage_mime_type()
-                )
+                if not is_local:
+                    s3_client.put_object(
+                        Body=file_obj,
+                        Bucket=file_storage_bucket,
+                        Key=file_path,
+                        ContentType=fv.get_storage_mime_type()
+                    )
+                else:
+                    if type(file_obj) is bytes:
+                        uploaded_file_content = file_obj.decode('utf-8')
+                    else:
+                        fpn = file_obj.stream
+                        try:
+                            fpn.seek(0)
+                            uploaded_file_content = fpn.read().decode("utf-8")
+                        except Exception as e:
+                            raise Exception(e)
+                    with open(os.path.join(file_storage_location, file_path), 'w') as f:
+                        f.write(uploaded_file_content)
 
             # update the metadata too - for default or custom
-            s3_client.put_object(
-                Body=json.dumps(file_metadata),
-                Bucket=file_storage_bucket,
-                Key=s3_metadata_path,
-                ContentType="application/json"
-            )
+            if not is_local:
+                s3_client.put_object(
+                    Body=json.dumps(file_metadata),
+                    Bucket=file_storage_bucket,
+                    Key=metadata_path,
+                    ContentType="application/json"
+                )
+            else:
+                with open(os.path.join(file_storage_location, metadata_path), 'w') as f:
+                    f.write(json.dumps(file_metadata))
 
             do_return_metadata_and_presigned_urls = True
-        except Exception as e:
-            raise Exception(e)
+        except Exception:
+            import traceback
+            traceback.print_exc()
+            raise
 
-    print(f"past first section; {do_return_metadata_and_presigned_urls=}")
+    # print(f"past first section; {do_return_metadata_and_presigned_urls=}")
 
     if do_return_metadata_and_presigned_urls:
         file_metadata = None
-        try:
-            content_object = s3_resource.Object(file_storage_bucket, s3_metadata_path)
-            file_content = content_object.get()["Body"].read().decode("utf-8")
-            file_metadata = json.loads(file_content)
-        except:
-            file_metadata = None
-        
+        if not is_local:
+            try:
+                content_object = s3_resource.Object(file_storage_bucket, metadata_path)
+                file_content = content_object.get()["Body"].read().decode("utf-8")
+                file_metadata = json.loads(file_content)
+            except Exception:
+                file_metadata = None
+        else:
+            try:
+                with open(os.path.join(file_storage_location, metadata_path)) as f:
+                    file_metadata = json.loads(f.read())
+            except Exception:
+                file_metadata = None
+
         if file_metadata is not None:
             rv["file_metadata"] = file_metadata
         else:
@@ -688,28 +753,52 @@ def associated_file_helper(scenario_id, misc_file_type:str, operation:str, file_
         rv["presigned_urls"] = {}
         try:
             # get everythign in the appropriate subdir
-            response = s3_client.list_objects_v2(
+            if not is_local:
+                response = s3_client.list_objects_v2(
                     Bucket=file_storage_bucket,
-                    Prefix = f"{scenario_id}/{misc_file_type}/",
-                    MaxKeys=100 )
+                    Prefix=f"{scenario_id}/{misc_file_type}/",
+                    MaxKeys=100
+                )
+                uploaded_files = [f.get('Key') for f in response.get("Contents", [])]
+            else:
+                uploaded_files = get_files_under_dir(
+                    file_storage_location, prefix=f"{scenario_id}/{misc_file_type}/"
+                )
 
-            s3_files = response.get("Contents", [])
-            for f in s3_files:
-                suppressed_files = fv.get_files_to_suppress_from_download()
+            suppressed_files = fv.get_files_to_suppress_from_download()
 
-                loop_key = f.get("Key")
-                if loop_key != s3_metadata_path:
+            for loop_key in uploaded_files:
+                if loop_key != metadata_path:
                     nested_path = loop_key.replace(f"{scenario_id}/{misc_file_type}/", "")
 
                     if nested_path not in suppressed_files:
-                        data_url = s3_client.generate_presigned_url("get_object",
-                                                                    Params={
-                                                                        "Bucket": file_storage_bucket,
-                                                                        "Key": loop_key
-                                                                    },
-                                                                    ExpiresIn=600) # expires in 10 minute(s)
+                        if not is_local:
+                            data_url = s3_client.generate_presigned_url(
+                                "get_object",
+                                Params={
+                                    "Bucket": file_storage_bucket,
+                                    "Key": loop_key
+                                },
+                                ExpiresIn=600  # expires in 10 minute(s)
+                            )
+                        else:
+                            data_url = url_for('static', filename=f'.uploads/{loop_key}')
                         rv["presigned_urls"][nested_path] = data_url
-        except Exception as e:
-            raise Exception(e)
+        except Exception:
+            import traceback
+            traceback.print_exc()
+            raise
 
     return rv
+
+
+def get_files_under_dir(dirname, prefix=None):
+    root = Path(dirname)
+    prefix = prefix.replace('\\', '/')
+    return [
+        path.relative_to(root).as_posix()
+        for path in root.rglob("*")
+        if path.is_file() and (
+            (prefix is None) or path.relative_to(root).as_posix().startswith(prefix)
+        )
+    ]

@@ -58,6 +58,7 @@ window.TRIM = (function(trim) {
             var toggle = document.createElement('a');
             toggle.href = '#help-' + id;
             toggle.setAttribute('role', 'button');
+            toggle.setAttribute('tabindex', '0');
             toggle.setAttribute('data-toggle', 'collapse');
             toggle.setAttribute('aria-expanded', 'false');
             toggle.setAttribute('aria-controls', 'help-' + id);
@@ -101,15 +102,14 @@ window.TRIM = (function(trim) {
         inner.style.maxWidth = '100%';
         field.appendChild(inner);
 
-        var innerLabel = document.createElement('label');
-        innerLabel.className = 'custom-file-label form-control-sm';
-        innerLabel.htmlFor = id;
-        innerLabel.innerText = 'Choose file';
-        field.appendChild(innerLabel);
+        var innerSpan = document.createElement('span');
+        innerSpan.className = 'custom-file-label form-control-sm';
+        innerSpan.innerText = 'Choose file';
+        field.appendChild(innerSpan);
 
         if (fieldDef.readonly) {
             inner.setAttribute('readonly', 'readonly');
-            innerLabel.setAttribute('readonly', 'readonly');
+            innerSpan.setAttribute('readonly', 'readonly');
         }
 
         return field;
@@ -122,7 +122,7 @@ window.TRIM = (function(trim) {
             return;
         }
         var val = e.target.value;
-        var lbl = e.target.parentElement.getElementsByTagName('label')[0];
+        var lbl = e.target.parentElement.getElementsByClassName('custom-file-label')[0];
         if (val.toString().trim()) {
             val = val.toString().split('/');
             val = val[val.length - 1];
@@ -671,14 +671,14 @@ window.TRIM = (function(trim) {
 
             for (var i = 0, len = if_true.length; i < len; i++) {
                 var check = if_true[i];
-                if (!document.getElementById(check).checked) {
+                if (!document.getElementById(check)?.checked) {
                     group.style.display = 'none';
                     break;
                 }
             }
             for (var i = 0, len = if_false.length; i < len; i++) {
                 var check = if_false[i];
-                if (document.getElementById(check).checked) {
+                if (document.getElementById(check)?.checked) {
                     group.style.display = 'none';
                     break;
                 }
@@ -962,10 +962,15 @@ window.TRIM = (function(trim) {
         let marker = create_element("sup", node);
 
         let toggle = create_element("a", marker);
+        let toggle_id = "help-" + title.toLowerCase().replaceAll(" ", "-")
         toggle.href = 'javascript:void(0);';
+        toggle.setAttribute('role', 'tooltip');
+        toggle.setAttribute('tabindex', '0');
         toggle.setAttribute('data-toggle', 'popover');
         toggle.setAttribute('data-html', 'true');
         toggle.setAttribute('data-trigger', 'focus');
+        toggle.setAttribute('id', toggle_id);
+        toggle.setAttribute('aria-label', title);
         toggle.setAttribute('data-original-title', title);
         toggle.setAttribute('data-content', note);
 
@@ -1026,6 +1031,6 @@ window.TRIM = (function(trim) {
     }
 
     trim.forms = forms;
-    trim.functions = functions
+    trim.functions = functions;
     return trim;
 })(window.TRIM || {});

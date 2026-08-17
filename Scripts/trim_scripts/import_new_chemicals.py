@@ -1,13 +1,7 @@
-import json
-import os
-import sys
-import time
-from trim_db.porting import *
-from trim_db.schema import *
-from trim_db.services import *
+import argparse, time
+
+from base import *
 from trim_db.schema.parameters.equations import find_arguments
-import argparse
-from pathlib import Path
 
 DEFAULT_IMPORT_RULES = \
     {
@@ -360,14 +354,6 @@ if __name__ == '__main__':
     parser.add_argument('-r', '--runtype')
     parser.add_argument('-c', '--chemical')
     args = parser.parse_args()
-    from trim_db.utils.users_roles import implement_users_roles
-
-    try:
-        import time
-        implement_users_roles()
-        time.sleep(5)
-    except Exception as e:
-        print(f'-- Unable to create Users/Roles.\n{e}')
 
     try:
         ScenarioService.get(id=2)

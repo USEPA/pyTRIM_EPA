@@ -153,17 +153,27 @@ window.TRIM = (function(trim) {
         for (var i = 0, len = fields.length; i < len; i++) {
             var field = fields[i];
             if (field.type === 'file') {
-                formData.append(field.name, field.files[0])
+                formData.append(field.name, field.files[0]);
             }
             else if (field.type === 'Feature') {
-                let GIS_data = field.properties
-                GIS_data.geom = field.geometry.coordinates[0]
+                let GIS_data = field.properties;
+                GIS_data.geom = field.geometry.coordinates[0];
                 for (var key in GIS_data) {
-                    formData.append(key, (key === 'geom') ? JSON.stringify(GIS_data[key]) : GIS_data[key])
+                    formData.append(key, (key === 'geom') ? JSON.stringify(GIS_data[key]) : GIS_data[key]);
                 }
             }
             else {
-                formData.append(field.name, field.value)
+                if (typeof field.value === typeof '') {
+                    // auto-convert super long strings to filedata to avoid overloading the server
+                    if (field.value.length > 5e5) {
+                        field.value = new File(
+                            [new Blob([field.value], { type: 'text/plain; charset=UTF-8' })],
+                            `${field.name}.api_blob`,
+                            { type: 'text/plain; charset=UTF-8' }
+                        );
+                    }
+                }
+                formData.append(field.name, field.value);
             }
         }
 
@@ -214,6 +224,23 @@ window.TRIM = (function(trim) {
         var url = api.getUrl('file_api.parse_parcel');
         var data = makeFormData(fields);
 
+        return AJAX.call({
+            method: 'POST',
+            url: url,
+            data: data,
+            callback: callbackFxn
+        });
+    };
+
+    api.uploadMetFile = function(scenario_id, met_file_field, callbackFxn) {
+        var url = api.getUrl('file_api.parse_met_file');
+        var data = makeFormData([
+            {
+                'name': 'scenario_id',
+                'value': scenario_id
+            },
+            met_file_field
+        ]);
         return AJAX.call({
             method: 'POST',
             url: url,
@@ -481,6 +508,29 @@ window.TRIM = (function(trim) {
         }
         throw new Error('Unsupported Entity Type for `TRIM.api.updateParameter()`')
     }
+
+    internalStore.fileData = ((fileData) => {
+        const internalFileStore = {};
+
+        fileData.add = (name, data) => {
+            internalFileStore[name] = data;
+        };
+
+        fileData.get = (name) => {
+            return internalFileStore[name];
+        }
+
+        fileData.remove = (name) => {
+            internalFileStore[name] = undefined;
+        }
+
+        fileData.fromField = (el, attr, pref) => {
+            const fileKey = pref != undefined ? `${pref}_${el.attr(attr)}` : el.attr(attr);
+            return internalFileStore[fileKey];
+        }
+
+        return fileData;
+    })(internalStore.fileData || {});
 
     trim.api = api;
     trim.store = internalStore;

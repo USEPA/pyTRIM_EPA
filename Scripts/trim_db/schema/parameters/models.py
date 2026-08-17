@@ -267,7 +267,7 @@ class FormulaArgument(Model):
 
 
 class ParameterDefinition(Model):
-    variable_name = sa.Column(sa.String(60), nullable=False)
+    variable_name = sa.Column(sa.String(150), nullable=False)
     full_name = sa.Column(sa.String(120), nullable=False)
 
     @property
@@ -289,7 +289,7 @@ class ParameterDefinition(Model):
     )
 
     default_value = sa.Column(sa.Float())
-    default_unit = sa.Column(sa.String(60))
+    default_unit = sa.Column(sa.String(150))
 
     default_formula_id = sa.Column(
         sa.Integer(), sa.ForeignKey('formula.id')
@@ -402,7 +402,7 @@ class CustomParameter(Model):
         return self._validator(self=entity) or False
 
     value = sa.Column(sa.Float())
-    unit = sa.Column(sa.String(60))
+    unit = sa.Column(sa.String(150))
 
     formula_id = sa.Column(
         sa.Integer(), sa.ForeignKey('formula.id')

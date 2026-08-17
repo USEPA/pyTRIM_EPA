@@ -9,7 +9,7 @@
         },
         {
             "id": "SedimentTable",
-            "label": "Sediment Properties",
+            "label": "Sediment Bed Properties",
             "data_type": "form",
             "form_definition": "subforms/water_body/sediment_props_form.json"
         }

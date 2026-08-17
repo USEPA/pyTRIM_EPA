@@ -5,28 +5,24 @@ import time
 import pint
 import types
 from datetime import datetime
-from pathlib import Path
 
 import boto3
-import pandas as pd
 from flask import Blueprint, request, abort, render_template, redirect, url_for
 from flask_security import login_required, current_user
 from flask_api import ApiException, ApiResult
-from datetime import datetime
 from trim_db.schema import ScenarioLoadRunProc, \
     CustomParameter, ParameterDefinition
 from trim_db.services import *
 from trim_frontend import api, db
-from trim_frontend.parcels.routes import delete_parcel_contents
 from .defaults import *
 from .forms import *
 from .utils import *
+from ..mirc.trim_bridge import compile_mirc_data
+from ..mirc.simulations.forms import MircSimulationForm
 from ..utils.logging import make_logger
 from ..utils.file_io import MiscAssociatedFileVariety, associated_file_helper
 from ..parcels.utils import calculate_receptor_grid_points_for_parcel
 from trim_core.algorithms.full_model_run import run_full_model
-# from trim_core.algorithms.GetFlow.getflow import run_getflow_v7_for_scenario_id
-# from sqlalchemy import inspect
 
 import traceback
 
@@ -89,11 +85,44 @@ def edit_scenario(id):
     s = ScenarioService.get(id)
     if not current_user.can('edit', s):
         abort(403)
-    user_emails = [u.email for u in UserService.get_all()]
     return render_template(
         'scenarios/editor.html',
-        scenario=s, title=s.name, user_emails=user_emails
+        scenario=s, title=s.name, user_emails=[u.email for u in UserService.get_all()],
+        simulation_form=get_simulation_form(s),
+        mirc_scenarios=[
+            ms for ms in MircScenarioService.get_all()
+            if current_user.can('view', ms)
+        ]
     )
+
+
+def get_simulation_form(scenario):
+    form = MircSimulationForm()
+
+    comps = scenario.compartments
+    air_comps = [(c.id, c.standard_name) for c in comps if c.media.isa('Air')]
+    sw_comps = [(c.id, c.standard_name) for c in comps if c.media.isa('Surface_Water')]
+    ss_comps = [(c.id, c.standard_name) for c in comps if c.media.isa('Surface_Soil')]
+    rz_comps = [(c.id, c.standard_name) for c in comps if c.media.isa('Root_Zone')]
+    fish_comps = [(c.id, c.standard_name) for c in comps if c.media.isa('Fish')]
+    sed_comps = [(c.id, c.standard_name) for c in comps if c.media.isa('Sediment')]
+
+    no_selection = [(-1, '')]
+
+    form.trim_air_compartment.choices = air_comps
+    form.trim_water_compartment.choices = sw_comps
+    form.trim_soil_human_compartment.choices = ss_comps
+    form.trim_soil_livestock_compartment.choices = ss_comps
+    form.trim_soil_garden_compartment.choices = (rz_comps + ss_comps)
+    form.trim_soil_root_compartment.choices = (rz_comps + ss_comps)
+    form.trim_soil_drdp_compartment.choices = ss_comps
+    form.trim_soil_drwp_compartment.choices = ss_comps
+    form.trim_fish_tl35_compartment.choices = no_selection + fish_comps
+    form.trim_fish_tl4_compartment.choices = no_selection + fish_comps
+    form.trim_sed_compartment.choices = no_selection + sed_comps
+    form.trim_surf_compartment.choices = no_selection + sw_comps
+
+    return form
 
 
 scenario_api = Blueprint('scenario_api', __name__)
@@ -126,7 +155,23 @@ def update_scenario(scenario_id):
         s = ScenarioService.get(int(scenario_id))
         if not current_user.can('edit', s):
             abort(403)
+
         scenario_data = request.form.to_dict()
+
+        # Merge file data
+        for field_name, file_data in request.files.to_dict().items():
+            if file_data.filename.endswith('.api_blob'):
+                # If we auto-converted a string to filedata to help with POSTing it,
+                # convert it back into a string!
+                file_bytes = b''
+                while True:
+                    chunk = file_data.stream.read(4096)
+                    if not chunk:
+                        break
+                    file_bytes += chunk
+                file_data = file_bytes.decode('utf-8')
+            scenario_data[field_name] = file_data
+
         # print(f"updating with {scenario_data}")
 
         rv = None
@@ -857,7 +902,6 @@ def check_stepfunction_status():
 
 
 @scenario_api.route('/api/scenario/<int:scenario_id>/export/mirc', methods=['GET'])
-# TODO: Need some way for MIRC *app* to authenticate?
 @login_required
 def export_for_mirc(scenario_id):
     scen = ScenarioService.get(scenario_id)
@@ -1042,7 +1086,10 @@ def get_chemical_properties(scenario_id):
                         logger.warning(f'Skipping parameter "{param_name}" ...')
                     continue
 
-                val = chem.parameters.evaluate(param)
+                try:
+                    val = chem.parameters.evaluate(param)
+                except Exception:
+                    continue  # Just skip it for now, probably a bad equation?
                 scope = None
                 if not isinstance(val, types.FunctionType):
                     # print('\t>', val)

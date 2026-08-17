@@ -149,7 +149,7 @@
     },
     {
       "id": "connected_runoff_to_this_sw",
-      "label": "Precipitation Runoff Volumetric Rate from Land to Water Body",
+      "label": "Precipitation Runoff Volumetric Rate to Water Body",
       "readonly": true,
       "data_type": "float",
       "default": 0,
@@ -180,7 +180,7 @@
       "data_type": "float",
       "default": 0,
       "tooltip": "1 / day",
-      "help": "See the TRIM User Guide Appendix for full reference information."
+      "help": "Enter the methylation rate for divalent mercury (Hg) in the water column. Valid values are ≥ 0. The default value of 0.001 is for a shallow lake with little or no anoxia, reflecting observed non-microbial rate constants in oxic waters, as reported on page B-20 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information."
     },
     {
       "id": "ReductionRate.Surface_Water",
@@ -188,7 +188,7 @@
       "data_type": "float",
       "default": 0,
       "tooltip": "1 / day",
-      "help": "See the TRIM User Guide Appendix for full reference information."
+      "help": "Enter the reduction rate for divalent mercury in the water column. Valid values are ≥ 0. The default value of 0.0075 is as discussed on pages B-18 and B-19 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information."
     },
     {
       "id": "OxidationRate.Surface_Water",
@@ -196,7 +196,7 @@
       "data_type": "float",
       "default": 0,
       "tooltip": "1 / day",
-      "help": "See the TRIM User Guide Appendix for full reference information."
+      "help": "Enter the oxidation rate for elemental mercury in the water column. Valid values are ≥ 0. The default value of 0 is from Table B-2 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information."
     },
     {
       "id": "DemethylationRate.Surface_Water",
@@ -204,7 +204,7 @@
       "data_type": "float",
       "default": 0,
       "tooltip": "1 / day",
-      "help": "See the TRIM User Guide Appendix for full reference information."
+      "help": "Enter the demethylation rate for methyl mercury in the water column. Valid values are ≥ 0. The default value of 0.013 is the average of the range of maximum potential rate constants (0.001 to 0.025) from Gilmour and Henry 1991 (Mercury Methylation in Aquatic Systems Affected by Acid Deposition), as reported on page B-21 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information."
     }
   ]
 }

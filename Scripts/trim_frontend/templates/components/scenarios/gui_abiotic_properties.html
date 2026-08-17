@@ -191,6 +191,7 @@
                 },
                 columns: setDynamicColumnWidths(surfPrecip_tblId, surfPrecip_cols, table_data),
                 initComplete: function (settings, json) {
+                    this.api().columns().header().to$().attr('scope', 'col');
                     $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
                     $(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
                     $(".dataTables_scrollHead").addClass('wrap-text-scrollhead');
@@ -805,7 +806,9 @@
             }]
             TRIM.api.updateScenario(scenario_info).on('load', function() {
                 LoadingScreen.hide('update_soil_data');
-                $('#save-btn').click();
+                setTimeout(() => {
+                    $('#save-btn').click();
+                }, 1000);
             });
         });
 

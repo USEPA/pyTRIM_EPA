@@ -92,12 +92,15 @@ function setWidthFromDefinitions(columns, dataRows, maxWidth=25) {
 // static value dropdown menu of column names
 function appendHeaderOptions(datatable, skip_columns=[]) {
     // clear existing options to avoid duplicates
-    $("#" + datatable.attr('id') + "_columns").empty();
+    const colSelect = $(`#${datatable.attr('id')}_columns`).empty();
     datatable.api().columns().every(function(column_idx) {
         let header = this.header().textContent;
-        if (!skip_columns.includes(header))
-            $("#"+datatable.attr('id')+"_columns").append(`<option value='${column_idx}'>${header}</option>`);
-    })
+        if (this.visible() && !skip_columns.includes(header)) {
+            colSelect.append(
+                `<option value='${column_idx}'>${header}</option>`
+            );
+        }
+    });
 }
 
 function ErrToolTip(ele, is_valid, message, parent_ele="td") {

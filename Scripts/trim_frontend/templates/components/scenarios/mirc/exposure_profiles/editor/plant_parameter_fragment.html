@@ -1,0 +1,79 @@
+{% from 'macros/mirc/form_macros.html' import render_input, render_label %}
+
+<tr class="plant-{{ pp.product_id.data }}">
+    <th scope="row" class="table-primary border-primary align-middle text-center">
+        {{ render_label(pp.MAF, hover_help=True, class="mb-0") }}
+    </th>
+    <td>
+        {{ render_input(pp.product_id) }}
+
+        {{ render_input(pp.MAF) }}
+    </td>
+    <td>
+        <input type="text" class="form-control form-control-sm"
+            readonly="readonly" value="unitless"
+            aria-label="Unit" />
+    </td>
+</tr>
+{% set protected = (
+    pp.product.data == 'root' or pp.product.data == 'grain' or
+    'protected' in pp.product.data
+) %}
+<tr class="plant-{{ pp.product_id.data }}">
+    <th scope="row" class="table-primary border-primary align-middle text-center">
+        {{ render_label(pp.Rp, hover_help=True, class="mb-0") }}
+    </th>
+    {% if not protected %}
+        <td>
+            {{ render_input(pp.Rp) }}
+        </td>
+        <td>
+            <input type="text" class="form-control form-control-sm"
+                readonly="readonly" value="unitless"
+                aria-label="Unit" />
+        </td>
+    {% else %}
+        <td colspan="2" rowspan="4" class="align-middle text-center text-muted">
+            (Not applicable for protected plant products, including roots and grains.)
+        </td>
+    {% endif %}
+</tr>
+<tr class="plant-{{ pp.product_id.data }}">
+    <th scope="row" class="table-primary border-primary align-middle text-center">
+        {{ render_label(pp.kp, hover_help=True, class="mb-0") }}
+    </th>
+    {% if not protected %}
+        <td>
+            {{ render_input(pp.kp) }}
+        </td>
+        <td>
+            {{ render_input(pp.kp_unit) }}
+        </td>
+    {% endif %}
+</tr>
+<tr class="plant-{{ pp.product_id.data }}">
+    <th scope="row" class="table-primary border-primary align-middle text-center">
+        {{ render_label(pp.Tp, hover_help=True, class="mb-0") }}
+    </th>
+    {% if not protected %}
+        <td>
+            {{ render_input(pp.Tp) }}
+        </td>
+        <td>
+            {{ render_input(pp.Tp_unit) }}
+        </td>
+    {% endif %}
+</tr>
+<tr class="plant-{{ pp.product_id.data }}">
+    <th scope="row" class="table-primary border-primary align-middle text-center">
+        {{ render_label(pp.Yp, hover_help=True, class="mb-0") }}
+    </th>
+    {% if not protected %}
+        <td>
+            {{ render_input(pp.Yp) }}
+        </td>
+        <td>
+            {{ render_input(pp.Yp_unit) }}
+        </td>
+    {% endif %}
+</tr>

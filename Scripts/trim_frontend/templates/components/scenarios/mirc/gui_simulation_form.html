@@ -1,0 +1,1213 @@
+{% from 'macros/mirc/form_macros.html' import
+    render_form_group, render_label, render_input, render_feedback
+%}
+{% from 'macros/mirc/chemical_selector.html' import
+    render_chemical_picker
+%}
+{% from 'macros/mirc/scenario_selector.html' import
+    render_scenario_picker
+%}
+
+<form id="simulation-form"
+    action="{{ url_for('mirc_simulation_api.create_simulation', trim_scenario_id=scenario.id) }}"
+    method="POST"
+>
+    <div class="form-row">
+        <div class="col-sm">
+            {{ render_label(form.mirc_scenario) }}
+            {{ render_scenario_picker(
+                mirc_scenarios,
+                id=form.mirc_scenario.id, name=form.mirc_scenario.name,
+                default=form.mirc_scenario.data, allow_none=False
+            ) }}
+            {{ render_feedback(form.mirc_scenario) }}
+            <div class="form-text">
+                <small>
+                    <a href="{{ url_for('mirc_scenario.view_risk_scenarios') }}" target="_blank" tabindex="0">
+                        <i class="fa fa-edit mr-1"></i>
+                        Create or Edit Exposure Profiles
+                    </a>
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-row mt-2">
+        <div class="col-sm">
+            {{ render_label(form.chemical) }}
+            {{ render_chemical_picker(
+                scenario.chemicals,
+                id=form.chemical.id,
+                name=form.chemical.name,
+                default=form.chemical.data,
+                priority=(
+                    [] if 'assessment' not in kwargs
+                    else kwargs['assessment'].scenario.priority_chemicals
+                ),
+                allow_multiple=True
+            ) }}
+            {{ render_feedback(form.chemical) }}
+            <small class="form-text text-muted ml-2">
+                * Note: Selecting multiple chemicals will create one new simulation per selected chemical.
+            </small>
+        </div>
+    </div>
+
+    <div class="form-row mt-2">
+        <div class="col-sm">
+            {{ render_form_group(form.human_body_weight_percentile) }}
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="col-sm">
+            {{ render_form_group(form.ingestion_percentile_preset) }}
+        </div>
+    </div>
+
+    <div class="form-row ingestion-rates">
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered">
+                <thead>
+                    <tr class="text-center">
+                        <th scope="col" class="font-weight-normal">
+                            {{ render_label(form.beef_percentile, class="mb-0") }}
+                        </th>
+                        <th scope="col" class="font-weight-normal">
+                            {{ render_label(form.dairy_percentile, class="mb-0") }}
+                        </th>
+                        <th scope="col" class="font-weight-normal">
+                            {{ render_label(form.eggs_percentile, class="mb-0") }}
+                        </th>
+                        <th scope="col" class="font-weight-normal">
+                            {{ render_label(form.pork_percentile, class="mb-0") }}
+                        </th>
+                        <th scope="col" class="font-weight-normal">
+                            {{ render_label(form.poultry_percentile, class="mb-0") }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            {{ render_input(form.beef_percentile) }}
+                        </td>
+                        <td>
+                            {{ render_input(form.dairy_percentile) }}
+                        </td>
+                        <td>
+                            {{ render_input(form.eggs_percentile) }}
+                        </td>
+                        <td>
+                            {{ render_input(form.pork_percentile) }}
+                        </td>
+                        <td>
+                            {{ render_input(form.poultry_percentile) }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="form-row ingestion-rates">
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered">
+                <thead>
+                    <tr class="text-center">
+                        <th scope="col" class="font-weight-normal">
+                            {{ render_label(form.exposed_fruit_percentile, class="mb-0") }}
+                        </th>
+                        <th scope="col" class="font-weight-normal">
+                            {{ render_label(form.protected_fruit_percentile, class="mb-0") }}
+                        </th>
+                        <th scope="col" class="font-weight-normal">
+                            {{ render_label(form.exposed_vegetable_percentile, class="mb-0") }}
+                        </th>
+                        <th scope="col" class="font-weight-normal">
+                            {{ render_label(form.protected_vegetable_percentile, class="mb-0") }}
+                        </th>
+                        <th scope="col" class="font-weight-normal">
+                            {{ render_label(form.root_percentile, class="mb-0") }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            {{ render_input(form.exposed_fruit_percentile) }}
+                        </td>
+                        <td>
+                            {{ render_input(form.protected_fruit_percentile) }}
+                        </td>
+                        <td>
+                            {{ render_input(form.exposed_vegetable_percentile) }}
+                        </td>
+                        <td>
+                            {{ render_input(form.protected_vegetable_percentile) }}
+                        </td>
+                        <td>
+                            {{ render_input(form.root_percentile) }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="form-row ingestion-rates">
+        <div class="table-responsive">
+            <table class="table table-sm table-bordered">
+                <thead>
+                    <tr class="text-center">
+                        <th scope="col" class="font-weight-normal">
+                            {{ render_label(form.fish_percentile, class="mb-0") }}
+                        </th>
+                        <th scope="col" class="font-weight-normal">
+                            {{ render_label(form.soil_percentile, class="mb-0") }}
+                        </th>
+                        <th scope="col" class="font-weight-normal">
+                            {{ render_label(form.water_percentile, class="mb-0") }}
+                        </th>
+                        <th scope="col" class="font-weight-normal">
+                            {{ render_label(form.breast_milk_percentile, class="mb-0") }}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            {{ render_input(form.fish_percentile) }}
+                        </td>
+                        <td>
+                            {{ render_input(form.soil_percentile) }}
+                        </td>
+                        <td>
+                            {{ render_input(form.water_percentile) }}
+                        </td>
+                        <td>
+                            {{ render_input(form.breast_milk_percentile) }}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+    <hr class="pb-2" />
+
+    <div class="form-row">
+        <div class="col-sm">
+            {{ render_form_group(form.trim_timestamp) }}
+        </div>
+    </div>
+
+    <section id="mirc-input-fields">
+        <div id="air-fields" class="form-row" style="display: none;">
+            <div class="col-sm">
+                {{ render_form_group(
+                    form.trim_air_compartment,
+                    input_class="air-compartment-field"
+                ) }}
+            </div>
+            <div class="col-sm">
+                {% set append %}
+                    <small class="form-text">
+                        {{ render_input(
+                            form.Ca_src,
+                            class="form-control-plaintext text-muted p-0 src-info"
+                        ) }}
+                    </small>
+                {% endset %}
+                {{ render_form_group(form.Ca, append=append, class="mb-1") }}
+                {% set append %}
+                    <small class="form-text">
+                        {{ render_input(
+                            form.Fv_src,
+                            class="form-control-plaintext text-muted p-0 src-info"
+                        ) }}
+                    </small>
+                {% endset %}
+                {{ render_form_group(form.Fv, append=append, class="mb-1") }}
+                {% set append %}
+                    <small class="form-text">
+                        {{ render_input(
+                            form.rho_a_src,
+                            class="form-control-plaintext text-muted p-0 src-info"
+                        ) }}
+                    </small>
+                {% endset %}
+                {{ render_form_group(form.rho_a, append=append, class="mb-1") }}
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="col-sm">
+                {{ render_form_group(
+                    form.trim_water_compartment,
+                    input_class="water-compartment-field"
+                ) }}
+            </div>
+            <div class="col-sm">
+                {% set append %}
+                    <small class="form-text">
+                        {{ render_input(
+                            form.C_water_src,
+                            class="form-control-plaintext text-muted p-0 src-info"
+                        ) }}
+                    </small>
+                {% endset %}
+                {{ render_form_group(form.C_water, append=append, class="mb-1") }}
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="col-sm">
+                {{ render_form_group(
+                    form.trim_soil_human_compartment,
+                    input_class="surf-soil-compartment-field"
+                ) }}
+            </div>
+            <div class="col-sm">
+                {% set append %}
+                    <small class="form-text">
+                        {{ render_input(
+                            form.C_soil_src,
+                            class="form-control-plaintext text-muted p-0 src-info"
+                        ) }}
+                    </small>
+                {% endset %}
+                {{ render_form_group(form.C_soil, append=append, class="mb-1") }}
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="col-sm">
+                {{ render_form_group(
+                    form.trim_soil_garden_compartment,
+                    input_class="root-soil-compartment-field"
+                ) }}
+            </div>
+            <div class="col-sm">
+                {% set append %}
+                    <small class="form-text">
+                        {{ render_input(
+                            form.C_root_veg_src,
+                            class="form-control-plaintext text-muted p-0 src-info"
+                        ) }}
+                    </small>
+                {% endset %}
+                {{ render_form_group(form.C_root_veg, append=append, class="mb-1") }}
+                {% set append %}
+                    <small class="form-text">
+                        {{ render_input(
+                            form.Kd_src,
+                            class="form-control-plaintext text-muted p-0 src-info"
+                        ) }}
+                    </small>
+                {% endset %}
+                {{ render_form_group(form.Kd, append=append, class="mb-1") }}
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="col-sm">
+                {{ render_form_group(
+                    form.trim_soil_livestock_compartment,
+                    input_class="surf-soil-compartment-field"
+                ) }}
+            </div>
+            <div class="col-sm">
+                {% set append %}
+                    <small class="form-text">
+                        {{ render_input(
+                            form.Cs_s_src,
+                            class="form-control-plaintext text-muted p-0 src-info"
+                        ) }}
+                    </small>
+                {% endset %}
+                {{ render_form_group(form.Cs_s, append=append, class="mb-1") }}
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="col-sm">
+                {{ render_form_group(
+                    form.trim_soil_root_compartment,
+                    input_class="root-soil-compartment-field"
+                ) }}
+            </div>
+            <div class="col-sm">
+                {% set append %}
+                    <small class="form-text">
+                        {{ render_input(
+                            form.Cs_root_zone_src,
+                            class="form-control-plaintext text-muted p-0 src-info"
+                        ) }}
+                    </small>
+                {% endset %}
+                {{ render_form_group(form.Cs_root_zone, append=append, class="mb-1") }}
+                {% set append %}
+                    <small class="form-text">
+                        {{ render_input(
+                            form.Kd_feed_src,
+                            class="form-control-plaintext text-muted p-0 src-info"
+                        ) }}
+                    </small>
+                {% endset %}
+                {{ render_form_group(form.Kd_feed, append=append, class="mb-1") }}
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="col-sm">
+                {{ render_form_group(
+                    form.trim_soil_drdp_compartment,
+                    input_class="dep-compartment-field"
+                ) }}
+            </div>
+            <div class="col-sm">
+                {% set append %}
+                    <small class="form-text">
+                        {{ render_input(
+                            form.Drdp_src,
+                            class="form-control-plaintext text-muted p-0 src-info"
+                        ) }}
+                    </small>
+                {% endset %}
+                {{ render_form_group(form.Drdp, append=append, class="mb-1") }}
+            </div>
+        </div>
+
+        <div class="form-row mb-2">
+            <div class="col-sm">
+                {{ render_form_group(
+                    form.trim_soil_drwp_compartment,
+                    input_class="dep-compartment-field"
+                ) }}
+            </div>
+            <div class="col-sm">
+                {% set append %}
+                    <small class="form-text">
+                        {{ render_input(
+                            form.Drwp_src,
+                            class="form-control-plaintext text-muted p-0 src-info"
+                        ) }}
+                    </small>
+                {% endset %}
+                {{ render_form_group(form.Drwp, append=append, class="mb-1") }}
+            </div>
+        </div>
+
+        {{ render_form_group(form.fish_factor) }}
+
+        <div class="tl-concentrations">
+            <div class="form-row">
+                <div class="col-sm">
+                    {{ render_form_group(
+                        form.trim_fish_tl35_compartment,
+                        input_class="fish-compartment-field"
+                    ) }}
+                </div>
+                <div class="col-sm">
+                    {% set append %}
+                        <small class="form-text">
+                            {{ render_input(
+                                form.C_tl35_src,
+                                class="form-control-plaintext text-muted p-0 src-info"
+                            ) }}
+                        </small>
+                    {% endset %}
+                    {{ render_form_group(form.C_tl35, append=append, class="mb-1") }}
+                    {% set append %}
+                        <small class="form-text">
+                            {{ render_input(
+                                form.f_tl35_src,
+                                class="form-control-plaintext text-muted p-0 src-info"
+                            ) }}
+                        </small>
+                    {% endset %}
+                    {{ render_form_group(form.f_tl35, append=append, class="mb-1") }}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="col-sm">
+                    {{ render_form_group(
+                        form.trim_fish_tl4_compartment,
+                        input_class="fish-compartment-field"
+                    ) }}
+                </div>
+                <div class="col-sm">
+                    {% set append %}
+                        <small class="form-text">
+                            {{ render_input(
+                                form.C_tl4_src,
+                                class="form-control-plaintext text-muted p-0 src-info"
+                            ) }}
+                        </small>
+                    {% endset %}
+                    {{ render_form_group(form.C_tl4, append=append, class="mb-1") }}
+                    {% set append %}
+                        <small class="form-text">
+                            {{ render_input(
+                                form.f_tl4_src,
+                                class="form-control-plaintext text-muted p-0 src-info"
+                            ) }}
+                        </small>
+                    {% endset %}
+                    {{ render_form_group(form.f_tl4, append=append, class="mb-1") }}
+                </div>
+            </div>
+        </div>
+        <div class="baf-concentrations" style="display: none;">
+            <div class="form-row">
+                <div class="col-sm">
+                    {{ render_form_group(
+                        form.trim_sed_compartment,
+                        input_class="sed-compartment-field"
+                    ) }}
+                </div>
+                <div class="col-sm">
+                    {% set append %}
+                        <small class="form-text">
+                            {{ render_input(
+                                form.C_sed_src,
+                                class="form-control-plaintext text-muted p-0 src-info"
+                            ) }}
+                        </small>
+                    {% endset %}
+                    {{ render_form_group(form.C_sed, append=append, class="mb-1") }}
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col-sm">
+                    {{ render_form_group(
+                        form.trim_surf_compartment,
+                        input_class="water-compartment-field"
+                    ) }}
+                </div>
+                <div class="col-sm">
+                    {% set append %}
+                        <small class="form-text">
+                            {{ render_input(
+                                form.C_surf_water_src,
+                                class="form-control-plaintext text-muted p-0 src-info"
+                            ) }}
+                        </small>
+                    {% endset %}
+                    {{ render_form_group(form.C_surf_water, append=append, class="mb-1") }}
+                    {% set append %}
+                        <small class="form-text">
+                            {{ render_input(
+                                form.FMD_src,
+                                class="form-control-plaintext text-muted p-0 src-info"
+                            ) }}
+                        </small>
+                    {% endset %}
+                    {{ render_form_group(form.FMD, append=append, class="mb-1") }}
+                </div>
+            </div>
+        </div>
+    </section>
+</form>
+
+
+<script>
+onDomLoad(function() {
+    window.MIRC = (function(mirc) {
+        return mirc;
+    })(window.MIRC || {});
+
+    function initFormEvents(form) {
+        var getParamsUrl = '{{ url_for("mirc_scenario_api.get_risk_scenario_parameters", id=0) }}';
+
+        // Filter valid BW by Exposure Profile
+        $('#mirc_scenario').on('change', function(e) {
+            var id = $(this).val();
+            $.ajax({
+                url: getParamsUrl.replace('/0', '/' + id) + '?variable=BW'
+            }).then(function(data) {
+                var bwpField = $('#human_body_weight_percentile');
+                var currentBWP = bwpField.val();
+                bwpField.find('option').prop('selected', false).hide();
+                validBWPs = Array.from(new Set(data.filter(x => x.value != 0).map(x => x.percentile)));
+                bwpField.find('option').each(function(i, el) {
+                    el = $(el);
+                    if (validBWPs.indexOf(el.text()) > -1) {
+                        el.show();
+                        if (el.attr('value') == currentBWP) {
+                            el.prop('selected', true);
+                        }
+                    }
+                });
+            });
+        }).change();
+
+        // Handle change to numeric inputs
+        form.on('change', 'input', function(e) {
+            var me = $(this);
+            var g = me.closest('.form-group');
+            g.find('.src-info').val('custom');
+        });
+
+        // Handle change to fish concentration calculation method
+        form.on('change', '[type="radio"]', function(e) {
+            if (this.name.indexOf('fish_factor') < 0) {
+                return;
+            }
+            var me = $(this);
+
+            var nm = this.name;
+            var val = $('[name="' + nm + '"]:checked').val();
+
+            if (val == 'baf') {
+                form.find('.tl-concentrations').hide();
+                form.find('.baf-concentrations').show();
+            }
+            else {
+                form.find('.baf-concentrations').hide();
+                form.find('.tl-concentrations').show();
+            }
+        });
+        form.find('[type="radio"]').change();
+
+        // Handle updating ingestion rate percentiles
+        var irs = $('.ingestion-rates select');
+        function setPercentile(select, preset, opts) {
+            select = $(select);
+            var defaultVal = opts.default || 7; // Pmean
+            select.val(defaultVal); // Pmean
+
+            $.each(opts, function(key, value) {
+                if (preset == key) {
+                    select.val(value);
+                    return false;
+                }
+            });
+        }
+        form.on('change', '[type="radio"]', function(e) { 
+            if (this.name.indexOf('ingestion_percentile_preset') < 0) {
+                return;
+            }
+
+            var nm = this.name;
+            var val = $('[name="' + nm + '"]:checked').val();
+
+            var irs = form.find('.ingestion-rates select');
+            if (val == 'custom') {
+                irs.prop('disabled', false);
+            }
+            else {
+                irs.prop('disabled', true);
+                irs.each(function() {
+                    var nm = this.name;
+                    if (nm.indexOf('breast_milk_percentile') > -1) {
+                        setPercentile(this, val, {
+                            default: 4 // P90
+                        });
+                    }
+                    else if (nm.indexOf('beef_percentile') > -1) {
+                        setPercentile(this, val, {
+                            farmer: 4, // P90
+                            farmer_fisher: 4, // P90
+                            default: 8 // None
+                        });
+                    }
+                    else if (nm.indexOf('dairy_percentile') > -1) {
+                        setPercentile(this, val, {
+                            farmer: 4, // P90
+                            farmer_fisher: 4, // P90
+                            default: 8 // None
+                        });
+                    }
+                    else if (nm.indexOf('eggs_percentile') > -1) {
+                        setPercentile(this, val, {
+                            fisher: 8, // None
+                            urban_gardener: 7, // Pmean
+                            default: 4 // P90
+                        });
+                    }
+                    else if (nm.indexOf('pork_percentile') > -1) {
+                        setPercentile(this, val, {
+                            farmer: 4, // P90
+                            farmer_fisher: 4, // P90
+                            default: 8 // None
+                        });
+                    }
+                    else if (nm.indexOf('poultry_percentile') > -1) {
+                        setPercentile(this, val, {
+                            farmer: 4, // P90
+                            farmer_fisher: 4, // P90
+                            default: 8 // None
+                        });
+                    }
+                    else if (nm.indexOf('_fruit_percentile') > -1) {
+                        setPercentile(this, val, {
+                            fisher: 8, // None
+                            urban_gardener: 7, // Pmean
+                            default: 4 // P90
+                        });
+                    }
+                    else if (nm.indexOf('_vegetable_percentile') > -1) {
+                        setPercentile(this, val, {
+                            fisher: 8, // None
+                            urban_gardener: 7, // Pmean
+                            default: 4 // P90
+                        });
+                    }
+                    else if (nm.indexOf('root_percentile') > -1) {
+                        setPercentile(this, val, {
+                            fisher: 8, // None
+                            urban_gardener: 7, // Pmean
+                            default: 4 // P90
+                        });
+                    }
+                    else if (nm.indexOf('soil_percentile') > -1) {
+                        setPercentile(this, val, {
+                            fisher: 8, // None
+                            default: 4 // P90
+                        });
+                    }
+                    else if (nm.indexOf('water_percentile') > -1) {
+                        setPercentile(this, val, {
+                            default: 8 // None
+                        });
+                    }
+                    else if (nm.indexOf('fish_percentile') > -1) {
+                        setPercentile(this, val, {
+                            fisher: 6, // P99
+                            farmer_fisher: 6, // P99
+                            default: 8 // None
+                        });
+                    }
+                });
+            }
+        });
+        var currentPreset = $('[name$="ingestion_percentile_preset"]:checked').val();
+        if (currentPreset != 'custom') {
+            form.find('[type="radio"]').change();
+        }
+        
+        // Handle change to compartment select
+        form.on('change', 'select, [type="radio"]', function() {
+            if (this.id.indexOf('trim_fish_tl35_compartment') > -1) {
+                form.find('[name$="C_tl35"]').val('').change();
+            }
+            else if (this.id.indexOf('trim_fish_tl4_compartment') > -1) {
+                form.find('[name$="C_tl4"]').val('').change();
+            }
+
+            var fromElement = undefined;
+            if ($(this).closest('#mirc-input-fields').length > 0) {
+                // if this was an input selector (e.g., not timestamp, chemical, etc.),
+                // only update that input
+                fromElement = $(this).closest('.form-row')[0];
+            }
+
+            updateSimulationMircFields(fromElement);
+        });
+    }
+
+    var form = $('#simulation-form');
+    initFormEvents(form);
+
+    window.MIRC.submitSimulationForm = function() {
+        form.find('input, textarea').removeClass('is-invalid');
+        form.find('.invalid-feedback').html('');
+
+        var irs = $('.ingestion-rates select');
+        irs.prop('disabled', false); // need to enable these so they are submitted correctly
+
+        function handleErrors(errors, pref) {
+            pref = pref || '';
+            $.each(errors, function(name, err) {
+                if (Array.isArray(err) && typeof err[0] == typeof {}) {
+                    $.each(err, function(i, subErrors) {
+                        handleErrors(subErrors, name + '-' + i + '-');
+                    });
+                }
+                else {
+                    form.find('[name="' + pref + name + '"]')
+                        .addClass('is-invalid')
+                        .next('.invalid-feedback').html(
+                            err.join('<br />')
+                        );
+                }
+            });
+        }
+
+        LoadingScreen.show('submitSimulationForm');
+        var loading = $.Deferred();
+        $.ajax({
+            url: form.attr('action'),
+            method: form.attr('method'),
+            processData: false,
+            contentType: false,
+            dataType: 'json',
+            data: new FormData(form[0])
+        }).done(function(data) {
+            // console.log(data);
+            loading.resolve(data);
+        }).fail(function(data) {
+            var error = data.responseJSON;
+            form_errs = error.message.form_errors;
+            if (form_errs) {
+                handleErrors(form_errs);
+            }
+            loading.reject(data);
+        }).always(function() {
+            irs.each(function() {
+                var me = $(this);
+                var controller = form.find('[name$="ingestion_percentile_preset"]:checked');
+                if (controller.val() != 'custom') {
+                    me.prop('disabled', true);
+                }
+            });
+            LoadingScreen.hide('submitSimulationForm');
+        });
+        return loading.promise();
+    }
+
+    form.submit(function(e) {
+        e.preventDefault();
+        window.MIRC.submitSimulationForm();
+    });
+});
+
+function initSimulationForm() {
+    updateSimulationTrimFields();
+
+    $('[name$="ingestion_percentile_preset"]').prop('checked', false);
+    $('[name$="ingestion_percentile_preset"][value="farmer_fisher"]').prop('checked', true).change();
+}
+
+function updateSimulationTrimFields() {
+    const data = TRIM.store.mirc_data;
+    if (!data || !data.chemicals || $.isEmptyObject(data.chemicals)) {
+        return;
+    }
+    const simulationForm = document.getElementById('simulation-form');
+
+    const chemField = simulationForm.querySelector('[name="chemical"]');
+    updateSelect(chemField, Object.entries(data.chemicals));
+    chemField.selectedIndex = 0;
+    chemField.removeAttribute('disabled');
+
+    const dtField = simulationForm.querySelector('[name="trim_timestamp"]');
+    updateSelect(dtField, data.timestamps);
+    dtField.selectedIndex = 0;
+    dtField.removeAttribute('disabled');
+
+    const airCompartments = [];
+    const soilCompartments = [];
+    const waterCompartments = [];
+    const sedCompartments = [];
+    const fishCompartments = [];
+
+    const airNames = ['air', 'upper air'];
+    const soilNames = ['soil surface', 'soil root zone'];
+    const sedNames = ['sediment'];
+    const waterNames = ['surface water'];
+
+    for (const parcel of data.parcels) {
+        if (!('volume_elements' in parcel)) {
+            continue;
+        }
+        for (const volume of parcel.volume_elements) {
+            if (!('compartments' in volume)) {
+                continue;
+            }
+            // Build the full volume name
+            const vol = volume.name + '_' + parcel.name;
+
+            for (const compartment of volume.compartments) {
+                // Build the full compartment name
+                const comp = compartment.name + ' in ' + vol;
+
+                const nm = compartment.name.toLowerCase().replace(/_/g, ' ').trim();
+
+                if (airNames.indexOf(nm) > -1) {
+                    airCompartments.push(comp);
+                }
+                else if (soilNames.indexOf(nm) > -1) {
+                    soilCompartments.push(comp);
+                }
+                else if (waterNames.indexOf(nm) > -1) {
+                    waterCompartments.push(comp);
+                }
+                else if (sedNames.indexOf(nm) > -1) {
+                    sedCompartments.push(comp);
+                }
+                else if (nm.indexOf('water column') > -1 || nm.indexOf('benthic') > -1) {
+                    fishCompartments.push(comp);
+                }
+            }
+        }
+    }
+    surfSoilCompartments = soilCompartments.filter(
+        x => x.toLowerCase().replace(/_/g, ' ').indexOf('soil surface') > -1);
+    waterCompartments.unshift(''); // Can be blank
+    sedCompartments.unshift(''); // Can be blank
+    fishCompartments.unshift(''); // Can be blank
+
+    const airField = simulationForm.querySelector('.air-compartment-field');
+    updateSelect(airField, airCompartments.sort());
+    airField.selectedIndex = 0;
+    airField.removeAttribute('disabled');
+
+    const surfFields = simulationForm.querySelectorAll('.surf-soil-compartment-field');
+    for (const surfField of surfFields) {
+        updateSelect(surfField, surfSoilCompartments.sort());
+        surfField.selectedIndex = 0;
+        surfField.removeAttribute('disabled');
+    }
+
+    const depFields = simulationForm.querySelectorAll('.dep-compartment-field');
+    for (const depField of depFields) {
+        updateSelect(depField, surfSoilCompartments.sort());
+        depField.selectedIndex = 0;
+        depField.removeAttribute('disabled');
+    }
+
+    const rootFields = simulationForm.querySelectorAll('.root-soil-compartment-field');
+    for (const rootField of rootFields) {
+        updateSelect(rootField, soilCompartments.sort());
+        rootField.selectedIndex = 0;
+        rootField.removeAttribute('disabled');
+    }
+
+    const waterFields = simulationForm.querySelectorAll('.water-compartment-field');
+    for (const waterField of waterFields) {
+        if (waterField.id == 'trim_water_compartment') {
+            updateSelect(waterField, waterCompartments.filter(x => x != '').sort());
+        }
+        else {
+            updateSelect(waterField, waterCompartments.sort());
+        }
+        waterField.selectedIndex = 0;
+        waterField.removeAttribute('disabled');
+    }
+
+    const sedField = simulationForm.querySelector('.sed-compartment-field');
+    updateSelect(sedField, sedCompartments.sort());
+    sedField.selectedIndex = 0;
+    sedField.removeAttribute('disabled');
+
+    const fishFields = simulationForm.querySelectorAll('.fish-compartment-field');
+    for (const fishField of fishFields) {
+        updateSelect(fishField, fishCompartments.sort());
+        fishField.selectedIndex = 0;
+        fishField.removeAttribute('disabled');
+    }
+
+    updateSimulationMircFields();
+}
+
+function updateSelect(select, options) {
+    if (typeof(select) === typeof('')) {
+        select = document.getElementById(select);
+    }
+
+    select.innerHTML = '';
+
+    const defaultVal = select.getAttribute('data-default') || undefined;
+
+    let selectIndex = -1;
+    for (const o of options) {
+        let opt = o;
+        if (typeof(o) == typeof('')) {
+            opt = {value: o, label: o};
+        }
+        else if (Array.isArray(o)) {
+            opt = {value: o[0], label: o[1]}
+        }
+        var option = document.createElement('option');
+        option.value = opt.value;
+        option.innerText = opt.label;
+        select.appendChild(option);
+
+        if (defaultVal !== undefined && defaultVal == opt.value) {
+            selectIndex = select.children.length - 1;
+        }
+    }
+    select.selectedIndex = selectIndex;
+}
+function getSelectedValue(select) {
+    const val = (select.options[select.selectedIndex] || {}).value;
+    return val;
+}
+function getCheckedValues(name) {
+    return Array.from(document.querySelectorAll(`[name="${name}"]`))
+        .filter(x => x.checked)
+        .map(x => x.value);
+}
+
+function updateSimulationMircFields(fromElement) {
+    // console.log(`Update MIRC input vals from ${fromElement}`)
+    const simulationForm = document.getElementById('simulation-form');
+
+    const airFields = document.getElementById('air-fields');
+    airFields.style.display = 'none';
+
+    const data = TRIM.store.mirc_data;
+    if (!data || !data.chemicals || $.isEmptyObject(data.chemicals)) {
+        return;
+    }
+    const importForm = document.getElementById('simulation-form');
+
+    const getVal = (name) => {
+        const field = importForm.querySelector(`[name="${name}"]`);
+        if (field.tagName == 'SELECT') {
+            return getSelectedValue(field);
+        }
+        else if (field.type?.toLowerCase() === 'checkbox') {
+            return getCheckedValues(name);
+        }
+        else {
+            return field.value;
+        }
+    };
+
+    const chem = data.chemicals[getVal('chemical')];
+
+    const useAermod = data.uses_aermod;
+    if (useAermod) {
+        airFields.style.display = '';
+    }
+
+    const dt = getVal('trim_timestamp');
+
+    const setField = (name, val, comp, conversion) => {
+        const field = $(`[name="${name}"]`);
+
+        if (fromElement !== undefined) {
+            if (field.closest('.form-row')[0] != fromElement) {
+                return;
+            }
+        }
+
+        if (val != undefined) {
+            val = Number(val);
+            if (conversion !== undefined) {
+                val = conversion(val);
+            }
+        }
+        else {
+            val = null;
+        }
+
+        field.val(val);
+
+        // Update src info
+        let src = 'custom';
+        if (comp) {
+            src = comp;
+        }
+        field.closest('.form-group').find('.src-info').val(src);
+    };
+
+    const parseCompartmentName = (name) => {
+        let n = name.split(' in '); // Split compartment from the rest of the name
+
+        let tmp = n.shift().trim(); // Take first element
+        let tmp2 = null;
+        if (n.length > 1) {
+            // We must have a sub-compartment!
+            tmp2 = n.shift().trim(); // Take next element as sub-compartment
+        }
+        const compartment = tmp2 !== null ? tmp2 : tmp;
+        const subCompartment = tmp2 !== null ? tmp : null;
+
+        n = n.join(' in ').trim(); // Re-join if there is any need
+
+        n = n.split('_'); // Split volume from parcel
+        const volume = n.shift().trim(); // Take first element as volume
+
+        const parcel = n.join('_') // Re-join if there is any need
+
+        const info = {
+            parcel, volume, compartment, subCompartment
+        }
+
+        return info;
+    };
+
+    const getParcel = (compartmentName) => {
+        if (!compartmentName) {
+            return null;
+        }
+        const parsed = parseCompartmentName(compartmentName);
+
+        const p = data.parcels.filter(x => x.name == parsed.parcel)[0];
+        if (!p) {
+            return null;
+        }
+        return p;
+    };
+
+    const getCompartment = (name) => {
+        if (!name) {
+            return null;
+        }
+        const parsed = parseCompartmentName(name);
+
+        const p = data.parcels.filter(x => x.name == parsed.parcel)[0];
+        if (!p) {
+            return null;
+        }
+        const v = p.volume_elements.filter(x => x.name == parsed.volume)[0];
+        if (!v) {
+            return null;
+        }
+        let c = v.compartments.filter(x => x.name == parsed.compartment)[0];
+        if (!c) {
+            return null;
+        }
+
+        if (parsed.subCompartment) {
+            c = c.compartments.filter(x => x.name == parsed.subCompartment)[0];
+            if (!c) {
+                return null;
+            }
+        }
+
+        return c;
+    };
+
+    if (useAermod) {
+        const airSrc = getVal('trim_air_compartment');
+        const airProps = getCompartment(airSrc).properties;
+        setField('Ca', airProps[chem].C_aermod?.value, airSrc);
+        setField('Fv', airProps[chem].Fv, airSrc);
+        setField(
+            'rho_a', airProps[chem].rho_a.value, airSrc
+        );
+    }
+    else {
+        // Zero-out air props by default
+        setField('Ca', 0, 'default');
+        setField('Fv', 0, 'default');
+        // Default for rho is 1 because it is used as the denominator of an equation
+        setField('rho_a', 1, 'default');
+    }
+
+    const waterSrc = getVal('trim_water_compartment');
+    const water = getCompartment(waterSrc);
+    if (water) {
+        setField('C_water', water.properties[chem].C?.[dt].value, waterSrc);
+    }
+    else {
+        setField('C_water', 0);
+    }
+
+    const humanSrc = getVal('trim_soil_human_compartment');
+    const human = getCompartment(humanSrc);
+    if (human) {
+        setField('C_soil', human.properties[chem].C?.[dt].value, humanSrc);
+    }
+    else {
+        setField('C_soil', 0);
+    }
+
+    const vegSrc = getVal('trim_soil_garden_compartment');
+    const veg = getCompartment(vegSrc);
+    if (veg) {
+        const vegProps = veg.properties;
+        setField('C_root_veg', vegProps[chem].C?.[dt].value, vegSrc);
+        setField('Kd', vegProps[chem].Kd.value, vegSrc);
+    }
+    else {
+        setField('C_root_veg', 0);
+        setField('Kd', 0);
+    }
+
+    const livestockSrc = getVal('trim_soil_livestock_compartment');
+    const livestock = getCompartment(livestockSrc);
+    if (human) {
+        setField('Cs_s', livestock.properties[chem].C?.[dt].value, livestockSrc);
+    }
+    else {
+        setField('Cs_s', 0);
+    }
+
+    const rootSrc = getVal('trim_soil_root_compartment');
+    const root = getCompartment(rootSrc);
+    if (root) {
+        const rootProps = root.properties;
+        setField('Cs_root_zone', rootProps[chem].C?.[dt].value, rootSrc);
+        setField('Kd_feed', rootProps[chem].Kd.value, rootSrc);
+    }
+    else {
+        setField('Cs_root_zone', 0);
+        setField('Kd_feed', 0);
+    }
+
+    const drdpSrc = getVal('trim_soil_drdp_compartment');
+    const drdp = getCompartment(drdpSrc);
+    if (drdp) {
+        setField(
+            'Drdp', drdp.properties[chem].Drdp?.[dt].value, drdpSrc,
+            // Convert daily to annual
+            function (x) { return (x * 365.25); }
+        );
+    }
+    else {
+        setField('Drdp', 0);
+    }
+
+    const drwpSrc = getVal('trim_soil_drwp_compartment');
+    const drwp = getCompartment(drwpSrc);
+    if (drwp) {
+        setField(
+            'Drwp', drwp.properties[chem].Drwp?.[dt].value, drwpSrc,
+            // Convert daily to annual
+            function (x) { return (x * 365.25); }
+        );
+    }
+    else {
+        setField('Drwp', 0);
+    }
+
+    const tl3Src = getVal('trim_fish_tl35_compartment');
+    const tl3 = getCompartment(tl3Src);
+    if (tl3) {
+        setField('C_tl35', tl3.properties[chem].C?.[dt].value, tl3Src);
+    }
+    else {
+        setField('C_tl35', 0);
+    }
+
+    const tl4Src = getVal('trim_fish_tl4_compartment');
+    const tl4 = getCompartment(tl4Src);
+    if (tl4) {
+        setField('C_tl4', tl4.properties[chem].C?.[dt].value, tl4Src);
+    }
+    else {
+        setField('C_tl4', 0);
+    }
+
+    const sedSrc = getVal('trim_sed_compartment');
+    const sed = getCompartment(sedSrc);
+    if (sed) {
+        setField('C_sed', sed.properties[chem].C?.[dt].value, sedSrc);
+    }
+    else {
+        setField('C_sed', 0);
+    }
+
+    const surfSrc = getVal('trim_surf_compartment');
+    const surf = getCompartment(surfSrc);
+    if (surf) {
+        const surfProps = surf.properties;
+        setField('C_surf_water', surfProps[chem].C?.[dt].value, surfSrc);
+        setField('FMD', surfProps[chem].FMD);
+    }
+    else {
+        setField('C_surf_water', 0);
+        setField('FMD', 0);
+    }
+}
+
+</script>

@@ -1,29 +1,29 @@
-import re, json
+import geopandas as gpd
+import json
 import numpy as np
+import re
 from copy import deepcopy
 from pprint import pprint
-import geopandas as gpd
 from shapely.geometry import Polygon, Point
 from shapely.prepared import prep
-from ..scenarios.utils import init_parameter_definitions
-from .defaults import SURFACE_SOIL_SPECIFIC_MEDIA_PARAMS
-
 from flask_api import ApiResult
-from pyproj import Transformer
-
+from trim_core.coordinates import CoordinateMapper
 from trim_frontend.scenarios.utils import update_dynamic_params
-from trim_db.schema import ureg, CustomParameter, ParameterDefinition, Parcel
+from trim_db.schema import CustomParameter, ParameterDefinition, Parcel
 from trim_db.services import ChemicalService, CompartmentService, FormulaService, \
     ParameterService, ParcelService, ScenarioService, VolumeElementService
 from trim_db.services.parameters import get_or_create_custom_param, update_custom_param_value
-from .defaults import get_watershed_area, \
-     Air_Parcel_VolElem_defaults, Aquatic_Biota_SW_Compartment_defaults, \
-     Aquatic_Biota_Sed_Compartment_defaults, Farm_Biota_SurfSoil_Compartment_defaults, \
-     LAND_USE_TYPES, AQUATIC_DIET, Land_Parcel_VolElem_defaults, Water_Parcel_VolElem_defaults, \
-     Wet_Dry_Source_VolElem_defaults, EROSION_DEFAULTS, make_self_requirements
-from .forms import ScenarioParcelsForm
 from ..scenarios.forms import ScenarioAbioticPropertiesForm
+from ..scenarios.utils import init_parameter_definitions
 from ..utils.logging import make_logger
+from .defaults import \
+    Air_Parcel_VolElem_defaults, Aquatic_Biota_SW_Compartment_defaults, \
+    Aquatic_Biota_Sed_Compartment_defaults, \
+    LAND_USE_TYPES, AQUATIC_DIET, Land_Parcel_VolElem_defaults, \
+    Water_Parcel_VolElem_defaults, Wet_Dry_Source_VolElem_defaults, \
+    EROSION_DEFAULTS, make_self_requirements, \
+    SURFACE_SOIL_SPECIFIC_MEDIA_PARAMS
+from .forms import ScenarioParcelsForm
 
 
 # note - this is mainly just code relocated from routes.py with absolutely zero changes.
@@ -779,7 +779,7 @@ def initialize_compartment_custom_parameters(nc):
         # (should be fixed value for that media across all parcels of the scenario for compartments with
         # that media
         search_comps = [c for c in this_parcel.scenario.compartments if c.media.isa(nc.media)]
-        ae_val = 0.5
+        ae_val = 1
         if len(search_comps) > 0:
             ae_vals = list(set([c.parameters.get("AllowExchange_Dynamic").value for c in search_comps if
                                 c.parameters.get("AllowExchange_Dynamic") is not None and
@@ -1008,30 +1008,23 @@ def delete_parcel_contents(del_parcel):
 # initialization/creation of the entity (i.e. compartment). In these cases we can get the default values from
 # the relevant flask form template (json) from the frontend.
 def get_default_value_from_json_form(form_name, parameter_name):
+    abiotic_form = ScenarioAbioticPropertiesForm()
+    parcels_form = ScenarioParcelsForm()
     json_forms = {
-        'Abiotic_Air': ScenarioAbioticPropertiesForm.__getattribute__(
-            ScenarioAbioticPropertiesForm, "AirAbioticTable"
-        ),
-        'Abiotic_Surface_Soil': ScenarioAbioticPropertiesForm.__getattribute__(
-            ScenarioAbioticPropertiesForm, "SurfaceSoilAbioticTable"
-        ),
-        'Abiotic_Tilled_Soil': ScenarioAbioticPropertiesForm.__getattribute__(
-            ScenarioAbioticPropertiesForm, "SurfaceSoilAbioticTable"
-        ),
-        'Abiotic_Root_Zone': ScenarioAbioticPropertiesForm.__getattribute__(
-            ScenarioAbioticPropertiesForm, "RootSoilAbioticTable"
-        ),
-        'Abiotic_Vadose_Zone': ScenarioAbioticPropertiesForm.__getattribute__(
-            ScenarioAbioticPropertiesForm, "VadoseSoilAbioticTable"
-        ),
-        'Abiotic_Groundwater': ScenarioAbioticPropertiesForm.__getattribute__(
-            ScenarioAbioticPropertiesForm, "GWSoilAbioticTable"
-        ),
-        'Parcels_Props': getattr(ScenarioParcelsForm, "mapTable")
+        'Abiotic_Air': getattr(abiotic_form, "AirAbioticTable"),
+        'Abiotic_Surface_Soil': getattr(abiotic_form, "SurfaceSoilAbioticTable"),
+        'Abiotic_Tilled_Soil': getattr(abiotic_form, "SurfaceSoilAbioticTable"),
+        'Abiotic_Root_Zone': getattr(abiotic_form, "RootSoilAbioticTable"),
+        'Abiotic_Vadose_Zone': getattr(abiotic_form, "VadoseSoilAbioticTable"),
+        'Abiotic_Groundwater': getattr(abiotic_form, "GWSoilAbioticTable"),
+        'Parcels_Props': getattr(parcels_form, "mapTable")
     }
     form_obj = json_forms[form_name]
-    form_class = form_obj.kwargs['form_class']
-    def_val = form_class.__getattribute__(form_class, parameter_name).kwargs["default"]
+    try:
+        def_val = getattr(form_obj, parameter_name).default
+    except Exception as e:
+        print(e)
+        def_val = None
     return def_val
 
 
@@ -1230,7 +1223,7 @@ def create_new_parameter_defs_for_domain(comp_name):
 
 
 # adapted from Samuel's "grid_points_in_polygon_meters" method
-def calculate_receptor_grid_points_for_parcel(pcl:Parcel):
+def calculate_receptor_grid_points_for_parcel(pcl: Parcel):
     """
     Calculate a rectangular grid of points inside the polygon defined by a parcel's
     vertices and spacing custom parameter.
@@ -1253,23 +1246,17 @@ def calculate_receptor_grid_points_for_parcel(pcl:Parcel):
     try:
 
         # EPSG:4326 is WGS84, which is what our parcel vertices are based on.
-        # Samuel's algorithm switches to 3857 for calculating the grid points
         CRS_FOR_WGS84 = 4326
-        CRS_FOR_GRID_CALCS = 3857
-        # note -- according to https://github.com/CityScope/CS_choiceModels/issues/4,
-        # CRS84 is also equvalent to EPSG:4326
 
-        def get_comp(p:Parcel, kwargs):
+        def get_comp(p: Parcel, **kwargs):
             comp = p.get_compartment(**kwargs)
-
             if kwargs.get("name") and isinstance(comp, list):
                 comp = comp[0]
-
             return comp
 
-        cdv = get_comp(pcl, {"name":"DryVaporSource"})
+        cdv = get_comp(pcl, name="DryVaporSource")
         spacing_param = cdv.parameters.get("ReceptorSpacing")
-        spacing_meters = spacing_param.default_value if type(spacing_param) is ParameterDefinition else spacing_param.value
+        spacing_meters = spacing_param.value
 
         if len(pcl.vertices) == 0:
             print(f"WARNING - {pcl} has no defined vertices; returning empty list")
@@ -1280,7 +1267,8 @@ def calculate_receptor_grid_points_for_parcel(pcl:Parcel):
         # (this dataframe is a single row with a single column; geometry contains all the points
 
         # Project to a CRS in meters (Web Mercator here; you could also use UTM for better accuracy)
-        gdf_proj = gdf.to_crs(epsg=CRS_FOR_GRID_CALCS)
+        utm_crs = gdf.estimate_utm_crs()
+        gdf_proj = gdf.to_crs(utm_crs)
         polygon = gdf_proj.geometry[0]
         prep_poly = prep(polygon)
 
@@ -1298,7 +1286,7 @@ def calculate_receptor_grid_points_for_parcel(pcl:Parcel):
                     points_inside.append(pt)
 
         # Convert list of Points to GeoDataFrame in EPSG:3857, then reproject back to EPSG:4326
-        points_gdf = gpd.GeoDataFrame(geometry=points_inside, crs=f"EPSG:{CRS_FOR_GRID_CALCS}")
+        points_gdf = gpd.GeoDataFrame(geometry=points_inside, crs=utm_crs)
         # return points_gdf.to_crs(epsg=CRS_FOR_WGS84)
         converted_points = points_gdf.to_crs(epsg=CRS_FOR_WGS84)
 
@@ -1316,26 +1304,22 @@ def calculate_receptor_grid_points_for_parcel(pcl:Parcel):
         print(f"ERROR calculating grid points for parcel {pcl}: {e}")
         return None
 
-# this is an adapted version of Samuel's "geojson_to_aermod_receptors" function; minor
-# changes made to help it work within TRIM app
-def geojson_to_aermod_receptors(geojson_contents, utm_zone=None, northern_hemisphere=True):
+
+# this is an adapted version of Samuel's "geojson_to_aermod_receptors" function;
+# minor changes made to help it work within TRIM app
+def geojson_to_aermod_receptors(geojson_contents):
     """
-    Converts GeoJSON points to AERMOD receptor file format.
+    Converts GeoJSON points to AERMOD receptor file format,
+    including WGS84-to-UTM coordinate conversion.
 
     Parameters:
     - geojson_contents: str containing GeoJSON
-    - utm_zone: int, UTM zone number
-    - northern_hemisphere: bool, True if northern hemisphere, False for southern
 
     Output:
     - AERMOD receptor file text (to be written to a file, returned to client, etc.)
     """
     # Set up transformer for lat/lon -> UTM
-    proj_str = "+proj=utm +datum=WGS84 +units=m +no_defs"
-    # proj_str += " +zone={utm_zone}"
-    if not northern_hemisphere:
-        proj_str += " +south"
-    transformer = Transformer.from_crs("EPSG:4326", proj_str, always_xy=True)
+    mapper = CoordinateMapper('WGS84_LONGLAT', 'UTM')
 
     # Read GeoJSON
     parsed_geojson = json.loads(geojson_contents)
@@ -1346,15 +1330,13 @@ def geojson_to_aermod_receptors(geojson_contents, utm_zone=None, northern_hemisp
     for feature in parsed_geojson['features']:
         geom = feature['geometry']
         if geom['type'] == 'Point':
-            lon, lat = geom['coordinates']
-            x, y = transformer.transform(lon, lat)
-            receptors.append((x, y))
+            receptors.append(mapper.translate(*geom['coordinates'])[:2])
         else:
             print(f"Skipping non-point geometry: {geom['type']}")
 
     # generate output
     aermod_format = ""
-    for idx, (x, y) in enumerate(receptors, start=1):
+    for (x, y) in receptors:
         aermod_format += f"RE DISCCART {x:.2f} {y:.2f} 0.0\n"
     aermod_format += "END\n"
 

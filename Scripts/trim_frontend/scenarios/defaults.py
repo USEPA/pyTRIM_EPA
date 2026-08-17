@@ -5,7 +5,6 @@ from trim_db.services import ParameterService
 
 @register_serializer(Scenario)
 def serialize_scenario(scen: Scenario):
-    start_time, end_time = scen.sim_begin_end_time
     try:
         erosion_source = scen.erosionRateCalcSource
     except Exception:
@@ -14,8 +13,8 @@ def serialize_scenario(scen: Scenario):
         'id': scen.id,
         'name': scen.name,
         'description': scen.description,
-        'simulation_start_date': start_time,
-        'simulation_end_date': end_time,
+        'simulation_start_date': scen.start_date,
+        'simulation_end_date': scen.end_date,
         'has_chemicals': len(list(scen.chemicals)) > 0,
         'has_parcels': len(list(scen.parcels)) > 0,
         'erosionRateSource': erosion_source
@@ -134,9 +133,9 @@ def get_seasonal_dynamics_params(scen, sd_type, media_name, default=-1):
         if sd_type == 'lf':
             sd_data = c.LitterFallRate
         elif sd_type == 'ae':
-            # TODO is allowExchange_forAir correct? should we use _forOther instead?
-            #   or should we directly use _Dynamic (which these point to)
-            sd_data = c.AllowExchange_forAir
+            # NOTE may need to reconsider _forAir and _forOther if steady-state modeling
+            # becomes supported
+            sd_data = c.AllowExchange_Dynamic
         else:
             raise ValueError('Unknown SD_Data!')
         if sd_data is None:

@@ -24,7 +24,7 @@
                         Show/Hide Non-Interactive Data
                     </label>
                     <sup>
-                        <a href="javascript:void(0);" title="" data-toggle="popover" data-html="true" data-placement="left" data-content="Select to show or hide properties which cannot be edited directly. These are property values which the model calculates from other property values. You have the option to see the calculated values, but you cannot change them except by changing the other property values they depend on. The help text on the non-interactive properties specifies the dependent properties, and when you click on one of the non-interactive properties then any dependent properties on this page will be highlighted in blue." data-original-title="Non-Interactive Data"><i class="fa fa-question"></i></a>
+                        <a href="javascript:void(0);" aria-label="Show/Hide Non-Interactive Data" title="" data-toggle="popover" data-html="true" data-placement="left" data-content="Select to show or hide properties which cannot be edited directly. These are property values which the model calculates from other property values. You have the option to see the calculated values, but you cannot change them except by changing the other property values they depend on. The help text on the non-interactive properties specifies the dependent properties, and when you click on one of the non-interactive properties then any dependent properties on this page will be highlighted in blue." data-original-title="Non-Interactive Data"><i class="fa fa-question"></i></a>
                     </sup>
                 </div>
             </div>
@@ -48,7 +48,7 @@
         </div>
         <div class = "row">
             <div class="col-md mt-4 text-center">
-                <h4>Sediment Properties</h4>
+                <h4>Sediment Bed Properties</h4>
             </div>
         </div>
         <div class ="row">
@@ -96,8 +96,14 @@
         const lkTblId = '#WaterColumnTable';
         const sedTblId = '#SedimentTable';
 
-        let lkTable = $(lkTblId).removeAttr('width').DataTable()
-        let sdTable = $(sedTblId).removeAttr('width').DataTable()
+        let lkTable = $(lkTblId).removeAttr('width').DataTable({
+            paging: false, bFilter: false, info: false,
+            language: { emptyTable: 'No data available in table' }
+        })
+        let sdTable = $(sedTblId).removeAttr('width').DataTable({
+            paging: false, bFilter: false, info: false,
+            language: { emptyTable: 'No data available in table' }
+        })
         let default_water_data = {
             'Water pH':{
                 'short_name':'water_ph',
@@ -181,7 +187,7 @@
                 'default_value': 2,
                 'unit': 'kg [sediment particles]/y',
                 'helpText': 'Volume of suspended sediment lost per year by the water column to discharge. Product of the Water Column Suspended Sediment Concentration and the Water Column Discharge Volumetric Rate\n' +
-                    '<p><strong>= (Water Column Suspended Sediment Concentration * Water Column Discharge Volumetric Rate)</strong></p>'
+                    '<p><strong>= (Suspended Sediment Concentration * Discharge Volumetric Rate)</strong></p>'
             },
             'Flush Rate':{
                 'short_name':'flush_rate',
@@ -197,7 +203,7 @@
                 'default_value': 2,
                 'unit': 'm<sup>3</sup> [water]/y',
                 'helpText': 'Volume of water lost per year by the water column to discharge. The Water Column Evaporation Volumetric Rate subtracted from the sum of the Precipitation Runoff Volumetric Rate from Land to Water Body, Precipitation Volumetric Rate to Water Body, Precipitation Seepage Volumetric Rate to Groundwater, and Water Column External Inflow from Other Water Bodies, assuming the lake maintains a constant volume (a simplifying assumption). That is, water inputs minus loss to evaporation.' +
-                    '<p><strong>= (Precipitation Runoff Volumetric Rate from Land to Water Body + Precipitation Volumetric Rate to Water Body + Precipitation Seepage Volumetric Rate to Groundwater + Water Column External Water Inflow from Other Water Bodies) - Water Column Evaporation Volumetric Rate.</strong></p>'
+                    '<p><strong>= (Precipitation Runoff Volumetric Rate to Water Body + Precipitation Volumetric Rate to Water Body + Precipitation Seepage Volumetric Rate to Groundwater + External Water Inflow from Other Water Bodies) - Evaporation Volumetric Rate.</strong></p>'
             },
             'Evaporation Rate':{
                 'short_name':'evaporation_rate',
@@ -212,7 +218,7 @@
                 'default_value': 0,
                 'unit': 'm<sup>3</sup> [water]/y',
                 'helpText': 'Volume of water lost per year by the water column to evaporation. Product of the Water Column Evaporation Rate and the water body surface area.' +
-                    '<p><strong>= (Water Column Evaporation Rate * water body surface area)</strong></p>'
+                    '<p><strong>= (Evaporation Rate * water body surface area)</strong></p>'
             },
             'External Water Inflow from Other Water Bodies':{
                 'short_name':'externalWaterInflow',
@@ -228,7 +234,7 @@
                 'unit': 'm<sup>2</sup>',
                 'helpText': "Portion of the modeling domain whose runoff terminates in this water body. Matrix multiplication on the matrix of parcel-to-parcel runoff fractions and the parcel surface areas. For the parcels directly sending runoff to the water body, it follows the flow lines upstream through the parcels contributing to those sending parcels, multiplying parcel areas by aggregate runoff fractions. For example: If a parcel sends 100% of its runoff directly to the water body, then that sending parcel&apos;s whole surface area is included in this Precipitation Runoff Watershed Area calculation. If Parcel A sends 10% of its runoff to Parcel B which sends 50% of its runoff to the water body, then the Precipitation Runoff Watershed Area calculation incorporates 10% * 50% = 5% of Parcel A&apos;s surface area and 50% of Parcel B&apos;s surface area."
             },
-            'Precipitation Runoff Volumetric Rate from Land to Water Body':{
+            'Precipitation Runoff Volumetric Rate to Water Body':{
                 'short_name':'connected_runoff_to_this_sw',
                 'is_editable': false,
                 'default_value': 0,
@@ -258,28 +264,28 @@
                 'is_editable': true,
                 'default_value': 0,
                 'unit': '1/day',
-                'helpText': 'See the TRIM User Guide Appendix for full reference information.'
+                'helpText': 'Enter the methylation rate for divalent mercury (Hg) in the water column. Valid values are ≥ 0. The default value of 0.001 is for a shallow lake with little or no anoxia, reflecting observed non-microbial rate constants in oxic waters, as reported on page B-20 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information.'
             },
             'Hg Reduction Rate':{
                 'short_name':'ReductionRate.Surface_Water',
                 'is_editable': true,
                 'default_value': 0,
                 'unit': '1/day',
-                'helpText': 'See the TRIM User Guide Appendix for full reference information.'
+                'helpText': 'Enter the reduction rate for divalent mercury in the water column. Valid values are ≥ 0. The default value of 0.0075 is as discussed on pages B-18 and B-19 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information.'
             },
             'Hg Oxidation Rate':{
                 'short_name':'OxidationRate.Surface_Water',
                 'is_editable': true,
                 'default_value': 0,
                 'unit': '1/day',
-                'helpText': 'See the TRIM User Guide Appendix for full reference information.'
+                'helpText': 'Enter the oxidation rate for elemental mercury in the water column. Valid values are ≥ 0. The default value of 0 is from Table B-2 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information.'
             },
             'Hg Demethylation Rate':{
                 'short_name':'DemethylationRate.Surface_Water',
                 'is_editable': true,
                 'default_value': 0,
                 'unit': '1/day',
-                'helpText': 'See the TRIM User Guide Appendix for full reference information.'
+                'helpText': 'Enter the demethylation rate for methyl mercury in the water column. Valid values are ≥ 0. The default value of 0.013 is the average of the range of maximum potential rate constants (0.001 to 0.025) from Gilmour and Henry 1991 (Mercury Methylation in Aquatic Systems Affected by Acid Deposition), as reported on page B-21 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information.'
             }
         }
         let default_sed_data = {
@@ -332,7 +338,7 @@
                 'default_value': 0,
                 'unit': 'm/d',
                 'helpText': 'Velocity of sediment returning to the water column (as suspended sediment) from the sediment bed. Ratio of the difference between the Water Body Sediment Deposition Volumetric Rate and the Water Body Sediment Burial Volumetric Rate to the difference between 1 and the Water Body Sediment Bed Porosity' +
-                    '<strong><p>= (Water Body Sediment Deposition Volumetric Rate - Water Body Sediment Burial Volumetric Rate) / (1 - Water Body Sediment Bed Porosity)</p></strong>'
+                    '<strong><p>= (Deposition Volumetric Rate - Sediment Burial Volumetric Rate) / (1 - Bed Porosity)</p></strong>'
             },
             'Deposition Volumetric Rate':{
                 'short_name': 'sed_deposition_vol_rate',
@@ -340,7 +346,7 @@
                 'default_value': 0,
                 'unit': 'm<sup>3</sup> [sediment] /m<sup>2</sup> [sediment bed interface] /d',
                 'helpText': 'Volume of sediment received per day by the water body’s sediment bed (per unit area) from the suspended sediment in the water column. Ratio of the product of the Water Column Sediment Deposition Velocity and the Water Column Suspended Sediment Concentration to the Sediment Bed Density.' +
-                    '<strong><p>= (Water Column Sediment Deposition Velocity * Water Column Suspended Sediment Concentration / Sediment Bed Density)</p></strong>'
+                    '<strong><p>= (Sediment Deposition Velocity * Suspended Sediment Concentration / Bed Density)</p></strong>'
             },
             'Soil Erosion Rate to Water Body':{
                 'short_name':'sed_soil_erosion_to_sw',
@@ -355,35 +361,35 @@
                 'default_value': 0,
                 'unit': 'm<sup>3</sup> [sediment] /m<sup>2</sup> [sediment bed interface] /d',
                 'helpText': 'Volume of sediment buried per day into the sediment bed (per unit area) from the suspended sediment in the water column. Ratio of the difference between the sum (across all contributing water bodies) of the Water Column External Sediment Inflow from Other Water Bodies and the Soil Erosion Rate to Water Body and the Water Column Sediment Discharge Rate (converted from kg/y to kg/d) to the product of the Water Body Sediment Bed Density and water body surface area.' +
-                    '<strong><p>= (Water Column External Sediment Inflow from Other Water Bodies + Soil Erosion Rate to Water Body - [Water Column Sediment Discharge Rate]/365) / (Sediment Bed Density* water body surface area)</p></strong>'                
+                    '<strong><p>= (External Sediment Inflow from Other Water Bodies + Soil Erosion Rate to Water Body - [Sediment Discharge Rate]/365) / (Bed Density * water body surface area)</p></strong>'                
             },
             'Hg Methylation Rate':{
                 'short_name':'MethylationRate.Sediment',
                 'is_editable': true,
                 'default_value': 0,
                 'unit': '1/day',
-                'helpText': 'See the TRIM User Guide Appendix for full reference information.'
+                'helpText': 'Enter the methylation rate for divalent mercury (Hg) in the sediment bed. Valid values are ≥ 0. The default value of 0.0001 is as discussed on pages B-20 and B-21 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information.'
             },
             'Hg Reduction Rate':{
                 'short_name':'ReductionRate.Sediment',
                 'is_editable': true,
                 'default_value': 0,
                 'unit': '1/day',
-                'helpText': 'See the TRIM User Guide Appendix for full reference information.'
+                'helpText': 'Enter the reduction rate for divalent mercury in the sediment bed. Valid values are ≥ 0. The default value of 1E-06 is inferred based on model calibration to general observations of elemental mercury in pore water, as discussed on page B-19 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information.'
             },
             'Hg Oxidation Rate':{
                 'short_name':'OxidationRate.Sediment',
                 'is_editable': true,
                 'default_value': 0,
                 'unit': '1/day',
-                'helpText': 'See the TRIM User Guide Appendix for full reference information.'
+                'helpText': 'Enter the oxidation rate for elemental mercury in the sediment bed. Valid values are ≥ 0. The default value of 0 is from Table B-2 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information.'
             },
             'Hg Demethylation Rate':{
                 'short_name':'DemethylationRate.Sediment',
                 'is_editable': true,
                 'default_value': 0,
                 'unit': '1/day',
-                'helpText': 'See the TRIM User Guide Appendix for full reference information.'
+                'helpText': 'Enter the demethylation rate for methyl mercury in the sediment bed. Valid values are ≥ 0. The default value of 0.0501 is the average of the range of maximum potential rate constants (2E-04 to 1E-01) from Gilmour and Henry 1991 (Mercury Methylation in Aquatic Systems Affected by Acid Deposition), as reported on page B-22 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information.'
             }
         }
 
@@ -402,8 +408,8 @@
             }
         })
 
-        let Auto_calculable = ["Water Column Flush Rate"]
-        let linked_data = ["Water Column External Water Inflow from Other Water Bodies"]
+        let Auto_calculable = ["Flush Rate"]
+        let linked_data = ["External Water Inflow from Other Water Bodies"]
         function TableRedraw(table_data, table_type) {
             let tblHandle = table_type == "lake" ? lkTable : sdTable
             let tblId = table_type == "lake" ? lkTblId : sedTblId
@@ -422,6 +428,7 @@
                 paging: false,
                 bFilter: false,
                 info: false,
+                language: { emptyTable: 'No data available in table' },
                 bAutoWidth: false,
                 scrollX: true,
                 scrollY: 500,
@@ -437,6 +444,7 @@
                 columns: setDynamicColumnWidths(tblId, get_pivoted_columns(tblId), table_data),
                 initComplete: function (settings, json) {
                     // $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
+                    this.api().columns().header().to$().attr('scope', 'col');
                     $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
                     $(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
                     $(".dataTables_scrollHead").addClass('wrap-text-scrollhead');
@@ -577,9 +585,9 @@
                         if (!$(e).is(":checked")) {
                             let table_col_headers = $(lkTblId).closest("div.dataTables_scroll").find("div.dataTables_scrollHeadInner th").map((i,h)=>h.innerHTML).toArray()
                             let table_row_headers = $(lkTblId + " tbody tr td:nth-child(1) label").map((i,r) => r.innerHTML).toArray()
-                            let external_flow_row_idx = table_row_headers.indexOf("Water Column External Water Inflow from Other Water Bodies")
-                            let discharge_row_idx = table_row_headers.indexOf("Water Column Discharge Volumetric Rate")
-                            let fr_row_idx = table_row_headers.indexOf("Water Column Flush Rate")
+                            let external_flow_row_idx = table_row_headers.indexOf("External Water Inflow from Other Water Bodies")
+                            let discharge_row_idx = table_row_headers.indexOf("Discharge Volumetric Rate")
+                            let fr_row_idx = table_row_headers.indexOf("Flush Rate")
                             let col_idx = table_col_headers.indexOf(this_parcel_name)
                             $(lkTblId).find('tr').eq(external_flow_row_idx+1).find('td').eq(col_idx).find("div.divLinkedPropBtn > label").text("0")
                             let tbl_data = get_Data_from_table(lkTblId)
@@ -619,7 +627,7 @@
                             let table_row_headers = $(lkTblId + " tbody tr td:nth-child(1) label").map((i,r) => r.innerHTML).toArray()
                             let total_inflow = 0
                             for (const this_val of values){
-                                let row_idx = table_row_headers.indexOf("Water Column Discharge Volumetric Rate")
+                                let row_idx = table_row_headers.indexOf("Discharge Volumetric Rate")
                                 let col_idx = table_col_headers.indexOf(this_val)
                                 let other_discharge_val = parseFloat($(lkTblId).find('tr').eq(row_idx+1).find('td').eq(col_idx).find("label").first().text())
                                 let this_ratio_data_tag = this_val.toLowerCase() + "_ratio"
@@ -659,7 +667,7 @@
                                                     let this_FR_id = "#FRatio_input_" + this_prc + "_" + this_parcel_name
                                                     let fraction_val = parseFloat($(this_FR_id).val())
                                                     // console.log($(this_FR_id))
-                                                    let row_idx = table_row_headers.indexOf("Water Column Discharge Volumetric Rate")
+                                                    let row_idx = table_row_headers.indexOf("Discharge Volumetric Rate")
                                                     let col_idx = table_col_headers.indexOf(this_prc)
                                                     let inflow_val = parseFloat($(lkTblId).find('tr').eq(row_idx + 1).find('td').eq(col_idx).find("label").first().text())
                                                     total_IF += inflow_val * fraction_val
@@ -676,8 +684,8 @@
                                                 // Calculate Flush rate if auto calculate = on
                                                 let tbl_data = get_Data_from_table(lkTblId)
                                                 let parcel_name = this_parcel_name
-                                                let fr_row_idx = table_row_headers.indexOf("Water Column Flush Rate")
-                                                let discharge_row_idx = table_row_headers.indexOf("Water Column Discharge Volumetric Rate")
+                                                let fr_row_idx = table_row_headers.indexOf("Flush Rate")
+                                                let discharge_row_idx = table_row_headers.indexOf("Discharge Volumetric Rate")
                                                 let col_idx = table_col_headers.indexOf(this_parcel_name)
                                                 // Calculate new discharge rate for the given inflow rate (so that the lake volume remains the same)
                                                 let res_dc = null
@@ -713,7 +721,7 @@
                                         for (const this_prc of values) {
                                             let this_FR_id = "#FRatio_input_" + this_prc + "_" + this_parcel_name
                                             let fraction_val = parseFloat($(this_FR_id).val())
-                                            let row_idx = table_row_headers.indexOf("Water Column Discharge Volumetric Rate")
+                                            let row_idx = table_row_headers.indexOf("Discharge Volumetric Rate")
                                             let col_idx = table_col_headers.indexOf(this_prc)
                                             let inflow_val = parseFloat($(lkTblId).find('tr').eq(row_idx + 1).find('td').eq(col_idx).find("label").first().text())
                                             total_IF += inflow_val * fraction_val
@@ -729,8 +737,8 @@
                                         // Calculate Flush rate if auto calculate = on
                                         let tbl_data = get_Data_from_table(lkTblId)
                                         let parcel_name = this_parcel_name
-                                        let fr_row_idx = table_row_headers.indexOf("Water Column Flush Rate")
-                                        let discharge_row_idx = table_row_headers.indexOf("Water Column Discharge Volumetric Rate")
+                                        let fr_row_idx = table_row_headers.indexOf("Flush Rate")
+                                        let discharge_row_idx = table_row_headers.indexOf("Discharge Volumetric Rate")
                                         let col_idx = table_col_headers.indexOf(this_parcel_name)
                                         // Calculate new discharge rate for the given inflow rate (so that the lake volume remains the same)
                                         let res_dc = null
@@ -853,7 +861,7 @@
 
                     let table_col_headers = $(lkTblId + " thead th").map((i,h)=>h.innerHTML).toArray()
                     let table_row_headers = $(lkTblId + " tbody tr td:nth-child(1) label").map((i,r) => r.innerHTML).toArray()
-                    let fr_row_idx = table_row_headers.indexOf("Water Column Flush Rate")
+                    let fr_row_idx = table_row_headers.indexOf("Flush Rate")
                     let col_idx = table_col_headers.indexOf(parcel_name)
                     let is_auto_calculated = $(lkTblId).find('tr').eq(fr_row_idx+1).find('td').eq(col_idx).find("button").data("active")
 
@@ -884,67 +892,67 @@
                     switch (field_name) {
                         case "evaporation_rate":
                             var val=calculate_wc_evaporation_vol_rate(wc_table_data, parcel_name, area)
-                            wc_table_data[wc_table_data.findIndex(e => e.Property == 'Water Column Evaporation Volumetric Rate')][parcel_name] = val
+                            wc_table_data[wc_table_data.findIndex(e => e.Property == 'Evaporation Volumetric Rate')][parcel_name] = val
                             var val_dvr = calculate_discharge_vol_rate(wc_table_data, parcel_name)
-                            wc_table_data[wc_table_data.findIndex(e => e.Property == 'Water Column Discharge Volumetric Rate')][parcel_name] = val_dvr
+                            wc_table_data[wc_table_data.findIndex(e => e.Property == 'Discharge Volumetric Rate')][parcel_name] = val_dvr
                             if (is_auto_calculated == 'True') {
                                 var val_fr = calculate_flush_rate(wc_table_data,parcel_name)
-                                wc_table_data[wc_table_data.findIndex(e => e.Property == 'Water Column Flush Rate')][parcel_name] = val_fr
+                                wc_table_data[wc_table_data.findIndex(e => e.Property == 'Flush Rate')][parcel_name] = val_fr
                             }
                             var val_sdr=calculate_sed_discharge_rate(wc_table_data,parcel_name)
-                            wc_table_data[wc_table_data.findIndex(e => e.Property == 'Water Column Sediment Discharge Rate')][parcel_name] = val_sdr
+                            wc_table_data[wc_table_data.findIndex(e => e.Property == 'Sediment Discharge Rate')][parcel_name] = val_sdr
                             var val_sbr = calculate_sed_burial_vol_rate(wc_table_data,sed_table_data,parcel_name, area)
                             sed_table_data[sed_table_data.findIndex(e => e.Property == 'Sediment Burial Volumetric Rate')][parcel_name] = val_sbr
                             var val_srv = calculate_sed_resuspension_vel(wc_table_data,sed_table_data,parcel_name, area)
-                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Sediment Resuspension Velocity')][parcel_name] = val_srv
+                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Resuspension Velocity')][parcel_name] = val_srv
                             break;
                         case "flush_rate":
                             // Fall through to discharge_vol_rate... no break!
                             var val_dvr = calculate_discharge_vol_rate(wc_table_data, parcel_name)
-                            wc_table_data[wc_table_data.findIndex(e => e.Property == 'Water Column Discharge Volumetric Rate')][parcel_name] = val_dvr      
+                            wc_table_data[wc_table_data.findIndex(e => e.Property == 'Discharge Volumetric Rate')][parcel_name] = val_dvr      
                         case "discharge_vol_rate":
                             if (is_auto_calculated == 'True') {
                                 var val_fr = calculate_flush_rate(wc_table_data,parcel_name)
-                                wc_table_data[wc_table_data.findIndex(e => e.Property == 'Water Column Flush Rate')][parcel_name] = val_fr
+                                wc_table_data[wc_table_data.findIndex(e => e.Property == 'Flush Rate')][parcel_name] = val_fr
                             }
                             var val_sdr=calculate_sed_discharge_rate(wc_table_data,parcel_name)
-                            wc_table_data[wc_table_data.findIndex(e => e.Property == 'Water Column Sediment Discharge Rate')][parcel_name] = val_sdr
+                            wc_table_data[wc_table_data.findIndex(e => e.Property == 'Sediment Discharge Rate')][parcel_name] = val_sdr
                             var val_sbr = calculate_sed_burial_vol_rate(wc_table_data,sed_table_data,parcel_name, area)
                             sed_table_data[sed_table_data.findIndex(e => e.Property == 'Sediment Burial Volumetric Rate')][parcel_name] = val_sbr
                             var val_srv = calculate_sed_resuspension_vel(wc_table_data,sed_table_data,parcel_name, area)
-                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Sediment Resuspension Velocity')][parcel_name] = val_srv
+                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Resuspension Velocity')][parcel_name] = val_srv
                             break;
                         case "suspended_sed_conc":
                             var val=calculate_sed_discharge_rate(wc_table_data,parcel_name)
-                            wc_table_data[wc_table_data.findIndex(e => e.Property == 'Water Column Sediment Discharge Rate')][parcel_name] = val
+                            wc_table_data[wc_table_data.findIndex(e => e.Property == 'Sediment Discharge Rate')][parcel_name] = val
                             var val_dvr=calculate_sed_deposition_vol_rate(wc_table_data,sed_table_data,parcel_name)
-                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Sediment Deposition Volumetric Rate')][parcel_name] = val_dvr
+                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Deposition Volumetric Rate')][parcel_name] = val_dvr
                             var val_srv = calculate_sed_resuspension_vel(wc_table_data,sed_table_data,parcel_name, area)
-                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Sediment Resuspension Velocity')][parcel_name] = val_srv
+                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Resuspension Velocity')][parcel_name] = val_srv
                             break;
                         case "sed_inflow":
                             var val=calculate_sed_burial_vol_rate(wc_table_data,sed_table_data,parcel_name, area)
                             sed_table_data[sed_table_data.findIndex(e => e.Property == 'Sediment Burial Volumetric Rate')][parcel_name] = val
                             var val_srv = calculate_sed_resuspension_vel(wc_table_data,sed_table_data,parcel_name, area)
-                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Sediment Resuspension Velocity')][parcel_name] = val_srv
+                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Resuspension Velocity')][parcel_name] = val_srv
                             break;
                         case "bed_density":
                             var val_bvr=calculate_sed_burial_vol_rate(wc_table_data,sed_table_data,parcel_name, area)
                             sed_table_data[sed_table_data.findIndex(e => e.Property == 'Sediment Burial Volumetric Rate')][parcel_name] = val_bvr
                             var val_dvr=calculate_sed_deposition_vol_rate(wc_table_data,sed_table_data,parcel_name)
-                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Sediment Deposition Volumetric Rate')][parcel_name] = val_dvr
+                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Deposition Volumetric Rate')][parcel_name] = val_dvr
                             var val = calculate_sed_resuspension_vel(wc_table_data,sed_table_data,parcel_name, area)
-                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Sediment Resuspension Velocity')][parcel_name] = val
+                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Resuspension Velocity')][parcel_name] = val
                             break;
                         case "sed_deposition_vel":
                             var val=calculate_sed_deposition_vol_rate(wc_table_data,sed_table_data,parcel_name)
-                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Sediment Deposition Volumetric Rate')][parcel_name] = val
+                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Deposition Volumetric Rate')][parcel_name] = val
                             var val_srv = calculate_sed_resuspension_vel(wc_table_data,sed_table_data,parcel_name, area)
-                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Sediment Resuspension Velocity')][parcel_name] = val_srv
+                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Resuspension Velocity')][parcel_name] = val_srv
                             break;
                         case "bed_porosity":
                             var val = calculate_sed_resuspension_vel(wc_table_data,sed_table_data,parcel_name, area)
-                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Sediment Resuspension Velocity')][parcel_name] = val
+                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Resuspension Velocity')][parcel_name] = val
                     }
 
                     let wc_store = getParcelByKey('name', parcel_name).surface_water.wc_props;
@@ -1014,8 +1022,9 @@
         form.addEventListener('form:visible', function() {
             console.log('lake props form visible')
             LoadingScreen.show('lake_props_loading');
+            document.body.removeEventListener('parcels:ready', updateLakeProps);
+            document.body.addEventListener('parcels:ready', updateLakeProps);
             TRIM.refreshParcels();
-            document.body.addEventListener('parcels:ready', updateLakeProps());
         });
 
         function get_pivoted_columns(tblId) {
@@ -1028,12 +1037,19 @@
                     'render': function (data, type, row){
                         let help_text = row.helpText;
                         let tooltip = row.unit || row.tooltip;
-                        return  "<label data-toggle='tooltip' data-placement='top' data-html='true' title='" + tooltip + "'>" + data + "</label>" +
-                        "<sup>" +
-                            "<a href='javascript:void(0);' title='"+ data +"' data-trigger='focus' data-toggle='popover' data-html='true' data-placement='left' data-content='" + help_text +"'>" +
-                                "<i class='fa fa-question'></i>" +
-                            "</a>" +
-                        "</sup>";
+                        return  `<label data-toggle='tooltip' data-placement='top' data-html='true' title='${tooltip}'>${data}</label>
+                        <sup>
+                            <a href='javascript:void(0);'
+                                title='${data}'
+                                aria-label='${data}'
+                                data-trigger='focus'
+                                data-toggle='popover'
+                                data-html='true'
+                                data-placement='left'
+                                data-content='${help_text}'>
+                                    <i class='fa fa-question'></i>
+                            </a>
+                        </sup>`;
                     }
                 }
             ];
@@ -1073,7 +1089,7 @@
                         })
                         let multi_select_html = "<div><div data-parcelname='"+ e.name +"' class='parcelMultiselect'>" +
                             "<div id='psl_" + e.name + "' class='parcelSelectLabel selectBox'>" +
-                            "<select class='form-select'>" +
+                            "<select class='form-select' aria-label='Parcels for external water inflow'>" +
                             "<option>Select Parcel(s)</option>" +
                             "</select>" +
                             "<div class='overSelect'>" +
@@ -1123,10 +1139,10 @@
                 $cells.each(function(cellIndex) {
                     // Set the header text
                     if(headersText[cellIndex] === undefined) {
-                        headersText[cellIndex] = $($headers[cellIndex]).text();
+                        headersText[cellIndex] = $($headers[cellIndex]).text().trim();
                     }
                     // Update the row object with the header/cell combo
-                    myRows[index][headersText[cellIndex]] = $(this).find("label").first().text();
+                    myRows[index][headersText[cellIndex]] = $(this).find("label").first().text().trim();
                 });
             });
             return myRows
@@ -1140,7 +1156,7 @@
             let evapo_rate = P.surface_water.wc_props.evaporation_rate;
             let watershed_area = P.surface_water.wc_props.connected_watershed_area;
             let lake_depth = P.surface_water.wc_props.mean_depth;
-            let external_inflow = Number(data.find(e=>e.Property == "Water Column External Water Inflow from Other Water Bodies")[parcel_name])
+            let external_inflow = Number(data.find(e=>e.Property == "External Water Inflow from Other Water Bodies")[parcel_name])
             let area = P.area;
             let wgt_ave_runoff_frac = pcls.filter(e=>e.runoff_fraction!=null).map(e=>e.runoff_fraction*e.area).reduce((a,e)=>a+e, 0)/
                 pcls.filter(e=>e.runoff_fraction!=null).map(e=>e.area).reduce((a,e)=>a+e, 0)
@@ -1151,8 +1167,8 @@
                 (watershed_area * precip_rate * wgt_ave_seepage_frac) + (external_inflow) - (area * evapo_rate)) /
                 (area * lake_depth)
             // let parcels = TRIM.store.currentScenario.parcels;
-            // let wc_discharge_vol_rate = Number(data.find(e=>e.Property == "Water Column Discharge Volumetric Rate")[parcel_name])
-            // let wc_depth = Number(data.find(e=>e.Property == "Water Column Depth")[parcel_name])
+            // let wc_discharge_vol_rate = Number(data.find(e=>e.Property == "Discharge Volumetric Rate")[parcel_name])
+            // let wc_depth = Number(data.find(e=>e.Property == "Water Depth")[parcel_name])
             // let res = wc_discharge_vol_rate/(area * wc_depth)
             return Number.parseFloat(res).toExponential(5)
         }
@@ -1161,52 +1177,53 @@
             // use flush rate if manually applied
             let table_col_headers = $(lkTblId + " thead th").map((i,h)=>h.innerHTML).toArray()
             let table_row_headers = $(lkTblId + " tbody tr td:nth-child(1) label").map((i,r) => r.innerHTML).toArray()
-            let fr_row_idx = table_row_headers.indexOf("Water Column Flush Rate")
+            let fr_row_idx = table_row_headers.indexOf("Flush Rate")
             let col_idx = table_col_headers.indexOf(parcel_name)
             let is_auto_calculated = $(lkTblId).find('tr').eq(fr_row_idx+1).find('td').eq(col_idx).find("button").data("active");
             if (is_auto_calculated == 'False') {
-                let flush_rate = Number(data.find(e=>e.Property == "Water Column Flush Rate")[parcel_name])
+                let flush_rate = Number(data.find(e=>e.Property == "Flush Rate")[parcel_name])
                 let area = getParcelByKey('name', parcel_name).area
-                let wc_depth = Number(data.find(e=>e.Property == "Water Column Depth")[parcel_name])
+                let wc_depth = Number(data.find(e=>e.Property == "Water Depth")[parcel_name])
                 let res = flush_rate * area * wc_depth
                 return Number.parseFloat(res).toExponential(5)
             }
 
-            let runoff_gain = Number(data.find(e=>e.Property == "Precipitation Runoff Volumetric Rate from Land to Water Body")[parcel_name])
+            let runoff_gain = Number(data.find(e=>e.Property == "Precipitation Runoff Volumetric Rate to Water Body")[parcel_name])
             let precipitation_gain = Number(data.find(e=>e.Property == "Precipitation Volumetric Rate to Water Body")[parcel_name])
             let precipitation_gw_seepage_gain = Number(data.find(e=>e.Property == "Precipitation Seepage Volumetric Rate to Groundwater")[parcel_name])
-            let external_inflow_gain = Number(data.find(e=>e.Property == "Water Column External Water Inflow from Other Water Bodies")[parcel_name])
-            let evaporation_loss = Number(data.find(e=>e.Property == "Water Column Evaporation Volumetric Rate")[parcel_name])
+            let external_inflow_gain = Number(data.find(e=>e.Property == "External Water Inflow from Other Water Bodies")[parcel_name])
+            let evaporation_loss = Number(data.find(e=>e.Property == "Evaporation Volumetric Rate")[parcel_name])
             let res = (runoff_gain + precipitation_gain + precipitation_gw_seepage_gain + external_inflow_gain) - evaporation_loss
             return Number.parseFloat(res).toExponential(5)
         }
 
         function calculate_wc_evaporation_vol_rate(data, parcel_name, area){
-            let evaporation_rate = Number(data.find(e=>e.Property == "Water Column Evaporation Rate")[parcel_name])
+            let evaporation_rate = Number(data.find(e=>e.Property == "Evaporation Rate")[parcel_name])
             let res = evaporation_rate * area
             return Number.parseFloat(res).toExponential(5)
         }
 
         function calculate_sed_discharge_rate(data, parcel_name){
-            let wc_discharge_vol_rate = Number(data.find(e=>e.Property == "Water Column Discharge Volumetric Rate")[parcel_name])
-            let suspended_sed_conc = Number(data.find(e=>e.Property == "Water Column Suspended Sediment Concentration")[parcel_name])
+            let wc_discharge_vol_rate = Number(data.find(e=>e.Property == "Discharge Volumetric Rate")[parcel_name])
+            let suspended_sed_conc = Number(data.find(e=>e.Property == "Suspended Sediment Concentration")[parcel_name])
             let res = wc_discharge_vol_rate * suspended_sed_conc
             return Number.parseFloat(res).toExponential(5)
         }
 
         function calculate_sed_burial_vol_rate(data_wc, data_sed, parcel_name, area){
-            let wc_external_sed_inflow = Number(data_wc.find(e=>e.Property == "Water Column External Sediment Inflow from Other Water Bodies")[parcel_name])
+            let wc_external_sed_inflow = Number(data_wc.find(e=>e.Property == "External Sediment Inflow from Other Water Bodies")[parcel_name])
             let soil_erosion_rate_to_wc = Number(data_sed.find(e=>e.Property == "Soil Erosion Rate to Water Body")[parcel_name])
-            let wc_sed_discharge_rate = Number(data_wc.find(e=>e.Property == "Water Column Sediment Discharge Rate")[parcel_name])
-            let sed_bed_density = Number(data_sed.find(e=>e.Property == "Sediment Bed Density")[parcel_name])
-            let res = (wc_external_sed_inflow + soil_erosion_rate_to_wc - wc_sed_discharge_rate) / (sed_bed_density * area)
+            let wc_sed_discharge_rate = Number(data_wc.find(e=>e.Property == "Sediment Discharge Rate")[parcel_name])
+            let sed_bed_density = Number(data_sed.find(e=>e.Property == "Bed Density")[parcel_name])
+            let res = (wc_external_sed_inflow + soil_erosion_rate_to_wc - (wc_sed_discharge_rate/365)) / (sed_bed_density * area)
+            res = Math.max(res, 0)
             return Number.parseFloat(res).toExponential(5)
         }
 
         function calculate_sed_deposition_vol_rate(data_wc, data_sed, parcel_name){
-            let wc_sed_deposition_vel = Number(data_wc.find(e=>e.Property == "Water Column Sediment Deposition Velocity")[parcel_name])
-            let wc_suspended_sed_conc = Number(data_wc.find(e=>e.Property == "Water Column Suspended Sediment Concentration")[parcel_name])
-            let sed_bed_density = Number(data_sed.find(e=>e.Property == "Sediment Bed Density")[parcel_name])
+            let wc_sed_deposition_vel = Number(data_wc.find(e=>e.Property == "Sediment Deposition Velocity")[parcel_name])
+            let wc_suspended_sed_conc = Number(data_wc.find(e=>e.Property == "Suspended Sediment Concentration")[parcel_name])
+            let sed_bed_density = Number(data_sed.find(e=>e.Property == "Bed Density")[parcel_name])
             let res = wc_sed_deposition_vel * wc_suspended_sed_conc / sed_bed_density
             return Number.parseFloat(res).toExponential(5)
         }
@@ -1214,13 +1231,13 @@
         function calculate_sed_resuspension_vel(data_wc, data_sed, parcel_name, area){
             let sed_deposition_vol_rate = calculate_sed_deposition_vol_rate(data_wc, data_sed, parcel_name)
             let sed_burial_vol_rate = calculate_sed_burial_vol_rate(data_wc, data_sed, parcel_name, area)
-            let sed_bed_porosity = Number(data_sed.find(e=>e.Property == "Sediment Bed Porosity")[parcel_name])
+            let sed_bed_porosity = Number(data_sed.find(e=>e.Property == "Bed Porosity")[parcel_name])
             let res = (sed_deposition_vol_rate - sed_burial_vol_rate) / (1 - sed_bed_porosity)
             return Number.parseFloat(res).toExponential(5)
         }
 
         function updateLakeProps() {
-            if (!TRIM.store.currentScenario.parcels) {
+            if (!TRIM.store.currentScenario || !TRIM.store.currentScenario.parcels) {
                 // Parcels haven't loaded yet; wait a bit and try again
                 setTimeout(function() { updateLakeProps(); }, 1000);
                 return;
@@ -1230,7 +1247,14 @@
             const sed_data = []
             const water_properties = Object.keys(default_water_data)
             const sed_properties = Object.keys(default_sed_data)
-            if (parcels.length > 0) {
+            const waterParcels = parcels.filter(e => e.parcelType == "Water Only" || e.parcelType == "Water & Air");
+            try {
+            if (waterParcels.length === 0) {
+                $(lkTblId + ' tbody:gt(0)').remove();
+                $(sedTblId + ' tbody:gt(0)').remove();
+                return;
+            }
+            if (parcels.length > 0 && waterParcels.length > 0) {
                 const mercuryTransformations = [
                     'MethylationRate', 'OxidationRate', 'ReductionRate', 'DemethylationRate'
                 ];
@@ -1270,7 +1294,7 @@
                             }
                             else {
                                 let exceptions = ['Precipitation Runoff Watershed Area',
-                                    'Precipitation Runoff Volumetric Rate from Land to Water Body',
+                                    'Precipitation Runoff Volumetric Rate to Water Body',
                                     'Precipitation Volumetric Rate to Water Body',
                                     'Precipitation Seepage Volumetric Rate to Groundwater'
                                 ]
@@ -1329,9 +1353,12 @@
                 })
                 TableRedraw(sed_data, "sed")
             }
-
             console.log('populated lake props form!')
-            LoadingScreen.hide('lake_props_loading');
+            } catch(e) {
+                console.error('updateLakeProps error:', e);
+            } finally {
+                LoadingScreen.hide('lake_props_loading');
+            }
         }
     });
 </script>

@@ -1,7 +1,4 @@
 import pandas as pd
-from sqlalchemy import or_
-from sqlalchemy.orm import selectinload, joinedload
-from ..schema.scenarios.models import Scenario
 from ..schema.entities.models import *
 from ..schema.entities.environment import DummyLink
 from ..schema.utils.caching import CacheManager
@@ -16,7 +13,7 @@ __all__ = [
 ]
 
 
-class ChemicalService(GenericService):
+class ChemicalService(GenericService[Chemical]):
     __model__ = parameterize(
         Chemical,
         # at the moment chemicals take custom params from the Foundries/Default scenario
@@ -49,6 +46,11 @@ class ChemicalService(GenericService):
 
         target_rates = dict(cls.mercury_transformation_parameters)
 
+        def media_key(comp):
+            if comp.media.isa('Surface_Soil'):
+                return 'Surface_Soil'
+            return comp.media.name
+
         mtr_params = {}
         for comp in parcel.compartments:
             if not (
@@ -59,8 +61,9 @@ class ChemicalService(GenericService):
                 or comp.media.isa('Sediment')
             ):
                 continue
-            mtr_params[comp.media.name] = {chem_name: {} for chem_name in target_rates}
-            media_params = mtr_params[comp.media.name]
+            key = media_key(comp)
+            mtr_params[key] = {chem_name: {} for chem_name in target_rates}
+            media_params = mtr_params[key]
             for chem in mercuries:
                 for rate in target_rates[chem.name]:
                     try:
@@ -96,24 +99,24 @@ class ChemicalService(GenericService):
         ChemicalService.commit()
 
 
-class ParcelService(GenericService):
+class ParcelService(GenericService[Parcel]):
     __model__ = Parcel
 
 
-class VolumeElementService(GenericService):
+class VolumeElementService(GenericService[VolumeElement]):
     __model__ = parameterize(
         VolumeElement,
         default_scenario=lambda x: x.parcel.scenario
     )
 
 
-class CompartmentService(GenericService):
+class CompartmentService(GenericService[Compartment]):
     __model__ = parameterize(
         Compartment,
         default_scenario=lambda x: x.volume_element.parcel.scenario
     )
 
-    class media(GenericService):
+    class media(GenericService[Media]):
         __model__ = Media
 
         @classmethod
@@ -151,11 +154,11 @@ class CompartmentService(GenericService):
             else:
                 return super().get(model_id=model_id, **kwargs)
 
-    class links(GenericService):
+    class links(GenericService[CompartmentLink]):
         __model__ = CompartmentLink
 
 
-class TransportProcessService(GenericService):
+class TransportProcessService(GenericService[TransportProcess]):
     __model__ = TransportProcess
 
 

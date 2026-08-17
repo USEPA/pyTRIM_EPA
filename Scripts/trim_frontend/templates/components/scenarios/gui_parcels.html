@@ -4,70 +4,93 @@
     data-form-src="scenario_parcels_form"
 >
     <section class="container px-0">
-		<fieldset>
-			<legend>Parcel Upload</legend>
-			<div class="row mb-1">
-				<div class="col-sm">
-					<div data-slot="true" data-target="parcels_file"></div>
-					<div class="form-text mb-2">
-						<small class="text-muted">
-							<a href="{{ url_for(
-								'static', filename='templates/parcels.csv'
-							) }}">
-                                Click here
-                            </a>
-                            to download the template for creating a CSV parcels file.
-                            X/Y coordinates must be provided as WGS84 Longitude/Latitude
-                            in decimal degrees.
-						</small>
-					</div>
+        <div class="accordion mb-3">
+            <div id="parcelUploadHeading" class="border-bottom">
+                <h2 class="mb-0">
+                    <button class="btn btn-link btn-block text-right text-decoration-none"
+                        type="button" data-toggle="collapse" data-target="#parcelUploadForm"
+                        aria-expanded="false" aria-controls="parcelUploadForm"
+                    >
+                        <i class="fa fa-chevron-down mr-2"></i>Load Parcels from File
+                    </button>
+                </h2>
+            </div>
 
-					<div class="row mb-1 subform" style="display: none;">
-						<div class="col-md">
-							<div data-slot="true" data-target="upload_coordinates_system"></div>
-						</div>
-						<div class="col-md" style="opacity:0">
-							<div data-slot="true" data-target="upload_utm_zone"></div>
-						</div>
-					</div>
+            <div id="parcelUploadForm" class="collapse" aria-labelledby="parcelUploadHeading">
+                <div class="row mt-3">
+                    <div class="col-sm">
+                        <div data-slot="true" data-target="parcels_file"></div>
+                        <div class="form-text mb-2">
+                            <small class="text-muted">
+                                <a href="{{ url_for(
+                                    'static', filename='templates/parcels.csv'
+                                ) }}" title="Click here to download template">
+                                    Click here
+                                </a>
+                                to download the template for creating a CSV parcels file.
+                                X/Y coordinates must be provided as WGS84 Longitude/Latitude
+                                in decimal degrees.
+                            </small>
+                        </div>
 
-					<!-- <div data-slot="true" data-target="parcel_coordinates_description"></div> -->
-					<a id="upload-btn" href="#" class="btn btn-secondary"><i class="fas fa-upload mr-1"></i>Upload</a>
-				</div>
-			</div>
-		</fieldset>
-		<fieldset>
-			<legend>Deposition Overlay</legend>
-			<div class="row mb-1">
-				<div class="col-sm">
-					<div data-slot="true" data-target="deposition_overlay_file"></div>
+                        <div class="row mb-1 subform" style="display: none;">
+                            <div class="col-md">
+                                <div data-slot="true" data-target="upload_coordinates_system"></div>
+                            </div>
+                            <div class="col-md" style="opacity:0">
+                                <div data-slot="true" data-target="upload_utm_zone"></div>
+                            </div>
+                        </div>
 
-					<div class="row mb-1 subform">
-						<div class="col-md" style="display: none;">
-							<div data-slot="true" data-target="deposition_overlay_upload_coordinates_system"></div>
-						</div>
-						<div class="col-md" style="opacity:0">
-							<div data-slot="true" data-target="deposition_overlay_upload_utm_zone"></div>
-						</div>
-					</div>
+                        <!-- <div data-slot="true" data-target="parcel_coordinates_description"></div> -->
+                        <a id="upload-btn" href="#" class="btn btn-secondary"><i class="fas fa-upload mr-1"></i>Upload</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="accordion mb-3">
+            <div id="depositionOverlayHeading" class="border-bottom">
+                <h2 class="mb-0">
+                    <button class="btn btn-link btn-block text-right text-decoration-none"
+                        type="button" data-toggle="collapse" data-target="#depositionOverlayForm"
+                        aria-expanded="false" aria-controls="depositionOverlayForm"
+                    >
+                        <i class="fa fa-chevron-down mr-2"></i>Deposition Overlay
+                    </button>
+                </h2>
+            </div>
 
-					<div data-slot="true" data-target="deposition_overlay_zflag_restriction"></div>
+            <div id="depositionOverlayForm" class="collapse" aria-labelledby="depositionOverlayHeading">
+                <div class="row mt-3">
+                    <div class="col-sm">
+                        <div data-slot="true" data-target="deposition_overlay_file"></div>
 
-					<!-- <div data-slot="true" data-target="parcel_coordinates_description"></div> -->
-					<a id="deposition-overlay-upload-btn" href="#" class="btn btn-secondary"><i class="fas fa-upload mr-1"></i>Upload</a>
-				</div>
-			</div>
+                        <div class="row mb-1 subform">
+                            <div class="col-md" style="display: none;">
+                                <div data-slot="true" data-target="deposition_overlay_upload_coordinates_system"></div>
+                            </div>
+                            <div class="col-md" style="opacity:0">
+                                <div data-slot="true" data-target="deposition_overlay_upload_utm_zone"></div>
+                            </div>
+                            <div class="col-md">
+                                <div data-slot="true" data-target="deposition_overlay_zflag_restriction"></div>
+                            </div>
+                        </div>
 
-			<div class="row mb-1" id="deposition-overlay-current-file" style="display:none; margin-top: 20px">
-				<div class="errors">
-				</div>
+                        <!-- <div data-slot="true" data-target="parcel_coordinates_description"></div> -->
+                        <a id="deposition-overlay-upload-btn" href="#" class="btn btn-secondary"><i class="fas fa-upload mr-1"></i>Upload</a>
+                    </div>
+                </div>
+                <div class="row mt-2" id="deposition-overlay-current-file" style="display:none; margin-top: 20px">
+                    <div class="errors">
+                    </div>
 
-				<div class="col-sm">
-					<a id="deposition-overlay-delete-btn" href="#" class="btn btn-secondary"><i class="fas fa-trash mr-1"></i>Delete <span id="deposition-overlay-current-filename"></span></a>
-				</div>
-			</div>
-
-		</fieldset>
+                    <div class="col-sm">
+                        <a id="deposition-overlay-delete-btn" href="#" class="btn btn-secondary"><i class="fas fa-trash mr-1"></i>Delete <span id="deposition-overlay-current-filename"></span></a>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div id="parcel_file_fields_div">
             <div class="row">
                 <div class="col-sm">
@@ -117,27 +140,36 @@
             </div>
         </div>
 		<div class="row">
-			<fieldset>
+			<fieldset class="mt-2">
 				<legend>AERMOD Receptors</legend>
 				<div class="row mb-1">
 					<div class="col-sm">
-						Select the Generate AERMOD Receptors button to generate grids of AERMOD receptors, using the Receptor Spacing you entered in the editable table above. Select either Download button to download a GeoJSON or AERMOD input file of the receptor grids. You can view the generated receptors in the map by turning on the display in the map’s basemap selection box. If you subsequently change receptor spacing, you must again select Generate AERMOD Receptors. If the display in the map does not refresh, select the Recalculate button at the bottom right of the page and again turn on the display in the map’s basemap selection box.
-						<p/>
-						<a id="generate_aermod_receptors_btn" style="cursor:pointer" class="btn btn-secondary">Generate AERMOD Receptors</a>
-
+                        <p>
+                            Generate grids of AERMOD receptors using the Receptor Spacing you entered in the editable table above.
+                        </p>
+                        <p>
+                            Once receptors have been generated, select one of the Download buttons
+                            to download a GeoJSON or AERMOD input file of the receptor grids.
+                            You can view the generated receptors in the map by turning on the display in the map’s basemap selection box.
+                            If you subsequently change receptor spacing, you must again select Generate AERMOD Receptors.
+                            If the display in the map does not refresh, select the Recalculate button at the bottom right of the page
+                            and again turn on the display in the map’s basemap selection box.
+                        </p>
+						<a id="generate_aermod_receptors_btn" role="link" style="cursor:pointer" tabindex="0" class="btn btn-secondary">Generate AERMOD Receptors</a>
 					</div>
 				</div>
-
-				<div class="row mb-1" id="aermod-receptors-current-file" style="display:none; margin-top: 20px">
+				<div class="row mb-1 mt-3" id="aermod-receptors-current-file" style="display: none;">
 					<div class="errors">
 					</div>
-
 					<div class="col-sm">
-						<a id="aermod-receptors-download-geojson-btn" href="#" class="btn btn-secondary"><i class="fas fa-download mr-1"></i>Download geojson</a>
-						<a id="aermod-receptors-download-aermod-btn" href="#" class="btn btn-secondary"><i class="fas fa-download mr-1"></i>Download AERMOD input</a>
+						<a id="aermod-receptors-download-geojson-btn" target="_blank" href="#" class="btn btn-dark">
+                            <i class="fas fa-download mr-1"></i>Download geojson
+                        </a>
+						<a id="aermod-receptors-download-aermod-btn" target="_blank" href="#" class="btn btn-dark">
+                            <i class="fas fa-download mr-1"></i>Download AERMOD input
+                        </a>
 					</div>
 				</div>
-
 			</fieldset>
 		</div>
     </section>
@@ -193,18 +225,19 @@
         window.receptorOverlayGroup = L.layerGroup();
 
 		if (presignedGeojsonUrl !== undefined) {
-			if (responseData.file_metadata.errors === undefined || responseData.file_metadata.errors.length == 0) {
+			if (responseData.file_metadata?.errors === undefined || responseData.file_metadata?.errors.length == 0) {
 				// fetch the data
 				TRIM.api.hitUrl(presignedGeojsonUrl, function(presignedSuccess, presignedResponse) {
 					let overlayGridPoints = [];
-					for (let i = 0 ; i < presignedResponse.features.length; i++) {
-						let el = presignedResponse.features[i];
-						let point = [ el.geometry.coordinates[1], el.geometry.coordinates[0] ];
-						overlayGridPoints.push(point);
-						let colorForDisplay = "#000000"; // black
-						var marker = L.circleMarker(point, { pmIgnore: true, radius: .2, stroke: true, color: colorForDisplay}).addTo(receptorOverlayGroup);
-					}
-
+                    if (presignedResponse != null) {
+                        for (let i = 0 ; i < presignedResponse.features.length; i++) {
+                            let el = presignedResponse.features[i];
+                            let point = [ el.geometry.coordinates[1], el.geometry.coordinates[0] ];
+                            overlayGridPoints.push(point);
+                            let colorForDisplay = "#000000"; // black
+                            var marker = L.circleMarker(point, { pmIgnore: true, radius: .2, stroke: true, color: colorForDisplay}).addTo(receptorOverlayGroup);
+                        }
+                    }
 
 					receptorOverlayGroup.on("add", function() { receptorOverlayShowing = true; });
 					receptorOverlayGroup.on("remove", function() { receptorOverlayShowing = false; });
@@ -216,12 +249,15 @@
 				});
 
 				mapLayers.addOverlay(receptorOverlayGroup, "AERMOD Receptors");
-			} else {
+			}
+            else {
 				// I don't think this'll ever actually happen
 				$("<h4/>").html("Errors with generated file:").appendTo(errorDisplayArea);
-				for (let i = 0 ; i < responseData.file_metadata.errors.length ; i++) {
-					$("<li/>").html(responseData.file_metadata.errors[i]).appendTo(errorDisplayArea);
-				}
+                if (responseData.file_metadata?.errors != undefined) {
+                    for (let i = 0 ; i < responseData.file_metadata.errors.length ; i++) {
+                        $("<li/>").html(responseData.file_metadata.errors[i]).appendTo(errorDisplayArea);
+                    }
+                }
 			}
 		}
 	};
@@ -579,6 +615,9 @@
         attributes: true
     });
     onDomLoad(function() {
+        $('.accordion h2 button').on('click', function() {
+            $(this).find('i.fa').toggleClass('fa-chevron-up fa-chevron-down')
+        });
 
         // FIXME hacky way to refresh all parcels when leaving the parcels tab
         let requires_reload = false;
@@ -654,10 +693,10 @@
 			}
 		}
 
-		// zones are 1A-60Z with no I/O. case/whitespace insensitive.
+		// zones are 1A-60Z with no A/B/I/O/Y/Z. case/whitespace insensitive.
 		function isValidUtmZone(z) {
 			let cleanedZone = z.trim().replaceAll(" ", "").toUpperCase();
-			const regex = /^([1-9]|[1-5][0-9]|60)([A-HJ-NP-Z])$/gm;
+			const regex = /^([1-9]|[1-5][0-9]|60)([C-HJ-NP-X])$/gm;
 
 			return (regex.exec(cleanedZone) != null);
 		}
@@ -689,7 +728,7 @@
 					return false;
 				} else if (coordsSystem.val() == "UTM") {
 					if (!isValidUtmZone(utmZone.val())) {
-						alert('Please enter a valid UTM zone (e.g. 16T, 32A, etc.).');
+						alert('Please enter a valid UTM zone (e.g. 16T, 13R, etc.).');
 						return false;
 					}
 				}
@@ -760,7 +799,7 @@
 					return false;
 				} else if (depoOverlayCoordsSystem.val() == "UTM") {
 					if (!isValidUtmZone(depoOverlayUtmZone.val())) {
-						alert('Please enter a valid UTM zone (e.g. 16T, 32A, etc.).');
+						alert('Please enter a valid UTM zone (e.g. 16T, 13R, etc.).');
 						return false;
 					}
 				}
@@ -843,7 +882,12 @@
 				LoadingScreen.hide('check_overlay_status');
 
 				if (!success) {
-					alert('An error occurred while fetching overlay data');
+                    if ('{{env_type}}' == 'production') {
+					    alert('An error occurred while fetching overlay data');
+                    }
+                    else {
+					    console.log('An error occurred while fetching overlay data');
+                    }
 				} else {
 					if (success) {
 						installDepositionOverlayOntoMap(responseData)
@@ -858,7 +902,12 @@
 				LoadingScreen.hide('check_aermod_receptors_file');
 
 				if (!success) {
-					alert('An error occurred while fetching aermod receptors');
+                    if ('{{env_type}}' == 'production') {
+					    alert('An error occurred while fetching aermod receptors');
+                    }
+                    else {
+                        console.log('An error occurred while fetching aermod receptors');
+                    }
 				} else {
 					if (success) {
 						// installDepositionOverlayOntoMap(responseData)
@@ -1173,6 +1222,9 @@
                     $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
                     $(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
                     $(".dataTables_scrollHead").addClass('wrap-text-scrollhead');
+
+                    $('table[aria-describedby="mapTable_info"]').removeAttr("aria-describedby");
+                    this.api().columns().header().to$().attr('scope', 'col');
 
                     $("[data-toggle=popover]").popover();
                     $('[data-toggle="tooltip"]').tooltip();
@@ -1556,6 +1608,10 @@
 		};
 		*/
 
+        // Leaflet button 508c
+        $("a.leaflet-control-zoom-in, a.leaflet-control-zoom-out").attr("tabindex", "0");
+        $("a[class^='leaflet']").attr("aria-label", "Leaflet map button");
+
         // CREATING A NEW PARCEL //
         var shapes = L.geoJSON()
 
@@ -1874,9 +1930,7 @@
                 .closest('.form-group').hide();
 
             function updateFields() {
-                var data = fileField.attr('data-filedata');
-                data = data || 'null';
-                data = JSON.parse(data);
+                var data = TRIM.store.fileData.fromField(fileField, 'name', 'parcels') || null;
 
                 desc.attr('disabled', 'disabled');
                 selects.html('');
@@ -1905,19 +1959,18 @@
                 var loadingRequest = 'load_' + this.id;
                 LoadingScreen.show(loadingRequest);
 
-                me.removeAttr('data-filedata');
+                var myName = me.attr('name');
+                var fileKey = `parcels_${myName}`;
+                TRIM.store.fileData.remove(fileKey);
                 TRIM.api.parseFiles(this).on('load', function() {
                     try {
                         var data = JSON.parse(this.responseText);
                         if (data) {
                             if (!$('#parcel_file_fields_div').is(":visible")) {
-                                $('#parcel_file_fields_div').show()
+                                $('#parcel_file_fields_div').show();
                             }
-                            var myData = data.files[me.attr('name')];
-                            fileField.attr(
-                                'data-filedata',
-                                JSON.stringify(myData)
-                            );
+                            var myData = data.files[myName];
+                            TRIM.store.fileData.add(fileKey, myData);
                         }
                         updateFields();
                     }

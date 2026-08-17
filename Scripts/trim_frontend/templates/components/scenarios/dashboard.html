@@ -9,11 +9,12 @@
     {% if current_user.is_admin %}
     <div class="float-left">
         <div class="mb-0">
-            <label class="switch">
-                <input checked type="checkbox" id="toggle-admin-view-off" />
-                <span class="slider round"></span>
-            </label>
-            <label for="toggle-admin-view-off">Show only my personal scenarios</label>
+            <div class="custom-control custom-switch">
+                <input type="checkbox" id="toggle-admin-view-off" class="custom-control-input" checked>
+                <label for="toggle-admin-view-off" class="mb-0 custom-control-label">
+                    Show only my personal scenarios
+                </label>
+            </div>         
         </div>
     </div>
     {% endif %}
@@ -38,7 +39,7 @@
                             {% endif %}
                             {{ scenario.name }}
                         </h5>
-                        <small class="text-muted">
+                        <small>
                             {{ scenario.updated.strftime('%Y-%m-%d %I:%M %p') }}
                         </small>
                     </div>
@@ -50,6 +51,7 @@
                     <div class="card-footer">
                         <a href="{{ url_for('scenario.edit_scenario', id=scenario.id) }}"
                             class="btn btn-block btn-outline-primary"
+                            title="View {{ scenario.name }}"
                         >
                             View
                         </a>
