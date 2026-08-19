@@ -9,7 +9,7 @@ from .utils import *
 __all__ = ['FormulaService', 'ParameterService']
 
 
-class FormulaService(GenericService):
+class FormulaService(GenericService[Formula]):
     __model__ = Formula
 
     @classmethod
@@ -48,13 +48,13 @@ class FormulaService(GenericService):
         return model
 
 
-class ParameterService(GenericService):
+class ParameterService(GenericService[CustomParameter]):
     __model__ = CustomParameter
 
-    class domains(GenericService):
+    class domains(GenericService[ParameterDomain]):
         __model__ = ParameterDomain
 
-    class definitions(GenericService):
+    class definitions(GenericService[ParameterDefinition]):
         __model__ = ParameterDefinition
 
         @classmethod
@@ -275,10 +275,9 @@ def evaluate_parameter(
             if 'self.' in q.equation:
                 arguments['self'] = entity
             if 'environment.' in q.equation:
-                if scenario is not None:
-                    arguments['environment'] = scenario
-                else:
-                    arguments['environment'] = entity.current_scenario()
+                if scenario is None:
+                    scenario = entity.current_scenario()
+                arguments['environment'] = scenario
             arguments.update(kwargs)
             try:
                 val = q.eval(**arguments)
@@ -300,7 +299,7 @@ def parameterize(cls, globalize_custom_parameters=False, default_scenario=None):
     cls_name = cls.__name__
     globalize_custom_parameters = globalize_custom_parameters or False
 
-    def get_scenario(obj, scenario=None):
+    def get_scenario(obj, scenario: Scenario = None) -> Scenario | None:
         if scenario is not None:
             # CacheManager.clear_cache(f'entity_param::{cls_name}')
             setattr(obj, '__current_scenario', scenario)
@@ -364,7 +363,7 @@ def parameterize(cls, globalize_custom_parameters=False, default_scenario=None):
 
     setattr(cls, 'domains', classproperty(get_domains))
 
-    @CacheManager.with_caching(f'entity_param_dicts')
+    @CacheManager.with_caching('entity_param_dicts')
     def get_param_dict(entity):
         if entity == cls:
             # If called on the class
@@ -425,6 +424,10 @@ def parameterize(cls, globalize_custom_parameters=False, default_scenario=None):
             self._default_domain = get_default_domain()
 
         @property
+        def unit_registry(self):
+            return ureg
+
+        @property
         def _params(self):
             return get_param_dict(self.entity)
 
@@ -439,6 +442,12 @@ def parameterize(cls, globalize_custom_parameters=False, default_scenario=None):
 
         def get(self, key, default=None):
             return self._params.get(key, default)
+
+        def get_custom(self, key, default=None):
+            param = self._params.get(key, default)
+            if param is None or isinstance(param, ParameterDefinition):
+                return default
+            return param
 
         def __setitem__(self, key, value):
             raise NotImplementedError
@@ -546,7 +555,7 @@ def parameterize(cls, globalize_custom_parameters=False, default_scenario=None):
                                 formula = existing_formula
 
                 merged = None
-                old = None
+                # old = None
                 # By passing existing_formula instead of formula,
                 # we prove that if this is true then all the other
                 # components must match
@@ -559,7 +568,7 @@ def parameterize(cls, globalize_custom_parameters=False, default_scenario=None):
                     # Maybe we can merge them?
                     try:
                         merged = merge_formulas(existing_formula, formula)
-                    except Exception as e:
+                    except Exception:
                         # We don't know how to merge these
                         import traceback
                         traceback.print_exc()
@@ -579,7 +588,7 @@ def parameterize(cls, globalize_custom_parameters=False, default_scenario=None):
                     old_v = ex_chars.get(k)
                     sym = '==' if v == old_v else '>>'
                     changelog += f'\n\t{k} : {old_v} {sym} {v}'
-                changelog +='\n</changelog>'
+                changelog += '\n</changelog>'
                 if merged is None:
                     # The new definition is incompatible with the existing one
                     if force_update or name == "Flushes":

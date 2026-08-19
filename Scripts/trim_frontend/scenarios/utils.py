@@ -4,7 +4,6 @@ import time
 from datetime import datetime
 import os
 import pandas as pd
-import pint
 import numpy as np
 from pathlib import Path
 from trim_frontend.external_API.routes import SoilData, get_soil_boundaries
@@ -70,8 +69,8 @@ def init_parameter_definitions(kwarg_list, check_subtypes=False):
 
 
 def use_local_model_run():
-    # in dev/prod, we execute an AWS StepFunction to run the model via Docker/ECS. Locally,
-    # we just run the model directly.
+    # in dev/prod, we execute an AWS StepFunction to run the model via Docker/ECS.
+    # Locally, we just run the model directly.
     trim_env_profile = os.environ.get("TRIM_ENV_PROFILE", "local").lower()
     return (trim_env_profile == "local")
 
@@ -308,119 +307,6 @@ def fetch_output_for_step_function_execution(execution_arn):
         return [ f"Error fetching logs: {e}" ]
 
 
-def compile_mirc_data(scen, latest_model_run, logger=None):
-    if not logger:
-        logger = make_logger('compile_mirc_data')
-    logger.info(f"Compiling required MIRC data for scenario {scen.name}...")
-    
-    if latest_model_run and not latest_model_run.is_run_error:
-        mass = json.loads(latest_model_run.result_nt)
-        mass = json.loads("{"+mass+"}")
-        conc = json.loads(latest_model_run.result_conc)
-        conc = json.loads("{"+conc+"}")
-
-        logger.info(f"Model run found, using run with id [{latest_model_run.id}]...")
-
-        chems = {c.name : c for c in scen.chemicals}
-        timestamps = [f"01/01/{year} 00:00:00 EST" for year in mass['year'].values()]
-
-        trim_data = {
-            'scenario_name': scen.name,
-            'chemicals': list(chems.keys()),
-            'timestamps': timestamps,
-        }
-        trim_data["parcels"] = compile_mirc_parcel_data(scen, chems, conc, timestamps, logger)
-        return {"trim_data": trim_data}
-    else:
-        return {"trim_data": {"message": "No valid data found"}}
-
-
-def compile_mirc_parcel_data(scen, chems, conc, timestamps, logger):
-    parcels = []
-    for parcel in scen.parcels:
-        logger.info(f"Compiling parcel data for {parcel.name}...")
-        p = {
-            "name": parcel.name,
-            "vertices": parcel.vertices,
-            "volume_elements": [],
-        }
-        for volume_element in parcel.volume_elements:
-            ve = {
-                "name": volume_element.name,
-                "compartments": [],
-            }
-            for compartment in volume_element.compartments:
-                c = {
-                    "name": compartment.name,
-                    "properties": {},
-                }
-
-                # properties not relevant for a given compartment can be skipped
-                for chem_name in chems.keys():
-                    props = {}
-                    filtered_key = f'{chem_name}_{compartment.standard_name}'
-                    if filtered_key not in conc:
-                        continue
-                    filtered_conc = list(conc[filtered_key].values())
-                    filtered_conc_units = list(conc[filtered_key+"_units"].values())
-
-                    # constants
-                    if "air" in c["name"].lower():
-                        props["rho_a"] = {
-                            "value": compartment.rho.magnitude,
-                            "unit": str(compartment.rho.units), # "g/cm^3"
-                        }
-
-                    chem_kd = chems[chem_name].Kd(compartment=compartment)
-                    props["Kd"] = {
-                        "value": chem_kd.magnitude,
-                        "unit": str(chem_kd.units), # "L/kg"
-                    }
-
-                    chem_fmd = chems[chem_name].FractionMass_Dissolved(compartment=compartment)
-                    if chem_fmd:
-                        if isinstance(chem_fmd, pint.Quantity):
-                            props["FMD"] = chem_fmd.magnitude
-                        else:
-                            props["FMD"] = chem_fmd
-    
-                    chem_fv = chems[chem_name].FractionMass_Vapor(compartment=compartment)
-                    if chem_fv:
-                        if isinstance(chem_fv, pint.Quantity):
-                            props["Fv"] = chem_fv.magnitude
-                        else:
-                            props["Fv"] = chem_fv
-
-                    # timestamp values
-                    props["C"] = {}  # concentration
-
-                    chem_wet = chems[chem_name].ParticleVolumetricWetDepositionRate(compartment=compartment)
-                    props["Drwp"] = {}  # deposition rate wet particle
-
-                    chem_dry = chems[chem_name].ParticleVolumetricDRYDepositionRate(compartment=compartment)
-                    props["Drdp"] = {}  # deposition rate dry particle
-                    for i, timestamp in enumerate(timestamps):
-                        if isinstance(filtered_conc_units[0], str):
-                            props["C"][timestamp] = {
-                                "value": filtered_conc[i],
-                                "unit": filtered_conc_units[i] # "ug/g"
-                            }
-                        props["Drwp"][timestamp] = {
-                            "value": chem_wet.magnitude,
-                            "unit": str(chem_wet.units) # "g/day/m^2"
-                        }
-                        props["Drdp"][timestamp] = {
-                            "value": chem_dry.magnitude,
-                            "unit": str(chem_dry.units) # "g/day/m^2"
-                        }
-
-                    c["properties"][chem_name] = props
-                ve["compartments"].append(c)
-            p["volume_elements"].append(ve)
-        parcels.append(p)
-    return parcels
-
-
 def handle_scenario_update(s, scenario_data):
     logger = make_logger('handle_scenario_update')
 
@@ -463,14 +349,18 @@ def handle_scenario_update(s, scenario_data):
             if "_static_" in field_name:
                 update_custom_param(s, s, param_name, param_data, create_if_dne=True)
             elif field_name.endswith("_TS"):
-                param_type = "SFC" if scenario_data.get("is_sfc") == 'true' else "MET"
-                ret_val = meteo_wgt_avg_value_from_timeseries(param_data, param_type)
-                if isinstance(ret_val, dict) and "wt_av_Rain" in ret_val.keys():
-                    param_value = ret_val["wt_av_Rain"]
-                elif isinstance(ret_val, dict) and "wt_av_CumulativeRain" in ret_val.keys():
-                    param_value = ret_val["wt_av_CumulativeRain"]
+                if isinstance(param_data, str) and param_data[0] == '{':
+                    param_type = "SFC" if scenario_data.get("is_sfc") == 'true' else "MET"
+                    ret_val = meteo_wgt_avg_value_from_timeseries(param_data, param_type)
+                    if isinstance(ret_val, dict) and "wt_av_Rain" in ret_val.keys():
+                        param_value = ret_val["wt_av_Rain"]
+                    elif isinstance(ret_val, dict) and "wt_av_CumulativeRain" in ret_val.keys():
+                        param_value = ret_val["wt_av_CumulativeRain"]
+                    else:
+                        param_value = list(ret_val.values())[0]
                 else:
-                    param_value = list(ret_val.values())[0]
+                    ret_val = {'value': param_data}
+                    param_value = param_data
                 update_custom_param(s, s, param_name, param_value, create_if_dne=True)
 
         if "_precipitation_" in field_name:
@@ -671,7 +561,7 @@ def create_litterfallrate_custom_param(scen, comps, par_name):
 
 
 def update_custom_param(scen, comp, par_name, par_val, create_if_dne = False):
-    if par_name == 'mixingHeight':
+    if par_name.lower() == 'mixingheight':
         update_mixing_height(scen, par_val)
         return
 
@@ -749,8 +639,11 @@ def true_wind_wt_ave(df_met, col, fallback=None):
 
 
 def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
-    par_dat = json.loads(par_dat)
-    df_met = pd.DataFrame.from_dict(par_dat, orient='columns')
+    if isinstance(par_dat, pd.DataFrame):
+        df_met = par_dat
+    else:
+        par_dat = json.loads(par_dat)
+        df_met = pd.DataFrame.from_dict(par_dat, orient='columns')
 
     df_met['dlist'] = df_met['Date'].str.split('/')  # split date column into list
     df_met = df_met[df_met.dlist.str.len() == 3]  # drop rows that have less than three elements
@@ -766,7 +659,7 @@ def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
     if param_type in ["MET", "SFC"]:
         df_met = df_met.loc[(df_met.Hour < 25)]  # drop faulty
         metcol_dict = {'Rain': (0, 1), 'AirTemperature': (200, 350), 'HorizontalWindSpeed': (0, 100),
-                       'WindDirection': (0, 360), 'mixingHeight': (0, 10000), 'IsDay': (0, 1),
+                       'WindDirection': (0, 360), 'MixingHeight': (0, 10000), 'IsDay': (0, 1),
                        'CumulativeRain': (0, 1.6)}  # k, v represent name and min-max
         for k, v in metcol_dict.items():
             if k in df_met.columns:
@@ -804,8 +697,7 @@ def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
                     wt_ave = df_met['metcol'].mean()
                 
                 if k in ["HorizontalWindSpeed", "WindDirection"]:
-                    if k == par_dat[0].get("_selected"):
-                        met_dict['wt_av_' + k] = true_wind_wt_ave(df_met, k, fallback=wt_ave)
+                    met_dict['wt_av_' + k] = true_wind_wt_ave(df_met, k, fallback=wt_ave)
                 else:
                     met_dict['wt_av_' + k] = wt_ave
 

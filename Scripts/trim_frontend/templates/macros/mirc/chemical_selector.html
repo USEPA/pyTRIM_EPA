@@ -1,0 +1,37 @@
+{% macro render_chemical_picker(
+    chemicals, id="chemical_picker", name="chemical_picker",
+    priority=[],
+    default=None, allow_none=False, allow_multiple=False
+) %}
+    <select id="{{ id }}" name="{{ name }}"
+        class="form-control form-control-sm custom-select custom-select-sm" {% if allow_multiple %}multiple="multiple"{% endif %}
+        style="max-width: 100%;"
+    >
+        {% if allow_none %}
+            <option value="">None</option>
+        {% endif %}
+
+        {% if priority %}
+            <optgroup label="Priority Chemicals">
+                {% for c in priority|sort(attribute='hap_name') %}
+                    <option value="{{ c.id }}"
+                        {% if c.id == default %} selected="selected"{% endif %}
+                    >{{
+                        (c.hap_name or c.name)|title
+                    }}</option>
+                {% endfor %}
+            </optgroup>
+            <optgroup label="Other">
+        {% endif %}
+            {% for c in chemicals %}
+                {% if c.id not in priority|map(attribute='id') %}
+                    <option value="{{ c.id }}" {% if c.id == default %} selected="selected"{% endif %}>{{
+                        (c.hap_name or c.name)|title
+                    }}</option>
+                {% endif %}
+            {% endfor %}
+        {% if priority %}
+            </optgroup>
+        {% endif %}
+    </select>
+{% endmacro %}

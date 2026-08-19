@@ -1,0 +1,65 @@
+{
+    "title": "Chemical Parameter",
+    "fields": [
+        {
+            "id": "chemical_id",
+            "data_type": "int",
+            "hidden": true
+        },
+        {
+            "id": "chemical",
+            "label": "Chemical",
+            "data_type": "string",
+            "readonly": true
+        },
+        {
+            "id": "Fw",
+            "label": "Fraction Wet Deposition",
+            "data_type": "float",
+            "min": 0,
+            "max": 1,
+            "step": "any",
+            "allow_empty": true,
+            "help": "Fraction for chemical wet deposition that adheres to plant surfaces. Assumes 0.2 for anions, 0.6 for cations and most organic chemicals."
+        },
+        {
+            "id": "soil_adjustment",
+            "label": "Soil Bioavailability",
+            "data_type": "float",
+            "min": 0,
+            "max": 1,
+            "step": "any",
+            "allow_empty": true,
+            "help": "Soil bioavailability factor for humans"
+        },
+        {
+            "id": "CSF",
+            "label": "Cancer Slope Factor",
+            "data_type": "float",
+            "allow_empty": true,
+            "help": "Chronic oral cancer slope factor"
+        },
+        {
+            "id": "CSF_unit",
+            "label": "CSF Unit",
+            "data_type": "string"
+        },
+        {
+            "id": "RfD",
+            "label": "Reference Dose",
+            "data_type": "float",
+            "allow_empty": true,
+            "help": "Chronic oral reference dose"
+        },
+        {
+            "id": "RfD_unit",
+            "label": "RfD Unit",
+            "data_type": "string"
+        },
+        {
+            "id": "notes",
+            "label": "Notes",
+            "data_type": "string"
+        }
+    ]
+}

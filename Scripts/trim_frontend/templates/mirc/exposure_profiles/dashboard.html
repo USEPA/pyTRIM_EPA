@@ -1,0 +1,116 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<h1 class="text-center">Built-in Exposure Profiles</h1>
+
+{% set create_modal_id = 'create-scenario-modal' %}
+
+{% set builtin_scenarios = mirc_scenarios|selectattr('is_builtin', 'true')|list %}
+
+<div class="row">
+    {% for scenario in builtin_scenarios|sort(attribute='name') %}
+        <div class="col-lg-3 col-md-4 col-sm-6 py-2">
+            <div class="card border-primary scenario-card">
+                <div class="card-header">
+                    <a href="{{ url_for('mirc_scenario.view_risk_scenario', id=scenario.id) }}"
+                        class="text-primary float-right"
+                    >
+                        <i class="fa fa-eye" role="img" title="View {{ scenario.name }}"></i>
+                    </a>
+                    <h5 class="card-title mb-0">{{ scenario.name }}</h5>
+                </div>
+                {% if scenario.notes or scenario.parent %}
+                    <div class="card-body">
+                        {% if scenario.parent %}
+                            <p class="card-text mb-1">
+                                Inherits From: <span class="text-primary font-weight-bold">{{ scenario.parent.name }}</span>
+                            </p>
+                        {% endif %}
+                        {% if scenario.notes %}
+                            <small class="card-text">
+                                {{ scenario.notes|abbrev }}
+                            </small>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<h1 class="text-center pt-3">Custom Exposure Profiles</h1>
+
+{% set custom_scenarios = mirc_scenarios|selectattr('is_builtin', 'false')|list %}
+
+{% if custom_scenarios|length %}
+    <div class="text-right pb-2">
+        <button type="button"
+            class="btn btn-primary btn-sm"
+            data-toggle="modal"
+            data-target="#{{ create_modal_id }}"
+        >
+            <i class="fa fa-plus"></i>&nbsp;
+            New<span class="d-none d-sm-inline"> Profile</span>
+        </button>
+    </div>
+{% endif %}
+
+<div class="row">
+    {% for scenario in custom_scenarios|sort(attribute='updated', reverse=True) %}
+        <div class="col-lg-3 col-md-4 col-sm-6 py-2">
+            <div class="card border-primary scenario-card custom-scenario-card">
+                <div class="card-header">
+                    <a href="{{ url_for('mirc_scenario.view_risk_scenario', id=scenario.id) }}"
+                        class="text-primary float-right"
+                    >
+                        {% if not current_user.can('edit', scenario) %}
+                            <i class="fa fa-eye" role="img" title="View {{ scenario.name }}"></i>
+                        {% else %}
+                            <i class="fa fa-edit" role="img" title="Edit {{ scenario.name }}"></i>
+                        {% endif %}
+                    </a>
+                    <h5 class="card-title mb-0">{{ scenario.name }}</h5>
+                </div>
+                {% if scenario.notes or scenario.parent %}
+                    <div class="card-body">
+                        {% if scenario.parent %}
+                            <p class="card-text mb-1">
+                                Inherits From: <span class="text-primary font-weight-bold">{{ scenario.parent.name }}</span>
+                            </p>
+                        {% endif %}
+                        {% if scenario.notes %}
+                            <small class="card-text">
+                                {{ scenario.notes|abbrev }}
+                            </small>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+    <div class="col-sm-12 text-center no-scenarios" style="display: none;">
+        You don't have any custom exposure profiles. Would you like to
+        <button type="button"
+            class="btn btn-link p-0"
+            data-toggle="modal"
+            data-target="#{{ create_modal_id }}"
+        >
+            make one now
+        </button>?
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (!$('.custom-scenario-card').length) {
+            $('.no-scenarios').show();
+        }
+    });
+</script>
+
+{% include 'components/scenarios/mirc/exposure_profiles/create_modal.html' %}
+
+{% endblock content %}
+
+{% block scripts %}
+{% endblock scripts %}

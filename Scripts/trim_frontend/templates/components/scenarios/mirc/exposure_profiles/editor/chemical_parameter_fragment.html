@@ -1,0 +1,52 @@
+{% from 'macros/mirc/form_macros.html' import render_input, render_label %}
+
+<tr class="chemical-{{ cp.chemical_id.data }}">
+    <th scope="row" class="table-primary border-primary align-middle text-center">
+        {{ render_label(cp.Fw, hover_help=True, class="mb-0") }}
+    </th>
+    <td>
+        {{ render_input(cp.chemical_id) }}
+
+        {{ render_input(cp.Fw) }}
+    </td>
+    <td>
+        <input type="text" class="form-control form-control-sm"
+            readonly="readonly" value="unitless"
+            aria-label="Unit" />
+    </td>
+</tr>
+<tr class="chemical-{{ cp.chemical_id.data }}">
+    <th scope="row" class="table-primary border-primary align-middle text-center">
+        {{ render_label(cp.soil_adjustment, hover_help=True, class="mb-0") }}
+    </th>
+    <td>
+        {{ render_input(cp.soil_adjustment) }}
+    </td>
+    <td>
+        <input type="text" class="form-control form-control-sm"
+            readonly="readonly" value="unitless"
+            aria-label="Unit" />
+    </td>
+</tr>
+<tr class="chemical-{{ cp.chemical_id.data }}">
+    <th scope="row" class="table-primary border-primary align-middle text-center">
+        {{ render_label(cp.CSF, hover_help=True, class="mb-0") }}
+    </th>
+    <td>
+        {{ render_input(cp.CSF) }}
+    </td>
+    <td>
+        {{ render_input(cp.CSF_unit) }}
+    </td>
+</tr>
+<tr class="chemical-{{ cp.chemical_id.data }}">
+    <th scope="row" class="table-primary border-primary align-middle text-center">
+        {{ render_label(cp.RfD, hover_help=True, class="mb-0") }}
+    </th>
+    <td>
+        {{ render_input(cp.RfD) }}
+    </td>
+    <td>
+        {{ render_input(cp.RfD_unit) }}
+    </td>
+</tr>

@@ -1,0 +1,39 @@
+{% from 'macros/mirc/form_macros.html' import render_input %}
+
+{% for bw in bws %}
+    <tr class="age-{{ bw.life_stage_id.data }}">
+        <th scope="row">
+            {{ render_input(bw.life_stage_id) }}
+            {{ render_input(bw.percentile_id) }}
+
+            {{ render_input(bw.percentile) }}
+        </th>
+        <td>
+            {{ render_input(bw.value) }}
+        </td>
+        <td>
+            {{ render_input(bw.unit) }}
+        </td>
+        <td class="align-middle text-center">
+            <button type="button" tabindex="0"
+                data-toggle="popover" data-trigger="hover"
+                data-placement="left"
+                data-content="{{ bw.notes.data or '<i>None</i>' }}"
+                data-src="{{ bw.notes.id }}"
+                data-html="true"
+                {% if scenario.is_builtin %}
+                    class="btn py-0 border-0 notes-modal-btn" disabled="disabled" style="cursor: default;"
+                {% else %}
+                    class="btn py-0 text-primary border-0 notes-modal-btn"
+                {% endif %}
+            >
+                <i class="fa fa-file"></i>
+            </button>
+        </td>
+    </tr>
+    <tr style="display: none;">
+        <td colspan="4">
+            {{ render_input(bw.notes) }}
+        </td>
+    </tr>
+{% endfor %}

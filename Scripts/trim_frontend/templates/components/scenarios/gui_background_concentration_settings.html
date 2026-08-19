@@ -24,7 +24,7 @@
                                                 <small class="text-muted">
                                                     <a href="{{ url_for(
                                                         'static', filename='templates/background_concentrations.csv'
-                                                    ) }}">Click here</a> to download the template for creating a CSV file containing initial concentrations.
+                                                    ) }}" title="Click here to download template">Click here</a> to download the template for creating a CSV file containing initial concentrations.
                                                 </small>
                                             </div>
                                             <div data-slot="true" data-target="concentration_upload_button"></div>
@@ -47,11 +47,11 @@
                                         <table class="compMap" style="border-collapse: collapse" cellpadding="6">
                                             <thead>
                                                 <tr>
-                                                    <th>Parcel</th>
-                                                    <th>Volume Element</th>
-                                                    <th>Compartment</th>
-                                                    <th>Initial Concentration</th>
-                                                    <th>Unit</th>
+                                                    <th scope="col">Parcel</th>
+                                                    <th scope="col">Volume Element</th>
+                                                    <th scope="col">Compartment</th>
+                                                    <th scope="col">Initial Concentration</th>
+                                                    <th scope="col">Unit</th>
                                                 </tr>
                                             </thead>
                                         </table>
@@ -103,6 +103,10 @@
                 return;
             }
             $(form).find("a[id*=_concentration_upload_button]").addClass("disabled")
+            $(form).find("a[id*=_concentration_upload_button]").attr({
+                'tabindex': '0',
+                'role': 'link'
+            });
         }
 
         function updateBackgroundConcentrations() {
@@ -152,6 +156,12 @@
                         return $(e).data('depth') == next_level;
                     });
                     $(next_child).show()
+                }
+            });
+
+            $('tr.colps').on('keydown', (e) => {
+                if (e.key === 'Enter' || e.which === 13) {
+                    $(e.target).click();
                 }
             });
 
@@ -247,16 +257,16 @@
             }
 
             $('a[id*=_concentration_upload_button]').click(function (){
-                let me = $(this);
-                let data = $(me).parent("div.form-group").parent("div.form-group").find('input[type="file"]').attr("data-filedata");
-                let my_data = JSON.parse(data);
+                const me = $(this);
+                const dataSource = $(me).parent("div.form-group").parent("div.form-group").find('input[type="file"]');
+                const my_data = TRIM.store.fileData.fromField(dataSource, 'name', 'bg_conc') || {};
 
                 // Validate file contents here
-                let expected_fields = ['Parcel Name', 'Compartment Name', 'Background Concentration Value', 'Unit']
-                let expected_parcel_names = TRIM.store.currentScenario.parcels.map(e=>e.name)
+                const expected_fields = ['Parcel Name', 'Compartment Name', 'Background Concentration Value', 'Unit']
+                const expected_parcel_names = TRIM.store.currentScenario.parcels.map(e=>e.name)
 
-                let has_all_required_fields = expected_fields.map(e=>my_data.fields.indexOf(e) > -1).every(e=>e);
-                let has_correct_parcel_names = my_data.file_data.map(e=>expected_parcel_names.indexOf(e["Parcel Name"]) > -1).every(e=>e)
+                const has_all_required_fields = expected_fields.map(e=>my_data.fields.indexOf(e) > -1).every(e=>e);
+                const has_correct_parcel_names = my_data.file_data.map(e=>expected_parcel_names.indexOf(e["Parcel Name"]) > -1).every(e=>e)
 
                 if (!has_all_required_fields) {
                     alert("File does  not have the required standard column names. Please use the provided template.")
@@ -266,8 +276,8 @@
                     alert("Some parcel names provided in the file cannot be found in scenario. Please check parcel names!")
                     return
                 }
-                let chem_name = $(me).closest("div.tab-pane").data("tab-name")
-                let background_conc_info = [{
+                const chem_name = $(me).closest("div.tab-pane").data("tab-name")
+                const background_conc_info = [{
                     'type': 'data',
                     'name': 'field',
                     'value': "initial concentration file upload"
@@ -282,7 +292,7 @@
                 },{
                     'type': 'input',
                     'name': 'file_data',
-                    'value': JSON.stringify(my_data["file_data"])
+                    'value': JSON.stringify(my_data["file_data"] || null)
                 }]
                 LoadingScreen.show("BC_upload")
                 TRIM.api.uploadBackgroundConcFile(background_conc_info).on('load', function() {
@@ -299,16 +309,16 @@
                     finally {
                         function populate_values(cmap, bc_data) {
                             bc_data.forEach(function(p,i){
-                                let pcl_find_str = "td[data-pcl-name='" + p["Parcel Name"] + "']"
-                                let ve_find_str = "td[data-ve-name='" + p["Volume Element Name"] + "']"
-                                let comp_find_str = "td[data-comp-name='" + p["Compartment Name"] + "']"
-                                let ic_cell = $(cmap).find(pcl_find_str).next(ve_find_str).next(comp_find_str).next("td.ic")
-                                let ic_val =  Number(p["Background Concentration Value"]).toExponential()
+                                const pcl_find_str = "td[data-pcl-name='" + p["Parcel Name"] + "']"
+                                const ve_find_str = "td[data-ve-name='" + p["Volume Element Name"] + "']"
+                                const comp_find_str = "td[data-comp-name='" + p["Compartment Name"] + "']"
+                                const ic_cell = $(cmap).find(pcl_find_str).next(ve_find_str).next(comp_find_str).next("td.ic")
+                                const ic_val =  Number(p["Background Concentration Value"]).toExponential()
                                 $(ic_cell).find("input").val(ic_val)
                                 $(ic_cell).find("label.editableCell").text(ic_val)
                             })
                         }
-                        let cmap = me.closest("div.tab-pane").find("table.compMap")
+                        const cmap = me.closest("div.tab-pane").find("table.compMap")
                         console.log(src_data)
                         populate_values(cmap, src_data.background_conc_file_data);
                         LoadingScreen.hide("BC_upload");
@@ -392,17 +402,17 @@
                 let loadingRequest = 'load_' + this.id;
                 LoadingScreen.show(loadingRequest);
 
-                me.removeAttr('data-filedata');
+                var myName = me.attr('name');
+                var fileKey = `bg_conc_${myName}`;
+                TRIM.store.fileData.remove(fileKey);
                 TRIM.api.parseFiles(this).on('load', function() {
                     try {
                         var data = JSON.parse(this.responseText);
-                        if (data.files[me.attr('name')]) {
-                            var myData = data.files[me.attr('name')];
-                            var filedata = data.files[me.attr('name')]['file_data'];
-                            me.attr(
-                                'data-filedata',
-                                JSON.stringify(myData)
-                            );
+                        if (data.files && data.files[myName]) {
+                            var myData = data.files[myName];
+                            TRIM.store.fileData.add(fileKey, myData);
+
+                            var filedata = myData.file_data;
                             let this_chem =  me.closest("div.tab-pane").data("tab-name")
                             scenario_data = {
                                 'type': 'input',
@@ -434,10 +444,10 @@
             var map_html = "<tbody>"
             let exclude = ["WetVaporSource", "DryVaporSource", "WetParticleSource", "DryParticleSource"] // + Sinks
             TRIM.store.currentScenario.parcels.forEach( function(e,i){
-                map_html = map_html + "<tr data-depth='0' class='level0 colps'><td data-pcl-name='" + e.name + "'>" + e.name + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td><td></td></tr>"
+                map_html = map_html + "<tr data-depth='0' tabindex='0' class='level0 colps'><td data-pcl-name='" + e.name + "'>" + e.name + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td><td></td></tr>"
                 for (ve in e.compartment_map) {
                     if (exclude.indexOf(ve) == -1) {
-                        map_html = map_html + "<tr data-depth='1' class='level1 colps'><td data-pcl-name='" + e.name + "'></td><td data-ve-name='" + ve + "'>" + ve + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
+                        map_html = map_html + "<tr data-depth='1' tabindex='0' class='level1 colps'><td data-pcl-name='" + e.name + "'></td><td data-ve-name='" + ve + "'>" + ve + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
                     }
                     for (comp in e.compartment_map[ve]) {
                         if (exclude.map(el => el + '_' + ve).indexOf(e.compartment_map[ve][comp]) > -1
@@ -446,7 +456,7 @@
                             continue;
                         }
                         if (exclude.indexOf(e.compartment_map[ve][comp]) == -1){
-                            map_html = map_html + "<tr data-depth='2' class='level2 colps'><td data-pcl-name='" + e.name + "'><td data-ve-name='" + ve + "'><td class='comp' data-comp-name='" + e.compartment_map[ve][comp] + "'>" + e.compartment_map[ve][comp]+ "</td><td class='ic'><input class='editableCell' style='width: 50px; display:none'/><label class='editableCell badge badge-light'>0</label></td><td class='ic_unit'></td></tr>"
+                            map_html = map_html + "<tr data-depth='2' tabindex='0' class='level2 colps'><td data-pcl-name='" + e.name + "'><td data-ve-name='" + ve + "'><td class='comp' data-comp-name='" + e.compartment_map[ve][comp] + "'>" + e.compartment_map[ve][comp]+ "</td><td class='ic'><input class='editableCell' style='width: 50px; display:none'/><label class='editableCell badge badge-light'>0</label></td><td class='ic_unit'></td></tr>"
                         }
                     }
                 }
@@ -493,7 +503,7 @@
             })
             let uniq_comp = [... new Set(comp_array)]
             uniq_comp.sort().forEach(function(e) {
-                let menu_item = "<a class='dropdown-item comp-item'>" + e + "</a>"
+                let menu_item = "<a href='#' class='dropdown-item comp-item'>" + e + "</a>"
                 $(menu_item).appendTo(dd_menu)
             })
             $("a.dropdown-item.comp-item").on("click",function (e){

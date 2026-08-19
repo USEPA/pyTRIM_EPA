@@ -9,19 +9,20 @@ from shapely.prepared import prep
 from flask_api import ApiResult
 from trim_core.coordinates import CoordinateMapper
 from trim_frontend.scenarios.utils import update_dynamic_params
-from trim_db.schema import ureg, CustomParameter, ParameterDefinition, Parcel
+from trim_db.schema import CustomParameter, ParameterDefinition, Parcel
 from trim_db.services import ChemicalService, CompartmentService, FormulaService, \
     ParameterService, ParcelService, ScenarioService, VolumeElementService
 from trim_db.services.parameters import get_or_create_custom_param, update_custom_param_value
 from ..scenarios.forms import ScenarioAbioticPropertiesForm
 from ..scenarios.utils import init_parameter_definitions
 from ..utils.logging import make_logger
-from .defaults import get_watershed_area, \
-     Air_Parcel_VolElem_defaults, Aquatic_Biota_SW_Compartment_defaults, \
-     Aquatic_Biota_Sed_Compartment_defaults, Farm_Biota_SurfSoil_Compartment_defaults, \
-     LAND_USE_TYPES, AQUATIC_DIET, Land_Parcel_VolElem_defaults, Water_Parcel_VolElem_defaults, \
-     Wet_Dry_Source_VolElem_defaults, EROSION_DEFAULTS, make_self_requirements, \
-     SURFACE_SOIL_SPECIFIC_MEDIA_PARAMS
+from .defaults import \
+    Air_Parcel_VolElem_defaults, Aquatic_Biota_SW_Compartment_defaults, \
+    Aquatic_Biota_Sed_Compartment_defaults, \
+    LAND_USE_TYPES, AQUATIC_DIET, Land_Parcel_VolElem_defaults, \
+    Water_Parcel_VolElem_defaults, Wet_Dry_Source_VolElem_defaults, \
+    EROSION_DEFAULTS, make_self_requirements, \
+    SURFACE_SOIL_SPECIFIC_MEDIA_PARAMS
 from .forms import ScenarioParcelsForm
 
 
@@ -1007,30 +1008,23 @@ def delete_parcel_contents(del_parcel):
 # initialization/creation of the entity (i.e. compartment). In these cases we can get the default values from
 # the relevant flask form template (json) from the frontend.
 def get_default_value_from_json_form(form_name, parameter_name):
+    abiotic_form = ScenarioAbioticPropertiesForm()
+    parcels_form = ScenarioParcelsForm()
     json_forms = {
-        'Abiotic_Air': ScenarioAbioticPropertiesForm.__getattribute__(
-            ScenarioAbioticPropertiesForm, "AirAbioticTable"
-        ),
-        'Abiotic_Surface_Soil': ScenarioAbioticPropertiesForm.__getattribute__(
-            ScenarioAbioticPropertiesForm, "SurfaceSoilAbioticTable"
-        ),
-        'Abiotic_Tilled_Soil': ScenarioAbioticPropertiesForm.__getattribute__(
-            ScenarioAbioticPropertiesForm, "SurfaceSoilAbioticTable"
-        ),
-        'Abiotic_Root_Zone': ScenarioAbioticPropertiesForm.__getattribute__(
-            ScenarioAbioticPropertiesForm, "RootSoilAbioticTable"
-        ),
-        'Abiotic_Vadose_Zone': ScenarioAbioticPropertiesForm.__getattribute__(
-            ScenarioAbioticPropertiesForm, "VadoseSoilAbioticTable"
-        ),
-        'Abiotic_Groundwater': ScenarioAbioticPropertiesForm.__getattribute__(
-            ScenarioAbioticPropertiesForm, "GWSoilAbioticTable"
-        ),
-        'Parcels_Props': getattr(ScenarioParcelsForm, "mapTable")
+        'Abiotic_Air': getattr(abiotic_form, "AirAbioticTable"),
+        'Abiotic_Surface_Soil': getattr(abiotic_form, "SurfaceSoilAbioticTable"),
+        'Abiotic_Tilled_Soil': getattr(abiotic_form, "SurfaceSoilAbioticTable"),
+        'Abiotic_Root_Zone': getattr(abiotic_form, "RootSoilAbioticTable"),
+        'Abiotic_Vadose_Zone': getattr(abiotic_form, "VadoseSoilAbioticTable"),
+        'Abiotic_Groundwater': getattr(abiotic_form, "GWSoilAbioticTable"),
+        'Parcels_Props': getattr(parcels_form, "mapTable")
     }
     form_obj = json_forms[form_name]
-    form_class = form_obj.kwargs['form_class']
-    def_val = form_class.__getattribute__(form_class, parameter_name).kwargs["default"]
+    try:
+        def_val = getattr(form_obj, parameter_name).default
+    except Exception as e:
+        print(e)
+        def_val = None
     return def_val
 
 
@@ -1309,6 +1303,7 @@ def calculate_receptor_grid_points_for_parcel(pcl: Parcel):
     except Exception as e:
         print(f"ERROR calculating grid points for parcel {pcl}: {e}")
         return None
+
 
 # this is an adapted version of Samuel's "geojson_to_aermod_receptors" function;
 # minor changes made to help it work within TRIM app

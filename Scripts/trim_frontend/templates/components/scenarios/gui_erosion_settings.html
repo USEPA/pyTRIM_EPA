@@ -167,9 +167,8 @@
                     );
 
                     // Get the input file data and parcel names in the input file data
-                    const inputFileData = $(
-                        `#erosion_inputs_opt${optionNum}_erosion_params_file_opt${optionNum}`
-                    ).data('filedata')['file_data'];
+                    const dataSource = $(`#erosion_inputs_opt${optionNum}_erosion_params_file_opt${optionNum}`);
+                    const inputFileData = (TRIM.store.fileData.fromField(dataSource, 'name', 'erosion') || {}).file_data;
 
                     // Find the field for parcel names in the input file
                     const pclNameSelect = $(
@@ -203,9 +202,11 @@
                 const loadingRequest = `load_${elId}`;
                 LoadingScreen.show(loadingRequest);
 
-                el.removeAttr('data-filedata'); // Remove existing data
-
                 const elName = el.attr('name');
+
+                const fileKey = `erosion_${elName}`;
+                TRIM.store.fileData.remove(fileKey); // Remove existing data
+
                 const optionNum = elId.split('_').pop().replace('opt', '');
 
                 // Call API to parse data
@@ -213,7 +214,7 @@
                     try {
                         const data = JSON.parse(this.responseText).files[elName];
                         if (data) {
-                            el.attr('data-filedata', JSON.stringify(data));
+                            TRIM.store.fileData.add(fileKey, data);
                         }
                         updateFileDataSelects(optionNum, data || null);
                     } finally {
@@ -647,7 +648,7 @@
                     .appendTo(td);
                 if (!isActive) {
                     lbl.css({
-                        color: 'gray',
+                        color: '#626262',
                         'text-decoration': 'line-through'
                     });
                 }
@@ -989,6 +990,9 @@
                     columns: tblColDefs[`opt${optionNum}`], //setDynamicColumnWidths('#' + tbl.attr('id'), tblColDefs[`opt${optionNum}`], tblData),
                     fnCreatedRow: function (row, data, index) {
                         $(row).attr('data-parcel-id', data.parcel_id);
+                    },
+                    initComplete: function (settings, json) {
+                        this.api().columns().header().to$().attr('scope', 'col');
                     },
                     drawCallback: (settings) => {
                         globalDrawCallback(tbl);

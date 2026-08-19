@@ -1,0 +1,600 @@
+{
+    "title": "Simulation Parameters",
+    "inherits": "mirc/percentiles.json",
+    "fields": [
+        {
+            "id": "mirc_scenario",
+            "label": "Exposure Profile",
+            "data_type": "int",
+            "widget": "select",
+            "choices": {
+                "source": "db",
+                "model": "MircScenario",
+                "value": "id",
+                "label": "name"
+            },
+            "required": true,
+            "default": 2
+        },
+        {
+            "id": "chemical",
+            "label": "Chemical",
+            "data_type": "int",
+            "widget": "select",
+            "multiselect": true,
+            "choices": {
+                "source": "db",
+                "model": "Chemical",
+                "value": "id",
+                "label": "name"
+            },
+            "required": true
+        },
+        {
+            "id": "ingestion_percentile_preset",
+            "label": "Ingestion Rate Percentiles",
+            "data_type": "string",
+            "widget": "radio",
+            "choices": [
+                {
+                    "value": "farmer",
+                    "label": "Farmer"
+                },
+                {
+                    "value": "fisher",
+                    "label": "Fisher"
+                },
+                {
+                    "value": "farmer_fisher",
+                    "label": "Farmer + Fisher"
+                },
+                {
+                    "value": "urban_gardener",
+                    "label": "Urban Gardener"
+                },
+                {
+                    "value": "rural_gardener",
+                    "label": "Rural Gardener"
+                },
+                {
+                    "value": "custom",
+                    "label": "Custom"
+                }
+            ],
+            "default": "farmer_fisher"
+        },
+        {
+            "id": "trim_timestamp",
+            "label": "Target Date/Time",
+            "data_type": "string",
+            "widget": "select",
+            "choices": [],
+            "required": true,
+            "help": "TRIM outputs modeled data at various simulation timesteps. Select the timestep of data you want to base this simulation on. Typically this is December 31 of the final full simulation year."
+        },
+
+        {
+            "id": "trim_air_compartment",
+            "label": "Compartment for Air Concentration",
+            "data_type": "string",
+            "widget": "select",
+            "class": "air-compartment-field",
+            "choices": [],
+            "help": "Select the compartment to retrieve air concentration results from. This is typically in the farm or garden parcel. This is used for vapor-phase chemical uptake into fruits, vegetables, and livestock feed."
+        },
+        {
+            "id": "Ca",
+            "label": "AERMOD Average Concentration in Air (&mu;g/m<sup>3</sup>)",
+            "data_type": "float",
+            "min": 0,
+            "step": "any"
+        },
+        {
+            "id": "Ca_unit",
+            "label": "",
+            "data_type": "string",
+            "default": "ug/m^3"
+        },
+        {
+            "id": "Ca_src",
+            "label": "",
+            "data_type": "string",
+            "readonly": true,
+            "default": "manual input",
+            "hidden": true
+        },
+        {
+            "id": "Fv",
+            "label": "Fraction of Airborne Chemical in Vapor Phase",
+            "data_type": "float",
+            "min": 0,
+            "max": 1,
+            "step": "any"
+        },
+        {
+            "id": "Fv_src",
+            "label": "",
+            "data_type": "string",
+            "readonly": true,
+            "default": "manual input",
+            "hidden": true
+        },
+        {
+            "id": "rho_a",
+            "label": "Density of Air (g/m<sup>3</sup>)",
+            "data_type": "float",
+            "min": 0,
+            "step": "any"
+        },
+        {
+            "id": "rho_a_unit",
+            "label": "",
+            "data_type": "string",
+            "default": "g/m^3"
+        },
+        {
+            "id": "rho_a_src",
+            "label": "",
+            "data_type": "string",
+            "readonly": true,
+            "default": "manual input",
+            "hidden": true
+        },
+
+        {
+            "id": "trim_water_compartment",
+            "label": "Compartment for Drinking Water Concentration",
+            "data_type": "string",
+            "widget": "select",
+            "class": "water-compartment-field",
+            "choices": [],
+            "help": "Select the compartment to retrieve surface water concentrations from for drinking water exposure."
+        },
+        {
+            "id": "C_water",
+            "label": "Average Concentration in Drinking Water (mg/L)",
+            "data_type": "float",
+            "min": 0,
+            "step": "any"
+        },
+        {
+            "id": "C_water_unit",
+            "label": "",
+            "data_type": "string",
+            "default": "mg/L"
+        },
+        {
+            "id": "C_water_src",
+            "label": "",
+            "data_type": "string",
+            "readonly": true,
+            "default": "manual input",
+            "hidden": true
+        },
+
+        {
+            "id": "trim_soil_human_compartment",
+            "label": "Compartment for Incidental Human Soil Ingestion",
+            "data_type": "string",
+            "widget": "select",
+            "class": "surf-soil-compartment-field",
+            "choices": [],
+            "help": "Select the compartment to retrieve surface soil concentrations from for incidental human soil ingestion. This is typically in a farm or garden parcel."
+        },
+        {
+            "id": "C_soil",
+            "label": "Average Concentration in Soil for Incidental Human Ingestion (mg/kg)",
+            "data_type": "float",
+            "min": 0,
+            "step": "any"
+        },
+        {
+            "id": "C_soil_unit",
+            "label": "",
+            "data_type": "string",
+            "default": "mg/kg"
+        },
+        {
+            "id": "C_soil_src",
+            "label": "",
+            "data_type": "string",
+            "readonly": true,
+            "default": "manual input",
+            "hidden": true
+        },
+
+        {
+            "id": "trim_soil_garden_compartment",
+            "label": "Compartment for Fruit & Vegetable Root Uptake",
+            "data_type": "string",
+            "widget": "select",
+            "class": "root-soil-compartment-field",
+            "choices": [],
+            "help": "Select the compartment to retrieve soil concentrations from for root uptake into fruits and vegetables (e.g., from the tilled surface soil compartment of a farm or garden)."
+        },
+        {
+            "id": "C_root_veg",
+            "label": "Average Concentration at Root-zone Depth for Garden Produce (mg/kg)",
+            "data_type": "float",
+            "min": 0,
+            "step": "any"
+        },
+        {
+            "id": "C_root_veg_unit",
+            "label": "",
+            "data_type": "string",
+            "default": "mg/kg"
+        },
+        {
+            "id": "C_root_veg_src",
+            "label": "",
+            "data_type": "string",
+            "readonly": true,
+            "default": "manual input",
+            "hidden": true
+        },
+        {
+            "id": "Kd",
+            "label": "Kd for Garden Produce (L/kg)",
+            "data_type": "float",
+            "min": 0,
+            "step": "any",
+            "help": "Ratio of concentration absorbed to solids vs dissolved at root-zone depth for garden produce"
+        },
+        {
+            "id": "Kd_unit",
+            "label": "",
+            "data_type": "string",
+            "default": "L/kg"
+        },
+        {
+            "id": "Kd_src",
+            "label": "",
+            "data_type": "string",
+            "readonly": true,
+            "default": "manual input",
+            "hidden": true
+        },
+
+        {
+            "id": "trim_soil_livestock_compartment",
+            "label": "Compartment for Incidental Livestock Soil Ingestion",
+            "data_type": "string",
+            "widget": "select",
+            "class": "surf-soil-compartment-field",
+            "choices": [],
+            "help": "Select the compartment to retrieve surface soil concentrations from for incidental livestock soil ingestion. This is typically in a farm parcel."
+        },
+        {
+            "id": "Cs_s",
+            "label": "Average Concentration in Soil for Incidental Livestock Ingestion (mg/kg)",
+            "data_type": "float",
+            "min": 0,
+            "step": "any"
+        },
+        {
+            "id": "Cs_s_unit",
+            "label": "",
+            "data_type": "string",
+            "default": "mg/kg"
+        },
+        {
+            "id": "Cs_s_src",
+            "label": "",
+            "data_type": "string",
+            "readonly": true,
+            "default": "manual input",
+            "hidden": true
+        },
+
+        {
+            "id": "trim_soil_root_compartment",
+            "label": "Compartment for Livestock Feed Root Uptake",
+            "data_type": "string",
+            "widget": "select",
+            "class": "root-soil-compartment-field",
+            "choices": [],
+            "help": "Select the compartment to retrieve soil concentrations from for root uptake into animal feed (e.g., from the tilled surface soil compartment of a farm or garden)."
+        },
+        {
+            "id": "Cs_root_zone",
+            "label": "Average Concentration at Root-zone Depth for Livestock Feed (mg/kg)",
+            "data_type": "float",
+            "min": 0,
+            "step": "any"
+        },
+        {
+            "id": "Cs_root_zone_unit",
+            "label": "",
+            "data_type": "string",
+            "default": "mg/kg"
+        },
+        {
+            "id": "Cs_root_zone_src",
+            "label": "",
+            "data_type": "string",
+            "readonly": true,
+            "default": "manual input",
+            "hidden": true
+        },
+        {
+            "id": "Kd_feed",
+            "label": "Kd for Livestock Feed (L/kg)",
+            "data_type": "float",
+            "min": 0,
+            "step": "any",
+            "help": "Ratio of concentration absorbed to solids vs dissolved at root-zone depth for livestock feed"
+        },
+        {
+            "id": "Kd_feed_unit",
+            "label": "",
+            "data_type": "string",
+            "default": "L/kg"
+        },
+        {
+            "id": "Kd_feed_src",
+            "label": "",
+            "data_type": "string",
+            "readonly": true,
+            "default": "manual input",
+            "hidden": true
+        },
+
+        {
+            "id": "trim_soil_drdp_compartment",
+            "label": "Compartment for Dry Deposition",
+            "data_type": "string",
+            "widget": "select",
+            "class": "dep-compartment-field",
+            "choices": [],
+            "help": "Select the compartment to retrieve dry deposition results from. This is typically in the farm or garden parcel. This is used for dry particle deposition onto fruits, vegetables, and livestock feed. If you chose to run TRIM with AERMOD, then the deposition to this compartment will be from redeposition following chemical resuspension (which is after initial deposition), and it will be added to the AERMOD deposition results. If you did not choose to run TRIM with AERMOD, then the deposition to this compartment will be entirely from TRIM air transfer and deposition/resuspension/redeposition calculations."
+        },
+        {
+            "id": "Drdp",
+            "label": "Average Annual Dry Deposition of Particle-phase Chemical (g/m<sup>2</sup>/year)",
+            "data_type": "float",
+            "min": 0,
+            "step": "any"
+        },
+        {
+            "id": "Drdp_unit",
+            "label": "",
+            "data_type": "string",
+            "default": "g/m^2/year"
+        },
+        {
+            "id": "Drdp_src",
+            "label": "",
+            "data_type": "string",
+            "readonly": true,
+            "default": "manual input",
+            "hidden": true
+        },
+
+        {
+            "id": "trim_soil_drwp_compartment",
+            "label": "Compartment for Wet Deposition",
+            "data_type": "string",
+            "widget": "select",
+            "class": "dep-compartment-field",
+            "choices": [],
+            "help": "Select the compartment to retrieve wet deposition results from. This is typically in the farm or garden parcel. This is used for wet particle deposition onto fruits, vegetables, and livestock feed. If you chose to run TRIM with AERMOD, then the deposition to this compartment will be from redeposition following chemical resuspension (which is after initial deposition), and it will be added to the AERMOD deposition results. If you did not choose to run TRIM with AERMOD, then the deposition to this compartment will be entirely from TRIM air transfer and deposition/resuspension/redeposition calculations."
+        },
+        {
+            "id": "Drwp",
+            "label": "Average Annual Wet Deposition of Particle-phase Chemical (g/m<sup>2</sup>/year)",
+            "data_type": "float",
+            "min": 0,
+            "step": "any"
+        },
+        {
+            "id": "Drwp_unit",
+            "label": "",
+            "data_type": "string",
+            "default": "g/m^2/year"
+        },
+        {
+            "id": "Drwp_src",
+            "label": "",
+            "data_type": "string",
+            "readonly": true,
+            "default": "manual input",
+            "hidden": true
+        },
+
+        {
+            "id": "fish_factor",
+            "label": "",
+            "data_type": "string",
+            "widget": "radio",
+            "choices": [
+                {
+                    "value": "direct",
+                    "label": "Set Fish Concentration Directly"
+                },
+                {
+                    "value": "baf",
+                    "label": "Calculate Fish Concentration Using Bioaccumulation Factors (BAFs)"
+                }
+            ],
+            "required": true,
+            "default": "direct"
+        },
+
+        {
+            "id": "trim_fish_tl35_compartment",
+            "label": "Trophic Level 3.5 Fish Compartment",
+            "data_type": "string",
+            "widget": "select",
+            "class": "fish-compartment-field",
+            "choices": [],
+            "help": "Select the compartment to retrieve Trophic Level 3.5 fish concentrations from. This is will be ignored if you calculate fish concentrations from Bioaccumulation Factors (BAFs)."
+        },
+        {
+            "id": "f_tl35",
+            "label": "Fraction of Fish Consumption from Trophic Level 3.5",
+            "data_type": "float",
+            "min": 0,
+            "max": 1,
+            "step": 0.01,
+            "default": 0.5,
+            "help": "Enter the fraction of a person’s total fish ingestion that are Trophic Level 3.5 fish. The default of 0.5 is professional judgment. This fraction, and the fraction for Trophic Level 4 fish, must sum to 1.0."
+        },
+        {
+            "id": "f_tl35_src",
+            "label": "",
+            "data_type": "string",
+            "readonly": true,
+            "default": "default",
+            "hidden": true
+        },
+        {
+            "id": "C_tl35",
+            "label": "Average Concentration in Trophic Level 3.5 Fish (mg/kg)",
+            "data_type": "float",
+            "min": 0,
+            "step": "any"
+        },
+        {
+            "id": "C_tl35_unit",
+            "label": "",
+            "data_type": "string",
+            "default": "mg/kg"
+        },
+        {
+            "id": "C_tl35_src",
+            "label": "",
+            "data_type": "string",
+            "readonly": true,
+            "default": "manual input",
+            "hidden": true
+        },
+
+        {
+            "id": "trim_fish_tl4_compartment",
+            "label": "Trophic Level 4 Fish Compartment",
+            "data_type": "string",
+            "widget": "select",
+            "class": "fish-compartment-field",
+            "choices": [],
+            "help": "Select the compartment to retrieve Trophic Level 4 fish concentrations from. This is will be ignored if you calculate fish concentrations from Bioaccumulation Factors (BAFs)."
+        },
+        {
+            "id": "f_tl4",
+            "label": "Fraction of Fish Consumption from Trophic Level 4",
+            "data_type": "float",
+            "min": 0,
+            "max": 1,
+            "step": 0.01,
+            "default": 0.5,
+            "help": "Enter the fraction of a person’s total fish ingestion that are Trophic Level 4 fish, which are assumed to be water column carnivores. The default of 0.5 is professional judgment. This fraction, and the fraction for Trophic Level 3.5 fish, must sum to 1.0."
+        },
+        {
+            "id": "f_tl4_src",
+            "label": "",
+            "data_type": "string",
+            "readonly": true,
+            "default": "default",
+            "hidden": true
+        },
+        {
+            "id": "C_tl4",
+            "label": "Average Concentration in Trophic Level 4 Fish (mg/kg)",
+            "data_type": "float",
+            "min": 0,
+            "step": "any"
+        },
+        {
+            "id": "C_tl4_unit",
+            "label": "",
+            "data_type": "string",
+            "default": "mg/kg"
+        },
+        {
+            "id": "C_tl4_src",
+            "label": "",
+            "data_type": "string",
+            "readonly": true,
+            "default": "manual input",
+            "hidden": true
+        },
+
+        {
+            "id": "trim_sed_compartment",
+            "label": "Sediment Compartment for Benthic Fish",
+            "data_type": "string",
+            "widget": "select",
+            "class": "sed-compartment-field",
+            "choices": [],
+            "help": "Select the compartment to retrieve sediment concentrations from. This is will be ignored if you calculate fish concentrations directly."
+        },
+        {
+            "id": "C_sed",
+            "label": "Average Concentration in Sediment (mg/kg)",
+            "data_type": "float",
+            "min": 0,
+            "step": "any"
+        },
+        {
+            "id": "C_sed_unit",
+            "label": "",
+            "data_type": "string",
+            "default": "mg/kg"
+        },
+        {
+            "id": "C_sed_src",
+            "label": "",
+            "data_type": "string",
+            "readonly": true,
+            "default": "manual input",
+            "hidden": true
+        },
+
+        {
+            "id": "trim_surf_compartment",
+            "label": "Surface Water Compartment for Water-Column Fish",
+            "data_type": "string",
+            "widget": "select",
+            "class": "water-compartment-field",
+            "choices": [],
+            "help": "Select the compartment to retrieve surface-water concentrations from. This is will be ignored if you calculate fish concentrations directly."
+        },
+        {
+            "id": "C_surf_water",
+            "label": "Average Concentration in Surface Water (mg/L)",
+            "data_type": "float",
+            "min": 0,
+            "step": "any"
+        },
+        {
+            "id": "C_surf_water_unit",
+            "label": "",
+            "data_type": "string",
+            "default": "mg/L"
+        },
+        {
+            "id": "C_surf_water_src",
+            "label": "",
+            "data_type": "string",
+            "readonly": true,
+            "default": "manual input",
+            "hidden": true
+        },
+        {
+            "id": "FMD",
+            "label": "Fraction of Total Chemical Mass That Is Dissolved in Liquid Phase",
+            "data_type": "float",
+            "min": 0,
+            "max": 1,
+            "step": "any"
+        },
+        {
+            "id": "FMD_src",
+            "label": "",
+            "data_type": "string",
+            "readonly": true,
+            "default": "manual input",
+            "hidden": true
+        }
+    ]
+}

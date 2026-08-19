@@ -1,0 +1,85 @@
+{% from 'macros/modal_macros.html' import render_modal %}
+{% from 'macros/mirc/form_macros.html' import
+    render_field, render_label, render_feedback
+%}
+{% from 'macros/mirc/scenario_selector.html' import
+    render_scenario_picker
+%}
+
+{% set modal_body %}
+<form id="create-scenario-form"
+    method="POST"
+    action="{{ url_for('mirc_scenario_api.create_risk_scenario') }}"
+>
+    {{ scenario_form.csrf_token }}
+    {{ render_field(scenario_form.name) }}
+    <div class="form-group">
+        {{ render_label(scenario_form.parent) }}
+        {{ render_scenario_picker(
+            mirc_scenarios,
+            id=scenario_form.parent.id, name=scenario_form.parent.name,
+            default=2
+        ) }}
+        {{ render_feedback(scenario_form.parent) }}
+    </div>
+    {{ render_field(scenario_form.notes) }}
+    <button type="submit" style="display: none;">Submit</button>
+</form>
+{% endset %}
+{% set modal_footer %}
+    <button type="button" class="btn btn-light" data-dismiss="modal">
+        Cancel
+    </button>
+    <button type="button" id="create-scenario-btn" class="btn btn-primary">
+        Create
+    </button>
+    <script>
+        document.addEventListener('DOMContentLoaded', function(e) {
+            var form = $('#create-scenario-form');
+            $('#create-scenario-btn').click(function(e) {
+                e.preventDefault();
+                // Forward this click to the ACTUAL submit button for the form
+                // (This lets us get nice browser-handled validation 
+                // for our required fields)
+                form.find('[type="submit"]').click();
+            });
+            form.submit(function(e) {
+                e.preventDefault();
+
+                form.find('input, textarea').removeClass('is-invalid');
+                form.find('.invalid-feedback').html('');
+
+                $.ajax({
+                    url: form.attr('action'),
+                    method: form.attr('method'),
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        'csrf_token': form.find('[name="csrf_token"]').val(),
+                        'scenario_id': -1,
+                        'name': form.find('[name="name"]').val(),
+                        'parent': parseInt(form.find('[name="parent"]').val()),
+                        'notes': form.find('[name="notes"]').val()
+                    })
+                }).done(function(data) {
+                    var scenario = data.scenario;
+                    window.location.href = '{{ url_for("mirc_scenario.view_risk_scenario", id=-1) }}'.replace('/-1/', `/${scenario.id}/`);
+                }).fail(function(data) {
+                    var error = data.responseJSON;
+                    if (error.message.form_errors) {
+                        $.each(error.message.form_errors, function(name, err) {
+                            form.find('[name="' + name + '"]')
+                                .addClass('is-invalid')
+                                .next('.invalid-feedback').html(
+                                    err.join('<br />')
+                                );
+                        });
+                    }
+                });
+            })
+        });
+    </script>
+{% endset %}
+{{ render_modal(
+    id='create-scenario-modal', title='New Exposure Profile',
+    body=modal_body, footer=modal_footer
+) }}

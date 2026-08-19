@@ -1,0 +1,32 @@
+{
+    "title": "Product Parameter",
+    "fields": [
+        {
+            "id": "product_id",
+            "data_type": "int",
+            "hidden": true
+        },
+        {
+            "id": "product",
+            "label": "Product",
+            "data_type": "string",
+            "readonly": true
+        },
+        {
+            "id": "EF",
+            "label": "Exposure Frequency",
+            "data_type": "float",
+            "min": 0,
+            "max": 365,
+            "step": "any",
+            "help": "The approximate amount of time within a year that humans are exposed to contamination from this product"
+        },
+        {
+            "id": "EF_unit",
+            "label": "Exposure Frequency Unit",
+            "data_type": "string",
+            "default": "day"
+        }
+
+    ]
+}

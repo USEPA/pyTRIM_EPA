@@ -1,13 +1,15 @@
 {% macro table_static_value(table_id, columns) %}
-<div class="pill pill-alert col-sm" style="font-size:.9em;">
-    <label for="{{table_id}}_columns">Set uniform value for column</label>
-    <select id="{{table_id}}_columns" name="{{table_id}}_columns">
+<div class="form-inline mb-2">
+    <label for="{{table_id}}_sv_val">Set uniform value</label>
+    <input id="{{table_id}}_sv_val" type="text" name="{{table_id}}_sv_val" title="Uniform value" class="form-control form-control-sm mx-sm-1">
+    <label for="{{table_id}}_columns">for column</label>
+    <select id="{{table_id}}_columns" name="{{table_id}}_columns" class="form-control form-control-sm mx-sm-1">
         {% for column in columns %}
             <option value='{{column | replace(" ", "")}}'>{{column}}</option>
         {% endfor %}
-    </select> 
+    </select>
+    <button id="{{table_id}}_sv_btn" class="btn btn-secondary px-2 mt-2 mt-sm-0" style="height:1.8em; padding:2px;">Update</button>
     <br>
-    Value: <input id="{{table_id}}_sv_val" type="text"> <button id="{{table_id}}_sv_btn" class="btn btn-warning" style="height:1.8em;padding:2px;">Update</button>
 </div>
 
 <style>

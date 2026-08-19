@@ -1,0 +1,52 @@
+{% from 'macros/mirc/form_macros.html' import render_input, render_label, render_form_group_row %}
+
+<tr>
+    <th scope="row" class="table-primary border-primary align-middle text-center">
+        {{ render_label(bmp.f_mbm, hover_help=True, class="mb-0") }}
+    </th>
+    <td>
+        {{ render_input(bmp.f_mbm) }}
+    </td>
+    <td>
+        <input type="text" class="form-control form-control-sm"
+            readonly="readonly" value="unitless"
+            aria-label="Unit" />
+    </td>
+</tr>
+<tr>
+    <th scope="row" class="table-primary border-primary align-middle text-center">
+        {{ render_label(bmp.f_fm, hover_help=True, class="mb-0") }}
+    </th>
+    <td>
+        {{ render_input(bmp.f_fm) }}
+    </td>
+    <td>
+        <input type="text" class="form-control form-control-sm"
+            readonly="readonly" value="unitless"
+            aria-label="Unit" />
+    </td>
+</tr>
+<tr>
+    <th scope="row" class="table-primary border-primary align-middle text-center">
+        {{ render_label(bmp.f_pm, hover_help=True, class="mb-0") }}
+    </th>
+    <td>
+        {{ render_input(bmp.f_pm) }}
+    </td>
+    <td>
+        <input type="text" class="form-control form-control-sm"
+            readonly="readonly" value="unitless"
+            aria-label="Unit" />
+    </td>
+</tr>
+<tr>
+    <th scope="row" class="table-primary border-primary align-middle text-center">
+        {{ render_label(bmp.t_pn, hover_help=True, class="mb-0") }}
+    </th>
+    <td>
+        {{ render_input(bmp.t_pn) }}
+    </td>
+    <td>
+        {{ render_input(bmp.t_pn_unit) }}
+    </td>
+</tr>

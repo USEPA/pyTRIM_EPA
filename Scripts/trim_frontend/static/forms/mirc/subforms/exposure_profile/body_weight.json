@@ -1,0 +1,48 @@
+{
+    "title": "Human Body Weight",
+    "fields": [
+        {
+            "id": "life_stage_id",
+            "data_type": "int",
+            "hidden": true
+        },
+        {
+            "id": "life_stage",
+            "label": "Life Stage",
+            "data_type": "string",
+            "readonly": true
+        },
+        {
+            "id": "percentile_id",
+            "data_type": "int",
+            "hidden": true
+        },
+        {
+            "id": "percentile",
+            "label": "Percentile",
+            "data_type": "string",
+            "readonly": true
+        },
+        {
+            "id": "value",
+            "label": "Value",
+            "data_type": "float",
+            "min": 0,
+            "step": "any",
+            "allow_empty": true
+        },
+        {
+            "id": "unit",
+            "label": "Unit",
+            "data_type": "string",
+            "widget": "select",
+            "choices": ["kg", "lbs"]
+        },
+        {
+            "id": "notes",
+            "label": "Notes",
+            "data_type": "string",
+            "widget": "textarea"
+        }
+    ]
+}
