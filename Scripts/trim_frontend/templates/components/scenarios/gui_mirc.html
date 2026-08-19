@@ -1,11 +1,11 @@
 
 <div id="mirc-results-gui">
     <section id="simulations-overview-display">
-        {% include 'components/scenarios/mirc/gui_simulations_overview.html' %}
+        {% include 'components/mirc/simulations/overview.html' %}
     </section>
 
     <section id="single-simulation-details" style="display: none;">
-        {% include 'components/scenarios/mirc/gui_simulation_results.html' %}
+        {% include 'components/mirc/simulations/results.html' %}
     </section>
 
     <div id="simulation-form-modal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-hidden="true">
@@ -19,7 +19,7 @@
                 </div>
                 <div class="modal-body">
                     {% with form = simulation_form %}
-                        {% include 'components/scenarios/mirc/gui_simulation_form.html' %}
+                        {% include 'components/mirc/simulations/create_form.html' %}
                     {% endwith %}
                 </div>
                 <div class="modal-footer">
@@ -54,5 +54,14 @@ onDomLoad(function() {
 
         return mirc;
     })(window.MIRC || {});
+    
+    var initialLoad = false;
+    $('#risk-calc-tab-pill').on('shown.bs.tab', function() {
+        if (!initialLoad) {
+            initialLoad = true;
+            console.log('mirc gui visible')
+            MIRC.refreshSimulations();
+        }
+    });
 });
 </script>

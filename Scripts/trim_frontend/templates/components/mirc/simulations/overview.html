@@ -1,18 +1,18 @@
 <div class="container px-0 mb-3">
     <div class="row mx-3 justify-content-end">
         <a href="{{ url_for('mirc_scenario.view_risk_scenarios') }}"
-            class="btn btn-sm mr-2 btn-outline-secondary text-dark"
+            class="btn btn-sm mb-1 btn-outline-secondary text-dark"
             target="_blank" tabindex="0"
         >
-            <i class="fa fa-pencil-alt mr-1"></i>
+            <i class="fa fa-pencil-alt"></i>
             Edit Exposure Profiles
         </a>
 
-        <a href="#" class="simulation-btn btn btn-outline-dark btn-sm mr-2" data-action="export" tabindex="0">
+        <a href="#" class="simulation-btn btn btn-outline-dark btn-sm ml-2 mb-1" data-action="export" tabindex="0">
             <i class="fa fa-download mr-1"></i>
             Export All
         </a>
-        <a href="#" class="simulation-btn btn btn-primary btn-sm" data-action="create" tabindex="0">
+        <a href="#" class="simulation-btn btn btn-primary btn-sm ml-2 mb-1" data-action="create" tabindex="0">
             <i class="fa fa-plus mr-1"></i>
             Add Simulation
         </a>
@@ -31,7 +31,7 @@ onDomLoad(function() {
                 LoadingScreen.show('loadMircData');
                 TRIM.api.exportScenarioForMirc(TRIM.store.currentScenario.id).on('load', function() {
                     TRIM.store.mirc_data = this.responseJSON.trim_data;
-                    initSimulationForm(withData); // see gui_simulation_form.html
+                    initSimulationForm(withData);
                     LoadingScreen.hide('loadMircData');
                     $('#simulation-form-modal').modal('show');
                 });
@@ -56,6 +56,11 @@ onDomLoad(function() {
                 form.find('[name$="ingestion_percentile_preset"][value="farmer_fisher"]').prop('checked', true).change();
                 form.find('[name="fish_factor"][value="direct"]').prop('checked', true).change();
                 return;
+            }
+
+            var desc = withData.meta?.description;
+            if (desc != undefined) {
+                form.find('[name="description"]').val(desc);
             }
 
             var profile = withData.meta?.exposureProfile;
@@ -600,6 +605,7 @@ onDomLoad(function() {
         var profileViewUrl = "{{ url_for('mirc_scenario.view_risk_scenario', id=0) }}";
 
         mirc.refreshSimulations = function(thenChangeToId) {
+            LoadingScreen.show('refreshingSimulations');
             TRIM.api.hitUrl(simulationsLoadUrl).on('load', function() {
                 try {
                     var data = JSON.parse(this.responseText);
@@ -638,16 +644,35 @@ onDomLoad(function() {
 
                             var cardBody = $('<div class="card-body py-2" />').appendTo(card);
 
-                            $('<p class="card-text mb-1" />')
+                            var cardRow = $('<div class="row p-0" />').appendTo(cardBody);
+                            var cardCol = $('<div class="col" />').appendTo(cardRow);
+                            $('<p class="mb-1" />')
                                 .append(
                                     $(`<a href="${profileViewUrl.replace('/0', '/' + sim.exposureProfile.id)}" target="_blank" tabindex="0" />`)
                                         .text(sim.exposureProfile.name)
                                 )
-                                .appendTo(cardBody);
-                            $('<p class="card-text mb-1" />')
+                                .appendTo(cardCol);
+
+                            cardCol = $('<div class="col" />').appendTo(cardRow);
+                            $('<p class="mb-1 text-right" />')
                                 .text((new Date(sim.timestamp)).toLocaleDateString('en-US', timeDisplayOpts))
-                                .appendTo(cardBody);
-                            $('<p class="card-text mb-0" />').text(`Fish Calculation: ${sim.fishPathway}`).appendTo(cardBody);
+                                .appendTo(cardCol);
+
+                            if ((sim.description || '').trim()) {
+                                cardRow = $('<div class="row p-0" />').appendTo(cardBody);
+                                cardCol = $('<div class="col" />').appendTo(cardRow);
+                                $('<p class="mb-1 text-muted" />').text(`> ${sim.description}`).appendTo(cardCol);
+                            }
+
+                            // cardRow = $('<div class="row p-0" />').appendTo(cardBody);
+                            // cardCol = $('<div class="col" />').appendTo(cardRow);
+                            // $('<p class="mb-1" />').text(`Fish Calculation: ${sim.fishPathway}`).appendTo(cardCol);
+
+                            cardRow = $('<div class="row p-0" />').appendTo(cardBody);
+                            cardCol = $('<div class="col" />').appendTo(cardRow);
+                            $('<p class="mb-0" />')
+                                .html(`Primary Pathway: <span class="${sim.primaryPathway ? 'text-danger' : 'text-muted'}">${sim.primaryPathway || 'None'}</span>`)
+                                .appendTo(cardCol);
                             
                             if (simNum % 2 == 0) {
                                 row = $('<div class="row" />').appendTo(simCards);
@@ -673,6 +698,7 @@ onDomLoad(function() {
                     console.log(this.responseText);
                     console.log(err);
                 }
+                LoadingScreen.hide('refreshingSimulations');
             });
         };
 
@@ -725,8 +751,6 @@ onDomLoad(function() {
 
         return mirc;
     })(window.MIRC || {});
-
-    window.MIRC.refreshSimulations();
 
     $('#submit-simulation-form').click(function(e) {
         e.preventDefault();

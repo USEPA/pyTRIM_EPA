@@ -75,6 +75,7 @@ def _ts_scenario(scenario: MircScenario):
 
 class MircSimulation(Model, TrackUpdatesMixin):
     name = sa.Column(sa.String(120), nullable=False)
+    description = sa.Column(sa.String(800))
 
     trim_scenario_id = sa.Column(
         sa.Integer(), sa.ForeignKey('scenario.id'), nullable=False
@@ -128,6 +129,7 @@ def _ts_simulation(simulation: MircSimulation):
     return {
         'id': simulation.id,
         'name': simulation.name,
+        'description': simulation.description or '',
         'chemical': {
             'name': simulation.chemical.name,
             'cas_number': simulation.chemical.cas_number

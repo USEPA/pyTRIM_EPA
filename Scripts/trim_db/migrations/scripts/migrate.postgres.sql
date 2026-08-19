@@ -257,6 +257,7 @@ CREATE TABLE mirc_simulation (
     created TIMESTAMP NOT NULL, 
     updated TIMESTAMP, 
     name VARCHAR(120) NOT NULL, 
+    description VARCHAR(800), 
     trim_scenario_id INTEGER NOT NULL, 
     mirc_scenario_id INTEGER NOT NULL, 
     chemical_id INTEGER NOT NULL, 

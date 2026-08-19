@@ -15,7 +15,7 @@
 
     {% with update_url = url_for('mirc_scenario_api.update_risk_scenario_permissions', id=mirc_scenario.id) %}
         {% with access_object = mirc_scenario %}
-            {% include 'components/scenarios/mirc/access_models/permissions.html' %}
+            {% include 'components/mirc/access_models/permissions.html' %}
         {% endwith %}
     {% endwith %}
 

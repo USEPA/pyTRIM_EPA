@@ -88,8 +88,25 @@ def get_simulations(trim_scenario_id):
 
             return api.FileResult(filepath)
 
+    sims = []
+    for sim in trim_scenario.mirc_simulations:
+        s = sim.as_serializable()
+        try:
+            pathways = MircSimulationService(sim).run_pathways()['results']
+            primary_path = None
+            for path, results in pathways.items():
+                if path == 'total' or results['risk'] is None:
+                    continue
+                if primary_path is None or results['risk']['Lifetime']['intake'].magnitude > primary_path[1]:
+                    primary_path = (path, results['risk']['Lifetime']['intake'].magnitude)
+            s['primaryPathway'] = primary_path[0].replace('_', ' ').title() if primary_path is not None else None
+        except Exception:
+            import traceback; traceback.print_exc()
+            pass
+        sims.append(s)
+
     return api.Result({
-        'simulations': [s.as_serializable() for s in trim_scenario.mirc_simulations]
+        'simulations': sims
     })
 
 

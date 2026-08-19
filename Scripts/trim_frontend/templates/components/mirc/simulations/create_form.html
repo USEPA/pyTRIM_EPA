@@ -14,6 +14,12 @@
 >
     <div class="form-row">
         <div class="col-sm">
+            {{ render_form_group(form.description) }}
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="col-sm">
             {{ render_label(form.mirc_scenario) }}
             {{ render_scenario_picker(
                 mirc_scenarios,
@@ -43,13 +49,9 @@
                 priority=(
                     [] if 'assessment' not in kwargs
                     else kwargs['assessment'].scenario.priority_chemicals
-                ),
-                allow_multiple=True
+                )
             ) }}
             {{ render_feedback(form.chemical) }}
-            <small class="form-text text-muted ml-2">
-                * Note: Selecting multiple chemicals will create one new simulation per selected chemical.
-            </small>
         </div>
     </div>
 
@@ -402,15 +404,15 @@
 
         {{ render_form_group(form.fish_factor) }}
 
-        <div class="tl-concentrations">
-            <div class="form-row">
-                <div class="col-sm">
-                    {{ render_form_group(
-                        form.trim_fish_tl35_compartment,
-                        input_class="fish-compartment-field"
-                    ) }}
-                </div>
-                <div class="col-sm">
+        <div class="form-row">
+            <div class="col-sm">
+                {{ render_form_group(
+                    form.trim_fish_tl35_compartment,
+                    input_class="fish-compartment-field"
+                ) }}
+            </div>
+            <div class="col-sm">
+                <div class="tl-concentrations">
                     {% set append %}
                         <small class="form-text">
                             {{ render_input(
@@ -420,26 +422,28 @@
                         </small>
                     {% endset %}
                     {{ render_form_group(form.C_tl35, append=append, class="mb-1") }}
-                    {% set append %}
-                        <small class="form-text">
-                            {{ render_input(
-                                form.f_tl35_src,
-                                class="form-control-plaintext text-muted p-0 src-info"
-                            ) }}
-                        </small>
-                    {% endset %}
-                    {{ render_form_group(form.f_tl35, append=append, class="mb-1") }}
                 </div>
+                {% set append %}
+                    <small class="form-text">
+                        {{ render_input(
+                            form.f_tl35_src,
+                            class="form-control-plaintext text-muted p-0 src-info"
+                        ) }}
+                    </small>
+                {% endset %}
+                {{ render_form_group(form.f_tl35, append=append, class="mb-1") }}
             </div>
+        </div>
 
-            <div class="form-row">
-                <div class="col-sm">
-                    {{ render_form_group(
-                        form.trim_fish_tl4_compartment,
-                        input_class="fish-compartment-field"
-                    ) }}
-                </div>
-                <div class="col-sm">
+        <div class="form-row">
+            <div class="col-sm">
+                {{ render_form_group(
+                    form.trim_fish_tl4_compartment,
+                    input_class="fish-compartment-field"
+                ) }}
+            </div>
+            <div class="col-sm">
+                <div class="tl-concentrations">
                     {% set append %}
                         <small class="form-text">
                             {{ render_input(
@@ -449,18 +453,19 @@
                         </small>
                     {% endset %}
                     {{ render_form_group(form.C_tl4, append=append, class="mb-1") }}
-                    {% set append %}
-                        <small class="form-text">
-                            {{ render_input(
-                                form.f_tl4_src,
-                                class="form-control-plaintext text-muted p-0 src-info"
-                            ) }}
-                        </small>
-                    {% endset %}
-                    {{ render_form_group(form.f_tl4, append=append, class="mb-1") }}
                 </div>
+                {% set append %}
+                    <small class="form-text">
+                        {{ render_input(
+                            form.f_tl4_src,
+                            class="form-control-plaintext text-muted p-0 src-info"
+                        ) }}
+                    </small>
+                {% endset %}
+                {{ render_form_group(form.f_tl4, append=append, class="mb-1") }}
             </div>
         </div>
+
         <div class="baf-concentrations" style="display: none;">
             <div class="form-row">
                 <div class="col-sm">
@@ -773,6 +778,13 @@ onDomLoad(function() {
     form.submit(function(e) {
         e.preventDefault();
         window.MIRC.submitSimulationForm();
+    });
+
+    form.on('blur', 'input, textarea', function(e) {
+        // automatically trigger validation
+        if (!form[0].checkValidity()) {
+            form[0].reportValidity();
+        }
     });
 });
 

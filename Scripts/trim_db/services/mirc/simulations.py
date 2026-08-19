@@ -532,6 +532,7 @@ class MircSimulationService(GenericService[MircSimulation]):
             i += 1
             sim = cls.create(
                 name=f'Simulation {i}',
+                description=form.description.data,
                 trim_scenario_id=trim_scenario.id,
                 mirc_scenario=MircScenarioService.get(form.mirc_scenario.data),
                 chemical=ChemicalService.get(chem_id),
@@ -722,6 +723,7 @@ class MircSimulationService(GenericService[MircSimulation]):
             'meta': {
                 '_id': simulation.id,
                 'name': simulation.name,
+                'description': simulation.description,
                 'exposureProfile': simulation.mirc_scenario.as_serializable(),
                 'importSource': simulation.trim_scenario.name or 'N/A',
                 'timestamp': simulation.timestamp,

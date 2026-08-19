@@ -7,7 +7,11 @@ from pprint import pformat
 
 def log_vals(log, **kwargs):
     for k, v in kwargs.items():
-        log.append(f'\t{k} = {pformat(v)}')
+        if hasattr(v, 'magnitude'):
+            v = str(v)
+        else:
+            v = pformat(v)
+        log.append(f'\t{k} = {v}')
 
 
 def input_units(**arg_checks):

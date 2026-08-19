@@ -28,6 +28,7 @@
                     <i class="fa fa-cog mr-1"></i>View Inputs
                 </a>
             </div>
+            <div id="simulation-description" class="lead mb-2"></div>
             <h5 class="card-title">Intake and Risk Results</h5>
         </div>
 
@@ -400,6 +401,13 @@ onDomLoad(function() {
                 'Simulation Not Found'
             );
             $('#mirc-results-shortdesc').hide();
+        }
+
+        if (meta.description) {
+            $('#simulation-description').text(meta.description).show();
+        }
+        else {
+            $('#simulation-description').hide();
         }
 
         $('#exposure-profile').val(meta.exposureProfile?.name);
@@ -902,7 +910,7 @@ onDomLoad(function() {
             var tr = $(this);
             if (tr.html().indexOf('Total') > -1) {
                 tr.addClass('font-weight-bold');
-                tr.css('background', 'rgb(50, 140, 193, 0.35)');
+                tr.css('background', 'rgb(241, 105, 19, 0.35)');
                 tr.find('td').css('border-bottom-width', '2px');
                 return false;
             }
@@ -1208,8 +1216,25 @@ onDomLoad(function() {
         }
 
         var htmlLogs = [];
+        var depth = 0;
         for (var i = 0; i < logs.length; i++) {
-            htmlLogs.push('<li>' + logs[i] + '</li>');
+            var entry = logs[i];
+            var d = 0;
+            while (entry[d] == '\t') {
+                d++;
+            }
+            if (d <= depth) {
+                if (d < depth) {
+                    htmlLogs.push('</ul>'); // close the previous ul
+                    depth--;
+                }
+                htmlLogs.push('</li>') // close the previous li
+            }
+            else {
+                htmlLogs.push('<ul>'); // start a sub-ul
+                depth++;
+            }
+            htmlLogs.push('<li>' + '<span>' + entry + '</span>');
         }
         log.append(htmlLogs.join(''));
     }
@@ -1220,9 +1245,9 @@ onDomLoad(function() {
         var seriesCount = series.filter(x => x != 0 && !Number.isNaN(x)).length; // we don't show 0-value entries
 
         var topThree = [
-            '#0B3C5D', // 1st - Dark Blue
-            '#328CC1', // 2nd - Medium Blue
-            '#7FBCE9', // 3rd - Light Blue
+            '#A63603', // dark orange
+            '#F16913', // medium orange
+            '#FDBE85' // light orange
         ];
         var startGray = parseInt('4A', 16); // -> #4A4A4A
         var endGray = parseInt('D0', 16); //  -> #D0D0D0
