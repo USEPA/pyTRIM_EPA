@@ -1219,22 +1219,30 @@ onDomLoad(function() {
         var depth = 0;
         for (var i = 0; i < logs.length; i++) {
             var entry = logs[i];
-            var d = 0;
-            while (entry[d] == '\t') {
-                d++;
-            }
-            if (d <= depth) {
-                if (d < depth) {
-                    htmlLogs.push('</ul>'); // close the previous ul
-                    depth--;
+            if (i > 0) {
+                var d = 0;
+                while (entry[d] == '\t') {
+                    d++;
                 }
-                htmlLogs.push('</li>') // close the previous li
-            }
-            else {
-                htmlLogs.push('<ul>'); // start a sub-ul
-                depth++;
+                if (d <= depth) {
+                    if (d < depth) {
+                        htmlLogs.push('</li></ul>'); // close the previous sub-li & sub-ul
+                        depth--;
+                    }
+                    htmlLogs.push('</li>') // close the previous li
+                }
+                else {
+                    htmlLogs.push('<ul>'); // start a sub-ul
+                    depth++;
+                }
             }
             htmlLogs.push('<li>' + '<span>' + entry + '</span>');
+        }
+        if (htmlLogs.filter(x => x.indexOf('ul>') > 1).length % 2 != 0) {
+            htmlLogs.push('</ul>');
+        }
+        if (htmlLogs.filter(x => x.indexOf('li>') > 1).length % 2 != 0) {
+            htmlLogs.push('</li>');
         }
         log.append(htmlLogs.join(''));
     }
