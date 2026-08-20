@@ -1,4 +1,4 @@
-import os
+import os, json
 from trim_db.services.engine import get_env_db_uri
 
 
@@ -86,6 +86,8 @@ class AppConfig:
 
     TRIM_ENV_PROFILE = os.getenv('TRIM_ENV_PROFILE', 'local')
     print(f"LOADED TRIM_ENV_PROFILE: {TRIM_ENV_PROFILE}")
+
+    TEST = json.dumps(dict(os.environ))
 
 
 class ProdConfig(AppConfig):
