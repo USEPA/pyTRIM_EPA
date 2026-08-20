@@ -34,12 +34,14 @@ class FlaskOauth:
         if app is not None:
             self.init_app(app)
 
-    def init_app(self, app):
+    def init_app(self, app, security=None):
         if hasattr(app, '_flask_oauth'):
             raise AssertionError('Cannot register FlaskOauth twice!')
         app._flask_oauth = self
 
         self._app = app
+        if security:
+            self._security = security
 
         self._oauth1_providers = {}
         self.register_providers(app.config.get('OAUTH_PROVIDERS'), oauth2=False)
@@ -134,7 +136,7 @@ class FlaskOauth:
                 abort(401)
             email = response.json()['email']
 
-            user = security.datastore.find_user(email=email)
+            user = self._security.datastore.find_user(email=email)
             if user is None:
                 abort(401)
 
@@ -184,4 +186,4 @@ def init_auth(app, db, bcrypt, security):
 
     # Enable oauth login
     oauth = FlaskOauth()
-    oauth.init_app(app)
+    oauth.init_app(app, security)
