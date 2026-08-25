@@ -33,7 +33,7 @@
             <div class="scenario-col col-lg-4 col-md-6 py-2">
                 <div class="card h-100 rounded-0 border-primary shadow">
                     <div class="card-header p-0 bg-transparent border-primary">
-                        <a href="{{ url_for('scenario.edit_scenario', id=scenario.id) }}" title="View Scenario"
+                        <a href="{{ url_for('scenario.edit_scenario', id=scenario.id) }}" title="View {{ scenario.name }}"
                             class="d-block btn btn-lg btn-outline-primary text-left rounded-0 border-0" style="color: #212529;"
                         > {# We make this btn-outline-primary so it shows a nice border when tabbing onto it; we want a light bg on hover though, so see the css below... #}
                             <i class="fa fa-eye float-right ml-1 py-2" style="font-size: 1rem;"></i>
