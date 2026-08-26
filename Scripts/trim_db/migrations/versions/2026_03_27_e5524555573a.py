@@ -41,6 +41,7 @@ def upgrade():
     sa.Column('created', sa.DateTime(), nullable=False),
     sa.Column('updated', sa.DateTime(), nullable=True),
     sa.Column('name', sa.String(length=120), nullable=False),
+    sa.Column('description', sa.String(length=800), nullable=True),
     sa.Column('trim_scenario_id', sa.Integer(), nullable=False),
     sa.Column('mirc_scenario_id', sa.Integer(), nullable=False),
     sa.Column('chemical_id', sa.Integer(), nullable=False),

@@ -3,6 +3,12 @@
     "inherits": "mirc/percentiles.json",
     "fields": [
         {
+            "id": "description",
+            "label": "Description",
+            "data_type": "string",
+            "widget": "textarea"
+        },
+        {
             "id": "mirc_scenario",
             "label": "Exposure Profile",
             "data_type": "int",
@@ -21,7 +27,6 @@
             "label": "Chemical",
             "data_type": "int",
             "widget": "select",
-            "multiselect": true,
             "choices": {
                 "source": "db",
                 "model": "Chemical",
@@ -428,7 +433,7 @@
             "widget": "select",
             "class": "fish-compartment-field",
             "choices": [],
-            "help": "Select the compartment to retrieve Trophic Level 3.5 fish concentrations from. This is will be ignored if you calculate fish concentrations from Bioaccumulation Factors (BAFs)."
+            "help": "Select the compartment for Trophic Level 3.5 fish. If you calculate fish concentrations directly, this will be used to retrieve concentrations."
         },
         {
             "id": "f_tl35",
@@ -477,7 +482,7 @@
             "widget": "select",
             "class": "fish-compartment-field",
             "choices": [],
-            "help": "Select the compartment to retrieve Trophic Level 4 fish concentrations from. This is will be ignored if you calculate fish concentrations from Bioaccumulation Factors (BAFs)."
+            "help": "Select the compartment for Trophic Level 4 fish.  If you calculate fish concentrations directly, this will be used to retrieve concentrations."
         },
         {
             "id": "f_tl4",

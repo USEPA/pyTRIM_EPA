@@ -1,28 +1,25 @@
 {% from 'macros/mirc/form_macros.html' import render_input %}
 
-{% for ir in irs %}
-    <tr class="animal-{{ ir.consumer_id.data }}">
+{% for bw in bws %}
+    <tr class="age-{{ bw.life_stage_id.data }}">
         <th scope="row">
-            {{ render_input(ir.consumer_id) }}
-            {{ render_input(ir.product_id) }}
+            {{ render_input(bw.life_stage_id) }}
+            {{ render_input(bw.percentile_id) }}
 
-            {{ render_input(ir.product) }}
+            {{ render_input(bw.percentile) }}
         </th>
         <td>
-            {{ render_input(ir.rate) }}
+            {{ render_input(bw.value) }}
         </td>
         <td>
-            {{ render_input(ir.unit) }}
-        </td>
-        <td>
-            {{ render_input(ir.fraction_contaminated) }}
+            {{ render_input(bw.unit) }}
         </td>
         <td class="align-middle text-center">
-            <button type="button" tabindex="0"
+            <button type="button" tabindex="0" aria-label="notes-field"
                 data-toggle="popover" data-trigger="hover"
                 data-placement="left"
-                data-content="{{ ir.notes.data or '<i>None</i>' }}"
-                data-src="{{ ir.notes.id }}"
+                data-content="{{ bw.notes.data or '<i>None</i>' }}"
+                data-src="{{ bw.notes.id }}"
                 data-html="true"
                 {% if scenario.is_builtin %}
                     class="btn py-0 border-0 notes-modal-btn" disabled="disabled" style="cursor: default;"
@@ -35,8 +32,8 @@
         </td>
     </tr>
     <tr style="display: none;">
-        <td>
-            {{ render_input(ir.notes) }}
+        <td colspan="4">
+            {{ render_input(bw.notes) }}
         </td>
     </tr>
 {% endfor %}

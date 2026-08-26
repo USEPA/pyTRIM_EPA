@@ -81,7 +81,7 @@ def get_form_fragment():
     params = get_fragment_args(name, ms, data)
 
     return render_template(
-        f'components/scenarios/mirc/exposure_profiles/editor/{name}_fragment.html',
+        f'components/mirc/exposure_profiles/editor/{name}_fragment.html',
         scenario=ms, **(params or {})
     )
 

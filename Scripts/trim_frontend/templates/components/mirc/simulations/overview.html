@@ -1,0 +1,779 @@
+<div class="container px-0 mb-3">
+    <div class="row mx-3 justify-content-end">
+        <a href="{{ url_for('mirc_scenario.view_risk_scenarios') }}"
+            class="btn btn-sm mb-1 btn-outline-secondary text-dark"
+            target="_blank" tabindex="0"
+        >
+            <i class="fa fa-pencil-alt"></i>
+            Edit Exposure Profiles
+        </a>
+
+        <a href="#" class="simulation-btn btn btn-outline-dark btn-sm ml-2 mb-1" data-action="export" tabindex="0">
+            <i class="fa fa-download mr-1"></i>
+            Export All
+        </a>
+        <a href="#" class="simulation-btn btn btn-primary btn-sm ml-2 mb-1" data-action="create" tabindex="0">
+            <i class="fa fa-plus mr-1"></i>
+            Add Simulation
+        </a>
+    </div>
+</div>
+
+<div id="simulation-cards" class="container">
+</div>
+
+<script>
+onDomLoad(function() {
+    window.MIRC = (function(mirc) {
+
+        mirc.showSimulationForm = function(withData) {
+            if (TRIM.store.mirc_data === undefined) {
+                LoadingScreen.show('loadMircData');
+                TRIM.api.exportScenarioForMirc(TRIM.store.currentScenario.id).on('load', function() {
+                    TRIM.store.mirc_data = this.responseJSON.trim_data;
+                    initSimulationForm(withData);
+                    LoadingScreen.hide('loadMircData');
+                    $('#simulation-form-modal').modal('show');
+                });
+            }
+            else {
+                initSimulationForm(withData);
+                $('#simulation-form-modal').modal('show');
+            }
+        }
+
+        function initSimulationForm(withData) {
+            updateSimulationTrimFields();
+
+            var form = $('#simulation-form');
+
+            form.find('[name$="ingestion_percentile_preset"]').prop('checked', false);
+            form.find('[name$="trim_timestamp"]').val(form.find('[name$="trim_timestamp"]').find('option:last-child').val());
+
+            form.find('[name="fish_factor"]').prop('checked', false);
+
+            if (withData == undefined) {
+                form.find('[name$="ingestion_percentile_preset"][value="farmer_fisher"]').prop('checked', true).change();
+                form.find('[name="fish_factor"][value="direct"]').prop('checked', true).change();
+                return;
+            }
+
+            var desc = withData.meta?.description;
+            if (desc != undefined) {
+                form.find('[name="description"]').val(desc);
+            }
+
+            var profile = withData.meta?.exposureProfile;
+            if (profile != undefined) {
+                form.find('[name="mirc_scenario"]').val(profile.id);
+            }
+
+            var chem = withData.meta?.chemical;
+            if (chem != undefined) {
+                form.find('[name="chemical"]').val(chem.id);
+            }
+            
+            function getPercentile(name) {
+                return withData.meta?.percentiles[name];
+            }
+
+            function setSelectByText(name, text) {
+                form.find(`[name$="${name}"] option`).filter(function() {
+                    return this.innerText === text;
+                }).prop('selected', true).change();
+            }
+
+            var bwPercentile = getPercentile('body_weight');
+            if (bwPercentile != undefined) {
+                setSelectByText('human_body_weight_percentile', bwPercentile)
+            }
+
+            function getParameter(name) {
+                var param = undefined;
+                if (name.indexOf('tl') == 0) {
+                    var tl = name.slice(2);
+                    if (tl.length > 1) {
+                        tl = tl[0] + '.' + tl.slice(1);
+                    }
+                    param = withData.meta?.other_parameters.filter(x => x.full_name.indexOf(`Concentration in Trophic Level ${tl}`) > -1);
+                }
+                else {
+                    param = withData.meta?.other_parameters.filter(x => x.variable_name == name);
+                }
+                if (param != undefined && param.length) {
+                    return param[0];
+                }
+                return undefined;
+            }
+
+            var preset = getParameter('percentile_preset');
+            if (preset?.value != undefined) {
+                var presetField = form.find(`[name$="ingestion_percentile_preset"][id="ingestion_percentile_preset-${preset.value}"]`);
+                presetField.prop('checked', true).change();
+                if (presetField.val() == 'custom') {
+                    for (var product in withData.meta.percentiles) {
+                        setSelectByText(`${product}_percentile`, withData.meta.percentiles[product]);
+                    }
+                }
+            }
+            else {
+                form.find('[name$="ingestion_percentile_preset"][value="farmer_fisher"]').prop('checked', true).change();
+            }
+
+            if (preset?.source != undefined) { // we hackily store timestamp as the preset source...
+                form.find('[name$="trim_timestamp"]').val(preset.source);
+            }
+
+            var air = getParameter('Ca');
+            setSelectByText('trim_air_compartment', air.source);
+
+            var water = getParameter('C_water');
+            setSelectByText('trim_water_compartment', water.source);
+
+            var soil = getParameter('C_soil');
+            setSelectByText('trim_soil_human_compartment', soil.source);
+
+            var root_veg = getParameter('C_root_veg');
+            setSelectByText('trim_soil_garden_compartment', root_veg.source);
+
+            var livestock = getParameter('Cs_s');
+            setSelectByText('trim_soil_livestock_compartment', livestock.source);
+
+            var feed = getParameter('Cs_root_zone');
+            setSelectByText('trim_soil_root_compartment', feed.source);
+
+            var drdp = getParameter('Drdp');
+            setSelectByText('trim_soil_drdp_compartment', drdp.source);
+
+            var drwp = getParameter('Drwp');
+            setSelectByText('trim_soil_drwp_compartment', drwp.source);
+
+            var fishPathway = withData.meta?.fishPathway;
+            if ((fishPathway || '').toLowerCase() == 'direct') {
+                form.find('[name="fish_factor"][value="direct"]').prop('checked', true).change();
+                var tl35 = getParameter('tl35');
+                setSelectByText('trim_fish_tl35_compartment', tl35.source);
+                var tl4 = getParameter('tl4');
+                setSelectByText('trim_fish_tl4_compartment', tl4.source);
+            }
+            else {
+                form.find('[name="fish_factor"][value="baf"]').prop('checked', true).change();
+                var sed = getParameter('C_sed');
+                setSelectByText('trim_sed_compartment', sed.source);
+                var surf = getParameter('C_surf_water');
+                setSelectByText('trim_surf_compartment', surf.source);
+            }
+        }
+
+        function updateSimulationTrimFields() {
+            const data = TRIM.store.mirc_data;
+            if (!data || !data.chemicals || $.isEmptyObject(data.chemicals)) {
+                return;
+            }
+            const simulationForm = document.getElementById('simulation-form');
+
+            function updateSelect(select, options) {
+                if (typeof(select) === typeof('')) {
+                    select = document.getElementById(select);
+                }
+
+                select.innerHTML = '';
+
+                const defaultVal = select.getAttribute('data-default') || undefined;
+
+                let selectIndex = -1;
+                for (const o of options) {
+                    let opt = o;
+                    if (typeof(o) == typeof('')) {
+                        opt = {value: o, label: o};
+                    }
+                    else if (Array.isArray(o)) {
+                        opt = {value: o[0], label: o[1]}
+                    }
+                    var option = document.createElement('option');
+                    option.value = opt.value;
+                    option.innerText = opt.label;
+                    select.appendChild(option);
+
+                    if (defaultVal !== undefined && defaultVal == opt.value) {
+                        selectIndex = select.children.length - 1;
+                    }
+                }
+                select.selectedIndex = selectIndex;
+            }
+
+            const chemField = simulationForm.querySelector('[name="chemical"]');
+            updateSelect(chemField, Object.entries(data.chemicals));
+            chemField.selectedIndex = 0;
+            chemField.removeAttribute('disabled');
+
+            const dtField = simulationForm.querySelector('[name="trim_timestamp"]');
+            updateSelect(dtField, data.timestamps);
+            dtField.selectedIndex = 0;
+            dtField.removeAttribute('disabled');
+
+            const airCompartments = [];
+            const soilCompartments = [];
+            const waterCompartments = [];
+            const sedCompartments = [];
+            const fishCompartments = [];
+
+            const airNames = ['air', 'upper air'];
+            const soilNames = ['soil surface', 'soil root zone'];
+            const sedNames = ['sediment'];
+            const waterNames = ['surface water'];
+
+            for (const parcel of data.parcels) {
+                if (!('volume_elements' in parcel)) {
+                    continue;
+                }
+                for (const volume of parcel.volume_elements) {
+                    if (!('compartments' in volume)) {
+                        continue;
+                    }
+                    // Build the full volume name
+                    const vol = volume.name + '_' + parcel.name;
+
+                    for (const compartment of volume.compartments) {
+                        // Build the full compartment name
+                        const comp = compartment.name + ' in ' + vol;
+
+                        const nm = compartment.name.toLowerCase().replace(/_/g, ' ').trim();
+
+                        if (airNames.indexOf(nm) > -1) {
+                            airCompartments.push(comp);
+                        }
+                        else if (soilNames.indexOf(nm) > -1) {
+                            soilCompartments.push(comp);
+                        }
+                        else if (waterNames.indexOf(nm) > -1) {
+                            waterCompartments.push(comp);
+                        }
+                        else if (sedNames.indexOf(nm) > -1) {
+                            sedCompartments.push(comp);
+                        }
+                        else if (nm.indexOf('water column') > -1 || nm.indexOf('benthic') > -1) {
+                            fishCompartments.push(comp);
+                        }
+                    }
+                }
+            }
+            surfSoilCompartments = soilCompartments.filter(
+                x => x.toLowerCase().replace(/_/g, ' ').indexOf('soil surface') > -1);
+            waterCompartments.unshift(''); // Can be blank
+            sedCompartments.unshift(''); // Can be blank
+            fishCompartments.unshift(''); // Can be blank
+
+            const airField = simulationForm.querySelector('.air-compartment-field');
+            updateSelect(airField, airCompartments.sort());
+            airField.selectedIndex = 0;
+            airField.removeAttribute('disabled');
+
+            const surfFields = simulationForm.querySelectorAll('.surf-soil-compartment-field');
+            for (const surfField of surfFields) {
+                updateSelect(surfField, surfSoilCompartments.sort());
+                surfField.selectedIndex = 0;
+                surfField.removeAttribute('disabled');
+            }
+
+            const depFields = simulationForm.querySelectorAll('.dep-compartment-field');
+            for (const depField of depFields) {
+                updateSelect(depField, surfSoilCompartments.sort());
+                depField.selectedIndex = 0;
+                depField.removeAttribute('disabled');
+            }
+
+            const rootFields = simulationForm.querySelectorAll('.root-soil-compartment-field');
+            for (const rootField of rootFields) {
+                updateSelect(rootField, soilCompartments.sort());
+                rootField.selectedIndex = 0;
+                rootField.removeAttribute('disabled');
+            }
+
+            const waterFields = simulationForm.querySelectorAll('.water-compartment-field');
+            for (const waterField of waterFields) {
+                if (waterField.id == 'trim_water_compartment') {
+                    updateSelect(waterField, waterCompartments.filter(x => x != '').sort());
+                }
+                else {
+                    updateSelect(waterField, waterCompartments.sort());
+                }
+                waterField.selectedIndex = 0;
+                waterField.removeAttribute('disabled');
+            }
+
+            const sedField = simulationForm.querySelector('.sed-compartment-field');
+            updateSelect(sedField, sedCompartments.sort());
+            sedField.selectedIndex = 0;
+            sedField.removeAttribute('disabled');
+
+            const fishFields = simulationForm.querySelectorAll('.fish-compartment-field');
+            for (const fishField of fishFields) {
+                updateSelect(fishField, fishCompartments.sort());
+                fishField.selectedIndex = 0;
+                fishField.removeAttribute('disabled');
+            }
+
+            mirc.updateSimulationMircFields();
+        }
+
+        mirc.updateSimulationMircFields = function(fromElement) {
+            // console.log(`Update MIRC input vals from ${fromElement}`)
+            const simulationForm = document.getElementById('simulation-form');
+
+            function getSelectedValue(select) {
+                const val = (select.options[select.selectedIndex] || {}).value;
+                return val;
+            }
+            function getCheckedValues(name) {
+                return Array.from(document.querySelectorAll(`[name="${name}"]`))
+                    .filter(x => x.checked)
+                    .map(x => x.value);
+            }
+
+            const airFields = document.getElementById('air-fields');
+            airFields.style.display = 'none';
+
+            const data = TRIM.store.mirc_data;
+            if (!data || !data.chemicals || $.isEmptyObject(data.chemicals)) {
+                return;
+            }
+            const importForm = document.getElementById('simulation-form');
+
+            const getVal = (name) => {
+                const field = importForm.querySelector(`[name="${name}"]`);
+                if (field.tagName == 'SELECT') {
+                    return getSelectedValue(field);
+                }
+                else if (field.type?.toLowerCase() === 'checkbox') {
+                    return getCheckedValues(name);
+                }
+                else {
+                    return field.value;
+                }
+            };
+
+            const chem = data.chemicals[getVal('chemical')];
+
+            const useAermod = data.uses_aermod;
+            if (useAermod) {
+                airFields.style.display = '';
+            }
+
+            const dt = getVal('trim_timestamp');
+
+            const setField = (name, val, comp, conversion) => {
+                const field = $(`[name="${name}"]`);
+
+                if (fromElement !== undefined) {
+                    if (field.closest('.form-row')[0] != fromElement) {
+                        return;
+                    }
+                }
+
+                if (val != undefined) {
+                    val = Number(val);
+                    if (conversion !== undefined) {
+                        val = conversion(val);
+                    }
+                }
+                else {
+                    val = null;
+                }
+
+                field.val(val);
+
+                // Update src info
+                let src = 'custom';
+                if (comp) {
+                    src = comp;
+                }
+                field.closest('.form-group').find('.src-info').val(src);
+            };
+
+            const parseCompartmentName = (name) => {
+                let n = name.split(' in '); // Split compartment from the rest of the name
+
+                let tmp = n.shift().trim(); // Take first element
+                let tmp2 = null;
+                if (n.length > 1) {
+                    // We must have a sub-compartment!
+                    tmp2 = n.shift().trim(); // Take next element as sub-compartment
+                }
+                const compartment = tmp2 !== null ? tmp2 : tmp;
+                const subCompartment = tmp2 !== null ? tmp : null;
+
+                n = n.join(' in ').trim(); // Re-join if there is any need
+
+                n = n.split('_'); // Split volume from parcel
+                const volume = n.shift().trim(); // Take first element as volume
+
+                const parcel = n.join('_') // Re-join if there is any need
+
+                const info = {
+                    parcel, volume, compartment, subCompartment
+                }
+
+                return info;
+            };
+
+            const getParcel = (compartmentName) => {
+                if (!compartmentName) {
+                    return null;
+                }
+                const parsed = parseCompartmentName(compartmentName);
+
+                const p = data.parcels.filter(x => x.name == parsed.parcel)[0];
+                if (!p) {
+                    return null;
+                }
+                return p;
+            };
+
+            const getCompartment = (name) => {
+                if (!name) {
+                    return null;
+                }
+                const parsed = parseCompartmentName(name);
+
+                const p = data.parcels.filter(x => x.name == parsed.parcel)[0];
+                if (!p) {
+                    return null;
+                }
+                const v = p.volume_elements.filter(x => x.name == parsed.volume)[0];
+                if (!v) {
+                    return null;
+                }
+                let c = v.compartments.filter(x => x.name == parsed.compartment)[0];
+                if (!c) {
+                    return null;
+                }
+
+                if (parsed.subCompartment) {
+                    c = c.compartments.filter(x => x.name == parsed.subCompartment)[0];
+                    if (!c) {
+                        return null;
+                    }
+                }
+
+                return c;
+            };
+
+            if (useAermod) {
+                const airSrc = getVal('trim_air_compartment');
+                const airProps = getCompartment(airSrc).properties;
+                setField('Ca', airProps[chem].C_aermod?.value, airSrc);
+                setField('Fv', airProps[chem].Fv, airSrc);
+                setField(
+                    'rho_a', airProps[chem].rho_a.value, airSrc
+                );
+            }
+            else {
+                // Zero-out air props by default
+                setField('Ca', 0, 'default');
+                setField('Fv', 0, 'default');
+                // Default for rho is 1 because it is used as the denominator of an equation
+                setField('rho_a', 1, 'default');
+            }
+
+            const waterSrc = getVal('trim_water_compartment');
+            const water = getCompartment(waterSrc);
+            if (water) {
+            try{
+                setField('C_water', water.properties[chem].C?.[dt]?.value, waterSrc);
+            } catch(err) {
+                console.log(e)
+
+            }
+                
+            }
+            else {
+                setField('C_water', 0);
+            }
+
+            const humanSrc = getVal('trim_soil_human_compartment');
+            const human = getCompartment(humanSrc);
+            if (human) {
+                setField('C_soil', human.properties[chem].C?.[dt]?.value, humanSrc);
+            }
+            else {
+                setField('C_soil', 0);
+            }
+
+            const vegSrc = getVal('trim_soil_garden_compartment');
+            const veg = getCompartment(vegSrc);
+            if (veg) {
+                const vegProps = veg.properties;
+                setField('C_root_veg', vegProps[chem].C?.[dt]?.value, vegSrc);
+                setField('Kd', vegProps[chem].Kd.value, vegSrc);
+            }
+            else {
+                setField('C_root_veg', 0);
+                setField('Kd', 0);
+            }
+
+            const livestockSrc = getVal('trim_soil_livestock_compartment');
+            const livestock = getCompartment(livestockSrc);
+            if (human) {
+                setField('Cs_s', livestock.properties[chem].C?.[dt]?.value, livestockSrc);
+            }
+            else {
+                setField('Cs_s', 0);
+            }
+
+            const rootSrc = getVal('trim_soil_root_compartment');
+            const root = getCompartment(rootSrc);
+            if (root) {
+                const rootProps = root.properties;
+                setField('Cs_root_zone', rootProps[chem].C?.[dt]?.value, rootSrc);
+                setField('Kd_feed', rootProps[chem].Kd.value, rootSrc);
+            }
+            else {
+                setField('Cs_root_zone', 0);
+                setField('Kd_feed', 0);
+            }
+
+            const drdpSrc = getVal('trim_soil_drdp_compartment');
+            const drdp = getCompartment(drdpSrc);
+            if (drdp) {
+                setField(
+                    'Drdp', drdp.properties[chem].Drdp?.[dt]?.value, drdpSrc,
+                    // Convert daily to annual
+                    function (x) { return (x * 365.25); }
+                );
+            }
+            else {
+                setField('Drdp', 0);
+            }
+
+            const drwpSrc = getVal('trim_soil_drwp_compartment');
+            const drwp = getCompartment(drwpSrc);
+            if (drwp) {
+                setField(
+                    'Drwp', drwp.properties[chem].Drwp?.[dt]?.value, drwpSrc,
+                    // Convert daily to annual
+                    function (x) { return (x * 365.25); }
+                );
+            }
+            else {
+                setField('Drwp', 0);
+            }
+
+            const tl3Src = getVal('trim_fish_tl35_compartment');
+            const tl3 = getCompartment(tl3Src);
+            if (tl3) {
+                setField('C_tl35', tl3.properties[chem].C?.[dt]?.value, tl3Src);
+            }
+            else {
+                setField('C_tl35', 0);
+            }
+
+            const tl4Src = getVal('trim_fish_tl4_compartment');
+            const tl4 = getCompartment(tl4Src);
+            if (tl4) {
+                setField('C_tl4', tl4.properties[chem].C?.[dt]?.value, tl4Src);
+            }
+            else {
+                setField('C_tl4', 0);
+            }
+
+            const sedSrc = getVal('trim_sed_compartment');
+            const sed = getCompartment(sedSrc);
+            if (sed) {
+                setField('C_sed', sed.properties[chem].C?.[dt]?.value, sedSrc);
+            }
+            else {
+                setField('C_sed', 0);
+            }
+
+            const surfSrc = getVal('trim_surf_compartment');
+            const surf = getCompartment(surfSrc);
+            if (surf) {
+                const surfProps = surf.properties;
+                setField('C_surf_water', surfProps[chem].C?.[dt]?.value, surfSrc);
+                setField('FMD', surfProps[chem].FMD);
+            }
+            else {
+                setField('C_surf_water', 0);
+                setField('FMD', 0);
+            }
+        };
+
+        var simCards = $('#simulation-cards');
+
+        var timeDisplayOpts = {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+        };
+
+        var simulationsLoadUrl = "{{ url_for('mirc_simulation_api.get_simulations', trim_scenario_id=scenario.id) }}";
+        var profileViewUrl = "{{ url_for('mirc_scenario.view_risk_scenario', id=0) }}";
+
+        mirc.refreshSimulations = function(thenChangeToId) {
+            LoadingScreen.show('refreshingSimulations');
+            TRIM.api.hitUrl(simulationsLoadUrl).on('load', function() {
+                try {
+                    var data = JSON.parse(this.responseText);
+                    
+                    simCards.empty();
+
+                    var row = $('<div class="row" />').appendTo(simCards);
+
+                    var simulations = (data.simulations || []).sort((a, b) => a.id - b.id);
+                    if (simulations.length) {
+                        for (var sim of simulations) {
+                            var col = $('<div class="col-lg-6 mb-2" />').appendTo(row);
+                            var card = $('<div class="card h-100 rounded-0" />').appendTo(col);
+
+                            var simNum = parseInt(sim.name.replace('Simulation', '').trim());
+
+                            var cardHeader = $('<div class="card-header p-0 bg-transparent" />').appendTo(card);
+
+                            // var actions = $('<div class="float-right" />').appendTo(cardHeader);
+                            // var cloneBtn = $('<a href="#clone-simulation" class="simulation-btn ml-2 text-dark" title="Clone" />')
+                            //     .data({'action': 'clone', 'simulation_id': sim.id})
+                            //     .append($('<i class="fa fa-clone" />'))
+                            //     .appendTo(actions);
+                            // var deleteBtn = $('<a href="#delete-simulation" class="simulation-btn ml-2 text-danger" title="Delete" />')
+                            //     .data({'action': 'delete', 'simulation_id': sim.id})
+                            //     .append($('<i class="fa fa-trash" />'))
+                            //     .appendTo(actions);
+
+                            // d-block h5 mb-0 px-3 py-2 text-dark text-decoration-none
+                            var title = $('<a href="#" class="simulation-btn d-block btn btn-lg btn-outline-light text-left text-dark rounded-0 border-0" title="View Simulation" />')
+                                .data({'action': 'view', 'simulation_id': sim.id})
+                                .appendTo(cardHeader);
+
+                            $('<i class="fa fa-eye float-right ml-1 py-2" style="font-size: 1rem;" />').appendTo(title);
+                            $('<span />').text(`(${simNum}) ${sim.chemical.name} Simulation`).appendTo(title);
+
+                            var cardBody = $('<div class="card-body py-2" />').appendTo(card);
+
+                            var cardRow = $('<div class="row p-0" />').appendTo(cardBody);
+                            var cardCol = $('<div class="col" />').appendTo(cardRow);
+                            $('<p class="mb-1" />')
+                                .append(
+                                    $(`<a href="${profileViewUrl.replace('/0', '/' + sim.exposureProfile.id)}" target="_blank" tabindex="0" />`)
+                                        .text(sim.exposureProfile.name)
+                                )
+                                .appendTo(cardCol);
+
+                            cardCol = $('<div class="col" />').appendTo(cardRow);
+                            $('<p class="mb-1 text-right" />')
+                                .text((new Date(sim.timestamp)).toLocaleDateString('en-US', timeDisplayOpts))
+                                .appendTo(cardCol);
+
+                            if ((sim.description || '').trim()) {
+                                cardRow = $('<div class="row p-0" />').appendTo(cardBody);
+                                cardCol = $('<div class="col" />').appendTo(cardRow);
+                                $('<p class="mb-1 text-muted" />').text(`> ${sim.description}`).appendTo(cardCol);
+                            }
+
+                            // cardRow = $('<div class="row p-0" />').appendTo(cardBody);
+                            // cardCol = $('<div class="col" />').appendTo(cardRow);
+                            // $('<p class="mb-1" />').text(`Fish Calculation: ${sim.fishPathway}`).appendTo(cardCol);
+
+                            cardRow = $('<div class="row p-0" />').appendTo(cardBody);
+                            cardCol = $('<div class="col" />').appendTo(cardRow);
+                            $('<p class="mb-0" />')
+                                .html(`Primary Pathway: <span class="${sim.primaryPathway ? 'text-danger' : 'text-muted'}">${sim.primaryPathway || 'None'}</span>`)
+                                .appendTo(cardCol);
+                            
+                            if (simNum % 2 == 0) {
+                                row = $('<div class="row" />').appendTo(simCards);
+                            }
+                        }
+                        if (thenChangeToId != undefined) {
+                            window.MIRC.displayResults(thenChangeToId);
+                        }
+                        else {
+                            window.MIRC.showScreen('overview');
+                        }
+                        $('.simulation-btn[data-action="export"]').removeAttr('disabled').removeClass('disabled');
+                    }
+                    else {
+                        window.MIRC.showScreen('overview');
+                        $('.simulation-btn[data-action="export"]').attr('disabled', 'disabled').addClass('disabled');
+                        $('<div class="d-block w-100 mx-3 p-3 text-center h6 rounded bg-light" />')
+                            .text('No Simulations Created')
+                            .appendTo(row);
+                    }
+                }
+                catch (err) {
+                    console.log(this.responseText);
+                    console.log(err);
+                }
+                LoadingScreen.hide('refreshingSimulations');
+            });
+        };
+
+        var simulationDeleteUrl = "{{ url_for('mirc_simulation_api.delete_simulation', trim_scenario_id=scenario.id, id=0) }}";
+
+        $('#mirc-results-gui').on('click', '.simulation-btn', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            var me = $(this);
+            var action = me.data('action');
+            var simId = me.data('simulation_id');
+            console.log(`${action} simulation ${simId}`)
+
+            if (action == 'overview') {
+                window.MIRC.showScreen('overview');
+            }
+            else if (action == 'create') {
+                window.MIRC.showSimulationForm();
+            }
+            else if (action == 'view') {
+                window.MIRC.displayResults(simId);
+            }
+            else if (action == 'clone') {
+                window.MIRC.loadResults(simId).then(function(data) {
+                    window.MIRC.showSimulationForm(data);
+                });
+            }
+            else if (action == 'delete') {
+                if (confirm('Are you sure you want to delete this simulation?\nThis action cannot be undone!')) {
+                    $.ajax({
+                        url: simulationDeleteUrl.replace('/0', '/' + simId),
+                        method: 'DELETE'
+                    }).then(function() {
+                        window.MIRC.refreshSimulations();
+                    });
+                }
+            }
+            else if (action == 'export') {
+                window.MIRC.downloadResults(simId);
+            }
+        });
+
+        $('#add-simulation').click(function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            window.MIRC.showSimulationForm();
+        });
+
+        return mirc;
+    })(window.MIRC || {});
+
+    $('#submit-simulation-form').click(function(e) {
+        e.preventDefault();
+        LoadingScreen.show('saveSimulation');
+        window.MIRC.submitSimulationForm() // defined in gui_simulation_form.html
+            .done(function(data) {
+                // console.log(data)
+                if (data?.simulation_id != undefined) {
+                    window.MIRC.refreshSimulations(data.simulation_id);
+                }
+                else if (data?.simulation_ids != undefined) {
+                    window.MIRC.refreshSimulations(data.simulation_ids[0]);
+                }
+            })
+            .always(function() {
+                LoadingScreen.hide('saveSimulation');
+            });
+    });
+});
+</script>

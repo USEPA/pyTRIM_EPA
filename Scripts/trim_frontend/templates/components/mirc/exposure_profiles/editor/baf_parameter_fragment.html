@@ -1,25 +1,25 @@
 {% from 'macros/mirc/form_macros.html' import render_input %}
 
-{% for bw in bws %}
-    <tr class="age-{{ bw.life_stage_id.data }}">
+{% for baf in bafs %}
+    <tr class="chemical-{{ baf.chemical_id.data }}">
         <th scope="row">
-            {{ render_input(bw.life_stage_id) }}
-            {{ render_input(bw.percentile_id) }}
+            {{ render_input(baf.chemical_id) }}
+            {{ render_input(baf.aquatic_type_id) }}
 
-            {{ render_input(bw.percentile) }}
+            {{ render_input(baf.aquatic_type) }}
         </th>
         <td>
-            {{ render_input(bw.value) }}
+            {{ render_input(baf.value) }}
         </td>
         <td>
-            {{ render_input(bw.unit) }}
+            {{ render_input(baf.unit) }}
         </td>
         <td class="align-middle text-center">
-            <button type="button" tabindex="0"
+            <button type="button" tabindex="0" aria-label="notes-field"
                 data-toggle="popover" data-trigger="hover"
                 data-placement="left"
-                data-content="{{ bw.notes.data or '<i>None</i>' }}"
-                data-src="{{ bw.notes.id }}"
+                data-content="{{ baf.notes.data or '<i>None</i>' }}"
+                data-src="{{ baf.notes.id }}"
                 data-html="true"
                 {% if scenario.is_builtin %}
                     class="btn py-0 border-0 notes-modal-btn" disabled="disabled" style="cursor: default;"
@@ -33,7 +33,7 @@
     </tr>
     <tr style="display: none;">
         <td colspan="4">
-            {{ render_input(bw.notes) }}
+            {{ render_input(baf.notes) }}
         </td>
     </tr>
 {% endfor %}

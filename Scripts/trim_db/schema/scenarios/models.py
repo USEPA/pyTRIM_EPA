@@ -1,8 +1,6 @@
 import sqlalchemy as sa
 from datetime import datetime
-
-import sqlalchemy.sql.sqltypes
-
+from shapely.ops import unary_union
 from ..utils.base import Model
 from ..utils.mixins import TrackUpdatesMixin
 from ..utils.permissions import require_permissions, PermissionsEnum
@@ -101,6 +99,15 @@ class Scenario(Model, TrackUpdatesMixin):
         if len(w):
             short += ' ...'
         return short.strip()
+
+    @property
+    def geographic_centroid(self):
+        try:
+            if not self.parcels:
+                return None
+            return unary_union([pcl.polygon for pcl in self.parcels]).centroid
+        except Exception:
+            return None
 
     creator_id = sa.Column(
         sa.Integer(), sa.ForeignKey('user.id'), nullable=False

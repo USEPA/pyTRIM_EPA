@@ -19,7 +19,7 @@
     </div>
     {% endif %}
     <button type="button"
-        class="btn btn-primary"
+        class="btn btn-primary py-1"
         data-toggle="modal"
         data-target="#{{ create_modal_id }}"
     >
@@ -30,54 +30,112 @@
 <div class="container-fluid content-row">
     <div class="row">
         {% for scenario in scenarios|sort(attribute='updated', reverse = True) %}
-            <div class="col-lg-3 col-md-4 col-sm-6 py-2">
-                <div class="card border-primary h-100">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">
-                            {% if not current_user.has_access(scenario, ignore_admin=True) %}
-                                <span class="admin-access-only">*</span>
-                            {% endif %}
-                            {{ scenario.name }}
-                        </h5>
-                        <small>
-                            {{ scenario.updated.strftime('%Y-%m-%d %I:%M %p') }}
-                        </small>
-                    </div>
-                    <div class="card-body">
-                        <p class="card-text">
-                            {{ scenario.short_description }}
-                        </p>
-                    </div>
-                    <div class="card-footer">
-                        <a href="{{ url_for('scenario.edit_scenario', id=scenario.id) }}"
-                            class="btn btn-block btn-outline-primary"
-                            title="View {{ scenario.name }}"
-                        >
-                            View
+            <div class="scenario-col col-lg-4 col-md-6 py-2">
+                <div class="card h-100 rounded-0 border-primary shadow">
+                    <div class="card-header p-0 bg-transparent border-primary">
+                        <a href="{{ url_for('scenario.edit_scenario', id=scenario.id) }}" title="View {{ scenario.name }}"
+                            class="d-block btn btn-lg btn-outline-primary text-left rounded-0 border-0" style="color: #212529;"
+                        > {# We make this btn-outline-primary so it shows a nice border when tabbing onto it; we want a light bg on hover though, so see the css below... #}
+                            <i class="fa fa-eye float-right ml-1 py-2" style="font-size: 1rem;"></i>
+                            <span>{{ scenario.name }}</span>
                         </a>
-                         <div class="row">
-                            <div class="col-md">
-                                <div class="text-center">
-                                    <div class="btn-group">
-                                        <form action="{{ url_for('scenario_api.copy_scenario') }}" id="copy-scenario-form" method="POST">
-                                            <input name="user_id" value="{{logged_in_user.id}}" type=hidden>
-                                            <input name="scenario_id" value="{{scenario.id}}" type=hidden>
-                                            <input name="scenario_name" value="{{scenario.name}}" type=hidden>
-                                            <button type="submit" class="btn btn-outline-primary m-1">
-                                            Copy
-                                            {{ scenario_form.csrf_token }}</button>
-                                        </form>
-                                        {% if current_user.can('manage', scenario) %}
-                                        <form action="{{ url_for('scenario_api.delete_scenario') }}" id="delete-scenario-form" method="POST">
-                                            <input name="scenario_id" value="{{scenario.id}}" type=hidden>
-                                            <input name="scenario_name" value="{{scenario.name}}" type=hidden>
-                                            <button type="submit" class="btn btn-outline-primary m-1">
-                                            Delete
-                                            {{ scenario_form.csrf_token }}</button>
-                                        </form>
-                                    {% endif %}
-                                    </div>
+                    </div>
+                    <div class="card-body py-2">
+                        {% if not current_user.has_access(scenario, ignore_admin=True) %}
+                            <div class="row p-0">
+                                <div class="col">
+                                    <small class="admin-access-only mb-1 font-italic"
+                                        title="You have administrator access, but are not directly assigned to this scenario."
+                                        style="cursor: default;"
+                                    >
+                                        <i class="fa fa-lock mr-1"></i> Admin Access
+                                    </small>
                                 </div>
+                            </div>
+                        {% endif %}
+                        <div class="row p-0">
+                            <div class="col">
+                                <small class="mb-1">
+                                    Modified: {{ scenario.updated.strftime('%b %d, %Y') }}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="row p-0">
+                            <div class="col">
+                                <small class="mb-1">
+                                    {% if scenario.geographic_centroid is not none %}
+                                        Location: {{scenario.geographic_centroid|lat_lon}}
+                                    {% else %}
+                                        Location: Unknown
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="row p-0">
+                            <div class="col">
+                                <small class="mb-1">
+                                    {% if scenario.latest_proc_status is not none %}
+                                        Last Model Run: {{scenario.latest_proc_status.run_datetime.strftime('%b %d, %Y')}}
+                                    {% else %}
+                                        Last Model Run: None
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                        <!-- <div class="row p-0">
+                            <div class="col">
+                                <small class="mb-1">
+                                    Parcels: {{ scenario.parcels|length }}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="row p-0">
+                            <div class="col">
+                                <small class="mb-1">
+                                    Chemicals: {{ scenario.chemicals|length }}
+                                </small>
+                            </div>
+                        </div> -->
+                        {% if scenario.short_description %}
+                            <div class="row p-0">
+                                <div class="col">
+                                    <small class="mb-1">
+                                        Notes: <span class="text-muted">{{ scenario.short_description }}</span>
+                                    </small>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-footer p-0 bg-transparent">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col p-0">
+                                    <form action="{{ url_for('scenario_api.copy_scenario') }}" id="copy-scenario-form" method="POST">
+                                        <input name="user_id" value="{{logged_in_user.id}}" type="hidden" />
+                                        <input name="scenario_id" value="{{scenario.id}}" type="hidden" />
+                                        <input name="scenario_name" value="{{scenario.name}}" type="hidden" />
+                                        <button type="submit" class="btn btn-block btn-sm py-2 btn-outline-secondary border-0 rounded-0 text-dark"
+                                            title="Copy Scenario"
+                                        >
+                                            <i class="fa fa-copy mr-1"></i>Copy
+                                        </button>
+                                        {{ scenario_form.csrf_token }}
+                                    </form>
+                                </div>
+                                {% if current_user.can('manage', scenario) and scenario.id != 1 %} {# Not allowed to delete base scenario #}
+                                    <div class="col p-0">
+                                        <form action="{{ url_for('scenario_api.delete_scenario') }}" id="delete-scenario-form" method="POST">
+                                            <input name="scenario_id" value="{{scenario.id}}" type="hidden" />
+                                            <input name="scenario_name" value="{{scenario.name}}" type="hidden" />
+                                            <button type="submit" class="btn btn-block btn-sm py-2 btn-outline-danger border-0 rounded-0"
+                                                title="Delete Scenario"
+                                            >
+                                                <i class="fa fa-trash mr-1"></i>Delete
+                                            </button>
+                                            {{ scenario_form.csrf_token }}
+                                        </form>
+                                    </div>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
@@ -97,7 +155,7 @@
         {% endfor %}
     </div>
     {% if current_user.is_admin %}
-    <div class="row mt-2 mx-1 card border-info text-info">
+    <div class="row mt-2 mx-1 card border-info text-info" style="display: none;">
         <div class="card-header font-weight-bold p-2">Admin Note</div>
         <div class="card-body p-2">
             An asterisk (*) before a Scenario name means that you have access
@@ -132,26 +190,33 @@
                 // Forward this click to the ACTUAL submit button for the form
                 // (This lets us get nice browser-handled validation 
                 // for our required fields)
-                let scenario_name = $("input#name");
+                var scenario_name = $("input#name");
                 if (scenario_name.val().length > 120) {
                     alert("Enter a short name for your scenario (120 characters or less)");
                     return;
                 }
                 $('#create-scenario-form [type="submit"]').click();
             });
-            
+
             $("#copy-scenario-form, #delete-scenario-form").on("submit", function(e){
-                let scenario_name = $(e.target).find('input[name="scenario_name"]').val();
-                let opt = (e.target.id == 'copy-scenario-form') ? "copy" : "delete";
-                let msg = `Are you sure you want to ${opt} scenario ${scenario_name}?`
+                var scenario_name = $(e.target).find('input[name="scenario_name"]').val();
+                var opt = (e.target.id == 'copy-scenario-form') ? "copy" : "delete";
+                var msg = `Are you sure you want to ${opt} Scenario "${scenario_name}"?`;
+                if (opt == 'copy') {
+                    msg += ' This operation may take a few minutes to complete.';
+                }
+                else if (opt == 'delete') {
+                    msg += ' This operation cannot be undone!';
+                }
                 if (!confirm(msg)) {
+                    e.stopPropagation();
                     e.preventDefault();
                     return;
                 }
 
                 var loadingRequest = 'load_' + this.id;
                 LoadingScreen.show(loadingRequest);
-            })
+            });
         });
     </script>
 {% endset %}
@@ -225,19 +290,24 @@
       border-radius: 50%;
     }
 
+    /* Even though we use btn-outline-primary (for tabbing), on hover we want the bg-light color */
+    .scenario-col .card-header a:hover {
+        background-color: #d8e0e3 !important;
+    }
+
 </style>
 
 <script>
     onDomLoad(function() {
-        $('.admin-access-only').closest('div.col-lg-3').hide(); // hide by default
+        $('.admin-access-only').closest('div.scenario-col').hide(); // hide by default
 
         $('#toggle-admin-view-off').on('change', function() {
             var onlyMine = $(this).prop('checked');
             if (onlyMine) {
-                $('.admin-access-only').closest('div.col-lg-3').hide();
+                $('.admin-access-only').closest('div.scenario-col').hide();
             }
             else {
-                $('.admin-access-only').closest('div.col-lg-3').show();
+                $('.admin-access-only').closest('div.scenario-col').show();
             }
         });
     });
