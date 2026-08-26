@@ -55,21 +55,22 @@
                     <td>
                         <input id="lf-product-id" type="hidden" />
 
-                        <input id="lf-description" type="text"
+                        <input id="lf-description" type="text" aria-label="lf-description"
                             class="form-control form-control-sm" />
                     </td>
                     <td>
-                        <input id="lf-fraction" type="number"
+                        <input id="lf-fraction" type="number" aria-label="lf-fraction"
                             min="0" max="1" step="any"
                             class="form-control form-control-sm" />
                     </td>
                     <td>
-                        <input id="lf-source" type="text"
+                        <input id="lf-source" type="text" aria-label="lf-source"
                             class="form-control form-control-sm" />
                     </td>
                     <td class="text-center align-middle">
                         <button type="button"
                             class="btn py-0 px-1 text-secondary border-0 rounded-circle add-lf"
+                            aria-label="add-loss-factor"
                         >
                             <span>
                                 <i class="fa fa-plus-circle"></i>
@@ -253,7 +254,8 @@
 
             var td4 = $('<td class="text-center align-middle" />');
             var btn = $('<button type="button" />')
-                .addClass('btn py-0 px-1 text-primary border-0 rounded-circle rem-lf');
+                .addClass('btn py-0 px-1 text-primary border-0 rounded-circle rem-lf')
+                .attr('aria-label', 'add-loss-factor');
             $('<span />').append('<i class="fa fa-times-circle" />').appendTo(btn);
             btn.appendTo(td4);
 

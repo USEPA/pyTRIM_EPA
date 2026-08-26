@@ -18,7 +18,7 @@
             {{ render_input(ir.fraction_contaminated) }}
         </td>
         <td class="align-middle text-center">
-            <button type="button" tabindex="0"
+            <button type="button" tabindex="0" aria-label="notes-field"
                 data-toggle="popover" data-trigger="hover"
                 data-placement="left"
                 data-content="{{ ir.notes.data or '<i>None</i>' }}"
