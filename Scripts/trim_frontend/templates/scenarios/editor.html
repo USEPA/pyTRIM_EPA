@@ -69,15 +69,15 @@
         'hide-save-btn': 1
     },
     {
-        'id': 'results-tab',
+        'id': 'transport-model-tab',
         'title': "Run Transport Model",
         'gui': 'gui_execution_results.html',
         'hide-save-btn': 1
     },
     {
-        'id': 'mirc-tab',
+        'id': 'risk-calc-tab',
         'title': "Calculate Risk",
-        'gui': 'mirc/gui_results.html',
+        'gui': 'gui_mirc.html',
         'hide-save-btn': 1
     }
 ] %}
@@ -92,47 +92,90 @@
     <div class="card-body container p-0">
         <div class="row m-0 p-2">
             <div
-                class="col-sm-4 col-md-3 col-lg-2 px-2 pr-sm-3 pt-2 mb-2 border-sm-right border-bottom border-sm-bottom-0"
+                class="col-md-3 col-lg-2 px-2 pr-md-3 pt-2 mb-2 border-md-right border-bottom border-md-bottom-0"
             >
                 <nav id="editor-nav" class="nav flex-column nav-pills mb-3"
                     role="tablist"
                     aria-orientation="vertical"
                 >
                     {% for tab in tabs %}
-
-                        <a id="{{ tab['id'] }}-pill"
-                            data-toggle="pill"
-                            href="#{{ tab['id'] }}"
-                            role="tab"
-                            aria-controls="{{ tab['id'] }}"
-                            class="nav-link"
-                            tabindex="0"
-                            aria-selected="true"
-                            data-no-save-btn="{{ tab.get('hide-save-btn') or 0 }}"
-                        >{{ tab['title'] }}</a>
+                        {% if 'sub_tabs' in tab %}
+                            <div id="{{ tab['id'] }}" class="accordion">
+                                <div id="{{ tab['id'] }}-heading" class="border-bottom">
+                                    <button type="button" data-toggle="collapse" data-target="#{{ tab['id'] }}-body"
+                                        class="btn btn-link btn-block text-left text-decoration-none collapsed py-2 px-3"
+                                        aria-expanded="true" aria-controls="{{ tab['id'] }}-body"
+                                    >
+                                        <i class="fa fa-chevron-down mr-2"></i>{{ tab['title'] }}
+                                    </button>
+                                </div>
+                                <div id="{{ tab['id'] }}-body" class="collapse show border-bottom py-1 mb-1"
+                                    aria-labelledby="{{ tab['id'] }}-heading" data-parent="#{{ tab['id'] }}"
+                                >
+                                    {% for sub_tab in tab['sub_tabs'] %}
+                                        <a id="{{ sub_tab['id'] }}-pill"
+                                            data-toggle="pill"
+                                            href="#{{ sub_tab['id'] }}"
+                                            role="tab"
+                                            aria-controls="{{ sub_tab['id'] }}"
+                                            class="nav-link ml-3"
+                                            tabindex="0"
+                                            aria-selected="true"
+                                            data-no-save-btn="{{ sub_tab.get('hide-save-btn') or 0 }}"
+                                        >
+                                            {{ sub_tab['title'] }}
+                                        </a>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% else %}
+                            <a id="{{ tab['id'] }}-pill"
+                                data-toggle="pill"
+                                href="#{{ tab['id'] }}"
+                                role="tab"
+                                aria-controls="{{ tab['id'] }}"
+                                class="nav-link"
+                                tabindex="0"
+                                aria-selected="true"
+                                data-no-save-btn="{{ tab.get('hide-save-btn') or 0 }}"
+                            >
+                                {{ tab['title'] }}
+                            </a>
+                        {% endif %}
 
                     {% endfor %}
                 </nav>
             </div>
-            <div class="col-sm-8 col-md-9 col-lg-10 p-2 pl-sm-3">
+            <div class="col-md-9 col-lg-10 p-2 pl-md-3">
                 <div class="tab-content mb-3">
                     {% for tab in tabs %}
-
-                        <div id="{{ tab['id'] }}"
-                            class="tab-pane show"
-                            role="tabpanel"
-                            aria-labelledby="{{ tab['id'] }}-pill"
-                        >
-                            <h3 class="text-center pb-3">{{ tab['title'] }}</h3>
-                            {% include 'components/scenarios/' + tab['gui'] %}
-                        </div>
-
+                        {% if 'sub_tabs' in tab %}
+                            {% for sub_tab in tab['sub_tabs'] %}
+                                <div id="{{ sub_tab['id'] }}"
+                                    class="tab-pane show"
+                                    role="tabpanel"
+                                    aria-labelledby="{{ sub_tab['id'] }}-pill"
+                                >
+                                    <h3 class="text-center pb-3">{{ sub_tab['title'] }}</h3>
+                                    {% include 'components/scenarios/' + sub_tab['gui'] %}
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div id="{{ tab['id'] }}"
+                                class="tab-pane show"
+                                role="tabpanel"
+                                aria-labelledby="{{ tab['id'] }}-pill"
+                            >
+                                <h3 class="text-center pb-3">{{ tab['title'] }}</h3>
+                                {% include 'components/scenarios/' + tab['gui'] %}
+                            </div>
+                        {% endif %}
                     {% endfor %}
                 </div>
                 <div class="text-right">
                     <a id="save-btn"
                         href="#save"
-                        class="btn btn-secondary"
+                        class="btn btn-sm btn-outline-secondary text-dark"
                     >
                         <i class="fas fa-save mr-1"></i>
                         Recalculate
@@ -178,8 +221,17 @@
             }
         });
 
-        // some tabs hide the save button
+        // fix sub-tab highlighting
+        $('.nav-pills .nav-link').click(function() {
+            $('.nav-pills #input-properties .nav-link').removeClass('active');
+        })
+
         $('#editor-nav [data-toggle="pill"].nav-link').on('show.bs.tab', function(e) {
+            // if this is a sub-tab, make sure the "Inputs" accordion is open
+            if ($(e.target).closest('#input-properties').length > 0) {
+                $('#input-properties').find('button[data-toggle="collapse"][aria-expanded="false"]').click();
+            }
+            // some tabs hide the save button
             if (e.target.getAttribute('data-no-save-btn') == '1') {
                 $('#save-btn').hide();
             }
@@ -243,3 +295,31 @@
         href="{{url_for('static', filename='css/lib/chartist/chartist.css')}}"
     />
 {% endblock scripts %}
+
+{% block styles %}
+    <style>
+        #editor-nav .nav-link:hover {
+            background-color: #d8e0e3 !important;
+        }
+        #editor-nav .nav-link.active:hover {
+            background-color: #9f4912 !important;
+        }
+
+        .nav-pills #input-properties .show>.nav-link {
+            color: #9f4912;
+            background-color: #fff;
+        }
+        .nav-pills #input-properties .nav-link.active {
+            color: #fff;
+            background-color: #9f4912;
+        }
+
+        /* #input-properties button[data-toggle="collapse"][aria-expanded="true"] {
+            color: #fff;
+            background-color: #485159 !important;
+        } */
+        #input-properties button[data-toggle="collapse"]:hover {
+            background-color: #d8e0e3 !important;
+        }
+    </style>
+{% endblock styles %}

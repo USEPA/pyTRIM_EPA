@@ -72,7 +72,7 @@
             {% set class = class + ' ' + default_input_class %}
         {% endif %}
         {% set style = style or "max-width: 100%;" %}
-        {{ field(class=class, style=style) }}
+        {{ field(class=class, style=style, aria_label="parameter-field") }}
     {% endif %}
 {% endmacro %}
 

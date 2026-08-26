@@ -96,17 +96,17 @@
         <div role="tabpanel" id="human-parameters" class="tab-pane show active"
             aria-labelledby="human-parameters-tab"
         >
-            {% include 'components/scenarios/mirc/exposure_profiles/editor/human_parameters.html' %}
+            {% include 'components/mirc/exposure_profiles/editor/human_parameters.html' %}
         </div>
         <div role="tabpanel" id="product-parameters" class="tab-pane"
             aria-labelledby="product-parameters-tab"
         >
-            {% include 'components/scenarios/mirc/exposure_profiles/editor/product_parameters.html' %}
+            {% include 'components/mirc/exposure_profiles/editor/product_parameters.html' %}
         </div>
         <div role="tabpanel" id="chemical-parameters" class="tab-pane"
             aria-labelledby="chemical-parameters-tab"
         >
-            {% include 'components/scenarios/mirc/exposure_profiles/editor/chemical_parameters.html' %}
+            {% include 'components/mirc/exposure_profiles/editor/chemical_parameters.html' %}
         </div>
     </div>
     {% if not mirc_scenario.is_builtin %}
@@ -344,6 +344,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
         modal.modal('hide');
     });
+
+    form.on('blur', 'input, textarea', function(e) {
+        // automatically trigger validation
+        if (!form[0].checkValidity()) {
+            form[0].reportValidity();
+        }
+    });
 });
 </script>
 {% endif %}
+
+<style>
+    /* Fix bs-popover arrows... */
+    .bs-popover-right > .arrow,
+    .bs-popover-auto[x-placement^="right"]>.arrow {
+        left: calc(0.5rem * -1 + 1px * -1);
+    }
+    .bs-popover-left>.arrow,
+    .bs-popover-auto[x-placement^="left"]>.arrow {
+        right: calc(0.5rem * -1 + 1px * -1);
+    }
+</style>

@@ -52,6 +52,22 @@ def create_app(testing=False):
 
     # Add global template functions & vars
     app.jinja_env.filters['dir'] = dir
+
+    def print_lat_lon(point):
+        lat = round(point.y, 2)
+        if lat < 0:
+            lat = f'{abs(lat)}S'
+        elif lat > 0:
+            lat = f'{lat}N'
+        lon = round(point.x, 2)
+        if lon < 0:
+            lon = f'{abs(lon)}W'
+        elif lon > 0:
+            lon = f'{lon}E'
+        return f'{lat}, {lon}'
+
+    app.jinja_env.filters['lat_lon'] = print_lat_lon
+
     app.jinja_env.globals['env_type'] = app.config['ENVIRONMENT_TYPE']
 
     init_mirc(app)
