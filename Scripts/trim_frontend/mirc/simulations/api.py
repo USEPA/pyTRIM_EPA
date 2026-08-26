@@ -84,7 +84,11 @@ def get_simulations(trim_scenario_id):
                             sheet_name = f'{base_sheet_name} (Metadata)'
                         else:
                             sheet_name = base_sheet_name
-                        df.to_excel(writer, sheet_name=sheet_name, index=False, header=(i < 2))
+                        try:
+                            df.to_excel(writer, sheet_name=sheet_name[:31], index=False, header=(i < 2))
+                        except Exception:
+                            import traceback
+                            traceback.print_exc()
 
             return api.FileResult(filepath)
 

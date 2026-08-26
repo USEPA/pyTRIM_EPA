@@ -479,7 +479,13 @@ onDomLoad(function() {
             const waterSrc = getVal('trim_water_compartment');
             const water = getCompartment(waterSrc);
             if (water) {
-                setField('C_water', water.properties[chem].C?.[dt].value, waterSrc);
+            try{
+                setField('C_water', water.properties[chem].C?.[dt]?.value, waterSrc);
+            } catch(err) {
+                console.log(e)
+
+            }
+                
             }
             else {
                 setField('C_water', 0);
@@ -488,7 +494,7 @@ onDomLoad(function() {
             const humanSrc = getVal('trim_soil_human_compartment');
             const human = getCompartment(humanSrc);
             if (human) {
-                setField('C_soil', human.properties[chem].C?.[dt].value, humanSrc);
+                setField('C_soil', human.properties[chem].C?.[dt]?.value, humanSrc);
             }
             else {
                 setField('C_soil', 0);
@@ -498,7 +504,7 @@ onDomLoad(function() {
             const veg = getCompartment(vegSrc);
             if (veg) {
                 const vegProps = veg.properties;
-                setField('C_root_veg', vegProps[chem].C?.[dt].value, vegSrc);
+                setField('C_root_veg', vegProps[chem].C?.[dt]?.value, vegSrc);
                 setField('Kd', vegProps[chem].Kd.value, vegSrc);
             }
             else {
@@ -509,7 +515,7 @@ onDomLoad(function() {
             const livestockSrc = getVal('trim_soil_livestock_compartment');
             const livestock = getCompartment(livestockSrc);
             if (human) {
-                setField('Cs_s', livestock.properties[chem].C?.[dt].value, livestockSrc);
+                setField('Cs_s', livestock.properties[chem].C?.[dt]?.value, livestockSrc);
             }
             else {
                 setField('Cs_s', 0);
@@ -519,7 +525,7 @@ onDomLoad(function() {
             const root = getCompartment(rootSrc);
             if (root) {
                 const rootProps = root.properties;
-                setField('Cs_root_zone', rootProps[chem].C?.[dt].value, rootSrc);
+                setField('Cs_root_zone', rootProps[chem].C?.[dt]?.value, rootSrc);
                 setField('Kd_feed', rootProps[chem].Kd.value, rootSrc);
             }
             else {
@@ -531,7 +537,7 @@ onDomLoad(function() {
             const drdp = getCompartment(drdpSrc);
             if (drdp) {
                 setField(
-                    'Drdp', drdp.properties[chem].Drdp?.[dt].value, drdpSrc,
+                    'Drdp', drdp.properties[chem].Drdp?.[dt]?.value, drdpSrc,
                     // Convert daily to annual
                     function (x) { return (x * 365.25); }
                 );
@@ -544,7 +550,7 @@ onDomLoad(function() {
             const drwp = getCompartment(drwpSrc);
             if (drwp) {
                 setField(
-                    'Drwp', drwp.properties[chem].Drwp?.[dt].value, drwpSrc,
+                    'Drwp', drwp.properties[chem].Drwp?.[dt]?.value, drwpSrc,
                     // Convert daily to annual
                     function (x) { return (x * 365.25); }
                 );
@@ -556,7 +562,7 @@ onDomLoad(function() {
             const tl3Src = getVal('trim_fish_tl35_compartment');
             const tl3 = getCompartment(tl3Src);
             if (tl3) {
-                setField('C_tl35', tl3.properties[chem].C?.[dt].value, tl3Src);
+                setField('C_tl35', tl3.properties[chem].C?.[dt]?.value, tl3Src);
             }
             else {
                 setField('C_tl35', 0);
@@ -565,7 +571,7 @@ onDomLoad(function() {
             const tl4Src = getVal('trim_fish_tl4_compartment');
             const tl4 = getCompartment(tl4Src);
             if (tl4) {
-                setField('C_tl4', tl4.properties[chem].C?.[dt].value, tl4Src);
+                setField('C_tl4', tl4.properties[chem].C?.[dt]?.value, tl4Src);
             }
             else {
                 setField('C_tl4', 0);
@@ -574,7 +580,7 @@ onDomLoad(function() {
             const sedSrc = getVal('trim_sed_compartment');
             const sed = getCompartment(sedSrc);
             if (sed) {
-                setField('C_sed', sed.properties[chem].C?.[dt].value, sedSrc);
+                setField('C_sed', sed.properties[chem].C?.[dt]?.value, sedSrc);
             }
             else {
                 setField('C_sed', 0);
@@ -584,7 +590,7 @@ onDomLoad(function() {
             const surf = getCompartment(surfSrc);
             if (surf) {
                 const surfProps = surf.properties;
-                setField('C_surf_water', surfProps[chem].C?.[dt].value, surfSrc);
+                setField('C_surf_water', surfProps[chem].C?.[dt]?.value, surfSrc);
                 setField('FMD', surfProps[chem].FMD);
             }
             else {
