@@ -46,7 +46,7 @@ class AppConfig:
     OAUTH2_PROVIDERS = {
         'login_gov': {
             'client_id': os.getenv('LOGIN_GOV_CLIENT_ID'),
-            'client_secret': os.getenv('LOGIN_GOV_CLIENT_SECRET'),
+            'client_secret': os.getenv('LOGIN_GOV_SECRET_ARN'), # secrets manager
             # Server URL is:
             #   "https://wamssostg.epa.gov/oauth2/rest" for dev,
             #   "https://wamssoprd.epa.gov/oauth2/rest" for prod

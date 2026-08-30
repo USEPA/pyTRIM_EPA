@@ -1,6 +1,8 @@
 import os
+import json
 import requests
 import secrets
+import boto3
 from datetime import datetime
 from urllib.parse import urlencode
 from flask import request, redirect, url_for, abort, session
@@ -70,6 +72,19 @@ class FlaskOauth:
 
             return redirect(provider['authorize_url'] + '?' + urlencode(query_args))
 
+    def get_client_secret(self, secret_id):
+        if not secret_id:
+            return None
+        secrets_client = boto3.client('secretsmanager')
+        response = secrets_client.get_secret_value(
+            SecretId=secret_id
+        )
+        try:
+            secret_data = json.loads(response['SecretString'])
+        except:
+            secret_data = response['SecretString']
+        return secret_data['client_secret']
+
     def register_providers(self, providers, oauth2=True):
         if not providers:
             return
@@ -96,9 +111,8 @@ class FlaskOauth:
     def _register_oauth2_provider(self, provider):
         self._oauth2_providers[provider['name']] = provider
 
-        redirect_endpoint = f'/oidc/callback/{provider["name"]}'
-        if 'redirect_endpoint' in provider:
-            redirect_endpoint = provider['redirect_endpoint']
+        if 'client_secret' in provider:
+            provider['client_secret'] = self.get_client_secret(secret_id=provider['client_secret'])
 
         @self._app.route(provider['redirect_endpoint'], endpoint=self.get_callback_endpoint_name(provider))
         def oidc_callback():
