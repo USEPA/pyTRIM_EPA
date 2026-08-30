@@ -272,6 +272,7 @@ CREATE TABLE `mirc_simulation` (
     `created` DATETIME NOT NULL, 
     `updated` DATETIME, 
     `name` VARCHAR(120) NOT NULL, 
+    `description` VARCHAR(800), 
     `trim_scenario_id` INTEGER NOT NULL, 
     `mirc_scenario_id` INTEGER NOT NULL, 
     `chemical_id` INTEGER NOT NULL, 

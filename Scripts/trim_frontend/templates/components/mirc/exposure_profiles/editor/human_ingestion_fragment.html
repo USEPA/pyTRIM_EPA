@@ -1,22 +1,29 @@
 {% from 'macros/mirc/form_macros.html' import render_input %}
 
-{% for adaf in adafs %}
-    <tr class="chemical-{{ adaf.chemical_id.data }}">
+{% for ir in irs %}
+    <tr class="age-{{ ir.life_stage_id.data }} percentile-{{ ir.percentile_id.data }}">
         <th scope="row">
-            {{ render_input(adaf.chemical_id) }}
-            {{ render_input(adaf.life_stage_id) }}
+            {{ render_input(ir.life_stage_id) }}
+            {{ render_input(ir.percentile_id) }}
+            {{ render_input(ir.product_id) }}
 
-            {{ render_input(adaf.life_stage) }}
+            {{ render_input(ir.product) }}
         </th>
         <td>
-            {{ render_input(adaf.value) }}
+            {{ render_input(ir.rate) }}
+        </td>
+        <td>
+            {{ render_input(ir.unit) }}
+        </td>
+        <td>
+            {{ render_input(ir.fraction_contaminated) }}
         </td>
         <td class="align-middle text-center">
-            <button type="button" tabindex="0"
+            <button type="button" tabindex="0" aria-label="notes-field"
                 data-toggle="popover" data-trigger="hover"
                 data-placement="left"
-                data-content="{{ adaf.notes.data or '<i>None</i>' }}"
-                data-src="{{ adaf.notes.id }}"
+                data-content="{{ ir.notes.data or '<i>None</i>' }}"
+                data-src="{{ ir.notes.id }}"
                 data-html="true"
                 {% if scenario.is_builtin %}
                     class="btn py-0 border-0 notes-modal-btn" disabled="disabled" style="cursor: default;"
@@ -29,8 +36,8 @@
         </td>
     </tr>
     <tr style="display: none;">
-        <td colspan="4">
-            {{ render_input(adaf.notes) }}
+        <td>
+            {{ render_input(ir.notes) }}
         </td>
     </tr>
 {% endfor %}

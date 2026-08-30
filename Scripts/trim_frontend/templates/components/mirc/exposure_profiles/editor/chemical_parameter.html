@@ -21,7 +21,7 @@
             </label>
             <select id="chemical-filter" class="form-control form-control-sm">
                 {% for c in chemicals %}
-                    <option value="{{ c.id }}">{{ (c.hap_name or c.name)|title }}</option>
+                    <option value="{{ c.id }}">{{ c.name|title }}</option>
                 {% endfor %}
             </select>
         </div>

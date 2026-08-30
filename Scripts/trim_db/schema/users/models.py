@@ -1,3 +1,4 @@
+import uuid
 import sqlalchemy as sa
 from sqlalchemy.ext.declarative import declared_attr
 from ..utils.base import Model
@@ -40,7 +41,7 @@ class UserMixin(ActiveFlagMixin):
     company_name = sa.Column(sa.String(255))
     password = sa.Column('password_hash', sa.String(128))
     confirmed_at = sa.Column(sa.DateTime())
-    fs_uniquifier = sa.Column(sa.String(64), unique=True)
+    fs_uniquifier = sa.Column(sa.String(64), unique=True, default=lambda: uuid.uuid4().hex)
 
     last_login_at = sa.Column(sa.DateTime())
     current_login_at = sa.Column(sa.DateTime())

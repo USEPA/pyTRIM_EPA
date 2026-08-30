@@ -17,9 +17,15 @@
                     title=("Logout " + current_user.get_preferred_name())
                 ) }}
             {% else %}
-                {{ render_nav_item(
-                    'Login', url_for('security.login'), icon='user-circle'
-                ) }}
+                {% if config['OAUTH2_PROVIDERS']['login_gov']['client_id'] %}
+                    {{ render_nav_item(
+                        'Login.gov', url_for('oauth2_login', provider_name='login_gov'), icon='user-circle'
+                    ) }}
+                {% else %}
+                    {{ render_nav_item(
+                        'Login', url_for('security.login'), icon='user-circle'
+                    ) }}
+                {% endif %}
             {% endif %}
         </ul>
     </div>

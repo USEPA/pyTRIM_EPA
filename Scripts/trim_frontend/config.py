@@ -36,12 +36,27 @@ class AppConfig:
 
     # Security config
     SECURITY_PASSWORD_HASH = 'bcrypt'
-    SECURITY_REGISTERABLE = True
     SECURITY_TRACKABLE = True
+    SECURITY_REGISTERABLE = False
     SECURITY_SEND_REGISTER_EMAIL = False
     SECURITY_CONFIRMABLE = has_mail
     SECURITY_CHANGEABLE = has_mail
     SECURITY_RECOVERABLE = has_mail
+
+    OAUTH2_PROVIDERS = {
+        'login_gov': {
+            'client_id': os.getenv('LOGIN_GOV_CLIENT_ID'),
+            'client_secret': os.getenv('LOGIN_GOV_SECRET_ARN'), # secrets manager
+            # Server URL is:
+            #   "https://wamssostg.epa.gov/oauth2/rest" for dev,
+            #   "https://wamssoprd.epa.gov/oauth2/rest" for prod
+            'authorize_url': f"{os.getenv('LOGIN_GOV_SERVER_URL')}/authorize",
+            'token_url': f"{os.getenv('LOGIN_GOV_SERVER_URL')}/token",
+            'userinfo_url': f"{os.getenv('LOGIN_GOV_SERVER_URL')}/userinfo",
+            'scopes': ['openid', 'email', 'profile'],
+            'redirect_endpoint': '/oidc/callback'
+        }
+    }
 
     # Custom message config
     bad_login = ("The username or password is invalid", 'error')

@@ -1,10 +1,9 @@
 {% from 'macros/mirc/form_macros.html' import render_input %}
 
 {% for ir in irs %}
-    <tr class="age-{{ ir.life_stage_id.data }} percentile-{{ ir.percentile_id.data }}">
+    <tr class="animal-{{ ir.consumer_id.data }}">
         <th scope="row">
-            {{ render_input(ir.life_stage_id) }}
-            {{ render_input(ir.percentile_id) }}
+            {{ render_input(ir.consumer_id) }}
             {{ render_input(ir.product_id) }}
 
             {{ render_input(ir.product) }}
@@ -19,7 +18,7 @@
             {{ render_input(ir.fraction_contaminated) }}
         </td>
         <td class="align-middle text-center">
-            <button type="button" tabindex="0"
+            <button type="button" tabindex="0" aria-label="notes-field"
                 data-toggle="popover" data-trigger="hover"
                 data-placement="left"
                 data-content="{{ ir.notes.data or '<i>None</i>' }}"

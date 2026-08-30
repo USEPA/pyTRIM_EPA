@@ -61,6 +61,16 @@ def compile_mirc_parcel_data(scen, chems, conc, timestamps, logger):
 
                     chem = chems[chem_name]
 
+                    try:
+                        wet_dep_rate = parcel.get_compartment(media='Source|Wet_Particle').surfaceDepositionRate(chemical=chem)
+                        dry_dep_rate = parcel.get_compartment(media='Source|Dry_Particle').surfaceDepositionRate(chemical=chem)
+
+                        comp_drwp = wet_dep_rate.to('g/year') / compartment.area
+                        comp_drdp = dry_dep_rate.to('g/year') / compartment.area
+                    except Exception:
+                        comp_drwp = None
+                        comp_drdp = None
+
                     # constants
                     if "air" in c["name"].lower():
                         props["rho_a"] = {
@@ -109,9 +119,7 @@ def compile_mirc_parcel_data(scen, chems, conc, timestamps, logger):
                         # timestamp values
                         props["C"] = {}  # concentration
                         props["Drwp"] = {}  # deposition rate wet particle
-                        chem_wet = chem.ParticleVolumetricWetDepositionRate(compartment=compartment)
                         props["Drdp"] = {}  # deposition rate dry particle
-                        chem_dry = chem.ParticleVolumetricDRYDepositionRate(compartment=compartment)
 
                         for i, timestamp in enumerate(timestamps):
                             if isinstance(filtered_conc_units[0], str):
@@ -119,14 +127,26 @@ def compile_mirc_parcel_data(scen, chems, conc, timestamps, logger):
                                     "value": filtered_conc[i],
                                     "unit": filtered_conc_units[i]  # "ug/g"
                                 }
-                            props["Drwp"][timestamp] = {
-                                "value": chem_wet.magnitude,
-                                "unit": str(chem_wet.units)  # "g/day/m^2"
-                            }
-                            props["Drdp"][timestamp] = {
-                                "value": chem_dry.magnitude,
-                                "unit": str(chem_dry.units)  # "g/day/m^2"
-                            }
+                            if comp_drwp is not None:
+                                props["Drwp"][timestamp] = {
+                                    "value": comp_drwp.magnitude,
+                                    "unit": str(comp_drwp.units)  # "g/day/m^2"
+                                }
+                            else:
+                                props["Drwp"][timestamp] = {
+                                    "value": 0,
+                                    "unit": "g/day/m^2"
+                                }
+                            if comp_drdp is not None:
+                                props["Drdp"][timestamp] = {
+                                    "value": comp_drdp.magnitude,
+                                    "unit": str(comp_drdp.units)  # "g/day/m^2"
+                                }
+                            else:
+                                props["Drdp"][timestamp] = {
+                                    "value": 0,
+                                    "unit": "g/day/m^2"
+                                }
                     if props:
                         c["properties"][chem_name] = props
                 ve["compartments"].append(c)

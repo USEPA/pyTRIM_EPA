@@ -13,11 +13,11 @@
 
         {% if priority %}
             <optgroup label="Priority Chemicals">
-                {% for c in priority|sort(attribute='hap_name') %}
+                {% for c in priority|sort(attribute='name') %}
                     <option value="{{ c.id }}"
                         {% if c.id == default %} selected="selected"{% endif %}
                     >{{
-                        (c.hap_name or c.name)|title
+                        c.name|title
                     }}</option>
                 {% endfor %}
             </optgroup>
@@ -26,7 +26,7 @@
             {% for c in chemicals %}
                 {% if c.id not in priority|map(attribute='id') %}
                     <option value="{{ c.id }}" {% if c.id == default %} selected="selected"{% endif %}>{{
-                        (c.hap_name or c.name)|title
+                        c.name|title
                     }}</option>
                 {% endif %}
             {% endfor %}

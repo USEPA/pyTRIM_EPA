@@ -228,6 +228,8 @@ def save_permissions(scenario_id):
 
     ScenarioService.clear_permissions(s, except_for=[current_user.id])
 
+    ScenarioService.update(s)
+
     for email, permission in value.get('permissions', {}).items():
         if permission.lower() == 'none':
             continue

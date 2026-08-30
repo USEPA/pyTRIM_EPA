@@ -8,6 +8,7 @@ $icf-dark-gray: #768591;
 
 // 508c compliant contrast
 $success-508c: #0a8927;
+$danger-508c: #c43f4c;
 $info-508c: #008298;
 $gray-508c: #626262;
 $dark-508c: darken($icf-dark-gray, 20%);
@@ -19,6 +20,7 @@ $theme-colors: (
   'primary-accent': $icf-dark-teal,
   'secondary-accent': $icf-teal,
   'success': $success-508c,
+  'danger': $danger-508c,
   'info': $info-508c,
   'light': $icf-gray,
   'dark': $dark-508c

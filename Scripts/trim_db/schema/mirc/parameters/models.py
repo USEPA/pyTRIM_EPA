@@ -163,7 +163,8 @@ def _ts_param(param: MircParameter):
         'media': param.media.name if param.media else None,
         'chemical': {
             'cas_number': param.chemical.cas_number,
-            'hap_name': param.chemical.hap_name
+            'hap_name': param.chemical.hap_name,
+            'name': param.chemical.name
         } if param.chemical else None,
         'life_stage': param.life_stage.name if param.life_stage else None,
         'percentile': param.percentile.name if param.percentile else None,
