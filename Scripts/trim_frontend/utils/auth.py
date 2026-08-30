@@ -175,7 +175,7 @@ class FlaskOauth:
                         'client_id': provider['client_id'],
                         'client_secret': provider['client_secret'],
                         'code': request.args['code'],
-                        'grant_type': 'authorization_code',
+                        'grant_type': 'client_credentials',
                         'redirect_uri': self.get_callback_uri(provider),
                     }
 
@@ -185,7 +185,7 @@ class FlaskOauth:
                         'client_id': provider['client_id'],
                         'client_secret': provider['client_secret'],
                         'code': request.args['code'],
-                        'grant_type': 'authorization_code',
+                        'grant_type': 'client_credentials',
                         'redirect_uri': self.get_callback_uri(provider),
                     },
                     headers={'Accept': 'application/json'}
