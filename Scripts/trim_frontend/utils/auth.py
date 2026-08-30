@@ -185,33 +185,33 @@ class FlaskOauth:
                         'client_id': provider['client_id'],
                         'client_secret': provider['client_secret'],
                         'code': request.args['code'],
-                        'grant_type': 'client_credentials',
+                        'grant_type': 'authorization_code',
                         'redirect_uri': self.get_callback_uri(provider),
                     },
                     headers={'Accept': 'application/json'}
                 )
-                datacollect['authcode_POST_rsp'] = response
+                datacollect['authcode_POST_rsp'] = response.json()
                 
                 if response.status_code != 200:
-                    raise
+                    raise "Invalid status code"
                 oauth2_token = response.json().get('access_token')
                 if not oauth2_token:
-                    raise
+                    raise "No auth token"
 
                 response = requests.get(provider['userinfo_url'], headers={
                     'Authorization': 'Bearer ' + oauth2_token,
                     'Accept': 'application/json',
                 })
 
-                datacollect["userinfo_rsp"] = response
+                datacollect["userinfo_rsp"] = response.json()
 
                 if response.status_code != 200:
-                    raise
+                    raise "invalid userinfo status code"
                 email = response.json()['email']
 
                 user = self._security.datastore.find_user(email=email)
                 if user is None:
-                    raise
+                    raise "user not found"
 
                 login_user(user)
                 return redirect(url_for('index'))
