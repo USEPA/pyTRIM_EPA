@@ -117,7 +117,7 @@ class FlaskOauth:
         @self._app.route(provider['redirect_endpoint'], endpoint=self.get_callback_endpoint_name(provider))
         def oidc_callback():
             if not current_user.is_anonymous:
-                return redirect(url_for('index'))
+                return redirect(url_for('scenario.view_scenarios'))
 
             if request.args['state'] != session.get('oauth2_state'):
                 abort(401)
@@ -155,7 +155,7 @@ class FlaskOauth:
                 abort(401)
 
             login_user(user)
-            return redirect(url_for('index'))
+            return redirect(url_for('scenario.view_scenarios'))
 
 
 def init_auth(app, db, bcrypt, security):
