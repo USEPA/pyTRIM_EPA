@@ -6,6 +6,12 @@ from ..utils.admin_views import AdminModelView, AdminScenarioView
 
 
 class UserAdminView(AdminModelView):
+    def create_model(self, form):
+        if form.password.data:
+            form.password.process_data(hash_password(form.password.data))
+        
+        return super().create_model(form)
+    
     def update_model(self, form, model):
         if not form.password.data:
             form.password.process_data(model.password)
