@@ -521,7 +521,8 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             else:
                 eq_arr = eq.split("else")
                 eq_arr.insert(-2, f' {src_val} if chemical.id == {chem.id} ')
-                new_formula = "else".join(eq_arr)
+                eq_arr = [part.strip() for part in eq_arr]
+                new_formula = " else ".join(eq_arr)
                 print(new_formula)
             FormulaService.get(src_par.formula.id).equation = new_formula
             FormulaService.commit()
@@ -556,7 +557,8 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             else:
                 eq_arr = eq.split("else")
                 eq_arr.insert(-2, f' {ic_val} if chemical.id == {chem.id} ')
-                new_formula = "else".join(eq_arr)
+                eq_arr = [part.strip() for part in eq_arr]
+                new_formula = " else ".join(eq_arr)
                 print(new_formula)
             FormulaService.get(ic_par.formula.id).equation = new_formula
             FormulaService.commit()
