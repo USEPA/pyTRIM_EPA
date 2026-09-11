@@ -700,15 +700,14 @@ class MircSimulationService(GenericService[MircSimulation]):
             RfD = scenario.parameters.for_chemical(c).RfD.quantity
             CSF = scenario.parameters.for_chemical(c).CSF.quantity
             for age, risk in total.items():
-                if c.mutagenic:
-                    i = risk['adjusted_intake']
-                else:
-                    i = risk['intake']
-
                 if RfD:
-                    risk['hazard_quotient'] = i / RfD
+                    risk['hazard_quotient'] = risk['intake'] / RfD
+
                 if CSF and age == 'Lifetime':
-                    risk['risk_factor'] = i * CSF
+                    if c.mutagenic:
+                        risk['risk_factor'] = risk['adjusted_intake'] * CSF
+                    else:
+                        risk['risk_factor'] = risk['intake'] * CSF
 
             simulation_results = {
                 'total': {'risk': total},

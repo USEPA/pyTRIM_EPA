@@ -562,19 +562,19 @@ onDomLoad(function() {
             th = document.createElement('th');
             th.colSpan = 2;
             th.innerText = 'ADD';
-            if (data.chemical.mutagenic) {
+            /*if (data.chemical.mutagenic) {
                 th.innerText = 'Base ADD';
-            }
+            }*/
             th.title = 'Average Daily Dose';
             tr.appendChild(th);
 
-            if (data.chemical.mutagenic) {
+            /*if (data.chemical.mutagenic) {
                 th = document.createElement('th');
                 th.colSpan = 2;
                 th.innerText = 'Adjusted ADD';
                 th.title = 'Adjusted Average Daily Dose';
                 tr.appendChild(th);
-            }
+            }*/
 
             th = document.createElement('th');
             th.innerText = 'HQ';
@@ -610,7 +610,7 @@ onDomLoad(function() {
                 td.innerText = simplifyUnit(i.unit, true);
                 tr.appendChild(td);
 
-                if (data.chemical.mutagenic) {
+                /*if (data.chemical.mutagenic) {
                     var adj = riskData.adjusted_intake;
                     if (adj == null) {
                         i = {value: NaN, unit: ''};
@@ -622,7 +622,7 @@ onDomLoad(function() {
                     td = document.createElement('td');
                     td.innerText = simplifyUnit(adj.unit, true);
                     tr.appendChild(td);
-                }
+                }*/
 
                 var hq = riskData.hazard_quotient;
                 td = document.createElement('td');
@@ -756,9 +756,9 @@ onDomLoad(function() {
                             return '';
                         }
                         var add = data[ageSelect.val()].intake;
-                        if (data[ageSelect.val()].adjusted_intake) {
+                        /*if (data[ageSelect.val()].adjusted_intake) {
                             add = data[ageSelect.val()].adjusted_intake;
-                        }
+                        }*/
                         return asScientific(add.value, 4);
                     }
                 },
@@ -771,9 +771,9 @@ onDomLoad(function() {
                             return '';
                         }
                         var add = data[ageSelect.val()].intake;
-                        if (data[ageSelect.val()].adjusted_intake) {
+                        /*if (data[ageSelect.val()].adjusted_intake) {
                             add = data[ageSelect.val()].adjusted_intake;
-                        }
+                        }*/
                         return simplifyUnit(add.unit, true);
                     }
                 },
@@ -935,12 +935,13 @@ onDomLoad(function() {
                     risk: 0
                 };
             }
-
-            i = info.risk[age].adjusted_intake;
+            
+            i = info.risk[age].intake;
+            //i = info.risk[age].adjusted_intake;
             iu = '';
-            if (i == null) {
-                i = info.risk[age].intake;
-            }
+            //if (i == null) {
+            //    i = info.risk[age].intake;
+            //}
             if (i == null) {
                 i = 0;
             }
