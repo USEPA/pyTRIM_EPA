@@ -136,6 +136,7 @@ def _ts_simulation(simulation: MircSimulation):
         },
         'exposureProfile': simulation.mirc_scenario.as_serializable(),
         'timestamp': simulation.timestamp,
+        'created': simulation.created.strftime('%B %d, %Y'),
         'fishPathway': 'B(S)AF' if simulation.use_baf else 'Direct'
     }
 

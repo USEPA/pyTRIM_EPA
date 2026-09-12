@@ -390,26 +390,31 @@ onDomLoad(function() {
 
         if (meta.name != undefined) {
             var simNum = parseInt(meta.name?.replace('Simulation', '').trim());
-
             $('#mirc-results-name').text(
                 `(${simNum}) ${chemical.name} Simulation (CAS ${chemical.cas_number?.replace(/ /g, '')})`
             );
-            $('#mirc-results-shortdesc').text(
-                `${(new Date(meta.timestamp)).toLocaleDateString('en-US', timeDisplayOpts)} | ${meta.exposureProfile?.name}`
-            ).show();
+            
+            shortdesc = $('#mirc-results-shortdesc');
+            shortdesc.text("");
+            function add_shortdesc(label, text) {
+                $(`<small class="mb-1">${label}</small>`)
+                    .append(
+                        $('<span class="text-muted" />').text(text)
+                    ).append("<br/>").appendTo(shortdesc);
+            }
+            add_shortdesc("Exposure Profile: ", meta.exposureProfile?.name);
+            add_shortdesc("Date Created: ", meta.created);
+            add_shortdesc("TRIM Output Date: ", (new Date(meta.timestamp)).toLocaleDateString('en-US', timeDisplayOpts));
+            if (meta.description) {
+                add_shortdesc("Notes: ", meta.description);
+            }
+            shortdesc.show();
         }
         else {
             $('#mirc-results-name').text(
                 'Simulation Not Found'
             );
             $('#mirc-results-shortdesc').hide();
-        }
-
-        if (meta.description) {
-            $('#simulation-description').text(meta.description).show();
-        }
-        else {
-            $('#simulation-description').hide();
         }
 
         $('#exposure-profile').val(meta.exposureProfile?.name);

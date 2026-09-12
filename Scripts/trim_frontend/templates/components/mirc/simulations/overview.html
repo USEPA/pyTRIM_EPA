@@ -652,33 +652,48 @@ onDomLoad(function() {
 
                             var cardRow = $('<div class="row p-0" />').appendTo(cardBody);
                             var cardCol = $('<div class="col" />').appendTo(cardRow);
-                            $('<p class="mb-1" />')
+                            $('<small class="mb-1">Exposure Profile: </small>')
                                 .append(
                                     $(`<a href="${profileViewUrl.replace('/0', '/' + sim.exposureProfile.id)}" target="_blank" tabindex="0" />`)
                                         .text(sim.exposureProfile.name)
                                 )
                                 .appendTo(cardCol);
-
+                            
+                            cardRow = $('<div class="row p-0" />').appendTo(cardBody);
                             cardCol = $('<div class="col" />').appendTo(cardRow);
-                            $('<p class="mb-1 text-right" />')
-                                .text((new Date(sim.timestamp)).toLocaleDateString('en-US', timeDisplayOpts))
+                            $('<small class="mb-0" />')
+                                .html(`Primary Pathway (LADD): <span class="${sim.primaryPathway ? 'text-danger' : 'text-muted'}">${sim.primaryPathway || 'None'}</span>`)
+                                .appendTo(cardCol);
+
+                            cardRow = $('<div class="row p-0" />').appendTo(cardBody);
+                            cardCol = $('<div class="col" />').appendTo(cardRow);
+                            $('<small class="mb-1">Date Created: </small>')
+                                .append(
+                                    $('<span class="text-muted" />').text((new Date(sim.created)).toLocaleDateString('en-US', timeDisplayOpts))
+                                )
+                                .appendTo(cardCol);
+
+                            cardRow = $('<div class="row p-0" />').appendTo(cardBody);
+                            cardCol = $('<div class="col" />').appendTo(cardRow);
+                            $('<small class="mb-1">TRIM Output Date: </small>')
+                                .append(
+                                    $('<span class="text-muted" />').text((new Date(sim.timestamp)).toLocaleDateString('en-US', timeDisplayOpts))
+                                )
                                 .appendTo(cardCol);
 
                             if ((sim.description || '').trim()) {
                                 cardRow = $('<div class="row p-0" />').appendTo(cardBody);
                                 cardCol = $('<div class="col" />').appendTo(cardRow);
-                                $('<p class="mb-1 text-muted" />').text(`> ${sim.description}`).appendTo(cardCol);
+                                $(`<small class="mb-1">Notes: </small>`)
+                                    .append(
+                                        $('<span class="text-muted" />').text(`${sim.description}`)
+                                    )
+                                    .appendTo(cardCol);
                             }
 
                             // cardRow = $('<div class="row p-0" />').appendTo(cardBody);
                             // cardCol = $('<div class="col" />').appendTo(cardRow);
                             // $('<p class="mb-1" />').text(`Fish Calculation: ${sim.fishPathway}`).appendTo(cardCol);
-
-                            cardRow = $('<div class="row p-0" />').appendTo(cardBody);
-                            cardCol = $('<div class="col" />').appendTo(cardRow);
-                            $('<p class="mb-0" />')
-                                .html(`Primary Pathway: <span class="${sim.primaryPathway ? 'text-danger' : 'text-muted'}">${sim.primaryPathway || 'None'}</span>`)
-                                .appendTo(cardCol);
                             
                             if (simNum % 2 == 0) {
                                 row = $('<div class="row" />').appendTo(simCards);

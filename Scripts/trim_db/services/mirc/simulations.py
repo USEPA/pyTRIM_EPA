@@ -726,6 +726,7 @@ class MircSimulationService(GenericService[MircSimulation]):
                 'exposureProfile': simulation.mirc_scenario.as_serializable(),
                 'importSource': simulation.trim_scenario.name or 'N/A',
                 'timestamp': simulation.timestamp,
+                'created': simulation.created.strftime('%B %d, %Y'),
                 'chemical': simulation.chemical.as_serializable(),
                 'usesAermod': len([p for p in simulation.parameters if p.variable == 'Ca' and p.value != 0]) > 0,
                 'fishPathway': 'B(S)AF' if simulation.use_baf else 'Direct',
