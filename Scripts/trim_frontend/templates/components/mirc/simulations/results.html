@@ -1022,7 +1022,7 @@ onDomLoad(function() {
         });
 
         var targetPercents = percents[factor];
-        var sigPaths = targetPercents.filter(x => x != 0 && !Number.isNaN(x)).length;
+        var sigPaths = targetPercents.filter(x => x >= 0.10 && !Number.isNaN(x)).length;
         if (otherPercent[factor] > 0) {
             products.push('Other');
             targetPercents.push(otherPercent[factor]);
@@ -1033,11 +1033,11 @@ onDomLoad(function() {
 
         function addKpis() {
             function makeKpi(title, value) {
-                var col = $('<div class="col-lg-4 mb-4" />');
+                var col = $('<div class="col-lg-3 mb-4" />');
                 var card = $('<div class="card border-left-primary shadow h-100" />').appendTo(col);
                 var cardBody = $('<div class="card-body p-3" />').appendTo(card);
 
-                $('<small class="d-block font-weight-bold text-uppercase mb-1 text-muted" />')
+                $('<small class="kpi-title d-block font-weight-bold text-uppercase mb-1 text-muted" />')
                     .text(title)
                     .appendTo(cardBody);
                 $('<div class="h5 mb-0 font-weight-bold text-gray-800" />')
@@ -1049,15 +1049,17 @@ onDomLoad(function() {
 
             var kpiRow = $('<div class="row" />').prependTo(legend);
             if (Number.isNaN(targetPercents[0])) {
-                makeKpi('Primary Path', 'N/A').appendTo(kpiRow);
+                makeKpi(`Primary Path (${age})`, 'N/A').appendTo(kpiRow);
             }
             else {
-                makeKpi('Primary Path', `${products[0]} (${round(parseFloat(targetPercents[0]) * 100, 2)}%)`)
+                makeKpi(`Primary Path (${age})`, `${products[0]} (${Math.ceil(parseFloat(targetPercents[0]) * 100)}%)`)
                     .appendTo(kpiRow);
             }
-            makeKpi('Total Risk', `${round(total.risk, 3)}`)
+            makeKpi(`TOTAL HQ (${age})`, `${asScientific(total.hazard, 2)}`)
                 .appendTo(kpiRow);
-            makeKpi('Significant Paths', `${round(sigPaths, 2)}`)
+            makeKpi('TOTAL LIFETIME RISK', `${asScientific(total.risk, 2)}`)
+                .appendTo(kpiRow);
+            makeKpi('PATHS AT LEAST 10% OF ADD', `${round(sigPaths, 2)}`)
                 .appendTo(kpiRow);
         }
 
@@ -1322,6 +1324,11 @@ onDomLoad(function() {
 </script>
 
 <style>
+    .kpi-title {
+        min-height: 2.5em;
+        line-height: 1.25;
+    }
+
     /* Fix bs-popover arrows... */
     .bs-popover-right > .arrow,
     .bs-popover-auto[x-placement^="right"]>.arrow {
