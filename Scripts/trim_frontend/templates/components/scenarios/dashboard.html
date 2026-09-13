@@ -18,21 +18,21 @@
         </div>
     </div>
     {% endif %}
+    <a href="{{ url_for('mirc_scenario.view_risk_scenarios') }}"
+        class="btn btn-sm btn-outline-secondary text-dark mb-1 mr-1 py-1"
+        target="_blank" tabindex="0"
+    >
+        <i class="fa fa-edit"></i>
+        Exposure Profiles
+    </a>
     <button type="button"
-        class="btn btn-sm btn-primary mb-1 mr-1 py-1"
+        class="btn btn-sm btn-primary mb-1 py-1"
         data-toggle="modal"
         data-target="#{{ create_modal_id }}"
     >
         <i class="fa fa-plus"></i>&nbsp;
         New<span class="d-none d-sm-inline"> Scenario</span>
     </button>
-    <a href="{{ url_for('mirc_scenario.view_risk_scenarios') }}"
-        class="btn btn-sm btn-outline-primary mb-1 py-1"
-        target="_blank" tabindex="0"
-    >
-        <i class="fa fa-pencil-alt"></i>
-        Exposure Profiles
-    </a>
 </div>
 <div class="container-fluid content-row">
     <div class="row">

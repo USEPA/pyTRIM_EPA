@@ -9,7 +9,8 @@ trim_scenario = ScenarioService.get(trim_scenario_id)
 simulation = [s for s in trim_scenario.mirc_simulations if s.id == simulation_id]
 simulation = simulation[0]
 
-vv = simulation.as_serializable()
+s = simulation.as_serializable()
+other_parameters = [p.as_serializable() for p in simulation.parameters]
 
 results = MircSimulationService(simulation).run_pathways()
 report = make_report(results)
