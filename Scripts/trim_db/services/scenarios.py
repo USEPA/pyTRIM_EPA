@@ -76,17 +76,29 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
     from shapely.ops import nearest_points
     from trim_core.aermod import AermodReader
     from trim_core.coordinates import CoordinateMapper
+    from trim_frontend.parcels.utils import handle_parcel_update
 
     try:
         df = AermodReader(filestream).as_dataframe()
     except Exception as e:
-        print('parse airmod lines error:', e)
-        import traceback
-        traceback.print_exc()
-        raise
+        raise Exception(f"Error parsing aermod :: {e}")
 
     # print('>>>>>>>>>> Initial load:')
     # print(df)
+
+    if "GRP" in df.columns.values:
+        unique_group_names = df["GRP"].unique()
+        if len(unique_group_names) == 1:
+            # only one group; ok to use it
+            pass
+        else:
+            if "ALL" in unique_group_names:
+                # drop all rows where "GRP" != "ALL" (tilde negates)
+                df = df.drop(df[~(df["GRP"] == "ALL")].index)
+            else:
+                raise Exception("Multiple GRP entries found; none were ALL")
+    else:
+        raise Exception("AERMOD file does not contain required 'GRP' column.")
 
     # Filter by zflag
     if 'ZFLAG' in df.columns.values:
@@ -116,7 +128,9 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
     # We will also need a user restriction to limit
     # receptors intended for TRIM modeling
     # – i.e., Cartesian grid with no overlapping receptors
-    df_aermod = df[~df['NET ID'].str.startswith('POLGRID')].copy()
+    df_aermod = df.copy()
+    if 'NET ID' in df_aermod.columns:
+        df_aermod = df[~df['NET ID'].str.startswith('POLGRID')]
 
     try:
         # Convert AERMOD X and Y to WGS84 coordinates.
@@ -138,10 +152,7 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
             df_aermod['wgs_x'] = df_aermod.X.astype('float')
             df_aermod['wgs_y'] = df_aermod.Y.astype('float')
     except Exception as e:
-        print('parse airmod wgs_x/wgs_y error:', e)
-        import traceback
-        traceback.print_exc()
-        raise
+        raise Exception(f"Error parsing aermod wgs_x/wgs_y :: {e}")
 
     # print('>>>>>>>>>> Mapped coords:')
     # print(df_aermod)
@@ -197,13 +208,13 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
             lambda p_id: get_compartment_volume(p_id, 'Air')
         )
     except Exception as e:
-        print(f"Error finding parcels corresponding to sources: {e}")
-        import traceback
-        traceback.print_exc()
-        raise
+        raise Exception(f"Error finding parcels corresponding to sources :: {e}")
 
     # print('>>>>>>>>>> Added parcel areas & compartment heights:')
     # print(df_aermod)
+
+    if df_aermod.empty:
+        raise ValueError("AERMOD file has no receptors to map to scenario parcel locations")
 
     def get_distance_to_nearest_neighbor(from_x, from_y, neighbors_df):
         point = Point(from_x, from_y)  # make a shapely point object of current point of interest
@@ -279,10 +290,7 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
                 (aggdep['WET DEPO'] / ndays) * aggdep['parcel_area']  # (g/m^2 / day) * m^2 = g/day
             )
     except Exception as e:
-        print(f'Possible Grouping Error: {e}')
-        import traceback
-        traceback.print_exc()
-        raise
+        raise Exception(f"Possible grouping error :: {e}")
 
     # print('>>>>>>>>>> Added aggregate deposition:')
     # print(aggdep)
@@ -296,10 +304,7 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
         ]
         aermod_results: dict[int, dict[str, float]] = aggdep.set_index('parcel_id').to_dict(orient='index')
     except Exception as e:
-        print('parse airmod res_json error:', e)
-        import traceback
-        traceback.print_exc()
-        raise
+        raise Exception(f"Error parsing aermod res_json :: {e}")
 
     # print('>>>>>>>>>> Result JSON:')
     # print(aermod_results)
@@ -322,6 +327,18 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
                 target_param, formula=f'{aermod_val} if chemical.id == {for_chemical.id} else 0',
                 unit=AERMOD_UNITS[target_param]
             )
+        elif compartment.volume_element.name in ['DryVaporSource', 'WetVaporSource']:
+            handle_parcel_update(
+                parcel,
+                {
+                    "chemical_name": for_chemical.name,
+                    "compartment_name": compartment.name,
+                    "emission_value": f"{aermod_val}",
+                    "field": "emission",
+                    "id": parcel.id,
+                    "ve_name": compartment.volume_element.name,
+                },
+            )
 
     try:
         chem_spec = metadata.get('chemical_species') or 'Particle'
@@ -343,9 +360,6 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
                 vals['Concentration_Avg']
             )
     except Exception as e:
-        print('parse airmod formulas error:', e)
-        import traceback
-        traceback.print_exc()
-        raise
+        raise Exception(f"Error parsing aermod formulas :: {e}")
 
     return aermod_results
