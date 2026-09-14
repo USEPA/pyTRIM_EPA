@@ -1,16 +1,11 @@
-
-<form id="parcels-gui"
-    data-async-form="true"
-    data-form-src="scenario_parcels_form"
->
+<form id="parcels-gui" data-async-form="true" data-form-src="scenario_parcels_form">
     <section class="container px-0">
         <div class="accordion mb-3">
             <div id="parcelUploadHeading" class="border-bottom">
                 <h2 class="mb-0">
-                    <button class="btn btn-link btn-block text-right text-decoration-none"
-                        type="button" data-toggle="collapse" data-target="#parcelUploadForm"
-                        aria-expanded="false" aria-controls="parcelUploadForm"
-                    >
+                    <button class="btn btn-link btn-block text-right text-decoration-none" type="button"
+                        data-toggle="collapse" data-target="#parcelUploadForm" aria-expanded="false"
+                        aria-controls="parcelUploadForm">
                         <i class="fa fa-chevron-down mr-2"></i>Load Parcels from File
                     </button>
                 </h2>
@@ -43,7 +38,8 @@
                         </div>
 
                         <!-- <div data-slot="true" data-target="parcel_coordinates_description"></div> -->
-                        <a id="upload-btn" href="#" class="btn btn-secondary"><i class="fas fa-upload mr-1"></i>Upload</a>
+                        <a id="upload-btn" href="#" class="btn btn-secondary"><i
+                                class="fas fa-upload mr-1"></i>Upload</a>
                     </div>
                 </div>
             </div>
@@ -51,10 +47,9 @@
         <div class="accordion mb-3">
             <div id="depositionOverlayHeading" class="border-bottom">
                 <h2 class="mb-0">
-                    <button class="btn btn-link btn-block text-right text-decoration-none"
-                        type="button" data-toggle="collapse" data-target="#depositionOverlayForm"
-                        aria-expanded="false" aria-controls="depositionOverlayForm"
-                    >
+                    <button class="btn btn-link btn-block text-right text-decoration-none" type="button"
+                        data-toggle="collapse" data-target="#depositionOverlayForm" aria-expanded="false"
+                        aria-controls="depositionOverlayForm">
                         <i class="fa fa-chevron-down mr-2"></i>Deposition Overlay
                     </button>
                 </h2>
@@ -78,7 +73,8 @@
                         </div>
 
                         <!-- <div data-slot="true" data-target="parcel_coordinates_description"></div> -->
-                        <a id="deposition-overlay-upload-btn" href="#" class="btn btn-secondary"><i class="fas fa-upload mr-1"></i>Upload</a>
+                        <a id="deposition-overlay-upload-btn" href="#" class="btn btn-secondary"><i
+                                class="fas fa-upload mr-1"></i>Upload</a>
                     </div>
                 </div>
                 <div class="row mt-2" id="deposition-overlay-current-file" style="display:none; margin-top: 20px">
@@ -86,7 +82,9 @@
                     </div>
 
                     <div class="col-sm">
-                        <a id="deposition-overlay-delete-btn" href="#" class="btn btn-secondary"><i class="fas fa-trash mr-1"></i>Delete <span id="deposition-overlay-current-filename"></span></a>
+                        <a id="deposition-overlay-delete-btn" href="#" class="btn btn-secondary"><i
+                                class="fas fa-trash mr-1"></i>Delete <span
+                                id="deposition-overlay-current-filename"></span></a>
                     </div>
                 </div>
             </div>
@@ -124,7 +122,7 @@
         </div>
         <div class="row mb-2">
             <div class="col-sm">
-                <div class="text-center" id="mapid" style="width: 100%; height: 600px;" ></div>
+                <div class="text-center" id="mapid" style="width: 100%; height: 600px;"></div>
             </div>
         </div>
         <div class="row">
@@ -132,51 +130,56 @@
                 <div class="pill pill-alert col-sm">
                     <small>
                         <strong>
-                            <u>Click on the table cells to edit properties</u>. 
+                            <u>Click on the table cells to edit properties</u>.
                         </strong>
                     </small>
                 </div>
                 <table data-slot="true" data-target="mapTable" class="hover wrap-text" id="mapTable"></table>
             </div>
         </div>
-		<div class="row">
-			<fieldset class="mt-2">
-				<legend>AERMOD Receptors</legend>
-				<div class="row mb-1">
-					<div class="col-sm">
+        <div class="row">
+            <fieldset class="mt-2">
+                <legend>AERMOD Receptors</legend>
+                <div class="row mb-1">
+                    <div class="col-sm">
                         <p>
-                            Generate grids of AERMOD receptors using the Receptor Spacing you entered in the editable table above.
+                            Generate grids of AERMOD receptors using the Receptor Spacing you entered in the editable
+                            table above.
                         </p>
                         <p>
                             Once receptors have been generated, select one of the Download buttons
                             to download a GeoJSON or AERMOD input file of the receptor grids.
-                            You can view the generated receptors in the map by turning on the display in the map’s basemap selection box.
-                            If you subsequently change receptor spacing, you must again select Generate AERMOD Receptors.
-                            If the display in the map does not refresh, select the Recalculate button at the bottom right of the page
+                            You can view the generated receptors in the map by turning on the display in the map’s
+                            basemap selection box.
+                            If you subsequently change receptor spacing, you must again select Generate AERMOD
+                            Receptors.
+                            If the display in the map does not refresh, select the Recalculate button at the bottom
+                            right of the page
                             and again turn on the display in the map’s basemap selection box.
                         </p>
-						<a id="generate_aermod_receptors_btn" role="link" style="cursor:pointer" tabindex="0" class="btn btn-secondary">Generate AERMOD Receptors</a>
-					</div>
-				</div>
-				<div class="row mb-1 mt-3" id="aermod-receptors-current-file" style="display: none;">
-					<div class="errors">
-					</div>
-					<div class="col-sm">
-						<a id="aermod-receptors-download-geojson-btn" target="_blank" href="#" class="btn btn-dark">
+                        <a id="generate_aermod_receptors_btn" role="link" style="cursor:pointer" tabindex="0"
+                            class="btn btn-secondary">Generate AERMOD Receptors</a>
+                    </div>
+                </div>
+                <div class="row mb-1 mt-3" id="aermod-receptors-current-file" style="display: none;">
+                    <div class="errors">
+                    </div>
+                    <div class="col-sm">
+                        <a id="aermod-receptors-download-geojson-btn" target="_blank" href="#" class="btn btn-dark">
                             <i class="fas fa-download mr-1"></i>Download geojson
                         </a>
-						<a id="aermod-receptors-download-aermod-btn" target="_blank" href="#" class="btn btn-dark">
+                        <a id="aermod-receptors-download-aermod-btn" target="_blank" href="#" class="btn btn-dark">
                             <i class="fas fa-download mr-1"></i>Download AERMOD input
                         </a>
-					</div>
-				</div>
-			</fieldset>
-		</div>
+                    </div>
+                </div>
+            </fieldset>
+        </div>
     </section>
 </form>
-<link rel="stylesheet" href="{{url_for('static', filename='css/form_styles.css')}}"/>
-<link rel="stylesheet" href="{{url_for('static', filename='css/custom_icons.css')}}"/>
-<link rel="stylesheet" href="{{url_for('static', filename='css/lib/leaflet.measurecontrol.css')}}"/>
+<link rel="stylesheet" href="{{url_for('static', filename='css/form_styles.css')}}" />
+<link rel="stylesheet" href="{{url_for('static', filename='css/custom_icons.css')}}" />
+<link rel="stylesheet" href="{{url_for('static', filename='css/lib/leaflet.measurecontrol.css')}}" />
 <script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}">
 </script>
 <script src="{{ url_for('static', filename='js/lib/dataTables/jquery.dataTables.min.js') }}">
@@ -191,438 +194,26 @@
 </script>
 <script src="{{ url_for('static', filename='js/lib/leaflet.measurecontrol.min.js') }}">
 </script>
+<script src="{{url_for('static', filename='js/parcels_leaflet.js')}}">
+</script>
 <script>
-	// aermod receptor related helper functions -- START
-	function renderAermodDownloadUi(responseData) {
-		let presignedGeojsonUrl = responseData.presigned_urls["data.geojson"];
-		let presignedAermodInputUrl = responseData.presigned_urls["aermod_receptors.txt"];
-
-		// update generate button label
-		$("#generate_aermod_receptors_btn").html((presignedGeojsonUrl === undefined ? "Generate" : "Regenerate") + " AERMOD Receptors");
-
-		// show the download URL
-		if (presignedGeojsonUrl != undefined) {
-			$("#aermod-receptors-download-geojson-btn").attr("href", presignedGeojsonUrl);
-			$("#aermod-receptors-download-aermod-btn").attr("href", presignedAermodInputUrl);
-			$("#aermod-receptors-current-file").show();
-		}
-
-		//plot it
-		installAermodReceptorsOntoMap(responseData, presignedGeojsonUrl);
-	}
-
-	window.receptorOverlayShowing = false;
-	let installAermodReceptorsOntoMap = function(responseData, presignedGeojsonUrl) {
-		let errorDisplayArea = $("#aermod-receptors-current-file .errors");
-		errorDisplayArea.empty();
-
-		let preserveShownState = receptorOverlayShowing;
-		if (window.receptorOverlayGroup !== null) {
-			mapLayers.removeLayer(receptorOverlayGroup); // removes option from the layers dialog
-			receptorOverlayGroup.removeFrom(map); // removes dots from the map
-		}
-
-        window.receptorOverlayGroup = L.layerGroup();
-
-		if (presignedGeojsonUrl !== undefined) {
-			if (responseData.file_metadata?.errors === undefined || responseData.file_metadata?.errors.length == 0) {
-				// fetch the data
-				TRIM.api.hitUrl(presignedGeojsonUrl, function(presignedSuccess, presignedResponse) {
-					let overlayGridPoints = [];
-                    if (presignedResponse != null) {
-                        for (let i = 0 ; i < presignedResponse.features.length; i++) {
-                            let el = presignedResponse.features[i];
-                            let point = [ el.geometry.coordinates[1], el.geometry.coordinates[0] ];
-                            overlayGridPoints.push(point);
-                            let colorForDisplay = "#000000"; // black
-                            var marker = L.circleMarker(point, { pmIgnore: true, radius: .2, stroke: true, color: colorForDisplay}).addTo(receptorOverlayGroup);
-                        }
-                    }
-
-					receptorOverlayGroup.on("add", function() { receptorOverlayShowing = true; });
-					receptorOverlayGroup.on("remove", function() { receptorOverlayShowing = false; });
-
-					// preserve previously selected state after a refresh or regeneration
-					if (preserveShownState) {
-						receptorOverlayGroup.addTo(map); // preselects it in the layers control!
-					}
-				});
-
-				mapLayers.addOverlay(receptorOverlayGroup, "AERMOD Receptors");
-			}
-            else {
-				// I don't think this'll ever actually happen
-				$("<h4/>").html("Errors with generated file:").appendTo(errorDisplayArea);
-                if (responseData.file_metadata?.errors != undefined) {
-                    for (let i = 0 ; i < responseData.file_metadata.errors.length ; i++) {
-                        $("<li/>").html(responseData.file_metadata.errors[i]).appendTo(errorDisplayArea);
-                    }
-                }
-			}
-		}
-	};
-	// aermod receptor related helper functions -- END
-
-	// deposition overlay helper functions -- START
-	let addDepositionOverlayLegend = function(bucketRanges, bucketColors) {
-		if (typeof depositionOverlayLegend != "undefined") {
-			map.removeControl(depositionOverlayLegend); // removes the legend
-		}
-
-		// thx https://codepen.io/haakseth/pen/KQbjdO
-		window.depositionOverlayLegend = L.control({ position: "bottomright" });
-
-		depositionOverlayLegend.onAdd = function(map) {
-			var div = L.DomUtil.create("div", "leaflet-legend deposition-overlay");
-
-			div.innerHTML += "<h4>Total Deposition (g/m<sup>2</sup>)</h4>";
-			for (let i = quartileGradient.length - 1 ; i >= 0 ; i--) {
-				let jenksBucket = bucketRanges[i];
-				let rangeDisplay = jenksBucket.from.toExponential() + " - " + jenksBucket.to.toExponential();
-				div.innerHTML += '<i style="background: ' +
-					quartileGradient[i] +
-					'"></i><span>' + 
-					rangeDisplay +
-					'</span><br>';
-			}
-
-			return div;
-		};
-
-		depositionOverlayLegend.addTo(map);
-	};
-
-	let uninstallDepositionOverlayFromMap = function() {
-		if (typeof depositionOverlayLegend != "undefined") {
-			map.removeControl(depositionOverlayLegend); // removes the legend
-		}
-		mapLayers.removeLayer(depositionOverlayGroup); // removes from the layers menu
-		depositionOverlayGroup.removeFrom(map); // hides from the map
-		$("#deposition-overlay-current-file").hide(); // hide management ui
-	};
-
-	let installDepositionOverlayOntoMap = function(responseData) {
-		let errorDisplayArea = $("#deposition-overlay-current-file .errors");
-		errorDisplayArea.empty();
-
-		if (responseData.file_metadata != null) {
-			// show the management UI
-			$("#deposition-overlay-current-filename").html(responseData.file_metadata.original_file_name);
-			$("#deposition-overlay-current-file").show();
-
-			if (responseData.file_metadata.errors === undefined || responseData.file_metadata.errors.length == 0) {
-				// fetch the data
-				let presignedUrl = responseData.presigned_urls["processed.json"];
-
-				TRIM.api.hitUrl(presignedUrl, function(presignedSuccess, presignedResponse) {
-					// the https://stackoverflow.com/questions/10756313/javascript-jquery-map-a-range-of-numbers-to-another-range-of-numbers, with a twist
-					/*
-					function findGradientSlot (number, inMin, inMax, outMin, outMax) {
-						return Math.round((number - inMin) * (outMax - outMin) /
-							(inMax - inMin) + outMin);
-					}
-					*/
-
-					let overlayPolyPoints = [];
-					for (let i = 0 ; i < presignedResponse.row_data.length; i++) {
-						let el = presignedResponse.row_data[i];
-						let point = [ el.wgs84_lat, el.wgs84_long ];
-						overlayPolyPoints.push(point);
-						let colorForDisplay = quartileGradient[el.jenks_bucket];
-						var marker = L.circleMarker(point, { pmIgnore: true, radius: 1, stroke: true, color: colorForDisplay}).bindPopup("Total Depo == " + el.combined_deposition.toExponential()).addTo(depositionOverlayGroup);
-					}
-
-					addDepositionOverlayLegend(responseData.file_metadata.jenks_buckets, quartileGradient);
-
-					depositionOverlayGroup.on("add", function() { $(".leaflet-legend").removeClass("hidden"); });
-					depositionOverlayGroup.on("remove", function() { $(".leaflet-legend").addClass("hidden"); });
-					depositionOverlayGroup.addTo(map); // preselects it in the layers control!
-				});
-
-				mapLayers.addOverlay(depositionOverlayGroup, "Deposition");
-			} else {
-				$("<h4/>").html("Errors with uploaded file:").appendTo(errorDisplayArea);
-				for (let i = 0 ; i < responseData.file_metadata.errors.length ; i++) {
-					$("<li/>").html(responseData.file_metadata.errors[i]).appendTo(errorDisplayArea);
-				}
-			}
-		}
-	};
-	// deposition overlay helper functions -- END
-
-	var map = L.map('mapid', { drawControl: false }).setView([35.99, -78.90], 12);
-
-	// Useful links:
-	// https://colordesigner.io/gradient-generator !
-	// https://visualisingdata.com/2019/08/five-ways-to-design-for-red-green-colour-blindness/
-	let quartileGradient = [ "#D8C56C", "#C55B6C", "#A03C8E", "#7D1F4B" ]; // low->high
-
-	// START -- dots on vertices
-
-	// dot is the leaflet internal id
-	// parcel is object containing the TRIM parcel id and the leaflet internal id
-	// e.g.:
-	// { leafletDotIdOne: { trimParcelId: A, leafletPolygonId: B }, leafletDotIdTwo: { trimParcelId: foo, leafletPolygonId: bar } }
-	let dotToParcel = {};
-
-	let addParcelAssociation = function(elementId, storageStructure, storageKey, associationType) {
-		if (associationType === undefined) {
-			associationType = "oneToOne";
-		}
-
-		if (associationType == "oneToMany") {
-			if (!(storageKey in storageStructure)) {
-				storageStructure[storageKey] = [];
-			}
-			if (!(elementId in storageStructure[storageKey])) {
-				storageStructure[storageKey].push(elementId);
-			}
-		} else if (associationType == "oneToOne") {
-			storageStructure[storageKey] = elementId;
-		}
-	};
-
-	let clearParcelAssociations = function(parcelId) {
-		for (let dotId in dotToParcel) {
-			if (dotToParcel[dotId] == parcelId) {
-				delete dotToParcel[dotId];
-			}
-		}
-	};
-
-	map.on('layerremove', function(e) {
-		if (e.layer.feature !== undefined) { // a parcel polygon was just deleted by the user...
-			// console.log("parcel remove: '" + e.layer.feature.properties.name + "' (leafletid==" + L.stamp(e.layer) + ", TRIM parcelid==" + e.layer.feature.properties.parcelid + ")");
-			clearParcelAssociations(e.layer.feature.properties.parcelid);
-
-			let relatedStampId = L.stamp(e.layer);
-			map.eachLayer(function(probe) {
-				if (probe.dotMarkerData !== undefined &&
-					probe.dotMarkerData.type == "VertexDotMarkers" &&
-					(probe.dotMarkerData.properties.relatedParcelId == e.layer.feature.properties.parcelid ||
-						probe.dotMarkerData.properties.relatedLeafletId == relatedStampId)) {
-					map.removeLayer(probe);
-					return;
-				}
-			});
-		} else {
-			let deletedId = L.stamp(e.layer);
-			if (deletedId in dotToParcel) {
-				// user clicked on an individual dot making up a parcel, not the middle of the parcel...let's delete the
-				// underlying parcel...
-
-				// console.log("dot '" + deletedId + "' removed: that's parcel " + dotToParcel[deletedId]);
-
-				map.eachLayer(function(probe) {
-					if (probe.feature !== undefined &&
-						probe.feature.type == "Feature" &&
-						(probe.feature.properties.parcelid == dotToParcel[deletedId].trimParcelId ||
-							L.stamp(probe) == dotToParcel[deletedId].leafletPolygonId)) {
-						map.removeLayer(probe);
-						window.deleteParcelFromServer({"properties": { "parcelid": probe.feature.properties.parcelid } });
-						return;
-					}
-				});
-			}
-		}
-	});
-
-	let mapDotColor = "#3388ff";
-
-	// EDIT MODE - start
-	let globalEditMode = false;
-	let globalEditBuildup = {}; // dictionary of { parcel_id: lat_lng_array }
-	map.on('pm:globaleditmodetoggled', function(e) {
-		globalEditMode = e.enabled;
-
-		if (globalEditMode) {
-			// console.log("EDITME handle prep...");
-			globalEditBuildup = {};
-		} else if (!globalEditMode) {
-			// console.log("EDITME handle cleanup/update...");
-
-			let numParcelsToUpdate = 0;
-			for (let key in globalEditBuildup) {
-				numParcelsToUpdate++;
-			}
-
-			let finishedCounter = 0;
-			for (let key in globalEditBuildup) {
-				let coords = globalEditBuildup[key];
-				console.log("SAVE: " + coords + " for parcel " + key);
-				// TRIM.api.updateParcel('{{ scenario.id }}', parcel.toGeoJSON()).on('load', function() {
-
-				let parcel_info = [{
-					'type': 'data',
-					'name': 'id',
-					'value': key
-				},{
-					'type': 'data',
-					'name': 'field',
-					'value': 'vertices'
-				}, {
-					'type': 'input',
-					'name': 'vertices',
-					'value': JSON.stringify(coords)
-				}]
-
-				TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load',function(){
-					finishedCounter++;
-					// console.log("finished [" + finishedCounter + "/" + numParcelsToUpdate + "]");
-					if (finishedCounter >= numParcelsToUpdate) {
-						window.location.reload(); // reload the page; redraws the dotMarkers, etc.
-					}
-				});
-				// FUTURE ENHANCEMENT - do we want to try to be smart if moving a shared vertex?
-				// e.g. if vertex is in two parcels we could try to update it for both...
-			}
-			globalEditBuildup = {};
-		}
-	});
-	// EDIT MODE - end
-
-	// as soon as a vertex change is made, we are going to reload the page at the end.
-	// easiest way to handle the blue dotMarkers is to just remove them all at this point.
-	// the page reload will re-add them at the new vertex locations.
-	//
-	// alternative would be to constantly be moving vertices around but that doesn't really seem
-	// worth the trouble.
-	let hideAllDotMarkers = function() {
-		map.eachLayer(function(probe) {
-			if (probe.dotMarkerData !== undefined && probe.dotMarkerData.type == "VertexDotMarkers") {
-				let dots = probe.getLayers();
-				for (let i = 0 ; i < dots.length ; i++) {
-					let dot = dots[i];
-					dot.setStyle({opacity:0, fillOpacity:0});
-				}
-			}
-		});
-	};
-
-	// case 1 -- fires on initial load, NOT when drawing a parcel on-the-fly
-	map.on('layeradd', function(e) {
-		
-		// user is editing vertices...
-		let vertexChangesMade = false;
-		e.layer.on('pm:change', function (e) {
-			if (globalEditMode === true) {
-				let parcelName = e.layer.feature.properties.name;
-				let parcelId = e.layer.feature.properties.parcelid;
-				let coords = e.latlngs[0];
-				// console.log("EDITME: '" + parcelName + "' (" + parcelId + ") resize, now has " + coords.length + " points");
-				let rawLatLongs = [];
-				for (let i = 0; i < coords.length ; i++) {
-					rawLatLongs.push([coords[i].lat, coords[i].lng]);
-				}
-				rawLatLongs.push([coords[0].lat, coords[0].lng]); // add trailing vertex to close
-				globalEditBuildup[parcelId] = rawLatLongs;
-			}
-
-			// fire the very first time a user moves a vertex, just one time.
-			for (let key in globalEditBuildup) {
-				if (!vertexChangesMade) {
-					vertexChangesMade = true;
-					hideAllDotMarkers();
-					break;
-				}
-			}
-		});
-
-
-
-
-
-
-
-
-
-
-
-		if (e.layer.feature !== undefined) { // a parcel polygon was just added...doesn't fire for e.g. dotMarkers
-			// see also e.layer._leaflet_id
-			// console.log("layer add: '" + e.layer.feature.properties.name + "' (leafletid==" + L.stamp(e.layer) + ", TRIM parcelid==" + e.layer.feature.properties.parcelid + ")");
-
-			// add arbitrary something to the layer?
-			// e.layer.feature.properties.leafletLayerId = "hello-" + L.stamp(e.layer) + "-world";
-
-			let parcelDefinition = TRIM.store.currentScenario.parcels.find((element) => element.id == e.layer.feature.properties.parcelid);
-			if (parcelDefinition !== undefined) {
-				let dotMarkers = [];
-				for (let i = 0 ; i < parcelDefinition.vertices.length - 1 ; i++) {
-					let vertex = parcelDefinition.vertices[i];
-					// reverse lat/long; leaflet expects different order than we use in TRIM
-					let dotMarker = L.circleMarker([vertex[1], vertex[0]], { radius: 3, stroke: true, color: mapDotColor});
-					dotMarkers.push(dotMarker);
-
-					// note that these dots are currently "behind" the lines; that's ok since they're the same color.
-					// If we wanted a different color, look into:
-					// https://gis.stackexchange.com/questions/137061/changing-layer-order-in-leaflet
-					// basically we could call bringToFront on each marker - not doing it as long as colors are same.
-
-					// track this for later; need it during deletions
-					addParcelAssociation({
-						"trimParcelId": e.layer.feature.properties.parcelid,
-						"leafletPolygonId": L.stamp(e.layer)
-					}, dotToParcel, L.stamp(dotMarker));
-				}
-
-				let lg = L.layerGroup(dotMarkers).addTo(map);
-
-				// We need to be able to delete this group when the underlying parcel is deleted, otherwise we'll
-				// have some random dots still left on the map.
-				// could either store "lg" somewhere to access later...
-				// ...or we can just put some data onto the leaflet object in relatedParcelId, and look it up during a delete.
-				// that's what we'll do.
-				let dotMarkerData = lg.dotMarkerData = lg.dotMarkerData || {};
-				dotMarkerData.type = "VertexDotMarkers";
-				dotMarkerData.properties = dotMarkerData.properties || {};
-				lg.dotMarkerData.properties.relatedParcelId = e.layer.feature.properties.parcelid;
-				lg.dotMarkerData.properties.relatedLeafletId = L.stamp(e.layer);
-			}
-		}
-	});
-
-	// case 2 -- fires when drawing a parcel on-the-fly. We don't have an entry in currentScenario.parcels so all we can use is
-	// the internal leaflet id we get by calling L.stamp
-	map.on('pm:create', ({layer})=>{
-		let dotMarkers = [];
-		for (let i = 0 ; i < layer._latlngs[0].length ; i++) {
-			let dotMarker = L.circleMarker(layer._latlngs[0][i], { radius: 3, stroke: true, color: mapDotColor});
-			dotMarkers.push(dotMarker);
-
-			// track here as well
-			addParcelAssociation({
-				"trimParcelId": null,
-				"leafletPolygonId": L.stamp(layer)
-			}, dotToParcel, L.stamp(dotMarker));
-		}
-
-		let lg = L.layerGroup(dotMarkers).addTo(map);
-
-		let dotMarkerData = lg.dotMarkerData = lg.dotMarkerData || {};
-		dotMarkerData.type = "VertexDotMarkers";
-		dotMarkerData.properties = dotMarkerData.properties || {};
-		lg.dotMarkerData.properties.relatedParcelId = null; // no entry in currentScenario.parcels...
-		lg.dotMarkerData.properties.relatedLeafletId = L.stamp(layer);
-	});
-	// FINISH -- dots on vertices
-
-    var observer = new MutationObserver(function(mutations) {
-        map.invalidateSize(true)
+    TRIM.leaflet.initMap('mapid');
+    var observer = new MutationObserver(function (mutations) {
+        TRIM.leaflet.map.invalidateSize(true)
     });
     var target = document.querySelector('#parcels-tab-pill');
     observer.observe(target, {
         attributes: true
     });
-    onDomLoad(function() {
-        $('.accordion h2 button').on('click', function() {
+    onDomLoad(function () {
+        $('.accordion h2 button').on('click', function () {
             $(this).find('i.fa').toggleClass('fa-chevron-up fa-chevron-down')
         });
 
         // FIXME hacky way to refresh all parcels when leaving the parcels tab
         let requires_reload = false;
-        $('a[href$="-tab"]').on('click', (e)=>{
-            if ($("#parcels-tab-pill").hasClass("active")){
+        $('a[href$="-tab"]').on('click', (e) => {
+            if ($("#parcels-tab-pill").hasClass("active")) {
                 if (requires_reload) {
                     e.target.click();
                     $('#save-btn').click();
@@ -630,15 +221,11 @@
             }
         });
 
-        var parcels = L.layerGroup();
-
         var DREW_MAP = false;
 
         var parcelsReadyEvent = document.createEvent('Event');
         parcelsReadyEvent.initEvent('parcels:ready', true, true);
-        TRIM.refreshParcels = function(force) {
-			// console.log("refreshing parcels (" + force + ")...");
-
+        TRIM.refreshParcels = function (force) {
             force = force || false;
             if (TRIM.store.currentScenario.parcels && !force) {
                 document.body.dispatchEvent(parcelsReadyEvent);
@@ -646,7 +233,7 @@
             }
             LoadingScreen.show('refreshing_parcels');
             DREW_MAP = false;
-            TRIM.api.getParcels('{{ scenario.id }}').on('load', function() {
+            TRIM.api.getParcels('{{ scenario.id }}').on('load', function () {
                 var parcelData = JSON.parse(this.responseText);
                 TRIM.store.currentScenario.parcels = parcelData.parcels;
                 TRIM.store.currentScenario.standardMedia = parcelData.media;
@@ -655,9 +242,145 @@
             });
         }
 
+        document.body.addEventListener('parcels:ready', function () {
+            try {
+                TRIM.forms.populate(form, TRIM.store.currentScenario);
+                if (DREW_MAP == false) {
+                    TRIM.leaflet.drawParcels();
+                    TRIM.leaflet.initServices();
+                    mapTableRedraw();
+                    DREW_MAP = true;
+                }
+            }
+            catch (err) {
+                console.log(TRIM.store.currentScenario.parcels, err);
+            }
+            console.log('populated parcels gui!')
+            LoadingScreen.hide('parcel_gui_loading');
+        });
+
+        // CREATING A NEW PARCEL //
+        var shapes = L.geoJSON()
+
+        TRIM.leaflet.map.on('pm:create', ({ layer }) => {
+            TRIM.leaflet.map.pm.setGlobalOptions({ snapSegment: TRIM.leaflet.getSmartSnapSetting("segments") });
+            newLayer(layer);
+        });
+
+        // Map and Parcel Table Functions
+        function newLayer(l) {
+            var idIW = L.popup();
+            parcel = l;
+            var feature = parcel.feature = parcel.feature || {};
+            feature.type = "Feature";
+            feature.properties = feature.properties || {};
+            let parcelDrawHelpText = "Enter an arbitrary but unique name for the parcel. Names should not begin with Air, SW, Sed, SurfSoil, RootSoil, VadoseSoil, or GW. Names should not contain spaces. We recommend short names (e.g., less than about 15 characters) because they will be displayed on other pages of this user interface.<br/><br/>Also enter an arbitrary description of the parcel. It will not be used within the modeling.";
+            var content = '<span>' + parcelDrawHelpText + '<br/><br/><b>Parcel Name</b></span><br/><input id="shapeName" type="text"/><br/><br/><span><b>Parcel Description<b/></span><br/><textarea id="shapeDesc" cols="25" rows="5"></textarea><br/><br/><input type="button" id="okBtn" value="Save"/>';
+            idIW.setContent(content);
+            idIW.setLatLng(l.getBounds().getCenter());
+            idIW.openOn(TRIM.leaflet.map);
+            $('#okBtn').on('click', null, { parcel: parcel }, saveIdIW)
+        };
+
+        function saveIdIW(event) {
+            let parcel = event.data.parcel
+            var sName = $('#shapeName').val();
+
+            // validation
+            let parcelList = TRIM.store.currentScenario.parcels;
+            let invalid_starts = [
+                "air",
+                "sw",
+                "sed",
+                "surfsoil",
+                "rootsoil",
+                "vadosesoil",
+                "gw"
+            ];
+            for (let substr of invalid_starts) {
+                if (sName.toLowerCase().startsWith(substr)) {
+                    return;
+                }
+            }
+            if (sName.indexOf(' ') >= 0) {
+                return; // contain spaces
+            }
+            else if (parcelList.filter(p => p.name.toLowerCase() == sName.toLowerCase()).length > 0) {
+                return; // dupe parcel name
+            }
+
+            var sDesc = $('#shapeDesc').val();
+            var Area = L.GeometryUtil.geodesicArea(parcel.getLatLngs()[0]);
+            var sArea = Area.toString() //L.GeometryUtil.readableArea(Area, isMetric = 'km')
+            parcel.feature.properties.name = sName;
+            parcel.feature.properties.desc = sDesc;
+            parcel.feature.properties.area = sArea;
+            parcel.feature.properties.parceltype = "Land & Air"
+            parcel.feature.properties.air = "No";
+            parcel.feature.properties.landuse = "Nozq   "; // we will need NLCD data here?
+            parcel.feature.properties.farmfoodchain = "No";
+            parcel.feature.properties.fishfoodweb = "No";
+            parcel.feature.properties.wetland = "No";
+            TRIM.leaflet.map.closePopup();
+            LoadingScreen.show('create_parcel');
+            TRIM.leaflet.parcels.addLayer(parcel);
+            parcel.bindTooltip(parcel.feature.properties.name, { permanent: false }).addTo(TRIM.leaflet.map);
+            mapTableRedraw()
+
+            // WRITE TO DATABASE
+            TRIM.api.createParcels('{{ scenario.id }}', parcel.toGeoJSON()).on('load', function () {
+                let resp = JSON.parse(this.responseText)
+                if (resp) {
+                    let new_parcel = resp['parcel']
+                    parcel.feature.properties.parcelid = new_parcel["id"]
+                    parcel.feature.properties.area = new_parcel["area"]
+                    parcel.feature.properties.air = new_parcel["hasAir"]
+                    parcel.feature.properties.parceltype = new_parcel["parcelType"]
+                    parcel.feature.properties.landuse = { 'lu': new_parcel["landUse"], 'list': resp.media }
+                    parcel.feature.properties.farmfoodchain = new_parcel["hasFarmFoodChain"]
+                    parcel.feature.properties.fishfoodweb = new_parcel["hasFishFoodWeb"]
+                    parcel.feature.properties.wetland = new_parcel["hasWetland"]
+                    parcel.feature.properties.wetland = new_parcel["hasWetland"]
+                    parcel.feature.properties.receptor_spacing = new_parcel["receptor_spacing"];
+
+                    TRIM.leaflet.parcels.addLayer(parcel);
+                    parcel.bindTooltip(parcel.feature.properties.name, { permanent: false }).addTo(TRIM.leaflet.map);
+                    mapTableRedraw()
+                    // add new parcel to TRIM.store to prevent dupes
+                    if (parcelList.length > 0) {
+                        TRIM.store.currentScenario.parcels.push(new_parcel);
+                    }
+                }
+                // TRIM.refreshParcels();
+                requires_reload = true;
+                LoadingScreen.hide('create_parcel');
+            })
+        };
+
+        // REMOVE A PARCEL//
+        window.deleteParcelFromServer = function (parcelObj) {
+            LoadingScreen.show('delete_parcel');
+            TRIM.api.deleteParcels(TRIM.store.currentScenario.id, parcelObj).on('load', function () {
+                // delete parcel from TRIM.store
+                const idx = TRIM.store.currentScenario.parcels.findIndex(p => p.id == parcelObj.properties.parcelid);
+                if (idx > -1) {
+                    TRIM.store.currentScenario.parcels.splice(idx, 1);
+                }
+                requires_reload = true;
+                TRIM.leaflet.refreshParcels()
+                mapTableRedraw()
+                LoadingScreen.hide('delete_parcel');
+            })
+        };
+
+        TRIM.leaflet.map.on('pm:remove', ({ layer }) => {
+            TRIM.leaflet.parcels.removeLayer(layer._leaflet_id)
+            deleteParcelFromServer(layer.toGeoJSON());
+        });
+
         var form = document.getElementById('parcels-gui');
 
-        form.addEventListener('form:visible', function() {
+        form.addEventListener('form:visible', function () {
             if (!TRIM.store.currentScenario.parcels) {
                 LoadingScreen.show('parcel_gui_loading');
             }
@@ -668,544 +391,403 @@
         function populateParcelsGui() {
             if ($(form).filter(':not(.form-loaded)').length) {
                 // Form hasn't loaded yet; wait a bit and try again
-                setTimeout(function() { populateParcelsGui(); }, 1000);
+                setTimeout(function () { populateParcelsGui(); }, 1000);
                 return;
             }
-            // console.log(form)
-            // console.log(TRIM.store.currentScenario.parcels)
             TRIM.refreshParcels();
-
-			enableParcelFileUploadUi();
+            enableParcelFileUploadUi();
         }
 
-		function onUploadCoordinateSystemChanged() {
-			let parcelGui = $("#parcels-gui");
+        function onUploadCoordinateSystemChanged() {
+            let parcelGui = $("#parcels-gui");
+            let uploadPrefixes = [
+                "",					    // parcel upload
+                "deposition_overlay_"   // depo overlay upload
+            ];
+            for (let i = 0; i < uploadPrefixes.length; i++) {
+                let prefix = uploadPrefixes[i];
+                let coordsSystem = parcelGui.find("#" + prefix + "upload_coordinates_system");
+                let utmZone = parcelGui.find("#" + prefix + "upload_utm_zone");
+                // show/hide the div containing the UTM zone widget
+                utmZone.parents("div[class='col-md']").css("opacity", (coordsSystem.val() == "UTM" ? 1 : 0));
+            }
+        }
 
-			let uploadPrefixes = ["",						// parcel upload
-									"deposition_overlay_"];	// depo overlay upload
+        // zones are 1A-60Z with no A/B/I/O/Y/Z. case/whitespace insensitive.
+        function isValidUtmZone(z) {
+            let cleanedZone = z.trim().replaceAll(" ", "").toUpperCase();
+            const regex = /^([1-9]|[1-5][0-9]|60)([C-HJ-NP-X])$/gm;
+            return (regex.exec(cleanedZone) != null);
+        }
 
-			for (let i = 0 ; i < uploadPrefixes.length ; i++) {
-				let prefix = uploadPrefixes[i];
-				let coordsSystem = parcelGui.find("#" + prefix + "upload_coordinates_system");
-				let utmZone = parcelGui.find("#" + prefix + "upload_utm_zone");
-				// show/hide the div containing the UTM zone widget
-				utmZone.parents("div[class='col-md']").css("opacity", (coordsSystem.val() == "UTM" ? 1 : 0));
-			}
-		}
+        function enableParcelFileUploadUi() {
+            let parcelGui = $("#parcels-gui");
 
-		// zones are 1A-60Z with no A/B/I/O/Y/Z. case/whitespace insensitive.
-		function isValidUtmZone(z) {
-			let cleanedZone = z.trim().replaceAll(" ", "").toUpperCase();
-			const regex = /^([1-9]|[1-5][0-9]|60)([C-HJ-NP-X])$/gm;
+            let parcelFile = parcelGui.find("#parcels_file");
+            let coordsSystem = parcelGui.find("#upload_coordinates_system");
+            let utmZone = parcelGui.find("#upload_utm_zone");
+            let parcelUploader = parcelGui.find("#upload-btn");
 
-			return (regex.exec(cleanedZone) != null);
-		}
+            let depoOverlayFile = parcelGui.find("#deposition_overlay_file");
+            let depoOverlayCoordsSystem = parcelGui.find("#deposition_overlay_upload_coordinates_system");
+            let depoOverlayUtmZone = parcelGui.find("#deposition_overlay_upload_utm_zone");
+            let depoOverlayZFlagRestriction = parcelGui.find("#deposition_overlay_zflag_restriction");
+            let overlayUploader = parcelGui.find("#deposition-overlay-upload-btn");
+            let overlayDeleter = parcelGui.find("#deposition-overlay-delete-btn");
 
-		function enableParcelFileUploadUi() {
-			let parcelGui = $("#parcels-gui");
+            coordsSystem.on('change', onUploadCoordinateSystemChanged);
+            depoOverlayCoordsSystem.on('change', onUploadCoordinateSystemChanged);
+            onUploadCoordinateSystemChanged();
 
-			let parcelFile = parcelGui.find("#parcels_file");
-			let coordsSystem = parcelGui.find("#upload_coordinates_system");
-			let utmZone = parcelGui.find("#upload_utm_zone");
-			let parcelUploader = parcelGui.find("#upload-btn");
+            parcelUploader.on('click', function () {
+                let parcelFileData = parcelFile.prop('files')[0];
 
-			let depoOverlayFile = parcelGui.find("#deposition_overlay_file");
-			let depoOverlayCoordsSystem = parcelGui.find("#deposition_overlay_upload_coordinates_system");
-			let depoOverlayUtmZone = parcelGui.find("#deposition_overlay_upload_utm_zone");
-			let depoOverlayZFlagRestriction = parcelGui.find("#deposition_overlay_zflag_restriction");
-			let overlayUploader = parcelGui.find("#deposition-overlay-upload-btn");
-			let overlayDeleter = parcelGui.find("#deposition-overlay-delete-btn");
+                if (parcelFileData == undefined) {
+                    alert('Please select a file to upload.');
+                    return false;
+                } else if (coordsSystem.val() == "UTM") {
+                    if (!isValidUtmZone(utmZone.val())) {
+                        alert('Please enter a valid UTM zone (e.g. 16T, 13R, etc.).');
+                        return false;
+                    }
+                }
 
-			coordsSystem.on('change', onUploadCoordinateSystemChanged);
-			depoOverlayCoordsSystem.on('change', onUploadCoordinateSystemChanged);
-			onUploadCoordinateSystemChanged();
+                // if we made it here, we're good to submit to server
+                let fieldData = [parcelFile.get(0)];
 
-			parcelUploader.on('click', function() {
-				let parcelFileData = parcelFile.prop('files')[0];
+                fieldData.push({
+                    "type": "input",
+                    "name": "scenario_id",
+                    "value": TRIM.store.currentScenario.id
+                });
 
-				if (parcelFileData == undefined) {
-					alert('Please select a file to upload.');
-					return false;
-				} else if (coordsSystem.val() == "UTM") {
-					if (!isValidUtmZone(utmZone.val())) {
-						alert('Please enter a valid UTM zone (e.g. 16T, 13R, etc.).');
-						return false;
-					}
-				}
+                fieldData.push({
+                    "type": "input",
+                    "name": "coord_system",
+                    "value": coordsSystem.val()
+                });
 
-				// if we made it here, we're good to submit to server
-				let fieldData = [parcelFile.get(0)];
+                fieldData.push({
+                    "type": "input",
+                    "name": "utm_zone",
+                    "value": coordsSystem.val() == "UTM" ? utmZone.val() : "n/a"
+                });
 
-				fieldData.push({
-					"type": "input",
-					"name": "scenario_id",
-					"value": TRIM.store.currentScenario.id
-				});
+                LoadingScreen.show('upload_parcel_csv');
+                TRIM.api.uploadParcelFile(fieldData, function (success, responseData, c) {
+                    LoadingScreen.hide('upload_parcel_csv');
 
-				fieldData.push({
-					"type": "input",
-					"name": "coord_system",
-					"value": coordsSystem.val()
-				});
-
-				fieldData.push({
-					"type": "input",
-					"name": "utm_zone",
-					"value": coordsSystem.val() == "UTM" ? utmZone.val() : "n/a"
-				});
-
-				LoadingScreen.show('upload_parcel_csv');
-				TRIM.api.uploadParcelFile(fieldData, function(success,responseData,c) {
-					LoadingScreen.hide('upload_parcel_csv');
-
-					if (!success) {
-						alert('An error occurred during upload.');
+                    if (!success) {
+                        alert('An error occurred during upload.');
                         console.log(responseData)
                         console.log(c)
-					} else {
-						// TODO - can we use this data to just redraw the map/table w/o a full page reload? probably!
-						// console.log("WORKED:");
-						// console.log(responseData);
-						// for (let i = 0 ; i < responseData.parcels.length ; i++) {
-							// let new_parcel = responseData.parcels[i];
-							// console.log("NEW PARCEL: " + JSON.stringify(new_parcel));
-						// }
-						console.log("reload...");
-						window.location.reload();
-					}
-				});
-				return false;
-			});
-
-			overlayDeleter.on('click', function() {
-				LoadingScreen.show('delete_depo_overlay_plt');
-				TRIM.api.deleteMiscScenarioFile(TRIM.store.currentScenario.id, "deposition_overlay", function(success,responseData,c) {
-					if (!success) {
-						alert('An error occurred during deletion.');
-					} else {
-						uninstallDepositionOverlayFromMap();
-					}
-					LoadingScreen.hide('delete_depo_overlay_plt');
-				});
-
-				return false;
-			});
-
-			overlayUploader.on('click', function() {
-				let overlayFileData = depoOverlayFile.prop('files')[0];
-
-				if (overlayFileData == undefined) {
-					alert('Please select a file to upload.');
-					return false;
-				} else if (depoOverlayCoordsSystem.val() == "UTM") {
-					if (!isValidUtmZone(depoOverlayUtmZone.val())) {
-						alert('Please enter a valid UTM zone (e.g. 16T, 13R, etc.).');
-						return false;
-					}
-				}
-
-				// if we made it here, we're good to submit to server
-				let fieldData = [depoOverlayFile.get(0)];
-
-				fieldData.push({
-					"type": "input",
-					"name": "scenario_id",
-					"value": TRIM.store.currentScenario.id
-				});
-
-				fieldData.push({
-					"type": "input",
-					"name": "misc_file_type",
-					"value": "deposition_overlay"
-				});
-
-				fieldData.push({
-					"type": "input",
-					"name": "coord_system",
-					"value": depoOverlayCoordsSystem.val()
-				});
-
-				fieldData.push({
-					"type": "input",
-					"name": "utm_zone",
-					"value": depoOverlayCoordsSystem.val() == "UTM" ? depoOverlayUtmZone.val() : "n/a"
-				});
-
-				fieldData.push({
-					"type": "input",
-					"name": "zflag_restriction",
-					"value": depoOverlayZFlagRestriction.val()
-				});
-
-				LoadingScreen.show('upload_depo_overlay_plt');
-				TRIM.api.uploadMiscScenarioFile(fieldData, function(success,responseData,c) {
-					uninstallDepositionOverlayFromMap();
-					LoadingScreen.hide('upload_depo_overlay_plt');
-
-					if (!success) {
-						if ("message" in responseData && responseData.message != "generic_error") {
-							alert("An error occurred during upload: " + responseData.message);
-						} else {
-							alert('An error occurred during upload.');
-						}
-					} else {
-						installDepositionOverlayOntoMap(responseData)
-					}
-				});
-
-				return false;
-			});
-		}
-
-        function drawAllParcels() {
-            TRIM.forms.populate(form, TRIM.store.currentScenario);
-            if (DREW_MAP) {
-                return;
-            }
-            map.whenReady(retrieveSavedParcels);
-            setTimeout(function () {map.invalidateSize()},1000);
-            DREW_MAP = true;
-        }
-
-        document.body.addEventListener('parcels:ready', function() {
-            // TODO keep an eye on this
-            try { 
-                drawAllParcels(); }
-            catch (err) {
-                console.log(TRIM.store.currentScenario.parcels, err);
-            }
-        });
-
-		document.body.addEventListener('parcels:ready', function() {
-			LoadingScreen.show('check_overlay_status');
-			TRIM.api.checkMiscScenarioFile(TRIM.store.currentScenario.id, "deposition_overlay", function(success,responseData) {
-				LoadingScreen.hide('check_overlay_status');
-
-				if (!success) {
-                    if ('{{env_type}}' == 'production') {
-					    alert('An error occurred while fetching overlay data');
+                    } else {
+                        console.log("reload...");
+                        window.location.reload();
                     }
-                    else {
-					    console.log('An error occurred while fetching overlay data');
+                });
+                return false;
+            });
+
+            overlayDeleter.on('click', function () {
+                LoadingScreen.show('delete_depo_overlay_plt');
+                TRIM.api.deleteMiscScenarioFile(TRIM.store.currentScenario.id, "deposition_overlay", function (success, responseData, c) {
+                    if (!success) {
+                        alert('An error occurred during deletion.');
+                    } else {
+                        TRIM.leaflet.removeDepositionOverlayFromMap();
                     }
-				} else {
-					if (success) {
-						installDepositionOverlayOntoMap(responseData)
-					}
-				}
-			});
-		});
+                    LoadingScreen.hide('delete_depo_overlay_plt');
+                });
 
-		document.body.addEventListener('parcels:ready', function() {
-			LoadingScreen.show('check_aermod_receptors_file');
-			TRIM.api.checkMiscScenarioFile(TRIM.store.currentScenario.id, "generated_aermod_receptors", function(success,responseData) {
-				LoadingScreen.hide('check_aermod_receptors_file');
+                return false;
+            });
 
-				if (!success) {
-                    if ('{{env_type}}' == 'production') {
-					    alert('An error occurred while fetching aermod receptors');
+            overlayUploader.on('click', function () {
+                let overlayFileData = depoOverlayFile.prop('files')[0];
+
+                if (overlayFileData == undefined) {
+                    alert('Please select a file to upload.');
+                    return false;
+                } else if (depoOverlayCoordsSystem.val() == "UTM") {
+                    if (!isValidUtmZone(depoOverlayUtmZone.val())) {
+                        alert('Please enter a valid UTM zone (e.g. 16T, 13R, etc.).');
+                        return false;
                     }
-                    else {
-                        console.log('An error occurred while fetching aermod receptors');
+                }
+
+                // if we made it here, we're good to submit to server
+                let fieldData = [depoOverlayFile.get(0)];
+
+                fieldData.push({
+                    "type": "input",
+                    "name": "scenario_id",
+                    "value": TRIM.store.currentScenario.id
+                });
+
+                fieldData.push({
+                    "type": "input",
+                    "name": "misc_file_type",
+                    "value": "deposition_overlay"
+                });
+
+                fieldData.push({
+                    "type": "input",
+                    "name": "coord_system",
+                    "value": depoOverlayCoordsSystem.val()
+                });
+
+                fieldData.push({
+                    "type": "input",
+                    "name": "utm_zone",
+                    "value": depoOverlayCoordsSystem.val() == "UTM" ? depoOverlayUtmZone.val() : "n/a"
+                });
+
+                fieldData.push({
+                    "type": "input",
+                    "name": "zflag_restriction",
+                    "value": depoOverlayZFlagRestriction.val()
+                });
+
+                LoadingScreen.show('upload_depo_overlay_plt');
+                TRIM.api.uploadMiscScenarioFile(fieldData, function (success, responseData, c) {
+                    TRIM.leaflet.removeDepositionOverlayFromMap();
+                    LoadingScreen.hide('upload_depo_overlay_plt');
+
+                    if (!success) {
+                        if ("message" in responseData && responseData.message != "generic_error") {
+                            alert("An error occurred during upload: " + responseData.message);
+                        } else {
+                            alert('An error occurred during upload.');
+                        }
+                    } else {
+                        TRIM.leaflet.installDepositionOverlayOntoMap(responseData)
                     }
-				} else {
-					if (success) {
-						// installDepositionOverlayOntoMap(responseData)
-						renderAermodDownloadUi(responseData);
-					}
-				}
-			});
-		});
+                });
 
-
-        function retrieveSavedParcels() {
-            parcels.clearLayers();
-            shapes = parcels.toGeoJSON();
-            var scenarioParcels = TRIM.store.currentScenario.parcels;
-
-			/*
-			console.log("!!!SCENARIO PARCELS ARE:");
-			console.log(scenarioParcels);
-			for (let i = 0 ; i < scenarioParcels.length ; i++) {
-				let p = scenarioParcels[i];
-				console.log("   EXISTING PARCEL: [" + p.id + "]: '" + p.name + "'");
-			}
-			*/
-
-            var standardMedia = TRIM.store.currentScenario.standardMedia;
-            if (scenarioParcels.length > 0) {
-                let lat_means = []
-                let lon_means = []
-                scenarioParcels.forEach(function(e,i) {
-                    let this_parcel_data = {'data': e, 'media': standardMedia}
-                    plotLoadedParcel(this_parcel_data)
-                    lon_means.push(e.vertices.map((c, i, arr) => c[0] / arr.length).reduce ((p, c) => c + p))
-                    lat_means.push(e.vertices.map((c, i, arr) => c[1] / arr.length).reduce ((p, c) => c + p))
-                })
-                let mean_lat = lat_means.map((c, i, arr) => c/ arr.length).reduce ((p, c) => c + p)
-                let mean_lon = lon_means.map((c, i, arr) => c/ arr.length).reduce ((p, c) => c + p)
-                map.setView([mean_lat, mean_lon], 12);
-            }
-            mapTableRedraw();
-            console.log('populated parcels gui!')
-            LoadingScreen.hide('parcel_gui_loading');
-        }
-
-        function plotLoadedParcel(parcel) {
-            let new_parcel = new L.polygon(parcel.data.vertices.map(e=>[e[1],e[0]]))
-            let feature = new_parcel.feature = new_parcel.feature || {};
-            feature.type = "Feature";
-            feature.properties = feature.properties || {};
-            new_parcel.feature.properties.parcelid = parcel.data.id;
-            new_parcel.feature.properties.name = parcel.data.name;
-            new_parcel.feature.properties.desc = parcel.data.description;
-            new_parcel.feature.properties.area = parcel.data.area;
-            new_parcel.feature.properties.air = parcel.data.hasAir;
-            new_parcel.feature.properties.parceltype=parcel.data.parcelType
-            new_parcel.feature.properties.receptor_spacing=parcel.data.receptor_spacing;
-            new_parcel.feature.properties.landuse = {'lu': parcel.data.landUse, 'list': parcel.media}; // we will need NLCD data here?
-            new_parcel.feature.properties.farmfoodchain = parcel.data.hasFarmFoodChain;
-            new_parcel.feature.properties.fishfoodweb = parcel.data.hasFishFoodWeb;
-            new_parcel.feature.properties.wetland = parcel.data.hasWetland;
-
-
-            let x = parcels.addLayer(new_parcel).addTo(map)
-            let y = new_parcel.bindTooltip(new_parcel.feature.properties.name, {permanent: false}).addTo(map);
-
-			// console.log("LISTENING FOR SNAPS ON: " + new_parcel._tooltip._content);
-			// this only fires when an existing parcel snaps. 
-			// e.g. during a resize
-			// y.on('pm:snap', function(e) { console.log("DEBUGME snap edit"); });
-
-            shapes = parcels.toGeoJSON()
+                return false;
+            });
         }
 
         let mapTable = null;
         function mapTableRedraw() {
             let tblId = "#mapTable"
             mapTable = $(tblId).removeAttr('width').DataTable();
+            shapes = TRIM.leaflet.parcels.toGeoJSON();
             // console.log(shapes.features)
-            
+
             map_cols = [
-                    {
-                        data: "properties.name",
-                        render: function (data, type, row) {
-                            return "<input class='editableCell form-control form-control-sm' type='text' value='" +  data + "' style='display:none'>" +
-                                "<label>" + data + "</label>"
-                        },
-                        className: 'font-weight-bold rightBorder freeze-column'
+                {
+                    data: "properties.name",
+                    render: function (data, type, row) {
+                        return "<input class='editableCell form-control form-control-sm' type='text' value='" + data + "' style='display:none'>" +
+                            "<label>" + data + "</label>"
                     },
-                    {
-                        data: "properties.desc",
-                        render: function (data, type, row) {
-                            let parcel_info = [{
-                                'type': 'data',
-                                'name': 'id',
-                                'value': row.properties.parcelid,
-                            },{
-                                'type': 'data',
-                                'name': 'field',
-                                'value': 'description'
-                            }, {
-                                'type': 'input',
-                                'name': 'description',
-                                'value': data
-                            }]
-                            parcel_info = JSON.stringify(parcel_info)
-                            return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                                "<label class='editableCell badge badge-light'>" + data + "</label>"
-                        }
-                    },
-                    {
-                        data: "properties.area",
-                        render: function (data, type, row) {
-                            return "<label>" + (data/1E6).toFixed(5) + "</label>"
-                        }
-                    },
-                    {
-                        data: "properties.parceltype",
-                        render: function (data, type, row) {
-                            let parcel_info = [{
-                                'type': 'data',
-                                'name': 'id',
-                                'value': row.properties.parcelid,
-                            },{
-                                'type': 'data',
-                                'name': 'field',
-                                'value': 'parcelType'
-                            }, {
-                                'type': 'input',
-                                'name': 'parcelType',
-                                'value': data
-                            }]
-                            parcel_info = JSON.stringify(parcel_info)
-                            var parcel_types = ["Air Only", "Water Only", "Land Only", "Land & Air", "Water & Air"]
-                            var $select = $("<select class='editableCell form-control form-control-sm parceltype_ddl' name='select' style='display:none'></select>", {})
-                            $.each(parcel_types, function(k,v){
-                                var $option = $("<option></option>",
-                                    {
-                                        text: v,
-                                        value: v
-                                    });
-                                if (row.properties.parceltype == v) {
-                                    $option.attr("selected","selected")
-                                }
-                                $select.append($option)
-                            })
-                            $select.attr("data-parcelinfo",parcel_info)
-                            return $select.prop("outerHTML") +
-                                "<label class='editableCell badge badge-light badge badge-light'>" + data + "</label>"
-                            // return "<select class='editableCell form-control form-control-sm parceltype_ddl' data-parcelinfo='" + parcel_info +"' name='select' style='display:none'>" +
-                            //             "<option value='Air Only'>Air Only</option>" +
-                            //             "<option value='Water Only'>Water Only</option>" +
-                            //             "<option value='Land Only'>Land Only</option>" +
-                            //             "<option value='Land & Air'>Land & Air</option>" +
-                            //             "<option value='Water & Air'>Water & Air</option>" +
-                            //         "</select>" +
-                            //        "<label class='editableCell badge badge-light badge badge-light'>" + data + "</label>"
-                        }
-                    },
-                    {
-                        data: "properties.landuse",
-                        render: function (data, type, row) {
-                            let parcel_info = [{
-                                'type': 'data',
-                                'name': 'id',
-                                'value': row.properties.parcelid,
-                            },{
-                                'type': 'data',
-                                'name': 'field',
-                                'value': 'landUse'
-                            }, {
-                                'type': 'input',
-                                'name': 'landUse',
-                                'value': data.lu
-                            }]
-                            parcel_info = JSON.stringify(parcel_info)
-                            var $select = $("<select class='editableCell form-control form-control-sm landuse_ddl' name='select' style='display:none'></select>", {})
-                            $.each(data.list, function(k,v){
-                                var $option = $("<option></option>",
-                                    {
-                                        text: v,
-                                        value: v
-                                    });
-                                if (row.properties.landuse.lu == v) {
-                                    $option.attr("selected","selected")
-                                }
-                                if (v == "Impervious") { // removing Impervous as a UI option only
-                                    $option.attr("hidden","");
-                                }
-                                $select.append($option)
-                            })
-                            let editFlag = (row.properties.landuse.lu != "N/A") ? "editableCell badge badge-light" : "text-muted"
-                            $select.attr("data-parcelinfo",parcel_info)
-                            return $select.prop("outerHTML") +
-                                "<label class='"+ editFlag +" landuse_lb'>" + data.lu + "</label>"
-                        }
-                    },
-                    {
-                        data: "properties.farmfoodchain",
-                        render: function (data, type, row) {
-                            let parcel_info = [{
-                                'type': 'data',
-                                'name': 'id',
-                                'value': row.properties.parcelid,
-                            },{
-                                'type': 'data',
-                                'name': 'field',
-                                'value': 'hasFarmFoodChain'
-                            }, {
-                                'type': 'input',
-                                'name': 'hasFarmFoodChain',
-                                'value': data
-                            }]
-                            let editFlag = (row.properties.landuse.lu == "Tilled Soil" || row.properties.landuse.lu == "Untilled Soil") ? "editableCell badge badge-light" : "text-muted"
-                            parcel_info = JSON.stringify(parcel_info)
-                            return "<select class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' name='select' style='display:none'>" +
-                                        "<option value='Yes'>Yes</option>" +
-                                        "<option value='No'>No</option>" +
-                                    "</select>" +
-                                   "<label class='" + editFlag + " farmfoodchain'>" + data + "</label>"
-                        }
-                    },
-                    {
-                        data: "properties.fishfoodweb",
-                        render: function (data, type, row) {
-                            let parcel_info = [{
-                                'type': 'data',
-                                'name': 'id',
-                                'value': row.properties.parcelid,
-                            },{
-                                'type': 'data',
-                                'name': 'field',
-                                'value': 'hasFishFoodWeb'
-                            }, {
-                                'type': 'input',
-                                'name': 'hasFishFoodWeb',
-                                'value': data
-                            }]
-                            let editFlag = (row.properties.parceltype.includes("Water"))  ? "editableCell badge badge-light" : "text-muted"
-                            parcel_info = JSON.stringify(parcel_info)
-                            return "<select class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' name='select' style='display:none'>" +
-                                        "<option value='Yes'>Yes</option>" +
-                                        "<option value='No'>No</option>" +
-                                    "</select>" +
-                                   "<label class='" + editFlag +" fishfoodweb'>" + data + "</label>"
-                        }
-                    },
-                    {
-                        data: "properties.wetland",
-                        render: function (data, type, row) {
-                            let parcel_info = [{
-                                'type': 'data',
-                                'name': 'id',
-                                'value': row.properties.parcelid,
-                            },{
-                                'type': 'data',
-                                'name': 'field',
-                                'value': 'hasWetland'
-                            }, {
-                                'type': 'input',
-                                'name': 'hasWetland',
-                                'value': data
-                            }]
-                            let editFlag = (row.properties.parceltype.includes("Water")
-                                            || row.properties.parceltype.includes("Air Only")
-                                            || row.properties.landuse.lu == "Impervious") ? "text-muted" : "editableCell badge badge-light"
-                            parcel_info = JSON.stringify(parcel_info)
-                            return "<select class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' name='select' style='display:none'>" +
-                                        "<option value='Yes'>Yes</option>" +
-                                        "<option value='No'>No</option>" +
-                                    "</select>" +
-                                   "<label class='" + editFlag + " wetland'>" + data + "</label>"
-                        }
-                    },
-                    {
-                        data: "properties.receptor_spacing",
-                        render: function (data, type, row) {
-                            let parcel_info = [{
-                                'type': 'data',
-                                'name': 'id',
-                                'value': row.properties.parcelid,
-                            },{
-                                'type': 'data',
-                                'name': 'field',
-                                'value': 'receptor_spacing'
-                            }, {
-                                'type': 'input',
-                                'name': 'receptor_spacing',
-                                'value': data
-                            }]
-                            parcel_info = JSON.stringify(parcel_info)
-                            return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none'>" +
-                                "<label class='editableCell badge badge-light'>" + data + "</label>"
-                        }
+                    className: 'font-weight-bold rightBorder freeze-column'
+                },
+                {
+                    data: "properties.desc",
+                    render: function (data, type, row) {
+                        let parcel_info = [{
+                            'type': 'data',
+                            'name': 'id',
+                            'value': row.properties.parcelid,
+                        }, {
+                            'type': 'data',
+                            'name': 'field',
+                            'value': 'description'
+                        }, {
+                            'type': 'input',
+                            'name': 'description',
+                            'value': data
+                        }]
+                        parcel_info = JSON.stringify(parcel_info)
+                        return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info + "' type='text' value='" + data + "' style='display:none'>" +
+                            "<label class='editableCell badge badge-light'>" + data + "</label>"
                     }
+                },
+                {
+                    data: "properties.area",
+                    render: function (data, type, row) {
+                        return "<label>" + (data / 1E6).toFixed(5) + "</label>"
+                    }
+                },
+                {
+                    data: "properties.parceltype",
+                    render: function (data, type, row) {
+                        let parcel_info = [{
+                            'type': 'data',
+                            'name': 'id',
+                            'value': row.properties.parcelid,
+                        }, {
+                            'type': 'data',
+                            'name': 'field',
+                            'value': 'parcelType'
+                        }, {
+                            'type': 'input',
+                            'name': 'parcelType',
+                            'value': data
+                        }]
+                        parcel_info = JSON.stringify(parcel_info)
+                        var parcel_types = ["Air Only", "Water Only", "Land Only", "Land & Air", "Water & Air"]
+                        var $select = $("<select class='editableCell form-control form-control-sm parceltype_ddl' name='select' style='display:none'></select>", {})
+                        $.each(parcel_types, function (k, v) {
+                            var $option = $("<option></option>",
+                                {
+                                    text: v,
+                                    value: v
+                                });
+                            if (row.properties.parceltype == v) {
+                                $option.attr("selected", "selected")
+                            }
+                            $select.append($option)
+                        })
+                        $select.attr("data-parcelinfo", parcel_info)
+                        return $select.prop("outerHTML") +
+                            "<label class='editableCell badge badge-light badge badge-light'>" + data + "</label>"
+                    }
+                },
+                {
+                    data: "properties.landuse",
+                    render: function (data, type, row) {
+                        let parcel_info = [{
+                            'type': 'data',
+                            'name': 'id',
+                            'value': row.properties.parcelid,
+                        }, {
+                            'type': 'data',
+                            'name': 'field',
+                            'value': 'landUse'
+                        }, {
+                            'type': 'input',
+                            'name': 'landUse',
+                            'value': data.lu
+                        }]
+                        parcel_info = JSON.stringify(parcel_info)
+                        var $select = $("<select class='editableCell form-control form-control-sm landuse_ddl' name='select' style='display:none'></select>", {})
+                        $.each(data.list, function (k, v) {
+                            var $option = $("<option></option>",
+                                {
+                                    text: v,
+                                    value: v
+                                });
+                            if (row.properties.landuse.lu == v) {
+                                $option.attr("selected", "selected")
+                            }
+                            if (v == "Impervious") { // removing Impervous as a UI option only
+                                $option.attr("hidden", "");
+                            }
+                            $select.append($option)
+                        })
+                        let editFlag = (row.properties.landuse.lu != "N/A") ? "editableCell badge badge-light" : "text-muted"
+                        $select.attr("data-parcelinfo", parcel_info)
+                        return $select.prop("outerHTML") +
+                            "<label class='" + editFlag + " landuse_lb'>" + data.lu + "</label>"
+                    }
+                },
+                {
+                    data: "properties.farmfoodchain",
+                    render: function (data, type, row) {
+                        let parcel_info = [{
+                            'type': 'data',
+                            'name': 'id',
+                            'value': row.properties.parcelid,
+                        }, {
+                            'type': 'data',
+                            'name': 'field',
+                            'value': 'hasFarmFoodChain'
+                        }, {
+                            'type': 'input',
+                            'name': 'hasFarmFoodChain',
+                            'value': data
+                        }]
+                        let editFlag = (row.properties.landuse.lu == "Tilled Soil" || row.properties.landuse.lu == "Untilled Soil") ? "editableCell badge badge-light" : "text-muted"
+                        parcel_info = JSON.stringify(parcel_info)
+                        return "<select class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info + "' name='select' style='display:none'>" +
+                            "<option value='Yes'>Yes</option>" +
+                            "<option value='No'>No</option>" +
+                            "</select>" +
+                            "<label class='" + editFlag + " farmfoodchain'>" + data + "</label>"
+                    }
+                },
+                {
+                    data: "properties.fishfoodweb",
+                    render: function (data, type, row) {
+                        let parcel_info = [{
+                            'type': 'data',
+                            'name': 'id',
+                            'value': row.properties.parcelid,
+                        }, {
+                            'type': 'data',
+                            'name': 'field',
+                            'value': 'hasFishFoodWeb'
+                        }, {
+                            'type': 'input',
+                            'name': 'hasFishFoodWeb',
+                            'value': data
+                        }]
+                        let editFlag = (row.properties.parceltype.includes("Water")) ? "editableCell badge badge-light" : "text-muted"
+                        parcel_info = JSON.stringify(parcel_info)
+                        return "<select class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info + "' name='select' style='display:none'>" +
+                            "<option value='Yes'>Yes</option>" +
+                            "<option value='No'>No</option>" +
+                            "</select>" +
+                            "<label class='" + editFlag + " fishfoodweb'>" + data + "</label>"
+                    }
+                },
+                {
+                    data: "properties.wetland",
+                    render: function (data, type, row) {
+                        let parcel_info = [{
+                            'type': 'data',
+                            'name': 'id',
+                            'value': row.properties.parcelid,
+                        }, {
+                            'type': 'data',
+                            'name': 'field',
+                            'value': 'hasWetland'
+                        }, {
+                            'type': 'input',
+                            'name': 'hasWetland',
+                            'value': data
+                        }]
+                        let editFlag = (row.properties.parceltype.includes("Water")
+                            || row.properties.parceltype.includes("Air Only")
+                            || row.properties.landuse.lu == "Impervious") ? "text-muted" : "editableCell badge badge-light"
+                        parcel_info = JSON.stringify(parcel_info)
+                        return "<select class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info + "' name='select' style='display:none'>" +
+                            "<option value='Yes'>Yes</option>" +
+                            "<option value='No'>No</option>" +
+                            "</select>" +
+                            "<label class='" + editFlag + " wetland'>" + data + "</label>"
+                    }
+                },
+                {
+                    data: "properties.receptor_spacing",
+                    render: function (data, type, row) {
+                        let parcel_info = [{
+                            'type': 'data',
+                            'name': 'id',
+                            'value': row.properties.parcelid,
+                        }, {
+                            'type': 'data',
+                            'name': 'field',
+                            'value': 'receptor_spacing'
+                        }, {
+                            'type': 'input',
+                            'name': 'receptor_spacing',
+                            'value': data
+                        }]
+                        parcel_info = JSON.stringify(parcel_info)
+                        return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info + "' type='text' value='" + data + "' style='display:none'>" +
+                            "<label class='editableCell badge badge-light'>" + data + "</label>"
+                    }
+                }
             ];
             mapTable.clear().draw();
             mapTable.destroy()
-            mapTable =  $('#mapTable').DataTable({
-                data : shapes.features,
+            mapTable = $('#mapTable').DataTable({
+                data: shapes.features,
                 paging: false,
                 bFilter: false,
                 info: false,
@@ -1219,7 +801,7 @@
                 columns: setDynamicColumnWidths(tblId, map_cols, shapes.features),
                 initComplete: function (settings, json) {
                     // $("#mapTable").wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
-                    $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
+                    $(".dataTables_scrollBody").css({ "max-height": "500px", "height": "100%" });
                     $(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
                     $(".dataTables_scrollHead").addClass('wrap-text-scrollhead');
 
@@ -1263,13 +845,13 @@
                             $(this).closest('tr').find("label.fishfoodweb").text("No")
                         }
                         if (changed != "Water Only" && changed != "Air Only" && changed != "Water & Air") {
-                            $(this).closest('tr').find("select.landuse_ddl option").filter(function() {
+                            $(this).closest('tr').find("select.landuse_ddl option").filter(function () {
                                 return $(this).text() == "Grasses/Herbs"
-                            }).attr('selected',true)
+                            }).attr('selected', true)
                             $(this).closest('tr').find('label.landuse_lb').text("Grasses/Herbs")
                         }
                         if (changed == "Water Only" || changed == "Air Only" || changed == "Water & Air") {
-                            $(this).closest('tr').find('label.landuse_lb').text("N/A").attr("class","text-muted")
+                            $(this).closest('tr').find('label.landuse_lb').text("N/A").attr("class", "text-muted")
                         }
                         //invalidate the data and redraw
                         //row.invalidate().draw(false);
@@ -1290,7 +872,7 @@
                 if (`#${focusTblId}` !== tblId) {
                     return;
                 }
-                
+
                 let data = $(this).val()
                 $(this).hide()
                 $(this).next("label").show().text(data)
@@ -1305,7 +887,7 @@
                     console.log(parcel_info);
                     previous_data.value = data;
                     LoadingScreen.show('loading_results');
-                    TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load',function(){
+                    TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', function () {
                         TRIM.refreshParcels();
                         requires_reload = true;
                         LoadingScreen.hide('loading_results');
@@ -1314,573 +896,34 @@
                 }
             })
 
-			// AERMOD Receptor UI setup -- start
-			$("a#generate_aermod_receptors_btn").click(function() {
-				console.log("do something!");
+            // AERMOD Receptor UI setup -- start
+            $("a#generate_aermod_receptors_btn").click(function () {
+                console.log("do something!");
 
-				LoadingScreen.show('generating_aermod_receptors');
-				TRIM.api.runReceptorGeneration('{{ scenario.id }}', function(success, responseData) {
-					if (success) {
-						renderAermodDownloadUi(responseData);
-					}
-					LoadingScreen.hide('generating_aermod_receptors');
-				});
-			});
+                LoadingScreen.show('generating_aermod_receptors');
+                TRIM.api.runReceptorGeneration('{{ scenario.id }}', function (success, responseData) {
+                    if (success) {
+                        TRIM.leaflet.renderAermodDownloadUi(responseData);
+                    }
+                    LoadingScreen.hide('generating_aermod_receptors');
+                });
+            });
 
-			/*
-			// abandoned -- button on the column header
-			$("table[data-target='mapTable']:first th").each(function() {
-				if ($(this).text().indexOf("Receptor Spacing") != -1) {
-					let a = $("<a/>").css("cursor", "pointer").attr("id", "foo").addClass("btn btn-secondary").html("Generate AERMOD Receptors");
-					let d = $("<div/>").appendTo($(this));
-					a.appendTo(d);
-
-				}
-			});
-			*/
-			// AERMOD Receptor UI setup -- end
+            // AERMOD Receptor UI setup -- end
         }
 
-        // var map = L.map('mapid', { drawControl: false }).setView([35.99, -78.90], 12);
         $('#parcel_file_fields_div').hide()
         enableFieldUpdates();
 
-        var StreetBM = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiY2JiaXJ5b2wiLCJhIjoiY2xnZHZ4cnVvMGcwZTNkcXJ6ZTNvM3N0dSJ9.S6TzhpcjiSv1qttl8B1UMA', {
-            maxZoom: 18,
-            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ' +
-                'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-            id: 'mapbox/streets-v11',
-            tileSize: 512,
-            zoomOffset: -1
-        }).addTo(map);
-
-        var Esri_WorldTopoMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
-            attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community'
-        });
-
-
-        var Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-        });
-
-        var wmsNLCD2016 = L.tileLayer.wms('https://www.mrlc.gov/geoserver/mrlc_display/NLCD_2016_Land_Cover_L48/ows?SERVICE=WMS&', {
-            layers: 'NLCD_2016_Land_Cover_L48'
-        });
-
-        var wmsFlowLine = L.tileLayer.wms('https://hydro.nationalmap.gov/arcgis/services/NHDPlus_HR/MapServer/WMSServer?',{
-            layers: "7",
-            transparent: true,
-            format: 'image/png'
-        });
-
-        var wmsHUC12 = L.tileLayer.wms('https://hydro.nationalmap.gov:443/arcgis/services/NHDPlus_HR/MapServer/WmsServer?',{
-            layers: "0",
-            transparent: true,
-            format: 'image/png'
-        });
-
-        var wmsLakes = L.tileLayer.wms('https://hydro.nationalmap.gov:443/arcgis/services/NHDPlus_HR/MapServer/WmsServer?',{
-            layers: "3",
-            transparent: true,
-            format: 'image/png'
-        });
-
-		// depositionOverlayGroup, mapLayers, depositionOverlayLegend, etc. are globals set
-		// on the window. Would be nice to not do that...
-        window.depositionOverlayGroup = L.layerGroup();
-        window.receptorOverlayGroup = null; // L.layerGroup();
-
-        var togglelayers = L.layerGroup([wmsNLCD2016])
-
-        var overlayMaps= {
-            "NLCD" : togglelayers,
-            "Flowline - Large Scale" : wmsFlowLine,
-            "HUC12 Boundaries" : wmsHUC12,
-			// "Deposition": depositionOverlayGroup
-        }
-        var baseMaps = {
-            "Streets Basemap" : StreetBM,
-            "Topography" : Esri_WorldTopoMap,
-            "Imagery" : Esri_WorldImagery,
-        }
-
-        window.mapLayers = L.control.layers(baseMaps,overlayMaps).addTo(map);
-
-        map.pm.addControls({
-            position: 'topleft',
-            drawMarker: false,
-            drawPolyline: false,
-            drawCircle  : false,
-            drawCircleMarker : false,
-            drawRectangle: false,
-            dragMode: false,
-            cutPolygon : false,
-            rotateMode : false,
-            editMode  : true,
-        });
-
-		window.measurementControl = L.Control.measureControl().addTo(map);
-
-		// make measuring and use of other tools mutually exclusive
-		$("a.leaflet-control-draw-measure").click(function() {
-			if ($(this).parent().hasClass("enabled")) {
-				map.pm.disableDraw();
-				map.pm.disableGlobalEditMode();
-				map.pm.disableGlobalRemovalMode();
-				map.pm.Toolbar.buttons.removalMode.disable();
-				map.pm.Toolbar.buttons.editMode.disable();
-				map.pm.Toolbar.buttons.drawPolygon.disable();
-			} else {
-				map.pm.Toolbar.buttons.removalMode.enable();
-				map.pm.Toolbar.buttons.editMode.enable();
-				map.pm.Toolbar.buttons.drawPolygon.enable();
-			}
-		});
-
-		// proof of concept -- add a red dot near Duke
-		// var barMarker = L.circleMarker([35.997895, -78.922519], { radius: 3, stroke: true, color: "red"}).bindPopup('BAR!').addTo(map);
-
-		conditionalSnapSettings = {
-			"vertices": true,
-			"segments": false
-		};
-
-		window.getSmartSnapSetting = function(typeOfSnap) {
-			if (typeOfSnap == "vertices" || typeOfSnap == "segments") {
-				return conditionalSnapSettings[typeOfSnap];
-			} else {
-				console.log("getSmartSnapSetting doesn't work with '" + typeOfSnap + "'");
-			}
-		};
-
-		window.smartSnapEnableOrDisable = function(typeOfSnap, enableOrDisable) {
-			if (typeOfSnap == "vertices" || typeOfSnap == "segments") {
-				conditionalSnapSettings[typeOfSnap] = enableOrDisable;
-
-				if (typeOfSnap == "vertices") {
-					map.pm.setGlobalOptions({ snapVertex: enableOrDisable });
-				} else if (typeOfSnap == "segments") {
-					map.pm.setGlobalOptions({ snapSegment: enableOrDisable });
-				}
-
-				let bothSnapsDisabled = conditionalSnapSettings["vertices"] == false && conditionalSnapSettings["segments"] == false;
-				map.pm.setGlobalOptions({ snappable: !bothSnapsDisabled });
-			} else {
-				console.log("smartSnapEnableOrDisable doesn't work with '" + typeOfSnap + "'");
-			}
-		};
-
-		let customSnapControls = [
-			{ "name": "ToggleSnapToVertices", "thing": "vertices" },
-			{ "name": "ToggleSnapToSegments", "thing": "segments" },
-		];
-
-		for (let i = 0 ; i < customSnapControls.length ; i++) {
-			let snapThing = customSnapControls[i].thing;
-			map.pm.Toolbar.createCustomControl({
-				name: customSnapControls[i].name,
-				block: "custom", // draw,edit,custom,options
-				title: "Snap to " + snapThing,
-				onClick: function(evt, btn) { smartSnapEnableOrDisable(snapThing, !this.toggleStatus); },
-				disableOtherButtons: false, disableByOtherButtons: false,
-				className: "trim-custom-icon-" + snapThing,
-			});
-
-			// I can't find a way to programmatically select these, so do it with jquery...
-			if (conditionalSnapSettings[snapThing] === true) {
-				$("div.button-container[title='Snap to " + snapThing + "'] a div").click();
-			}
-		}
-
-		map.on('pm:drawstart', function(e) {
-		  var layer = e.workingLayer;
-
-		/*
-		// not used anymore; was used when we had implemented "disable snap to segments after first vertex placed". That's
-		// since been abandoned in favor of providing controls to let users toggle vertex/segment snapping manually.
-		  layer.on('pm:vertexadded', function(e) {
-			// e includes the new vertex, it's marker
-			// the index in the coordinates array
-			// the working layer and shape
-
-			  // map.pm.setGlobalOptions({ snapSegment: false });
-		  });
-		*/
-
-		  /*
-		  layer.on('pm:snap', function(e) {
-			  if (e.layerInteractedWith.feature !== undefined) {
-				  console.log("DEBUGME DRAWING snap (to " + e.layerInteractedWith.feature.properties.name + ")!");
-			  } else {
-				  console.log("DEBUGME DRAWING snap (to myself)!");
-			  }
-			  // console.log(e);
-		  });
-		  */
-		});
-
-        map.pm.enableDraw(
-            'Polygon', {
-				snappable: true,
-				snapSegment: getSmartSnapSetting("segments"),
-				snapVertex: getSmartSnapSetting("vertices"),
-				allowSelfIntersection : false
-			}
-		);
-
-		// experimental function -- can we check/warn about gaps/overlap? The snap changes help
-		/*
-		window.checkVerticesDebug = function(parcelName) {
-			console.log("checkVerticesDebug '" + parcelName + "'");
-			let p = null;
-			let otherParcels = [];
-			for (let i = 0 ; i < TRIM.store.currentScenario.parcels.length ; i++) {
-				if (TRIM.store.currentScenario.parcels[i].name == parcelName) {
-					p = TRIM.store.currentScenario.parcels[i];
-			    } else {
-					otherParcels.push(TRIM.store.currentScenario.parcels[i]);
-			    }
-		    }
-
-			if (p != null) {
-				console.log("check: " + JSON.stringify(p.vertices));
-				for (let i = 0 ; i < p.vertices.length - 1 ; i++) {
-					let v = p.vertices[i];
-
-					if (i == 0) {
-						let lastV = p.vertices[p.vertices.length - 1];
-						if (v[0] == lastV[0] && v[1] == lastV[1]) {
-							console.log("polygon looks closed...");
-						} else {
-							console.log("polygon looks not closed!");
-						}
-					}
-
-					console.log("consider point [" + i + "]: " + v);
-					let matchFound = false;
-					for (let otherParcelIdx = 0 ; !matchFound && otherParcelIdx < otherParcels.length ; otherParcelIdx++) {
-						let otherP = otherParcels[otherParcelIdx];
-						console.log("  compare against vertices of '" + otherP.name + "'...");
-
-						for (let k = 0 ; !matchFound && k < otherP.vertices.length - 1 ; k++) {
-							let otherV = otherP.vertices[k];
-							console.log("    compare against vertex [" + k + "]: " + otherV);
-							if (v[0] == otherV[0] && v[1] == otherV[1]) {
-								console.log("EXACT VERTEX MATCH!!!!!!");
-								matchFound = true;
-							}
-						}
-					}
-
-					if (!matchFound) {
-						console.log("no vertex match found; now let's try lines...");
-						for (let otherParcelIdx = 0 ; !matchFound && otherParcelIdx < otherParcels.length ; otherParcelIdx++) {
-							let otherP = otherParcels[otherParcelIdx];
-							console.log("  compare against lines of '" + otherP.name + "'...");
-
-							for (let k = 0 ; !matchFound && k < otherP.vertices.length - 1 ; k++) {
-								let otherStartVertex = otherP.vertices[k];
-								let otherEndVertex = otherP.vertices[k+1];
-								console.log("    compare against line [" + k + "]: " + otherStartVertex + " -> " + otherEndVertex);
-								let pt = turf.point(v);
-								let line = turf.lineString([otherStartVertex, otherEndVertex]);
-								let isPointOnLine = turf.booleanPointOnLine( pt, line, { epsilon: 5e-8 });
-
-								if (isPointOnLine) {
-									console.log("SEGMENT MATCH!!!!!!");
-									matchFound = true;
-								} else {
-									if (turf.booleanPointOnLine( pt, line, { epsilon: 0.25 })) {
-										console.log("SECOND LEVEL CHECK MATCH!");
-									}
-								}
-							}
-						}
-					}
-
-					if (!matchFound) {
-						console.log("STILL NO MATCH AFTER CHECKING LINES...");
-					}
-				}
-			} else {
-				console.log("couldnt find it...");
-			}
-		};
-		*/
-
-        // Leaflet button 508c
-        $("a.leaflet-control-zoom-in, a.leaflet-control-zoom-out").attr("tabindex", "0");
-        $("a[class^='leaflet']").attr("aria-label", "Leaflet map button");
-
-        // CREATING A NEW PARCEL //
-        var shapes = L.geoJSON()
-
-        map.on('pm:create', ({layer})=>{
-			map.pm.setGlobalOptions({ snapSegment: getSmartSnapSetting("segments") });
-			newLayer(layer);
-        });
-
-        // Map and Parcel Table Functions
-        function newLayer(l) {
-            var idIW = L.popup();
-            parcel = l;
-            var feature = parcel.feature = parcel.feature || {};
-            feature.type = "Feature";
-            feature.properties = feature.properties || {};
-            let parcelDrawHelpText = "Enter an arbitrary but unique name for the parcel. Names should not begin with Air, SW, Sed, SurfSoil, RootSoil, VadoseSoil, or GW. Names should not contain spaces. We recommend short names (e.g., less than about 15 characters) because they will be displayed on other pages of this user interface.<br/><br/>Also enter an arbitrary description of the parcel. It will not be used within the modeling.";
-            var content = '<span>'+parcelDrawHelpText+'<br/><br/><b>Parcel Name</b></span><br/><input id="shapeName" type="text"/><br/><br/><span><b>Parcel Description<b/></span><br/><textarea id="shapeDesc" cols="25" rows="5"></textarea><br/><br/><input type="button" id="okBtn" value="Save"/>';
-            idIW.setContent(content);
-            idIW.setLatLng(l.getBounds().getCenter());
-            idIW.openOn(map);
-            $('#okBtn').on('click',null,{parcel: parcel},saveIdIW)
-        };
-
-        function saveIdIW(event) {
-            let parcel = event.data.parcel
-            var sName = $('#shapeName').val();
-
-            // validation
-            let parcelList = TRIM.store.currentScenario.parcels;
-            let invalid_starts = [
-                "air",
-                "sw",
-                "sed",
-                "surfsoil",
-                "rootsoil",
-                "vadosesoil",
-                "gw"
-            ];
-            for (let substr of invalid_starts) {
-                if (sName.toLowerCase().startsWith(substr)) {
-                    return;
-                }
-            }
-            if (sName.indexOf(' ') >= 0) {
-                return; // contain spaces
-            }
-            else if (parcelList.filter(p=>p.name.toLowerCase() == sName.toLowerCase()).length > 0) {
-                return; // dupe parcel name
-            }
-
-            var sDesc = $('#shapeDesc').val();
-            var Area = L.GeometryUtil.geodesicArea(parcel.getLatLngs()[0]);
-            var sArea = Area.toString() //L.GeometryUtil.readableArea(Area, isMetric = 'km')
-            parcel.feature.properties.name = sName;
-            parcel.feature.properties.desc = sDesc;
-            parcel.feature.properties.area = sArea;
-            parcel.feature.properties.parceltype = "Land & Air"
-            parcel.feature.properties.air = "No";
-            parcel.feature.properties.landuse = "Nozq   "; // we will need NLCD data here?
-            parcel.feature.properties.farmfoodchain = "No";
-            parcel.feature.properties.fishfoodweb = "No";
-            parcel.feature.properties.wetland = "No";
-            map.closePopup();
-            LoadingScreen.show('create_parcel');
-            parcels.addLayer(parcel);
-            parcel.bindTooltip(parcel.feature.properties.name, {permanent: false}).addTo(map);
-            shapes = parcels.toGeoJSON()
-            mapTableRedraw()
-            // WRITE TO DATABASE
-            // TRIM.api.createParcels('{{ scenario.id }}', shapes.features.reverse()[0])
-            TRIM.api.createParcels('{{ scenario.id }}', parcel.toGeoJSON()).on('load', function() {
-                let resp = JSON.parse(this.responseText)
-                if (resp) {
-                    let new_parcel = resp['parcel']
-                    parcel.feature.properties.parcelid = new_parcel["id"]
-                    parcel.feature.properties.area = new_parcel["area"]
-                    parcel.feature.properties.air = new_parcel["hasAir"]
-                    parcel.feature.properties.parceltype = new_parcel["parcelType"]
-                    parcel.feature.properties.landuse = {'lu': new_parcel["landUse"], 'list': resp.media}
-                    parcel.feature.properties.farmfoodchain = new_parcel["hasFarmFoodChain"]
-                    parcel.feature.properties.fishfoodweb = new_parcel["hasFishFoodWeb"]
-                    parcel.feature.properties.wetland = new_parcel["hasWetland"]
-                    parcel.feature.properties.wetland = new_parcel["hasWetland"]
-                    parcel.feature.properties.receptor_spacing = new_parcel["receptor_spacing"];
-                    parcels.addLayer(parcel);
-                    parcel.bindTooltip(parcel.feature.properties.name, {permanent: false}).addTo(map);
-                    shapes = parcels.toGeoJSON()
-                    mapTableRedraw()
-                    // add new parcel to TRIM.store to prevent dupes
-                    if (parcelList.length > 0) {
-                        TRIM.store.currentScenario.parcels.push(new_parcel);
-                    }
-                }
-                // TRIM.refreshParcels();
-                requires_reload = true;
-                LoadingScreen.hide('create_parcel');
-            })
-        };
-
-        // SAVING GEOJSON FILE //
-        function saveToFile(content, filename) {
-            //content = content.toGeoJSON()
-            var file = filename + '.geojson';
-            saveAs(new File([JSON.stringify(content)], file, {
-            type: "text/plain;charset=utf-8"
-          }), file);
-        }
-
-		// parcelObj must contain at a minimum "properties.parcelid"; if pulling from geojson it will have more.
-		// making this global so that it's callable from elsewhere on the page w/o a major rewrite (kludgey)
-		window.deleteParcelFromServer = function(parcelObj) {
-			// console.log("DELETING: " + JSON.stringify(parcelObj));
-            LoadingScreen.show('delete_parcel');
-            TRIM.api.deleteParcels(TRIM.store.currentScenario.id, parcelObj).on('load', function(){
-                // delete parcel from TRIM.store
-                const idx = TRIM.store.currentScenario.parcels.findIndex(p => p.id == parcelObj.properties.parcelid);
-                if (idx > -1) {
-                    TRIM.store.currentScenario.parcels.splice(idx, 1);
-                }
-				// TRIM.refreshParcels();
-				requires_reload = true;
-				shapes = parcels.toGeoJSON()
-				mapTableRedraw()
-				LoadingScreen.hide('delete_parcel');
-            })
-		};
-
-        // REMOVE A PARCEL//
-        map.on('pm:remove', ({layer})=>{
-            // LoadingScreen.show('deleting_parcel');
-            parcels.removeLayer(layer._leaflet_id)
-			/*
-            LoadingScreen.show('delete_parcel');
-            TRIM.api.deleteParcels(TRIM.store.currentScenario.id, layer.toGeoJSON()).on('load', function(){
-                TRIM.refreshParcels();
-                requires_reload = true;
-                LoadingScreen.hide('delete_parcel');
-            })
-            mapTableRedraw()
-			*/
-
-			deleteParcelFromServer(layer.toGeoJSON());
-        });
-
-		// see https://geoman.io/docs/leaflet/modes/edit-mode
-		/*
-		map.on('pm:intersect', e => { console.log("DEBUGME intersect!"); });
-		map.on('pm:edit', e => { console.log("DEBUGME edit!"); });
-		map.on('pm:update', e => { console.log("DEBUGME update!"); });
-		map.on('pm:enable', e => { console.log("DEBUGME enable!"); });
-		map.on('pm:disable', e => { console.log("DEBUGME disable!"); });
-		map.on('pm:vertexadded', e => { console.log("DEBUGME vertexadded!"); });
-		map.on('pm:vertexremoved', e => { console.log("DEBUGME vertexremoved!"); });
-		map.on('pm:vertexclick', e => { console.log("DEBUGME vertexclick!"); });
-		map.on('pm:markerdragstart', e => { console.log("DEBUGME markerdragstart!"); });
-		map.on('pm:markerdrag', e => { console.log("DEBUGME markerdrag!"); });
-		map.on('pm:markerdragend', e => { console.log("DEBUGME markerdragend!"); });
-		map.on('pm:layerreset', e => { console.log("DEBUGME layerreset!"); });
-		map.on('pm:snapdrag', e => { console.log("DEBUGME snapdrag!"); });
-		map.on('pm:snap', e => { console.log("DEBUGME snapme!"); });
-		map.on('pm:unsnap', e => { console.log("DEBUGME unsnap!"); });
-		map.on('pm:centerplaced', e => { console.log("DEBUGME centerplaced!"); });
-		map.on('pm:change', e => { console.log("DEBUGME change!"); });
-		map.on('pm:cancel', e => { console.log("DEBUGME cancel!"); });
-
-		// fires when  you enter drawing mode; NOT when you place first vertex!
-		// map.on('pm:drawstart', e => { console.log("DEBUGME drawstart!"); });
-
-		// fires when you place last vertex, cancel drawing, etc.
-		map.on('pm:drawend', e => { console.log("DEBUGME drawend!"); });
-
-		// fires when layer actually creates
-		map.on('pm:create', e => { console.log("DEBUGME create!"); });
-		*/
-
-        L.easyButton(
-            '<span class = DownArrowBar style = "font-size: 1.5em;">&DownArrowBar;</span>', 
-            function(btn, map){
-                saveToFile(shapes, "Test")
-            },
-            'Download parcel geojson'
-        ).addTo(map);
-
-        L.easyButton(
-            '<span class = UpArrowBar style = "font-size: 1.5em;">&UpArrowBar;</span>', 
-            function(btn, map){
-            var input = document.createElement('input');
-            input.type = 'file';
-
-            input.onchange = e => {
-
-            // getting a hold of the file reference
-            var file = e.target.files[0];
-            if (file.name.split('.').pop() == "geojson"){
-                // setting up the reader
-                var reader = new FileReader();
-                reader.readAsText(file,'UTF-8');
-
-                // here we tell the reader what to do when it's done reading...
-                reader.onload = readerEvent => {
-                    var fileContent = readerEvent.target.result; // this is the content!
-                    shapesJson = JSON.parse(fileContent);
-
-                    let fieldData = [{
-                        "type": "input",
-                        "name": "geojson",
-                        "value": JSON.stringify(shapesJson["features"])
-                    }];
-
-                    fieldData.push({
-                        "type": "input",
-                        "name": "scenario_id",
-                        "value": TRIM.store.currentScenario.id
-                    });
-
-                    LoadingScreen.show('upload_parcel_geojson');
-                    TRIM.api.uploadParcelFile(fieldData, function(success,responseData,c) {
-                        LoadingScreen.hide('upload_parcel_geojson');
-                        
-                        if (!success) {
-                            //alert('An error occurred during upload.');
-                            alert(responseData?.message)
-                            console.log(responseData)
-                            console.log(c)
-                        } else {
-                            console.log("reload...");
-                            window.location.reload();
-                        }
-                    });
-                }
-            }
-            else if (file.name.split('.').pop() == "shp"){
-                console.log("This is a ShapeFile")
-                var shpfile = new L.Shapefile('shpFile/Durham.zip', {
-                    onEachFeature: function(feature, layer) {
-                        if (feature.properties) {
-                            layer.bindPopup(Object.keys(feature.properties).map(function(k) {
-                                return k + ": " + feature.properties[k];
-                            }).join("<br />"), {
-                                maxHeight: 200
-                            });
-                        }
-                    }
-                });
-                shpfile.addTo(map);
-            }
-            // else if (file.name.split('.').pop() == "kml"){
-            //     console.log("This is a KML")
-            // }
-            // else if (file.name.split('.').pop() == "kmz"){
-            //     console.log("This is a KMZ")
-            // }
-            // else {console.log("Unsupported File")}
-            }
-            input.click();
-        },
-        'Upload parcel geojson'
-    ).addTo(map);
-
-        
         function update_data(this_table_id) {
             let new_table_data = get_Data_from_table(this_table_id)
             new_table_data.forEach(function (e) {
                 let i = 0, ii = shapes.features.length;
-                for(i; i < ii; i++) if(shapes.features[i].properties.name === e["Parcel Name"]){break};
+                for (i; i < ii; i++) if (shapes.features[i].properties.name === e["Parcel Name"]) { break };
                 shapes.features[i].properties.desc = e["Description"]
                 shapes.features[i].properties.air = e["Air"]
                 shapes.features[i].properties.parceltype = e["Parcel Type"]
-                shapes.features[i].properties.landuse = {'lu': e["Land Use"], 'list':shapes.features[i].properties.landuse.list}
+                shapes.features[i].properties.landuse = { 'lu': e["Land Use"], 'list': shapes.features[i].properties.landuse.list }
                 shapes.features[i].properties.farmfoodchain = e["Farm Food Chain"]
                 shapes.features[i].properties.fishfoodweb = e["Fish Food Web"]
                 shapes.features[i].properties.wetland = e["Wetland"]
@@ -1888,7 +931,7 @@
             })
         }
 
-        function get_Data_from_table(thisTableID){
+        function get_Data_from_table(thisTableID) {
             let myRows = [];
             let headersText = [];
             let head_section = thisTableID + ' thead th'
@@ -1896,12 +939,12 @@
 
             // Loop through grabbing everything
             let thisRows = thisTableID + ' tbody tr'
-            let $rows = $(thisRows).each(function(index) {
+            let $rows = $(thisRows).each(function (index) {
                 $cells = $(this).find("td");
                 myRows[index] = {};
-                $cells.each(function(cellIndex) {
+                $cells.each(function (cellIndex) {
                     // Set the header text
-                    if(headersText[cellIndex] === undefined) {
+                    if (headersText[cellIndex] === undefined) {
                         headersText[cellIndex] = $($headers[cellIndex]).text();
                     }
                     // Update the row object with the header/cell combo
@@ -1911,8 +954,8 @@
             return myRows
         }
 
-        $(window).on ('load',function(){
-            setTimeout(function () {map.invalidateSize()},2000)
+        $(window).on('load', function () {
+            setTimeout(function () { TRIM.leaflet.refreshMap() }, 2000)
         })
 
         function enableFieldUpdates() {
@@ -1943,7 +986,7 @@
                         coords.show();
                     }
                     var fields = data.fields;
-                    selects.each(function() {
+                    selects.each(function () {
                         var me = $(this);
                         TRIM.forms.updateSelect(this, fields, true);
                         this.removeAttribute('disabled');
@@ -1954,7 +997,7 @@
                 }
             }
 
-            fileField.change(function(e) {
+            fileField.change(function (e) {
                 var me = $(this);
                 var loadingRequest = 'load_' + this.id;
                 LoadingScreen.show(loadingRequest);
@@ -1962,7 +1005,7 @@
                 var myName = me.attr('name');
                 var fileKey = `parcels_${myName}`;
                 TRIM.store.fileData.remove(fileKey);
-                TRIM.api.parseFiles(this).on('load', function() {
+                TRIM.api.parseFiles(this).on('load', function () {
                     try {
                         var data = JSON.parse(this.responseText);
                         if (data) {
@@ -1982,25 +1025,5 @@
                 });
             });
         }
-
-
-		/*
-		// LAT, LNG
-		a = [44.282225, -85.37830428060558];
-		b =[44.282225, -85.341451];
-		c = [44.262225, -85.352451];
-
-		var fooMarker = L.circleMarker(a, { pmIgnore: true, radius: 10, stroke: true, color: "green"}).bindPopup('FOO!').addTo(aermodTestOverlay);
-		var barMarker = L.circleMarker(b, { pmIgnore: true, radius: 10, stroke: true, color: "red"}).bindPopup('BAR!').addTo(aermodTestOverlay);
-		var bazMarker = L.circleMarker(c, { pmIgnore: true, radius: 10, stroke: true, color: "purple"}).bindPopup('BAZ!').addTo(aermodTestOverlay);
-
-		var polyTest = L.polygon([a,b,c], { pmIgnore: true, color: "orange"}).addTo(aermodTestOverlay);
-
-		aermodTestOverlay.addTo(map); // preselects it in the layers control!
-		*/
-
-		// delete fooMarker.pm; // makes it undeletable...
-		// delete barMarker.pm; // makes it undeletable...
-		// pmIgnore: true makes it undeletable and unsnappable, great!
     });
 </script>
