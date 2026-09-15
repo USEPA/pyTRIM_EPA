@@ -119,43 +119,49 @@ class FlaskOauth:
             if not current_user.is_anonymous:
                 return redirect(url_for('scenario.view_scenarios'))
 
-            if request.args['state'] != session.get('oauth2_state'):
-                abort(401)
+            try:
+                if request.args['state'] != session.get('oauth2_state'):
+                    raise Exception("State did not match stored session")
 
-            if 'code' not in request.args:
-                abort(401)
+                if 'code' not in request.args:
+                    raise Exception(f"'code' not in response :: {request.args}")
 
-            response = requests.post(
-                provider['token_url'],
-                data={
-                    'client_id': provider['client_id'],
-                    'client_secret': provider['client_secret'],
-                    'code': request.args['code'],
-                    'grant_type': 'authorization_code',
-                    'redirect_uri': self.get_callback_uri(provider),
-                },
-                headers={'Accept': 'application/json'}
-            )
-            if response.status_code != 200:
-                abort(401)
-            oauth2_token = response.json().get('access_token')
-            if not oauth2_token:
-                abort(401)
+                response = requests.post(
+                    provider['token_url'],
+                    data={
+                        'client_id': provider['client_id'],
+                        'client_secret': provider['client_secret'],
+                        'code': request.args['code'],
+                        'grant_type': 'authorization_code',
+                        'redirect_uri': self.get_callback_uri(provider),
+                    },
+                    headers={'Accept': 'application/json'}
+                )
+                response.raise_for_status()
 
-            response = requests.get(provider['userinfo_url'], headers={
-                'Authorization': 'Bearer ' + oauth2_token,
-                'Accept': 'application/json',
-            })
-            if response.status_code != 200:
-                abort(401)
-            email = response.json()['email']
+                oauth2_token = response.json().get('access_token')
+                if not oauth2_token:
+                    raise Exception(f"Missing token :: [{response.json()}]")                    
 
-            user = self._security.datastore.find_user(email=email) or self._security.datastore.find_user(email=email.casefold())
-            if user is None:
-                abort(401)
+                response = requests.get(provider['userinfo_url'], headers={
+                    'Authorization': 'Bearer ' + oauth2_token,
+                    'Accept': 'application/json',
+                })
+                response.raise_for_status()
+                
+                email = response.json().get('email')
+                if email is None:
+                    raise Exception(f"No email in response :: [{response.json()}]")
 
-            login_user(user)
-            return redirect(url_for('scenario.view_scenarios'))
+                user = self._security.datastore.find_user(email=email) or self._security.datastore.find_user(email=email.casefold())
+                if user is None:
+                    raise Exception(f"User does not exist :: [{email}]")
+
+                login_user(user)
+                return redirect(url_for('scenario.view_scenarios'))
+            except Exception as e:
+                self._app.logger.error(e)
+                abort(401)
 
 
 def init_auth(app, db, bcrypt, security):
