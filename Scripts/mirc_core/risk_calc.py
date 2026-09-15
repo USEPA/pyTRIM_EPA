@@ -175,8 +175,8 @@ def assess_risk(
 
         hq = None
         if RfD:
-            i = adj if adj is not None else val
-            hq = i / RfD
+            # i = adj if adj is not None else val
+            hq = val / RfD
 
         # elcr = None  # We are not reporting risk_factor for individual life stages
         if CSF:
@@ -203,8 +203,8 @@ def assess_risk(
 
     LADD_hq = None
     if RfD:
-        i = LADD_adj if LADD_adj is not None else LADD
-        LADD_hq = i / RfD
+        # i = LADD_adj if LADD_adj is not None else LADD
+        LADD_hq = LADD / RfD
 
     LADD_elcr = None
     if CSF:
