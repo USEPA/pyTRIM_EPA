@@ -864,13 +864,20 @@
 
         function runModel() {
             LoadingScreen.show('start_run');
-            TRIM.api.runModel(TRIM.store.currentScenario.id).on('load', function() {
-                // TODO: No idea why this works (locally -- stepmachine makes sense)
-                // -- the runModel endpoint doesn't return locally until finished??
-                setTimeout(function() {
+            TRIM.api.runModel(TRIM.store.currentScenario.id).on('load', function(rsp) {
+                if (this.responseJSON?.success == false) {
+                    alert("Error running model");
+                    console.error(this.responseJSON.error);
                     LoadingScreen.hide('start_run');
-                    pollForResults();
-                }, 3000);
+                }
+                else {
+                    // TODO: No idea why this works (locally -- stepmachine makes sense)
+                    // -- the runModel endpoint doesn't return locally until finished??
+                    setTimeout(function() {
+                        LoadingScreen.hide('start_run');
+                        pollForResults();
+                    }, 3000);
+                }
             });
         }
 
