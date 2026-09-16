@@ -510,22 +510,26 @@ onDomLoad(function() {
         addInput('C_water');
         addInput('C_soil');
         addInput('C_root_veg');
-        addInput('C_root_veg');
         addInput('Kd');
         addInput('Cs_s');
+        addInput('Cs_root_zone');
         addInput('Kd_feed');
         addInput('Drdp');
         addInput('Drwp');
         if (meta.fishPathway.toLowerCase() == 'direct') {
             var fishParam = findFish(3.5);
             addInput(fishParam?.variable_name);
+            addInput('f_tl35');
             var fishParam = findFish(4);
             addInput(fishParam?.variable_name);
+            addInput('f_tl4');
         }
         else {
             addInput('C_sed');
+            addInput('f_tl35');
             addInput('C_surf_water');
             addInput('FMD');
+            addInput('f_tl4');
         }
         for (var pct in meta.percentiles) {
             if (pct != 'body_weight' && pct != 'breast_milk') {

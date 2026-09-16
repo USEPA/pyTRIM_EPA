@@ -364,7 +364,6 @@
         // Load the Visualization API and the corechart package.
         google.charts.load('current', {'packages':['corechart']});
         google.charts.setOnLoadCallback(function() {
-            console.log("Google charts ready")
             ResultsDisplay.chartsReady = true;
             if (ResultsDisplay.pendingDraw) {
                 ResultsDisplay.pendingDraw = false;
