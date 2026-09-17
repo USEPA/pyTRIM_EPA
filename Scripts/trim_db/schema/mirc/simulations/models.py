@@ -232,6 +232,9 @@ class MircSimulationConsumptionBreakdown(Model):
         )
     )
 
+    variable = sa.Column(sa.String(60), nullable=True)
+    name = sa.Column(sa.String(255), nullable=True)
+
     subfood_id = sa.Column(
         sa.Integer(), sa.ForeignKey('mirc_product.id'), nullable=False
     )
@@ -247,3 +250,15 @@ class MircSimulationConsumptionBreakdown(Model):
             f"'{self.simulation.name}', {self.subfood.name}, {self.fraction}"
             ")"
         )
+
+
+@register_serializer(MircSimulationConsumptionBreakdown)
+def _ts_simulation_consumption_breakdown(param: MircSimulationConsumptionBreakdown):
+    return {
+        'full_name': param.name or '',
+        'variable_name': param.variable or '',
+        'id': param.id,
+        'subfood': param.subfood or '',
+        'source': param.source or '',
+        'value': param.fraction,
+    }
