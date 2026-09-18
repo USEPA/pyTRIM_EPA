@@ -3,8 +3,15 @@ window.TRIM = (function (trim) {
 
     leaflet.map = undefined;
     leaflet.parcels = undefined;
+    leaflet.requires_reload = false;
 
     const parcelsTableRedrawEvent = new Event('parcels:tableRedraw');
+
+    // dot is the leaflet internal id
+    // parcel is object containing the TRIM parcel id and the leaflet internal id
+    // e.g.:
+    // { leafletDotIdOne: { trimParcelId: A, leafletPolygonId: B }, leafletDotIdTwo: { trimParcelId: foo, leafletPolygonId: bar } }
+    var dotToParcel = {};
 
     // These are set in initLayers
     var depositionOverlayGroup,
@@ -99,20 +106,7 @@ window.TRIM = (function (trim) {
 
     leaflet.drawParcels = function () {
         function plotSavedParcels() {
-            let scenarioParcels = TRIM.store.currentScenario.parcels;
-            if (scenarioParcels.length == 0) {
-                return;
-            }
-            let lat_means = []
-            let lon_means = []
-            scenarioParcels.forEach(function (e, i) {
-                lon_means.push(e.vertices.map((c, i, arr) => c[0] / arr.length).reduce((p, c) => c + p))
-                lat_means.push(e.vertices.map((c, i, arr) => c[1] / arr.length).reduce((p, c) => c + p))
-            })
-            let mean_lat = lat_means.map((c, i, arr) => c / arr.length).reduce((p, c) => c + p)
-            let mean_lon = lon_means.map((c, i, arr) => c / arr.length).reduce((p, c) => c + p)
-            leaflet.map.setView([mean_lat, mean_lon], 12);
-
+            leaflet.focusMap();
             for (const layer of Object.values(leaflet.parcels._layers)) {
                 layer.addTo(leaflet.map);
                 layer.bindTooltip(layer.feature.properties.name, { permanent: false }).addTo(leaflet.map);
@@ -180,14 +174,29 @@ window.TRIM = (function (trim) {
             TRIM.api.createParcels(TRIM.store.currentScenario.id, parcel.toGeoJSON()).on('load', function () {
                 let resp = JSON.parse(this.responseText)
                 if (resp) {
-                    let new_parcel = resp['parcel'];
+                    let new_parcel = resp['parcel']
+                    parcel.feature.properties.parcelid = new_parcel["id"]
+                    parcel.feature.properties.area = new_parcel["area"]
+                    parcel.feature.properties.air = new_parcel["hasAir"]
+                    parcel.feature.properties.parceltype = new_parcel["parcelType"]
+                    parcel.feature.properties.landuse = { 'lu': new_parcel["landUse"], 'list': resp.media }
+                    parcel.feature.properties.farmfoodchain = new_parcel["hasFarmFoodChain"]
+                    parcel.feature.properties.fishfoodweb = new_parcel["hasFishFoodWeb"]
+                    parcel.feature.properties.wetland = new_parcel["hasWetland"]
+                    parcel.feature.properties.wetland = new_parcel["hasWetland"]
+                    parcel.feature.properties.receptor_spacing = new_parcel["receptor_spacing"];
+
+                    leaflet.parcels.addLayer(parcel);
+                    parcel.bindTooltip(parcel.feature.properties.name, { permanent: false }).addTo(leaflet.map);
+
                     if (TRIM.store.currentScenario.parcels.length > 0) {
                         TRIM.store.currentScenario.parcels.push(new_parcel);
                     }
                 }
-                leaflet.drawParcels();
+                leaflet.refreshParcels();
+                leaflet.focusMap();
                 document.body.dispatchEvent(parcelsTableRedrawEvent);
-                requires_reload = true;
+                leaflet.requires_reload = true;
                 LoadingScreen.hide('create_parcel');
             })
         };
@@ -208,15 +217,17 @@ window.TRIM = (function (trim) {
 
     leaflet.removeParcel = function (layer) {
         LoadingScreen.show('delete_parcel');
-        let parcelObj = layer.toGeoJSON();        
+        let parcelObj = layer.toGeoJSON();
+        parcelObj.properties.parcelid = getParcelByKey('name', parcelObj.properties.name)?.id
         TRIM.api.deleteParcels(TRIM.store.currentScenario.id, parcelObj).on('load', function () {
             // delete parcel from TRIM.store
             const idx = TRIM.store.currentScenario.parcels.findIndex(p => p.id == parcelObj.properties.parcelid);
             if (idx > -1) {
                 TRIM.store.currentScenario.parcels.splice(idx, 1);
             }
-            requires_reload = true;
-            leaflet.drawParcels();
+            leaflet.requires_reload = true;
+            leaflet.refreshParcels();
+            leaflet.focusMap();
             document.body.dispatchEvent(parcelsTableRedrawEvent);
             LoadingScreen.hide('delete_parcel');
         });
@@ -269,13 +280,6 @@ window.TRIM = (function (trim) {
         });
 
         // START -- dots on vertices
-
-        // dot is the leaflet internal id
-        // parcel is object containing the TRIM parcel id and the leaflet internal id
-        // e.g.:
-        // { leafletDotIdOne: { trimParcelId: A, leafletPolygonId: B }, leafletDotIdTwo: { trimParcelId: foo, leafletPolygonId: bar } }
-        let dotToParcel = {};
-
         let addParcelAssociation = function (elementId, storageStructure, storageKey, associationType) {
             if (associationType === undefined) {
                 associationType = "oneToOne";
@@ -466,7 +470,7 @@ window.TRIM = (function (trim) {
 
         // delete parcel
         map.on('pm:remove', ({ layer }) => {
-            leaflet.parcels.removeLayer(layer._leaflet_id)
+            leaflet.map.removeLayer(layer);
             leaflet.removeParcel(layer);
         });
 
@@ -476,6 +480,22 @@ window.TRIM = (function (trim) {
 
     leaflet.refreshMap = function () {
         leaflet.map.invalidateSize();
+    }
+
+    leaflet.focusMap = function () {
+        let scenarioParcels = TRIM.store.currentScenario.parcels;
+        if (scenarioParcels.length == 0) {
+            return;
+        }
+        let lat_means = []
+        let lon_means = []
+        scenarioParcels.forEach(function (e, i) {
+            lon_means.push(e.vertices.map((c, i, arr) => c[0] / arr.length).reduce((p, c) => c + p))
+            lat_means.push(e.vertices.map((c, i, arr) => c[1] / arr.length).reduce((p, c) => c + p))
+        })
+        let mean_lat = lat_means.map((c, i, arr) => c / arr.length).reduce((p, c) => c + p)
+        let mean_lon = lon_means.map((c, i, arr) => c / arr.length).reduce((p, c) => c + p)
+        leaflet.map.setView([mean_lat, mean_lon], 12);
     }
 
     leaflet.initLayers = function () {

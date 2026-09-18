@@ -216,7 +216,7 @@
         let requires_reload = false;
         $('a[href$="-tab"]').on('click', (e) => {
             if ($("#parcels-tab-pill").hasClass("active")) {
-                if (requires_reload) {
+                if (requires_reload || TRIM.leaflet.requires_reload) {
                     e.target.click();
                     $('#save-btn').click();
                 }
@@ -258,7 +258,7 @@
                 LoadingScreen.hide('refreshing_parcels');
             });
         }
-        
+
         // for leaflet
         document.body.addEventListener('parcels:tableRedraw', function () {
             console.log("Redrawing parcels table");
@@ -404,37 +404,35 @@
                 }
 
                 // if we made it here, we're good to submit to server
-                let fieldData = [depoOverlayFile.get(0)];
+                let fieldData = [
+                    depoOverlayFile.get(0),
+                    {
+                        "type": "input",
+                        "name": "scenario_id",
+                        "value": TRIM.store.currentScenario.id
+                    },
+                    {
+                        "type": "input",
+                        "name": "misc_file_type",
+                        "value": "deposition_overlay"
+                    },
+                    {
+                        "type": "input",
+                        "name": "coord_system",
+                        "value": depoOverlayCoordsSystem.val()
+                    },
 
-                fieldData.push({
-                    "type": "input",
-                    "name": "scenario_id",
-                    "value": TRIM.store.currentScenario.id
-                });
+                    {
+                        "type": "input",
+                        "name": "utm_zone",
+                        "value": depoOverlayCoordsSystem.val() == "UTM" ? depoOverlayUtmZone.val() : "n/a"
+                    },
 
-                fieldData.push({
-                    "type": "input",
-                    "name": "misc_file_type",
-                    "value": "deposition_overlay"
-                });
-
-                fieldData.push({
-                    "type": "input",
-                    "name": "coord_system",
-                    "value": depoOverlayCoordsSystem.val()
-                });
-
-                fieldData.push({
-                    "type": "input",
-                    "name": "utm_zone",
-                    "value": depoOverlayCoordsSystem.val() == "UTM" ? depoOverlayUtmZone.val() : "n/a"
-                });
-
-                fieldData.push({
-                    "type": "input",
-                    "name": "zflag_restriction",
-                    "value": depoOverlayZFlagRestriction.val()
-                });
+                    {
+                        "type": "input",
+                        "name": "zflag_restriction",
+                        "value": depoOverlayZFlagRestriction.val()
+                    }];
 
                 LoadingScreen.show('upload_depo_overlay_plt');
                 TRIM.api.uploadMiscScenarioFile(fieldData, function (success, responseData, c) {
@@ -461,7 +459,23 @@
             let tblId = "#mapTable"
             mapTable = $(tblId).removeAttr('width').DataTable();
             shapes = TRIM.leaflet.parcels.toGeoJSON();
-            // console.log(shapes.features)
+
+            function constructPcl(parcelid, fieldname, value) {
+                let parcel_info = [{
+                    'type': 'data',
+                    'name': 'id',
+                    'value': parcelid,
+                }, {
+                    'type': 'data',
+                    'name': 'field',
+                    'value': fieldname
+                }, {
+                    'type': 'input',
+                    'name': fieldname,
+                    'value': value
+                }];
+                return JSON.stringify(parcel_info);
+            }
 
             map_cols = [
                 {
@@ -475,20 +489,7 @@
                 {
                     data: "properties.desc",
                     render: function (data, type, row) {
-                        let parcel_info = [{
-                            'type': 'data',
-                            'name': 'id',
-                            'value': row.properties.parcelid,
-                        }, {
-                            'type': 'data',
-                            'name': 'field',
-                            'value': 'description'
-                        }, {
-                            'type': 'input',
-                            'name': 'description',
-                            'value': data
-                        }]
-                        parcel_info = JSON.stringify(parcel_info)
+                        let parcel_info = constructPcl(row.properties.parcelid, 'description', data);
                         return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info + "' type='text' value='" + data + "' style='display:none'>" +
                             "<label class='editableCell badge badge-light'>" + data + "</label>"
                     }
@@ -502,20 +503,7 @@
                 {
                     data: "properties.parceltype",
                     render: function (data, type, row) {
-                        let parcel_info = [{
-                            'type': 'data',
-                            'name': 'id',
-                            'value': row.properties.parcelid,
-                        }, {
-                            'type': 'data',
-                            'name': 'field',
-                            'value': 'parcelType'
-                        }, {
-                            'type': 'input',
-                            'name': 'parcelType',
-                            'value': data
-                        }]
-                        parcel_info = JSON.stringify(parcel_info)
+                        let parcel_info = constructPcl(row.properties.parcelid, 'parcelType', data);
                         var parcel_types = ["Air Only", "Water Only", "Land Only", "Land & Air", "Water & Air"]
                         var $select = $("<select class='editableCell form-control form-control-sm parceltype_ddl' name='select' style='display:none'></select>", {})
                         $.each(parcel_types, function (k, v) {
@@ -537,20 +525,7 @@
                 {
                     data: "properties.landuse",
                     render: function (data, type, row) {
-                        let parcel_info = [{
-                            'type': 'data',
-                            'name': 'id',
-                            'value': row.properties.parcelid,
-                        }, {
-                            'type': 'data',
-                            'name': 'field',
-                            'value': 'landUse'
-                        }, {
-                            'type': 'input',
-                            'name': 'landUse',
-                            'value': data.lu
-                        }]
-                        parcel_info = JSON.stringify(parcel_info)
+                        let parcel_info = constructPcl(row.properties.parcelid, 'landUse', data.lu);
                         var $select = $("<select class='editableCell form-control form-control-sm landuse_ddl' name='select' style='display:none'></select>", {})
                         $.each(data.list, function (k, v) {
                             var $option = $("<option></option>",
@@ -575,21 +550,8 @@
                 {
                     data: "properties.farmfoodchain",
                     render: function (data, type, row) {
-                        let parcel_info = [{
-                            'type': 'data',
-                            'name': 'id',
-                            'value': row.properties.parcelid,
-                        }, {
-                            'type': 'data',
-                            'name': 'field',
-                            'value': 'hasFarmFoodChain'
-                        }, {
-                            'type': 'input',
-                            'name': 'hasFarmFoodChain',
-                            'value': data
-                        }]
                         let editFlag = (row.properties.landuse.lu == "Tilled Soil" || row.properties.landuse.lu == "Untilled Soil") ? "editableCell badge badge-light" : "text-muted"
-                        parcel_info = JSON.stringify(parcel_info)
+                        let parcel_info = constructPcl(row.properties.parcelid, 'hasFarmFoodChain', data);
                         return "<select class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info + "' name='select' style='display:none'>" +
                             "<option value='Yes'>Yes</option>" +
                             "<option value='No'>No</option>" +
@@ -600,21 +562,8 @@
                 {
                     data: "properties.fishfoodweb",
                     render: function (data, type, row) {
-                        let parcel_info = [{
-                            'type': 'data',
-                            'name': 'id',
-                            'value': row.properties.parcelid,
-                        }, {
-                            'type': 'data',
-                            'name': 'field',
-                            'value': 'hasFishFoodWeb'
-                        }, {
-                            'type': 'input',
-                            'name': 'hasFishFoodWeb',
-                            'value': data
-                        }]
                         let editFlag = (row.properties.parceltype.includes("Water")) ? "editableCell badge badge-light" : "text-muted"
-                        parcel_info = JSON.stringify(parcel_info)
+                        let parcel_info = constructPcl(row.properties.parcelid, 'hasFishFoodWeb', data);
                         return "<select class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info + "' name='select' style='display:none'>" +
                             "<option value='Yes'>Yes</option>" +
                             "<option value='No'>No</option>" +
@@ -625,23 +574,10 @@
                 {
                     data: "properties.wetland",
                     render: function (data, type, row) {
-                        let parcel_info = [{
-                            'type': 'data',
-                            'name': 'id',
-                            'value': row.properties.parcelid,
-                        }, {
-                            'type': 'data',
-                            'name': 'field',
-                            'value': 'hasWetland'
-                        }, {
-                            'type': 'input',
-                            'name': 'hasWetland',
-                            'value': data
-                        }]
                         let editFlag = (row.properties.parceltype.includes("Water")
                             || row.properties.parceltype.includes("Air Only")
                             || row.properties.landuse.lu == "Impervious") ? "text-muted" : "editableCell badge badge-light"
-                        parcel_info = JSON.stringify(parcel_info)
+                        let parcel_info = constructPcl(row.properties.parcelid, 'hasWetland', data);
                         return "<select class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info + "' name='select' style='display:none'>" +
                             "<option value='Yes'>Yes</option>" +
                             "<option value='No'>No</option>" +
@@ -652,20 +588,7 @@
                 {
                     data: "properties.receptor_spacing",
                     render: function (data, type, row) {
-                        let parcel_info = [{
-                            'type': 'data',
-                            'name': 'id',
-                            'value': row.properties.parcelid,
-                        }, {
-                            'type': 'data',
-                            'name': 'field',
-                            'value': 'receptor_spacing'
-                        }, {
-                            'type': 'input',
-                            'name': 'receptor_spacing',
-                            'value': data
-                        }]
-                        parcel_info = JSON.stringify(parcel_info)
+                        let parcel_info = constructPcl(row.properties.parcelid, 'receptor_spacing', data);
                         return "<input class='editableCell form-control form-control-sm' data-parcelinfo='" + parcel_info + "' type='text' value='" + data + "' style='display:none'>" +
                             "<label class='editableCell badge badge-light'>" + data + "</label>"
                     }
@@ -698,11 +621,7 @@
                     $("[data-toggle=popover]").popover();
                     $('[data-toggle="tooltip"]').tooltip();
                     $('#mapTable tbody').on('change', 'select.landuse_ddl', function () {
-                        //get selected value
                         var changed = $(this).find(":selected").val();
-                        //get cell being changed
-                        //var cell = mapTable.cell($(this).closest('td'));
-                        //get row being changed
                         var row = mapTable.row($(this).closest('tr'));
                         var data = row.data();
                         if (changed == "Water" || changed == "Impervious" || changed == "Air Only") {
@@ -714,15 +633,9 @@
                         if (changed != "Water") {
                             $(this).closest('tr').find("label.fishfoodweb").text("No")
                         }
-                        //invalidate the data and redraw
-                        //row.invalidate().draw(false);
                     });
                     $('#mapTable tbody').on('change', 'select.parceltype_ddl', function () {
-                        //get selected value
                         var changed = $(this).find(":selected").val();
-                        //get cell being changed
-                        //var cell = mapTable.cell($(this).closest('td'));
-                        //get row being changed
                         var row = mapTable.row($(this).closest('tr'));
                         var data = row.data();
                         if (changed.includes("Water") || changed.includes("Air Only")) {
@@ -740,8 +653,6 @@
                         if (changed == "Water Only" || changed == "Air Only" || changed == "Water & Air") {
                             $(this).closest('tr').find('label.landuse_lb').text("N/A").attr("class", "text-muted")
                         }
-                        //invalidate the data and redraw
-                        //row.invalidate().draw(false);
                     });
                 }
             });
@@ -785,8 +696,6 @@
 
             // AERMOD Receptor UI setup -- start
             $("a#generate_aermod_receptors_btn").click(function () {
-                console.log("do something!");
-
                 LoadingScreen.show('generating_aermod_receptors');
                 TRIM.api.runReceptorGeneration('{{ scenario.id }}', function (success, responseData) {
                     if (success) {
