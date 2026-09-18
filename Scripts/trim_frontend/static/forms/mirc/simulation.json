@@ -219,7 +219,7 @@
         },
         {
             "id": "C_root_veg",
-            "label": "Average Concentration at Root-zone Depth for Garden Produce (mg/kg)",
+            "label": "Average Concentration where Produce Root Uptake Occurs (mg/kg)",
             "data_type": "float",
             "min": 0,
             "step": "any"
@@ -303,7 +303,7 @@
         },
         {
             "id": "Cs_root_zone",
-            "label": "Average Concentration at Root-zone Depth for Livestock Feed (mg/kg)",
+            "label": "Average Concentration where Livestock Feed Root Uptake Occurs (mg/kg)",
             "data_type": "float",
             "min": 0,
             "step": "any"

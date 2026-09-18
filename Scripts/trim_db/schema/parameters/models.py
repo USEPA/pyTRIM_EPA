@@ -351,6 +351,9 @@ def serialize_parameter_definition(pd: ParameterDefinition):
 
 
 class CustomParameter(Model):
+    __mapper_args__ = { 'confirm_deleted_rows': False }
+
+    
     definition_id = sa.Column(
         sa.Integer(), sa.ForeignKey('parameter_definition.id'), nullable=False
     )

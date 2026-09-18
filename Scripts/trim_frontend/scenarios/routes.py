@@ -778,8 +778,7 @@ def run_result_scenario(scenario_id):
                     "error": "Missing required variable to run re-architected model"
                 }
     except Exception as e:
-        print('scenario run error:', e)
-        data_resp = {"success": False, "error": e}
+        data_resp = {"success": False, "error": repr(e)}
 
     return ApiResult(data_resp)
 

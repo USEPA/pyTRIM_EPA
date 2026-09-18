@@ -243,17 +243,15 @@
             if ($(elem).attr('name').indexOf("_field_name") === -1) {
                 ErrorValidation.isPositiveValue(elem, "div");
             }
-            let subsection_header = $(elem).closest("div.sd_subsection").find('h3').text()
-            let sd_type = subsection_header == "Litterfall" ? "litterfall" : "allowexchange"
-            let type_text = subsection_header == "Litterfall" ? subsection_header : "Allow exchange"
 
             // all litterfall rates must be <= 1
-            if ($(elem).attr("id").includes(sd_type) && elementIsValid($(elem).parent())) {
+            if ($(elem).attr("id").includes("litterfall") && elementIsValid($(elem).parent())) {
                 if (!$(elem).is("select")) {
-                    ErrToolTip(elem, parseFloat($(elem).val()) <= 1.0, `${type_text} rates must be <= 1.`, "div");
+                    ErrToolTip(elem, parseFloat($(elem).val()) <= 1.0, `Litterfall rates must be <= 1.`, "div");
                 } else {
-                    let bad_data = $(elem).data("seasonal").filter((e,i)=>parseFloat(e.LitterfallRate) > 1)
-                    ErrToolTip(elem, bad_data.length == 0, `${type_text} rates must be <= 1.`, "div");
+                    let data = TRIM.store.fileData.fromField(elem, 'name', 'seasonal');
+                    let bad_data = data.filter((e,i)=>parseFloat(e.LitterfallRate) > 1);
+                    ErrToolTip(elem, bad_data.length == 0, `Litterfall rates must be <= 1.`, "div");
                 }
             }
 
@@ -261,7 +259,7 @@
             if ($(elem).attr("id").includes("allowexchange") && elementIsValid($(elem).parent())) {
                 if ($(elem).attr('name').indexOf("_field_name") === -1) {
                     let val = parseFloat($(elem).val());
-                    ErrToolTip(elem, (val == 0 || val == 1), `${type_text} rates must be either 0 or 1.`, "div");
+                    ErrToolTip(elem, (val == 0 || val == 1), `Allow Exchange rates must be either 0 or 1.`, "div");
                 }
             }
 
@@ -305,16 +303,17 @@
                 let resp = TRIM.api.updateScenario(param_info).on('load',function(){
                     let val_resp = this.responseJSON
                     LoadingScreen.hide('loading_results');
+                    console.log(val_resp)
                     if (val_resp?.success === false) {
                         return;
                     }
                     else if (val_resp) {
                         let val = val_resp[Object.keys(val_resp)[0]]
-                        let lb_static_val = $(elem).closest('div.form-group').find("label.wt_avg_val")
+                        let lb_static_val = $(elem).closest('div.form-group').find("div.wt_avg_val")
                         if (lb_static_val.length > 0) {
                             lb_static_val.text(`Time-weighted average from file: ${val}`)
                         } else {
-                            let lb_static_val = `<label class=wt_avg_val>Time-weighted average from file: ${val}</label>`
+                            let lb_static_val = `<div class="wt_avg_val mt-2 text-muted">Time-weighted Average: ${val}</div>`
                             $(elem).closest('div.form-group').append(lb_static_val)
                         }
                     }
@@ -407,7 +406,7 @@
                 if (subform.find('[type="checkbox"][id$="use_custom_file"]').prop('checked')) {
                     dataSource = subform.find('[type="file"]');
                 }
-                const data = TRIM.store.fileData.fromField(dataSource, 'name', 'meteo') || null;
+                const data = TRIM.store.fileData.fromField(dataSource, 'name', 'seasonal') || null;
 
                 const scenario = TRIM.store.currentScenario;
                 const sim_start = Date.parse(scenario["simulation_start_date"]);

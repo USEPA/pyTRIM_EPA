@@ -9,6 +9,11 @@
                 >
                     Run Model
                 </button>
+                <button id="btn_cancel_model" disabled="disabled"
+                    class="comp_show_all btn btn-outline-dark py-1"
+                >
+                    Cancel
+                </button>
             </div>
             <div class="col-sm text-right">
                 <div class="btn-group" id="btn_download_dd" style="display: none;">
@@ -219,6 +224,7 @@
         </div>
         <div class="row mb-1 mt-4">
             <div class="col-sm">
+                {% if current_user.email.lower().endswith("@icf.com") %}
                 <script language="JavaScript">
                     function displayModelDebugging(msgs) {
                         let debugZone = $("#model_progress_debug_zone textarea").empty();
@@ -234,7 +240,6 @@
                         }
                     }
                 </script>
-                {% if current_user.email.lower().endswith("@icf.com") %}
                 <div class="row mb-1" style="border: 1px solid">
                     <div class="col-sm">
                         <div class="mt-3" id="model_progress_debug_zone">
@@ -358,6 +363,13 @@
     onDomLoad(function(e) {
         // Load the Visualization API and the corechart package.
         google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(function() {
+            ResultsDisplay.chartsReady = true;
+            if (ResultsDisplay.pendingDraw) {
+                ResultsDisplay.pendingDraw = false;
+                ResultsDisplay.draw();
+            }
+        });
         const form = document.getElementById('model-run-result-gui');
 
         form.addEventListener('form:visible', function() {
@@ -369,6 +381,9 @@
     window.ResultsDisplay = ((display) => {
         let initializedForms = false;
         let initializingForms = false;
+
+        display.chartsReady = display.chartsReady || false;
+        display.pendingDraw = display.pendingDraw || false;
 
         const noRunInfo = {
             "has_run": false,
@@ -420,6 +435,13 @@
                 btnRunModel.prop('disabled', true);
                 resetDisplay();
                 runModel();
+            });
+
+            $('#btn_cancel_model').on('click', function (e) {
+                e.preventDefault();
+                TRIM.api.clearOldResults(TRIM.store.currentScenario.id).on('load', function(rsp) {
+                    window.location.reload();
+                });
             });
 
             $('#btn_mirc_export').on('click', function (e) {
@@ -642,30 +664,35 @@
             const loadIndicator = $('p#cb_proc_vis');
 
             if (stage == 'tm') {
+                $('#btn_cancel_model').prop('disabled', false);
                 runOrDone(tmIndicator, percent);
                 setIndicator(odeIndicator, "off", 0);
                 setIndicator(writeIndicator, "off", 0);
                 setIndicator(loadIndicator, "off", 0);
             }
             else if (stage == 'ode') {
+                $('#btn_cancel_model').prop('disabled', false);
                 setIndicator(tmIndicator, "done", 100);
                 runOrDone(odeIndicator, percent);
                 setIndicator(writeIndicator, "off", 0);
                 setIndicator(loadIndicator, "off", 0);
             }
             else if (stage == 'csv') {
+                $('#btn_cancel_model').prop('disabled', false);
                 setIndicator(tmIndicator, "done", 100);
                 setIndicator(odeIndicator, "done", 100);
                 runOrDone(writeIndicator, percent);
                 setIndicator(loadIndicator, "off", 0);
             }
             else if (stage == 'fin') {
+                $('#btn_cancel_model').prop('disabled', true);
                 setIndicator(tmIndicator, "done", 100);
                 setIndicator(odeIndicator, "done", 100);
                 setIndicator(writeIndicator, "done", 100);
                 runOrDone(loadIndicator, percent);
             }
             else {
+                $('#btn_cancel_model').prop('disabled', true);
                 setIndicator(tmIndicator, "off", 0);
                 setIndicator(odeIndicator, "off", 0);
                 setIndicator(writeIndicator, "off", 0);
@@ -803,6 +830,11 @@
 
         display.draw = () => {
             console.log('Redrawing display...')
+            if (!display.chartsReady) {
+                // Charts API not ready
+                display.pendingDraw = true;
+                return;
+            }
             resetDisplay();
 
             if (!TRIM.store.latestRunInfo?.has_run) {
@@ -831,13 +863,20 @@
 
         function runModel() {
             LoadingScreen.show('start_run');
-            TRIM.api.runModel(TRIM.store.currentScenario.id).on('load', function() {
-                // TODO: No idea why this works (locally -- stepmachine makes sense)
-                // -- the runModel endpoint doesn't return locally until finished??
-                setTimeout(function() {
+            TRIM.api.runModel(TRIM.store.currentScenario.id).on('load', function(rsp) {
+                if (this.responseJSON?.success == false) {
+                    alert("Error running model");
+                    console.error(this.responseJSON.error);
                     LoadingScreen.hide('start_run');
-                    pollForResults();
-                }, 3000);
+                }
+                else {
+                    // TODO: No idea why this works (locally -- stepmachine makes sense)
+                    // -- the runModel endpoint doesn't return locally until finished??
+                    setTimeout(function() {
+                        LoadingScreen.hide('start_run');
+                        pollForResults();
+                    }, 3000);
+                }
             });
         }
 

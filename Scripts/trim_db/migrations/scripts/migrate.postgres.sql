@@ -11,6 +11,7 @@ CREATE TABLE alembic_version (
 -- Running upgrade  -> 12f3b3bc93f9
 
 CREATE TABLE chemical (
+    active BOOLEAN NOT NULL,
     name VARCHAR(120) NOT NULL, 
     cas_number VARCHAR(120) NOT NULL, 
     hap_number VARCHAR(255), 

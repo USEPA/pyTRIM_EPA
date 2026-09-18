@@ -390,26 +390,31 @@ onDomLoad(function() {
 
         if (meta.name != undefined) {
             var simNum = parseInt(meta.name?.replace('Simulation', '').trim());
-
             $('#mirc-results-name').text(
                 `(${simNum}) ${chemical.name} Simulation (CAS ${chemical.cas_number?.replace(/ /g, '')})`
             );
-            $('#mirc-results-shortdesc').text(
-                `${(new Date(meta.timestamp)).toLocaleDateString('en-US', timeDisplayOpts)} | ${meta.exposureProfile?.name}`
-            ).show();
+            
+            shortdesc = $('#mirc-results-shortdesc');
+            shortdesc.text("");
+            function add_shortdesc(label, text) {
+                $(`<small class="mb-1">${label}</small>`)
+                    .append(
+                        $('<span class="text-muted" />').text(text)
+                    ).append("<br/>").appendTo(shortdesc);
+            }
+            add_shortdesc("Exposure Profile: ", meta.exposureProfile?.name);
+            add_shortdesc("Date Created: ", meta.created);
+            add_shortdesc("TRIM Output Date: ", (new Date(meta.timestamp)).toLocaleDateString('en-US', timeDisplayOpts));
+            if (meta.description) {
+                add_shortdesc("Notes: ", meta.description);
+            }
+            shortdesc.show();
         }
         else {
             $('#mirc-results-name').text(
                 'Simulation Not Found'
             );
             $('#mirc-results-shortdesc').hide();
-        }
-
-        if (meta.description) {
-            $('#simulation-description').text(meta.description).show();
-        }
-        else {
-            $('#simulation-description').hide();
         }
 
         $('#exposure-profile').val(meta.exposureProfile?.name);
@@ -505,22 +510,26 @@ onDomLoad(function() {
         addInput('C_water');
         addInput('C_soil');
         addInput('C_root_veg');
-        addInput('C_root_veg');
         addInput('Kd');
         addInput('Cs_s');
+        addInput('Cs_root_zone');
         addInput('Kd_feed');
         addInput('Drdp');
         addInput('Drwp');
         if (meta.fishPathway.toLowerCase() == 'direct') {
             var fishParam = findFish(3.5);
             addInput(fishParam?.variable_name);
+            addInput('f_tl35');
             var fishParam = findFish(4);
             addInput(fishParam?.variable_name);
+            addInput('f_tl4');
         }
         else {
             addInput('C_sed');
+            addInput('f_tl35');
             addInput('C_surf_water');
             addInput('FMD');
+            addInput('f_tl4');
         }
         for (var pct in meta.percentiles) {
             if (pct != 'body_weight' && pct != 'breast_milk') {
@@ -562,19 +571,19 @@ onDomLoad(function() {
             th = document.createElement('th');
             th.colSpan = 2;
             th.innerText = 'ADD';
-            if (data.chemical.mutagenic) {
+            /*if (data.chemical.mutagenic) {
                 th.innerText = 'Base ADD';
-            }
+            }*/
             th.title = 'Average Daily Dose';
             tr.appendChild(th);
 
-            if (data.chemical.mutagenic) {
+            /*if (data.chemical.mutagenic) {
                 th = document.createElement('th');
                 th.colSpan = 2;
                 th.innerText = 'Adjusted ADD';
                 th.title = 'Adjusted Average Daily Dose';
                 tr.appendChild(th);
-            }
+            }*/
 
             th = document.createElement('th');
             th.innerText = 'HQ';
@@ -610,7 +619,7 @@ onDomLoad(function() {
                 td.innerText = simplifyUnit(i.unit, true);
                 tr.appendChild(td);
 
-                if (data.chemical.mutagenic) {
+                /*if (data.chemical.mutagenic) {
                     var adj = riskData.adjusted_intake;
                     if (adj == null) {
                         i = {value: NaN, unit: ''};
@@ -622,7 +631,7 @@ onDomLoad(function() {
                     td = document.createElement('td');
                     td.innerText = simplifyUnit(adj.unit, true);
                     tr.appendChild(td);
-                }
+                }*/
 
                 var hq = riskData.hazard_quotient;
                 td = document.createElement('td');
@@ -756,9 +765,9 @@ onDomLoad(function() {
                             return '';
                         }
                         var add = data[ageSelect.val()].intake;
-                        if (data[ageSelect.val()].adjusted_intake) {
+                        /*if (data[ageSelect.val()].adjusted_intake) {
                             add = data[ageSelect.val()].adjusted_intake;
-                        }
+                        }*/
                         return asScientific(add.value, 4);
                     }
                 },
@@ -771,9 +780,9 @@ onDomLoad(function() {
                             return '';
                         }
                         var add = data[ageSelect.val()].intake;
-                        if (data[ageSelect.val()].adjusted_intake) {
+                        /*if (data[ageSelect.val()].adjusted_intake) {
                             add = data[ageSelect.val()].adjusted_intake;
-                        }
+                        }*/
                         return simplifyUnit(add.unit, true);
                     }
                 },
@@ -935,12 +944,13 @@ onDomLoad(function() {
                     risk: 0
                 };
             }
-
-            i = info.risk[age].adjusted_intake;
+            
+            i = info.risk[age].intake;
+            //i = info.risk[age].adjusted_intake;
             iu = '';
-            if (i == null) {
-                i = info.risk[age].intake;
-            }
+            //if (i == null) {
+            //    i = info.risk[age].intake;
+            //}
             if (i == null) {
                 i = 0;
             }
@@ -1016,7 +1026,7 @@ onDomLoad(function() {
         });
 
         var targetPercents = percents[factor];
-        var sigPaths = targetPercents.filter(x => x != 0 && !Number.isNaN(x)).length;
+        var sigPaths = targetPercents.filter(x => x >= 0.10 && !Number.isNaN(x)).length;
         if (otherPercent[factor] > 0) {
             products.push('Other');
             targetPercents.push(otherPercent[factor]);
@@ -1027,11 +1037,11 @@ onDomLoad(function() {
 
         function addKpis() {
             function makeKpi(title, value) {
-                var col = $('<div class="col-lg-4 mb-4" />');
+                var col = $('<div class="col-lg-3 mb-4" />');
                 var card = $('<div class="card border-left-primary shadow h-100" />').appendTo(col);
                 var cardBody = $('<div class="card-body p-3" />').appendTo(card);
 
-                $('<small class="d-block font-weight-bold text-uppercase mb-1 text-muted" />')
+                $('<small class="kpi-title d-block font-weight-bold text-uppercase mb-1 text-muted" />')
                     .text(title)
                     .appendTo(cardBody);
                 $('<div class="h5 mb-0 font-weight-bold text-gray-800" />')
@@ -1043,15 +1053,17 @@ onDomLoad(function() {
 
             var kpiRow = $('<div class="row" />').prependTo(legend);
             if (Number.isNaN(targetPercents[0])) {
-                makeKpi('Primary Path', 'N/A').appendTo(kpiRow);
+                makeKpi(`Primary Path (${age})`, 'N/A').appendTo(kpiRow);
             }
             else {
-                makeKpi('Primary Path', `${products[0]} (${round(parseFloat(targetPercents[0]) * 100, 2)}%)`)
+                makeKpi(`Primary Path (${age})`, `${products[0]} (${Math.ceil(parseFloat(targetPercents[0]) * 100)}%)`)
                     .appendTo(kpiRow);
             }
-            makeKpi('Total Risk', `${round(total.risk, 3)}`)
+            makeKpi(`TOTAL HQ (${age})`, `${asScientific(total.hazard, 2)}`)
                 .appendTo(kpiRow);
-            makeKpi('Significant Paths', `${round(sigPaths, 2)}`)
+            makeKpi('TOTAL LIFETIME RISK', `${asScientific(total.risk, 2)}`)
+                .appendTo(kpiRow);
+            makeKpi('PATHS AT LEAST 10% OF ADD', `${round(sigPaths, 2)}`)
                 .appendTo(kpiRow);
         }
 
@@ -1316,6 +1328,11 @@ onDomLoad(function() {
 </script>
 
 <style>
+    .kpi-title {
+        min-height: 2.5em;
+        line-height: 1.25;
+    }
+
     /* Fix bs-popover arrows... */
     .bs-popover-right > .arrow,
     .bs-popover-auto[x-placement^="right"]>.arrow {

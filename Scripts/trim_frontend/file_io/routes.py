@@ -150,7 +150,6 @@ def parse_aermod():
             }
         )
     except Exception as e:
-        print('Import error:', e)
         import traceback
         traceback.print_exc()
         raise

@@ -1,11 +1,14 @@
 import sqlalchemy as sa
+from sqlalchemy.orm import Session, with_loader_criteria
+
 from ..utils.base import Model
 from ..utils.serialize import register_serializer
+from ..utils.mixins import ActiveFlagMixin
 
 __all__ = ['Chemical']
 
 
-class Chemical(Model):
+class Chemical(Model, ActiveFlagMixin):
     name = sa.Column(sa.String(120), nullable=False)
     cas_number = sa.Column(sa.String(120), nullable=False, unique=True)
     hap_number = sa.Column(sa.String(255))
@@ -95,3 +98,15 @@ scenario_chemicals = sa.Table(
     ),
     sa.UniqueConstraint('scenario_id', 'chemical_id'),
 )
+
+
+@sa.event.listens_for(Session, "do_orm_execute")
+def filter_inactive_chemicals(execute_state):
+    if execute_state.is_select:
+        execute_state.statement = execute_state.statement.options(
+            with_loader_criteria(
+                Chemical,
+                lambda chemical: chemical.active.is_(True),
+                include_aliases=True,
+            )
+        )

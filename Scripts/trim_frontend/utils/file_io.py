@@ -422,11 +422,16 @@ class MiscAssociatedFileDepositionOverlay(MiscAssociatedFileVariety):
             TOTAL_DEPO_COL = "TOTAL DEPO"
             COMBINED_DEPO_COL = "combined_deposition" # this one we'll generate
 
+            has_total_depo = (TOTAL_DEPO_COL in plt_cols)
+            has_dry_wet_depo = (DRY_DEPO_COL in plt_cols and WET_DEPO_COL in plt_cols)
+
             if len(df) == 0:
                 input_file_errors.append("No data rows")
             else:
-                if TOTAL_DEPO_COL not in plt_cols and DRY_DEPO_COL not in plt_cols and WET_DEPO_COL not in plt_cols:
-                    input_file_errors.append("missing 'TOTAL DEPO' / 'DRY DEPO' / 'WET DEPO'")
+                if not (has_total_depo or has_dry_wet_depo):
+                    input_file_errors.append(
+                        "File must contain 'TOTAL DEPO' or both 'DRY DEPO' and 'WET DEPO'"
+                    )
 
             # apply some bizlogic rules based on GRP and ZFLAG cols
             if len(input_file_errors) == 0:
@@ -435,11 +440,11 @@ class MiscAssociatedFileDepositionOverlay(MiscAssociatedFileVariety):
 
             # sum up deposition
             if len(df) > 0:
-                if TOTAL_DEPO_COL not in plt_cols:
+                if has_total_depo:
+                    df[COMBINED_DEPO_COL] = df["TOTAL DEPO"]
+                elif has_dry_wet_depo:
                     cols_to_sum = [x for x in [DRY_DEPO_COL, WET_DEPO_COL] if x in plt_cols]
                     df[COMBINED_DEPO_COL] = df[cols_to_sum].sum(axis=1)
-                else:
-                    df[COMBINED_DEPO_COL] = df["TOTAL DEPO"]
             else:
                 input_file_errors.append("No data rows after GRP/ZFLAG filtering")
 

@@ -36,6 +36,7 @@
             "id": "CSF",
             "label": "Cancer Slope Factor",
             "data_type": "float",
+            "step": "any",
             "allow_empty": true,
             "help": "Chronic oral cancer slope factor"
         },
@@ -48,6 +49,8 @@
             "id": "RfD",
             "label": "Reference Dose",
             "data_type": "float",
+            "min": 0,
+            "step": "any",
             "allow_empty": true,
             "help": "Chronic oral reference dose"
         },

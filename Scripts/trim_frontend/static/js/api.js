@@ -391,7 +391,8 @@ window.TRIM = (function(trim) {
         let url = api.getUrl('scenario_api.clear_old_result');
         return AJAX.call({
             method: 'DELETE',
-            url: url.replace("/0/", "/" + scenarioId + "/")
+            url: url.replace("/0/", "/" + scenarioId + "/"),
+            data: makeFormData([])
         })
     }
 
@@ -399,7 +400,8 @@ window.TRIM = (function(trim) {
         let url = api.getUrl('scenario_api.run_result_scenario');
         return AJAX.call({
             method: 'POST',
-            url: url.replace('/0/', '/' + scenarioId + '/')
+            url: url.replace('/0/', '/' + scenarioId + '/'),
+            data: makeFormData([])
         });
     }
 
