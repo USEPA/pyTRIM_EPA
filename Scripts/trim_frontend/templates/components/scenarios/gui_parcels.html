@@ -206,6 +206,8 @@
         attributes: true
     });
     onDomLoad(function () {
+        var DREW_MAP = false;
+
         $('.accordion h2 button').on('click', function () {
             $(this).find('i.fa').toggleClass('fa-chevron-up fa-chevron-down')
         });
@@ -221,27 +223,8 @@
             }
         });
 
-        var DREW_MAP = false;
-
         var parcelsReadyEvent = document.createEvent('Event');
         parcelsReadyEvent.initEvent('parcels:ready', true, true);
-        TRIM.refreshParcels = function (force) {
-            force = force || false;
-            if (TRIM.store.currentScenario.parcels && !force) {
-                document.body.dispatchEvent(parcelsReadyEvent);
-                return
-            }
-            LoadingScreen.show('refreshing_parcels');
-            DREW_MAP = false;
-            TRIM.api.getParcels('{{ scenario.id }}').on('load', function () {
-                var parcelData = JSON.parse(this.responseText);
-                TRIM.store.currentScenario.parcels = parcelData.parcels;
-                TRIM.store.currentScenario.standardMedia = parcelData.media;
-                document.body.dispatchEvent(parcelsReadyEvent);
-                LoadingScreen.hide('refreshing_parcels');
-            });
-        }
-
         document.body.addEventListener('parcels:ready', function () {
             try {
                 TRIM.forms.populate(form, TRIM.store.currentScenario);
@@ -259,123 +242,27 @@
             LoadingScreen.hide('parcel_gui_loading');
         });
 
-        // CREATING A NEW PARCEL //
-        var shapes = L.geoJSON()
-
-        TRIM.leaflet.map.on('pm:create', ({ layer }) => {
-            TRIM.leaflet.map.pm.setGlobalOptions({ snapSegment: TRIM.leaflet.getSmartSnapSetting("segments") });
-            newLayer(layer);
-        });
-
-        // Map and Parcel Table Functions
-        function newLayer(l) {
-            var idIW = L.popup();
-            parcel = l;
-            var feature = parcel.feature = parcel.feature || {};
-            feature.type = "Feature";
-            feature.properties = feature.properties || {};
-            let parcelDrawHelpText = "Enter an arbitrary but unique name for the parcel. Names should not begin with Air, SW, Sed, SurfSoil, RootSoil, VadoseSoil, or GW. Names should not contain spaces. We recommend short names (e.g., less than about 15 characters) because they will be displayed on other pages of this user interface.<br/><br/>Also enter an arbitrary description of the parcel. It will not be used within the modeling.";
-            var content = '<span>' + parcelDrawHelpText + '<br/><br/><b>Parcel Name</b></span><br/><input id="shapeName" type="text"/><br/><br/><span><b>Parcel Description<b/></span><br/><textarea id="shapeDesc" cols="25" rows="5"></textarea><br/><br/><input type="button" id="okBtn" value="Save"/>';
-            idIW.setContent(content);
-            idIW.setLatLng(l.getBounds().getCenter());
-            idIW.openOn(TRIM.leaflet.map);
-            $('#okBtn').on('click', null, { parcel: parcel }, saveIdIW)
-        };
-
-        function saveIdIW(event) {
-            let parcel = event.data.parcel
-            var sName = $('#shapeName').val();
-
-            // validation
-            let parcelList = TRIM.store.currentScenario.parcels;
-            let invalid_starts = [
-                "air",
-                "sw",
-                "sed",
-                "surfsoil",
-                "rootsoil",
-                "vadosesoil",
-                "gw"
-            ];
-            for (let substr of invalid_starts) {
-                if (sName.toLowerCase().startsWith(substr)) {
-                    return;
-                }
+        TRIM.refreshParcels = function (force) {
+            force = force || false;
+            if (TRIM.store.currentScenario.parcels && !force) {
+                document.body.dispatchEvent(parcelsReadyEvent);
+                return
             }
-            if (sName.indexOf(' ') >= 0) {
-                return; // contain spaces
-            }
-            else if (parcelList.filter(p => p.name.toLowerCase() == sName.toLowerCase()).length > 0) {
-                return; // dupe parcel name
-            }
-
-            var sDesc = $('#shapeDesc').val();
-            var Area = L.GeometryUtil.geodesicArea(parcel.getLatLngs()[0]);
-            var sArea = Area.toString() //L.GeometryUtil.readableArea(Area, isMetric = 'km')
-            parcel.feature.properties.name = sName;
-            parcel.feature.properties.desc = sDesc;
-            parcel.feature.properties.area = sArea;
-            parcel.feature.properties.parceltype = "Land & Air"
-            parcel.feature.properties.air = "No";
-            parcel.feature.properties.landuse = "Nozq   "; // we will need NLCD data here?
-            parcel.feature.properties.farmfoodchain = "No";
-            parcel.feature.properties.fishfoodweb = "No";
-            parcel.feature.properties.wetland = "No";
-            TRIM.leaflet.map.closePopup();
-            LoadingScreen.show('create_parcel');
-            TRIM.leaflet.parcels.addLayer(parcel);
-            parcel.bindTooltip(parcel.feature.properties.name, { permanent: false }).addTo(TRIM.leaflet.map);
-            mapTableRedraw()
-
-            // WRITE TO DATABASE
-            TRIM.api.createParcels('{{ scenario.id }}', parcel.toGeoJSON()).on('load', function () {
-                let resp = JSON.parse(this.responseText)
-                if (resp) {
-                    let new_parcel = resp['parcel']
-                    parcel.feature.properties.parcelid = new_parcel["id"]
-                    parcel.feature.properties.area = new_parcel["area"]
-                    parcel.feature.properties.air = new_parcel["hasAir"]
-                    parcel.feature.properties.parceltype = new_parcel["parcelType"]
-                    parcel.feature.properties.landuse = { 'lu': new_parcel["landUse"], 'list': resp.media }
-                    parcel.feature.properties.farmfoodchain = new_parcel["hasFarmFoodChain"]
-                    parcel.feature.properties.fishfoodweb = new_parcel["hasFishFoodWeb"]
-                    parcel.feature.properties.wetland = new_parcel["hasWetland"]
-                    parcel.feature.properties.wetland = new_parcel["hasWetland"]
-                    parcel.feature.properties.receptor_spacing = new_parcel["receptor_spacing"];
-
-                    TRIM.leaflet.parcels.addLayer(parcel);
-                    parcel.bindTooltip(parcel.feature.properties.name, { permanent: false }).addTo(TRIM.leaflet.map);
-                    mapTableRedraw()
-                    // add new parcel to TRIM.store to prevent dupes
-                    if (parcelList.length > 0) {
-                        TRIM.store.currentScenario.parcels.push(new_parcel);
-                    }
-                }
-                // TRIM.refreshParcels();
-                requires_reload = true;
-                LoadingScreen.hide('create_parcel');
-            })
-        };
-
-        // REMOVE A PARCEL//
-        window.deleteParcelFromServer = function (parcelObj) {
-            LoadingScreen.show('delete_parcel');
-            TRIM.api.deleteParcels(TRIM.store.currentScenario.id, parcelObj).on('load', function () {
-                // delete parcel from TRIM.store
-                const idx = TRIM.store.currentScenario.parcels.findIndex(p => p.id == parcelObj.properties.parcelid);
-                if (idx > -1) {
-                    TRIM.store.currentScenario.parcels.splice(idx, 1);
-                }
-                requires_reload = true;
-                TRIM.leaflet.refreshParcels()
-                mapTableRedraw()
-                LoadingScreen.hide('delete_parcel');
-            })
-        };
-
-        TRIM.leaflet.map.on('pm:remove', ({ layer }) => {
-            TRIM.leaflet.parcels.removeLayer(layer._leaflet_id)
-            deleteParcelFromServer(layer.toGeoJSON());
+            LoadingScreen.show('refreshing_parcels');
+            DREW_MAP = false;
+            TRIM.api.getParcels('{{ scenario.id }}').on('load', function () {
+                var parcelData = JSON.parse(this.responseText);
+                TRIM.store.currentScenario.parcels = parcelData.parcels;
+                TRIM.store.currentScenario.standardMedia = parcelData.media;
+                document.body.dispatchEvent(parcelsReadyEvent);
+                LoadingScreen.hide('refreshing_parcels');
+            });
+        }
+        
+        // for leaflet
+        document.body.addEventListener('parcels:tableRedraw', function () {
+            console.log("Redrawing parcels table");
+            mapTableRedraw();
         });
 
         var form = document.getElementById('parcels-gui');

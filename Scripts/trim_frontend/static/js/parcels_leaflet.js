@@ -4,6 +4,8 @@ window.TRIM = (function (trim) {
     leaflet.map = undefined;
     leaflet.parcels = undefined;
 
+    const parcelsTableRedrawEvent = new Event('parcels:tableRedraw');
+
     // These are set in initLayers
     var depositionOverlayGroup,
         receptorOverlayGroup,
@@ -33,12 +35,35 @@ window.TRIM = (function (trim) {
         }
     }
 
+    leaflet.initHtmlAdjustments = function () {
+        // make measuring and use of other tools mutually exclusive
+        $("a.leaflet-control-draw-measure").click((e) => {
+            if ($(e.target).parent().hasClass("enabled")) {
+                leaflet.map.pm.disableDraw();
+                leaflet.map.pm.disableGlobalEditMode();
+                leaflet.map.pm.disableGlobalRemovalMode();
+                leaflet.map.pm.Toolbar.buttons.removalMode.disable();
+                leaflet.map.pm.Toolbar.buttons.editMode.disable();
+                leaflet.map.pm.Toolbar.buttons.drawPolygon.disable();
+            } else {
+                leaflet.map.pm.Toolbar.buttons.removalMode.enable();
+                leaflet.map.pm.Toolbar.buttons.editMode.enable();
+                leaflet.map.pm.Toolbar.buttons.drawPolygon.enable();
+            }
+        });
+
+        // Leaflet button 508c
+        $("a.leaflet-control-zoom-in, a.leaflet-control-zoom-out").attr("tabindex", "0");
+        $("a[class^='leaflet']").attr("aria-label", "Leaflet map button");
+    }
+
     // parcel interactions -- START
     // see https://geoman.io/docs/leaflet/modes/edit-mode
     leaflet.initParcelLayer = function () {
         return L.layerGroup();
     }
 
+    // reconstruct parcels based on map
     leaflet.refreshParcels = function () {
         function createParcel(parcel) {
             let new_parcel = new L.polygon(parcel.data.vertices.map(e => [e[1], e[0]]))
@@ -98,177 +123,105 @@ window.TRIM = (function (trim) {
         leaflet.map.whenReady(plotSavedParcels);
         setTimeout(function () { leaflet.refreshMap() }, 1000);
     }
-    // parcel interactions -- END
 
-    // aermod receptor related helper functions -- START
-    leaflet.initAermodReceptors = function () {
-        LoadingScreen.show('check_aermod_receptors_file');
-        TRIM.api.checkMiscScenarioFile(TRIM.store.currentScenario.id, "generated_aermod_receptors", function (success, responseData) {
-            LoadingScreen.hide('check_aermod_receptors_file');
-            if (!success) {
-                console.log('An error occurred while fetching aermod receptors');
-            } else {
-                leaflet.renderAermodDownloadUi(responseData);
+    leaflet.addParcel = function (layer) {
+        function validateParcelName(sName) {
+            let parcelList = TRIM.store.currentScenario.parcels;
+            let invalid_starts = [
+                "air",
+                "sw",
+                "sed",
+                "surfsoil",
+                "rootsoil",
+                "vadosesoil",
+                "gw"
+            ];
+            for (let substr of invalid_starts) {
+                if (sName.toLowerCase().startsWith(substr)) {
+                    alert(`Invalid start. Parcel name cannot start with any of the following words: ${invalid_starts}`);
+                    return false;
+                }
             }
-        });
-    }
-
-    leaflet.installAermodReceptors = function (responseData, presignedGeojsonUrl) {
-        let errorDisplayArea = $("#aermod-receptors-current-file .errors");
-        errorDisplayArea.empty();
-
-        let preserveShownState = receptorOverlayShowing;
-        if (receptorOverlayGroup !== null) {
-            mapLayers.removeLayer(receptorOverlayGroup); // removes option from the layers dialog
-            receptorOverlayGroup.removeFrom(leaflet.map); // removes dots from the map
+            if (sName.indexOf(' ') >= 0) {
+                alert(`Parcel name can't contain spaces`);
+                return false;
+            }
+            else if (parcelList.filter(p => p.name.toLowerCase() == sName.toLowerCase()).length > 0) {
+                alert(`Parcel name already exists`);
+                return false;
+            }
+            return true;
         }
 
-        receptorOverlayGroup = L.layerGroup();
+        function saveIdIW(event) {
+            let parcel = event.data.parcel;
+            var sName = $('#shapeName').val();
+            var sDesc = $('#shapeDesc').val();
+            var Area = L.GeometryUtil.geodesicArea(parcel.getLatLngs()[0]);
+            var sArea = Area.toString();
 
-        if (presignedGeojsonUrl === undefined) {
-            return;
-        }
-        if (responseData.file_metadata?.errors === undefined || responseData.file_metadata?.errors.length == 0) {
-            TRIM.api.hitUrl(presignedGeojsonUrl, function (presignedSuccess, presignedResponse) {
-                let overlayGridPoints = [];
-                if (presignedResponse != null) {
-                    for (let i = 0; i < presignedResponse.features.length; i++) {
-                        let el = presignedResponse.features[i];
-                        let point = [el.geometry.coordinates[1], el.geometry.coordinates[0]];
-                        overlayGridPoints.push(point);
-                        let colorForDisplay = "#000000"; // black
-                        var marker = L.circleMarker(point, { pmIgnore: true, radius: .2, stroke: true, color: colorForDisplay }).addTo(receptorOverlayGroup);
+            if (!validateParcelName(sName)) {
+                return;
+            }
+
+            parcel.feature.properties.name = sName;
+            parcel.feature.properties.desc = sDesc;
+            parcel.feature.properties.area = sArea;
+            parcel.feature.properties.parceltype = "Land & Air"
+            parcel.feature.properties.air = "No";
+            parcel.feature.properties.landuse = "Nozq   "; // we will need NLCD data here?
+            parcel.feature.properties.farmfoodchain = "No";
+            parcel.feature.properties.fishfoodweb = "No";
+            parcel.feature.properties.wetland = "No";
+            leaflet.map.closePopup();
+            leaflet.parcels.addLayer(parcel);
+
+            LoadingScreen.show('create_parcel');
+            TRIM.api.createParcels(TRIM.store.currentScenario.id, parcel.toGeoJSON()).on('load', function () {
+                let resp = JSON.parse(this.responseText)
+                if (resp) {
+                    let new_parcel = resp['parcel'];
+                    if (TRIM.store.currentScenario.parcels.length > 0) {
+                        TRIM.store.currentScenario.parcels.push(new_parcel);
                     }
                 }
-
-                receptorOverlayGroup.on("add", function () { receptorOverlayShowing = true; });
-                receptorOverlayGroup.on("remove", function () { receptorOverlayShowing = false; });
-
-                // preserve previously selected state after a refresh or regeneration
-                if (preserveShownState) {
-                    receptorOverlayGroup.addTo(leaflet.map); // preselects it in the layers control!
-                }
-            });
-
-            mapLayers.addOverlay(receptorOverlayGroup, "AERMOD Receptors");
-        }
-        else {
-            $("<h4/>").html("Errors with generated file:").appendTo(errorDisplayArea);
-            if (responseData.file_metadata?.errors != undefined) {
-                for (let i = 0; i < responseData.file_metadata.errors.length; i++) {
-                    $("<li/>").html(responseData.file_metadata.errors[i]).appendTo(errorDisplayArea);
-                }
-            }
-        }
-    };
-
-    leaflet.renderAermodDownloadUi = function (responseData) {
-        let presignedGeojsonUrl = responseData.presigned_urls["data.geojson"];
-        let presignedAermodInputUrl = responseData.presigned_urls["aermod_receptors.txt"];
-
-        // update generate button label
-        $("#generate_aermod_receptors_btn").html((presignedGeojsonUrl === undefined ? "Generate" : "Regenerate") + " AERMOD Receptors");
-
-        // show the download URL
-        if (presignedGeojsonUrl != undefined) {
-            $("#aermod-receptors-download-geojson-btn").attr("href", presignedGeojsonUrl);
-            $("#aermod-receptors-download-aermod-btn").attr("href", presignedAermodInputUrl);
-            $("#aermod-receptors-current-file").show();
-        }
-
-        //plot it
-        leaflet.installAermodReceptors(responseData, presignedGeojsonUrl);
-    };
-    // aermod receptor related helper functions -- END
-
-    // deposition overlay helper functions -- START
-    leaflet.initDepositionOverlay = function () {
-        LoadingScreen.show('check_overlay_status');
-        TRIM.api.checkMiscScenarioFile(TRIM.store.currentScenario.id, "deposition_overlay", function (success, responseData) {
-            LoadingScreen.hide('check_overlay_status');
-            if (!success) {
-                console.log('An error occurred while fetching overlay data');
-            } else {
-                TRIM.leaflet.installDepositionOverlayOntoMap(responseData)
-            }
-        });
-    }
-
-    leaflet.addDepositionOverlayLegend = function (bucketRanges, bucketColors) {
-        if (typeof depositionOverlayLegend != "undefined") {
-            leaflet.map.removeControl(depositionOverlayLegend); // removes the legend
-        }
-
-        // thx https://codepen.io/haakseth/pen/KQbjdO
-        depositionOverlayLegend = L.control({ position: "bottomright" });
-
-        depositionOverlayLegend.onAdd = function () {
-            var div = L.DomUtil.create("div", "leaflet-legend deposition-overlay");
-
-            div.innerHTML += "<h4>Total Deposition (g/m<sup>2</sup>)</h4>";
-            for (let i = quartileGradient.length - 1; i >= 0; i--) {
-                let jenksBucket = bucketRanges[i];
-                let rangeDisplay = jenksBucket.from.toExponential() + " - " + jenksBucket.to.toExponential();
-                div.innerHTML += '<i style="background: ' +
-                    quartileGradient[i] +
-                    '"></i><span>' +
-                    rangeDisplay +
-                    '</span><br>';
-            }
-
-            return div;
+                leaflet.drawParcels();
+                document.body.dispatchEvent(parcelsTableRedrawEvent);
+                requires_reload = true;
+                LoadingScreen.hide('create_parcel');
+            })
         };
 
-        depositionOverlayLegend.addTo(leaflet.map);
-    };
+        // Map and Parcel Table Functions
+        var idIW = L.popup();
+        parcel = layer;
+        var feature = parcel.feature = parcel.feature || {};
+        feature.type = "Feature";
+        feature.properties = feature.properties || {};
+        let parcelDrawHelpText = "Enter an arbitrary but unique name for the parcel. Names should not begin with Air, SW, Sed, SurfSoil, RootSoil, VadoseSoil, or GW. Names should not contain spaces. We recommend short names (e.g., less than about 15 characters) because they will be displayed on other pages of this user interface.<br/><br/>Also enter an arbitrary description of the parcel. It will not be used within the modeling.";
+        var content = '<span>' + parcelDrawHelpText + '<br/><br/><b>Parcel Name</b></span><br/><input id="shapeName" type="text"/><br/><br/><span><b>Parcel Description<b/></span><br/><textarea id="shapeDesc" cols="25" rows="5"></textarea><br/><br/><input type="button" id="okBtn" value="Save"/>';
+        idIW.setContent(content);
+        idIW.setLatLng(layer.getBounds().getCenter());
+        idIW.openOn(leaflet.map);
+        $('#okBtn').on('click', null, { parcel: parcel }, saveIdIW)
+    }
 
-    leaflet.removeDepositionOverlayFromMap = function () {
-        if (typeof depositionOverlayLegend != "undefined") {
-            leaflet.map.removeControl(depositionOverlayLegend); // removes the legend
-        }
-        mapLayers.removeLayer(depositionOverlayGroup); // removes from the layers menu
-        depositionOverlayGroup.removeFrom(leaflet.map); // hides from the map
-        $("#deposition-overlay-current-file").hide(); // hide management ui
-    };
-
-    leaflet.installDepositionOverlayOntoMap = function (responseData) {
-        let errorDisplayArea = $("#deposition-overlay-current-file .errors");
-        errorDisplayArea.empty();
-
-        if (responseData.file_metadata == null) {
-            return;
-        }
-        // show the management UI
-        $("#deposition-overlay-current-filename").html(responseData.file_metadata.original_file_name);
-        $("#deposition-overlay-current-file").show();
-
-        if (responseData.file_metadata.errors === undefined || responseData.file_metadata.errors.length == 0) {
-            let presignedUrl = responseData.presigned_urls["processed.json"];
-            TRIM.api.hitUrl(presignedUrl, function (presignedSuccess, presignedResponse) {
-                let overlayPolyPoints = [];
-                for (let i = 0; i < presignedResponse.row_data.length; i++) {
-                    let el = presignedResponse.row_data[i];
-                    let point = [el.wgs84_lat, el.wgs84_long];
-                    overlayPolyPoints.push(point);
-                    let colorForDisplay = quartileGradient[el.jenks_bucket];
-                    var marker = L.circleMarker(point, { pmIgnore: true, radius: 1, stroke: true, color: colorForDisplay }).bindPopup("Total Depo == " + el.combined_deposition.toExponential()).addTo(depositionOverlayGroup);
-                }
-
-                leaflet.addDepositionOverlayLegend(responseData.file_metadata.jenks_buckets, quartileGradient);
-
-                depositionOverlayGroup.on("add", function () { $(".leaflet-legend").removeClass("hidden"); });
-                depositionOverlayGroup.on("remove", function () { $(".leaflet-legend").addClass("hidden"); });
-                depositionOverlayGroup.addTo(leaflet.map); // preselects it in the layers control!
-            });
-            mapLayers.addOverlay(depositionOverlayGroup, "Deposition");
-        } else {
-            $("<h4/>").html("Errors with uploaded file:").appendTo(errorDisplayArea);
-            for (let i = 0; i < responseData.file_metadata.errors.length; i++) {
-                $("<li/>").html(responseData.file_metadata.errors[i]).appendTo(errorDisplayArea);
+    leaflet.removeParcel = function (layer) {
+        LoadingScreen.show('delete_parcel');
+        let parcelObj = layer.toGeoJSON();        
+        TRIM.api.deleteParcels(TRIM.store.currentScenario.id, parcelObj).on('load', function () {
+            // delete parcel from TRIM.store
+            const idx = TRIM.store.currentScenario.parcels.findIndex(p => p.id == parcelObj.properties.parcelid);
+            if (idx > -1) {
+                TRIM.store.currentScenario.parcels.splice(idx, 1);
             }
-        }
-    };
-    // deposition overlay helper functions -- END
+            requires_reload = true;
+            leaflet.drawParcels();
+            document.body.dispatchEvent(parcelsTableRedrawEvent);
+            LoadingScreen.hide('delete_parcel');
+        });
+    }
+    // parcel interactions -- END
 
     // leaflet functionality -- START
     leaflet.initMap = function (mapId) {
@@ -307,7 +260,7 @@ window.TRIM = (function (trim) {
                             (probe.feature.properties.parcelid == dotToParcel[deletedId].trimParcelId ||
                                 L.stamp(probe) == dotToParcel[deletedId].leafletPolygonId)) {
                             map.removeLayer(probe);
-                            window.deleteParcelFromServer({ "properties": { "parcelid": probe.feature.properties.parcelid } });
+                            leaflet.removeParcel(probe);
                             return;
                         }
                     });
@@ -364,8 +317,6 @@ window.TRIM = (function (trim) {
                 for (let key in globalEditBuildup) {
                     let coords = globalEditBuildup[key];
                     console.log("SAVE: " + coords + " for parcel " + key);
-                    // TRIM.api.updateParcel('{{ scenario.id }}', parcel.toGeoJSON()).on('load', function() {
-
                     let parcel_info = [{
                         'type': 'data',
                         'name': 'id',
@@ -380,7 +331,7 @@ window.TRIM = (function (trim) {
                         'value': JSON.stringify(coords)
                     }]
 
-                    TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', function () {
+                    TRIM.api.updateParcel(TRIM.store.currentScenario.id, parcel_info).on('load', function () {
                         finishedCounter++;
                         // console.log("finished [" + finishedCounter + "/" + numParcelsToUpdate + "]");
                         if (finishedCounter >= numParcelsToUpdate) {
@@ -507,6 +458,18 @@ window.TRIM = (function (trim) {
         });
         // FINISH -- dots on vertices
 
+        // add parcel
+        map.on('pm:create', ({ layer }) => {
+            map.pm.setGlobalOptions({ snapSegment: leaflet.getSmartSnapSetting("segments") });
+            leaflet.addParcel(layer);
+        });
+
+        // delete parcel
+        map.on('pm:remove', ({ layer }) => {
+            leaflet.parcels.removeLayer(layer._leaflet_id)
+            leaflet.removeParcel(layer);
+        });
+
         leaflet.map = map;
         return map;
     }
@@ -514,7 +477,6 @@ window.TRIM = (function (trim) {
     leaflet.refreshMap = function () {
         leaflet.map.invalidateSize();
     }
-    // leaflet functionality -- END
 
     leaflet.initLayers = function () {
         var StreetBM = L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiY2JiaXJ5b2wiLCJhIjoiY2xnZHZ4cnVvMGcwZTNkcXJ6ZTNvM3N0dSJ9.S6TzhpcjiSv1qttl8B1UMA', {
@@ -587,7 +549,9 @@ window.TRIM = (function (trim) {
 
         measurementControl = L.Control.measureControl().addTo(leaflet.map);
     }
+    // leaflet functionality -- END
 
+    // additional leaflet buttons -- START
     leaflet.getSmartSnapSetting = function (typeOfSnap) {
         if (typeOfSnap == "vertices" || typeOfSnap == "segments") {
             return conditionalSnapSettings[typeOfSnap];
@@ -612,7 +576,6 @@ window.TRIM = (function (trim) {
             console.log("smartSnapEnableOrDisable doesn't work with '" + typeOfSnap + "'");
         }
     };
-
 
     leaflet.initSmartSnap = function () {
         let customSnapControls = [
@@ -736,28 +699,178 @@ window.TRIM = (function (trim) {
             'Upload parcel geojson'
         ).addTo(leaflet.map);
     }
+    // additional leaflet buttons -- END
 
-    leaflet.initHtmlAdjustments = function () {
-        // make measuring and use of other tools mutually exclusive
-        $("a.leaflet-control-draw-measure").click((e) => {
-            if ($(e.target).parent().hasClass("enabled")) {
-                leaflet.map.pm.disableDraw();
-                leaflet.map.pm.disableGlobalEditMode();
-                leaflet.map.pm.disableGlobalRemovalMode();
-                leaflet.map.pm.Toolbar.buttons.removalMode.disable();
-                leaflet.map.pm.Toolbar.buttons.editMode.disable();
-                leaflet.map.pm.Toolbar.buttons.drawPolygon.disable();
+    // aermod receptors -- START
+    leaflet.initAermodReceptors = function () {
+        LoadingScreen.show('check_aermod_receptors_file');
+        TRIM.api.checkMiscScenarioFile(TRIM.store.currentScenario.id, "generated_aermod_receptors", function (success, responseData) {
+            LoadingScreen.hide('check_aermod_receptors_file');
+            if (!success) {
+                console.log('An error occurred while fetching aermod receptors');
             } else {
-                leaflet.map.pm.Toolbar.buttons.removalMode.enable();
-                leaflet.map.pm.Toolbar.buttons.editMode.enable();
-                leaflet.map.pm.Toolbar.buttons.drawPolygon.enable();
+                leaflet.renderAermodDownloadUi(responseData);
             }
         });
-
-        // Leaflet button 508c
-        $("a.leaflet-control-zoom-in, a.leaflet-control-zoom-out").attr("tabindex", "0");
-        $("a[class^='leaflet']").attr("aria-label", "Leaflet map button");
     }
+
+    leaflet.installAermodReceptors = function (responseData, presignedGeojsonUrl) {
+        let errorDisplayArea = $("#aermod-receptors-current-file .errors");
+        errorDisplayArea.empty();
+
+        let preserveShownState = receptorOverlayShowing;
+        if (receptorOverlayGroup !== null) {
+            mapLayers.removeLayer(receptorOverlayGroup); // removes option from the layers dialog
+            receptorOverlayGroup.removeFrom(leaflet.map); // removes dots from the map
+        }
+
+        receptorOverlayGroup = L.layerGroup();
+
+        if (presignedGeojsonUrl === undefined) {
+            return;
+        }
+        if (responseData.file_metadata?.errors === undefined || responseData.file_metadata?.errors.length == 0) {
+            TRIM.api.hitUrl(presignedGeojsonUrl, function (presignedSuccess, presignedResponse) {
+                let overlayGridPoints = [];
+                if (presignedResponse != null) {
+                    for (let i = 0; i < presignedResponse.features.length; i++) {
+                        let el = presignedResponse.features[i];
+                        let point = [el.geometry.coordinates[1], el.geometry.coordinates[0]];
+                        overlayGridPoints.push(point);
+                        let colorForDisplay = "#000000"; // black
+                        var marker = L.circleMarker(point, { pmIgnore: true, radius: .2, stroke: true, color: colorForDisplay }).addTo(receptorOverlayGroup);
+                    }
+                }
+
+                receptorOverlayGroup.on("add", function () { receptorOverlayShowing = true; });
+                receptorOverlayGroup.on("remove", function () { receptorOverlayShowing = false; });
+
+                // preserve previously selected state after a refresh or regeneration
+                if (preserveShownState) {
+                    receptorOverlayGroup.addTo(leaflet.map); // preselects it in the layers control!
+                }
+            });
+
+            mapLayers.addOverlay(receptorOverlayGroup, "AERMOD Receptors");
+        }
+        else {
+            $("<h4/>").html("Errors with generated file:").appendTo(errorDisplayArea);
+            if (responseData.file_metadata?.errors != undefined) {
+                for (let i = 0; i < responseData.file_metadata.errors.length; i++) {
+                    $("<li/>").html(responseData.file_metadata.errors[i]).appendTo(errorDisplayArea);
+                }
+            }
+        }
+    };
+
+    leaflet.renderAermodDownloadUi = function (responseData) {
+        let presignedGeojsonUrl = responseData.presigned_urls["data.geojson"];
+        let presignedAermodInputUrl = responseData.presigned_urls["aermod_receptors.txt"];
+
+        // update generate button label
+        $("#generate_aermod_receptors_btn").html((presignedGeojsonUrl === undefined ? "Generate" : "Regenerate") + " AERMOD Receptors");
+
+        // show the download URL
+        if (presignedGeojsonUrl != undefined) {
+            $("#aermod-receptors-download-geojson-btn").attr("href", presignedGeojsonUrl);
+            $("#aermod-receptors-download-aermod-btn").attr("href", presignedAermodInputUrl);
+            $("#aermod-receptors-current-file").show();
+        }
+
+        //plot it
+        leaflet.installAermodReceptors(responseData, presignedGeojsonUrl);
+    };
+    // aermod receptors -- END
+
+    // deposition overlay -- START
+    leaflet.initDepositionOverlay = function () {
+        LoadingScreen.show('check_overlay_status');
+        TRIM.api.checkMiscScenarioFile(TRIM.store.currentScenario.id, "deposition_overlay", function (success, responseData) {
+            LoadingScreen.hide('check_overlay_status');
+            if (!success) {
+                console.log('An error occurred while fetching overlay data');
+            } else {
+                TRIM.leaflet.installDepositionOverlayOntoMap(responseData)
+            }
+        });
+    }
+
+    leaflet.addDepositionOverlayLegend = function (bucketRanges, bucketColors) {
+        if (typeof depositionOverlayLegend != "undefined") {
+            leaflet.map.removeControl(depositionOverlayLegend); // removes the legend
+        }
+
+        // thx https://codepen.io/haakseth/pen/KQbjdO
+        depositionOverlayLegend = L.control({ position: "bottomright" });
+
+        depositionOverlayLegend.onAdd = function () {
+            var div = L.DomUtil.create("div", "leaflet-legend deposition-overlay");
+
+            div.innerHTML += "<h4>Total Deposition (g/m<sup>2</sup>)</h4>";
+            for (let i = quartileGradient.length - 1; i >= 0; i--) {
+                let jenksBucket = bucketRanges[i];
+                let rangeDisplay = jenksBucket.from.toExponential() + " - " + jenksBucket.to.toExponential();
+                div.innerHTML += '<i style="background: ' +
+                    quartileGradient[i] +
+                    '"></i><span>' +
+                    rangeDisplay +
+                    '</span><br>';
+            }
+
+            return div;
+        };
+
+        depositionOverlayLegend.addTo(leaflet.map);
+    };
+
+
+    leaflet.installDepositionOverlayOntoMap = function (responseData) {
+        let errorDisplayArea = $("#deposition-overlay-current-file .errors");
+        errorDisplayArea.empty();
+
+        if (responseData.file_metadata == null) {
+            return;
+        }
+        // show the management UI
+        $("#deposition-overlay-current-filename").html(responseData.file_metadata.original_file_name);
+        $("#deposition-overlay-current-file").show();
+
+        if (responseData.file_metadata.errors === undefined || responseData.file_metadata.errors.length == 0) {
+            let presignedUrl = responseData.presigned_urls["processed.json"];
+            TRIM.api.hitUrl(presignedUrl, function (presignedSuccess, presignedResponse) {
+                let overlayPolyPoints = [];
+                for (let i = 0; i < presignedResponse.row_data.length; i++) {
+                    let el = presignedResponse.row_data[i];
+                    let point = [el.wgs84_lat, el.wgs84_long];
+                    overlayPolyPoints.push(point);
+                    let colorForDisplay = quartileGradient[el.jenks_bucket];
+                    var marker = L.circleMarker(point, { pmIgnore: true, radius: 1, stroke: true, color: colorForDisplay }).bindPopup("Total Depo == " + el.combined_deposition.toExponential()).addTo(depositionOverlayGroup);
+                }
+
+                leaflet.addDepositionOverlayLegend(responseData.file_metadata.jenks_buckets, quartileGradient);
+
+                depositionOverlayGroup.on("add", function () { $(".leaflet-legend").removeClass("hidden"); });
+                depositionOverlayGroup.on("remove", function () { $(".leaflet-legend").addClass("hidden"); });
+                depositionOverlayGroup.addTo(leaflet.map); // preselects it in the layers control!
+            });
+            mapLayers.addOverlay(depositionOverlayGroup, "Deposition");
+        } else {
+            $("<h4/>").html("Errors with uploaded file:").appendTo(errorDisplayArea);
+            for (let i = 0; i < responseData.file_metadata.errors.length; i++) {
+                $("<li/>").html(responseData.file_metadata.errors[i]).appendTo(errorDisplayArea);
+            }
+        }
+    };
+
+    leaflet.removeDepositionOverlayFromMap = function () {
+        if (typeof depositionOverlayLegend != "undefined") {
+            leaflet.map.removeControl(depositionOverlayLegend); // removes the legend
+        }
+        mapLayers.removeLayer(depositionOverlayGroup); // removes from the layers menu
+        depositionOverlayGroup.removeFrom(leaflet.map); // hides from the map
+        $("#deposition-overlay-current-file").hide(); // hide management ui
+    };
+    // deposition overlay  -- END
 
     trim.leaflet = leaflet;
     return trim;

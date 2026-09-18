@@ -327,7 +327,8 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
                 target_param, formula=f'{aermod_val} if chemical.id == {for_chemical.id} else 0',
                 unit=AERMOD_UNITS[target_param]
             )
-        elif compartment.volume_element.name in ['DryVaporSource', 'WetVaporSource']:
+        elif compartment.volume_element.name in ['DryVaporSource', 'WetVaporSource', 'DryParticleSource', 'WetParticleSource']:
+
             handle_parcel_update(
                 parcel,
                 {
