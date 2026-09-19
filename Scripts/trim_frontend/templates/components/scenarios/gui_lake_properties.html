@@ -105,6 +105,7 @@
             language: { emptyTable: 'No data available in table' }
         })
 
+        let waterParcels = undefined;
         let default_water_data = undefined;
         let default_sed_data = undefined;
         function getTableFields(table_id) {
@@ -523,7 +524,7 @@
                     {type: 'input', name: 'externalWaterInflow', value: total_IF},
                 ];
                 LoadingScreen.show('external_water_inflow');
-                TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', (rsp)=>{
+                TRIM.api.updateParcel(TRIM.store.currentScenario.id, parcel_info).on('load', (rsp)=>{
                     pcl.surface_water.wc_props.externalWaterInflow = total_IF;
                     pcl.surface_water.wc_props.discharge_vol_rate = discharge_rate;
                     LoadingScreen.hide('external_water_inflow');
@@ -577,8 +578,7 @@
                         }
                 }
                 let parcel_name = $($(this).closest("table").find("thead > tr > th")[$(this).closest("td").prevAll().length]).text()
-                let parcels = TRIM.store.currentScenario.parcels;
-                let area = Number(parcels.find(e => e.name == parcel_name).area)
+                let area = Number(getParcelByKey('name', parcel_name).area)
                 let data = $(this).val()
                 let $label = $(this).next("label")
                 $label.siblings().hide()
@@ -616,12 +616,12 @@
                     }
 
                     LoadingScreen.show(ls_info)
-                    TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', (rsp)=>{
+                    TRIM.api.updateParcel(TRIM.store.currentScenario.id, parcel_info).on('load', (rsp)=>{
                         update_data_store_callback(rsp, elm, parcel_info, param_store_key, data, old_data)
                         updateMercuryTransformRate(parcel_info)
                         LoadingScreen.hide(ls_info)
                     })
-                    // table_data = get_Data_from_table(tblId)
+
                     let wc_table_data = get_Data_from_table(lkTblId)
                     let sed_table_data = get_Data_from_table(sedTblId)
                     
@@ -789,10 +789,8 @@
                     }
                 }
             ];
-            let parcels = TRIM.store.currentScenario.parcels;
-            let data_subset = parcels.filter(e=> (e.parcelType == "Water Only" || e.parcelType == "Water & Air"))
-            data_subset.forEach(function (e, i) {
-                if ($(table_header).find("th").length < (data_subset.length + 1)) {
+            waterParcels.forEach(function (e, i) {
+                if ($(table_header).find("th").length < (waterParcels.length + 1)) {
                     $(table_header).append("<th>" + e.name + "</th>")
                 }
                 cols.push({
@@ -816,11 +814,9 @@
                         let calc_info = JSON.stringify({'property':row.shortProperty, 'parcel':e.name})
                         let auto_calc_button = Auto_calculable.indexOf(row.Property) >= 0 ? "<p><button data-active='False' data-calcinfo='" + calc_info +"' class='btn btn-sm btn-outline-dark auto_calc'><small>Auto-calculate</small></button></p>" : ""
                         let link_options = []
-                        parcels.forEach(function (el, i) {
-                            if (el.parcelType == "Water Only" || el.parcelType == "Water & Air") {
-                                if (el.name != e.name) {
-                                    link_options.push(el.name)
-                                }
+                        waterParcels.forEach(function (el, i) {
+                            if (el.name != e.name) {
+                                link_options.push(el.name)
                             }
                         })
                         let multi_select_html = "<div><div data-parcelname='"+ e.name +"' class='parcelMultiselect'>" +
@@ -886,7 +882,7 @@
 
         function calculate_flush_rate(data, parcel_name) {
             let pcls = TRIM.store.currentScenario.parcels;
-            let P = pcls.filter(e=>e.name==parcel_name)[0];
+            let P = getParcelByKey('name', parcel_name);
 
             let precip_rate = P.precip_rate * 365;
             let evapo_rate = P.surface_water.wc_props.evaporation_rate;
@@ -979,120 +975,116 @@
                 return;
             }
 
+            waterParcels = TRIM.store.currentScenario.parcels.filter(e => e.parcelType == "Water Only" || e.parcelType == "Water & Air");
             default_water_data = getTableFields('WaterColumnTable');
             default_sed_data = getTableFields('SedimentTable');
 
-            const parcels = TRIM.store.currentScenario.parcels;
             const water_data = []
             const sed_data = []
             const water_properties = Object.keys(default_water_data)
             const sed_properties = Object.keys(default_sed_data)
-            const waterParcels = parcels.filter(e => e.parcelType == "Water Only" || e.parcelType == "Water & Air");
+            
             try {
             if (waterParcels.length === 0) {
                 $(lkTblId + ' tbody:gt(0)').remove();
                 $(sedTblId + ' tbody:gt(0)').remove();
                 return;
             }
-            if (parcels.length > 0 && waterParcels.length > 0) {
-                const mercuryTransformations = [
-                    'MethylationRate', 'OxidationRate', 'ReductionRate', 'DemethylationRate'
-                ];
-                const hasHg = (parcels[0]['mercury_transformation_rates'] != undefined);
-                water_properties.forEach(function (p, i) {
-                    const shortName = default_water_data[p]['id'];
-                    const isHg = (mercuryTransformations.indexOf(shortName.split('.')[0]) > -1);
-                    if (isHg && !hasHg) {
-                        return;
-                    }
 
-                    const this_water_property = {};
-                    this_water_property["min"] = default_water_data[p]['min'];
-                    this_water_property["max"] = default_water_data[p]['max'];
-                    this_water_property["shortProperty"] = shortName;
-                    this_water_property["isEditable"] = !default_water_data[p]['readonly'];
-                    this_water_property["helpText"] = default_water_data[p]['help'] || undefined;
-                    let defaultVal = default_water_data[p]['default'];
-                    let defaultUnit = default_water_data[p]['tooltip'];
-                    parcels.forEach(function (e, i) {
-                        if (e.parcelType == "Water Only" || e.parcelType == "Water & Air") {
-                            this_water_property['Property'] = p;
-                            if (isHg) {
-                                const rateName = shortName.split('.')[0];
-                                let src = e['mercury_transformation_rates']['Surface_Water'];
-                                for (const chem in src) {
-                                    for (const rate in src[chem]) {
-                                        if (rate != rateName) {
-                                            continue;
-                                        }
-                                        let val = src[chem][rate].value;
-                                        defaultVal = val != undefined ? val : defaultVal;
-                                        defaultUnit = src[chem][rate].unit;
-                                        break;
-                                    }
-                                }
-                            }
-                            else {
-                                let exceptions = ['Precipitation Runoff Watershed Area',
-                                    'Precipitation Runoff Volumetric Rate to Water Body',
-                                    'Precipitation Volumetric Rate to Water Body',
-                                    'Precipitation Seepage Volumetric Rate to Groundwater'
-                                ]
-                                let d = (p.startsWith("Precipitation ") && exceptions.indexOf(p) == -1 )? e : e['surface_water']['wc_props']
-                                defaultVal = d[shortName] != undefined ? d[shortName] : defaultVal;
-                            }
-                            this_water_property[e.name] = defaultVal;
-                            this_water_property["unit"] = (defaultUnit != undefined ? defaultUnit : "unitless").replace('/', ' / ').replace(/\s/g, ' ').replace(/< \/ /g, '</');
-                        }
-                    });
-                    water_data.push(this_water_property)
-                })
-                TableRedraw(water_data, "lake")
-                sed_properties.forEach(function (p, i) {
-                    const shortName = default_sed_data[p]['id'];
-                    const isHg = (mercuryTransformations.indexOf(shortName.split('.')[0]) > -1);
-                    if (isHg && !hasHg) {
-                        return;
-                    }
+            const mercuryTransformations = [
+                'MethylationRate', 'OxidationRate', 'ReductionRate', 'DemethylationRate'
+            ];
+            const hasHg = (waterParcels[0]['mercury_transformation_rates'] != undefined);
+            water_properties.forEach(function (p, i) {
+                const shortName = default_water_data[p]['id'];
+                const isHg = (mercuryTransformations.indexOf(shortName.split('.')[0]) > -1);
+                if (isHg && !hasHg) {
+                    return;
+                }
 
-                    const this_sed_property = {}
-                    this_sed_property["min"] = default_sed_data[p]['min'];
-                    this_sed_property["max"] = default_sed_data[p]['max'];
-                    this_sed_property["shortProperty"] = shortName;
-                    this_sed_property["isEditable"] = !default_sed_data[p]['readonly'];
-                    this_sed_property["helpText"] = default_sed_data[p]['help'] || undefined;
-                    let defaultVal = default_sed_data[p]['default'];
-                    let defaultUnit = default_sed_data[p]['tooltip'];
-                    parcels.forEach(function (e, i) {
-                        if (e.parcelType == "Water Only" || e.parcelType == "Water & Air") {
-                            this_sed_property['Property'] = p
-                            if (isHg) {
-                                const rateName = shortName.split('.')[0];
-                                let src = e['mercury_transformation_rates']['Sediment'];
-                                for (const chem in src) {
-                                    for (const rate in src[chem]) {
-                                        if (rate != rateName) {
-                                            continue;
-                                        }
-                                        let val = src[chem][rate].value;
-                                        defaultVal = val != undefined ? val : defaultVal;
-                                        defaultUnit = src[chem][rate].unit;
-                                        break;
-                                    }
+                const this_water_property = {};
+                this_water_property["min"] = default_water_data[p]['min'];
+                this_water_property["max"] = default_water_data[p]['max'];
+                this_water_property["shortProperty"] = shortName;
+                this_water_property["isEditable"] = !default_water_data[p]['readonly'];
+                this_water_property["helpText"] = default_water_data[p]['help'] || undefined;
+                let defaultVal = default_water_data[p]['default'];
+                let defaultUnit = default_water_data[p]['tooltip'];
+                waterParcels.forEach(function (e, i) {
+                    this_water_property['Property'] = p;
+                    if (isHg) {
+                        const rateName = shortName.split('.')[0];
+                        let src = e['mercury_transformation_rates']['Surface_Water'];
+                        for (const chem in src) {
+                            for (const rate in src[chem]) {
+                                if (rate != rateName) {
+                                    continue;
                                 }
+                                let val = src[chem][rate].value;
+                                defaultVal = val != undefined ? val : defaultVal;
+                                defaultUnit = src[chem][rate].unit;
+                                break;
                             }
-                            else {
-                                let d = e['surface_water']['sed_props']
-                                defaultVal = d[shortName] != undefined ? d[shortName] : defaultVal;
-                            }
-                            this_sed_property[e.name] = defaultVal;
-                            this_sed_property["unit"] = (defaultUnit != undefined ? defaultUnit : "unitless").replace('/', ' / ').replace(/\s/g, ' ').replace(/< \/ /g, '</');
                         }
-                    })
-                    sed_data.push(this_sed_property)
+                    }
+                    else {
+                        let exceptions = ['Precipitation Runoff Watershed Area',
+                            'Precipitation Runoff Volumetric Rate to Water Body',
+                            'Precipitation Volumetric Rate to Water Body',
+                            'Precipitation Seepage Volumetric Rate to Groundwater'
+                        ]
+                        let d = (p.startsWith("Precipitation ") && exceptions.indexOf(p) == -1 )? e : e['surface_water']['wc_props']
+                        defaultVal = d[shortName] != undefined ? d[shortName] : defaultVal;
+                    }
+                    this_water_property[e.name] = defaultVal;
+                    this_water_property["unit"] = (defaultUnit != undefined ? defaultUnit : "unitless").replace('/', ' / ').replace(/\s/g, ' ').replace(/< \/ /g, '</');
+                });
+                water_data.push(this_water_property)
+            })
+            TableRedraw(water_data, "lake")
+            sed_properties.forEach(function (p, i) {
+                const shortName = default_sed_data[p]['id'];
+                const isHg = (mercuryTransformations.indexOf(shortName.split('.')[0]) > -1);
+                if (isHg && !hasHg) {
+                    return;
+                }
+
+                const this_sed_property = {}
+                this_sed_property["min"] = default_sed_data[p]['min'];
+                this_sed_property["max"] = default_sed_data[p]['max'];
+                this_sed_property["shortProperty"] = shortName;
+                this_sed_property["isEditable"] = !default_sed_data[p]['readonly'];
+                this_sed_property["helpText"] = default_sed_data[p]['help'] || undefined;
+                let defaultVal = default_sed_data[p]['default'];
+                let defaultUnit = default_sed_data[p]['tooltip'];
+                waterParcels.forEach(function (e, i) {
+                    this_sed_property['Property'] = p
+                    if (isHg) {
+                        const rateName = shortName.split('.')[0];
+                        let src = e['mercury_transformation_rates']['Sediment'];
+                        for (const chem in src) {
+                            for (const rate in src[chem]) {
+                                if (rate != rateName) {
+                                    continue;
+                                }
+                                let val = src[chem][rate].value;
+                                defaultVal = val != undefined ? val : defaultVal;
+                                defaultUnit = src[chem][rate].unit;
+                                break;
+                            }
+                        }
+                    }
+                    else {
+                        let d = e['surface_water']['sed_props']
+                        defaultVal = d[shortName] != undefined ? d[shortName] : defaultVal;
+                    }
+                    this_sed_property[e.name] = defaultVal;
+                    this_sed_property["unit"] = (defaultUnit != undefined ? defaultUnit : "unitless").replace('/', ' / ').replace(/\s/g, ' ').replace(/< \/ /g, '</');
                 })
-                TableRedraw(sed_data, "sed")
-            }
+                sed_data.push(this_sed_property)
+            })
+            TableRedraw(sed_data, "sed")
+        
             console.log('populated lake props form!')
             } catch(e) {
                 console.error('updateLakeProps error:', e);
