@@ -125,6 +125,14 @@
             }
         }
 
+        function getParam(pcl_name, table_type, param_name) {
+            let pcl_sw = getParcelByKey('name', pcl_name).surface_water;
+            if (table_type == "wc")
+                return pcl_sw.wc_props[param_name];
+            else if (table_type == "sed")
+                return pcl_sw.sed_props[param_name];
+        }
+
         $('#toggleData').on('change', function(event) {
             event.preventDefault()
             if ($(this).attr("data-isactive") == "true") {
@@ -140,8 +148,6 @@
             }
         })
 
-        let Auto_calculable = ["Flush Rate"]
-        let linked_data = ["External Water Inflow from Other Water Bodies"]
         function TableRedraw(table_data, table_type) {
             let tblHandle = table_type == "lake" ? lkTable : sdTable
             let tblId = table_type == "lake" ? lkTblId : sedTblId
@@ -226,13 +232,8 @@
                     if (iter_row.css("background-color") !== color_white) {
                         iter_row.css("background-color", color_white);
                     }
-                    try {
-                        if (row_text.includes("= (") && row_text.includes(name)){
-                            iter_row.css("background-color", color_blue);
-                        }
-                    }
-                    catch(err) {
-                        console.error(err)
+                    if (row_text.includes("= (") && row_text.includes(name)){
+                        iter_row.css("background-color", color_blue);
                     }
                 })  
 
@@ -404,10 +405,9 @@
                                         for (const this_prc of values) {
                                             let this_FR_id = "#FRatio_input_" + this_prc + "_" + this_parcel_name
                                             let fraction_val = parseFloat($(this_FR_id).val())
-                                            let row_idx = table_row_headers.indexOf("Discharge Volumetric Rate")
-                                            let col_idx = table_col_headers.indexOf(this_prc)
-                                            let inflow_val = parseFloat($(lkTblId).find('tr').eq(row_idx + 1).find('td').eq(col_idx).find("label").first().text())
-                                            total_IF += inflow_val * fraction_val
+                                            let wc_discharge_vol_rate = getParam(this_prc, 'wc', 'discharge_vol_rate');                                 
+                                            total_IF += wc_discharge_vol_rate * fraction_val
+
                                             // Update the data tag of the checkbox to current value
                                             let this_inp_id = "#MS_" + this_prc + "_" + this_parcel_name
                                             let this_ratio_data_tag = this_prc.toLowerCase() + "_ratio"
@@ -791,6 +791,43 @@
                     }
                 }
             ];
+
+            function make_autocalc_btn(calc_info, is_active) {
+                is_active = (is_active === true) ? 'True' : 'False';
+                return `<p>
+                    <button data-active='${is_active}' data-calcinfo='${calc_info}' class='btn btn-sm btn-outline-dark auto_calc'>
+                        <small>Auto-calculate</small>
+                    </button></p>`;
+            };
+
+            function make_externalinflow_select(e) {
+                let multi_select_html = new $(`
+                    <div>
+                        <div data-parcelname='${e.name}' class='parcelMultiselect'>
+                            <div id='psl_${e.name}' class='parcelSelectLabel selectBox'>
+                                <select class='form-select' aria-label='Parcels for external water inflow'>
+                                    <option>Select Parcel(s)</option>
+                                </select>
+                                <div class='overSelect'></div>
+                            </div>
+                            <div class='parcelSelectOptions'></div>
+                        </div>
+                    </div>`);
+
+                for (let pcl of waterParcels) {
+                    if (pcl.name == e.name) {
+                        continue;
+                    }
+                    $(multi_select_html).find('div.parcelSelectOptions').append(
+                        `<label for='MS_${pcl.name}_${e.name}'>
+                            <input type='checkbox' id='MS_${pcl.name}_${e.name}' value='${pcl.name}' />
+                            ${pcl.name}
+                        </label>`
+                    );
+                }
+                return multi_select_html.html();
+            };
+
             waterParcels.forEach(function (e, i) {
                 if ($(table_header).find("th").length < (waterParcels.length + 1)) {
                     $(table_header).append("<th>" + e.name + "</th>")
@@ -812,48 +849,28 @@
                             'name': String(row.shortProperty),
                             'value': data
                         }]
-                        parcel_info = JSON.stringify(parcel_info)
-                        let calc_info = JSON.stringify({'property':row.shortProperty, 'parcel':e.name})
-                        let auto_calc_button = Auto_calculable.indexOf(row.Property) >= 0 ? "<p><button data-active='False' data-calcinfo='" + calc_info +"' class='btn btn-sm btn-outline-dark auto_calc'><small>Auto-calculate</small></button></p>" : ""
-                        let link_options = []
-                        waterParcels.forEach(function (el, i) {
-                            if (el.name != e.name) {
-                                link_options.push(el.name)
-                            }
-                        })
-                        let multi_select_html = "<div><div data-parcelname='"+ e.name +"' class='parcelMultiselect'>" +
-                            "<div id='psl_" + e.name + "' class='parcelSelectLabel selectBox'>" +
-                            "<select class='form-select' aria-label='Parcels for external water inflow'>" +
-                            "<option>Select Parcel(s)</option>" +
-                            "</select>" +
-                            "<div class='overSelect'>" +
-                            "</div>" +
-                            "</div>" +
-                            "<div class='parcelSelectOptions'>" +
-                            "</div>" +
-                            "</div></div>"
-                            let hq_ms = new $(multi_select_html)
-                        link_options.forEach(function(p,i) {
-                            // Get ratios if they already exist.
-                            let inp_id = "#MS_" + p + "_" + e.name
-                            let data_tag = p.toLowerCase() + '_ratio'
-                            let r = $(inp_id).data(data_tag) === undefined ? '0' : $(inp_id).data(data_tag)
-                            $(hq_ms).find('div.parcelSelectOptions').append("<label for='MS_" + p + "_"+ e.name +"'>" +
-                            "<input type='checkbox' id='MS_" + p + "_"+ e.name +"' data-" + p + "_ratio='" + r + "' value='" + p + "' />" + p +
-                            "</label>")
-                        })
-                        let linked_prop_input = linked_data.indexOf(row.Property) >= 0 ? $(hq_ms).html() : ""
-                        // let linked_prop_input = linked_data.indexOf(row.Property) >= 0 ? "<p><select class='form-select'>" + link_options.map(el => "<option>" + el + "</option>").join("") + "</select></p>" : ""
-                        let this_cell_data = !isNaN(Number(data)) && String(data).length > 6 ? Number.parseFloat(data).toExponential(4) : data
-                        let this_cell_prop = row.isEditable ? 'editableCell badge badge-light' : 'nonEditableCell text-muted'
-                        let input_prop = 'editableCell form-control form-control-sm'
-                        let min = row.min !== undefined ? " min='" + row.min + "' " : ""
-                        let max = row.max !== undefined ? " max='" + row.max + "' " : ""
-                        if (linked_data.indexOf(row.Property) >= 0) {
-                            return "<div class='divLinkedPropBtn'><label>" + this_cell_data + "</label></div>" + auto_calc_button + linked_prop_input
+                        parcel_info = JSON.stringify(parcel_info)                        
+                        let this_cell_data = !isNaN(Number(data)) && String(data).length > 6 ? Number.parseFloat(data).toExponential(4) : data;
+                        let this_cell_prop = row.isEditable ? 'editableCell badge badge-light' : 'nonEditableCell text-muted';
+                        let min = row.min !== undefined ? " min='" + row.min + "' " : "";
+                        let max = row.max !== undefined ? " max='" + row.max + "' " : "";
+                        let auto_calc_button = ""
+
+                        if (row.shortProperty == 'externalWaterInflow') {
+                            let linked_prop_input = make_externalinflow_select(e);
+                            return `<div class='divLinkedPropBtn'><label>${this_cell_data}</label></div>${linked_prop_input}`;
                         }
-                        return "<input class='" + input_prop + "' data-parcelinfo='" + parcel_info +"' type='text' value='" +  data + "' style='display:none' " + min + " " + max + "/>" +
-                            "<label class='"+ this_cell_prop +"'>" + this_cell_data + "</label>" + auto_calc_button
+                        else if (row.shortProperty == 'flush_rate') {
+                            let calc_info = JSON.stringify({'property':row.shortProperty, 'parcel':e.name});
+                            auto_calc_button = make_autocalc_btn(calc_info, false);
+                        }
+
+                        return `<input class='editableCell form-control form-control-sm' type='text'
+                                    data-parcelinfo='${parcel_info}'
+                                    value='${data}' ${min} ${max}
+                                    style='display:none' />
+                                <label class='${this_cell_prop}'>${this_cell_data}</label>
+                                ${auto_calc_button}`;
                     }
                 })
             })
