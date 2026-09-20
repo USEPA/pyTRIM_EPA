@@ -1794,7 +1794,7 @@
         L.easyButton(
             '<span class = DownArrowBar style = "font-size: 1.5em;">&DownArrowBar;</span>',
             function (btn, map) {
-                saveToFile(shapes, "Test")
+                saveToFile(shapes, `Parcels_${TRIM.store.currentScenario.name}`)
             },
             'Download parcel geojson'
         ).addTo(map);
