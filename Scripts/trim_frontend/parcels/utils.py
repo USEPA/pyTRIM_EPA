@@ -405,7 +405,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
 
         if field_name in ['flush_rate', 'externalWaterInflow']:
             if 'autocalc' in parcels_data:
-                eq = parcels_data['autocalc']
+                eq = '1' if (parcels_data['autocalc'].upper() == "TRUE") else '0'
             elif 'allInflow' in parcels_data:
                 eq = parcels_data['allInflow']
 

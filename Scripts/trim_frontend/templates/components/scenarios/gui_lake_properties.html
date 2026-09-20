@@ -66,20 +66,20 @@
     </section>
 </form>
 <div class="modal fade" id="inflow-modal" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Lake Inflow</h5>
-                </div>
-                <div class="modal-body "></div>
-                <div class="modal-footer">
-                    <button class="btn btn-sm btn-outline-dark" id="inflow-modal-close" data-dismiss="modal">Cancel</button>
-                    <button type="button"  id="inflow-modal-save" class="btn btn-sm btn-outline-secondary text-dark">
-                        <i class="fas fa-save mr-1"></i> Save
-                    </button>
-                </div>
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Lake Inflow</h5>
+            </div>
+            <div class="modal-body "></div>
+            <div class="modal-footer">
+                <button class="btn btn-sm btn-outline-dark" id="inflow-modal-close" data-dismiss="modal">Cancel</button>
+                <button type="button"  id="inflow-modal-save" class="btn btn-sm btn-outline-secondary text-dark">
+                    <i class="fas fa-save mr-1"></i> Save
+                </button>
             </div>
         </div>
+    </div>
 </div>
 <link rel="stylesheet" href="{{url_for('static', filename='css/form_styles.css')}}"/>
 <script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}">
@@ -112,7 +112,7 @@
                     let fields = table.form_definition.fields;
                     // return fields;
 
-                    // temp rewrite to work with original format
+                    // rewrite to work with original format
                     let _data = {};
                     for (let field_grp of fields) {
                         _data[field_grp.label] = field_grp
@@ -120,14 +120,6 @@
                     return _data;
                 }
             }
-        }
-
-        function getParam(pcl_name, table_type, param_name) {
-            let pcl_sw = getParcelByKey('name', pcl_name).surface_water;
-            if (table_type == "wc")
-                return pcl_sw.wc_props[param_name];
-            else if (table_type == "sed")
-                return pcl_sw.sed_props[param_name];
         }
 
         $('#toggleData').on('change', function(event) {
@@ -248,15 +240,6 @@
                 $(this).css("background-color", color_green);
             })
 
-            let sort_order = "asc"
-            $('.sortClass').click(function(e){
-                e.preventDefault();
-                let Table = $(tblId).dataTable()
-                let cellIndex = $(this).closest("th").index()
-                Table.fnSort([[cellIndex,sort_order]]);//use asc/desc as you want
-                sort_order= sort_order == "desc" ? "asc" : "desc"
-            });
-
             $('label.editableCell').click(function () {
                 $(this).siblings("input").show()
                 $(this).siblings("select").show()
@@ -265,40 +248,28 @@
                 $(this).hide();
             });
 
-            $('button.auto_calc').click(function (evt) {
-                evt.preventDefault()
-                if ($(this).data("active") == "False") {
-                    $(this).data("active","True")
-                    $(this).removeClass("btn-outline-dark")
-                    $(this).addClass("btn-success")
-                    let calcInfo = $(this).data("calcinfo")
-                    let tbl_id = $(this).parents("table").attr("id")
-                    tbl_id = "#" + tbl_id
-                    let tbl_data = get_Data_from_table(tbl_id)
-                    let parcel_name = calcInfo.parcel
-                    let res = null
-                    if (calcInfo.property == "flush_rate") {
-                        res = calculate_flush_rate(tbl_data, parcel_name)
-                    }
-                    if (calcInfo.property == "discharge_vol_rate") {
-                        res = calculate_discharge_vol_rate(tbl_data, parcel_name)
-                    }
-                    $(this).parent().siblings("label").text(Number(res))
-                    $(this).parent().siblings("input").attr("value",Number(res))
-                    $(this).parent().siblings("input").trigger("blur")
-                }
-            });
+            if (tblId == lkTblId) {
+                $('button.auto_calc').click(function (e) {                
+                    e.preventDefault()
+                    let pcl = getParcelByKey('name', $(e.currentTarget).data('parcel'));
+                    pcl.surface_water.fr_autocalc_changed = true;
+                    res = calculate_flush_rate(pcl.name);
 
-            // Calculating External Water Inflow from Other Water Bodies
-            if (tblId == lkTblId) { // TODO better way to split lake/sed listeners
+                    $(this).removeClass("btn-outline-dark").addClass("btn-success");
+                    $(this).parent().siblings("label").text(Number(res))
+                    $(this).parent().siblings("input").attr("value",Number(res)).trigger("blur");
+                
+                });
+
+                // Calculate External Water Inflow from Other Water Bodies
                 $('.inflow-modal-btn').on('click', (e) => {
                     let thisPcl = getParcelByKey('name', $(e.currentTarget).data('parcel'));
 
                     let body = $('#inflow-modal').find('.modal-body');
                     body.empty();
                     body.append(
-                        $(`<button class="btn btn-sm btn-outline-primary float-right m-n2" id="f-reset"
-                            data-toggle="tooltip" data-trigger="hover" title="Set all fractions to 0">
+                        $(`<button class="btn btn-sm btn-outline-primary float-right" id="f-reset"
+                            data-toggle="tooltip" data-trigger="hover" title="Set all to 0">
                             <i class="fas fa-redo"></i>
                         </button>`)
                     );
@@ -337,7 +308,7 @@
 
                     let new_inflow = [];
                     let is_valid = $(".inflow-fraction").toArray().every((el) => {
-                        new_inflow.push({'name': $(el).attr('id').slice(2), 'fraction': +$(el).val()})
+                        new_inflow.push({'name': $(el).attr('id').slice(2), 'fraction': +$(el).val()});
                         return elementIsValid($(el).parent());
                     });
                     
@@ -367,7 +338,7 @@
                         }
                         LoadingScreen.hide('external_water_inflow');
                     });                                      
-                })
+                });
             }
 
             $('input.editableCell,select.editableCell').blur(function() {
@@ -390,52 +361,74 @@
                             return;
                         }
                 }
-                let parcel_name = $($(this).closest("table").find("thead > tr > th")[$(this).closest("td").prevAll().length]).text()
-                let area = Number(getParcelByKey('name', parcel_name).area)
-                let data = $(this).val()
-                let $label = $(this).next("label")
+                let parcel_name = $($(this).closest("table").find("thead > tr > th")[$(this).closest("td").prevAll().length]).text();
+                let pcl = getParcelByKey('name', parcel_name);
+                let area = Number(pcl.area);
+
+                let data = $(this).val();
+                let $label = $(this).next("label");
                 $label.siblings().hide()
-                let this_cell_data = !isNaN(Number(data)) && String(data).length > 6 ? Number.parseFloat(data).toExponential(4) : data
-                $label.show().text(this_cell_data)
-                let parcel_info = $(this).data('parcelinfo')
+                let this_cell_data = !isNaN(Number(data)) && String(data).length > 6 ? Number.parseFloat(data).toExponential(4) : data;
+                $label.show().text(this_cell_data);
+    
+                let parcel_info = $(this).data('parcelinfo');
                 if (parcel_info) {
-                    let old_data = parcel_info[parcel_info.findIndex(e => e.type == 'input')].value
                     parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-
                     let field_name = parcel_info[parcel_info.findIndex(e => e.name == 'field')].value
-
-                    let table_col_headers = $(lkTblId + " thead th").map((i,h)=>h.innerHTML).toArray()
-                    let table_row_headers = $(lkTblId + " tbody tr td:nth-child(1) label").map((i,r) => r.innerHTML).toArray()
-                    let fr_row_idx = table_row_headers.indexOf("Flush Rate")
-                    let col_idx = table_col_headers.indexOf(parcel_name)
-                    let is_auto_calculated = $(lkTblId).find('tr').eq(fr_row_idx+1).find('td').eq(col_idx).find("button").data("active")
 
                     if (field_name == 'flush_rate') {
                         parcel_info = parcel_info.concat([
                             {
-                                'type': 'data',
-                                'name': 'field',
-                                'value': 'autocalc'
-                            },{
                                 'type': 'input',
                                 'name': 'autocalc',
-                                'value': is_auto_calculated
+                                'value': (pcl.surface_water?.fr_autocalc_changed === true)
                             }
-                        ])                        
+                        ]);
                     }
 
                     LoadingScreen.show("Water_body_prop_update")
-                    let pcl = getParcelByKey('name', parcel_name);
                     parcel_info.push({type: 'input', name: 'parcelType', value: pcl.parcelType});
                     TRIM.api.updateParcel(TRIM.store.currentScenario.id, parcel_info).on('load', (rsp)=>{
                         if (rsp.target.status === 200) {
                             pcl.surface_water= rsp.target.responseJSON;
+                            updateMercuryTransformRate(parcel_info);
                             updateLakeProps();
                         }
                         LoadingScreen.hide("Water_body_prop_update");
                     });
                 }
             })
+        }
+
+        function isMercuryTransformation(field) {
+            const hgRates = [
+                'MethylationRate',
+                'OxidationRate',
+                'ReductionRate',
+                'DemethylationRate'
+            ];
+            const rateField = field.split('.')[0];
+            return hgRates.indexOf(rateField) > -1;
+        }
+
+        function updateMercuryTransformRate(parcel_info) {
+            const field = parcel_info[2].name;
+            if (!isMercuryTransformation(field)) {
+                return;
+            }
+            const pcl = getParcelByKey('id', parcel_info[0].value);
+            const media = field.split('.')[1];
+            const rate = field.split('.')[0];
+            const val = parcel_info[2].value;
+            const mtrs = (pcl.mercury_transformation_rates[media] || {});
+            for (const chem in mtrs) {
+                for (const targetRate in mtrs[chem]) {
+                    if (targetRate == rate) {
+                        mtrs[chem][rate].value = Number(val);
+                        break;
+                    }
+                }
+            }
         }
 
         var form = document.getElementById('lake-props-gui');
@@ -474,11 +467,11 @@
                     }
                 }
             ];
-
-            function make_autocalc_btn(calc_info, is_active) {
-                is_active = (is_active === true) ? 'True' : 'False';
+            
+            function make_autocalc_btn(pcl) {
+                let props = (pcl.surface_water.fr_autocalc === true) ? 'btn-success' : 'btn-outline-dark';
                 return `<p>
-                    <button data-active='${is_active}' data-calcinfo='${calc_info}' class='btn btn-sm btn-outline-dark auto_calc'>
+                    <button class='btn btn-sm auto_calc ${props}' data-parcel='${pcl.name}'>
                         <small>Auto-calculate</small>
                     </button></p>`;
             };
@@ -517,8 +510,7 @@
                             inflow_button = `<a class="inflow-modal-btn badge badge-secondary-accent ml-2" data-parcel='${e.name}'><i class="fa fa-list"></i></a>`;
                         }
                         else if (row.shortProperty == 'flush_rate') {
-                            let calc_info = JSON.stringify({'property':row.shortProperty, 'parcel':e.name});
-                            autocalc_button = make_autocalc_btn(calc_info, false);
+                            autocalc_button = make_autocalc_btn(e);
                         }
 
                         return `<input class='editableCell form-control form-control-sm' type='text' style='display:none'
@@ -529,28 +521,6 @@
                 })
             })
             return cols
-        }
-        function get_Data_from_table(thisTableID){
-            var myRows = [];
-            var headersText = [];
-            var head_section = thisTableID + ' thead th'
-            var $headers = $(head_section);
-
-            // Loop through grabbing everything
-            thisRows = thisTableID + ' tbody tr'
-            var $rows = $(thisRows).each(function(index) {
-                $cells = $(this).find("td");
-                myRows[index] = {};
-                $cells.each(function(cellIndex) {
-                    // Set the header text
-                    if(headersText[cellIndex] === undefined) {
-                        headersText[cellIndex] = $($headers[cellIndex]).text().trim();
-                    }
-                    // Update the row object with the header/cell combo
-                    myRows[index][headersText[cellIndex]] = $(this).find("label").first().text().trim();
-                });
-            });
-            return myRows
         }
 
         function calculate_external_water_inflow(inflow_data) {
@@ -564,7 +534,7 @@
             return Number.parseFloat(total_inflow).toExponential(5);
         }
 
-        function calculate_flush_rate(data, parcel_name) {
+        function calculate_flush_rate(parcel_name) {
             let pcls = TRIM.store.currentScenario.parcels;
             let P = getParcelByKey('name', parcel_name);
 
@@ -585,30 +555,6 @@
             return Number.parseFloat(res).toExponential(5)
         }
 
-        function calculate_discharge_vol_rate(data, parcel_name){
-            // use flush rate if manually applied
-            let table_col_headers = $(lkTblId + " thead th").map((i,h)=>h.innerHTML).toArray()
-            let table_row_headers = $(lkTblId + " tbody tr td:nth-child(1) label").map((i,r) => r.innerHTML).toArray()
-            let fr_row_idx = table_row_headers.indexOf("Flush Rate")
-            let col_idx = table_col_headers.indexOf(parcel_name)
-            let is_auto_calculated = $(lkTblId).find('tr').eq(fr_row_idx+1).find('td').eq(col_idx).find("button").data("active");
-            if (is_auto_calculated == 'False') {
-                let flush_rate = Number(data.find(e=>e.Property == "Flush Rate")[parcel_name])
-                let area = getParcelByKey('name', parcel_name).area
-                let wc_depth = Number(data.find(e=>e.Property == "Water Depth")[parcel_name])
-                let res = flush_rate * area * wc_depth
-                return Number.parseFloat(res).toExponential(5)
-            }
-
-            let runoff_gain = Number(data.find(e=>e.Property == "Precipitation Runoff Volumetric Rate to Water Body")[parcel_name])
-            let precipitation_gain = Number(data.find(e=>e.Property == "Precipitation Volumetric Rate to Water Body")[parcel_name])
-            let precipitation_gw_seepage_gain = Number(data.find(e=>e.Property == "Precipitation Seepage Volumetric Rate to Groundwater")[parcel_name])
-            let external_inflow_gain = Number(data.find(e=>e.Property == "External Water Inflow from Other Water Bodies")[parcel_name])
-            let evaporation_loss = Number(data.find(e=>e.Property == "Evaporation Volumetric Rate")[parcel_name])
-            let res = (runoff_gain + precipitation_gain + precipitation_gw_seepage_gain + external_inflow_gain) - evaporation_loss
-            return Number.parseFloat(res).toExponential(5)
-        }
-
         function updateLakeProps() {
             if (!TRIM.store.currentScenario || !TRIM.store.currentScenario.parcels) {
                 // Parcels haven't loaded yet; wait a bit and try again
@@ -616,6 +562,15 @@
                 return;
             }
 
+            // avoid stacking events... clean this all up eventually
+            $(lkTblId).off();
+            $(sedTblId).off();
+            $("label.editableCell").off();
+            $("input.editableCell,select.editableCell").off();
+            $("button.auto_calc").off();
+            $("#inflow-modal-save").off();
+            $(".inflow-modal-btn").off();
+           
             waterParcels = TRIM.store.currentScenario.parcels.filter(
                 e => e.parcelType == "Water Only" || e.parcelType == "Water & Air"
             );
