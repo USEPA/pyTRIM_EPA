@@ -1,3 +1,4 @@
+import json
 import pandas as pd
 import numpy as np
 from trim_db.schema import ureg, Parcel
@@ -491,11 +492,16 @@ def get_water_params(pcl, parcel_type):
         )
 
         precipitation_vol_rate_to_sw = 0  # 4.8E6
-        wc_external_inflow = get_correct_param("ExternalWaterInflow", sw_pars) or 0
-        wc_flush_rate = get_correct_param("Flushes", sw_pars)
 
+        wc_external_inflow = get_correct_param("ExternalWaterInflow", sw_pars) or 0
+        external_inflow_param = sw.parameters.get("ExternalWaterInflow")
+        lake_inflow = []
+        if isinstance(external_inflow_param, CustomParameter) and external_inflow_param.formula:
+            lake_inflow = json.loads(external_inflow_param.formula.equation)
+
+        wc_flush_rate = get_correct_param("Flushes", sw_pars)
         fr_param = sw.parameters.get("Flushes")
-        wc_flush_rate_is_autocalc = 'True'
+        wc_flush_rate_is_autocalc = 'False'
         if isinstance(fr_param, CustomParameter) and fr_param.formula:
             wc_flush_rate_is_autocalc = 'True' if fr_param.formula.equation == 'True' else 'False'
 
@@ -597,9 +603,8 @@ def get_water_params(pcl, parcel_type):
         # sed_resuspension_vel = get_correct_param("SedimentResuspensionVelocity", sed_pars)  # 6.2480e-5
 
         sw_params = {
-            'autocalc': {
-                'flush_rate': wc_flush_rate_is_autocalc
-            },
+            'flush_rate_autocalc': wc_flush_rate_is_autocalc,
+            'inflow': lake_inflow,
             'wc_props':  {
                 'flush_rate': wc_flush_rate,
                 'suspended_sed_conc': get_correct_param("SuspendedSedimentConcentration", sw_pars),

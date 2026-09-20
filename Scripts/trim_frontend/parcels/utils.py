@@ -3,7 +3,7 @@ import json
 import numpy as np
 import re
 from copy import deepcopy
-from pprint import pprint
+from pprint import pprint, pformat
 from shapely.geometry import Polygon, Point
 from shapely.prepared import prep
 from flask_api import ApiResult
@@ -39,9 +39,8 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
 
     land_use = get_land_use(p)
 
-    print(f"\t\tREFACTORED HANDLE_PARCEL_UPDATE FOR {p}")
-    pprint(parcels_data)
-    print(f"land_use == '{land_use}'\n")
+    logger.info(f"Update for {p} ({p.id})\n%s", pformat(parcels_data))
+    logger.info(f"land_use == '{land_use}'\n")
 
     air_params = {
         'dustLoad': "DustLoad",
@@ -404,13 +403,25 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             )
             update_custom_param_value(par, parcels_data[field_name])
 
-        if field_name == 'flush_rate':
+        if field_name in ['flush_rate', 'externalWaterInflow']:
+            if 'autocalc' in parcels_data:
+                eq = parcels_data['autocalc']
+            elif 'allInflow' in parcels_data:
+                eq = parcels_data['allInflow']
+
             if not par.formula:
-                new_formula_obj = FormulaService.create(equation=parcels_data['autocalc'])
+                new_formula_obj = FormulaService.create(equation=eq)
                 par.formula = new_formula_obj
             else:
-                FormulaService.get(par.formula.id).equation = parcels_data['autocalc']
-                FormulaService.commit()
+                FormulaService.get(par.formula.id).equation = eq
+            FormulaService.commit()
+        ParcelService.update(p)
+
+        if field_name == 'externalWaterInflow': # eventually do this for everything
+            from trim_frontend.parcels.defaults import get_water_params
+            logger.info("Re-calculating water params...")
+            water_params = get_water_params(p, parcels_data["parcelType"])
+            return water_params["surface_water"]
 
     elif field_name in bed_params:
         par_name = bed_params[field_name]

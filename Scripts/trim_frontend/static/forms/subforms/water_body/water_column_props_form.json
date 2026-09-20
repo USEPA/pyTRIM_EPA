@@ -136,6 +136,7 @@
     {
       "id": "externalWaterInflow",
       "label": "External Water Inflow from Other Water Bodies",
+      "readonly": true,
       "data_type": "float",
       "default": 0,
       "tooltip": "m<sup>3</sup> [water]/y",

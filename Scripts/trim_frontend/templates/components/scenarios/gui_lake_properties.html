@@ -65,21 +65,18 @@
         </div>
     </section>
 </form>
-<div class="modal fade" id="WBP_editModal" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+<div class="modal fade" id="inflow-modal" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="WBP_ModalLabel">Modal title</h5>
-                    <!--<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>-->
+                    <h5 class="modal-title">Lake Inflow</h5>
                 </div>
-                <div class="modal-body">
-                </div>
+                <div class="modal-body "></div>
                 <div class="modal-footer">
-                    <a  class="btn btn-secondary" id="WBP_closeModalButton" data-dismiss="modal">Cancel</a>
-                    <!-- <button type="button"  id="saveModalButton" class="btn btn-primary" data-dismiss="modal">Save</button> -->
-                    <button type="button"  id="WBP_saveModalButton" class="btn btn-primary">Save</button>
+                    <button class="btn btn-sm btn-outline-dark" id="inflow-modal-close" data-dismiss="modal">Cancel</button>
+                    <button type="button"  id="inflow-modal-save" class="btn btn-sm btn-outline-secondary text-dark">
+                        <i class="fas fa-save mr-1"></i> Save
+                    </button>
                 </div>
             </div>
         </div>
@@ -198,7 +195,6 @@
                             }
                         }, 0);
                     }
-
                 }
             });
 
@@ -293,270 +289,85 @@
                 }
             });
 
-            // toggleCheckboxArea
-            $("div[id^='psl_']").each(function(i,e){
-                if (tblId == lkTblId) {
-                    $(e).click(function(evt){
-                        var checkboxes = $(e).siblings("div.parcelSelectOptions");
-                        var displayValue = $(checkboxes).css("display");
-                        if (displayValue != "block") {
-                            $(checkboxes).css("display", "block");
-                        } else {
-                            $(checkboxes).css("display", "none");
-                        }
-                    })
-                }
-            })
+            // Calculating External Water Inflow from Other Water Bodies
+            if (tblId == lkTblId) { // TODO better way to split lake/sed listeners
+                $('.inflow-modal-btn').on('click', (e) => {
+                    let thisPcl = getParcelByKey('name', $(e.currentTarget).data('parcel'));
 
-            $("input[id^='MS_']").each(function(i,e) {
-                if (tblId !== lkTblId) {
-                    return;
-                }
-                $(e).change(function(evt){
-                    let this_parcel_name = $(e).closest("td").find("div.parcelMultiselect").data("parcelname")
-                    var multiselectDiv = $(e).closest("td").find("div.divLinkedPropBtn");
-                    // var multiselectOptions = $(multiselectDiv).find('input[type|="button"]');
+                    let body = $('#inflow-modal').find('.modal-body');
+                    body.empty();
+                    body.append(
+                        $(`<button class="btn btn-sm btn-outline-primary float-right m-n2" id="f-reset"
+                            data-toggle="tooltip" data-trigger="hover" title="Set all fractions to 0">
+                            <i class="fas fa-redo"></i>
+                        </button>`)
+                    );
 
-                    // Reset previous ratio data
-                    let selected_parcel = $(e).attr('value');
-                    $(e).data(selected_parcel.toLowerCase()+"_ratio",0)
-                    $(e).attr("data-" + selected_parcel + "_ratio",0)
-                    // Recalculate Discharge and flush rate if unchecked
-                    if (!$(e).is(":checked")) {
-                        let table_col_headers = $(lkTblId).closest("div.dataTables_scroll").find("div.dataTables_scrollHeadInner th").map((i,h)=>h.innerHTML).toArray()
-                        let table_row_headers = $(lkTblId + " tbody tr td:nth-child(1) label").map((i,r) => r.innerHTML).toArray()
-                        let external_flow_row_idx = table_row_headers.indexOf("External Water Inflow from Other Water Bodies")
-                        let discharge_row_idx = table_row_headers.indexOf("Discharge Volumetric Rate")
-                        let fr_row_idx = table_row_headers.indexOf("Flush Rate")
-                        let col_idx = table_col_headers.indexOf(this_parcel_name)
-                        $(lkTblId).find('tr').eq(external_flow_row_idx+1).find('td').eq(col_idx).find("div.divLinkedPropBtn > label").text("0")
-                        let tbl_data = get_Data_from_table(lkTblId)
-                        let res_dc = calculate_discharge_vol_rate(tbl_data,this_parcel_name)
-                        $(lkTblId).find('tr').eq(discharge_row_idx+1).find('td').eq(col_idx).find("label").text(res_dc)
-                        $(lkTblId).find('tr').eq(discharge_row_idx+1).find('td').eq(col_idx).find("input").attr("value",res_dc)
-                        let is_auto_calculated = $(lkTblId).find('tr').eq(fr_row_idx+1).find('td').eq(col_idx).find("button").data("active")
-                        if (is_auto_calculated == "True") {
-                            let tbl_data = get_Data_from_table(lkTblId)
-                            let res_fr = calculate_flush_rate(tbl_data, this_parcel_name)
-                            $(lkTblId).find('tr').eq(fr_row_idx+1).find('td').eq(col_idx).find("label").text(res_fr)
-                            $(lkTblId).find('tr').eq(fr_row_idx+1).find('td').eq(col_idx).find("input").attr("value",res_fr)
+                    $('#inflow-modal').find('.modal-title').text(`Lake Inflow into ${thisPcl.name}`);
+                    $('#inflow-modal').find('.modal-title').data('parcel', thisPcl.name);
+
+                    // init fraction select
+                    for (let otherPcl of waterParcels) {
+                        if (otherPcl.name == thisPcl.name) {
+                            continue;
                         }
+                        
+                        // If thisPcl already flows into otherPcl, otherPcl can't flow into thisPcl
+                        let isUsed = otherPcl.surface_water.inflow.find(_p => _p.name == thisPcl.name)?.fraction || false;
+                        let fraction = thisPcl.surface_water.inflow.find(_p => _p.name == otherPcl.name)?.fraction ?? 0;
+                        $(`<div class="mb-3">
+                                <label class="form-label" for="f-${otherPcl.name}">Fraction of discharge from ${otherPcl.name}</label>   
+                                <input class="form-control w-75 inflow-fraction" type="number"
+                                    ${(isUsed) ? 'disabled':''} id="f-${otherPcl.name}" value="${fraction}"
+                                    oninput="ErrorValidation.isValidFraction(this);" title="" />
+                            </div> 
+                        `).appendTo(body);
                     }
 
-                    var values = [];
-                    var checkboxes = $(e).closest("div.parcelMultiselect").find("div.parcelSelectOptions");
-                    var checkedCheckboxes = checkboxes.find('input[type|="checkbox"]:checked');
-                    for (const item of checkedCheckboxes) {
-                        var checkboxValue = $(item).attr('value');
-                        values.push(checkboxValue);
-                        // Need to disable corresponding component on other columns to avoid cyclic flow
-                        let disabledInput = "[id ^= 'MS_"+ this_parcel_name +"'][id $='"+ checkboxValue +"']" //"input#MS_" + this_parcel_name // $(e).closest("div.parcelMultiselect").attr("data-parcelname")
-                        $(tblId).find(disabledInput).attr("disabled","disabled")
-                    }
-                    var uncheckedCheckboxes = checkboxes.find('input[type|="checkbox"]:not(:checked)');
-                    for (const item of uncheckedCheckboxes) {
-                        // Need to activate corresponding components on other columns if unchecked
-                        let enabledInput = "[id ^= 'MS_" + this_parcel_name +"'][id $='"+ $(item).val() +"']"
-                        $(tblId).find(enabledInput).removeAttr("disabled")
-                    }
-
-                    var no_select_Value = "0";
-                    if (values.length > 0) {
-                        // Loop through checked parcels/lakes and calculate total cumulative inflow to this parcel/lake
-                        let table_col_headers =  $(lkTblId).closest("div.dataTables_scroll").find("div.dataTables_scrollHeadInner th").map((i,h)=>h.innerHTML).toArray()
-                        let table_row_headers = $(lkTblId + " tbody tr td:nth-child(1) label").map((i,r) => r.innerHTML).toArray()
-                        let total_inflow = 0
-                        for (const this_val of values){
-                            let row_idx = table_row_headers.indexOf("Discharge Volumetric Rate")
-                            let col_idx = table_col_headers.indexOf(this_val)
-                            let other_discharge_val = parseFloat($(lkTblId).find('tr').eq(row_idx+1).find('td').eq(col_idx).find("label").first().text())
-                            let this_ratio_data_tag = this_val.toLowerCase() + "_ratio"
-                            let inflow_ratio = $(e).data(this_ratio_data_tag) ? parseFloat($(e).data(this_ratio_data_tag)) : 0
-                            total_inflow = total_inflow + (other_discharge_val * inflow_ratio)
-                        }
-                        // Update "Inflow from other water bodies" using the calculated total inflow
-                        $(multiselectDiv).find("label").text(total_inflow)
-                        // Setup "List" button to allow users change inflow ratios
-                        let this_btn = '<a class="badge badge-secondary-accent ml-2" id="LB_'+ this_parcel_name +'"><i class="fa fa-list"></i></a>'
-                        let list_button_id = "#LB_" + this_parcel_name
-                        let lb = $(list_button_id)
-                        if (lb.length > 0) {
-                            this_btn = lb[0]
-                        }
-                        // On click display list of checked parcels and form fields to type in ratios
-                        this_btn = $(this_btn).click((evt1) => {
-                            let valueFormDiv = $('#WBP_editModal div.modal-body')
-                            $('#WBP_ModalLabel').text("Lake Inflow")
-                            $(valueFormDiv).empty()
-                            let initial_ifr = []
-                            for (const this_val of values) {
-                                // Display the value of the ratio using data tag of the checkbox input (0 by default)
-                                let this_ratio_data_tag = this_val.toLowerCase() + "_ratio"
-                                let inflow_ratio = $(e).data(this_ratio_data_tag) ? parseFloat($(e).data(this_ratio_data_tag)) : 0
-                                let this_input_id = "FRatio_input_" + this_val + "_" + this_parcel_name
-                                initial_ifr.push([this_input_id, inflow_ratio])
-                                let this_label = '<label> Fraction of discharge from ' + this_val + ' as inflow into ' + this_parcel_name + '</label>'
-                                let this_inp = '<input type="text" data-validate="True" data-valtype="numValue" data-chkval="1" id="FRatio_input_' + this_val + '_' + this_parcel_name + '" class="form-control mb-2" value="' + inflow_ratio + '"/>'
-                                this_inp = $(this_inp).change(function (evt2) {
-                                    let is_valid = validate_input(this)
-                                    if (is_valid) {
-                                        // Loop through the ratio input and recalculate the total inflow
-                                        let total_IF = 0
-                                        for (const this_prc of values) {
-                                            let this_FR_id = "#FRatio_input_" + this_prc + "_" + this_parcel_name
-                                            let fraction_val = parseFloat($(this_FR_id).val())
-                                            let wc_discharge_vol_rate = getParam(this_prc, 'wc', 'discharge_vol_rate');                                 
-                                            total_IF += wc_discharge_vol_rate * fraction_val
-
-                                            // Update the data tag of the checkbox to current value
-                                            let this_inp_id = "#MS_" + this_prc + "_" + this_parcel_name
-                                            let this_ratio_data_tag = this_prc.toLowerCase() + "_ratio"
-                                            $(this_inp_id).data(this_ratio_data_tag, fraction_val)
-                                            $(this_inp_id).attr("data-" + this_ratio_data_tag, fraction_val)
-                                        }
-                                        // Display new value
-                                        $(multiselectDiv).find("label").text(total_IF)
-                                        $(multiselectDiv).find("label").parent("div").append($(this_btn))
-
-                                        // Calculate Flush rate if auto calculate = on
-                                        let tbl_data = get_Data_from_table(lkTblId)
-                                        let parcel_name = this_parcel_name
-                                        let fr_row_idx = table_row_headers.indexOf("Flush Rate")
-                                        let discharge_row_idx = table_row_headers.indexOf("Discharge Volumetric Rate")
-                                        let col_idx = table_col_headers.indexOf(this_parcel_name)
-                                        // Calculate new discharge rate for the given inflow rate (so that the lake volume remains the same)
-                                        let res_dc = null
-                                        res_dc = calculate_discharge_vol_rate(tbl_data, parcel_name)
-                                        $(lkTblId).find('tr').eq(discharge_row_idx + 1).find('td').eq(col_idx).find("label").text(res_dc)
-                                        $(lkTblId).find('tr').eq(discharge_row_idx + 1).find('td').eq(col_idx).find("input").attr("value", res_dc)
-                                        // if flush rate auto-calculation is active update the flush rate based on the new discharge value
-                                        let is_auto_calculated = $(lkTblId).find('tr').eq(fr_row_idx + 1).find('td').eq(col_idx).find("button").data("active")
-                                        let res_fr = null
-                                        if (is_auto_calculated == "True") {
-                                            // get updated data from table
-                                            tbl_data = get_Data_from_table(lkTblId)
-                                            res_fr = calculate_flush_rate(tbl_data, parcel_name)
-                                            $(lkTblId).find('tr').eq(fr_row_idx + 1).find('td').eq(col_idx).find("label").text(res_fr)
-                                            $(lkTblId).find('tr').eq(fr_row_idx + 1).find('td').eq(col_idx).find("input").attr("value", res_fr)
-                                        }
-                                        // post flush, discharge, inflow rates and linked discharge fractions to backend
-                                        submit_external_water_inflow(parcel_name, total_IF, res_dc);
-                                    }
-                                })
-                                // Add Parcel name label and ratio input field in the modal body
-                                $(valueFormDiv).append(this_label)
-                                $(valueFormDiv).append(this_inp)
-                            }
-                            $("#WBP_editModal").modal("show")
-                            // Make sure close button resets to initial values.
-                            $("#WBP_closeModalButton").click(function (evt_close) {
-                                initial_ifr.forEach(function (inp, index) {
-                                    let inp_id = "#" + inp[0]
-                                    $(inp_id).val(inp[1])
-                                })
-                                let total_IF = 0
-                                for (const this_prc of values) {
-                                    let this_FR_id = "#FRatio_input_" + this_prc + "_" + this_parcel_name
-                                    let fraction_val = parseFloat($(this_FR_id).val())
-                                    let row_idx = table_row_headers.indexOf("Discharge Volumetric Rate")
-                                    let col_idx = table_col_headers.indexOf(this_prc)
-                                    let inflow_val = parseFloat($(lkTblId).find('tr').eq(row_idx + 1).find('td').eq(col_idx).find("label").first().text())
-                                    total_IF += inflow_val * fraction_val
-                                    // Update the data tag of the checkbox to current value
-                                    let this_inp_id = "#MS_" + this_prc + "_" + this_parcel_name
-                                    let this_ratio_data_tag = this_prc.toLowerCase() + "_ratio"
-                                    $(this_inp_id).data(this_ratio_data_tag, fraction_val)
-                                    $(this_inp_id).attr("data-" + this_ratio_data_tag, fraction_val)
-                                }
-                                // Display new value
-                                $(multiselectDiv).find("label").text(total_IF)
-                                $(multiselectDiv).find("label").parent("div").append($(this_btn))
-                                // Calculate Flush rate if auto calculate = on
-                                let tbl_data = get_Data_from_table(lkTblId)
-                                let parcel_name = this_parcel_name
-                                let fr_row_idx = table_row_headers.indexOf("Flush Rate")
-                                let discharge_row_idx = table_row_headers.indexOf("Discharge Volumetric Rate")
-                                let col_idx = table_col_headers.indexOf(this_parcel_name)
-                                // Calculate new discharge rate for the given inflow rate (so that the lake volume remains the same)
-                                let res_dc = null
-                                res_dc = calculate_discharge_vol_rate(tbl_data, parcel_name)
-                                $(lkTblId).find('tr').eq(discharge_row_idx + 1).find('td').eq(col_idx).find("label").text(res_dc)
-                                $(lkTblId).find('tr').eq(discharge_row_idx + 1).find('td').eq(col_idx).find("input").attr("value", res_dc)
-                                // if flush rate auto-calculation is active update the flush rate based on the new discharge value
-                                let is_auto_calculated = $(lkTblId).find('tr').eq(fr_row_idx + 1).find('td').eq(col_idx).find("button").data("active")
-                                let res_fr = null
-                                if (is_auto_calculated == "True") {
-                                    // get updated data from table
-                                    tbl_data = get_Data_from_table(lkTblId)
-                                    res_fr = calculate_flush_rate(tbl_data, parcel_name)
-                                    $(lkTblId).find('tr').eq(fr_row_idx + 1).find('td').eq(col_idx).find("label").text(res_fr)
-                                    $(lkTblId).find('tr').eq(fr_row_idx + 1).find('td').eq(col_idx).find("input").attr("value", res_fr)
-                                }
-                                // post flush, discharge, inflow rates and linked discharge fractions to backend
-                                submit_external_water_inflow(parcel_name, total_IF, res_dc);
-                            })
-                        })
-                        let lbl = $(multiselectDiv).find("label").parent("div")
-                        $(lbl).append($(this_btn))
-                    } else {
-                        $(multiselectDiv).find('a[class|="badge badge-secondary-accent ml-2"]').remove()
-                        $(multiselectDiv).find("label").text(no_select_Value);
-                        $(multiselectDiv).find("div.MultiselectInput").remove()
-                    }
-                })
-            })
-
-            $("#WBP_saveModalButton").click(function(evt_save){
-                $(this).removeAttr("data-dismiss")
-                let is_valid = validate_input(this)
-                if (is_valid) {
-                    $(this).attr("data-dismiss","modal")
-                }
-            })
-
-            function submit_external_water_inflow(pcl_name, total_IF, discharge_rate) {
-                if (!Number.isFinite(total_IF)) {
-                    console.error("Invalid for [externalWaterInflow]", total_IF)
-                    return;
-                }
-                let pcl = getParcelByKey('name', pcl_name);
-                let parcel_info = [
-                    {type: 'data', name: 'id', value: pcl.id},
-                    {type: 'data', name: 'field', value: 'externalWaterInflow'},
-                    {type: 'input', name: 'externalWaterInflow', value: total_IF},
-                ];
-                LoadingScreen.show('external_water_inflow');
-                TRIM.api.updateParcel(TRIM.store.currentScenario.id, parcel_info).on('load', (rsp)=>{
-                    pcl.surface_water.wc_props.externalWaterInflow = total_IF;
-                    pcl.surface_water.wc_props.discharge_vol_rate = discharge_rate;
-                    LoadingScreen.hide('external_water_inflow');
+                    $("#inflow-modal").modal("show");
+                    $('[data-toggle="tooltip"]').tooltip();
+                    $(body).on('click', '#f-reset', (e) => {
+                        $('.inflow-fraction').each((i, el) => {$(el).val(0)});
+                    });
                 });
-            }
 
-            function validate_input(e) {
-                let elem = $(e).closest("div.modal-content").find("input.form-control")
-                elem = elem[0]
-                let isValidated = $(elem).data("validate")
-                if (isValidated == "True") {
-                    let validation_type = $(elem).data("valtype")
-                    if (validation_type == "numValue") {
-                        let chk_val = parseFloat($(elem).data("chkval"))
-                        let val = parseFloat($(elem).val())
-                        if (val > chk_val) {
-                            $("label.warningTT").tooltip('dispose')
-                            $("label.warningTT").remove()
-                            let tt = '<label class="warningTT" data-toggle="tooltip" data-placement="right" data-html="true" title="Discharge fraction cannot exceed 1"><i class="ml-1 fas fa-exclamation-triangle"></i></label>'
-                            let this_cell = $(elem).siblings("label")
-                            $(this_cell).append(tt)
-                            $("label.warningTT").tooltip('show')
-                            return false
-                        } else {
-                            $("label.warningTT").tooltip('hide')
-                            $("label.warningTT").remove()
-                            return true
-                        }
+                $("#inflow-modal-save").click(function(e){
+                    e.preventDefault();
+                    $(this).removeAttr("data-dismiss");
+
+                    let new_inflow = [];
+                    let is_valid = $(".inflow-fraction").toArray().every((el) => {
+                        new_inflow.push({'name': $(el).attr('id').slice(2), 'fraction': +$(el).val()})
+                        return elementIsValid($(el).parent());
+                    });
+                    
+                    if (!is_valid) {
+                        return;
                     }
-                }
+
+                    let total_inflow = calculate_external_water_inflow(new_inflow);
+                    let pcl = $('#inflow-modal').find('.modal-title').data('parcel');
+                    pcl = getParcelByKey('name', pcl);
+                    let parcel_info = [
+                        {type: 'data', name: 'id', value: pcl.id},
+                        {type: 'data', name: 'field', value: 'externalWaterInflow'},
+                        {type: 'input', name: 'externalWaterInflow', value: total_inflow},
+                        {type: 'input', name: 'allInflow', value: JSON.stringify(new_inflow)},
+                        {type: 'input', name: 'parcelType', value: pcl.parcelType},
+                    ];
+
+                    $(this).attr("data-dismiss","modal");  
+                    LoadingScreen.show('external_water_inflow');
+                    TRIM.api.updateParcel(TRIM.store.currentScenario.id, parcel_info).on('load', (rsp)=>{
+                        if (rsp.target.status === 200) {
+                            pcl.surface_water= rsp.target.responseJSON;
+                            updateLakeProps();
+                        } else {
+                            alert("Error while updating parcel");
+                        }
+                        LoadingScreen.hide('external_water_inflow');
+                    });                                      
+                })
             }
 
             $('input.editableCell,select.editableCell').blur(function() {
@@ -780,7 +591,7 @@
                             <a href='javascript:void(0);'
                                 title='${data}'
                                 aria-label='${data}'
-                                data-trigger='click'
+                                data-trigger='focus'
                                 data-toggle='popover'
                                 data-html='true'
                                 data-placement='left'
@@ -798,34 +609,6 @@
                     <button data-active='${is_active}' data-calcinfo='${calc_info}' class='btn btn-sm btn-outline-dark auto_calc'>
                         <small>Auto-calculate</small>
                     </button></p>`;
-            };
-
-            function make_externalinflow_select(e) {
-                let multi_select_html = new $(`
-                    <div>
-                        <div data-parcelname='${e.name}' class='parcelMultiselect'>
-                            <div id='psl_${e.name}' class='parcelSelectLabel selectBox'>
-                                <select class='form-select' aria-label='Parcels for external water inflow'>
-                                    <option>Select Parcel(s)</option>
-                                </select>
-                                <div class='overSelect'></div>
-                            </div>
-                            <div class='parcelSelectOptions'></div>
-                        </div>
-                    </div>`);
-
-                for (let pcl of waterParcels) {
-                    if (pcl.name == e.name) {
-                        continue;
-                    }
-                    $(multi_select_html).find('div.parcelSelectOptions').append(
-                        `<label for='MS_${pcl.name}_${e.name}'>
-                            <input type='checkbox' id='MS_${pcl.name}_${e.name}' value='${pcl.name}' />
-                            ${pcl.name}
-                        </label>`
-                    );
-                }
-                return multi_select_html.html();
             };
 
             waterParcels.forEach(function (e, i) {
@@ -854,23 +637,22 @@
                         let this_cell_prop = row.isEditable ? 'editableCell badge badge-light' : 'nonEditableCell text-muted';
                         let min = row.min !== undefined ? " min='" + row.min + "' " : "";
                         let max = row.max !== undefined ? " max='" + row.max + "' " : "";
-                        let auto_calc_button = ""
+
+                        let inflow_button = "";
+                        let autocalc_button = "";
 
                         if (row.shortProperty == 'externalWaterInflow') {
-                            let linked_prop_input = make_externalinflow_select(e);
-                            return `<div class='divLinkedPropBtn'><label>${this_cell_data}</label></div>${linked_prop_input}`;
+                            inflow_button = `<a class="inflow-modal-btn badge badge-secondary-accent ml-2" data-parcel='${e.name}'><i class="fa fa-list"></i></a>`;
                         }
                         else if (row.shortProperty == 'flush_rate') {
                             let calc_info = JSON.stringify({'property':row.shortProperty, 'parcel':e.name});
-                            auto_calc_button = make_autocalc_btn(calc_info, false);
+                            autocalc_button = make_autocalc_btn(calc_info, false);
                         }
 
-                        return `<input class='editableCell form-control form-control-sm' type='text'
-                                    data-parcelinfo='${parcel_info}'
-                                    value='${data}' ${min} ${max}
-                                    style='display:none' />
+                        return `<input class='editableCell form-control form-control-sm' type='text' style='display:none'
+                                    data-parcelinfo='${parcel_info}' value='${data}' ${min} ${max} />
                                 <label class='${this_cell_prop}'>${this_cell_data}</label>
-                                ${auto_calc_button}`;
+                                ${autocalc_button} ${inflow_button}`;
                     }
                 })
             })
@@ -897,6 +679,17 @@
                 });
             });
             return myRows
+        }
+
+        function calculate_external_water_inflow(inflow_data) {
+            // [{'parcel': 'w1', 'fraction': 0.001}, ...]
+            let total_inflow = 0;
+            for (let inflow of inflow_data) {
+                let pcl = getParcelByKey('name', inflow.name);
+                let wc_discharge_vol_rate = pcl.surface_water.wc_props.discharge_vol_rate;
+                total_inflow += wc_discharge_vol_rate * Number(inflow.fraction);
+            }
+            return Number.parseFloat(total_inflow).toExponential(5);
         }
 
         function calculate_flush_rate(data, parcel_name) {
@@ -994,7 +787,9 @@
                 return;
             }
 
-            waterParcels = TRIM.store.currentScenario.parcels.filter(e => e.parcelType == "Water Only" || e.parcelType == "Water & Air");
+            waterParcels = TRIM.store.currentScenario.parcels.filter(
+                e => e.parcelType == "Water Only" || e.parcelType == "Water & Air"
+            );
             default_water_data = getTableFields('WaterColumnTable');
             default_sed_data = getTableFields('SedimentTable');
 
