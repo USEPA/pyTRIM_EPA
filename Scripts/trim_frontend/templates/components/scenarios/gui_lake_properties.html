@@ -258,7 +258,6 @@
                     $(this).removeClass("btn-outline-dark").addClass("btn-success");
                     $(this).parent().siblings("label").text(Number(res))
                     $(this).parent().siblings("input").attr("value",Number(res)).trigger("blur");
-                
                 });
 
                 // Calculate External Water Inflow from Other Water Bodies
@@ -390,8 +389,12 @@
                     parcel_info.push({type: 'input', name: 'parcelType', value: pcl.parcelType});
                     TRIM.api.updateParcel(TRIM.store.currentScenario.id, parcel_info).on('load', (rsp)=>{
                         if (rsp.target.status === 200) {
-                            pcl.surface_water= rsp.target.responseJSON;
-                            updateMercuryTransformRate(parcel_info);
+                            if ('wc_props' in rsp.target.responseJSON) {
+                                pcl.surface_water= rsp.target.responseJSON;
+                            }
+                            else {
+                                updateMercuryTransformRate(parcel_info);
+                            }
                             updateLakeProps();
                         }
                         LoadingScreen.hide("Water_body_prop_update");
