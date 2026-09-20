@@ -401,11 +401,7 @@
                 if (parcel_info) {
                     let old_data = parcel_info[parcel_info.findIndex(e => e.type == 'input')].value
                     parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                    let param_store_key = "surface_water"
-                    let ls_info = "Water_body_prop_update"
-                    let sub_cat = this_table == "WaterColumnTable" ? "wc_props" : "sed_props"
-                    param_store_key = param_store_key + "." + sub_cat
-                    
+
                     let field_name = parcel_info[parcel_info.findIndex(e => e.name == 'field')].value
 
                     let table_col_headers = $(lkTblId + " thead th").map((i,h)=>h.innerHTML).toArray()
@@ -428,142 +424,18 @@
                         ])                        
                     }
 
-                    LoadingScreen.show(ls_info)
+                    LoadingScreen.show("Water_body_prop_update")
+                    let pcl = getParcelByKey('name', parcel_name);
+                    parcel_info.push({type: 'input', name: 'parcelType', value: pcl.parcelType});
                     TRIM.api.updateParcel(TRIM.store.currentScenario.id, parcel_info).on('load', (rsp)=>{
-                        update_data_store_callback(rsp, elm, parcel_info, param_store_key, data, old_data)
-                        updateMercuryTransformRate(parcel_info)
-                        LoadingScreen.hide(ls_info)
-                    })
-
-                    let wc_table_data = get_Data_from_table(lkTblId)
-                    let sed_table_data = get_Data_from_table(sedTblId)
-                    
-                    switch (field_name) {
-                        case "evaporation_rate":
-                            var val=calculate_wc_evaporation_vol_rate(wc_table_data, parcel_name, area)
-                            wc_table_data[wc_table_data.findIndex(e => e.Property == 'Evaporation Volumetric Rate')][parcel_name] = val
-                            var val_dvr = calculate_discharge_vol_rate(wc_table_data, parcel_name)
-                            wc_table_data[wc_table_data.findIndex(e => e.Property == 'Discharge Volumetric Rate')][parcel_name] = val_dvr
-                            if (is_auto_calculated == 'True') {
-                                var val_fr = calculate_flush_rate(wc_table_data,parcel_name)
-                                wc_table_data[wc_table_data.findIndex(e => e.Property == 'Flush Rate')][parcel_name] = val_fr
-                            }
-                            var val_sdr=calculate_sed_discharge_rate(wc_table_data,parcel_name)
-                            wc_table_data[wc_table_data.findIndex(e => e.Property == 'Sediment Discharge Rate')][parcel_name] = val_sdr
-                            var val_sbr = calculate_sed_burial_vol_rate(wc_table_data,sed_table_data,parcel_name, area)
-                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Sediment Burial Volumetric Rate')][parcel_name] = val_sbr
-                            var val_srv = calculate_sed_resuspension_vel(wc_table_data,sed_table_data,parcel_name, area)
-                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Resuspension Velocity')][parcel_name] = val_srv
-                            break;
-                        case "flush_rate":
-                            // Fall through to discharge_vol_rate... no break!
-                            var val_dvr = calculate_discharge_vol_rate(wc_table_data, parcel_name)
-                            wc_table_data[wc_table_data.findIndex(e => e.Property == 'Discharge Volumetric Rate')][parcel_name] = val_dvr      
-                        case "discharge_vol_rate":
-                            if (is_auto_calculated == 'True') {
-                                var val_fr = calculate_flush_rate(wc_table_data,parcel_name)
-                                wc_table_data[wc_table_data.findIndex(e => e.Property == 'Flush Rate')][parcel_name] = val_fr
-                            }
-                            var val_sdr=calculate_sed_discharge_rate(wc_table_data,parcel_name)
-                            wc_table_data[wc_table_data.findIndex(e => e.Property == 'Sediment Discharge Rate')][parcel_name] = val_sdr
-                            var val_sbr = calculate_sed_burial_vol_rate(wc_table_data,sed_table_data,parcel_name, area)
-                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Sediment Burial Volumetric Rate')][parcel_name] = val_sbr
-                            var val_srv = calculate_sed_resuspension_vel(wc_table_data,sed_table_data,parcel_name, area)
-                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Resuspension Velocity')][parcel_name] = val_srv
-                            break;
-                        case "suspended_sed_conc":
-                            var val=calculate_sed_discharge_rate(wc_table_data,parcel_name)
-                            wc_table_data[wc_table_data.findIndex(e => e.Property == 'Sediment Discharge Rate')][parcel_name] = val
-                            var val_dvr=calculate_sed_deposition_vol_rate(wc_table_data,sed_table_data,parcel_name)
-                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Deposition Volumetric Rate')][parcel_name] = val_dvr
-                            var val_srv = calculate_sed_resuspension_vel(wc_table_data,sed_table_data,parcel_name, area)
-                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Resuspension Velocity')][parcel_name] = val_srv
-                            break;
-                        case "sed_inflow":
-                            var val=calculate_sed_burial_vol_rate(wc_table_data,sed_table_data,parcel_name, area)
-                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Sediment Burial Volumetric Rate')][parcel_name] = val
-                            var val_srv = calculate_sed_resuspension_vel(wc_table_data,sed_table_data,parcel_name, area)
-                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Resuspension Velocity')][parcel_name] = val_srv
-                            break;
-                        case "bed_density":
-                            var val_bvr=calculate_sed_burial_vol_rate(wc_table_data,sed_table_data,parcel_name, area)
-                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Sediment Burial Volumetric Rate')][parcel_name] = val_bvr
-                            var val_dvr=calculate_sed_deposition_vol_rate(wc_table_data,sed_table_data,parcel_name)
-                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Deposition Volumetric Rate')][parcel_name] = val_dvr
-                            var val = calculate_sed_resuspension_vel(wc_table_data,sed_table_data,parcel_name, area)
-                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Resuspension Velocity')][parcel_name] = val
-                            break;
-                        case "sed_deposition_vel":
-                            var val=calculate_sed_deposition_vol_rate(wc_table_data,sed_table_data,parcel_name)
-                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Deposition Volumetric Rate')][parcel_name] = val
-                            var val_srv = calculate_sed_resuspension_vel(wc_table_data,sed_table_data,parcel_name, area)
-                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Resuspension Velocity')][parcel_name] = val_srv
-                            break;
-                        case "bed_porosity":
-                            var val = calculate_sed_resuspension_vel(wc_table_data,sed_table_data,parcel_name, area)
-                            sed_table_data[sed_table_data.findIndex(e => e.Property == 'Resuspension Velocity')][parcel_name] = val
-                    }
-
-                    let wc_store = getParcelByKey('name', parcel_name).surface_water.wc_props;
-                    wc_table_data.map(function(e,i){
-                            e['unit'] = default_water_data[e['Property']]['tooltip']
-                            e['helpText'] = default_water_data[e['Property']]['help']
-                            e['shortProperty'] = default_water_data[e['Property']]['id']
-                            e['isEditable'] = !default_water_data[e['Property']]['readonly'];
-                            e['min'] = default_water_data[e['Property']]['min']
-                            e['max'] = default_water_data[e['Property']]['max']
-
-                            wc_store[e['shortProperty']] = e[parcel_name];
+                        if (rsp.target.status === 200) {
+                            pcl.surface_water= rsp.target.responseJSON;
+                            updateLakeProps();
                         }
-                    )
-                    TableRedraw(wc_table_data, "lake")
-
-                    let sed_store = getParcelByKey('name', parcel_name).surface_water.sed_props;
-                    sed_table_data.map(function(e,i){
-                            e['unit'] = default_sed_data[e['Property']]['tooltip']
-                            e['helpText'] = default_sed_data[e['Property']]['help']
-                            e['shortProperty'] = default_sed_data[e['Property']]['id']
-                            e['isEditable'] = !default_sed_data[e['Property']]['readonly'];
-                            e['min'] = default_sed_data[e['Property']]['min']
-                            e['max'] = default_sed_data[e['Property']]['max']
-
-                            sed_store[e['shortProperty']] = e[parcel_name];
-                        }
-                    )
-                    TableRedraw(sed_table_data, "sed")
+                        LoadingScreen.hide("Water_body_prop_update");
+                    });
                 }
             })
-        }
-
-        function isMercuryTransformation(field) {
-            const hgRates = [
-                'MethylationRate',
-                'OxidationRate',
-                'ReductionRate',
-                'DemethylationRate'
-            ];
-            const rateField = field.split('.')[0];
-            return hgRates.indexOf(rateField) > -1;
-        }
-
-        function updateMercuryTransformRate(parcel_info) {
-            const field = parcel_info[2].name;
-            if (!isMercuryTransformation(field)) {
-                return;
-            }
-            const pcl = getParcelByKey('id', parcel_info[0].value);
-            const media = field.split('.')[1];
-            const rate = field.split('.')[0];
-            const val = parcel_info[2].value;
-            const mtrs = (pcl.mercury_transformation_rates[media] || {});
-            for (const chem in mtrs) {
-                for (const targetRate in mtrs[chem]) {
-                    if (targetRate == rate) {
-                        mtrs[chem][rate].value = Number(val);
-                        break;
-                    }
-                }
-            }
         }
 
         var form = document.getElementById('lake-props-gui');
@@ -700,7 +572,7 @@
             let evapo_rate = P.surface_water.wc_props.evaporation_rate;
             let watershed_area = P.surface_water.wc_props.connected_watershed_area;
             let lake_depth = P.surface_water.wc_props.mean_depth;
-            let external_inflow = Number(data.find(e=>e.Property == "External Water Inflow from Other Water Bodies")[parcel_name])
+            let external_inflow = P.surface_water.wc_props.externalWaterInflow;
             let area = P.area;
             let wgt_ave_runoff_frac = pcls.filter(e=>e.runoff_fraction!=null).map(e=>e.runoff_fraction*e.area).reduce((a,e)=>a+e, 0)/
                 pcls.filter(e=>e.runoff_fraction!=null).map(e=>e.area).reduce((a,e)=>a+e, 0)
@@ -710,10 +582,6 @@
             let res = ((area * precip_rate) + (watershed_area * precip_rate * wgt_ave_runoff_frac) +
                 (watershed_area * precip_rate * wgt_ave_seepage_frac) + (external_inflow) - (area * evapo_rate)) /
                 (area * lake_depth)
-            // let parcels = TRIM.store.currentScenario.parcels;
-            // let wc_discharge_vol_rate = Number(data.find(e=>e.Property == "Discharge Volumetric Rate")[parcel_name])
-            // let wc_depth = Number(data.find(e=>e.Property == "Water Depth")[parcel_name])
-            // let res = wc_discharge_vol_rate/(area * wc_depth)
             return Number.parseFloat(res).toExponential(5)
         }
 
@@ -738,45 +606,6 @@
             let external_inflow_gain = Number(data.find(e=>e.Property == "External Water Inflow from Other Water Bodies")[parcel_name])
             let evaporation_loss = Number(data.find(e=>e.Property == "Evaporation Volumetric Rate")[parcel_name])
             let res = (runoff_gain + precipitation_gain + precipitation_gw_seepage_gain + external_inflow_gain) - evaporation_loss
-            return Number.parseFloat(res).toExponential(5)
-        }
-
-        function calculate_wc_evaporation_vol_rate(data, parcel_name, area){
-            let evaporation_rate = Number(data.find(e=>e.Property == "Evaporation Rate")[parcel_name])
-            let res = evaporation_rate * area
-            return Number.parseFloat(res).toExponential(5)
-        }
-
-        function calculate_sed_discharge_rate(data, parcel_name){
-            let wc_discharge_vol_rate = Number(data.find(e=>e.Property == "Discharge Volumetric Rate")[parcel_name])
-            let suspended_sed_conc = Number(data.find(e=>e.Property == "Suspended Sediment Concentration")[parcel_name])
-            let res = wc_discharge_vol_rate * suspended_sed_conc
-            return Number.parseFloat(res).toExponential(5)
-        }
-
-        function calculate_sed_burial_vol_rate(data_wc, data_sed, parcel_name, area){
-            let wc_external_sed_inflow = Number(data_wc.find(e=>e.Property == "External Sediment Inflow from Other Water Bodies")[parcel_name])
-            let soil_erosion_rate_to_wc = Number(data_sed.find(e=>e.Property == "Soil Erosion Rate to Water Body")[parcel_name])
-            let wc_sed_discharge_rate = Number(data_wc.find(e=>e.Property == "Sediment Discharge Rate")[parcel_name])
-            let sed_bed_density = Number(data_sed.find(e=>e.Property == "Bed Density")[parcel_name])
-            let res = (wc_external_sed_inflow + soil_erosion_rate_to_wc - (wc_sed_discharge_rate/365)) / (sed_bed_density * area)
-            res = Math.max(res, 0)
-            return Number.parseFloat(res).toExponential(5)
-        }
-
-        function calculate_sed_deposition_vol_rate(data_wc, data_sed, parcel_name){
-            let wc_sed_deposition_vel = Number(data_wc.find(e=>e.Property == "Sediment Deposition Velocity")[parcel_name])
-            let wc_suspended_sed_conc = Number(data_wc.find(e=>e.Property == "Suspended Sediment Concentration")[parcel_name])
-            let sed_bed_density = Number(data_sed.find(e=>e.Property == "Bed Density")[parcel_name])
-            let res = wc_sed_deposition_vel * wc_suspended_sed_conc / sed_bed_density
-            return Number.parseFloat(res).toExponential(5)
-        }
-
-        function calculate_sed_resuspension_vel(data_wc, data_sed, parcel_name, area){
-            let sed_deposition_vol_rate = calculate_sed_deposition_vol_rate(data_wc, data_sed, parcel_name)
-            let sed_burial_vol_rate = calculate_sed_burial_vol_rate(data_wc, data_sed, parcel_name, area)
-            let sed_bed_porosity = Number(data_sed.find(e=>e.Property == "Bed Porosity")[parcel_name])
-            let res = (sed_deposition_vol_rate - sed_burial_vol_rate) / (1 - sed_bed_porosity)
             return Number.parseFloat(res).toExponential(5)
         }
 

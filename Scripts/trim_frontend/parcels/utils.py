@@ -417,11 +417,10 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             FormulaService.commit()
         ParcelService.update(p)
 
-        if field_name == 'externalWaterInflow': # eventually do this for everything
-            from trim_frontend.parcels.defaults import get_water_params
-            logger.info("Re-calculating water params...")
-            water_params = get_water_params(p, parcels_data["parcelType"])
-            return water_params["surface_water"]
+        from trim_frontend.parcels.defaults import get_water_params
+        logger.info("Re-calculating water params...")
+        water_params = get_water_params(p, parcels_data["parcelType"])
+        return water_params["surface_water"]
 
     elif field_name in bed_params:
         par_name = bed_params[field_name]
