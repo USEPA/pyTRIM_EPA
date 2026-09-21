@@ -44,7 +44,7 @@
                                             </div>
                                         </div>
                                         <button class="comp_reset_all btn btn-danger" id="ic-reset-vals">Reset All to Zero</button>
-                                        <div style="overflow-x: auto;">
+                                        <!--<div style="overflow-x: auto;">-->
                                             <table class="compMap" style="border-collapse: collapse" cellpadding="6">
                                                 <thead>
                                                     <tr>
@@ -56,7 +56,7 @@
                                                     </tr>
                                                 </thead>
                                             </table>
-                                        </div>
+                                        <!--</div>-->
                                     </div>
                                 </div>
                             </div>
@@ -127,7 +127,7 @@
                 TRIM.functions.removeTabFromFieldList(fieldset[0], i);
             });
 
-            TRIM.store.currentScenario.chemicals.map(x => x.name).forEach((sc, i) => {
+            TRIM.store.currentScenario.chemicals.map(x => x.name).sort().forEach((sc, i) => {
                 window.TRIM.functions.addTabToFieldList(fieldset[0], sc)
                 let current_index = ($("#background-conc-gui").find("span.chemInfo")).length-1
 
@@ -315,7 +315,7 @@
                                 const ve_find_str = "td[data-ve-name='" + p["Volume Element Name"] + "']"
                                 const comp_find_str = "td[data-comp-name='" + p["Compartment Name"] + "']"
                                 const ic_cell = $(cmap).find(pcl_find_str).next(ve_find_str).next(comp_find_str).next("td.ic")
-                                const ic_val =  Number(p["Background Concentration Value"]).toExponential()
+                                const ic_val =  Number(p["Background Concentration Value"]).toExponential(4)
                                 $(ic_cell).find("input").val(ic_val)
                                 $(ic_cell).find("label.editableCell").text(ic_val)
                             })
@@ -442,10 +442,13 @@
             });
         }
 
+        var comps_added = [];
         function initialize_compartment_map() {
-            var map_html = "<tbody>"
             let skip_ves = ['Air', 'UpperAir'];
             let exclude = ["WetVaporSource", "DryVaporSource", "WetParticleSource", "DryParticleSource"] // + Sinks
+            comps_added = [];
+    
+            var map_html = "<tbody>"
             TRIM.store.currentScenario.parcels.forEach( function(e,i){
                 map_html = map_html + "<tr data-depth='0' tabindex='0' class='level0 colps'><td data-pcl-name='" + e.name + "'>" + e.name + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td><td></td></tr>"
                 for (ve in e.compartment_map) {
@@ -456,13 +459,15 @@
                         map_html = map_html + "<tr data-depth='1' tabindex='0' class='level1 colps'><td data-pcl-name='" + e.name + "'></td><td data-ve-name='" + ve + "'>" + ve + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
                     }
                     for (comp in e.compartment_map[ve]) {
-                        if (exclude.map(el => el + '_' + ve).indexOf(e.compartment_map[ve][comp]) > -1
-                        || exclude.indexOf(e.compartment_map[ve][comp]) > -1
-                        || e.compartment_map[ve][comp].includes("_Sink")) {
+                        let comp_name = e.compartment_map[ve][comp];
+                        if (exclude.map(el => el + '_' + ve).indexOf(comp_name) > -1
+                        || exclude.indexOf(comp_name) > -1
+                        || comp_name.includes("_Sink")) {
                             continue;
                         }
-                        if (exclude.indexOf(e.compartment_map[ve][comp]) == -1){
-                            map_html = map_html + "<tr data-depth='2' tabindex='0' class='level2 colps'><td data-pcl-name='" + e.name + "'><td data-ve-name='" + ve + "'><td class='comp' data-comp-name='" + e.compartment_map[ve][comp] + "'>" + e.compartment_map[ve][comp]+ "</td><td class='ic'><input class='editableCell' style='width: 50px; display:none'/><label class='editableCell badge badge-light'>0</label></td><td class='ic_unit'></td></tr>"
+                        if (exclude.indexOf(comp_name) == -1){
+                            comps_added.push(comp_name);
+                            map_html = map_html + "<tr data-depth='2' tabindex='0' class='level2 colps'><td data-pcl-name='" + e.name + "'><td data-ve-name='" + ve + "'><td class='comp' data-comp-name='" + comp_name + "'>" + comp_name + "</td><td class='ic'><input class='editableCell' style='width: 50px; display:none'/><label class='editableCell badge badge-light'>0</label></td><td class='ic_unit'></td></tr>"
                         }
                     }
                 }
@@ -485,7 +490,7 @@
                                 let ve_find_str = "td[data-ve-name='" + ve + "']"
                                 let comp_find_str = "td[data-comp-name='" + comp + "']"
                                 let ic_cell = $(cmap).find(pcl_find_str).next(ve_find_str).next(comp_find_str).next("td.ic")
-                                let ic_val =  Number(p.initialConcentrations[chem][ve][comp]['ic']).toExponential()
+                                let ic_val =  Number(p.initialConcentrations[chem][ve][comp]['ic']).toExponential(4)
                                 let ic_unit_cell = $(cmap).find(pcl_find_str).next(ve_find_str).next(comp_find_str).next("td.ic").next("td.ic_unit")
                                 let ic_unit = p.initialConcentrations[chem][ve][comp]['unit']
                                 $(ic_cell).find("input").val(ic_val)
@@ -499,15 +504,7 @@
         }
 
         function populate_comp_dd(dd_menu){
-            let comp_array = []
-            TRIM.store.currentScenario.parcels.forEach( function(e,i){
-                for (let ve in e.compartment_map) {
-                    for (let comp in e.compartment_map[ve]) {
-                        comp_array.push(e.compartment_map[ve][comp])
-                    }
-                }
-            })
-            let uniq_comp = [... new Set(comp_array)]
+            let uniq_comp = [... new Set(comps_added)]
             uniq_comp.sort().forEach(function(e) {
                 let menu_item = "<a href='#' class='dropdown-item comp-item'>" + e + "</a>"
                 $(menu_item).appendTo(dd_menu)

@@ -13,9 +13,6 @@
                         <div class="col-sm">
                             <h5>Chemical Name:</h5><h6><span class="chemInfo"></span></h6>
                         </div>
-                        <div class="col-sm">
-                            <h5>Chemical Species:</h5><h6><span class="stateInfo"></span></h6>
-                        </div>
                     </div>
                     <div class="row mb-1">
                         <div class="col-sm">
@@ -45,6 +42,9 @@
                                                 <div class="col-md">
                                                     <div data-slot="true" data-target="spacing"></div>
                                                 </div>
+                                                <div class="col-md">
+                                                    <div data-slot="true" data-target="species"></div>
+                                                </div>
                                             </div>
                                             <div data-slot="true" data-target="emission_upload_button"></div>
                                         </div>
@@ -71,7 +71,7 @@
                                                 </strong>
                                             </small>
                                         </div>
-                                        <div style="overflow-x: auto;">
+                                        <!--<div style="overflow-x: auto;">-->
                                             <table class="compMap" style="border-collapse: collapse" cellpadding="6">
                                                 <thead>
                                                     <tr>
@@ -82,7 +82,7 @@
                                                     </tr>
                                                 </thead>
                                             </table>
-                                        </div>
+                                        <!--</div>-->
                                     </div>
                                 </div>
                             </div>
@@ -152,7 +152,7 @@
         var chemicals = null
         var parcels = null;
         try {
-            chemicals = TRIM.store.currentScenario.chemicals.map(x => x.name);
+            chemicals = TRIM.store.currentScenario.chemicals.map(x => x.name).sort();
             parcels = TRIM.store.currentScenario.parcels;
         } catch(e) {
             chemicals = null;
@@ -161,7 +161,7 @@
         var chem_spec = {}
 
         function renderEmissions() {
-            if (!TRIM.store.currentScenario.parcels) {
+            if (!TRIM.store.currentScenario.parcels || !TRIM.store.currentScenario.chemicals) {
                 if (!PARCEL_REFRESH) {
                     PARCEL_REFRESH = true;
                     LoadingScreen.show('emissions_parcels_loading');
@@ -173,7 +173,7 @@
             }
 
             let fieldset = $('#chemicals-add-btn').closest("fieldset")
-            chemicals = TRIM.store.currentScenario.chemicals.map(x => x.name);
+            chemicals = TRIM.store.currentScenario.chemicals.map(x => x.name).sort();
             parcels = TRIM.store.currentScenario.parcels;
             chem_spec = {}
             parcels.forEach(p =>
@@ -194,22 +194,15 @@
             });
 
             chemicals.forEach((sc, i) => {
-                ["Vapor", "Particle"].forEach((st, ii) => {
-                    // let spec = chem_spec[sc][ii].indexOf("Vapor") > -1 ? "Gaseous" : "Particulate"
-                    let spec = st == "Vapor" ? "Gaseous" : "Particulate"
-                    window.TRIM.functions.addTabToFieldList(fieldset[0], sc + " (" +spec + ")")
+                TRIM.functions.addTabToFieldList(fieldset[0], sc);
+                let current_index = ($("#emissions-settings-gui").find("span.chemInfo")).length-1;
+                $("#emissions-settings-gui").find("span.chemInfo")[current_index].innerHTML = sc;
 
-                    let current_index = ($("#emissions-settings-gui").find("span.chemInfo")).length-1
+                $(initialize_compartment_map()).insertAfter($($("#emissions-settings-gui").find("table.compMap")[current_index]).find("thead"))
 
-                    $("#emissions-settings-gui").find("span.chemInfo")[current_index].innerHTML = sc
-                    $("#emissions-settings-gui").find("span.stateInfo")[current_index].innerHTML = spec
-                    $(initialize_compartment_map(spec)).insertAfter($($("#emissions-settings-gui").find("table.compMap")[current_index]).find("thead"))
-
-                    let dd_menu = $($("#emissions-settings-gui").find("table.compMap")[current_index]).prevAll("div.dropdown:first").find("div.dropdown-menu")
-                    populate_comp_dd(dd_menu);
-                    populate_values($($("#emissions-settings-gui").find("table.compMap")[current_index]))
-                    }
-                )
+                let dd_menu = $($("#emissions-settings-gui").find("table.compMap")[current_index]).prevAll("div.dropdown:first").find("div.dropdown-menu");
+                populate_comp_dd(dd_menu);
+                populate_values($($("#emissions-settings-gui").find("table.compMap")[current_index]))
             })
 
             if (!TRIM.store.allChemicals) {
@@ -247,23 +240,6 @@
                 $("#chemicals-modal").find("button.close")[0].click()
                 LoadingScreen.show('adding_chemical');
                 let chem = $('#chemical').find(":selected").val()
-                // let spec = $('#state').find(":selected").val()
-                // window.TRIM.functions.addTabToFieldList(fieldset[0], chem)
-                // let i = Number($("#emissions-settings-gui").find("a.nav-link.p-2.active").attr("id").split("-")[1])
-                let specs = ["Vapor", "Particle"]
-                specs.forEach((st, ii) => {
-                    let spec = st == "Vapor" ? "Gaseous" : "Particulate"
-                    window.TRIM.functions.addTabToFieldList(fieldset[0], chem + " (" + spec + ")")
-                    let current_index = ($("#emissions-settings-gui").find("span.chemInfo")).length - 1
-                    $("#emissions-settings-gui").find("span.chemInfo")[current_index].innerHTML = chem
-                    $("#emissions-settings-gui").find("span.stateInfo")[current_index].innerHTML = spec
-                    $(initialize_compartment_map(spec)).insertAfter($($("#emissions-settings-gui").find("table.compMap")[current_index]).find("thead"))
-                    let dd_menu = $($("#emissions-settings-gui").find("table.compMap")[current_index]).prevAll("div.dropdown:first").find("div.dropdown-menu")
-                    populate_comp_dd(dd_menu);
-                    populate_values($($("#emissions-settings-gui").find("table.compMap")[current_index]))
-                })
-                attach_event_handlers()
-                //TRIM.refreshParcels();
                 let scenario_info = [{
                         'type': 'data',
                         'name': 'id',
@@ -315,7 +291,8 @@
                 const utmZone = aermodSettings.find("input[id*=_upload_utm_zone]");
                 const zflag = aermodSettings.find("input[id*=_zflag_restriction]");
                 const spacing = aermodSettings.find("select[id*=_spacing]");
-                const aermodFields = [coordsSystem, utmZone, zflag, spacing];
+                const species = aermodSettings.find("select[id*=_species]");
+                const aermodFields = [coordsSystem, utmZone, zflag, spacing, species];
 
                 me.on('change', function() {
                     const parcelFileData = me.prop('files')[0];
@@ -474,7 +451,7 @@
                 let parcel_id = parcels.filter(e => e.name == parcel_name)[0].id
                 let compartment_name = $($(this).closest("tr.level2").find("td")[2]).attr("data-comp-name")
                 let ve_name = $($(this).closest("tr.level2").find("td")[1]).attr("data-ve-name")
-                let chem_name = $(this).closest("div.tab-pane").data("tab-name").split(" (")[0]
+                let chem_name = $(this).closest("div.tab-pane").data("tab-name");
                 let parcel_info = [{
                     'type': 'data',
                     'name': 'field',
@@ -512,6 +489,7 @@
             const utmZone = aermodSettingsSection.find("input[id*=_upload_utm_zone]");
             const zflag = aermodSettingsSection.find("input[id*=_zflag_restriction]");
             const spacing = aermodSettingsSection.find("select[id*=_spacing]");
+            const species = aermodSettingsSection.find("select[id*=_species]");
 
             // Get projection
             const coord_sys = $(coordsSystem).val();
@@ -528,9 +506,7 @@
             const loadingRequest = 'load_' + fileElem[0].id;
             LoadingScreen.show(loadingRequest);
 
-            const this_chem_prop =  aermodSettingsSection.closest("div.tab-pane").data("tab-name").split(" (");
-            const this_chem = this_chem_prop[0];
-            const this_spec = this_chem_prop[1].split(")")[0] == "Gaseous" ? "Vapor" : "Particle";
+            const this_chem =  aermodSettingsSection.closest("div.tab-pane").data("tab-name");
 
             const field_data = [
                 fileElem[0],
@@ -547,7 +523,7 @@
                 {
                     'type': 'input',
                     'name': 'species',
-                    'value': this_spec
+                    'value': species.val()
                 },
                 {
                     'type': 'input',
@@ -574,6 +550,7 @@
             TRIM.api.parseAERMODFile(field_data).on('load', function() {
                 try {
                     let src_data = JSON.parse(this.responseText);
+                    let this_spec = species.val();
                     parcels.forEach(function(p, i) {
                         let dryval = src_data.aermod_results[p.id]['Dry_Deposition_Avg']
                         let wetval = src_data.aermod_results[p.id]['Wet_Deposition_Avg']
@@ -591,71 +568,92 @@
         function submit_emission_value(elem, parcel_info) {
             let ls_info = 'submit_pseudo_emission'
             ErrorValidation.isPositiveValue(elem)
-            if (elementIsValid($(elem).parent())){
-                let data = $(elem).val() == "" ? 0 : $(elem).val()
-                parcel_info[4].value = data
-                let $label = $(elem).next("label.editableCell")
-                $label.siblings("input").hide()
-                let old_data = $label.text() == "" ? 0 : $label.text()
-                $label.show().text(data)
-
-                parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                console.log(parcel_info)              
-                TRIM.api.updateParcel(TRIM.store.currentScenario.id, parcel_info).on('load', (rsp)=>{
-                    let chem_name = parcel_info[parcel_info.findIndex(e => e.type == 'data' & e.name == 'chemical_name')].value
-                    let ve_name = parcel_info[parcel_info.findIndex(e => e.type == 'data' & e.name == 've_name')].value
-                    let comp_name = parcel_info[parcel_info.findIndex(e => e.type == 'data' & e.name == 'compartment_name')].value
-                    let param_store_key =  'sources' + '.' + chem_name + '.' + ve_name
-                    parcel_info[parcel_info.findIndex(e => e.type == 'data' & e.name == 'field')].value = comp_name
-                    update_data_store_callback(rsp, elem, parcel_info, param_store_key, data, old_data)
-                    LoadingScreen.hide(ls_info);
-                    // if updated value is a non-pseudo source compartment updated the other chemical state as both states are the same
-                    let chem_tabs = $(elem).closest("div.tab-pane").parent("div").find("div.tab-pane")
-                    let this_chem = $(elem).closest('div.tab-pane').data('tab-name').split("(")[0].trim()
-                    let this_state = $(elem).closest('div.tab-pane').data('tab-name').split("(")[1].replace(")","").trim()
-                    let other_state = this_state == "Gaseous" ? "Particulate" : "Gaseous"
-                    let other_chem = this_chem +" (" + other_state +")"
-                    let other_tab = chem_tabs.filter((i,e) =>{ return $(e).attr("data-tab-name") == other_chem })
-                    let cmp_map = $(other_tab).find("table.compMap")
-                    populate_values($(other_tab).find(cmp_map))
-                })
-            } else {
-                return
+            if (!elementIsValid($(elem).parent())) {
+                return;
             }
+            let data = $(elem).val() == "" ? 0 : $(elem).val()
+            parcel_info[4].value = data
+            let $label = $(elem).next("label.editableCell")
+            $label.siblings("input").hide()
+            let old_data = $label.text() == "" ? 0 : $label.text()
+            $label.show().text(data)
+
+            parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
+            console.log(parcel_info)              
+            TRIM.api.updateParcel(TRIM.store.currentScenario.id, parcel_info).on('load', (rsp)=>{
+                let chem_name = parcel_info[parcel_info.findIndex(e => e.type == 'data' & e.name == 'chemical_name')].value
+                let ve_name = parcel_info[parcel_info.findIndex(e => e.type == 'data' & e.name == 've_name')].value
+                let comp_name = parcel_info[parcel_info.findIndex(e => e.type == 'data' & e.name == 'compartment_name')].value
+                let param_store_key =  'sources' + '.' + chem_name + '.' + ve_name
+                parcel_info[parcel_info.findIndex(e => e.type == 'data' & e.name == 'field')].value = comp_name
+                update_data_store_callback(rsp, elem, parcel_info, param_store_key, data, old_data)
+                LoadingScreen.hide(ls_info);
+            });
         }
 
+        var comps_added = [];
         function initialize_compartment_map(spec) {
-            let parcels = TRIM.store.currentScenario.parcels;
-            var map_html = "<tbody>"
             let skip_ves = ['Air', 'UpperAir'];
-            let skip_comps = ['Degradation_Reaction_Sink', 'Soil_Advection_Sink', 'Flush_Rate_Sink']
-            let exclude = spec == "Particulate" ? "VaporSource" : "ParticleSource"
+            let skip_comps = ['Degradation_Reaction_Sink', 'Soil_Advection_Sink', 'Flush_Rate_Sink'];
+            comps_added = [];
+
+            var map_html = "<tbody>";
+            let parcels = TRIM.store.currentScenario.parcels;
             parcels.forEach( function(e,i){
-                map_html = map_html + "<tr data-depth='0' tabindex='0' class='level0 colps'><td data-pcl-name='" + e.name + "'>" + e.name + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
+                map_html += `
+                <tr data-depth='0' tabindex='0' class='level0 colps'>
+                    <td data-pcl-name='${e.name}'>${e.name}&nbsp;
+                        <span class='toggle colps'>
+                        <i class='fas fa-angle-down'></i>&nbsp;
+                        </span>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>`;
+
                 for (ve in e.compartment_map) {
                     if (skip_ves.indexOf(ve) > -1) {
                         continue;
                     }
-                    else if (ve.indexOf(exclude) == -1) {
-                        map_html = map_html + "<tr data-depth='1'tabindex='0' class='level1 colps'><td data-pcl-name='" + e.name + "'></td><td data-ve-name='" + ve + "'>" + ve + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td></tr>"
-                    }
+                    map_html += `
+                    <tr data-depth='1'tabindex='0' class='level1 colps'>
+                        <td data-pcl-name='${e.name}'></td>
+                        <td data-ve-name='${ve}'>${ve}&nbsp;
+                            <span class='toggle colps'>
+                            <i class='fas fa-angle-down'></i>&nbsp;
+                            </span></td>
+                        <td></td>
+                        <td></td>
+                    </tr>`;
                     for (comp in e.compartment_map[ve]) {
-                        if (skip_comps.map(el => el + '_' + ve).indexOf(e.compartment_map[ve][comp]) > -1 ||
-                        skip_comps.indexOf(e.compartment_map[ve][comp]) > -1) {
-                            continue
+                        let comp_name = e.compartment_map[ve][comp];
+                        if (
+                            skip_comps.map(el => el + '_' + ve).indexOf(comp_name) > -1 ||
+                            skip_comps.indexOf(comp_name) > -1
+                        ) {
+                            continue;
                         }
-                        if (e.compartment_map[ve][comp].indexOf(exclude) == -1){
-                            map_html = map_html + "<tr data-depth='2' tabindex='0' class='level2 colps'><td data-pcl-name='" + e.name + "'></td><td data-ve-name='" + ve + "'></td><td class='comp' data-comp-name='" + e.compartment_map[ve][comp] + "'>" + e.compartment_map[ve][comp] + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='editableCell badge badge-light'>0</label></td></tr>"
-                        }
+                        comps_added.push(comp_name)
+                        map_html += `
+                        <tr data-depth='2' tabindex='0' class='level2 colps'>
+                            <td data-pcl-name='${e.name}'></td>
+                            <td data-ve-name='${ve}'></td>
+                            <td class='comp' data-comp-name='${comp_name}'>${comp_name}</td>
+                            <td class='ems'>
+                                <input class='editableCell' style='width: 50px; display:none'/>
+                                <label class='editableCell badge badge-light'>0</label>
+                            </td>
+                        </tr>`;
                     }
                 }
             })
-            map_html += "</tbody>"
+            map_html += "</tbody>";
             return map_html
         }
 
         function populate_values(cmap) {
-            let this_chem = $(cmap).closest("div.tab-pane").data("tab-name").split(" (")[0]
+            let this_chem = $(cmap).closest("div.tab-pane").data("tab-name");
             let parcels = TRIM.store.currentScenario.parcels;
             parcels.forEach(function(p,i){
                 Object.keys(p.sources).forEach(function(chem,j) {
@@ -668,7 +666,7 @@
                                 let ve_find_str = "td[data-ve-name='" + ve + "']"
                                 let comp_find_str = "td[data-comp-name='" + comp + "']"
                                 let ems_cell = $(cmap).find(pcl_find_str).next(ve_find_str).next(comp_find_str).next("td.ems")
-                                let ems_val =  Number(p.sources[chem][ve][comp]).toExponential()
+                                let ems_val =  Number(p.sources[chem][ve][comp]).toExponential(4);
                                 $(ems_cell).find("input").val(ems_val)
                                 $(ems_cell).find("label.editableCell").text(ems_val)
                             })
@@ -679,20 +677,12 @@
         }
 
         function populate_comp_dd(dd_menu){
-            let comp_array = []
-            let parcels = TRIM.store.currentScenario.parcels;
-            parcels.forEach( function(e,i){
-                for (let ve in e.compartment_map) {
-                    for (let comp in e.compartment_map[ve]) {
-                        comp_array.push(e.compartment_map[ve][comp])
-                    }
-                }
-            })
-            let uniq_comp = [... new Set(comp_array)]
+            let uniq_comp = [... new Set(comps_added)]
             uniq_comp.sort().forEach(function(e) {
-                let menu_item = "<a href='#' class='dropdown-item comp-item'>" + e + "</a>"
-                $(menu_item).appendTo(dd_menu)
-            })
+                let menu_item = "<a href='#' class='dropdown-item comp-item'>" + e + "</a>";
+                $(menu_item).appendTo(dd_menu);
+            });
+
             $("a.dropdown-item.comp-item").on("click",function (e){
                 e.preventDefault()
                 let this_table = $(this).closest("div.dropdown").nextAll("table.compMap:first")
