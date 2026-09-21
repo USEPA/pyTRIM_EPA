@@ -1,3 +1,4 @@
+import json
 import pandas as pd
 import numpy as np
 from trim_db.schema import ureg, Parcel
@@ -491,13 +492,18 @@ def get_water_params(pcl, parcel_type):
         )
 
         precipitation_vol_rate_to_sw = 0  # 4.8E6
-        wc_external_inflow = get_correct_param("ExternalWaterInflow", sw_pars) or 0
-        wc_flush_rate = get_correct_param("Flushes", sw_pars)
 
+        wc_external_inflow = get_correct_param("ExternalWaterInflow", sw_pars) or 0
+        external_inflow_param = sw.parameters.get("ExternalWaterInflow")
+        lake_inflow = []
+        if isinstance(external_inflow_param, CustomParameter) and external_inflow_param.formula:
+            lake_inflow = json.loads(external_inflow_param.formula.equation)
+
+        wc_flush_rate = get_correct_param("Flushes", sw_pars)
         fr_param = sw.parameters.get("Flushes")
-        wc_flush_rate_is_autocalc = 'True'
+        wc_flush_rate_is_autocalc = False
         if isinstance(fr_param, CustomParameter) and fr_param.formula:
-            wc_flush_rate_is_autocalc = 'True' if fr_param.formula.equation == 'True' else 'False'
+            wc_flush_rate_is_autocalc = True if fr_param.formula.equation == '1' else False
 
         try:
             precipitation_vol_rate_to_sw = (
@@ -514,23 +520,21 @@ def get_water_params(pcl, parcel_type):
         # evaporation_vol_rate = 3.3E6
 
         try:
-            wc_discharge_vol_rate = float('{:.5f}'.format(
-                total_runoff_vol_rate_to_this_sw
-                + total_seepage_vol_rate_to_gw
-                + wc_external_inflow
-                + precipitation_vol_rate_to_sw
-                 - evaporation_vol_rate
-            ))
-
-            if wc_flush_rate_is_autocalc == 'False':
+            if wc_flush_rate_is_autocalc:
+                wc_discharge_vol_rate = float('{:.5f}'.format(
+                    total_runoff_vol_rate_to_this_sw
+                    + total_seepage_vol_rate_to_gw
+                    + wc_external_inflow
+                    + precipitation_vol_rate_to_sw
+                    - evaporation_vol_rate
+                ))
+            else:
                 wc_discharge_vol_rate = float('{:.5f}'.format(
                     wc_flush_rate * abs(sw.MeanDepth.magnitude) * pcl.area.magnitude
                 ))
         except Exception as ex:
             wc_discharge_vol_rate = None
             print(f'Problem Calculating Water Column Discharge Volumetric Rate:\n {ex}')
-
-        # wc_discharge_vol_rate = 6.2E6
         
         try:
             wc_sed_discharge_rate = (
@@ -540,7 +544,6 @@ def get_water_params(pcl, parcel_type):
         except Exception as ex:
             wc_sed_discharge_rate = None
             print(f'Problem Calculating Sediment Discharge Rate:\n {ex}')
-        # wc_sed_discharge_rate = 3.13E5
 
         try:
             sed_burial_vol_rate = ( # need to convert all to /day
@@ -564,7 +567,6 @@ def get_water_params(pcl, parcel_type):
         except Exception as ex:
             sed_burial_vol_rate = None
             print(f'Problem Calculating Sediment Burial Rate:\n {ex}')
-        # sed_burial_vol_rate = get_correct_param("SedimentBurialRateToHaveZeroNetDeposition", sed_pars)  # 2.4992e-5
 
         try:
             sed_deposition_vol_rate = (
@@ -574,7 +576,6 @@ def get_water_params(pcl, parcel_type):
         except Exception as ex:
             sed_deposition_vol_rate = None
             print(f'Problem Calculating Sediment Deposition Volumetric Rate:\n {ex}')
-        # sed_deposition_vol_rate = get_correct_param("SedimentDepositionRate", sw_pars)  # 3.8462e-5
 
         try:
             sed_resuspension_vel = (
@@ -594,12 +595,10 @@ def get_water_params(pcl, parcel_type):
         except Exception as ex:
             sed_resuspension_vel = None
             print(f'Problem Calculating Sediment Resuspension Velocity:\n {ex}')
-        # sed_resuspension_vel = get_correct_param("SedimentResuspensionVelocity", sed_pars)  # 6.2480e-5
 
         sw_params = {
-            'autocalc': {
-                'flush_rate': wc_flush_rate_is_autocalc
-            },
+            'fr_autocalc': wc_flush_rate_is_autocalc,
+            'inflow': lake_inflow,
             'wc_props':  {
                 'flush_rate': wc_flush_rate,
                 'suspended_sed_conc': get_correct_param("SuspendedSedimentConcentration", sw_pars),

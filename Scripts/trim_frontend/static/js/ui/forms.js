@@ -991,6 +991,11 @@ window.TRIM = (function(trim) {
         return JSON.parse(val);
     }
 
+    var _forms = {};
+    forms.get = function(formName) {
+        return _forms[formName];
+    }
+
     // On dom load, auto-draw forms that are labelled async
     var formLoadEvent = document.createEvent('Event');
     formLoadEvent.initEvent('form:loaded', true, true);
@@ -1014,6 +1019,7 @@ window.TRIM = (function(trim) {
             try {
                 var data = this.responseJSON;
                 if (data && data[src]) {
+                    _forms[src] = structuredClone(data[src]);
                     forms.draw(data[src], template);
                     template.className = template.className + ' form-loaded';
                     template.dispatchEvent(formLoadEvent);
