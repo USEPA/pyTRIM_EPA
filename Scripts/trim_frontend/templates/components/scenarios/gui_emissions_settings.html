@@ -320,22 +320,19 @@
             });
         }
 
-        function toggle_expand_icon(tr, dir){
-            if ($(tr).find("i.fas").length <= 0) return;
-            if (!dir) {
-                if ($(tr).find("i.fas").attr("class").indexOf("fa-angle-right") > -1) {
-                    $(tr).find("i.fas").attr("class", "fas fa-angle-down")
-                } else {
-                    $(tr).find("i.fas").attr("class", "fas fa-angle-right")
-                }
-            } else {
-                if (dir == "down") {
-                    $(tr).find("i.fas").attr("class", "fas fa-angle-down")
-                } else {
-                    $(tr).find("i.fas").attr("class", "fas fa-angle-right")
-                }
+        function toggle_expand_icon(tr, dir) {
+            const icon = $(tr).find("span.toggle > i.fas").first();
+            if (!icon.length) {
+                return;
             }
 
+            if (dir === "down") {
+                icon.removeClass("fa-angle-right").addClass("fa-angle-down");
+            } else if (dir === "up") {
+                icon.removeClass("fa-angle-down").addClass("fa-angle-right");
+            } else {
+                icon.toggleClass("fa-angle-right fa-angle-down");
+            }
         }
 
         function attach_event_handlers() {
@@ -597,17 +594,14 @@
             let skip_comps = ['Degradation_Reaction_Sink', 'Soil_Advection_Sink', 'Flush_Rate_Sink'];
             comps_added = [];
 
-            var map_html = "<tbody>";
-            let parcels = TRIM.store.currentScenario.parcels;
-            parcels.forEach( function(e,i){
+            let map_html = "<tbody>";
+            let icon_html = "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span>";
+            TRIM.store.currentScenario.parcels.forEach( function(e,i){
                 map_html += `
                 <tr data-depth='0' tabindex='0' class='level0 colps'>
-                    <td data-pcl-name='${e.name}'>${e.name}&nbsp;
-                        <span class='toggle colps'>
-                        <i class='fas fa-angle-down'></i>&nbsp;
-                        </span>
+                    <td colspan="2" data-pcl-name='${e.name}'>
+                        ${e.name}${icon_html}
                     </td>
-                    <td></td>
                     <td></td>
                     <td></td>
                 </tr>`;
@@ -619,10 +613,9 @@
                     map_html += `
                     <tr data-depth='1'tabindex='0' class='level1 colps'>
                         <td data-pcl-name='${e.name}'></td>
-                        <td data-ve-name='${ve}'>${ve}&nbsp;
-                            <span class='toggle colps'>
-                            <i class='fas fa-angle-down'></i>&nbsp;
-                            </span></td>
+                        <td data-ve-name='${ve}'>
+                            ${ve}${icon_html}
+                        </td>
                         <td></td>
                         <td></td>
                     </tr>`;
@@ -640,8 +633,8 @@
                             <td data-pcl-name='${e.name}'></td>
                             <td data-ve-name='${ve}'></td>
                             <td class='comp' data-comp-name='${comp_name}'>${comp_name}</td>
-                            <td class='ems'>
-                                <input class='editableCell' style='width: 50px; display:none'/>
+                            <td class='ems form-inline'>
+                                <input class='editableCell form-control form-control-sm w-75' style='display:none'/>
                                 <label class='editableCell badge badge-light'>0</label>
                             </td>
                         </tr>`;
