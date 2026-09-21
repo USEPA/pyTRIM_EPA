@@ -493,18 +493,6 @@ def get_water_params(pcl, parcel_type):
 
         precipitation_vol_rate_to_sw = 0  # 4.8E6
 
-        wc_external_inflow = get_correct_param("ExternalWaterInflow", sw_pars) or 0
-        external_inflow_param = sw.parameters.get("ExternalWaterInflow")
-        lake_inflow = []
-        if isinstance(external_inflow_param, CustomParameter) and external_inflow_param.formula:
-            lake_inflow = json.loads(external_inflow_param.formula.equation)
-
-        wc_flush_rate = get_correct_param("Flushes", sw_pars)
-        fr_param = sw.parameters.get("Flushes")
-        wc_flush_rate_is_autocalc = False
-        if isinstance(fr_param, CustomParameter) and fr_param.formula:
-            wc_flush_rate_is_autocalc = True if fr_param.formula.equation == '1' else False
-
         try:
             precipitation_vol_rate_to_sw = (
                     precipitation_rate * 365
@@ -518,6 +506,35 @@ def get_water_params(pcl, parcel_type):
             evaporation_vol_rate = None
             print(f'Problem Calculating Water Column Evaporation Volumetric Rate:\n {ex}')
         # evaporation_vol_rate = 3.3E6
+    
+        try:
+            wc_external_inflow = get_correct_param("ExternalWaterInflow", sw_pars) or 0
+            lake_inflow = json.loads(sw_pars.get('ExternalWaterInflow').formula.equation)
+        except:
+            lake_inflow = []
+
+        try:
+            wc_flush_rate = get_correct_param("Flushes", sw_pars)
+            wc_flush_rate_is_autocalc = True if sw_pars.get("Flushes").formula.equation == '1' else False
+        except:
+            wc_flush_rate_is_autocalc = False           
+
+        if wc_flush_rate_is_autocalc:
+            res = (
+                (
+                    total_runoff_vol_rate_to_this_sw
+                    + total_seepage_vol_rate_to_gw
+                    + wc_external_inflow
+                    + precipitation_vol_rate_to_sw
+                    - evaporation_vol_rate
+                )
+                / (pcl.area.magnitude * abs(sw.MeanDepth.magnitude))
+            )
+            res = float(round(res, 5))
+            if is_significantly_different(wc_flush_rate, res):
+                wc_flush_rate = res
+                sw_pars.get("Flushes").value = res
+                ParameterService.commit()
 
         try:
             if wc_flush_rate_is_autocalc:

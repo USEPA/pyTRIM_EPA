@@ -254,7 +254,7 @@
                     let pcl = getParcelByKey('name', $(e.currentTarget).data('parcel'));
                     pcl.surface_water.fr_autocalc_changed = true;
 
-                    let res = calculate_flush_rate(pcl.name);
+                    let res = 1; // placeholder, recalculated on the backend
                     $(this).removeClass("btn-outline-dark").addClass("btn-success");
                     $(this).parent().siblings("label").text(res)
                     $(this).parent().siblings("input").attr("value",res).trigger("blur");
@@ -332,12 +332,7 @@
                         LoadingScreen.hide('external_water_inflow');
                         try {
                             pcl.surface_water= rsp.target.responseJSON;
-                            if (pcl.surface_water.fr_autocalc) {
-                                $(`.auto_calc[data-parcel="${pcl.name}"]`).click();
-                            }
-                            else {
-                                updateLakeProps();
-                            }
+                            updateLakeProps();
                         } catch (err) {
                             console.error(err);
                         }
@@ -540,27 +535,6 @@
                 total_inflow += wc_discharge_vol_rate * Number(inflow.fraction);
             }
             return Number.parseFloat(total_inflow).toExponential(5);
-        }
-
-        function calculate_flush_rate(parcel_name) {
-            let pcls = TRIM.store.currentScenario.parcels;
-            let P = getParcelByKey('name', parcel_name);
-
-            let precip_rate = P.precip_rate * 365;
-            let evapo_rate = P.surface_water.wc_props.evaporation_rate;
-            let watershed_area = P.surface_water.wc_props.connected_watershed_area;
-            let lake_depth = P.surface_water.wc_props.mean_depth;
-            let external_inflow = P.surface_water.wc_props.externalWaterInflow;
-            let area = P.area;
-            let wgt_ave_runoff_frac = pcls.filter(e=>e.runoff_fraction!=null).map(e=>e.runoff_fraction*e.area).reduce((a,e)=>a+e, 0)/
-                pcls.filter(e=>e.runoff_fraction!=null).map(e=>e.area).reduce((a,e)=>a+e, 0)
-            let wgt_ave_seepage_frac = pcls.filter(e=>e.seepage_frac!=null).map(e=>
-                e.seepage_frac*e.area).reduce((a,e)=>a+e, 0)/
-                pcls.filter(e=>e.seepage_frac!=null).map(e=>e.area).reduce((a,e)=>a+e, 0)
-            let res = ((area * precip_rate) + (watershed_area * precip_rate * wgt_ave_runoff_frac) +
-                (watershed_area * precip_rate * wgt_ave_seepage_frac) + (external_inflow) - (area * evapo_rate)) /
-                (area * lake_depth)
-            return Number.parseFloat(res).toExponential(5)
         }
 
         function updateLakeProps() {
