@@ -71,16 +71,18 @@
                                                 </strong>
                                             </small>
                                         </div>
-                                        <table class="compMap" style="border-collapse: collapse" cellpadding="6">
-                                            <thead>
-                                                <tr>
-                                                    <th scope="col">Parcel</th>
-                                                    <th scope="col">Volume Element</th>
-                                                    <th scope="col">Compartment</th>
-                                                    <th scope="col">Emission (g/day)</th>
-                                                </tr>
-                                            </thead>
-                                        </table>
+                                        <div style="overflow-x: auto;">
+                                            <table class="compMap" style="border-collapse: collapse" cellpadding="6">
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="col">Parcel</th>
+                                                        <th scope="col">Volume Element</th>
+                                                        <th scope="col">Compartment</th>
+                                                        <th scope="col">Emission (g/day)</th>
+                                                    </tr>
+                                                </thead>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -625,12 +627,16 @@
         function initialize_compartment_map(spec) {
             let parcels = TRIM.store.currentScenario.parcels;
             var map_html = "<tbody>"
+            let skip_ves = ['Air', 'UpperAir'];
             let skip_comps = ['Degradation_Reaction_Sink', 'Soil_Advection_Sink', 'Flush_Rate_Sink']
             let exclude = spec == "Particulate" ? "VaporSource" : "ParticleSource"
             parcels.forEach( function(e,i){
                 map_html = map_html + "<tr data-depth='0' tabindex='0' class='level0 colps'><td data-pcl-name='" + e.name + "'>" + e.name + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
                 for (ve in e.compartment_map) {
-                    if (ve.indexOf(exclude) == -1) {
+                    if (skip_ves.indexOf(ve) > -1) {
+                        continue;
+                    }
+                    else if (ve.indexOf(exclude) == -1) {
                         map_html = map_html + "<tr data-depth='1'tabindex='0' class='level1 colps'><td data-pcl-name='" + e.name + "'></td><td data-ve-name='" + ve + "'>" + ve + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td></tr>"
                     }
                     for (comp in e.compartment_map[ve]) {

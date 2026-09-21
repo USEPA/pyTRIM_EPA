@@ -44,17 +44,19 @@
                                             </div>
                                         </div>
                                         <button class="comp_reset_all btn btn-danger" id="ic-reset-vals">Reset All to Zero</button>
-                                        <table class="compMap" style="border-collapse: collapse" cellpadding="6">
-                                            <thead>
-                                                <tr>
-                                                    <th scope="col">Parcel</th>
-                                                    <th scope="col">Volume Element</th>
-                                                    <th scope="col">Compartment</th>
-                                                    <th scope="col">Initial Concentration</th>
-                                                    <th scope="col">Unit</th>
-                                                </tr>
-                                            </thead>
-                                        </table>
+                                        <div style="overflow-x: auto;">
+                                            <table class="compMap" style="border-collapse: collapse" cellpadding="6">
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="col">Parcel</th>
+                                                        <th scope="col">Volume Element</th>
+                                                        <th scope="col">Compartment</th>
+                                                        <th scope="col">Initial Concentration</th>
+                                                        <th scope="col">Unit</th>
+                                                    </tr>
+                                                </thead>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -442,11 +444,15 @@
 
         function initialize_compartment_map() {
             var map_html = "<tbody>"
+            let skip_ves = ['Air', 'UpperAir'];
             let exclude = ["WetVaporSource", "DryVaporSource", "WetParticleSource", "DryParticleSource"] // + Sinks
             TRIM.store.currentScenario.parcels.forEach( function(e,i){
                 map_html = map_html + "<tr data-depth='0' tabindex='0' class='level0 colps'><td data-pcl-name='" + e.name + "'>" + e.name + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td><td></td></tr>"
                 for (ve in e.compartment_map) {
-                    if (exclude.indexOf(ve) == -1) {
+                    if (skip_ves.indexOf(ve) > -1) {
+                        continue;
+                    }
+                    else if (exclude.indexOf(ve) == -1) {
                         map_html = map_html + "<tr data-depth='1' tabindex='0' class='level1 colps'><td data-pcl-name='" + e.name + "'></td><td data-ve-name='" + ve + "'>" + ve + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
                     }
                     for (comp in e.compartment_map[ve]) {

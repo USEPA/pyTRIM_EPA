@@ -531,6 +531,7 @@ def get_water_params(pcl, parcel_type):
                 / (pcl.area.magnitude * abs(sw.MeanDepth.magnitude))
             )
             res = float(round(res, 5))
+            res = max(res, 0)
             if is_significantly_different(wc_flush_rate, res):
                 wc_flush_rate = res
                 sw_pars.get("Flushes").value = res
