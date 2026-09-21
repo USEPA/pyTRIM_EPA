@@ -22,6 +22,11 @@ def serialize_parcel(pcl: Parcel):
     except Exception:
         spacing_val = None
 
+    try:
+        pcl.volume_elements.sort(key=lambda ve: ve.name)
+    except:
+        pass
+    
     s = {
         'id': pcl.id,
         'name': pcl.name,

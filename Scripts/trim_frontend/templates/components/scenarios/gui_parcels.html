@@ -1320,8 +1320,6 @@
 
             // AERMOD Receptor UI setup -- start
             $("a#generate_aermod_receptors_btn").click(function () {
-                console.log("do something!");
-
                 LoadingScreen.show('generating_aermod_receptors');
                 TRIM.api.runReceptorGeneration('{{ scenario.id }}', function (success, responseData) {
                     if (success) {

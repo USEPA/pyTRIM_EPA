@@ -158,7 +158,6 @@
             chemicals = null;
             parcels = null;
         }
-        var chem_spec = {}
 
         function renderEmissions() {
             if (!TRIM.store.currentScenario.parcels || !TRIM.store.currentScenario.chemicals) {
@@ -175,17 +174,6 @@
             let fieldset = $('#chemicals-add-btn').closest("fieldset")
             chemicals = TRIM.store.currentScenario.chemicals.map(x => x.name).sort();
             parcels = TRIM.store.currentScenario.parcels;
-            chem_spec = {}
-            parcels.forEach(p =>
-                Object.keys(p.sources).forEach(ch => {
-                    chem_spec[ch] = []
-                    Object.keys(p.sources[ch]).forEach(function (ve) {
-                        Object.keys(p.sources[ch][ve]).forEach(function (co) {
-                            chem_spec[ch].push(co)
-                        })
-                    })
-                })
-            )
 
             // clear existing fields
             fieldset.find('[data-pill-id]').each(function() {

@@ -1350,6 +1350,6 @@ def geojson_to_aermod_receptors(geojson_contents):
     aermod_format = ""
     for (x, y) in receptors:
         aermod_format += f"RE DISCCART {x:.2f} {y:.2f} 0.0\n"
-    aermod_format += "END\n"
+    # aermod_format += "END\n"
 
     return aermod_format
