@@ -253,11 +253,11 @@
                     e.preventDefault()
                     let pcl = getParcelByKey('name', $(e.currentTarget).data('parcel'));
                     pcl.surface_water.fr_autocalc_changed = true;
-                    res = calculate_flush_rate(pcl.name);
 
+                    let res = calculate_flush_rate(pcl.name);
                     $(this).removeClass("btn-outline-dark").addClass("btn-success");
-                    $(this).parent().siblings("label").text(Number(res))
-                    $(this).parent().siblings("input").attr("value",Number(res)).trigger("blur");
+                    $(this).parent().siblings("label").text(res)
+                    $(this).parent().siblings("input").attr("value",res).trigger("blur");
                 });
 
                 // Calculate External Water Inflow from Other Water Bodies
@@ -329,13 +329,18 @@
                     $(this).attr("data-dismiss","modal");  
                     LoadingScreen.show('external_water_inflow');
                     TRIM.api.updateParcel(TRIM.store.currentScenario.id, parcel_info).on('load', (rsp)=>{
-                        if (rsp.target.status === 200) {
-                            pcl.surface_water= rsp.target.responseJSON;
-                            updateLakeProps();
-                        } else {
-                            alert("Error while updating parcel");
-                        }
                         LoadingScreen.hide('external_water_inflow');
+                        try {
+                            pcl.surface_water= rsp.target.responseJSON;
+                            if (pcl.surface_water.fr_autocalc) {
+                                $(`.auto_calc[data-parcel="${pcl.name}"]`).click();
+                            }
+                            else {
+                                updateLakeProps();
+                            }
+                        } catch (err) {
+                            console.error(err);
+                        }
                     });                                      
                 });
             }
