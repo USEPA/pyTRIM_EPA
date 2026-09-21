@@ -3,11 +3,10 @@
     data-form-src="scenario_property_summary_form"
 >
     <section class="container px-0">
-        <div class="row mb-1">
+        <div class="row mb-3">
             <div class="col-sm">
-                <h3> General Properties </h3>
-                <button class="scenario_show_all comp_show_all btn btn-warning">Show All</button>
-                <button class="scenario_hide_all comp_hide_all btn btn-warning">Hide All</button>
+                <h3 class="m-0"> General Properties </h3>
+                <button hidden class="scenario_hide_all comp_hide_all btn btn-warning">Hide All</button>
                 <div class="border-right border-dark" style="overflow-x: auto;">
                     <table class="scenarioMap" style="border-collapse: collapse" cellpadding="6">
                         <thead>
@@ -22,7 +21,7 @@
             </div>
         </div>
 
-        <div class="row mb-1">
+        <div class="row mb-3">
             <div class="col-sm">
                 <h3> Chemical Properties </h3>
                 <button class="chem_show_all btn btn-warning">Show All</button>
@@ -44,14 +43,15 @@
             </div>
         </div>
 
-        <div class="row mb-1">
+        <div class="row mb-3">
             <div class="col-sm">
                 <h3> Environment Properties </h3>
                 <button class="comp_show_all btn btn-warning">Show All</button>
                 <button class="comp_hide_all btn btn-warning">Hide All</button>
                 <button class="comp_show_nz btn btn-outline-success">Show Non-Zero</button>
                 <div class="dropdown d-inline">
-                    <button class="btn_show_comp btn btn-outline-success dropdown-toggle" type="button" data-toggle="dropdown">
+                    <button class="btn_show_comp btn btn-outline-success dropdown-toggle btn-character-limit" 
+                            id="show-env-props" type="button" data-toggle="dropdown">
                         Show Property
                     </button>
                     <div class="dropdown-menu">
@@ -77,6 +77,12 @@
 <style>
     .ems {
         background-color: white !important;
+    }
+    .btn-character-limit {
+        max-width: 250px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 </style>
 <script>
@@ -144,8 +150,8 @@
             let env_map_html = initialize_project_map("env")
             $(env_map_html).insertAfter($($("#property-summary-gui").find("table.compMap")[0]).find("thead"))
 
-            let dd_menu = $($("#property-summary-gui").find("table.compMap")[0]).prev("div.dropdown").find("div.dropdown-menu")
-            populate_comp_dd(dd_menu);
+            let dd_menu = $("#property-summary-gui #show-env-props").siblings("div.dropdown-menu");
+            populate_props_dd(dd_menu);
 
             $('tr.colps').on('click', function() {
                 toggle_expand_icon(this, null)
@@ -175,12 +181,6 @@
                 }
             });
 
-            $('button.scenario_show_all').on('click', function(e) {
-                let this_table =$(this).closest("div[role=tabpanel]").find("table.scenarioMap")
-                $(this_table).find("tr.colps").show();
-                $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "down"))
-                $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "down"))
-            });
             $('button.chem_show_all').on('click', function(e) {
                 e.preventDefault()
                 let this_table =$(this).closest("div[role=tabpanel]").find("table.chemMap")
@@ -194,7 +194,7 @@
                 $(this_table).find("tr.colps").show();
                 $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "down"))
                 $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "down"))
-                $(this).closest("div").find("button.btn_show_comp").text("Show Compartment")
+                $(this).closest("div").find("button.btn_show_comp").text("Show Property")
             });
 
             $('button.scenario_hide_all').on('click', function(e) {
@@ -216,7 +216,7 @@
                 $(this_table).find("tr.colps:not([data-depth='0'])").hide();
                 $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "up"))
                 $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "up"))
-                $(this).closest("div").find("button.btn_show_comp").text("Show Compartment")
+                $(this).closest("div").find("button.btn_show_comp").text("Show Property")
             });
 
             $('button.comp_show_nz').on('click', function(e) {
@@ -226,7 +226,7 @@
                 let non_zeros = $(this_table).find("tr.colps.level2").filter((i,e) => $(e).find("td.ems").text() > 0);
                 $(non_zeros).show()
                 $(non_zeros).prev("tr.level1").show()
-                $(this).closest("div").find("button.btn_show_comp").text("Show Compartment")
+                $(this).closest("div").find("button.btn_show_comp").text("Show Property")
             });
             $('button.chem_show_nz').on('click', function(e) {
                 e.preventDefault()
@@ -328,8 +328,12 @@
             return map_html
         }
 
-        // FIXME no daytime_indicator
+        var env_props_added = [];
+        var chem_props_added = [];
         function initialize_project_map(type) {
+            env_props_added = [];
+            chem_props_added = [];
+
             let scenario = TRIM.store.currentScenario
             var map_html = "<tbody>"
             let scenario_map = {
@@ -496,6 +500,13 @@
                             "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
 
                         for (const [property_key, property_value] of Object.entries(cat_value)) {
+                            if (type == "env") {
+                                env_props_added.push(property_key);
+                            }
+                            else {
+                                chem_props_added.push(property_key);
+                            }
+
                             let prop_value = property_value.value;
                             if (prop_value?.length > 18) { // turn into a link with a popup
                                 let title = property_key;
@@ -523,24 +534,15 @@
             return map_html        
         }
 
-        function populate_comp_dd(dd_menu){
-            let comp_array = []
-            let parcels = TRIM.store.currentScenario.parcels;
-            parcels.forEach( function(e,i){
-                for (let ve in e.compartment_map) {
-                    for (let comp in e.compartment_map[ve]) {
-                        comp_array.push(e.compartment_map[ve][comp])
-                    }
-                }
-            })
-            let uniq_comp = [... new Set(comp_array)]
+        function populate_props_dd(dd_menu){
+            let uniq_comp = [... new Set(env_props_added)]
             uniq_comp.sort().forEach(function(e) {
                 let menu_item = "<a href='#' class='dropdown-item comp-item'>" + e + "</a>"
                 $(menu_item).appendTo(dd_menu)
             })
             $("a.dropdown-item.comp-item").on("click",function (e){
                 e.preventDefault()
-                let this_table = $(this).closest("div.dropdown").next("table.compMap")
+                let this_table = $('#property-summary-gui table.compMap');
                 let this_dd_btn = $(this).closest("div.dropdown").find("button.btn_show_comp")
                 $('button.comp_hide_all').trigger('click');
                 let only_comps = $(this_table).find("tr.colps.level2").filter((i,tr) => $(tr).find("td.comp").text() == $(this).text());
