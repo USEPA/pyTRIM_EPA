@@ -206,7 +206,7 @@
     </div>
 
     <section id="mirc-input-fields">
-        <div id="air-fields" class="form-row" style="display: none;">
+        <div id="air-fields" class="form-row">
             <div class="col-sm">
                 {{ render_form_group(
                     form.trim_air_compartment,
@@ -558,6 +558,17 @@ onDomLoad(function() {
         });
 
         // Handle change to fish concentration calculation method
+        // FIXME -- make better!
+        let help_fishfactor = {
+            "tl35": {
+                "direct": "Select the compartment to retrieve trophic level 3.5 fish concentrations from. While there is no default compartment, benthic carnivore may be a reasonable one. The concentration to the right will auto-populate based on your compartment selection, but you may change it if you wish. Also enter the fraction of your simulated population’s fish consumption which comes from trophic level 3.5 fish. This fraction, plus the fraction for trophic level 4 fish, must sum to 1.0.",
+                "bafs": "Select the compartment to estimate trophic level 3.5 fish concentrations for. While there is no default compartment, benthic carnivore may be a reasonable one. Also enter the fraction of your simulated population’s fish consumption which comes from trophic level 3.5 fish. This fraction, plus the fraction for trophic level 4 fish, must sum to 1.0."
+            },
+            "tl4": {
+                "direct": "Select the compartment to retrieve trophic level 4 fish concentrations from. While there is no default compartment, water column carnivore may be a reasonable one. The concentration to the right will auto-populate based on your compartment selection, but you may change it if you wish. Also enter the fraction of your simulated population’s fish consumption which comes from trophic level 4 fish. This fraction, plus the fraction for trophic level 3.5 fish, must sum to 1.0.",
+                "bafs": "Select the compartment to estimate trophic level 4 fish concentrations for. While there is no default compartment, water column carnivore may be a reasonable one. Also enter the fraction of your simulated population’s fish consumption which comes from trophic level 4 fish. This fraction, plus the fraction for trophic level 3.5 fish, must sum to 1.0."
+            }
+        };
         form.on('change', '[type="radio"]', function(e) {
             if (this.name.indexOf('fish_factor') < 0) {
                 return;
@@ -570,10 +581,14 @@ onDomLoad(function() {
             if (val == 'baf') {
                 form.find('.tl-concentrations').hide();
                 form.find('.baf-concentrations').show();
+                $('#help-trim_fish_tl35_compartment .form-text').text(help_fishfactor.tl35.bafs);
+                $('#help-trim_fish_tl4_compartment .form-text').text(help_fishfactor.tl4.bafs);
             }
             else {
                 form.find('.baf-concentrations').hide();
                 form.find('.tl-concentrations').show();
+                $('#help-trim_fish_tl35_compartment .form-text').text(help_fishfactor.tl35.direct);
+                $('#help-trim_fish_tl4_compartment .form-text').text(help_fishfactor.tl4.direct);
             }
         });
         form.find('[type="radio"]').change();

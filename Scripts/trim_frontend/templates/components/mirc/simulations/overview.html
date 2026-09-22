@@ -331,9 +331,6 @@ onDomLoad(function() {
                     .map(x => x.value);
             }
 
-            const airFields = document.getElementById('air-fields');
-            airFields.style.display = 'none';
-
             const data = TRIM.store.mirc_data;
             if (!data || !data.chemicals || $.isEmptyObject(data.chemicals)) {
                 return;
@@ -354,12 +351,6 @@ onDomLoad(function() {
             };
 
             const chem = data.chemicals[getVal('chemical')];
-
-            const useAermod = data.uses_aermod;
-            if (useAermod) {
-                airFields.style.display = '';
-            }
-
             const dt = getVal('trim_timestamp');
 
             const setField = (name, val, comp, conversion) => {
@@ -459,22 +450,20 @@ onDomLoad(function() {
                 return c;
             };
 
+            const useAermod = data.uses_aermod;
+            const airSrc = getVal('trim_air_compartment');
+            const airProps = getCompartment(airSrc).properties;
             if (useAermod) {
-                const airSrc = getVal('trim_air_compartment');
-                const airProps = getCompartment(airSrc).properties;
                 setField('Ca', airProps[chem].C_aermod?.value, airSrc);
                 setField('Fv', airProps[chem].Fv, airSrc);
-                setField(
-                    'rho_a', airProps[chem].rho_a.value, airSrc
-                );
             }
             else {
                 // Zero-out air props by default
                 setField('Ca', 0, 'default');
                 setField('Fv', 0, 'default');
-                // Default for rho is 1 because it is used as the denominator of an equation
-                setField('rho_a', 1, 'default');
             }
+            // This is AirDensity from TRIM
+            setField('rho_a', airProps[chem].rho_a.value, airSrc);
 
             const waterSrc = getVal('trim_water_compartment');
             const water = getCompartment(waterSrc);

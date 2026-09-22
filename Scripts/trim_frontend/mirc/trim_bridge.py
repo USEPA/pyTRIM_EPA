@@ -62,8 +62,15 @@ def compile_mirc_parcel_data(scen, chems, conc, timestamps, logger):
                     chem = chems[chem_name]
 
                     try:
-                        wet_dep_rate = parcel.get_compartment(media='Source|Wet_Particle').surfaceDepositionRate(chemical=chem)
-                        dry_dep_rate = parcel.get_compartment(media='Source|Dry_Particle').surfaceDepositionRate(chemical=chem)
+                        wet_dep_rate = parcel.get_compartment(media='Source|Wet_Particle')
+                        if isinstance(wet_dep_rate, list):
+                            wet_dep_rate = wet_dep_rate[0]
+                        wet_dep_rate = wet_dep_rate.surfaceDepositionRate(chemical=chem)
+
+                        dry_dep_rate = parcel.get_compartment(media='Source|Dry_Particle')
+                        if isinstance(dry_dep_rate, list):
+                            dry_dep_rate = dry_dep_rate[0]
+                        dry_dep_rate = dry_dep_rate.surfaceDepositionRate(chemical=chem)
 
                         comp_drwp = wet_dep_rate.to('g/year') / compartment.area
                         comp_drdp = dry_dep_rate.to('g/year') / compartment.area

@@ -6,7 +6,8 @@
             "id": "description",
             "label": "Description",
             "data_type": "string",
-            "widget": "textarea"
+            "widget": "textarea",
+            "help": "Enter a description for your simulation."
         },
         {
             "id": "mirc_scenario",
@@ -20,7 +21,8 @@
                 "label": "name"
             },
             "required": true,
-            "default": 2
+            "default": 2,
+            "help": "Select a built-in exposure profile or an existing custom profile. This provides parameter values for ingestion, body weight, cooking and preparation effects, chemical uptake factors, cancer slope factors and reference doses, and so on. To create or edit a profile, select the “Create or Edit Exposure Profiles” link below."
         },
         {
             "id": "chemical",
@@ -33,7 +35,8 @@
                 "value": "id",
                 "label": "name"
             },
-            "required": true
+            "required": true,
+            "help": "Select one of the chemicals which were in the transport simulation."
         },
         {
             "id": "ingestion_percentile_preset",
@@ -66,7 +69,8 @@
                     "label": "Custom"
                 }
             ],
-            "default": "farmer_fisher"
+            "default": "farmer_fisher",
+            "help": "Select an ingestion scenario (defined as the type of food consumer) from the available options. The percentiles of each product shown beneath the selection menu will auto-populate based on your selection (and will not be editable), unless you select “Custom” which will allow you to set each product percentile. These percentiles are defined in your exposure profile."
         },
         {
             "id": "trim_timestamp",
@@ -75,7 +79,7 @@
             "widget": "select",
             "choices": [],
             "required": true,
-            "help": "TRIM outputs modeled data at various simulation timesteps. Select the timestep of data you want to base this simulation on. Typically this is December 31 of the final full simulation year."
+            "help": "TRIM outputs modeled data at various simulation timesteps. Select the timestep of data you want to base this simulation on. Typically this is the end of the simulation."
         },
 
         {
@@ -85,11 +89,11 @@
             "widget": "select",
             "class": "air-compartment-field",
             "choices": [],
-            "help": "Select the compartment to retrieve air concentration results from. This is typically in the farm or garden parcel. This is used for vapor-phase chemical uptake into fruits, vegetables, and livestock feed."
+            "help": "Select the compartment to retrieve air concentration results from. This is typically in the farm or garden parcel. This is used for vapor-phase chemical uptake into exposed fruits and vegetables and onto livestock forage and silage. This will not be used if the beef, dairy, eggs, pork, poultry, exposed vegetable, and exposed fruit ingestion rates all are set to “None.” If you chose to run TRIM with AERMOD outputs, then the concentration to the right will auto-populate with the parcel average air concentration from the AERMOD file you uploaded to the Emissions page, specifically for the vapor phase of the chemical. If you wish to use a different value, or if you did not choose to run TRIM with AERMOD vapor-phase outputs, you may enter a value there. Values for fraction of airborne chemical in vapor phase and density of air also will be pre-populated and you may change those values if you wish. However, the pre-populated value for density of air comes from your entry for the selected compartment’s parcel on the Abiotic Media page and you likely want to keep it the same."
         },
         {
             "id": "Ca",
-            "label": "AERMOD Average Concentration in Air (&mu;g/m<sup>3</sup>)",
+            "label": "Average Vapor-phase Concentration in Air (&mu;g/m<sup>3</sup>)",
             "data_type": "float",
             "min": 0,
             "step": "any"
@@ -153,7 +157,7 @@
             "widget": "select",
             "class": "water-compartment-field",
             "choices": [],
-            "help": "Select the compartment to retrieve surface water concentrations from for drinking water exposure."
+            "help": "Select the compartment to retrieve surface water concentrations from for drinking water exposure. This will not be used if the water ingestion rate is set to “None.” The concentration to the right will auto-populate based on your compartment selection. If you wish to use a different value, you may enter it there."
         },
         {
             "id": "C_water",
@@ -184,7 +188,7 @@
             "widget": "select",
             "class": "surf-soil-compartment-field",
             "choices": [],
-            "help": "Select the compartment to retrieve surface soil concentrations from for incidental human soil ingestion. This is typically in a farm or garden parcel."
+            "help": "Select the compartment to retrieve surface soil concentrations from for incidental human soil ingestion. This is typically in a farm or garden parcel. This will not be used if the soil ingestion rate is set to “None.” The concentration to the right will auto-populate based on your compartment selection. If you wish to use a different value, you may enter it there."
         },
         {
             "id": "C_soil",
@@ -215,7 +219,7 @@
             "widget": "select",
             "class": "root-soil-compartment-field",
             "choices": [],
-            "help": "Select the compartment to retrieve soil concentrations from for root uptake into fruits and vegetables (e.g., from the tilled surface soil compartment of a farm or garden)."
+            "help": "Select the compartment to retrieve soil concentrations from for root uptake into fruits and vegetables (e.g., from the tilled surface soil compartment of a farm or garden). This will not be used if all the fruit and vegetable ingestion rates are set to “None.” The concentration to the right will auto-populate based on your compartment selection. If you wish to use a different value, you may enter it there. Kd is the ratio of concentration absorbed to solids vs dissolved at root-zone depth for garden produce. Kd is populated with a default chemical-specific value, but you may change the value if you wish."
         },
         {
             "id": "C_root_veg",
@@ -243,8 +247,7 @@
             "label": "Kd for Garden Produce (L/kg)",
             "data_type": "float",
             "min": 0,
-            "step": "any",
-            "help": "Ratio of concentration absorbed to solids vs dissolved at root-zone depth for garden produce"
+            "step": "any"
         },
         {
             "id": "Kd_unit",
@@ -268,7 +271,7 @@
             "widget": "select",
             "class": "surf-soil-compartment-field",
             "choices": [],
-            "help": "Select the compartment to retrieve surface soil concentrations from for incidental livestock soil ingestion. This is typically in a farm parcel."
+            "help": "Select the compartment to retrieve surface soil concentrations from for incidental livestock soil ingestion. This is typically in a farm parcel. This will not be used if the beef, dairy, eggs, pork, and poultry ingestion rates all are set to “None.” The concentration to the right will auto-populate based on your compartment selection. If you wish to use a different value, you may enter it there."
         },
         {
             "id": "Cs_s",
@@ -299,7 +302,7 @@
             "widget": "select",
             "class": "root-soil-compartment-field",
             "choices": [],
-            "help": "Select the compartment to retrieve soil concentrations from for root uptake into animal feed (e.g., from the tilled surface soil compartment of a farm or garden)."
+            "help": "Select the compartment to retrieve soil concentrations from for root uptake into animal feed (e.g., from the tilled surface soil compartment of a farm or garden). This will not be used if the beef, dairy, eggs, pork, and poultry ingestion rates all are set to “None.” The concentration to the right will auto-populate based on your compartment selection. If you wish to use a different value, you may enter it there. Kd is the ratio of concentration absorbed to solids vs dissolved at root-zone depth for livestock feed. Kd is populated with a default chemical-specific value, but you may change the value if you wish."
         },
         {
             "id": "Cs_root_zone",
@@ -327,8 +330,7 @@
             "label": "Kd for Livestock Feed (L/kg)",
             "data_type": "float",
             "min": 0,
-            "step": "any",
-            "help": "Ratio of concentration absorbed to solids vs dissolved at root-zone depth for livestock feed"
+            "step": "any"
         },
         {
             "id": "Kd_feed_unit",
@@ -352,7 +354,7 @@
             "widget": "select",
             "class": "dep-compartment-field",
             "choices": [],
-            "help": "Select the compartment to retrieve dry deposition results from. This is typically in the farm or garden parcel. This is used for dry particle deposition onto fruits, vegetables, and livestock feed. If you chose to run TRIM with AERMOD, then the deposition to this compartment will be from redeposition following chemical resuspension (which is after initial deposition), and it will be added to the AERMOD deposition results. If you did not choose to run TRIM with AERMOD, then the deposition to this compartment will be entirely from TRIM air transfer and deposition/resuspension/redeposition calculations."
+            "help": "Select the compartment to retrieve dry deposition results from. This is typically in the farm or garden parcel. This is used for dry particle deposition onto exposed fruits and vegetables and onto livestock forage and silage. This will not be used if the beef, dairy, eggs, pork, poultry, exposed vegetable, and exposed fruit ingestion rates all are set to “None.” If you chose to run TRIM with AERMOD outputs, then the deposition to the right will auto-populate with the parcel total dry deposition from the AERMOD file you uploaded to the Emissions page, specifically for the particle phase of the chemical. If you wish to use a different value, or if you did not choose to run TRIM with AERMOD particle-phase outputs, you may enter a value there."
         },
         {
             "id": "Drdp",
@@ -383,7 +385,7 @@
             "widget": "select",
             "class": "dep-compartment-field",
             "choices": [],
-            "help": "Select the compartment to retrieve wet deposition results from. This is typically in the farm or garden parcel. This is used for wet particle deposition onto fruits, vegetables, and livestock feed. If you chose to run TRIM with AERMOD, then the deposition to this compartment will be from redeposition following chemical resuspension (which is after initial deposition), and it will be added to the AERMOD deposition results. If you did not choose to run TRIM with AERMOD, then the deposition to this compartment will be entirely from TRIM air transfer and deposition/resuspension/redeposition calculations."
+            "help": "Select the compartment to retrieve wet deposition results from. This is typically in the farm or garden parcel. This is used for wet particle deposition onto exposed fruits and vegetables and onto livestock forage and silage. This will not be used if the beef, dairy, eggs, pork, poultry, exposed vegetable, and exposed fruit ingestion rates all are set to “None.” If you chose to run TRIM with AERMOD outputs, then the deposition to the right will auto-populate with the parcel total wet deposition from the AERMOD file you uploaded to the Emissions page, specifically for the particle phase of the chemical. If you wish to use a different value, or if you did not choose to run TRIM with AERMOD particle-phase outputs, you may enter a value there."
         },
         {
             "id": "Drwp",
@@ -409,7 +411,7 @@
 
         {
             "id": "fish_factor",
-            "label": "",
+            "label": "&#8203;",
             "data_type": "string",
             "widget": "radio",
             "choices": [
@@ -423,7 +425,8 @@
                 }
             ],
             "required": true,
-            "default": "direct"
+            "default": "direct",
+            "help": "Select whether to supply chemical concentrations in fish compartments (from the transport model) or to use bioaccumulation factors to estimate them using chemical concentrations in surface water and sediment (from the transport model). This will not be used if the fish ingestion rate is set to “None.”"
         },
 
         {
@@ -433,7 +436,8 @@
             "widget": "select",
             "class": "fish-compartment-field",
             "choices": [],
-            "help": "Select the compartment for Trophic Level 3.5 fish. If you calculate fish concentrations directly, this will be used to retrieve concentrations."
+            "help": "Select the compartment to retrieve trophic level 3.5 fish concentrations from. While there is no default compartment, benthic carnivore may be a reasonable one. The concentration to the right will auto-populate based on your compartment selection, but you may change it if you wish. Also enter the fraction of your simulated population’s fish consumption which comes from trophic level 3.5 fish. This fraction, plus the fraction for trophic level 4 fish, must sum to 1.0.",
+            "help_bafs": "Select the compartment to estimate trophic level 3.5 fish concentrations for. While there is no default compartment, benthic carnivore may be a reasonable one. Also enter the fraction of your simulated population’s fish consumption which comes from trophic level 3.5 fish. This fraction, plus the fraction for trophic level 4 fish, must sum to 1.0."
         },
         {
             "id": "f_tl35",
@@ -442,8 +446,7 @@
             "min": 0,
             "max": 1,
             "step": 0.01,
-            "default": 0.5,
-            "help": "Enter the fraction of a person’s total fish ingestion that are Trophic Level 3.5 fish. The default of 0.5 is professional judgment. This fraction, and the fraction for Trophic Level 4 fish, must sum to 1.0."
+            "default": 0.5
         },
         {
             "id": "f_tl35_src",
@@ -482,7 +485,8 @@
             "widget": "select",
             "class": "fish-compartment-field",
             "choices": [],
-            "help": "Select the compartment for Trophic Level 4 fish.  If you calculate fish concentrations directly, this will be used to retrieve concentrations."
+            "help": "Select the compartment to retrieve trophic level 4 fish concentrations from. While there is no default compartment, water column carnivore may be a reasonable one. The concentration to the right will auto-populate based on your compartment selection, but you may change it if you wish. Also enter the fraction of your simulated population’s fish consumption which comes from trophic level 4 fish. This fraction, plus the fraction for trophic level 3.5 fish, must sum to 1.0.",
+            "help_bafs": "Select the compartment to estimate trophic level 4 fish concentrations for. While there is no default compartment, water column carnivore may be a reasonable one. Also enter the fraction of your simulated population’s fish consumption which comes from trophic level 4 fish. This fraction, plus the fraction for trophic level 3.5 fish, must sum to 1.0."
         },
         {
             "id": "f_tl4",
@@ -491,8 +495,7 @@
             "min": 0,
             "max": 1,
             "step": 0.01,
-            "default": 0.5,
-            "help": "Enter the fraction of a person’s total fish ingestion that are Trophic Level 4 fish, which are assumed to be water column carnivores. The default of 0.5 is professional judgment. This fraction, and the fraction for Trophic Level 3.5 fish, must sum to 1.0."
+            "default": 0.5
         },
         {
             "id": "f_tl4_src",
@@ -531,7 +534,7 @@
             "widget": "select",
             "class": "sed-compartment-field",
             "choices": [],
-            "help": "Select the compartment to retrieve sediment concentrations from. This is will be ignored if you calculate fish concentrations directly."
+            "help": "Select the compartment to retrieve sediment concentrations from. The concentration to the right will auto-populate based on your compartment selection, but you may change it if you wish."
         },
         {
             "id": "C_sed",
@@ -562,7 +565,7 @@
             "widget": "select",
             "class": "water-compartment-field",
             "choices": [],
-            "help": "Select the compartment to retrieve surface-water concentrations from. This is will be ignored if you calculate fish concentrations directly."
+            "help": "Select the compartment to retrieve surface water concentrations from. The concentration to the right will auto-populate based on your compartment selection, but you may change it if you wish. The value for fraction of total chemical mass that is dissolved in liquid phase also will be pre-populated and you may change it if you wish."
         },
         {
             "id": "C_surf_water",
