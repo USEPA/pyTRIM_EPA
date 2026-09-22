@@ -73,9 +73,10 @@ def compile_mirc_parcel_data(scen, chems, conc, timestamps, logger):
 
                     # constants
                     if "air" in c["name"].lower():
+                        air_density = compartment.AirDensity.to('g/m^3')               
                         props["rho_a"] = {
-                            "value": compartment.rho.magnitude,
-                            "unit": str(compartment.rho.units),  # "g/cm^3"
+                            "value": round(air_density.magnitude, 6),
+                            "unit": str(air_density.units),  # "g/m^3"
                         }
                         try:
                             aermod_Ca = compartment.aermodAirConcentration(chemical=chem)
@@ -87,7 +88,7 @@ def compile_mirc_parcel_data(scen, chems, conc, timestamps, logger):
                                 uses_aermod = True
                         except (KeyError, AttributeError):
                             props["C_aermod"] = {
-                                "value": None,
+                                "value": 0,
                                 "unit": "ug/m^3"
                             }
 

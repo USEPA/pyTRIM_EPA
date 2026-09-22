@@ -1,4 +1,5 @@
 from typing import IO
+import numpy as np
 from ..schema.entities.chemicals import Chemical
 from ..schema.entities.environment import Parcel
 from ..schema.utils.caching import CacheManager
@@ -76,7 +77,7 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
     from shapely.ops import nearest_points
     from trim_core.aermod import AermodReader
     from trim_core.coordinates import CoordinateMapper
-    from trim_frontend.parcels.utils import handle_parcel_update
+    from trim_frontend.parcels.utils import update_chemical_formula
 
     try:
         df = AermodReader(filestream).as_dataframe()
@@ -163,7 +164,7 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
         for p in parcels.values():
             if p.contains_point(x, y):
                 return p.id
-        return None
+        return np.nan
 
     def get_compartment(pcl_id, media):
         compartment = parcels[pcl_id].get_compartment(
@@ -197,6 +198,7 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
         df_aermod = df_aermod.dropna(
             subset=['parcel_id']
         ).reset_index(drop=True)
+        df_aermod['parcel_id'] = df_aermod['parcel_id'].astype(int)
         # add parcel areas (m^2)
         df_aermod['parcel_area'] = df_aermod.parcel_id.apply(
             lambda p_id: parcels[p_id].area.magnitude
@@ -307,7 +309,7 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
         raise Exception(f"Error parsing aermod res_json :: {e}")
 
     # print('>>>>>>>>>> Result JSON:')
-    # print(aermod_results)
+    # print(aermod_results.keys())
 
     def update_aermod_value(parcel: Parcel, target_media: str, target_param: str, aermod_val: float):
         compartment = parcel.get_compartment(
@@ -319,27 +321,7 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
         if isinstance(compartment, list):
             compartment = compartment[0]
 
-        param = compartment.parameters.get_custom(target_param)
-        # print('\t\t->', param)
-
-        if not param:
-            compartment.parameters.add(
-                target_param, formula=f'{aermod_val} if chemical.id == {for_chemical.id} else 0',
-                unit=AERMOD_UNITS[target_param]
-            )
-        elif compartment.volume_element.name in ['DryVaporSource', 'WetVaporSource', 'DryParticleSource', 'WetParticleSource']:
-
-            handle_parcel_update(
-                parcel,
-                {
-                    "chemical_name": for_chemical.name,
-                    "compartment_name": compartment.name,
-                    "emission_value": f"{aermod_val}",
-                    "field": "emission",
-                    "id": parcel.id,
-                    "ve_name": compartment.volume_element.name,
-                },
-            )
+        update_chemical_formula(for_chemical, compartment, target_param, aermod_val, AERMOD_UNITS[target_param])
 
     try:
         chem_spec = metadata.get('chemical_species') or 'Particle'
@@ -356,10 +338,11 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
                 parcel, f'Source|Wet_{chem_spec}', 'surfaceDepositionRate',
                 vals['Wet_Deposition_Avg']
             )
-            update_aermod_value(
-                parcel, 'Air', 'aermodAirConcentration',
-                vals['Concentration_Avg']
-            )
+            if chem_spec == 'Vapor':
+                update_aermod_value(
+                    parcel, 'Air', 'aermodAirConcentration',
+                    vals['Concentration_Avg']
+                )
     except Exception as e:
         raise Exception(f"Error parsing aermod formulas :: {e}")
 

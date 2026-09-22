@@ -430,43 +430,19 @@ def handle_scenario_update(s, scenario_data):
 
 def reset_emissions_and_concentrations(s, chem, ic_reset=False):
     # Just reset to 0
-    from trim_frontend.parcels.utils import handle_parcel_update
+    from trim_frontend.parcels.utils import update_chemical_formula
+    params = ['aermodAirConcentration', 'surfaceDepositionRate', 'initialConcentration']
     for comp in s.compartments:
-        pcl = comp.volume_element.parcel
-        src_param = comp.parameters.get('surfaceDepositionRate')
-        ic_param = comp.parameters.get('initialConcentration')
+        for param_name in params:
+            if ic_reset and param_name != 'initialConcentration':
+                continue
 
-        if (
-            isinstance(src_param, CustomParameter)
-            and f"chemical.id == {str(chem.id)}" in src_param.formula.equation
-            and not ic_reset
-        ):
-            handle_parcel_update(
-                pcl,
-                {
-                    "chemical_name": chem.name,
-                    "compartment_name": comp.name,
-                    "emission_value": "0",
-                    "field": "emission",
-                    "id": pcl.id,
-                    "ve_name": comp.volume_element.name,
-                },
-            )
-        if (
-            isinstance(ic_param, CustomParameter)
-            and f"chemical.id == {str(chem.id)}" in ic_param.formula.equation
-        ):
-            handle_parcel_update(
-                pcl,
-                {
-                    "chemical_name": chem.name,
-                    "compartment_name": comp.name,
-                    "initial_concentration_value": "0",
-                    "field": "initial concentration",
-                    "id": pcl.id,
-                    "ve_name": comp.volume_element.name,
-                },
-            )
+            param = comp.parameters.get(param_name)
+            if (
+                isinstance(param, CustomParameter)
+                and f"chemical.id == {str(chem.id)}" in param.formula.equation
+            ):
+                update_chemical_formula(chem, comp, param_name, 0)
 
 
 def update_dynamic_params(scen, skip_existing=False):

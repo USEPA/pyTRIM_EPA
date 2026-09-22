@@ -536,7 +536,11 @@
                 try {
                     let src_data = JSON.parse(this.responseText);
                     let this_spec = species.val();
-                    parcels.forEach(function(p, i) {
+                    parcels.forEach(function(p, i) {  
+                        if (!src_data.aermod_results[p.id]) {
+                            console.log(`No data for ${p.name}, skipping...`);
+                            return;
+                        }                    
                         let dryval = src_data.aermod_results[p.id]['Dry_Deposition_Avg']
                         let wetval = src_data.aermod_results[p.id]['Wet_Deposition_Avg']
                         p.sources[this_chem][`Dry${this_spec}Source`][`Dry${this_spec}Source`] = dryval
