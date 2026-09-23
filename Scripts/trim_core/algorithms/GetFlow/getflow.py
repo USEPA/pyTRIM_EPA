@@ -6,11 +6,18 @@ import requests
 import os
 import numpy as np
 import pandas as pd
+from datetime import datetime as dt
 from qgis import processing
 from qgis.core import *
 from shapely.geometry import shape
 from Scripts.trim_frontend.external_API.helpers import convert_to_geojson
 from trim_db.services import *
+
+
+# Output safe for viewing on the frontend!
+def loggy_safe(s):
+    msg = f"[_$]: {s}"
+    print(msg)
 
 TEMP_PARCEL_NAME_COL = 'title' # actual TRIM parcels have a "title", not a "name"!
 
@@ -56,7 +63,7 @@ def download_elevation_data(bbox, output_path="elevation.tif"):
         'outputFormat': 'JSON'
     }
     
-    print(f"Requesting elevation data for bbox: {params['bbox']}")
+    loggy_safe(f"Requesting elevation data for bbox: {params['bbox']}")
     
     # Make the API request
     response = requests.get(tnm_api_url, params=params)
@@ -74,7 +81,7 @@ def download_elevation_data(bbox, output_path="elevation.tif"):
     download_url = data['items'][0]['downloadURL']
     
     # Download the elevation data
-    print(f"Downloading elevation data from {download_url}")
+    loggy_safe(f"Downloading elevation data from {download_url}")
     response = requests.get(download_url, stream=True)
     
     if response.status_code != 200:
@@ -103,11 +110,11 @@ def download_elevation_data(bbox, output_path="elevation.tif"):
                     difference = f"{now - then}ns"
                 else:
                     difference = "initial"
-                print(f"[{difference}] streaming response iteration {looper}; {output_path} now {curr_size}...")
+                loggy_safe(f"[{difference}] streaming response iteration {looper}; {output_path} now {curr_size}...")
                 then = now
             f.write(chunk)
     
-    print(f"Elevation data saved to {output_path}")
+    loggy_safe(f"Elevation data saved to {output_path}")
     return output_path
 
 ### END: Samuel's USGS_API_TNM.py functions
@@ -158,7 +165,7 @@ def build_parcel_flow_matrix(parcels_layer, accum_raster, direction_raster, name
     - raw flow matrix (absolute flow values)
     - percent flow matrix (row-normalized)
     """
-
+    loggy_safe("Building parcel flow matrix")
     print(f"FIX ME {name_col=}")
     print(f"debug parcels layer START:")
     for f in parcels_layer.getFeatures():
@@ -233,7 +240,7 @@ def build_parcel_flow_matrix(parcels_layer, accum_raster, direction_raster, name
     flow_matrix_pct = flow_matrix.div(flow_matrix.sum(axis=1), axis=0).fillna(0) * 100
     flow_matrix_pct = flow_matrix_pct.round(2)
 
-    print(f"✅ Flow analysis complete. Matched: {matched}, To SINK: {unmatched}")
+    loggy_safe(f"Flow analysis complete. Matched: {matched}, To SINK: {unmatched}")
     return flow_matrix, flow_matrix_pct, matched, unmatched
 
 ### END: Samuel's GetFlow_V10/13 utility functions
@@ -247,14 +254,14 @@ def run_getflow_v13_for_scenario_id(scenario_id):
         p_serialized = p.as_serializable()
         if p_serialized['parcelType'] in ['Air Only']: # no air parcels
             continue
-        print(f"{p.name}\t{p_serialized['parcelType']}")
+        loggy_safe(f"{p.name}\t{p_serialized['parcelType']}")
         names_to_vertices[p.name] = [(v[1], v[0]) for v in p_serialized['vertices']]
 
     # print(f"convert it ({names_to_vertices})")
     # parcels_for_this_scenario = json.dumps(names_to_vertices)
     parcels_for_this_scenario = names_to_vertices
 
-    print(f"LOADED PARCELS: {parcels_for_this_scenario}")
+    loggy_safe(f"Loaded parcels: {parcels_for_this_scenario}")
     return run_getflow_v13(parcels_for_this_scenario)
 
 
@@ -316,9 +323,9 @@ def run_getflow_v13(parcels):
                 # TODO -- can we somehow cache this? These files are *very* big. e.g. name them based on
                 # bounding box and upload that to S3? Can we be smarter?
                 dem_raster_layer = download_elevation_data(bbox, dem_raster_layer)
-                print(f"Successfully downloaded elevation data to {dem_raster_layer}")
+                loggy_safe(f"Successfully downloaded elevation data to {dem_raster_layer}")
             except Exception as e:
-                print(f"Error downloading elevation data: {str(e)}")
+                loggy_safe(f"Error downloading elevation data: {str(e)}")
                 raise e
         else:
             print(f"USING PRE-DOWNLOADED tif FILE FOR DEBUGGING SPEED ({dem_raster_layer})")
@@ -340,7 +347,7 @@ def run_getflow_v13(parcels):
     # ----------------------------------------------------------
     # STEP 1: Buffer the parcels to include edge pixels in the clip
     # ----------------------------------------------------------
-    print(f"STEP 1: Buffer the parcels to include edge pixels in the clip")
+    loggy_safe(f"STEP 1: Buffer the parcels to include edge pixels in the clip")
     # Determine an appropriate buffer distance; one option is to use the cell size of your DEM.
     cell_size = dem.rasterUnitsPerPixelX()  # assuming square cells; adjust if necessary
     buffer_distance = cell_size * 20  # Adjust multiplier as needed
@@ -361,7 +368,7 @@ def run_getflow_v13(parcels):
     # ----------------------------------------------------------
     # STEP 2: Clip the DEM using the buffered parcel layer
     # ----------------------------------------------------------
-    print(f"STEP 2: Clip the DEM using the buffered parcel layer")
+    loggy_safe(f"STEP 2: Clip the DEM using the buffered parcel layer")
     clip_params = {
         'INPUT': dem_raster_layer,
         'MASK': buffered_parcels,  # using buffered parcels instead of original parcels
@@ -413,7 +420,7 @@ def run_getflow_v13(parcels):
     # ----------------------------------------------------------
     # STEP 3: Continue with filling depressions and watershed analysis
     # ----------------------------------------------------------
-    print("STEP 3: Continue with filling depressions and watershed analysis")
+    loggy_safe("STEP 3: Continue with filling depressions and watershed analysis")
 
     proc_params ={'input':ClippedRaster,
         '-k':False,
@@ -497,7 +504,7 @@ def run_getflow_v13(parcels):
 
     print(f"TIBSV13 build_parcel_flow_matrix...")
     raw_matrix, percent_matrix, matched, unmatched = build_parcel_flow_matrix(parcels, ABS_ACCUMULATION, DRAINAGE, TEMP_PARCEL_NAME_COL)
-    print(f"TIBSV13 build_parcel_flow_matrix...DONE")
+    loggy_safe(f"build_parcel_flow_matrix...DONE")
 
     raw_output_path = f"{current_folder_path}{sep}parcel_raw_flow_matrix.csv"
     percent_output_path = f"{current_folder_path}{sep}parcel_percent_flow_matrix.csv"
@@ -506,9 +513,9 @@ def run_getflow_v13(parcels):
     percent_matrix.to_csv(percent_output_path)
 
 
-    print("Parcel-to-parcel flow matrix created.")
+    loggy_safe("Parcel-to-parcel flow matrix created.")
     print(f"Raw flow matrix saved to '{raw_output_path}'")
     print(f"Percentage flow matrix saved to '{percent_output_path}'")
-    print(f"Matched: {matched}, Unmatched (to SINK): {unmatched}")
+    loggy_safe(f"Matched: {matched}, Unmatched (to SINK): {unmatched}")
 
     return (raw_output_path, percent_output_path)

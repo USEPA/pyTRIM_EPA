@@ -52,6 +52,11 @@
         </div>
         <div class="row">
             <div class="col-md">
+                <div class="alert" id="getflow-status"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md">
                 <div class="pill pill-alert col-sm">
                     <small>
                         <strong>
@@ -360,9 +365,8 @@
 
         $("#run_getflow").on('click', function (e) {
             let rowWithButton = $("form#surface-runoff-gui section.container div.row:eq(1)");
-            let getflowStatusArea = $("<div/>").addClass("getflow_status_area").insertAfter(rowWithButton);
-            //getflowStatusArea.html("Kicking off getflow run...");
-            //getflowStatusArea.addClass('alert alert-warning');
+            let getflowStatusArea = $("#getflow-status");
+            getflowStatusArea.removeClass("alert-danger").html("");
 
             // setup the code for polling
             let executionArn = "";
@@ -384,43 +388,44 @@
             let keepChecking = function () {
                 TRIM.api.checkStepFunctionStatus(executionArn, function (success, data) {
                     console.log(data);
-                    //getflowStatusArea.removeClass('')
                     if (data.status == "SUCCEEDED") {
                         clearInterval(keepCheckingId);
-                        getflowStatusArea.html("Run complete!&nbsp;&nbsp;");
-                        getflowStatusArea.addClass('alert alert-success');
+                        getflowStatusArea.html("<b>Run complete!</b>");
+                        getflowStatusArea.addClass('alert-success');
                         toggleBtnState(false);
 
                         // Download for admin debugging
-                        if ("{{current_user.is_admin}}".toUpperCase() === "TRUE") {
+                        let is_admin = ("{{current_user.is_admin}}".toUpperCase() === "TRUE");
+                        if (is_admin) {
                             $("<a/>").attr("href", data.output.presigned_urls[1]).html("Download results").appendTo(getflowStatusArea);
                         }
                         
                         // import getflow generated matrix
                         $("<button/>").addClass('ml-3 btn btn-link').html("Update matrix").appendTo(getflowStatusArea).on('click', (e) => {
                             e.preventDefault();
-                            let fieldData = [{
-                                "type": "input",
-                                "name": "presigned_url",
-                                "value": data.output.presigned_urls[1]
-                            }];
-                            fieldData.push({
-                                "type": "input",
-                                "name": "scenario_id",
-                                "value": TRIM.store.currentScenario.id
-                            });
-
-                            // list of parcels to skip
                             let skipPcls = [];
                             TRIM.store.currentScenario.parcels.forEach((p, i) => {
                                 if (p?.parcelType?.includes("Water") || p?.parcelType?.includes("Air Only")) skipPcls.push(p.name)
                             });
-                            fieldData.push({
-                                "type": "input",
-                                "name": "skip_parcels",
-                                "value": skipPcls
-                            });
 
+                            let fieldData = [
+                                {
+                                    "type": "input",
+                                    "name": "presigned_url",
+                                    "value": data.output.presigned_urls[1]
+                                },
+                                {
+                                    "type": "input",
+                                    "name": "scenario_id",
+                                    "value": TRIM.store.currentScenario.id
+                                },
+                                {
+                                    "type": "input",
+                                    "name": "skip_parcels",
+                                    "value": skipPcls
+                                }
+                            ];
+    
                             LoadingScreen.show('upload_matrix_csv');
                             TRIM.api.uploadSurfaceRunoffMatrixFile(fieldData, function (success, responseData, c) {
                                 LoadingScreen.hide('upload_matrix_csv');
@@ -432,15 +437,30 @@
                                 }
                             });
                         });
-                        $(getflowStatusArea).find('button').click(); // do this automatically... not great
+
+                        if (!is_admin) {
+                            $(getflowStatusArea).find('button').click();
+                        }
                     } else if (data.status == "FAILED" || data.status == "TIMED_OUT" || data.status == "ABORTED") {
-                        getflowStatusArea.html("Run in " + data.status + " state. Please contact support.");
-                        getflowStatusArea.addClass('alert alert-danger');
+                        getflowStatusArea.html(`<b>Run status: ${data.status}</b>`);
+                        getflowStatusArea.addClass('alert-danger');
                         clearInterval(keepCheckingId);
                         toggleBtnState(false);
-                    } else {
-                        console.log("keep waiting...");
 
+                        // populate errors
+                        if (data?.logs && data.logs.length > 0) {
+                            let err_str = "";
+                            $(`<textarea class="form-control-plaintext" id="getflow-err-logs" rows="8">`).appendTo(getflowStatusArea);
+                            for (let i = 0 ; i < data.logs.length ; i++) {
+                                let timestamp = new Date(data.logs[i].timestamp).toLocaleString();
+                                err_str += `[${timestamp}] ${data.logs[i]?.message}\n`;
+                            }
+                            let debugZone = $('#getflow-err-logs');
+                            debugZone.val(err_str);
+                            debugZone.scrollTop(debugZone[0].scrollHeight - debugZone.height());                   
+                        }
+
+                    } else {
                         TRIM.store.currentScenario.getflow_timestamp = TRIM.store.currentScenario?.getflow_timestamp || new Date().getTime();
                         let time_elapsed = new Date().getTime() - TRIM.store.currentScenario?.getflow_timestamp;
                         let seconds = Math.floor(time_elapsed / 1000);
@@ -456,19 +476,14 @@
 
             console.log("getflow kickoff (gui_surface_runoff.html)!");
             TRIM.api.runGetFlow(TRIM.store.currentScenario.id, function (success, data) {
-                console.log("back in gui_surface_runoff.html callback!");
-                console.log(success);
                 console.log(data);
-                console.log("-----");
-
                 executionArn = data["executionArn"];
                 console.log("start polling for '" + executionArn + "'");
 
                 if (data.error) {
-                    alert(data.error);
+                    getflowStatusArea.addClass("alert-danger");
+                    getflowStatusArea.html(`<b>Error starting Getflow:</b> ${data.error}`);
                     toggleBtnState(false);
-                    getflowStatusArea.html("Run failed. Please contact support.");
-                    getflowStatusArea.css("background-color", "red");
                     return;
                 }
                 keepCheckingId = setInterval(keepChecking, 15000);

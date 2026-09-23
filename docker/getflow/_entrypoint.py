@@ -10,21 +10,31 @@ import uuid as uuidlib
 import boto3
 from qgis.core import *
 
+
+def loggy(s):
+    msg = f"[DOCKER_GETFLOW_DEBUG] {dt.now()}: {s}"
+    print(msg)
+
+# Output safe for viewing on the frontend!
+def loggy_safe(s):
+    msg = f"[_$] {dt.now()}: {s}"
+    print(msg)
+
 INCOMING_TOKEN_ENV_KEY = "TASK_TOKEN_ENV_VARIABLE"
 STORAGE_BUCKET_NAME_KEY = "STORAGE_BUCKET_NAME"
 SCENARIO_ID_KEY = "TRIM_SCENARIO_ID.$"
 
-print(f"QUICK SHIM FOR GETFLOW, SETTING DB CREDS, CORRECT REORDERING!")
+loggy(f"QUICK SHIM FOR GETFLOW, SETTING DB CREDS, CORRECT REORDERING!")
 
-print(f"MAKE SECRET CLiENT...")
+loggy(f"MAKE SECRET CLiENT...")
 secrets_client = boto3.client('secretsmanager')
-print(f"got if: {secrets_client}")
+loggy(f"got if: {secrets_client}")
 
 response = secrets_client.get_secret_value(
     SecretId='pytrim/database/credentials'
 )
 
-print(f"secrets response: {response}")
+loggy(f"secrets response: {response}")
 secret_data = json.loads(response['SecretString'])
 
 engine = os.getenv('DB_ENGINE')
@@ -42,26 +52,22 @@ os.environ["SQLALCHEMY_DATABASE_URI"] = (
 )
 
 # verify what's in the environment
-# print(f"ENVIRONMENT (start):")
+# loggy(f"ENVIRONMENT (start):")
 # for key, value in os.environ.items():
-#     print(f'{key}: {value}')
-# print(f"ENVIRONMENT (end):")
+#     loggy(f'{key}: {value}')
+# loggy(f"ENVIRONMENT (end):")
 
 from getflow import run_getflow_v13, run_getflow_v13_for_scenario_id
 from trim_db import ScenarioService
 from trim_frontend import create_app
 
 
-print(f"QUICK SHIM END!")
+loggy(f"QUICK SHIM END!")
 
 try:
     os.remove("saved_output.json")
 except:
     pass
-
-def loggy(s):
-    msg = f"[DOCKER_GETFLOW_ENTRYPOINT Aug2025 TueA] {dt.now()}: {s}"
-    print(msg)
 
 class DockerGetflowEntryPoint:
     def __init__(self):
@@ -87,10 +93,10 @@ class DockerGetflowEntryPoint:
         self.storage_bucket_name = os.getenv(STORAGE_BUCKET_NAME_KEY)
         self.scenario_id = int(os.getenv(SCENARIO_ID_KEY, -1))
 
-        print(f"@@@@@@@@@@ ALL ENVIRONMENT START @@@@@@@@@@@@@@")
+        loggy(f"@@@@@@@@@@ ALL ENVIRONMENT START @@@@@@@@@@@@@@")
         for key, value in os.environ.items():
-            print(f'[{key}]: [{value}]')
-        print(f"@@@@@@@@@@ ALL ENVIRONMENT END @@@@@@@@@@@@@@")
+            loggy(f'[{key}]: [{value}]')
+        loggy(f"@@@@@@@@@@ ALL ENVIRONMENT END @@@@@@@@@@@@@@")
 
     def get_app_context(self):
         self.app = create_app()
@@ -99,18 +105,18 @@ class DockerGetflowEntryPoint:
     def launch_helper(self, parcels_or_scenario_id):
         # h/t https://gis.stackexchange.com/questions/348140/qgis-3-10-python-ide-application-path-not-initialized
         # see also https://docs.qgis.org/3.28/en/docs/pyqgis_developer_cookbook/index.html
-        loggy("setup qgs application/path/initialization...")
+        loggy_safe("Setting up qgs application/path/initialization...")
         sys.path.append("/usr/share/qgis/python/plugins")
         qgs = QgsApplication([], False)
         QgsApplication.setPrefixPath("/usr/bin/qgis", True)
         QgsApplication.initQgis()
 
-        loggy("initialize processing plugins...")
+        loggy_safe("Initialize processing plugins...")
         import processing
         from processing.core.Processing import Processing
         Processing.initialize()
 
-        loggy("initialize saga...")
+        loggy_safe("Initialize saga...")
         # this seems promising:
         # https://gis.stackexchange.com/a/456180
         # you need to unzip processing_saga_nextgen in your plugins dir...see Dockerfile
@@ -119,15 +125,14 @@ class DockerGetflowEntryPoint:
         provider.loadAlgorithms()
         QgsApplication.processingRegistry().addProvider(provider=provider)
 
-        loggy("running getflow v13...")
+        loggy_safe("Running getflow...")
         if type(parcels_or_scenario_id) is int:
             saved_outputs = run_getflow_v13_for_scenario_id(parcels_or_scenario_id)
         else:
             saved_outputs = run_getflow_v13(parcels)
 
-        loggy(f"back from run_getflow_v13 ({saved_outputs})...")
+        loggy_safe(f"Getflow run complete ({saved_outputs})")
         qgs.exitQgis()
-        loggy("gis exited...")
 
         bucket, paths, presigned_urls = self.upload_results_to_s3(saved_outputs)
 
@@ -136,18 +141,7 @@ class DockerGetflowEntryPoint:
     def upload_results_to_s3(self, output_files):
         # write the data to the bucket
         s3_client = boto3.client("s3")
-        """
-        full_key = f"{self.uuid}/something.json"
-        print(f"WRITE DATA TO '{full_key}'")
-        try:
-            s3_client.put_object(
-                Body=json.dumps(model_output),
-                Bucket=storage_bucket_name,
-                Key=full_key
-            )
-        except Exception as e:
-            loggy(f"ERROR WRITING DATA TO S3: {e}")
-        """
+        loggy_safe("Uploading results to s3...")
 
         presigned_urls = []
         full_keys = []
@@ -155,12 +149,12 @@ class DockerGetflowEntryPoint:
         for output_file in output_files:
             key_name = output_file.split(os.path.sep)[-1]
 
-            print(f"output probe '{key_name}' is '{output_file}'")
+            loggy(f"output probe '{key_name}' is '{output_file}'")
 
             if output_file is not None and os.path.isfile(output_file) and os.path.exists(output_file):
                 full_key = f"{self.uuid}/{key_name}"
-                print(f"upload it to '{full_key}'...")
-                print(f"file S3 URL is https://{self.storage_bucket_name}.s3.amazonaws.com/{full_key}")
+                loggy(f"upload it to '{full_key}'...")
+                loggy(f"file S3 URL is https://{self.storage_bucket_name}.s3.amazonaws.com/{full_key}")
 
                 try:
                     s3_client.put_object(
@@ -179,12 +173,13 @@ class DockerGetflowEntryPoint:
                     loggy(f"ERROR WRITING DATA TO S3: {e}")
                     errored = True
             else:
-                print(f"skip '{output_file}'; not found somehow?")
+                loggy(f"skip '{output_file}'; not found somehow?")
                 errored = True
 
         if errored:
             return None, None, None
         else:
+            loggy_safe("Upload complete")
             return self.storage_bucket_name, full_keys, presigned_urls
         
     def create_presigned_url(self, s3_client, bucket_name, object_name, expiration = 3600):
@@ -223,11 +218,11 @@ class DockerGetflowEntryPoint:
         """
         loggy(f"Found task token '{self.task_token}' and bucket '{self.storage_bucket_name}' from environment")
 
-        loggy("app context attempt...")
+        loggy_safe("App context attempt...")
 
         with self.get_app_context():
             scen = ScenarioService.get(self.scenario_id)
-            print(f"loaded {scen} ({scen.name}) / ({scen.description}) [not really needed]...")
+            loggy_safe(f"Loaded {scen} ({self.scenario_id})")
 
             # model_output = { "fake": "hardcoded_output" }
             # fake_parcels = { "x": "y" }

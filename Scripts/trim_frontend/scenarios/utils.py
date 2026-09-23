@@ -297,8 +297,10 @@ def fetch_output_for_step_function_execution(execution_arn):
         )
 
         # construct log group/stream relating to this execution
-        log_group=def_resp["taskDefinition"]["containerDefinitions"][0]["logConfiguration"]["options"]["awslogs-group"]
-        log_stream=f"ecs/{def_resp['taskDefinition']['containerDefinitions'][0]['name']}/{task_key}"
+        container_def = ["taskDefinition"]["containerDefinitions"][0]
+        log_prefix = container_def["logConfiguration"]["options"]["awslogs-stream-prefix"]
+        log_group = container_def["logConfiguration"]["options"]["awslogs-group"]
+        log_stream = f"{log_prefix}/{container_def['name']}/{task_key}"
 
         print(f"let's use {log_group=} / {log_stream=}...")
 
