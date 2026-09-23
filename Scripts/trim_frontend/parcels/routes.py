@@ -80,7 +80,6 @@ def get_parcels(scenario_id):
         if p:
             start_time_s = time.time()
             s = p[0].scenario
-            ScenarioService(s).calculate_watershed_matrix()
             logger.info(f"Acquired scenario {s.name} in {time.time() - start_time_s} seconds")
 
             total_start = time.time()

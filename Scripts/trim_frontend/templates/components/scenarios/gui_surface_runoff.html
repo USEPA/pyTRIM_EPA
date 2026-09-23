@@ -264,7 +264,7 @@
                 let elem = elem_list[0]
                 if (elementIsValid($(elem).closest('tr'))){
                     console.log(parcel_info)
-                    TRIM.api.updateParcel('{{ scenario.id }}',parcel_info).on('load',function(){
+                    TRIM.api.updateParcel(TRIM.store.currentScenario.id, parcel_info).on('load',function(){
                         let msg =  this.responseJSON["message"]
                         if (msg != "success") {
                             // oops! something went wrong... if there is a message display it as alert and revert to
@@ -358,22 +358,21 @@
             });
         });
 
-        $("#run_getflow").on('click', function(e) {
-		   let rowWithButton = $("form#surface-runoff-gui section.container div.row:eq(1)");
-		    let getflowStatusArea = $("<div/>").addClass("getflow_status_area").insertAfter(rowWithButton);
-			getflowStatusArea.html("Kicking off getflow run...");
-			getflowStatusArea.css("background-color", "yellow");
+        $("#run_getflow").on('click', function (e) {
+            let rowWithButton = $("form#surface-runoff-gui section.container div.row:eq(1)");
+            let getflowStatusArea = $("<div/>").addClass("getflow_status_area").insertAfter(rowWithButton);
+            //getflowStatusArea.html("Kicking off getflow run...");
+            //getflowStatusArea.addClass('alert alert-warning');
 
-			let api = window.TRIM.api;
-
-			// setup the code for polling
-			let executionArn = "";
-			let keepCheckingId = -1;
+            // setup the code for polling
+            let executionArn = "";
+            let keepCheckingId = -1;
+            TRIM.store.currentScenario.getflow_timestamp = new Date().getTime();
 
             function toggleBtnState(disable) {
                 $(e.target).attr('disabled', disable);
                 if (disable) {
-                    $(e.target).html(`<span><label class="lds-dual-ring mr-3"></label></span> Run GetFlow`);
+                    $(e.target).html(`<span><label class="lds-dual-ring mr-3"></label></span>Starting GetFlow...`);
                 }
                 else {
                     $(e.target).html('Run GetFlow');
@@ -381,26 +380,22 @@
             };
             toggleBtnState(true);
 
-			// polling function
-			let keepChecking = function() {
-				api.checkStepFunctionStatus(executionArn, function(success,data) {
-					 console.log(success);
-					 console.log(data);
-					 console.log(typeof data);
-					 console.log("-----");
-				  console.log("STATUS == [" + data.status + "]");
-
-					if (data.status == "SUCCEEDED") {
-						clearInterval(keepCheckingId);
-						getflowStatusArea.html("Run complete!&nbsp;&nbsp;");
-						getflowStatusArea.css("background-color", "lime");
-						// disabling download since it is a different format from the upload!
-						// we'll just allow users to update the matrix (and they can then
-						// use "Export Matrix" to download in the right format)
-						// $("<a/>").attr("href", data.output.presigned_urls[1]).html("Download results").appendTo(getflowStatusArea);
-
+            // polling function
+            let keepChecking = function () {
+                TRIM.api.checkStepFunctionStatus(executionArn, function (success, data) {
+                    console.log(data);
+                    //getflowStatusArea.removeClass('')
+                    if (data.status == "SUCCEEDED") {
+                        clearInterval(keepCheckingId);
+                        getflowStatusArea.html("Run complete!&nbsp;&nbsp;");
+                        getflowStatusArea.addClass('alert alert-success');
                         toggleBtnState(false);
 
+                        // Download for admin debugging
+                        if ("{{current_user.is_admin}}".toUpperCase() === "TRUE") {
+                            $("<a/>").attr("href", data.output.presigned_urls[1]).html("Download results").appendTo(getflowStatusArea);
+                        }
+                        
                         // import getflow generated matrix
                         $("<button/>").addClass('ml-3 btn btn-link').html("Update matrix").appendTo(getflowStatusArea).on('click', (e) => {
                             e.preventDefault();
@@ -408,7 +403,7 @@
                                 "type": "input",
                                 "name": "presigned_url",
                                 "value": data.output.presigned_urls[1]
-                            }]; 
+                            }];
                             fieldData.push({
                                 "type": "input",
                                 "name": "scenario_id",
@@ -425,9 +420,9 @@
                                 "name": "skip_parcels",
                                 "value": skipPcls
                             });
-                            
+
                             LoadingScreen.show('upload_matrix_csv');
-                            TRIM.api.uploadSurfaceRunoffMatrixFile(fieldData, function(success,responseData,c) {
+                            TRIM.api.uploadSurfaceRunoffMatrixFile(fieldData, function (success, responseData, c) {
                                 LoadingScreen.hide('upload_matrix_csv');
                                 if (!success) {
                                     alert('An error occurred during upload:\n' + responseData.message);
@@ -438,51 +433,37 @@
                             });
                         });
                         $(getflowStatusArea).find('button').click(); // do this automatically... not great
-					} else if (data.status == "FAILED" || data.status == "TIMED_OUT" || data.status == "ABORTED") {
-						alert("An error occurred; run resulted in " + data.status + " status");
-						getflowStatusArea.html("Run in " + data.status + " state. Please contact support.");
-						getflowStatusArea.css("background-color", "red");
-						clearInterval(keepCheckingId);
+                    } else if (data.status == "FAILED" || data.status == "TIMED_OUT" || data.status == "ABORTED") {
+                        getflowStatusArea.html("Run in " + data.status + " state. Please contact support.");
+                        getflowStatusArea.addClass('alert alert-danger');
+                        clearInterval(keepCheckingId);
                         toggleBtnState(false);
-					} else {
-						console.log("keep waiting...");
-						getflowStatusArea.html("Run still ongoing... (" + (new Date()).toLocaleTimeString() + ")");
-				    }
-				});
+                    } else {
+                        console.log("keep waiting...");
 
-			};
+                        TRIM.store.currentScenario.getflow_timestamp = TRIM.store.currentScenario?.getflow_timestamp || new Date().getTime();
+                        let time_elapsed = new Date().getTime() - TRIM.store.currentScenario?.getflow_timestamp;
+                        let seconds = Math.floor(time_elapsed / 1000);
+                        let minutes = Math.floor(seconds / 60);
+                        seconds = seconds % 60;
+                        minutes = minutes % 60;
 
+                        const pad = (n) => String(n).padStart(2, '0');
+                        $('#run_getflow').html(`<span><label class="lds-dual-ring mr-3"></label></span>GetFlow Running... (${pad(minutes)}:${pad(seconds)})`);
+                    }
+                });
+            };
 
-
-			// START - FAKE
-			// if we just want to test the polling code...
-			// executionArn = "arn:aws:states:us-east-1:426714360284:execution:DockerStateMachineWrapperGetFlow-uD7RgxZSemK9:45b21e17-1447-4d81-aa3c-65f291b1ef68";
-			 // keepCheckingId = setInterval(keepChecking, 1000);
-			 // return;
-			// END - FAKE
-
-
-			// kick off the getflow run
-			let scenario_id = window.TRIM.store.currentScenario.id;
-			
-			/*
-			let scenario_info = [{
-				'type': 'data',
-				'name': 'scenario_id',
-				'value': scenario_id
-			}];
-			*/
-
-			console.log("getflow kickoff (gui_surface_runoff.html)!");
-			api.runGetFlow(scenario_id, function(success,data) {
-				console.log("back in gui_surface_runoff.html callback!");
+            console.log("getflow kickoff (gui_surface_runoff.html)!");
+            TRIM.api.runGetFlow(TRIM.store.currentScenario.id, function (success, data) {
+                console.log("back in gui_surface_runoff.html callback!");
                 console.log(success);
                 console.log(data);
                 console.log("-----");
 
                 executionArn = data["executionArn"];
                 console.log("start polling for '" + executionArn + "'");
-            
+
                 if (data.error) {
                     alert(data.error);
                     toggleBtnState(false);
@@ -491,9 +472,9 @@
                     return;
                 }
                 keepCheckingId = setInterval(keepChecking, 15000);
-			});
-			return false;
-		});
+            });
+            return false;
+        });
 
         function renderRunoffForm() {
             if (!TRIM.store.currentScenario.parcels) {
@@ -513,12 +494,12 @@
             let columns = [{
                 'data': 'sender',
                 'title': '<table><tbody><tr id="ROHead">' +
-                    '<td style="border-bottom: 0px; padding: 0px">receiver</td>' +
-                    '<td style="border-bottom: 0px; padding: 0px"><i class="fa fa-arrow-right"></i></td>' +
+                    '<td style="border-bottom: 0px; padding: 0px">receiver <i class="fa fa-arrow-right"></i></td>' +
+                    '<td style="border-bottom: 0px; padding: 0px"></td>' +
                     '</tr>' +
                     '<tr>' +
-                    '<td style="border-bottom: 0px; padding: 0px">sender</td>' +
-                    '<td style="border-bottom: 0px; padding: 0px"><i class="fa fa-arrow-down"></i></td>' +
+                    '<td style="border-bottom: 0px; padding: 0px">sender <i class="fa fa-arrow-down"></i></td>' +
+                    '<td style="border-bottom: 0px; padding: 0px"></td>' +
                     '</tr></tbody></table>',
                 'bSortable': false,
                 'className': 'font-weight-bold rightBorder freeze-column runoff-matrix-corner-header'

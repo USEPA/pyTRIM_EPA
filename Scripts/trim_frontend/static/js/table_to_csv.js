@@ -24,7 +24,7 @@ function exportTableToCSV($table, filename) {
 
         // Data URI
         csvData = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csv);
-        console.log(csv);
+        //console.log(csv);
 
         if (window.navigator.msSaveBlob) { // IE 10+
             //alert('IE' + csv);
