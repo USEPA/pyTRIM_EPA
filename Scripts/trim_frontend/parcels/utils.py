@@ -565,13 +565,13 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                         formula_part = f'{rep_val}'
                     formula_parts[0] = formula_part
                     new_formula = f"if {entity_name}.id in {{{formula_entity.id}}}".join(formula_parts)
-                    print(new_formula)
+                    # print(new_formula)
                 # We do not have the receiver compartment in the formula. We need to add it...
                 else:
                     eq_arr = eq.split("else")
                     eq_arr.insert(-2, f' ({replacing_value}) if {entity_name}.id in {{{formula_entity.id}}} ')
                     new_formula = "else".join(eq_arr)
-                    print(new_formula)
+                    # print(new_formula)
                 eq = new_formula
             FormulaService.get(sender_par.formula.id).equation = new_formula
             FormulaService.commit()

@@ -39,10 +39,13 @@ class StepfnxHelper:
     def __init__(self, execution_arn=None):
         self.execution_arn = execution_arn
 
-    def start_stepfnx_execution(self, scn_id, statemachineArn):
+    def start_stepfnx_execution(self, statemachineArn, sfn_input: dict):
+        # JUST FOR TESTING
+        # 171 is the taconite scenario on dev
+        sfn_input["scenarioId"] = str(171)
         rsp = self.sfn_client.start_execution(
             stateMachineArn=statemachineArn,
-            input=json.dumps({"scenarioId": str(scn_id), "generateFakeResults": "false"}),
+            input=json.dumps(sfn_input),
         )
         return rsp["executionArn"]
 
@@ -106,7 +109,7 @@ class StepfnxHelper:
         Usually the step function won't stop running until it times out...
         """
         try:
-            if not (self.cluster_arn and self.task_arn and self.container_name):
+            if not self.container_name:
                 self.fetch_task_metadata()
 
             task_def_resp = self.ecs_client.describe_tasks(
@@ -116,7 +119,12 @@ class StepfnxHelper:
             for container in task_def_resp["tasks"][0]["containers"]:
                 if container["name"] == self.container_name:
                     exit_code = container.get("exitCode")
-                    return exit_code == 1
+                    if exit_code is not None:
+                        return exit_code == 1
+                    elif container.get('lastStatus', '').upper() == 'STOPPED':
+                        self.logger.warning(f"Error while running task")
+                        self.logger.warning(task_def_resp['tasks'][0])
+                        return True
         except Exception:
             return None
 
@@ -127,6 +135,9 @@ class StepfnxHelper:
         Pagination only done when "nextXToken" response
         from get_log_events equals the "nextToken" you had just passed in
         """
+        if not self.container_name:
+            self.fetch_task_metadata()
+
         log_stream_name = f"{self.log_group_prefix}/{self.container_name}/{self.task_id}"
         self.logger.info(f"Fetching logs from [{log_stream_name}]...")
 
@@ -163,7 +174,7 @@ class StepfnxHelper:
             if self.sanitize_key in log["message"]:
                 logs_cleaned.append({
                     "timestamp": log["timestamp"],
-                    "message": log["message"].replace(self.sanitize_key, ""),
+                    "message": log["message"].replace(self.sanitize_key, "").strip(),
                 })
         return logs_cleaned
 

@@ -833,7 +833,9 @@ def run_getflow(scenario_id):
     try:
         state_machine_arn = os.environ.get("TRIM_DOCKERIZED_GETFLOW_STATEMACHINE_ARN")
         if state_machine_arn is not None:
-            execution_arn = StepfnxHelper().start_stepfnx_execution(scenario_id, state_machine_arn)
+            sfn_input = {"scenarioId": str(scenario_id), "generateFakeResults": "false"}
+            execution_arn = StepfnxHelper().start_stepfnx_execution(state_machine_arn, sfn_input)
+            logger.info(f"Execution ARN: {execution_arn}")
             data_resp = { "executionArn": execution_arn }
         else:
             data_resp = { "error": "Missing required envrionment variable to run getflow" }

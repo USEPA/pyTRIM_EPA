@@ -384,6 +384,20 @@
             };
             toggleBtnState(true);
 
+            function loggingHtml(statusArea, logs) {
+                if (logs && logs.length > 0) {
+                    let logs_str = "";
+                    $(`<textarea readonly class="form-control-plaintext" id="getflow-logs" rows="8">`).appendTo(statusArea);
+                    for (let i = 0 ; i < logs.length ; i++) {
+                        let timestamp = new Date(logs[i].timestamp).toLocaleString();
+                        logs_str += `[${timestamp}] ${logs[i]?.message}\n`;
+                    }
+                    let debugZone = $('#getflow-logs');
+                    debugZone.val(logs_str);
+                    debugZone.scrollTop(debugZone[0].scrollHeight - debugZone.height());                   
+                }
+            }
+
             // polling function
             let keepChecking = function () {
                 TRIM.api.checkStepFunctionStatus(executionArn, function (success, data) {
@@ -393,12 +407,6 @@
                         getflowStatusArea.html("<b>Run complete!</b>");
                         getflowStatusArea.addClass('alert-success');
                         toggleBtnState(false);
-
-                        // Download for admin debugging
-                        let is_admin = ("{{current_user.is_admin}}".toUpperCase() === "TRUE");
-                        if (is_admin) {
-                            $("<a/>").attr("href", data.output.presigned_urls[1]).html("Download results").appendTo(getflowStatusArea);
-                        }
                         
                         // import getflow generated matrix
                         $("<button/>").addClass('ml-3 btn btn-link').html("Update matrix").appendTo(getflowStatusArea).on('click', (e) => {
@@ -438,7 +446,13 @@
                             });
                         });
 
-                        if (!is_admin) {
+                        // Admin debugging
+                        let is_admin = ("{{current_user.is_admin}}".toUpperCase() === "TRUE");
+                        if (is_admin) {
+                            $("<a/>").addClass('ml-3 btn btn-link').attr("href", data.output.presigned_urls[1]).html("Download results").appendTo(getflowStatusArea);
+                            loggingHtml(getflowStatusArea, data.logs);
+                        }
+                        else {
                             $(getflowStatusArea).find('button').click();
                         }
                     } else if (data.status == "FAILED" || data.status == "TIMED_OUT" || data.status == "ABORTED") {
@@ -448,18 +462,7 @@
                         toggleBtnState(false);
 
                         // populate errors
-                        if (data?.logs && data.logs.length > 0) {
-                            let err_str = "";
-                            $(`<textarea class="form-control-plaintext" id="getflow-err-logs" rows="8">`).appendTo(getflowStatusArea);
-                            for (let i = 0 ; i < data.logs.length ; i++) {
-                                let timestamp = new Date(data.logs[i].timestamp).toLocaleString();
-                                err_str += `[${timestamp}] ${data.logs[i]?.message}\n`;
-                            }
-                            let debugZone = $('#getflow-err-logs');
-                            debugZone.val(err_str);
-                            debugZone.scrollTop(debugZone[0].scrollHeight - debugZone.height());                   
-                        }
-
+                        loggingHtml(getflowStatusArea, data.logs);
                     } else {
                         TRIM.store.currentScenario.getflow_timestamp = TRIM.store.currentScenario?.getflow_timestamp || new Date().getTime();
                         let time_elapsed = new Date().getTime() - TRIM.store.currentScenario?.getflow_timestamp;
