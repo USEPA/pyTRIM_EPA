@@ -354,7 +354,6 @@ window.TRIM = (function(trim) {
 
 	api.checkStepFunctionStatus = function(execution_arn, callback_fxn) {
         let url = api.getUrl('general_api.stepfxn_check');
-        console.log("CHECK STEPFXN STATUS URL IS: [" + url + "]");
         let data = makeFormData({type: "data", name: "arn", value: execution_arn})
 
         return AJAX.call({

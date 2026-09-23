@@ -34,6 +34,8 @@ class StepfnxHelper:
     log_group_name = ""
     log_group_prefix = "ecs"
 
+    sanitize_key = "[_$]" # this is what's used to filter for safe prints
+
     def __init__(self, execution_arn=None):
         self.execution_arn = execution_arn
 
@@ -55,6 +57,7 @@ class StepfnxHelper:
             parsed_output = json.loads(output)
             for key in parsed_output:
                 self.output[key] = parsed_output[key]
+            self.logs = self.get_logs()
         elif self.task_failed():
             self.status = "FAILED"
             self.logs = self.get_logs()
@@ -90,7 +93,7 @@ class StepfnxHelper:
             if len(container_defs) > 1:
                 self.logger.warning(f"More than one container definition found for [{self.task_def_arn}]")
 
-            for container_def in task_defs_rsp["taskDefinition"]["containerDefinitions"]:
+            for container_def in container_defs:
                 self.container_name = container_def["name"]
                 self.log_group_name = container_def["logConfiguration"]["options"]["awslogs-group"]
                 self.log_group_prefix = container_def["logConfiguration"]["options"]["awslogs-stream-prefix"]
@@ -154,14 +157,15 @@ class StepfnxHelper:
             self.logger.warning(f"Could not retrieve logs: {e}")
         return self.sanitize_logs(rv)
 
-    # FIXME -- only getflow for now... and should clean up entrypoint.py
     def sanitize_logs(self, logs):
-        # "sanitize" but really we're just clipping out all the debugging before getflow start
-        log_entrypoint = "app context attempt..."
-        for i, log in enumerate(logs):
-            if log_entrypoint in log["message"]:
-                return logs[i:]
-        return []
+        logs_cleaned = []
+        for log in logs:
+            if self.sanitize_key in log["message"]:
+                logs_cleaned.append({
+                    "timestamp": log["timestamp"],
+                    "message": log["message"].replace(self.sanitize_key, ""),
+                })
+        return logs_cleaned
 
     # EXPERIMENTAL BACKGROUND POLLING
     def wait_for_task(self):

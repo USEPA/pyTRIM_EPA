@@ -1,5 +1,4 @@
 import json, os, sys
-from datetime import datetime as dt
 
 # now that we run in a virtual environment within our Docker container,
 # also need to point at this or qgis.core can't be imported...
@@ -12,12 +11,12 @@ from qgis.core import *
 
 
 def loggy(s):
-    msg = f"[DOCKER_GETFLOW_DEBUG] {dt.now()}: {s}"
+    msg = f"[DOCKER_GETFLOW_DEBUG]: {s}"
     print(msg)
 
 # Output safe for viewing on the frontend!
 def loggy_safe(s):
-    msg = f"[_$] {dt.now()}: {s}"
+    msg = f"[_$] {s}"
     print(msg)
 
 INCOMING_TOKEN_ENV_KEY = "TASK_TOKEN_ENV_VARIABLE"

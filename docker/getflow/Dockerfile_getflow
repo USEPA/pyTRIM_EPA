@@ -7,7 +7,7 @@ ARG PYTRIM_GETFLOW_BUILD_PLATFORM="linux/amd64"
 # start with QGIS image
 # FROM qgis/qgis
 # FROM --platform=linux/amd64 qgis/qgis
-FROM --platform=${PYTRIM_GETFLOW_BUILD_PLATFORM} qgis/qgis
+FROM --platform=${PYTRIM_GETFLOW_BUILD_PLATFORM} qgis/qgis:4.2
 
 # Set environment variables for QGIS
 ENV QGIS_PREFIX_PATH=/usr

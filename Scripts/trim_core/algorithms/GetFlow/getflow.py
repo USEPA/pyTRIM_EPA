@@ -6,7 +6,6 @@ import requests
 import os
 import numpy as np
 import pandas as pd
-from datetime import datetime as dt
 from qgis import processing
 from qgis.core import *
 from shapely.geometry import shape
@@ -16,7 +15,7 @@ from trim_db.services import *
 
 # Output safe for viewing on the frontend!
 def loggy_safe(s):
-    msg = f"[_$]: {s}"
+    msg = f"[_$] {s}"
     print(msg)
 
 TEMP_PARCEL_NAME_COL = 'title' # actual TRIM parcels have a "title", not a "name"!
