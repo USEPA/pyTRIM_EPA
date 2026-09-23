@@ -648,12 +648,12 @@ def get_scenario_runoff_matrix(scenario_id):
         if not current_user.can('view', s):
             abort(403)
         start_time = time.time()
-        runoff_matrix = ScenarioService(s).get_surface_runoff()
+        ScenarioService(s).calculate_watershed_matrix()
         logger.info(f"Acquired runoff matrix in {time.time() - start_time} seconds")
+        return ApiResult({'watershed_areas': s._wsa, 'runoff_matrix': s._rom})
     except Exception as e:
         logger.error(traceback.format_exc())
         return ApiException(repr(e))
-    return ApiResult({'runoff_matrix': runoff_matrix})
 
 
 @scenario_api.route(

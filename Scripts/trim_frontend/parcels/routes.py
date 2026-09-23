@@ -78,10 +78,11 @@ def get_parcels(scenario_id):
         media = m
 
         if p:
-            s = p[0].scenario
             start_time_s = time.time()
-            # sh = s.as_serializable()
+            s = p[0].scenario
+            ScenarioService(s).calculate_watershed_matrix()
             logger.info(f"Acquired scenario {s.name} in {time.time() - start_time_s} seconds")
+
             total_start = time.time()
             for this_p in p:
                 start_time = time.time()

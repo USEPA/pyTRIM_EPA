@@ -324,6 +324,8 @@
                         {type: 'input', name: 'externalWaterInflow', value: total_inflow},
                         {type: 'input', name: 'allInflow', value: JSON.stringify(new_inflow)},
                         {type: 'input', name: 'parcelType', value: pcl.parcelType},
+                        {type: 'input', name: 'runoff_matrix', value: JSON.stringify(TRIM.store.currentScenario.runoff_matrix)},
+                        {type: 'input', name: 'watershed_areas', value: JSON.stringify(TRIM.store.currentScenario.watershed_areas)}
                     ];
 
                     $(this).attr("data-dismiss","modal");  
@@ -386,7 +388,11 @@
                     }
 
                     LoadingScreen.show("Water_body_prop_update")
-                    parcel_info.push({type: 'input', name: 'parcelType', value: pcl.parcelType});
+                    parcel_info = parcel_info.concat([
+                        {type: 'input', name: 'parcelType', value: pcl.parcelType},
+                        {type: 'input', name: 'runoff_matrix', value: JSON.stringify(TRIM.store.currentScenario.runoff_matrix)},
+                        {type: 'input', name: 'watershed_areas', value: JSON.stringify(TRIM.store.currentScenario.watershed_areas)}
+                    ]);
                     TRIM.api.updateParcel(TRIM.store.currentScenario.id, parcel_info).on('load', (rsp)=>{
                         if (rsp.target.status === 200) {
                             if ('wc_props' in rsp.target.responseJSON) {
@@ -442,6 +448,13 @@
             document.body.removeEventListener('parcels:ready', updateLakeProps);
             document.body.addEventListener('parcels:ready', updateLakeProps);
             TRIM.refreshParcels();
+            
+            LoadingScreen.show('matrix_loading');
+            TRIM.api.getRunoffMatrix(TRIM.store.currentScenario).on('load', function () {
+                TRIM.store.currentScenario.runoff_matrix = this.responseJSON.runoff_matrix;
+                TRIM.store.currentScenario.watershed_areas = this.responseJSON.watershed_areas;
+                LoadingScreen.hide('matrix_loading');
+            });
         });
 
         function get_pivoted_columns(tblId) {

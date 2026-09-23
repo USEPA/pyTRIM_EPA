@@ -1,14 +1,30 @@
 import logging
 import os
+import json
 from contextlib import contextmanager, redirect_stdout
 
 
 class ConditionalFormatter(logging.Formatter):
     def format(self, record):
+        if isinstance(record.msg, dict):
+            record.msg = self._format_dict(record.msg)
+
         if hasattr(record, 'no_formatting') and record.no_formatting:
             return record.getMessage()
         else:
             return logging.Formatter.format(self, record)
+
+    def _format_dict(self, data):
+        exclude = ['csrf_token', 'runoff_matrix', 'watershed_areas']
+        other = []
+        cleaned = {}
+        for k, v in data.items():
+            if k in exclude:
+                other.append(k)
+            else:
+                cleaned[k] = v
+        cleaned['__other'] = str(other)
+        return json.dumps(cleaned, indent=4)
 
 
 def make_logger(

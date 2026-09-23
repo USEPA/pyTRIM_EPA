@@ -1,5 +1,6 @@
 from typing import IO
 import numpy as np
+import pandas as pd
 from ..schema.entities.chemicals import Chemical
 from ..schema.entities.environment import Parcel
 from ..schema.utils.caching import CacheManager
@@ -27,6 +28,14 @@ class ScenarioService(GenericService[Scenario], PermissionsMixin):
 
     def get_surface_runoff(self):
         return get_scenario_surface_runoff(self.__instance)
+
+    def calculate_watershed_matrix(self):
+        runoff_matrix = self.get_surface_runoff()
+        watershed_areas = get_scenario_watershed_matrix(self.__instance, runoff_matrix)
+
+        self.__instance._rom = runoff_matrix
+        self.__instance._wsa = watershed_areas
+        return runoff_matrix, watershed_areas
 
     def import_aermod(self, filestream: IO, for_chemical: Chemical, metadata: dict = {}):
         return import_aermod_to_scenario(self.__instance, filestream, for_chemical, metadata=metadata)
@@ -63,6 +72,77 @@ def get_scenario_surface_runoff(scen):
             else:
                 runoffs[sending_parcel][receiving_parcel] = runoff_frac
     return runoffs
+
+
+def get_scenario_watershed_matrix(scenario: Scenario, ro_array):
+    def compute_watershed_areas(runoff_matrix, area_parcels, parcel_type):
+        # v3 deducts area of lakes from watershed (technically the area of a lake catches rain and 
+        # delivers it to the lake and this how MC computes it. but to be consistent with the builder 
+        # formulas this version substracts lake areas from runoff area of lakes only)
+        # function to compute watershed areas by markov chain estimation. Only works if lakes runoff 100% to themselves. 
+        # Land parcel do not have watersheds and will tend to zero but lake parcel watersheds will be accurate.
+        # runoff_matrix is a square nxn matrix that must not include sinks and must include lakes in both rows and columns. 
+        # Lakes must runoff 100% to themselves.
+        # n is a large number like 200 or 300 that will enable the markov chain to reach steady state. 
+        # area_parcels is a single matrix with areas of all parcels in the same order as the rows/cols of the runoff_matrix
+
+        # New in v3: parcel_type is a list of parcel type with the same indexing as the other matrices. 
+        # Note: the transpose is required because of the arrangment of the matrix such that row are senders 
+        # and cols are receivers. When multiplying by area matrix to estimate watershed, the rows must be receivers, so transpose.
+
+        M = np.matrix(runoff_matrix)# convert to np matrix
+        M = np.nan_to_num(M)
+        M_n = np.linalg.matrix_power(M, 1000) # raise M to a large number (markov chain estimation of probabilities of endpoint of flow)
+        M_n_T = M_n.T # transpose of M_n so that it can be multiplied as a dot product with area parcels
+        
+        try:
+            indexlist=area_parcels.index
+        except:
+            indexlist=[] # if already a matrix then 
+        area_parcels = np.matrix(area_parcels)# convert to np matrix
+
+        runoff_areas = M_n_T @ area_parcels
+        try:
+            runoff_areas=pd.DataFrame(runoff_areas,index=indexlist)
+        except:
+            runoff_areas=pd.DataFrame(runoff_areas)
+
+        # new line to subtract parcel area from runoff area is parcel type is water
+        runoff_areas.loc[pd.Series(parcel_type).str.contains('water', case=False), 0] -= np.array(area_parcels[pd.Series(parcel_type).str.contains('water', case=False)]).flatten()
+        return (runoff_areas)
+
+    if not scenario.parcels:
+        return {}
+
+    # Compute watershed area using Markoff chain approach
+    # 1. get runoff fractions matrix (rom) and parcel areas as vector (pav)
+    pcl_types = [
+        "water"
+        if scenario.get_parcel(name=pn).get_compartment("Surface_water")
+        else "N/A"
+        for pn in ro_array.keys()
+    ]
+
+    pa_dict = {pp.name: pp.area.magnitude for pp in scenario.parcels}
+    rom = []
+    pav = []
+    pcl_names = []
+    for p, ro_dict in ro_array.items():
+        pav.append([pa_dict[p]])
+        pcl_names.append(p)
+        m_row = []
+        for pp, ro in ro_dict.items():
+            if pp == 'sink':
+                continue
+            m_row.append(ro)
+        rom.append(m_row)
+    pav = np.array(pav)
+    rom = np.array(rom)
+
+    # 2. Compute watershed area matrix
+    wsa_matrix = compute_watershed_areas(rom, pav, pcl_types)
+    wsa_matrix.index = pcl_names
+    return wsa_matrix[0].to_dict()
 
 
 AERMOD_UNITS = {

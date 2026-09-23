@@ -3,7 +3,6 @@ import json
 import numpy as np
 import re
 from copy import deepcopy
-from pprint import pprint, pformat
 from shapely.geometry import Polygon, Point
 from shapely.prepared import prep
 from flask_api import ApiResult
@@ -26,20 +25,13 @@ from .defaults import \
 from .forms import ScenarioParcelsForm
 
 
-# note - this is mainly just code relocated from routes.py with absolutely zero changes.
-# handle_parcel_update is technically new -- but is really just refactoring, taking logic that
-# lived in the "update_parcel" method in routes.py and refactoring it ever-so-slightly
-# so that we can utilize this logic from either UI widgets or CSV uploads. I did NOT write this
-# original code and have not done a thorough review
-# tfeiler 20240618
-#
-# manually merged in Max's latest changes on June 29
 def handle_parcel_update(p:Parcel, parcels_data:dict):
     logger = make_logger('handle_parcel_update')
 
     land_use = get_land_use(p)
 
-    logger.info(f"Update for {p} ({p.id})\n%s", pformat(parcels_data))
+    logger.info(f"Update for {p} (id={p.id})")
+    logger.info(parcels_data)
     logger.info(f"land_use == '{land_use}'\n")
 
     air_params = {
@@ -419,6 +411,8 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
 
         from trim_frontend.parcels.defaults import get_water_params
         logger.info("Re-calculating water params...")
+        p.scenario._rom = json.loads(parcels_data['runoff_matrix'])
+        p.scenario._wsa = json.loads(parcels_data['watershed_areas'])
         water_params = get_water_params(p, parcels_data["parcelType"])
         return water_params["surface_water"]
 

@@ -287,76 +287,6 @@ def get_soil_abiotic_params(pcl):
     return {"soil_params": soil_abiotic_params}
 
 
-def get_watershed_area(pcl):
-    # Compute watershed area using Markoff chain approach
-    # 1. get runoff fractions matrix (rom) and parcel areas as vector (pav)
-    ro_array = ScenarioService(pcl.scenario).get_surface_runoff()
-
-    pcl_types = [
-        "water"
-        if pcl.scenario.get_parcel(name=pn).get_compartment("Surface_water")
-        else "N/A"
-        for pn in ro_array.keys()
-    ]
-
-    pa_dict = {pp.name: pp.area.magnitude for pp in pcl.scenario.parcels}
-    rom = []
-    pav = []
-    pcl_names = []
-    for p, ro_dict in ro_array.items():
-        pav.append([pa_dict[p]])
-        pcl_names.append(p)
-        m_row = []
-        for pp, ro in ro_dict.items():
-            if pp == 'sink':
-                continue
-            m_row.append(ro)
-        rom.append(m_row)
-    pav = np.array(pav)
-    rom = np.array(rom)
-    # 2. Compute watershed area matrix
-    wsa_matrix = compute_watershed_areas(rom, pav, pcl_types)
-    # 3. get the watershed area specific to this surface water parcel
-    return wsa_matrix.loc[pcl_names.index(pcl.name), 0]
-
-
-def compute_watershed_areas(runoff_matrix, area_parcels, parcel_type):
-    # v3 deducts area of lakes from watershed (technically the area of a lake catches rain and 
-    # delivers it to the lake and this how MC computes it. but to be consistent with the builder 
-    # formulas this version substracts lake areas from runoff area of lakes only)
-    # function to compute watershed areas by markov chain estimation. Only works if lakes runoff 100% to themselves. 
-    # Land parcel do not have watersheds and will tend to zero but lake parcel watersheds will be accurate.
-    # runoff_matrix is a square nxn matrix that must not include sinks and must include lakes in both rows and columns. 
-    # Lakes must runoff 100% to themselves.
-    # n is a large number like 200 or 300 that will enable the markov chain to reach steady state. 
-    # area_parcels is a single matrix with areas of all parcels in the same order as the rows/cols of the runoff_matrix
-
-    # New in v3: parcel_type is a list of parcel type with the same indexing as the other matrices. 
-    # Note: the transpose is required because of the arrangment of the matrix such that row are senders 
-    # and cols are receivers. When multiplying by area matrix to estimate watershed, the rows must be receivers, so transpose.
-
-    M = np.matrix(runoff_matrix)# convert to np matrix
-    M = np.nan_to_num(M)
-    M_n = np.linalg.matrix_power(M, 1000) # raise M to a large number (markov chain estimation of probabilities of endpoint of flow)
-    M_n_T = M_n.T # transpose of M_n so that it can be multiplied as a dot product with area parcels
-    
-    try:
-        indexlist=area_parcels.index
-    except:
-        indexlist=[] # if already a matrix then 
-    area_parcels = np.matrix(area_parcels)# convert to np matrix
-
-    runoff_areas = M_n_T @ area_parcels
-    try:
-        runoff_areas=pd.DataFrame(runoff_areas,index=indexlist)
-    except:
-        runoff_areas=pd.DataFrame(runoff_areas)
-
-    # new line to subtract parcel area from runoff area is parcel type is water
-    runoff_areas.loc[pd.Series(parcel_type).str.contains('water', case=False), 0] -= np.array(area_parcels[pd.Series(parcel_type).str.contains('water', case=False)]).flatten()
-    return (runoff_areas)
-
-
 def calculate_avg_precipitation_runoff_fraction(all_soil_comps, fraction_name):
     # Example
     # get the fraction of precipitation that contributes to overland runoff 
@@ -443,7 +373,10 @@ def get_water_params(pcl, parcel_type):
         total_seepage_vol_rate_to_gw = 0
 
         # get watershed area for water parcel
-        sw_total_watershed_area = get_watershed_area(pcl)
+        scn = pcl.scenario
+        if not hasattr(scn, '_wsa'):
+            ScenarioService(scn).calculate_watershed_matrix()
+        sw_total_watershed_area = scn._wsa[pcl.name]
 
         all_soil_comps = []
         connected_soil_comps = []
@@ -458,31 +391,14 @@ def get_water_params(pcl, parcel_type):
         
         # sum up watershed area of connected Soil parcels.
         for this_soil_comp in connected_soil_comps:
-            # this_watershed_area = (
-            #         this_soil_comp.area
-            #         * this_soil_comp.FractionofAreaAvailableforRunoff
-            # ).magnitude
-            # sw_total_watershed_area += this_watershed_area
-            # we need to calculate runoff to this surface_water body using the watershed area above
-            # comp_link = this_soil_comp.get_links(sw)
-            # if len(comp_link) > 0:
-            #     tps = comp_link[0].transport_processes(chemical=ch)
-            #     runoff_tps = [t for t in tps if t.name.startswith("Runoff from Surface Soil to Surface Water")]
-            #     if len(runoff_tps) > 0:
-            #         runoff_tps = runoff_tps[0]
-            #         precip_runoff = runoff_tps.eval(sender=this_soil_comp, receiver=sw, chemical=ch)
-            #         this_precip_runoff_frac_to_sw = (precip_runoff / precipitation_rate).magnitude
-            #     else:
-            #         # This handles exception for Run-off when there is no link between compartments.
-            #         print(f"No runoff transport from {this_soil_comp.standard_name} to {sw.standard_name}. "
-            #               f"They are not next to each other. Check Runoff Matrix!")
-            #         this_precip_runoff_frac_to_sw = 0
-
+            soil_pcl = this_soil_comp.volume_element.parcel
+            soil_runoff_fraction = scn._rom[soil_pcl.name][pcl.name] # this_soil_comp.FractionOfTotalRunoff(sw)
             erosion_rate = this_soil_comp.TotalErosionRate.magnitude if this_soil_comp.TotalErosionRate else 0
+
             sed_soil_erosion_to_sw += (
                 erosion_rate
-                * this_soil_comp.FractionOfTotalRunoff(sw) # surface runoff matrix
-                * this_soil_comp.volume_element.parcel.area.magnitude
+                * soil_runoff_fraction # surface runoff matrix
+                * soil_pcl.area.magnitude
             )
 
         total_runoff_vol_rate_to_this_sw = (
