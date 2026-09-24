@@ -323,7 +323,7 @@ def parse_parcel_upload():
         else:  # assume csv
             fpn = [f.stream for n, f in files.items()][0]
             fpn.seek(0)
-            lines = fpn.read().decode("utf-8")
+            lines = fpn.read().decode("utf-8-sig")
             line_num = 2
             reader = csv.DictReader(io.StringIO(lines))
 
@@ -350,6 +350,9 @@ def parse_parcel_upload():
             fish_food_web = row_data["hasFishFoodWeb"]
             receptor_spacing = row_data["receptorSpacing"]
             coordinates = row_data["coordinates"]
+
+            if not parcel_type:
+                parcel_type = "Land & Air"
 
             # TODO - reload page after upload (done; but we could do better...)
             p = ParcelService.create(name=parcel_name, description=parcel_description, scenario_id=scenario_id, vertices=coordinates)
@@ -391,8 +394,14 @@ def parse_parcel_upload():
                     "field": "receptor_spacing",
                     "receptor_spacing": receptor_spacing
                 })       
-
+            
             return_data["parcels"].append(p.as_serializable())
+            if isinstance(return_data["parcels"][-1], str):
+                print(f"Deleting corrupted parcel {p.name}...")
+                delete_parcel_contents(p)
+                ParcelService.delete(p.id)
+                raise Exception(return_data["parcels"][-1])
+
 
             # TODO - verify that "Air" in the csv sample is meaningless?
             # TODO - "Agriculture (General)" doesn't work either in UI or via CSV upload

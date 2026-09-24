@@ -80,7 +80,7 @@ class Parcel(Model):
             if len(uz) == 1:
                 self._utm_zone = uz[0]
             else:
-                self.utm_zone = uz
+                self._utm_zone = uz
         return self._utm_zone
 
     _polygon = None

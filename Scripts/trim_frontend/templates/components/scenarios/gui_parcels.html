@@ -762,7 +762,7 @@
                     LoadingScreen.hide('upload_parcel_csv');
 
                     if (!success) {
-                        alert('An error occurred during upload.');
+                        alert(`An error occurred during upload:\n${responseData?.message}`);
                         console.log(responseData)
                         console.log(c)
                     } else {
