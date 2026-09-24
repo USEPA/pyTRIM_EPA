@@ -348,6 +348,7 @@ def parse_parcel_upload():
             farm_food_chain = row_data["hasFarmFoodChain"]
             wetland = row_data["hasWetland"]
             fish_food_web = row_data["hasFishFoodWeb"]
+            receptor_spacing = row_data["receptorSpacing"]
             coordinates = row_data["coordinates"]
 
             # TODO - reload page after upload (done; but we could do better...)
@@ -384,6 +385,12 @@ def parse_parcel_upload():
                     "field": "hasFishFoodWeb",
                     "hasFishFoodWeb": fish_food_web
                 })
+
+            if receptor_spacing:
+                handle_parcel_update(p, {
+                    "field": "receptor_spacing",
+                    "receptor_spacing": receptor_spacing
+                })       
 
             return_data["parcels"].append(p.as_serializable())
 
@@ -652,6 +659,7 @@ def get_parcel_row_csv(row, coord_system, utm_zone):
         "hasFarmFoodChain": "Yes" if has_farm_food_chain else "No",
         "hasWetland": "Yes" if has_wetland else "No",
         "hasFishFoodWeb": "Yes" if has_fish_food_web else "No",
+        'receptorSpacing': row.get('ReceptorSpacing'),
         "coordinates": fixed_coords[0],
     }
 
@@ -700,23 +708,16 @@ def aggregate_parcel_vertices_from_csv(csv_rows):
         
         if not parcel_name or parcel_name.strip() == '':
             continue
-        
-        parcelType = None
-        if "Air" in row:
-            parcelType = row.get("Air")
-        if "Water" in row:
-            parcelType = row.get("Water")
-        if "Land" in row:
-            parcelType = row.get("Land")
-        
+                
         if parcel_name not in parcels:
             parcels[parcel_name] = {
                 'ParcelName': parcel_name,
-                'ParcelType': parcelType,
+                'ParcelType': row.get('ParcelType', ''),
                 'LandUse': row.get('LandUse', ''),
                 'FarmFoodChain': row.get('FarmFoodChain', ''),
                 'FishFoodWeb': row.get('FishFoodWeb', ''),
                 'Wetland': row.get('Wetland', ''),
+                'ReceptorSpacing': row.get('ReceptorSpacing'),
                 'Description': row.get('Description', ''),
                 'vertices': []
             }
@@ -779,6 +780,7 @@ def normalize_single_row_parcels(csv_rows):
             'FarmFoodChain': row.get('FarmFoodChain', ''),
             'FishFoodWeb': row.get('FishFoodWeb', ''),
             'Wetland': row.get('Wetland', ''),
+            'ReceptorSpacing': row.get('ReceptorSpacing'),
             'Description': row.get('Description', ''),
             'coordinates': coordinates
         }
@@ -814,6 +816,7 @@ def get_parcel_row_geojson(row):
         "hasFarmFoodChain": props.get("farmfoodchain").strip(),
         "hasWetland": props.get("wetland").strip(),
         "hasFishFoodWeb": props.get("fishfoodweb").strip(),
+        'receptorSpacing': row.get('ReceptorSpacing'),
         "coordinates": row["geometry"].get("coordinates")[0],
     }
 

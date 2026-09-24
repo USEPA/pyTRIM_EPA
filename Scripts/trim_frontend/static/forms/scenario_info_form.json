@@ -3,15 +3,6 @@
     "inherits": "scenario_definition_form.json",
     "fields": [
         {
-            "id": "time_zone",
-            "label": "Time Zone",
-            "data_type": "timezone",
-            "widget": "select",
-            "choices": ["EST"],
-            "required": true,
-            "help": "Indicate the time zone of your simulated location. Should match the time zone indicated in your inputs (e.g., meteorology)."
-        },
-        {
             "id": "simulation_start_date",
             "label": "First Day of Simulation",
             "data_type": "date",
@@ -54,13 +45,6 @@
             "default": 1,
             "required": true,
             "help": "Enter the interval when the model calculates transfer factors. Typically matches the time-step of your input meteorological data (which is typically 1 hr)."
-        },
-        {
-            "id": "use_steady_state",
-            "label": "Use Steady State Mode",
-            "data_type": "boolean",
-            "default": false,
-            "help": "Check this box to run a steady-state simulation (requires that all inputs and outputs are not time-varying). This feature is not typically used."
         }
     ]
 }

@@ -376,7 +376,7 @@ def get_water_params(pcl, parcel_type):
         scn = pcl.scenario
         if not hasattr(scn, '_wsa'):
             ScenarioService(scn).calculate_watershed_matrix()
-        sw_total_watershed_area = scn._wsa[pcl.name]
+        sw_total_watershed_area = scn._wsa.get(pcl.name, 0)
 
         all_soil_comps = []
         connected_soil_comps = []
