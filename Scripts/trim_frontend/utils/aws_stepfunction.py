@@ -53,8 +53,8 @@ class StepfnxHelper:
         self.logs = self.get_logs()
 
         if self.status == "SUCCEEDED":
-            output = exec_rsp.get("output", "{}")
-            parsed_output = json.loads(output)
+            _output = exec_rsp.get("output", "{}")
+            parsed_output = json.loads(_output)
             for key in parsed_output:
                 self.output[key] = parsed_output[key]
         elif self.task_failed():

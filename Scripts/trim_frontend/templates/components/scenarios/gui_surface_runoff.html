@@ -15,7 +15,7 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-md">
+            <!--<div class="col-md">
                 <div class="row">
                     <div class="col-md align-content-center justify-content-center">
                         <div class="text-center">
@@ -23,7 +23,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div>-->
             <div class="col-md">
                 <div class="row">
                     <div class="col-md align-content-center justify-content-center">
@@ -321,7 +321,7 @@
             exportTableToCSV.apply(e.target, [cleanedTable, filename]);
         });
 
-        $("#surface-runoff-upload-btn").on('click', function(e) {
+        $(form).on('change', '#default_runoff_matrix_file', (e) => {
             let matrixImport = $(form).find('[type="file"]');
             let matrixImportFileData = matrixImport.prop('files')[0];
             if (matrixImportFileData == undefined) {
@@ -330,7 +330,6 @@
             }
 
             let matrixFile = $(form).find("#default_runoff_matrix_file");
-
             let fieldData = [matrixFile.get(0)];
 
             fieldData.push({
@@ -360,7 +359,7 @@
                     console.log("reload...");
                     window.location.reload();
                 }
-            });
+            });            
         });
 
         $("#run_getflow").on('click', function (e) {

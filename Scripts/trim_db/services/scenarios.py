@@ -30,12 +30,9 @@ class ScenarioService(GenericService[Scenario], PermissionsMixin):
         return get_scenario_surface_runoff(self.__instance)
 
     def calculate_watershed_matrix(self):
-        runoff_matrix = self.get_surface_runoff()
-        watershed_areas = get_scenario_watershed_matrix(self.__instance, runoff_matrix)
-
-        self.__instance._rom = runoff_matrix
-        self.__instance._wsa = watershed_areas
-        return runoff_matrix, watershed_areas
+        self.__instance._rom = self.get_surface_runoff()
+        self.__instance._wsa = get_scenario_watershed_matrix(self.__instance, self.__instance._rom)
+        return self.__instance._rom, self.__instance._wsa
 
     def import_aermod(self, filestream: IO, for_chemical: Chemical, metadata: dict = {}):
         return import_aermod_to_scenario(self.__instance, filestream, for_chemical, metadata=metadata)
