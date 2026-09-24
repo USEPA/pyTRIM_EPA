@@ -143,7 +143,7 @@ class DockerHelper(object):
     #
     # also helpful:
     # https://stackoverflow.com/questions/45839549/docker-python-api-tagging-containers
-    def build_etc(self, stack_name):
+    def build_etc(self, stack_name, dockermode=None):
         (stack_id, outputs) = await_stack_completion(stack_name)
 
         # new way - multiple repos (one for "model run", one for "getflow", can add more later...)
@@ -153,21 +153,21 @@ class DockerHelper(object):
         sep = os.path.sep
         config_blobs = [
             {
-                "disabled": False,
+                "disabled": True if dockermode == "getflow" else False,
                 "description": "docker image for the 'run model' operation, added in mid-2024",
                 "repo_uri_output_name": "PyTrimPrivateECRModelRunRepoUri",
                 "image_tag_name": IMAGE_TAG_NAME_MODELRUN,
                 "relative_prep_script_path": "prepare_dockerized_pytrim.py",
-                "build_cmd": ["docker", "build", "--platform", "linux/amd64", "-t", IMAGE_TAG_NAME_MODELRUN, f"{parent_dir}docker"],
+                "build_cmd": ["podman", "build", "--platform", "linux/amd64", "-t", IMAGE_TAG_NAME_MODELRUN, f"{parent_dir}docker"],
                 "temp_dir": f"{parent_dir}docker{sep}temp",
             },
             {
-                "disabled": False,
+                "disabled": True if dockermode == "modelrun" else False,
                 "description": "docker image for the 'getflow' operation, added in early-2025",
                 "repo_uri_output_name": "PyTrimPrivateECRGetFlowRepoUri",
                 "image_tag_name": IMAGE_TAG_NAME_GETFLOW,
                 "relative_prep_script_path": f"getflow{sep}prepare_dockerized.py",
-                "build_cmd": ["docker", "build", "--platform", "linux/amd64", "-t", IMAGE_TAG_NAME_GETFLOW, "-f", f"{parent_dir}docker{sep}getflow{sep}Dockerfile_getflow", f"{parent_dir}docker{sep}getflow"],
+                "build_cmd": ["podman", "build", "--platform", "linux/amd64", "-t", IMAGE_TAG_NAME_GETFLOW, "-f", f"{parent_dir}docker{sep}getflow{sep}Dockerfile_getflow", f"{parent_dir}docker{sep}getflow"],
                 "temp_dir": f"{parent_dir}docker{sep}getflow{sep}temp",
             },
         ]

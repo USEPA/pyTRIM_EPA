@@ -352,8 +352,8 @@ window.TRIM = (function(trim) {
         });
     };
 
-	api.checkStepFunctionStatus = function(execution_arn, callback_fxn) {
-        let url = api.getUrl('general_api.stepfxn_check');
+	api.checkGetflowStatus = function(execution_arn, callback_fxn) {
+        let url = api.getUrl('general_api.getflow_stepfxn_check');
         let data = makeFormData({type: "data", name: "arn", value: execution_arn})
 
         return AJAX.call({

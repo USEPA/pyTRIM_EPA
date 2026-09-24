@@ -844,10 +844,10 @@ def run_getflow(scenario_id):
 
 
 @scenario_api.route(
-    '/api/stepfxn_check', methods=['POST']
+    '/api/getflow_stepfxn_check', methods=['POST']
 )
 @login_required
-def check_stepfunction_status():
+def check_getflow_status():
     execution_arn = request.form.to_dict().get("arn")
     try:
         if execution_arn is None:

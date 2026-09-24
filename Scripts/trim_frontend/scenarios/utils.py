@@ -119,9 +119,8 @@ def get_latest_run_info(scen, allow_debug=False):
             elif proc_info.execution_arn:
                 run_info["run_results"] = get_runmodel_results(proc_info.execution_arn)
 
+        # gets status of the task itself, cloudwatch logs, any outputs
         if (not is_local_run) and proc_info.execution_arn:
-
-            # gets status of the task itself, cloudwatch logs, any outputs
             run_info |= StepfnxHelper(proc_info.execution_arn).get_stepfnx_status()
             if run_info.get("status") in StepfnxHelper.STATUS_STOP:
                 run_info["run_status"] = "err "

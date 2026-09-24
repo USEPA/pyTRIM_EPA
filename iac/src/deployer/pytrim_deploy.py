@@ -21,7 +21,7 @@ class PyTrimDeployer(object):
             self.cfg = json.load(f)
             loggy(f"Stack: '{self.get_cfg_val('environment_name')}'")
 
-    def run_deployment(self, mode):
+    def run_deployment(self, mode, dockermode=None):
         loggy(f"running deployment in mode '{mode}'")
 
         if mode == "full" or mode == "ssh_key":
@@ -37,7 +37,7 @@ class PyTrimDeployer(object):
             self.create_cronjobs()
 
         if mode == "full" or mode == "docker":
-            self.build_and_push_docker_images()
+            self.build_and_push_docker_images(dockermode)
 
         if mode == "full" or mode == "push_flask_build":
             self.build_and_push_flask_app()
@@ -147,12 +147,12 @@ class PyTrimDeployer(object):
         crons_helper = CronjobsHelper()
         crons_helper.create_cronjobs(env_name, crons)
 
-    def build_and_push_docker_images(self):
+    def build_and_push_docker_images(self, dockermode=None):
         loggy(f"DOCKER SETUP!")
         docker_helper = DockerHelper()
         env_name = self.get_cfg_val("environment_name")
         loggy(f"performing Docker build/deploy...")
-        docker_helper.build_etc(env_name)
+        docker_helper.build_etc(env_name, dockermode)
 
     def build_and_push_flask_app(self):
         beanstalk_helper = BeanstalkHelper()
@@ -163,19 +163,20 @@ class PyTrimDeployer(object):
 
 def usage(msg=""):
     loggy(
-        f"Usage: python ls_deploy.py -c <json_configuration_file> (-m <mode>) (-p <aws_profile_name>)"
+        f"Usage: python ls_deploy.py -c <json_configuration_file> (-m <mode>) (-p <aws_profile_name>) (-d <docker_mode>)"
     )
     die(msg)
 
 if __name__ == "__main__":
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "c:m:p:", [ "config=", "mode=", "profile=" ])
+        opts, args = getopt.getopt(sys.argv[1:], "c:m:p:d", [ "config=", "mode=", "profile=", "docker=" ])
     except getopt.GetoptError as e:
         usage(e)
 
     config_file = None
     mode = None
-    profile = None
+    profile = None # AWS profile
+    dockermode = None # runmodel / getflow / runs both for anything else
     for opt, arg in opts:
         if opt in ("-c", "--config"):
             config_file = arg
@@ -183,6 +184,8 @@ if __name__ == "__main__":
             mode = arg
         elif opt in ("-p", "--profile"):
             profile = arg
+        elif opt in ("-d", "--docker"):
+            dockermode = arg
 
     if mode is None:
         mode = "full"

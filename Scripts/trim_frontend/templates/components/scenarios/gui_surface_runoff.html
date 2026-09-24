@@ -400,7 +400,7 @@
 
             // polling function
             let keepChecking = function () {
-                TRIM.api.checkStepFunctionStatus(executionArn, function (success, data) {
+                TRIM.api.checkGetflowStatus(executionArn, function (success, data) {
                     console.log(data);
                     if (data.status == "SUCCEEDED") {
                         clearInterval(keepCheckingId);
