@@ -24,7 +24,8 @@ class ConditionalFormatter(logging.Formatter):
             else:
                 cleaned[k] = v
         cleaned['__other'] = str(other)
-        return json.dumps(cleaned, indent=4)
+        try: return json.dumps(cleaned, indent=4)
+        except: return cleaned
 
 
 def make_logger(

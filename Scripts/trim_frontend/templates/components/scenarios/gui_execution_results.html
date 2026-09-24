@@ -224,39 +224,7 @@
         </div>
         <div class="row mb-1 mt-4">
             <div class="col-sm">
-                {% if current_user.email.lower().endswith("@icf.com") %}
-                <script language="JavaScript">
-                    function displayModelDebugging(msgs) {
-                        let debugZone = $("#model_progress_debug_zone textarea").empty();
-                        if (msgs !== undefined) {
-                            for (let i = 0 ; i < msgs.length ; i++) {
-                                let textToDisplay = typeof(msgs[i]) == "object" && "message" in msgs[i] ? msgs[i].message : msgs[i];
-                                // $("<div/>").text(textToDisplay).appendTo(debugZone);
-                                debugZone.html(debugZone.html() + textToDisplay + "\n");
-                            }
-                            debugZone.scrollTop(debugZone[0].scrollHeight - debugZone.height());
-                        } else {
-                            debugZone.html("No debug info retrieved");
-                        }
-                    }
-                </script>
-                <div class="row mb-1" style="border: 1px solid">
-                    <div class="col-sm">
-                        <div class="mt-3" id="model_progress_debug_zone">
-                            <div><b>Model run debug output will appear here.</b></div>
-                            <div><b>This info only appears for @icf.com accounts.</b></div>
-                            <textarea rows=15 cols=103 aria-label="admin-debug"></textarea>
-                            <div class="mt-1 mb-2">
-                                <button type="button" id="btn-load-debug" disabled="disabled"
-                                    class="btn btn-sm btn-outline-info"
-                                >
-                                    Refresh Debug Logs
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
+                <div class="alert" id="modelrun-status"></div>
             </div>
         </div>
     </section>
@@ -377,6 +345,26 @@
             ResultsDisplay.init();
         });
     });
+
+    function displayModelDebugging(logs) {
+        let statusArea = $("#modelrun-status");
+        statusArea.html("");
+        statusArea.removeClass('alert-warning');
+
+        if (logs && logs.length > 0) {
+            statusArea.html("<b>Model logs</b>");
+            statusArea.addClass("alert-warning");
+            let logs_str = "";
+            $(`<textarea readonly class="form-control-plaintext" id="modelrun-logs" rows="8">`).appendTo(statusArea);
+            for (let i = 0 ; i < logs.length ; i++) {
+                let timestamp = new Date(logs[i].timestamp).toLocaleString();
+                logs_str += `[${timestamp}] ${logs[i]?.message}\n`;
+            }
+            let debugZone = $('#modelrun-logs');
+            debugZone.val(logs_str);
+            debugZone.scrollTop(debugZone[0].scrollHeight - debugZone.height());           
+        }
+    }
 
     window.ResultsDisplay = ((display) => {
         let initializedForms = false;
@@ -726,7 +714,7 @@
             LoadingScreen.show('refresh_debug_logs');
             TRIM.api.refreshDebugLogs(TRIM.store.currentScenario.id).on('load', function() {
                 try {
-                    displayModelDebugging(this.responseJSON.debug_messages || []);
+                    displayModelDebugging(this.responseJSON.logs || []);
                     console.log('Done! Got latest debug logs')
                 }
                 catch (err) {
@@ -848,7 +836,7 @@
 
             const runStats = parseRunStatus(TRIM.store.latestRunInfo.run_status);
             updateRunStatusDisplay(runStats.status, runStats.stage, runStats.percent);
-            displayModelDebugging(TRIM.store.latestRunInfo.debug_messages);
+            displayModelDebugging(TRIM.store.latestRunInfo.logs);
 
             if (!TRIM.store.latestRunInfo.run_results?.mass_results) {
                 // Nothing else to draw
@@ -885,6 +873,9 @@
             TRIM.api.getLastResults(TRIM.store.currentScenario.id).on('load', function() {
                 try {
                     TRIM.store.latestRunInfo = this.responseJSON.latest_run_info || noRunInfo;
+                    if (this.responseJSON.latest_run_info) {
+                        console.log({"status": TRIM.store.latestRunInfo.status});
+                    }
                 }
                 catch (err) {
                     console.log("Error pulling latest run info\n", err);

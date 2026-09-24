@@ -700,7 +700,7 @@ def get_last_results(scenario_id):
         start_time = time.time()
         latest_run_info = get_latest_run_info(
             s,
-            allow_debug=(current_user.email.lower().endswith('@icf.com'))
+            allow_debug=(current_user.email.lower().endswith('@icf.com')) 
         )
         logger.info(f"Acquired scenario results in {time.time() - start_time} seconds")
     except Exception as e:
@@ -792,20 +792,18 @@ def get_debug_logs(scenario_id):
     if not current_user.can('view', s):
         abort(403)
     if not current_user.email.lower().endswith('@icf.com'):
-        return ApiResult({'debug_messages': ['Not authorized']})
+        return ApiResult({'logs': ['Not authorized']})
     try:
         if use_local_model_run():
             debug_messages = ["Debug messages not tracked for local runs"]
         else:
             start_time = time.time()
-            debug_messages = fetch_output_for_step_function_execution(
-                s.latest_proc_status.execution_arn
-            )
+            debug_messages = StepfnxHelper(s.latest_proc_status.execution_arn).get_logs()
             logger.info(f"Acquired debug messages in {time.time() - start_time} seconds")
     except Exception as e:
         logger.error(traceback.format_exc())
-        return ApiResult({'debug_messages': [str(e)]})
-    return ApiResult({'debug_messages': debug_messages})
+        return ApiResult({'logs': [str(e)]})
+    return ApiResult({'logs': debug_messages})
 
 
 @scenario_api.route(
@@ -835,7 +833,6 @@ def run_getflow(scenario_id):
         if state_machine_arn is not None:
             sfn_input = {"scenarioId": str(scenario_id), "generateFakeResults": "false"}
             execution_arn = StepfnxHelper().start_stepfnx_execution(state_machine_arn, sfn_input)
-            logger.info(f"Execution ARN: {execution_arn}")
             data_resp = { "executionArn": execution_arn }
         else:
             data_resp = { "error": "Missing required envrionment variable to run getflow" }

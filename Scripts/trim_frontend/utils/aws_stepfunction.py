@@ -3,13 +3,6 @@ import threading
 import boto3
 from .logging import make_logger
 
-"""
-To replace:
-    fetch_output_for_step_function_execution
-    get_complete_logs_from_group_and_stream
-    get_step_function_results
-"""
-
 
 class StepfnxHelper:
     logger = make_logger("StepfnxHelper")
@@ -17,6 +10,8 @@ class StepfnxHelper:
     sfn_client = boto3.client("stepfunctions")
     ecs_client = boto3.client("ecs")
     logs_client = boto3.client("logs")
+
+    STATUS_STOP = ['FAILED', 'TIMED_OUT', 'ABORTED']
 
     # stepfunction data
     status = ""
@@ -39,14 +34,15 @@ class StepfnxHelper:
     def __init__(self, execution_arn=None):
         self.execution_arn = execution_arn
 
+    def _make_sanitized(self, msg):
+        return f"{self.sanitize_key} {msg}"
+
     def start_stepfnx_execution(self, statemachineArn, sfn_input: dict):
-        # JUST FOR TESTING
-        # 171 is the taconite scenario on dev
-        sfn_input["scenarioId"] = str(171)
         rsp = self.sfn_client.start_execution(
             stateMachineArn=statemachineArn,
             input=json.dumps(sfn_input),
         )
+        self.logger.info(f"Execution ARN: {rsp['executionArn']}")
         return rsp["executionArn"]
 
     def get_stepfnx_status(self):
@@ -80,14 +76,14 @@ class StepfnxHelper:
                     tasks = evt_details.get("Tasks", [])
                     task = tasks[0] if len(tasks) > 0 else None
                     if not task:
-                        return []
+                        return [self._make_sanitized("No task found...")]
 
                     self.cluster_arn = task["ClusterArn"]
                     self.task_def_arn = task["TaskDefinitionArn"]
                     self.task_arn = task["TaskArn"]
                     self.task_id = self.task_arn.split("/")[-1]
         except Exception as e:
-            return [f"Error fetching logs: {e}"]
+            return [self._make_sanitized(f"Error fetching logs: {repr(e)}")]
 
         # logging, container information
         try:
@@ -101,7 +97,9 @@ class StepfnxHelper:
                 self.log_group_name = container_def["logConfiguration"]["options"]["awslogs-group"]
                 self.log_group_prefix = container_def["logConfiguration"]["options"]["awslogs-stream-prefix"]
         except Exception as e:
-            return [f"Error fetching logs: {e}"]
+            return [self._make_sanitized(f"Error fetching logs: {repr(e)}")]
+
+        return []
 
     def task_failed(self) -> bool | None:
         """
@@ -122,8 +120,9 @@ class StepfnxHelper:
                     if exit_code is not None:
                         return exit_code == 1
                     elif container.get('lastStatus', '').upper() == 'STOPPED':
-                        self.logger.warning(f"Error while running task")
-                        self.logger.warning(task_def_resp['tasks'][0])
+                        _code = container.get('stopCode', '')
+                        _rsn = container.get('stoppedReason', '')
+                        self.logger.info(f"Task stopped [{_code} / {_rsn}]")
                         return True
         except Exception:
             return None
@@ -135,15 +134,15 @@ class StepfnxHelper:
         Pagination only done when "nextXToken" response
         from get_log_events equals the "nextToken" you had just passed in
         """
-        if not self.container_name:
-            self.fetch_task_metadata()
-
-        log_stream_name = f"{self.log_group_prefix}/{self.container_name}/{self.task_id}"
-        self.logger.info(f"Fetching logs from [{log_stream_name}]...")
-
         rv = []
         next_token = None
+
+        if not self.container_name:
+            rv = self.fetch_task_metadata()
+
         try:
+            log_stream_name = f"{self.log_group_prefix}/{self.container_name}/{self.task_id}"
+            self.logger.info(f"Fetching logs from [{log_stream_name}]...")
             for attempt in range(10):
                 params = {
                     "logGroupName": self.log_group_name,
@@ -166,6 +165,8 @@ class StepfnxHelper:
                     next_token = logs_rsp["nextForwardToken"]
         except Exception as e:
             self.logger.warning(f"Could not retrieve logs: {e}")
+            rv.append(self._make_sanitized(repr(e)))
+
         return self.sanitize_logs(rv)
 
     def sanitize_logs(self, logs):

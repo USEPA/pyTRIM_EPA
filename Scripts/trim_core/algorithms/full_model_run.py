@@ -45,6 +45,14 @@ def full_stack():
     return stackstr
 
 
+# Output safe for viewing on the frontend!
+def loggy_safe(msg):
+    is_local = os.getenv("TRIM_ENV_PROFILE", "local").lower() == "local"
+    if not is_local:
+        msg = f"[_$] {msg}"
+    print(msg)
+
+
 def make_transition_matrix(scenario):
     chem_list = list(sorted(
         scenario.chemicals, key=lambda x: x.name
@@ -85,7 +93,7 @@ def make_transition_matrix(scenario):
                 chem_comp_name = chem.name + '_' + comp.standard_name
                 source_matrix.append((chem_comp_name, dr.magnitude))
         except Exception:
-            print(
+            loggy_safe(
                 f'{"*" * 20}'
                 f' Problem with getting Surface Deposition Rate'
                 f' for compartment={comp.name}, chemical={chem}'
@@ -107,7 +115,7 @@ def make_transition_matrix(scenario):
             else:
                 ic_matrix.append((chem_comp_name, 0, ic_units))
         except Exception:
-            print(
+            loggy_safe(
                 f'{"*" * 20}'
                 f' Problem with getting Initial Concentration'
                 f' for compartment={comp.name}, chemical={chem}'
@@ -171,7 +179,7 @@ def make_transition_matrix(scenario):
             # tuples of volume, mass, units, output factor, and denominator quantity
             vmu_tup = (chem_comp_name, comp.name, vol, mass, cou, cof, denom)
         except Exception:
-            print(
+            loggy_safe(
                 f'{"*" * 20}'
                 f' Problem with getting Surface Concentration Output factor'
                 f' for compartment={comp.name}, chemical={chem}'
@@ -195,9 +203,9 @@ def make_transition_matrix(scenario):
             ScenarioService.commit(preserve_cache=True)
             # if chem.name != 'Elemental Mercury':
             #     continue
-            print('\n' + '==' * 28)
-            print(f'Chemical = {chem.name}')
-            print('==' * 28)
+            loggy_safe('\n' + '==' * 28)
+            loggy_safe(f'Chemical = {chem.name}')
+            loggy_safe('==' * 28)
 
             for x, sender in enumerate(comp_list):
                 if (x % 100) == 0:
@@ -251,7 +259,7 @@ def make_transition_matrix(scenario):
                             except Exception as ex:
                                 print_vals.append(f'Unable to evaluate {transport_proc.name}')
                                 check_alg = True
-                                print(f'{"#"*100}\n{ex}\n{"#"*100}\n')
+                                loggy_safe(f'{"#"*100}\n{ex}\n{"#"*100}\n')
                             # print('\t\ttf =', transfer_factor)
                             if hasattr(transfer_factor, 'dimensionality'):
                                 transfer_factor = transfer_factor.magnitude
@@ -316,11 +324,11 @@ def make_transition_matrix(scenario):
 
                     if len(print_vals) > 1:
                         for ln in print_vals:
-                            print(ln)
+                            loggy_safe(ln)
     except KeyboardInterrupt:
         pass
 
-    print(f'{"**"*20} TM Calculation Complete {"**"*20}')
+    loggy_safe(f'{"**"*20} TM Calculation Complete {"**"*20}')
 
     df_tm = pd.DataFrame(
         transition_matrix, index=index_names,
@@ -356,7 +364,7 @@ def make_transition_matrix(scenario):
         df_c0.index.name = None
 
     except Exception as a:
-        print(full_stack())
+        loggy_safe(full_stack())
 
     return df_tm, df_sm, df_vmu, df_c0
 
@@ -562,19 +570,19 @@ def run_full_model(scn):
                 )
                 scn.proc_status.add(new_proc)
             except Exception as e:
-                print(e)
+                loggy_safe(e)
         ScenarioService.commit()
         scn = ScenarioService.get(scn.id)
         try:
             (df_tm, df_sm, df_vmu, df_c0) = make_transition_matrix(scn)
         except Exception as e:
-            print(full_stack())
+            loggy_safe(full_stack())
             return model_err(scn, f"ERRORED WHILE MAKING TRANSITION MATRIX: {e}", 'err tm 0')
 
         try:
             df_n0 = compute_initial_mass(df_c0, df_vmu)  # dataframe of initial masses computed
         except Exception as e:
-            print(full_stack())
+            loggy_safe(full_stack())
             return model_err(scn, f"ERRORED WHILE COMPUTING INITIAL MASS: {e}", 'err tm 0')
 
         # get result
@@ -588,7 +596,7 @@ def run_full_model(scn):
             # make concentration output
             df_conc = compute_concentration(df_nt, df_vmu)
         except Exception as e:
-            print(full_stack())
+            loggy_safe(full_stack())
             return model_err(scn, f"ERRORED WHILE MAKING CONCENTRATION OUTPUT: {e}", 'err ode 0')
 
         # compute annual average mass and conc time series
@@ -636,11 +644,11 @@ def run_full_model(scn):
         return json_n_avg, json_c_avg, outfile_nt, outfile_conc, outfile_tm
     finally:
         et = time.time()
-        print(f'Ran model in {(et - st) / 60:.4f} min')
+        loggy_safe(f'Ran model in {(et - st) / 60:.4f} min')
 
 
 def model_err(scn, err_msg, status):
-    print(err_msg)
+    loggy_safe(err_msg)
     # import traceback; traceback.print_exc()
     if ' fin ' in status:
         new_status = status  # force the provided status
@@ -695,7 +703,7 @@ def safe_save_output(output_data, scn=None, filetype='csv'):
 
             df = data['df']
             fname = os.path.join(out_dir, f'{abbr}_{fname_suff}')
-            print(f'\t> Saving "{fname}" ...')
+            loggy_safe(f'\t> Saving "{fname}" ...')
             try:
                 if filetype == 'csv':
                     fname += '.csv'
@@ -710,9 +718,9 @@ def safe_save_output(output_data, scn=None, filetype='csv'):
                         writer.close()
                 outfiles[abbr] = fname
             except Exception:
-                print(f'{20 * ">"} Output write exception writing {filetype} file for {abbr} data:\n{e}')
+                loggy_safe(f'{20 * ">"} Output write exception writing {filetype} file for {abbr} data:\n{e}')
     except Exception as e:
-        print(f'{20 * ">"} Output write exception writing {filetype} file:\n{e}')
+        loggy_safe(f'{20 * ">"} Output write exception writing {filetype} file:\n{e}')
     return outfiles
 
 

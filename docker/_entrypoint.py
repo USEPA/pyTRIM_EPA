@@ -6,17 +6,26 @@ from datetime import datetime as dt
 
 import boto3
 
-print(f"QUICK SHIM START - retrieve from secrets manager and set environment variables on the fly...")
+def loggy(s):
+    msg = f"[DOCKER_MODELRUN_DEBUG]: {s}"
+    print(msg)
 
-print(f"MAKE SECRET CLiENT...")
+# Output safe for viewing on the frontend!
+def loggy_safe(s):
+    msg = f"[_$] {s}"
+    print(msg)
+
+loggy(f"QUICK SHIM START - retrieve from secrets manager and set environment variables on the fly...")
+
+loggy(f"MAKE SECRET CLiENT...")
 secrets_client = boto3.client('secretsmanager')
-print(f"got if: {secrets_client}")
+loggy(f"got if: {secrets_client}")
 
 response = secrets_client.get_secret_value(
     SecretId='pytrim/database/credentials'
 )
 
-print(f"secrets response: {response}")
+loggy(f"secrets response: {response}")
 secret_data = json.loads(response['SecretString'])
 
 engine = os.getenv('DB_ENGINE')
@@ -36,13 +45,13 @@ os.environ["SQLALCHEMY_DATABASE_URI"] = (
 
 """
 # verify what's in the environment
-print(f"ENVIRONMENT (start):")
+loggy(f"ENVIRONMENT (start):")
 for key, value in os.environ.items():
-    print(f'{key}: {value}')
-print(f"ENVIRONMENT (end):")
+    loggy(f'{key}: {value}')
+loggy(f"ENVIRONMENT (end):")
 """
 
-print(f"QUICK SHIM END!")
+loggy(f"QUICK SHIM END!")
 
 from trim_core.algorithms.full_model_run import run_full_model
 from trim_db import ScenarioService
@@ -94,22 +103,18 @@ try:
 except:
     pass
 
-def loggy(s):
-    msg = f"[DOCKERENTRYPOINT] {dt.now()}: {s}"
-    print(msg)
-
 class DockerEntryPoint:
     def __init__(self):
         loggy(f"DockerEntryPoint.__init__()")
 
     """
-    def print_environment(self):
-        print("##### FULL ENVIRONMENT (START) #####")
+    def loggy_environment(self):
+        loggy("##### FULL ENVIRONMENT (START) #####")
         for key in os.environ:
-            print(f"\t'{key}' == '{os.environ[key]}'")
-        print("##### FULL ENVIRONMENT (END) #####")
-        print(f"just the tasktoken ({INCOMING_TOKEN_ENV_KEY}): '{os.getenv(INCOMING_TOKEN_ENV_KEY)}'")
-        print(f"just the scenarioid ({SCENARIO_ID_KEY}): '{os.getenv(SCENARIO_ID_KEY)}'")
+            loggy(f"\t'{key}' == '{os.environ[key]}'")
+        loggy("##### FULL ENVIRONMENT (END) #####")
+        loggy(f"just the tasktoken ({INCOMING_TOKEN_ENV_KEY}): '{os.getenv(INCOMING_TOKEN_ENV_KEY)}'")
+        loggy(f"just the scenarioid ({SCENARIO_ID_KEY}): '{os.getenv(SCENARIO_ID_KEY)}'")
     """
 
     def attempt_task_conclusion(self, output_data):
@@ -145,27 +150,27 @@ class DockerEntryPoint:
 
         # tested this -- but didn't actually need it; in fact it's actually harmful (sets up
         # the listeners and all that, when all I need is like database connectivity)
-        # print(f"Launching internal Flask app ({self.app})...")
+        # loggy(f"Launching internal Flask app ({self.app})...")
         # self.app.run(port=6060)
-        # print(f"launched!")
+        # loggy(f"launched!")
         """
         # testing - this works!
         with self.app.app_context():
-                print(f"{dt.now()}: App context established!")
+                loggy(f"{dt.now()}: App context established!")
                 s = ScenarioService.get(self.scenario_id)
 
                 if s is None:
-                    print(f"{dt.now()}: ERROR: unable to find scenario with id {self.scenario_id}; exiting.")
+                    loggy(f"{dt.now()}: ERROR: unable to find scenario with id {self.scenario_id}; exiting.")
                     return
                 else:
-                    print(f"{dt.now()}: Loaded scenario {s.id} ({s.name}): {s.description}")
+                    loggy(f"{dt.now()}: Loaded scenario {s.id} ({s.name}): {s.description}")
         """
         return self.app.app_context()
 
     # basically a ripoff of run_result_scenario in trim_frontend/scenarios/routes.py
     def run_model(self, scenario):
         global FAKE_THE_RESULTS
-        print(f"RUN MODEL WITH {FAKE_THE_RESULTS=}")
+        loggy(f"RUN MODEL WITH {FAKE_THE_RESULTS=}")
         if FAKE_THE_RESULTS:
             with open("fake_path.txt", "w") as f:
                 f.write("fake data\ni expect this to go onto S3")
@@ -185,7 +190,7 @@ class DockerEntryPoint:
                 }
             }
         else:
-            loggy(f"Kick off run for scenario {scenario.id} ({scenario.name})...")
+            loggy_safe(f"Kicking off run for scenario {scenario.id} ({scenario.name})...")
             try:
                 json_n_avg, json_c_avg, output_file_n, output_file_c, output_file_tm = run_full_model(scenario)
                 data_resp = {
@@ -198,7 +203,7 @@ class DockerEntryPoint:
                     "outputTM": output_file_tm
                 }
             except Exception as e:
-                loggy(e)
+                loggy_safe(e)
                 data_resp = {"error": e}
 
         return data_resp
@@ -208,7 +213,7 @@ class DockerEntryPoint:
         loggy(f"DockerEntryPoint.launch(); back to real data")
         uuid = str(uuidlib.uuid1())
         storage_bucket_name = os.getenv(STORAGE_BUCKET_NAME_KEY)
-        # self.print_environment()
+        # self.loggy_environment()
         loggy(f"uuid for this run is '{uuid}'; bucket is '{storage_bucket_name}'")
 
         self.get_input_data_from_environment()
@@ -221,6 +226,7 @@ class DockerEntryPoint:
         # FAKE_THE_RESULTS = True
         # loggy(f"FAKE RESULTS BBB SET TO '{FAKE_THE_RESULTS}'")
 
+        loggy_safe("App context attempt...")
         model_output = None
         with self.get_app_context():
             loggy(f"App context established!")
@@ -232,18 +238,19 @@ class DockerEntryPoint:
                 readable_scenario = f"{s['id']} ({s['name']})"
 
             if s is None:
-                loggy(f"ERROR: unable to find scenario with id {self.scenario_id}; exiting.")
+                loggy_safe(f"ERROR: unable to find scenario with id {self.scenario_id}; exiting.")
                 return
             else:
-                loggy(f"Loaded scenario {readable_scenario}; proceeding with model run...")
+                loggy_safe(f"Loaded scenario {readable_scenario}; proceeding with model run...")
                 model_output = self.run_model(s)
-                loggy(f"Run complete!!!")
+                loggy_safe(f"Run complete!")
 
         # write the data to the bucket
         s3_client = boto3.client("s3")
         full_key = f"{uuid}/model_output.json"
 
-        print(f"WRITE DATA TO '{full_key}'")
+        loggy_safe("Writing results to s3...")
+        loggy(f"WRITE DATA TO '{full_key}'")
         try:
             s3_client.put_object(
                 Body=json.dumps(model_output),
@@ -255,12 +262,12 @@ class DockerEntryPoint:
 
         for key_name in [ "outputMass", "outputConc", "outputTM" ]:
             output_file = model_output.get(key_name)
-            print(f"output probe '{key_name}' is '{output_file}'")
+            loggy(f"output probe '{key_name}' is '{output_file}'")
 
             if output_file is not None and os.path.isfile(output_file) and os.path.exists(output_file):
                 full_key = f"{uuid}/{key_name}.xlsx"
-                print(f"upload it to '{full_key}'...")
-                print(f"file S3 URL is https://{storage_bucket_name}.s3.amazonaws.com/{full_key}")
+                loggy(f"upload it to '{full_key}'...")
+                loggy(f"file S3 URL is https://{storage_bucket_name}.s3.amazonaws.com/{full_key}")
 
                 try:
                     s3_client.put_object(
@@ -292,9 +299,9 @@ class DockerEntryPoint:
                 except Exception as e:
                     loggy(f"ERROR STORING S3 URL in the DB: {e}")
             else:
-                print(f"skip '{output_file}'; doesn't exist in this payload (maybe testing data...)")
+                loggy_safe(f"Skipping '{output_file}'; doesn't exist in this payload")
 
-
+        loggy_safe("Done!")
         """
         if model_output is None:
             pass
