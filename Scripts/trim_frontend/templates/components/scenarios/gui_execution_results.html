@@ -355,10 +355,9 @@
             statusArea.html("<b>Model logs</b>");
             statusArea.addClass("alert-warning");
             let logs_str = "";
-            $(`<textarea readonly class="form-control-plaintext" id="modelrun-logs" rows="8">`).appendTo(statusArea);
+            $(`<textarea readonly class="form-control-plaintext mt-2" id="modelrun-logs" rows="10">`).appendTo(statusArea);
             for (let i = 0 ; i < logs.length ; i++) {
-                let timestamp = new Date(logs[i].timestamp).toLocaleString();
-                logs_str += `[${timestamp}] ${logs[i]?.message}\n`;
+                logs_str += `${logs[i]?.message}\n`;
             }
             let debugZone = $('#modelrun-logs');
             debugZone.val(logs_str);

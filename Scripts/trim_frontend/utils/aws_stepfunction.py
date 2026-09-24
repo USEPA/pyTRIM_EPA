@@ -34,8 +34,8 @@ class StepfnxHelper:
     def __init__(self, execution_arn=None):
         self.execution_arn = execution_arn
 
-    def _make_sanitized(self, msg):
-        return f"{self.sanitize_key} {msg}"
+    def _make_log(self, msg):
+        return {"message": f"{self.sanitize_key}{msg}"}
 
     def start_stepfnx_execution(self, statemachineArn, sfn_input: dict):
         rsp = self.sfn_client.start_execution(
@@ -50,16 +50,15 @@ class StepfnxHelper:
 
         exec_rsp = self.sfn_client.describe_execution(executionArn=self.execution_arn)
         self.status = exec_rsp.get("status", "").upper()
+        self.logs = self.get_logs()
 
         if self.status == "SUCCEEDED":
             output = exec_rsp.get("output", "{}")
             parsed_output = json.loads(output)
             for key in parsed_output:
                 self.output[key] = parsed_output[key]
-            self.logs = self.get_logs()
         elif self.task_failed():
             self.status = "FAILED"
-            self.logs = self.get_logs()
 
         return {"status": self.status, "output": self.output, "logs": self.logs}
 
@@ -76,14 +75,14 @@ class StepfnxHelper:
                     tasks = evt_details.get("Tasks", [])
                     task = tasks[0] if len(tasks) > 0 else None
                     if not task:
-                        return [self._make_sanitized("No task found...")]
+                        return [self._make_log("No task found...")]
 
                     self.cluster_arn = task["ClusterArn"]
                     self.task_def_arn = task["TaskDefinitionArn"]
                     self.task_arn = task["TaskArn"]
                     self.task_id = self.task_arn.split("/")[-1]
         except Exception as e:
-            return [self._make_sanitized(f"Error fetching logs: {repr(e)}")]
+            self.logger.info(e)
 
         # logging, container information
         try:
@@ -97,7 +96,7 @@ class StepfnxHelper:
                 self.log_group_name = container_def["logConfiguration"]["options"]["awslogs-group"]
                 self.log_group_prefix = container_def["logConfiguration"]["options"]["awslogs-stream-prefix"]
         except Exception as e:
-            return [self._make_sanitized(f"Error fetching logs: {repr(e)}")]
+            self.logger.info(e)
 
         return []
 
@@ -164,9 +163,10 @@ class StepfnxHelper:
                 else:
                     next_token = logs_rsp["nextForwardToken"]
         except Exception as e:
-            self.logger.warning(f"Could not retrieve logs: {e}")
-            rv.append(self._make_sanitized(repr(e)))
+            self.logger.warning(e)
 
+        if len(rv) == 0:
+            rv.append(self._make_log("No logs yet..."))
         return self.sanitize_logs(rv)
 
     def sanitize_logs(self, logs):
@@ -174,8 +174,8 @@ class StepfnxHelper:
         for log in logs:
             if self.sanitize_key in log["message"]:
                 logs_cleaned.append({
-                    "timestamp": log["timestamp"],
-                    "message": log["message"].replace(self.sanitize_key, "").strip(),
+                    "timestamp": log.get("timestamp"),
+                    "message": log["message"].replace(self.sanitize_key, ""),
                 })
         return logs_cleaned
 

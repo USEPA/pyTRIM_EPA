@@ -47,9 +47,9 @@ def full_stack():
 
 # Output safe for viewing on the frontend!
 def loggy_safe(msg):
-    is_local = os.getenv("TRIM_ENV_PROFILE", "local").lower() == "local"
-    if not is_local:
-        msg = f"[_$] {msg}"
+    if "\n" in msg:
+        msg = msg.replace("\n", "\n[_$]")
+    msg = f"[_$] {msg}"
     print(msg)
 
 
