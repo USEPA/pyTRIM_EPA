@@ -15,8 +15,10 @@ def loggy(s):
     print(msg)
 
 # Output safe for viewing on the frontend!
-def loggy_safe(s):
-    msg = f"[_$] {s}"
+def loggy_safe(msg):
+    if "\n" in msg:
+        msg = msg.replace("\n", "\n[_$]")
+    msg = f"[_$] {msg}"
     print(msg)
 
 INCOMING_TOKEN_ENV_KEY = "TASK_TOKEN_ENV_VARIABLE"
@@ -125,16 +127,19 @@ class DockerGetflowEntryPoint:
         QgsApplication.processingRegistry().addProvider(provider=provider)
 
         loggy_safe("Running getflow...")
-        if type(parcels_or_scenario_id) is int:
-            saved_outputs = run_getflow_v13_for_scenario_id(parcels_or_scenario_id)
-        else:
-            saved_outputs = run_getflow_v13(parcels)
+        try:
+            if type(parcels_or_scenario_id) is int:
+                saved_outputs = run_getflow_v13_for_scenario_id(parcels_or_scenario_id)
+            else:
+                saved_outputs = run_getflow_v13(parcels)
+            loggy_safe(f"Getflow run complete ({saved_outputs})")
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            loggy_safe(f"Getflow run failed: {e}")       
 
-        loggy_safe(f"Getflow run complete ({saved_outputs})")
         qgs.exitQgis()
-
         bucket, paths, presigned_urls = self.upload_results_to_s3(saved_outputs)
-
         return bucket, paths, presigned_urls
 
     def upload_results_to_s3(self, output_files):

@@ -11,8 +11,10 @@ def loggy(s):
     print(msg)
 
 # Output safe for viewing on the frontend!
-def loggy_safe(s):
-    msg = f"[_$] {s}"
+def loggy_safe(msg):
+    if "\n" in msg:
+        msg = msg.replace("\n", "\n[_$]")
+    msg = f"[_$] {msg}"
     print(msg)
 
 loggy(f"QUICK SHIM START - retrieve from secrets manager and set environment variables on the fly...")
@@ -203,6 +205,8 @@ class DockerEntryPoint:
                     "outputTM": output_file_tm
                 }
             except Exception as e:
+                import traceback
+                traceback.print_exc()
                 loggy_safe(e)
                 data_resp = {"error": e}
 

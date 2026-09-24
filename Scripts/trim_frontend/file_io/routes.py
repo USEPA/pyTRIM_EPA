@@ -469,6 +469,14 @@ def parse_met_file():
                 if 'Date' not in df.columns:
                     raise AssertionError('"Date" column is required')
 
+                df = df.rename(
+                    columns={
+                        "AmbientAirTemperature": "AirTemperature",
+                        "DaytimeIndicator": "IsDay",
+                        "Precipitation": "Rain",
+                    }
+                )
+
                 # Restrict file data date range to the simulation period
                 if not is_sfc:
                     df['DateFilter'] = pd.to_datetime(df.Date)

@@ -14,8 +14,10 @@ from trim_db.services import *
 
 
 # Output safe for viewing on the frontend!
-def loggy_safe(s):
-    msg = f"[_$] {s}"
+def loggy_safe(msg):
+    if "\n" in msg:
+        msg = msg.replace("\n", "\n[_$]")
+    msg = f"[_$] {msg}"
     print(msg)
 
 TEMP_PARCEL_NAME_COL = 'title' # actual TRIM parcels have a "title", not a "name"!
