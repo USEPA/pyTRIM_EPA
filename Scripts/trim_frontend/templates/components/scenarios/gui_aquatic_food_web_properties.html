@@ -232,6 +232,12 @@
                         $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
                         $(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
                         $(".dataTables_scrollHead").addClass('wrap-text-scrollhead');
+                        $('#aquatic-food-web-props-gui [data-toggle="popover"]').parent('sup').each(function () {
+                            const $label = $(this).siblings('label').first();
+                            if ($label.length) {
+                                $(this).appendTo($label);
+                            }
+                        });
                         $('[data-toggle="tooltip"]').tooltip()
                         $('[data-toggle="popover"]').popover()
                     },
