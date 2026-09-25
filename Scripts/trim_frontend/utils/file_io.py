@@ -181,7 +181,9 @@ def parse_plt_file(raw_data):
             cell_data = (line[col_start:col_end+1]).strip()
             converted = convert_data(col_name, cell_data)
             try:
-                if " " in converted:
+                if str(converted).startswith("*"): # comments can happen anywhere!
+                    continue
+                elif " " in converted:
                     raise Exception(json.dumps({"user_facing_error_msg": "data rows in uploaded file do not conform to column widths"}))
             except TypeError:
                 pass  # Assume successful

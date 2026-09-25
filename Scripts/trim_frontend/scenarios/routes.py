@@ -158,6 +158,7 @@ def update_scenario(scenario_id):
             abort(403)
 
         scenario_data = request.form.to_dict()
+        logger.info(scenario_data)
 
         # Merge file data
         for field_name, file_data in request.files.to_dict().items():

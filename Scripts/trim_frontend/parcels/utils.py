@@ -1295,10 +1295,12 @@ def geojson_to_aermod_receptors(geojson_contents):
 
 
 def update_chemical_formula(chem, comp, param_name, val, unit=None):
+    logger = make_logger("formula_update")
+
     param = comp.parameters.get(param_name)
     val = float(val)
     if not param:
-        print(f"No parameter [{param_name}] for compartment [{comp.name} :: {comp.id}]")
+        logger.info(f"No parameter [{param_name}] for compartment [{comp.name} :: {comp.id}]")
         return
 
     kwargs = {"requirements": f"(self.id == {comp.id})", "scenario_id": comp.volume_element.parcel.scenario.id}
@@ -1331,6 +1333,6 @@ def update_chemical_formula(chem, comp, param_name, val, unit=None):
         eq_arr = [part.strip() for part in eq_arr]
         new_formula = " else ".join(eq_arr)
 
-    print(new_formula)
+    logger.debug(new_formula)
     FormulaService.get(param.formula.id).equation = new_formula
     FormulaService.commit()

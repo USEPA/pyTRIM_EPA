@@ -388,12 +388,16 @@ def get_water_params(pcl, parcel_type):
         # weighted average of precipitation fractions
         avg_precip_runoff_frac = calculate_avg_precipitation_runoff_fraction(all_soil_comps, 'PrecipitationRunoffFraction')
         avg_precip_seepage_frac = calculate_avg_precipitation_runoff_fraction(all_soil_comps, 'GroundwaterSeepageFraction')
-        
+
         # sum up watershed area of connected Soil parcels.
         for this_soil_comp in connected_soil_comps:
             soil_pcl = this_soil_comp.volume_element.parcel
-            soil_runoff_fraction = scn._rom[soil_pcl.name][pcl.name] # this_soil_comp.FractionOfTotalRunoff(sw)
             erosion_rate = this_soil_comp.TotalErosionRate.magnitude if this_soil_comp.TotalErosionRate else 0
+
+            try:
+                soil_runoff_fraction = scn._rom[soil_pcl.name][pcl.name]
+            except:
+                soil_runoff_fraction = this_soil_comp.FractionOfTotalRunoff(sw)
 
             sed_soil_erosion_to_sw += (
                 erosion_rate
@@ -427,7 +431,7 @@ def get_water_params(pcl, parcel_type):
             evaporation_vol_rate = None
             print(f'Problem Calculating Water Column Evaporation Volumetric Rate:\n {ex}')
         # evaporation_vol_rate = 3.3E6
-    
+
         try:
             wc_external_inflow = get_correct_param("ExternalWaterInflow", sw_pars) or 0
             lake_inflow = json.loads(sw_pars.get('ExternalWaterInflow').formula.equation)
@@ -474,7 +478,7 @@ def get_water_params(pcl, parcel_type):
         except Exception as ex:
             wc_discharge_vol_rate = None
             print(f'Problem Calculating Water Column Discharge Volumetric Rate:\n {ex}')
-        
+
         try:
             wc_sed_discharge_rate = (
                 get_correct_param("SuspendedSedimentConcentration", sw_pars)
