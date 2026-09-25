@@ -1,5 +1,7 @@
+import time
 import requests
 import xmltodict
+from ...utils.logging import make_logger
 
 
 class ApiMeta(type):
@@ -26,7 +28,7 @@ class ApiMeta(type):
 
 class UsdaApi(metaclass=ApiMeta):
     @classmethod
-    def get_parcel_soil_data(cls, parcel_coords, username=None, password=None):
+    def get_parcel_soil_data(cls, parcel_name, parcel_coords, username=None, password=None):
         cls.headers['Content-Type'] = 'text/xml'
         vertex = parcel_coords
         query = f'-- Define a triangular AOI in WGS84\n\
@@ -71,11 +73,16 @@ where A.id = M.mukey;\n\
 </sdm:RunQuery>\n\
 </soap:Body>\n\
 </soap:Envelope>'
-        response_xml = cls.session.post(f'{cls.root}', data=body, headers=cls.headers)
-        if not response_xml.status_code == 200:
-            # print(xmltodict.parse(response_xml.content, process_namespaces=False))
-            raise ValueError('USDA Soil Data Mart API call Error')
-        response_dict = xmltodict.parse(response_xml.content, process_namespaces=False)
+        
+        #response_xml = cls.session.post(f'{cls.root}', data=body, headers=cls.headers)
+        #if not response_xml.status_code == 200:
+        #    # print(xmltodict.parse(response_xml.content, process_namespaces=False))
+        #    raise ValueError('USDA Soil Data Mart API call Error')
+        #response_dict = xmltodict.parse(response_xml.content, process_namespaces=False)
+        #return response_dict
+
+        cls._parcel = parcel_name
+        response_dict = UsdaApi._post_query(body)
         return response_dict
 
     @classmethod
@@ -109,3 +116,31 @@ where A.id = M.mukey;\n\
         response_dict = xmltodict.parse(response_xml.content, process_namespaces=False)
         return response_dict
 
+    @classmethod
+    def _post_query(cls, body, attempts=3):
+        logger = make_logger('usda_call')
+        for attempt in range(attempts):
+            try:
+                response_xml = cls.session.post(
+                    cls.root,
+                    data=body,
+                    headers=cls.headers,
+                    timeout=(10, 90),
+                )
+                response_xml.raise_for_status()
+
+                parsed = xmltodict.parse(
+                    response_xml.content,
+                    process_namespaces=False,
+                )
+
+                if "Fault" in str(parsed):
+                    raise RuntimeError(f"USDA SOAP fault: {parsed}")
+
+                return parsed
+            
+            except (requests.RequestException, RuntimeError) as e:
+                logger.warning(f"Failed to fetch data for {cls._parcel} ({attempt+1}/{attempts}): {e}")
+                if attempt == attempts - 1:
+                    raise
+                time.sleep(2 ** attempt)

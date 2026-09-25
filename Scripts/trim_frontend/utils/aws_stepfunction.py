@@ -34,8 +34,9 @@ class StepfnxHelper:
     def __init__(self, execution_arn=None):
         self.execution_arn = execution_arn
 
-    def _make_log(self, msg):
-        return {"message": f"{self.sanitize_key}{msg}"}
+    @classmethod
+    def make_log(cls, msg):
+        return {"message": f"{cls.sanitize_key}{msg}"}
 
     def start_stepfnx_execution(self, statemachineArn, sfn_input: dict):
         rsp = self.sfn_client.start_execution(
@@ -75,7 +76,7 @@ class StepfnxHelper:
                     tasks = evt_details.get("Tasks", [])
                     task = tasks[0] if len(tasks) > 0 else None
                     if not task:
-                        return [self._make_log("No task found...")]
+                        return [self.make_log("No task found...")]
 
                     self.cluster_arn = task["ClusterArn"]
                     self.task_def_arn = task["TaskDefinitionArn"]
@@ -166,7 +167,7 @@ class StepfnxHelper:
             self.logger.warning(e)
 
         if len(rv) == 0:
-            rv.append(self._make_log("No logs yet..."))
+            rv.append(self.make_log("No logs yet..."))
         return self.sanitize_logs(rv)
 
     def sanitize_logs(self, logs):

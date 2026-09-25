@@ -94,7 +94,7 @@ def start_state_machine_model_run(scen):
         return None  # Nothing to do
 
 
-def get_latest_run_info(scen, allow_debug=False):
+def get_latest_run_info(scen):
     run_info = {
         'has_run': scen.has_process_hist,
         "lastest_run_date": "",

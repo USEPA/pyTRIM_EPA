@@ -699,10 +699,7 @@ def get_last_results(scenario_id):
         if not current_user.can('view', s):
             abort(403)
         start_time = time.time()
-        latest_run_info = get_latest_run_info(
-            s,
-            allow_debug=(current_user.email.lower().endswith('@icf.com')) 
-        )
+        latest_run_info = get_latest_run_info(s)
         logger.info(f"Acquired scenario results in {time.time() - start_time} seconds")
     except Exception as e:
         logger.error(traceback.format_exc())
@@ -792,11 +789,9 @@ def get_debug_logs(scenario_id):
     s = ScenarioService.get(scenario_id)
     if not current_user.can('view', s):
         abort(403)
-    if not current_user.email.lower().endswith('@icf.com'):
-        return ApiResult({'logs': ['Not authorized']})
     try:
         if use_local_model_run():
-            debug_messages = ["Debug messages not tracked for local runs"]
+            debug_messages = [StepfnxHelper.make_log("Debug messages not tracked for local runs")]
         else:
             start_time = time.time()
             debug_messages = StepfnxHelper(s.latest_proc_status.execution_arn).get_logs()
