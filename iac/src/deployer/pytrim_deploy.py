@@ -169,7 +169,7 @@ def usage(msg=""):
 
 if __name__ == "__main__":
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "c:m:p:d", [ "config=", "mode=", "profile=", "docker=" ])
+        opts, args = getopt.getopt(sys.argv[1:], "c:m:p:d:", [ "config=", "mode=", "profile=", "docker=" ])
     except getopt.GetoptError as e:
         usage(e)
 

@@ -331,7 +331,7 @@ def reset_emissions_and_concentrations(s, chem, ic_reset=False):
             param = comp.parameters.get(param_name)
             if (
                 isinstance(param, CustomParameter)
-                and f"chemical.id == {str(chem.id)}" in param.formula.equation
+                and f"chemical.id == {str(chem.id)} " in param.formula.equation
             ):
                 update_chemical_formula(chem, comp, param_name, 0)
 

@@ -71,22 +71,34 @@
                                 <div data-slot="true" data-target="deposition_overlay_zflag_restriction"></div>
                             </div>
                         </div>
+                        
+                        <div class="row">
+                            <div class="col-2">
+                                <!-- <div data-slot="true" data-target="parcel_coordinates_description"></div> -->
+                                <a id="deposition-overlay-upload-btn" href="#" class="btn btn-secondary"><i
+                                        class="fas fa-upload mr-1"></i>Upload</a>
+                            </div>
 
-                        <!-- <div data-slot="true" data-target="parcel_coordinates_description"></div> -->
-                        <a id="deposition-overlay-upload-btn" href="#" class="btn btn-secondary"><i
-                                class="fas fa-upload mr-1"></i>Upload</a>
-                    </div>
-                </div>
-                <div class="row mt-2" id="deposition-overlay-current-file" style="display:none; margin-top: 20px">
-                    <div class="errors">
-                    </div>
+                            <!--Uploaded PLT file-->
+                            <div class="col ml-2">
+                                <div id="deposition-overlay-current-file" style="display:none;">
+                                    <div class="">
+                                        <a id="deposition-overlay-delete-btn" href="#" class="btn btn-secondary"><i
+                                                class="fas fa-trash mr-1"></i>Delete <span
+                                                id="deposition-overlay-current-filename"
+                                                class="text-break"></span></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                    <div class="col-sm">
-                        <a id="deposition-overlay-delete-btn" href="#" class="btn btn-secondary"><i
-                                class="fas fa-trash mr-1"></i>Delete <span
-                                id="deposition-overlay-current-filename"></span></a>
+                        <div class="row mt-2">
+                            <div class="col">
+                                <div class="alert alert-danger" id="dep-file-errors"></div>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                </div>                                     
             </div>
         </div>
         <div id="parcel_file_fields_div">
@@ -302,11 +314,13 @@
         mapLayers.removeLayer(depositionOverlayGroup); // removes from the layers menu
         depositionOverlayGroup.removeFrom(map); // hides from the map
         $("#deposition-overlay-current-file").hide(); // hide management ui
+        $("#dep-file-errors").closest('.row').hide();
     };
 
     let installDepositionOverlayOntoMap = function (responseData) {
-        let errorDisplayArea = $("#deposition-overlay-current-file .errors");
+        let errorDisplayArea = $("#dep-file-errors");
         errorDisplayArea.empty();
+        errorDisplayArea.closest('.row').hide();
 
         if (responseData.file_metadata != null) {
             // show the management UI
@@ -344,10 +358,13 @@
 
                 mapLayers.addOverlay(depositionOverlayGroup, "Deposition");
             } else {
-                $("<h4/>").html("Errors with uploaded file:").appendTo(errorDisplayArea);
+                $("#dep-file-errors").closest('.row').show();
+                $("<b/>").html(`Errors with ${responseData.file_metadata?.original_file_name}`).appendTo(errorDisplayArea);
+                let _ul = $('<ul/>');
                 for (let i = 0; i < responseData.file_metadata.errors.length; i++) {
-                    $("<li/>").html(responseData.file_metadata.errors[i]).appendTo(errorDisplayArea);
+                    $("<li/>").html(responseData.file_metadata.errors[i]).appendTo(_ul);
                 }
+                $(_ul).appendTo(errorDisplayArea);
             }
         }
     };

@@ -209,6 +209,8 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
     df_aermod = df.copy()
     if 'NET ID' in df_aermod.columns:
         df_aermod = df[~df['NET ID'].str.startswith('POLGRID')]
+        if df_aermod.empty:
+            raise ValueError("AERMOD file has 0 rows remaining after dropping where NET ID starts with POLGRID")
 
     try:
         # Convert AERMOD X and Y to WGS84 coordinates.
@@ -253,18 +255,6 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
             compartment = compartment[0]
         return compartment
 
-    def get_compartment_height(pcl_id, media, default=(0 * scenario.parameters.unit_registry('m'))):
-        compartment = get_compartment(pcl_id, media)
-        if not compartment:
-            return default
-        return compartment.height
-
-    def get_compartment_volume(pcl_id, media, default=(0 * scenario.parameters.unit_registry('m^3'))):
-        compartment = get_compartment(pcl_id, media)
-        if not compartment:
-            return default
-        return compartment.volume
-
     try:
         # add parcel location to each receptor in aermod file
         df_aermod['parcel_id'] = df_aermod.apply(
@@ -280,11 +270,23 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
         df_aermod['parcel_area'] = df_aermod.parcel_id.apply(
             lambda p_id: parcels[p_id].area.magnitude
         )
+
+        pcl_aircomp_data = {}
+        for pcl_id in df_aermod['parcel_id'].astype(int).unique():
+            aircomp = get_compartment(pcl_id, "Air")
+            if aircomp:
+                pcl_aircomp_data[pcl_id] = {"height": aircomp.height, "volume": aircomp.volume}
+            else:
+                pcl_aircomp_data[pcl_id] = {
+                    "height": (0 * scenario.parameters.unit_registry("m")),
+                    "volume": (0 * scenario.parameters.unit_registry("m^3")),
+                }
+
         df_aermod['air_compartment_height'] = df_aermod.parcel_id.apply(
-            lambda p_id: get_compartment_height(p_id, 'Air')
+            lambda p_id: pcl_aircomp_data[p_id]["height"]
         )
         df_aermod['air_compartment_volume'] = df_aermod.parcel_id.apply(
-            lambda p_id: get_compartment_volume(p_id, 'Air')
+            lambda p_id: pcl_aircomp_data[p_id]["volume"]
         )
     except Exception as e:
         raise Exception(f"Error finding parcels corresponding to sources :: {e}")
@@ -293,7 +295,7 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
     # print(df_aermod)
 
     if df_aermod.empty:
-        raise ValueError("AERMOD file has no receptors to map to scenario parcel locations")
+        raise ValueError("AERMOD file has 0 rows remaining after dropping receptors not mapped to scenario parcel locations")
 
     def get_distance_to_nearest_neighbor(from_x, from_y, neighbors_df):
         point = Point(from_x, from_y)  # make a shapely point object of current point of interest

@@ -378,25 +378,23 @@ class MiscAssociatedFileDepositionOverlay(MiscAssociatedFileVariety):
     
     def apply_ZFLAG_logic(self, df, input_file_errors, metadata):
         try:
-            zflag_restriction = float(metadata.get("zflag_restriction"))
-        except Exception:
+            zflag_restriction = float(metadata.get('zflag_restriction'))
+        except:
             zflag_restriction = None
 
-        if "ZFLAG" in df.columns.to_list():
-            unique_zflag_vals = df["ZFLAG"].unique()
-            if len(unique_zflag_vals) == 1:
-                # only one zflag; ok to use it
-                pass
-            else:
-                if 0 in unique_zflag_vals:
-                    # drop all rows where "ZFLAG" != 0 (tilde negates)
-                    df = df.drop(df[~(df["ZFLAG"] == 0)].index)
-                else:
-                    if zflag_restriction is not None:
-                        # filter to only include thise
-                        df = df.drop(df[~(df["ZFLAG"] == zflag_restriction)].index)
-                    else:
-                        input_file_errors.append(f"ZFLAG issues")
+        if 'ZFLAG' in df.columns.values:
+            if zflag_restriction is not None:
+                # Filter to user-specified value
+                if zflag_restriction not in df.ZFLAG.unique():
+                    input_file_errors.append(f'ZFLAG={zflag_restriction} not found in file')
+                df = df[df["ZFLAG"] == zflag_restriction].copy()
+
+            avail_zflags = df.ZFLAG.unique()
+            if len(avail_zflags) > 1:
+                # By default, filter to lowest value
+                lowest_zflag = min(avail_zflags)
+                df = df[df["ZFLAG"] == lowest_zflag].copy()
+        return df
 
     def perform_custom_upload_behavior(self, **kwargs):
         if "uploaded_contents" in kwargs and "metadata" in kwargs:
@@ -436,7 +434,7 @@ class MiscAssociatedFileDepositionOverlay(MiscAssociatedFileVariety):
             # apply some bizlogic rules based on GRP and ZFLAG cols
             if len(input_file_errors) == 0:
                 self.apply_GRP_logic(df, input_file_errors)
-                self.apply_ZFLAG_logic(df, input_file_errors, metadata)
+                df = self.apply_ZFLAG_logic(df, input_file_errors, metadata)
 
             # sum up deposition
             if len(df) > 0:
@@ -582,8 +580,8 @@ class MiscAssociatedFileAERMODGeneratedReceptors(MiscAssociatedFileVariety):
 def use_local_misc_files():
     # in dev/prod, we store misc files in S3.
     # Locally, we just run the model directly.
-    trim_env_profile = os.environ.get("TRIM_ENV_PROFILE", "").lower()
-    return (trim_env_profile not in ["test", "dev", "devgetflow", "prod"])
+    trim_env_profile = os.environ.get("TRIM_ENV_PROFILE", "local").lower()
+    return (trim_env_profile == "local")
 
 
 def get_local_misc_file_loc():
