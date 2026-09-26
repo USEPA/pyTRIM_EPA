@@ -402,58 +402,25 @@
                 TRIM.api.checkGetflowStatus(executionArn, function (success, data) {
                     console.log(data);
                     if (data.status == "SUCCEEDED") {
-                        clearInterval(keepCheckingId);
                         getflowStatusArea.html("<b>Run complete!</b>");
                         getflowStatusArea.addClass('alert-success');
+                        clearInterval(keepCheckingId);
                         toggleBtnState(false);
+
+                        $("<a/>").addClass('ml-3 btn btn-link text-dark')
+                            .attr("href", data.output.presigned_urls[1])
+                            .html(`<i class="fa fa-download mr-2"></i>Download percent flow matrix`)
+                            .appendTo(getflowStatusArea);
+                        loggingHtml(getflowStatusArea, data.logs);
                         
-                        // import getflow generated matrix
-                        $("<button/>").addClass('ml-3 btn btn-link').html("Update matrix").appendTo(getflowStatusArea).on('click', (e) => {
-                            e.preventDefault();
-                            let skipPcls = [];
-                            TRIM.store.currentScenario.parcels.forEach((p, i) => {
-                                if (p?.parcelType?.includes("Water") || p?.parcelType?.includes("Air Only")) skipPcls.push(p.name)
-                            });
-
-                            let fieldData = [
-                                {
-                                    "type": "input",
-                                    "name": "presigned_url",
-                                    "value": data.output.presigned_urls[1]
-                                },
-                                {
-                                    "type": "input",
-                                    "name": "scenario_id",
-                                    "value": TRIM.store.currentScenario.id
-                                },
-                                {
-                                    "type": "input",
-                                    "name": "skip_parcels",
-                                    "value": skipPcls
-                                }
-                            ];
-    
-                            LoadingScreen.show('upload_matrix_csv');
-                            TRIM.api.uploadSurfaceRunoffMatrixFile(fieldData, function (success, responseData, c) {
-                                LoadingScreen.hide('upload_matrix_csv');
-                                if (!success) {
-                                    alert('An error occurred during upload:\n' + responseData.message);
-                                } else {
-                                    console.log("reload...");
-                                    window.location.reload();
-                                }
-                            });
+                        // update table
+                        LoadingScreen.show('surface_runoff_loading');
+                        TRIM.api.getRunoffMatrix(TRIM.store.currentScenario).on('load', function () {
+                            var sd = this.responseJSON.runoff_matrix;
+                            TRIM.store.currentScenario.runoff_matrix = sd;
+                            TRIM.forms.populate(form, TRIM.store.currentScenario.runoff_matrix);
+                            renderRunoffForm();
                         });
-
-                        // Admin debugging
-                        let is_admin = ("{{current_user.is_admin}}".toUpperCase() === "TRUE");
-                        if (is_admin) {
-                            $("<a/>").addClass('ml-3 btn btn-link').attr("href", data.output.presigned_urls[1]).html("Download results").appendTo(getflowStatusArea);
-                            loggingHtml(getflowStatusArea, data.logs);
-                        }
-                        else {
-                            $(getflowStatusArea).find('button').click();
-                        }
                     } else if (data.status == "FAILED" || data.status == "TIMED_OUT" || data.status == "ABORTED") {
                         getflowStatusArea.html(`<b>Run status: ${data.status}</b>`);
                         getflowStatusArea.addClass('alert-danger');

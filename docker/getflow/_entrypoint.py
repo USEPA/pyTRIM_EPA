@@ -1,4 +1,5 @@
 import json, os, sys
+import traceback
 
 # now that we run in a virtual environment within our Docker container,
 # also need to point at this or qgis.core can't be imported...
@@ -103,7 +104,7 @@ class DockerGetflowEntryPoint:
         self.app = create_app()
         return self.app.app_context()
 
-    def launch_helper(self, parcels_or_scenario_id):
+    def launch_helper(self, scenario_id):
         # h/t https://gis.stackexchange.com/questions/348140/qgis-3-10-python-ide-application-path-not-initialized
         # see also https://docs.qgis.org/3.28/en/docs/pyqgis_developer_cookbook/index.html
         loggy_safe("Setting up qgs application/path/initialization...")
@@ -112,12 +113,12 @@ class DockerGetflowEntryPoint:
         QgsApplication.setPrefixPath("/usr/bin/qgis", True)
         QgsApplication.initQgis()
 
-        loggy_safe("Initialize processing plugins...")
+        loggy_safe("Initializing processing plugins...")
         import processing
         from processing.core.Processing import Processing
         Processing.initialize()
 
-        loggy_safe("Initialize saga...")
+        loggy_safe("Initializing saga...")
         # this seems promising:
         # https://gis.stackexchange.com/a/456180
         # you need to unzip processing_saga_nextgen in your plugins dir...see Dockerfile
@@ -126,26 +127,40 @@ class DockerGetflowEntryPoint:
         provider.loadAlgorithms()
         QgsApplication.processingRegistry().addProvider(provider=provider)
 
-        loggy_safe("Running getflow...")
         try:
-            if type(parcels_or_scenario_id) is int:
-                saved_outputs = run_getflow_v13_for_scenario_id(parcels_or_scenario_id)
-            else:
-                saved_outputs = run_getflow_v13(parcels)
-            loggy_safe(f"Getflow run complete ({saved_outputs})")
+            loggy_safe("Running getflow...")
+            saved_outputs, percent_matrix_df = run_getflow_v13_for_scenario_id(scenario_id)
+            loggy_safe(f"Getflow run complete, percent flow matrix generated")
         except Exception as e:
-            import traceback
             traceback.print_exc()
-            loggy_safe(f"Getflow run failed: {e}")       
+            loggy_safe(f"Getflow run failed: {e}")
+            sys.exit(1) 
 
         qgs.exitQgis()
-        bucket, paths, presigned_urls = self.upload_results_to_s3(saved_outputs)
+
+        try:
+            loggy_safe("Uploading results to s3...")
+            bucket, paths, presigned_urls = self.upload_results_to_s3(saved_outputs)
+            loggy_safe("Upload complete")
+        except Exception as e:
+            traceback.print_exc()      
+            loggy_safe(f"Failed to save getflow results to s3, skipping...")      
+
+        try:
+            loggy_safe("Updating surface runoff matrix...")
+            self.update_runoff_matrix(scenario_id, percent_matrix_df)
+            loggy_safe("Surface runoff matrix updated")
+        except Exception as e:
+            traceback.print_exc()
+            loggy_safe(f"Failed to update surface runoff matrix with getflow results: {e}")
+            sys.exit(1) 
+
         return bucket, paths, presigned_urls
 
     def upload_results_to_s3(self, output_files):
         # write the data to the bucket
         s3_client = boto3.client("s3")
-        loggy_safe("Uploading results to s3...")
+        loggy(output_files)
 
         presigned_urls = []
         full_keys = []
@@ -181,9 +196,9 @@ class DockerGetflowEntryPoint:
                 errored = True
 
         if errored:
-            return None, None, None
+            raise
+            #return None, None, None
         else:
-            loggy_safe("Upload complete")
             return self.storage_bucket_name, full_keys, presigned_urls
         
     def create_presigned_url(self, s3_client, bucket_name, object_name, expiration = 3600):
@@ -207,6 +222,56 @@ class DockerGetflowEntryPoint:
 
         # The response contains the presigned URL
         return response
+
+    def update_runoff_matrix(self, scenario_id, df):
+        from decimal import Decimal
+        import pandas as pd
+        from trim_frontend.parcels.utils import handle_parcel_update
+        from trim_frontend.parcels.defaults import get_general_params
+
+        df.insert(0, 'sink', df.pop('SINK'))
+        df[df.select_dtypes(include=['number']).columns] /= 100
+
+        # We can skip water and air parcels
+        scn = ScenarioService.get(scenario_id)
+        pcls = {}
+        for pcl in scn.parcels:
+            parcel_type = get_general_params(pcl).get("parcelType")
+            if "Water" in parcel_type or parcel_type == "Air Only":
+                df = df.drop(index=pcl.name)
+            else:
+                pcls[pcl.name] = pcl
+
+        reader = df.to_dict('index')
+        row_counter = 1
+        precision = 4
+        for sender, row in reader.items():
+            row_total = [round(v, precision) for v in row.values()]
+            row_total = round(sum(row_total), precision)
+            if row_total == 0: continue
+            elif row_total != 1:
+                row_diff = round(Decimal(1.0000) - Decimal(row_total), precision)
+                for k, v in row.items():
+                    if k == "parcels" or k == 'sink' or v == 0: continue
+                    after = round(row_diff + Decimal(v), precision)
+                    df.at[row_counter-1, k] = float(after)
+                    row[k] = after
+                    break
+            row_counter += 1
+
+        for sender, receivers in reader.items():
+            loggy_safe(f"Updating for sender [{sender}]...")
+            sender = pcls[sender]
+            receiver_pcls = [f"ro_{k}" for k in receivers.keys()]
+            receive_vals = [f"{float(Decimal(v))}" for v in receivers.values()]
+            payload = {
+                "id": sender.id,
+                "field": "runoff_matrix_value",
+                "sender": f"ro_{sender.name}",
+                "receiver": ",".join(receiver_pcls),
+                "ro_value": ",".join(receive_vals)
+            }
+            handle_parcel_update(sender, payload)
 
     def launch(self):
         loggy(f"DockerGetflowEntryPoint.launch()")
@@ -243,7 +308,7 @@ class DockerGetflowEntryPoint:
                 "presigned_urls": presigned_urls
             })
 
-        loggy(f"DONE!")
+        loggy_safe(f"Getflow run complete! Surface runoff matrix updated for {scen} ({self.scenario_id})")
 
 if __name__ == "__main__":
     ep = DockerGetflowEntryPoint()

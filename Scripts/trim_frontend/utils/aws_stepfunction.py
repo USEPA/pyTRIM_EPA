@@ -118,7 +118,7 @@ class StepfnxHelper:
                 if container["name"] == self.container_name:
                     exit_code = container.get("exitCode")
                     if exit_code is not None:
-                        return exit_code == 1
+                        return exit_code != 0
                     elif container.get('lastStatus', '').upper() == 'STOPPED':
                         _code = container.get('stopCode', '')
                         _rsn = container.get('stoppedReason', '')

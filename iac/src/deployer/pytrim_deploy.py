@@ -213,4 +213,4 @@ if __name__ == "__main__":
 
         if proceed_or_not[0].lower() == "y":
             d = PyTrimDeployer(config_file, whoami)
-            d.run_deployment(mode)
+            d.run_deployment(mode, dockermode)

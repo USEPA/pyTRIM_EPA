@@ -263,11 +263,11 @@ def run_getflow_v13_for_scenario_id(scenario_id):
     parcels_for_this_scenario = names_to_vertices
 
     loggy_safe(f"Loaded parcels: {parcels_for_this_scenario}")
-    return run_getflow_v13(parcels_for_this_scenario)
+    return run_getflow_v13(parcels.scenario.name, parcels_for_this_scenario)
 
 
 # this is Samuel's GetFlow_V13_LakesAndFlowLines.py script with some changes -- separated out util functions, renamed a few things, etc.
-def run_getflow_v13(parcels):
+def run_getflow_v13(scn_name, parcels):
     # make it fast
     print(f"TIBSV13 RUN_GETFLOW_V13 ({type(parcels)}): {parcels}")
     sep = os.path.sep
@@ -507,8 +507,8 @@ def run_getflow_v13(parcels):
     raw_matrix, percent_matrix, matched, unmatched = build_parcel_flow_matrix(parcels, ABS_ACCUMULATION, DRAINAGE, TEMP_PARCEL_NAME_COL)
     loggy_safe(f"build_parcel_flow_matrix...DONE")
 
-    raw_output_path = f"{current_folder_path}{sep}parcel_raw_flow_matrix.csv"
-    percent_output_path = f"{current_folder_path}{sep}parcel_percent_flow_matrix.csv"
+    raw_output_path = f"{current_folder_path}{sep}{scn_name}_raw_flow_matrix.csv"
+    percent_output_path = f"{current_folder_path}{sep}{scn_name}_percent_flow_matrix.csv"
 
     raw_matrix.to_csv(raw_output_path)
     percent_matrix.to_csv(percent_output_path)
@@ -519,4 +519,4 @@ def run_getflow_v13(parcels):
     print(f"Percentage flow matrix saved to '{percent_output_path}'")
     loggy_safe(f"Matched: {matched}, Unmatched (to SINK): {unmatched}")
 
-    return (raw_output_path, percent_output_path)
+    return (raw_output_path, percent_output_path), percent_matrix

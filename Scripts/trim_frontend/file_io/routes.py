@@ -851,139 +851,41 @@ def parse_runoff_matrix_upload():
     parcel_names = {p.name.lower() : p for p in parcels}
 
     files = request.files
-    presigned_url = request.form.get("presigned_url")
-    if not files and not presigned_url:
+    if not files:
         return ApiException("No files were uploaded")
 
     try:
-        if presigned_url: # getflow generated matrix
-            # START - validate the presigned_url
-            # make sure it hasn't been monkeyed with -- URL matches expected pattern,
-            # we have exactly the params we expect, etc. If we don't, we'll throw an Exception
-            validate_url = True
+        fpn = [f.stream for n, f in files.items()][0]
+        fpn.seek(0)
+        lines = fpn.read().decode("utf-8")
+        reader = csv.DictReader(io.StringIO(lines))
 
-            if validate_url:
-                regex = r"^https:\/\/[-a-z0-9]*\.s3\.amazonaws\.com\/[-0-9a-f]*\/[_a-z]*\.csv.*\?(.*)"
-                matches = re.finditer(regex, presigned_url)
-
-                presigned_params = {}
-                for matchNum, match in enumerate(matches, start=1):
-                    for groupNum in range(0, len(match.groups())):
-                        groupNum = groupNum + 1
-                        chunks = match.group(1).split("&")
-                        i = 0
-                        for c in chunks:
-                            print(f"\t[{i}] [{c}]")
-                            equal_pos = c.find("=")
-                            param_name = c[:equal_pos]
-                            param_val = c[equal_pos+1:]
-                            presigned_params[param_name] = param_val
-                            i += 1
-
-                expected = { "AWSAccessKeyId", "Signature", "x-amz-security-token", "Expires" }
-                for param_name in presigned_params:
-                    if param_name not in expected:
-                        return ApiException(f"Encountered unexpected presigned url param '{param_name}'")
-                    else:
-                        expected.remove(param_name)
-
-                if len(expected) > 0:
-                    return ApiException(f"Missing expected presigned url param(s): '{', '.join([x for x in expected])}'")
-
-                # if we make it this far -- presigned_url looks ok. We can proceed.
-            # END - validate the presigned_url
-
-            r = pyRequest.get(presigned_url)
-            csv_data = io.StringIO(r.content.decode('utf-8'))
-            df = pd.read_csv(csv_data, delimiter=',')
-
-            make_adjustments=True
-            if make_adjustments:
-                df.rename(columns={ df.columns[0]: 'parcels' }, inplace = True)
-
-            """
-            # old v10 cleanup of raw values->percents; not needed in v13+
-            # clean up extra rows/columns
-            total_out_mask = df[df.columns[0]] != 'TOTAL_OUT'
-            sink_mask = df[df.columns[0]] != 'SINK'
-            df = df[total_out_mask & sink_mask]
-            df.drop('TOTAL_IN', axis='columns', inplace=True)
-            df.columns = df.columns.str.lower()
-
-            # need to make adjustments for value to equal 1 exactly
-            precision = 4
-            pcls_col = df.pop('parcels').reset_index(drop=True)
-            df = np.trunc(10000 * df) / 10000
-            df = pd.concat([pcls_col, df], axis='columns')
-            """
-
-            if make_adjustments:
-                # getflow v13 is giving percentages like 85.23% == "85.23"; we want ".8523"
-                df[df.select_dtypes(include=['number']).columns] /= 100
-
-                # rename SINK->sink and move it to right after parcels (position==1)
-                df.insert(1, 'sink', df.pop('SINK'))
-
-            reader = df.to_dict('records')
-            row_counter = 1
-            precision = 4
-            for row in reader:
-                row_total = []
-                for k, v in row.items():
-                    if k == "parcels": continue
-                    rounded_val = round(v, precision)
-                    # print(f"\trow [{row_counter}] '{k}': {v} -> {rounded_val}")
-                    # row_total.append(Decimal(v))
-                    row_total.append(rounded_val)
-                # row_total = float(sum(row_total))
-                row_total = round(sum(row_total), precision)
-                # print(f"\t{row_total=}")
-                if row_total == 0: continue
-
-                elif row_total != 1:
-                    row_diff = round(Decimal(1.0000) - Decimal(row_total), precision)
-                    for k, v in row.items():
-                        if k == "parcels" or k == 'sink' or v == 0: continue
-                        before = v
-                        after = round(row_diff + Decimal(v), precision)
-                        df.at[row_counter-1, k] = float(after)
-                        row[k] = after
-                        break
-
-                # print(f"ROW {row_counter} TOTAL {row_total}")
-                row_counter += 1
-        else:
-            fpn = [f.stream for n, f in files.items()][0]
-            fpn.seek(0)
-            lines = fpn.read().decode("utf-8")
-            reader = csv.DictReader(io.StringIO(lines))
-
-            # TODO make sure all parcels are accounted for
-            # verify headers are valid parcels + sink exists
-            for header in reader.fieldnames:
-                if header == 'sink' or header == 'parcels':
-                    continue
-                elif header.lower() not in parcel_names.keys():
-                    return ApiException(f"Parcel '{header}' does not exist in the scenario")
-            for row in reader:
-                if row.get("parcels").lower() not in parcel_names.keys():
-                    return ApiException(f"Parcel '{row.get('parcels')}' does not exist in the scenario")    
-            if "sink" not in reader.fieldnames:
-                return ApiException("Required header 'sink' is missing")
-            
-            # verify values are valid
-            reader = csv.DictReader(io.StringIO(lines))
-            for row in reader:
-                row_total = []
-                for k, v in row.items():
-                    if k == "parcels": continue
-                    if Decimal(v) < 0: return ApiException("All values must be positive")
-                    row_total.append(Decimal(v))
-                row_total = float(sum(row_total))
-                if row_total != 1 and row_total != 0:
-                    print(row)
-                    print(row_total)
-                    return ApiException("Sum of runoff fractions should be 1")
+        # TODO make sure all parcels are accounted for
+        # verify headers are valid parcels + sink exists
+        for header in reader.fieldnames:
+            if header == 'sink' or header == 'parcels':
+                continue
+            elif header.lower() not in parcel_names.keys():
+                return ApiException(f"Parcel '{header}' does not exist in the scenario")
+        for row in reader:
+            if row.get("parcels").lower() not in parcel_names.keys():
+                return ApiException(f"Parcel '{row.get('parcels')}' does not exist in the scenario")    
+        if "sink" not in reader.fieldnames:
+            return ApiException("Required header 'sink' is missing")
+        
+        # verify values are valid
+        reader = csv.DictReader(io.StringIO(lines))
+        for row in reader:
+            row_total = []
+            for k, v in row.items():
+                if k == "parcels": continue
+                if Decimal(v) < 0: return ApiException("All values must be positive")
+                row_total.append(Decimal(v))
+            row_total = float(sum(row_total))
+            if row_total != 1 and row_total != 0:
+                print(row)
+                print(row_total)
+                return ApiException("Sum of runoff fractions should be 1")
 
         # submit
         if files:
