@@ -302,8 +302,10 @@ class SoilData:
 
     @staticmethod
     def get_soil_data(parcel_verts):
-        parcel_dict = parcel_verts["pv"]
-        r = UsdaApi.get_parcel_soil_data(parcel_coords=parcel_dict)
+        r = UsdaApi.get_parcel_soil_data(
+            parcel_name=parcel_verts["pn"],
+            parcel_coords=parcel_verts["pv"]
+        )
         return r
 
     def compute_parameters(self, parcel_data):

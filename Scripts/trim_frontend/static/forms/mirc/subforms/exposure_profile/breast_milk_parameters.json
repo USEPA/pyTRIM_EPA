@@ -33,6 +33,7 @@
             "id": "t_pn",
             "label": "Maternal Exposure Duration",
             "data_type": "float",
+            "step": "any",
             "allow_empty": true,
             "help": ""
         },

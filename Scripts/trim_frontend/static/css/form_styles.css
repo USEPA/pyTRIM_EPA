@@ -7,6 +7,9 @@ legend {
     width: inherit;
     padding: 2px;
 }
+.popover { 
+  z-index: 1080; /* Above Bootstrap's tooltip (1070) */
+} 
 /* table {
     white-space: nowrap;
 } */

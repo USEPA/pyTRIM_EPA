@@ -187,4 +187,6 @@ class BeanstalkHelper(object):
         print(f"built zipfile '{zipfile}'")
         self.push_to_eb(stack_name, zipfile)
 
+        time.sleep(5)
+        os.chdir(figure_home_dir())
         shutil.rmtree(temp_dir)

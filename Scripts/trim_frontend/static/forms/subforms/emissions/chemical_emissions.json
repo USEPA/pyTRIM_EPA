@@ -63,6 +63,16 @@
             "if_true": ["have_AERMOD_file"]
         },
         {
+            "id": "species",
+            "label": "Species",
+            "data_type": "string",
+            "widget": "select",
+            "choices": ["Vapor", "Particle"],
+            "required": true,
+            "help": "Indicate whether the chemical species is vapor or particle.",
+            "if_true": ["have_AERMOD_file"]
+        },
+        {
             "id": "emission_upload_button",
             "label": "",
             "data_type": "none",

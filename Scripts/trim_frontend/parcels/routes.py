@@ -78,10 +78,10 @@ def get_parcels(scenario_id):
         media = m
 
         if p:
-            s = p[0].scenario
             start_time_s = time.time()
-            # sh = s.as_serializable()
+            s = p[0].scenario
             logger.info(f"Acquired scenario {s.name} in {time.time() - start_time_s} seconds")
+
             total_start = time.time()
             for this_p in p:
                 start_time = time.time()
@@ -89,6 +89,7 @@ def get_parcels(scenario_id):
                 if isinstance(parcels[-1], str):
                     raise Exception(parcels[-1])
                 logger.info(f"Acquired parcel {this_p.name} in {time.time() - start_time} seconds")
+            parcels.sort(key=lambda x: x.get('name'))
             logger.info(f"Acquired all parcels in {time.time() - total_start} seconds")
     except Exception as e:
         logger.error(traceback.format_exc())

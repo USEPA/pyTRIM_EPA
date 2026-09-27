@@ -8,6 +8,7 @@
       "label": "Bed Thickness",
       "data_type": "float",
       "default": 0.05,
+      "min": 5.00E-324,
       "tooltip": "m",
       "help": "Enter the average thickness of the water body sediment bed (i.e., the unburied sediment). Valid values are > 0. The default value of 0.05 is from Table 3 of McKone et al. 2001 (Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models). There is no typical source of site-specific values. See the TRIM User Guide Appendix for full reference information."
     },
@@ -16,7 +17,8 @@
       "label": "Bed Density",
       "data_type": "float",
       "default": 2600,
-      "tooltip": "kg [sediment particles] / m<sup>3</sup> [sediment particles]",
+      "min": 5.00E-324,
+      "tooltip": "kg [sediment particles]/m<sup>3</sup> [sediment particles]",
       "help": "Enter the density of dry sediment in the water bodys sediment bed (i.e., the unburied sediment). Valid values are > 0. The default value of 2600 is from Table 3 of McKone et al. 2001 (Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models). There is no typical source of site-specific values. See the TRIM User Guide Appendix for full reference information."
     },
     {
@@ -55,8 +57,8 @@
       "readonly": true,
       "data_type": "float",
       "default": 0,
-      "tooltip": "m / d",
-      "help": "Velocity of sediment returning to the water column (as suspended sediment) from the sediment bed. Ratio of the difference between the Water Body Sediment Deposition Volumetric Rate and the Water Body Sediment Burial Volumetric Rate to the difference between 1 and the Water Body Sediment Bed Porosity<strong><p>= (Water Body Sediment Deposition Volumetric Rate - Water Body Sediment Burial Volumetric Rate) / (1 - Water Body Sediment Bed Porosity)</p></strong>"
+      "tooltip": "m/d",
+      "help": "Velocity of sediment returning to the water column (as suspended sediment) from the sediment bed. Ratio of the difference between the Water Body Sediment Deposition Volumetric Rate and the Water Body Sediment Burial Volumetric Rate to the difference between 1 and the Water Body Sediment Bed Porosity.\n<strong><p>= (Deposition Volumetric Rate - Sediment Burial Volumetric Rate) / (1 - Bed Porosity)</p></strong>"
     },
     {
       "id": "sed_deposition_vol_rate",
@@ -64,8 +66,8 @@
       "readonly": true,
       "data_type": "float",
       "default": 0,
-      "tooltip": "m<sup>3</sup> [sediment] / m<sup>2</sup> [sediment bed interface] / d",
-      "help": "Volume of sediment received per day by the water body’s sediment bed (per unit area) from the suspended sediment in the water column. Ratio of the product of the Water Column Sediment Deposition Velocity and the Water Column Suspended Sediment Concentration to the Sediment Bed Density.<strong><p>= (Water Column Sediment Deposition Velocity * Water Column Suspended Sediment Concentration / Sediment Bed Density)</p></strong>"
+      "tooltip": "m<sup>3</sup> [sediment] /m<sup>2</sup> [sediment bed interface] / d",
+      "help": "Volume of sediment received per day by the water body’s sediment bed (per unit area) from the suspended sediment in the water column. Ratio of the product of the Water Column Sediment Deposition Velocity and the Water Column Suspended Sediment Concentration to the Sediment Bed Density. <strong><p>= (Sediment Deposition Velocity * Suspended Sediment Concentration / Bed Density)</p></strong>"
     },
     {
       "id": "sed_soil_erosion_to_sw",
@@ -82,15 +84,15 @@
       "readonly": true,
       "data_type": "float",
       "default": 0,
-      "tooltip": "m<sup>3</sup> [sediment] / m<sup>2</sup> [sediment bed interface] / d",
-      "help": "Volume of sediment buried per day into the sediment bed (per unit area) from the suspended sediment in the water column. Ratio of the difference between the sum (across all contributing water bodies) of the Water Column External Sediment Inflow from Other Water Bodies and the Soil Erosion Rate to Water Body and the Water Column Sediment Discharge Rate (converted from kg/y to kg/d) to the product of the Water Body Sediment Bed Density and water body surface area.<strong><p>= (Water Column External Sediment Inflow from Other Water Bodies + Soil Erosion Rate to Water Body - [Water Column Sediment Discharge Rate]/365) / (Sediment Bed Density* water body surface area)</p></strong>"
+      "tooltip": "m<sup>3</sup> [sediment] /m<sup>2</sup> [sediment bed interface] /d",
+      "help": "Volume of sediment buried per day into the sediment bed (per unit area) from the suspended sediment in the water column. Ratio of the difference between the sum (across all contributing water bodies) of the Water Column External Sediment Inflow from Other Water Bodies and the Soil Erosion Rate to Water Body and the Water Column Sediment Discharge Rate (converted from kg/y to kg/d) to the product of the Water Body Sediment Bed Density and water body surface area. <strong><p>= (External Sediment Inflow from Other Water Bodies + Soil Erosion Rate to Water Body - [Sediment Discharge Rate]/365) / (Bed Density * water body surface area)</p></strong>"                
     },
     {
       "id": "MethylationRate.Sediment",
       "label": "Hg Methylation Rate",
       "data_type": "float",
       "default": 0,
-      "tooltip": "1 / day",
+      "tooltip": "1/day",
       "help": "Enter the methylation rate for divalent mercury (Hg) in the sediment bed. Valid values are ≥ 0. The default value of 0.0001 is as discussed on pages B-20 and B-21 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information."
     },
     {
@@ -98,7 +100,7 @@
       "label": "Hg Reduction Rate",
       "data_type": "float",
       "default": 0,
-      "tooltip": "1 / day",
+      "tooltip": "1/day",
       "help": "Enter the reduction rate for divalent mercury in the sediment bed. Valid values are ≥ 0. The default value of 1E-06 is inferred based on model calibration to general observations of elemental mercury in pore water, as discussed on page B-19 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information."
     },
     {
@@ -106,7 +108,7 @@
       "label": "Hg Oxidation Rate",
       "data_type": "float",
       "default": 0,
-      "tooltip": "1 / day",
+      "tooltip": "1/day",
       "help": "Enter the oxidation rate for elemental mercury in the sediment bed. Valid values are ≥ 0. The default value of 0 is from Table B-2 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information."
     },
     {
@@ -114,7 +116,7 @@
       "label": "Hg Demethylation Rate",
       "data_type": "float",
       "default": 0,
-      "tooltip": "1 / day",
+      "tooltip": "1/day",
       "help": "Enter the demethylation rate for methyl mercury in the sediment bed. Valid values are ≥ 0. The default value of 0.0501 is the average of the range of maximum potential rate constants (2E-04 to 1E-01) from Gilmour and Henry 1991 (Mercury Methylation in Aquatic Systems Affected by Acid Deposition), as reported on page B-22 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information."
     }
   ]

@@ -87,7 +87,7 @@
                 return;
             }
             initializingForms = true;
-            TRIM.refreshParcels();
+            TRIM.refreshParcels(true);
             initFormFields();
             initializedForms = true;
             initializingForms = false;
@@ -255,7 +255,7 @@
             usdaBtn.on('click', (e) => getUsdaSoilData());
 
             function getUsdaSoilData() {
-                usdaBtn.append("<span class='lds-dual-ring mx-2'>");
+                usdaBtn.prepend("<span class='lds-dual-ring mr-2'>");
                 usdaBtn.prop('disabled', true);
                 TRIM.api.getSoilData('notill').on('load', function() {
                     updateUsdaSoilData(JSON.parse(this.responseText));

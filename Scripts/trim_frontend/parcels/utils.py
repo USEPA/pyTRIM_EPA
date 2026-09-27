@@ -3,7 +3,6 @@ import json
 import numpy as np
 import re
 from copy import deepcopy
-from pprint import pprint
 from shapely.geometry import Polygon, Point
 from shapely.prepared import prep
 from flask_api import ApiResult
@@ -26,22 +25,14 @@ from .defaults import \
 from .forms import ScenarioParcelsForm
 
 
-# note - this is mainly just code relocated from routes.py with absolutely zero changes.
-# handle_parcel_update is technically new -- but is really just refactoring, taking logic that
-# lived in the "update_parcel" method in routes.py and refactoring it ever-so-slightly
-# so that we can utilize this logic from either UI widgets or CSV uploads. I did NOT write this
-# original code and have not done a thorough review
-# tfeiler 20240618
-#
-# manually merged in Max's latest changes on June 29
 def handle_parcel_update(p:Parcel, parcels_data:dict):
     logger = make_logger('handle_parcel_update')
 
     land_use = get_land_use(p)
 
-    print(f"\t\tREFACTORED HANDLE_PARCEL_UPDATE FOR {p}")
-    pprint(parcels_data)
-    print(f"land_use == '{land_use}'\n")
+    logger.info(f"Update for {p} (id={p.id})")
+    logger.info(parcels_data)
+    logger.info(f"land_use == '{land_use}'\n")
 
     air_params = {
         'dustLoad': "DustLoad",
@@ -404,13 +395,26 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             )
             update_custom_param_value(par, parcels_data[field_name])
 
-        if field_name == 'flush_rate':
+        if field_name in ['flush_rate', 'externalWaterInflow']:
+            if 'autocalc' in parcels_data:
+                eq = '1' if (parcels_data['autocalc'].upper() == "TRUE") else '0'
+            elif 'allInflow' in parcels_data:
+                eq = parcels_data['allInflow']
+
             if not par.formula:
-                new_formula_obj = FormulaService.create(equation=parcels_data['autocalc'])
+                new_formula_obj = FormulaService.create(equation=eq)
                 par.formula = new_formula_obj
             else:
-                FormulaService.get(par.formula.id).equation = parcels_data['autocalc']
-                FormulaService.commit()
+                FormulaService.get(par.formula.id).equation = eq
+            FormulaService.commit()
+        ParcelService.update(p)
+
+        from trim_frontend.parcels.defaults import get_water_params
+        logger.info("Re-calculating water params...")
+        p.scenario._rom = json.loads(parcels_data['runoff_matrix'])
+        p.scenario._wsa = json.loads(parcels_data['watershed_areas'])
+        water_params = get_water_params(p, parcels_data["parcelType"])
+        return water_params["surface_water"]
 
     elif field_name in bed_params:
         par_name = bed_params[field_name]
@@ -493,73 +497,20 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             ParameterService.commit()
 
     elif field_name == "emission":
-        src_comp = p.get_compartment(name=parcels_data["compartment_name"])
-        src_par = src_comp.parameters.get('surfaceDepositionRate')
-        src_val = float(parcels_data["emission_value"])
         chem = ChemicalService.get(name=parcels_data["chemical_name"])
-        if src_par:
-            src_par = get_or_create_custom_param(
-                src_par,
-                {"requirements": f"(self.id == {src_comp.id})", "scenario_id": p.scenario.id},
-                new_formula=True
-            )
-
-            eq = src_par.formula.equation
-            # We have the chemical in the formula
-            if f'chemical.id == {chem.id} ' in eq:
-                formula_parts = eq.split(f"if chemical.id == {chem.id} ")
-                formula_part = formula_parts[0]
-                if "else" in formula_part:
-                    arr = formula_part.split("else")[:-1]
-                    formula_part = "else".join(arr + [f' {src_val} '])
-                else:
-                    formula_part = f'{src_val} '
-                formula_parts[0] = formula_part
-                new_formula = f"if chemical.id == {chem.id} ".join(formula_parts)
-                print(new_formula)
-            # We do not have the chemical in the formula. We need to add it...
-            else:
-                eq_arr = eq.split("else")
-                eq_arr.insert(-2, f' {src_val} if chemical.id == {chem.id} ')
-                new_formula = "else".join(eq_arr)
-                print(new_formula)
-            FormulaService.get(src_par.formula.id).equation = new_formula
-            FormulaService.commit()
+        src_comp = p.get_compartment(name=parcels_data["compartment_name"])
+        src_param_name = 'surfaceDepositionRate'
+        src_val = parcels_data["emission_value"]
+        unit = 'g / day'
+        update_chemical_formula(chem, src_comp, src_param_name, src_val, unit)
 
     elif field_name == "initial concentration":
-        ic_comp = p.get_compartment(name=parcels_data["compartment_name"])
-        ic_par = ic_comp.parameters.get('initialConcentration')
-        ic_val = float(parcels_data["initial_concentration_value"])
         chem = ChemicalService.get(name=parcels_data["chemical_name"])
-        if ic_par:
-            unit = "g / m^3" if ic_comp.media.id in [2, 5, 7, 56, 55, 8, 9] else "g / kg" if ic_comp.media.id in [23, 24, 27, 28, 29, 31, 32, 33, 37, 39, 41, 43, 44, 45, 46, 47, 48, 49, 50, 51] else "g / L" if ic_comp.media.id in [10, 4] else ""
-            ic_par = get_or_create_custom_param(
-                ic_par,
-                {"requirements": f"(self.id == {ic_comp.id})", "scenario_id": p.scenario.id, "unit": unit},
-                new_formula=True
-            )
-
-            eq = ic_par.formula.equation
-            # We have the chemical in the formula
-            if f'chemical.id == {chem.id} ' in eq:
-                formula_parts = eq.split(f"if chemical.id == {chem.id} ")
-                formula_part = formula_parts[0]
-                if "else" in formula_part:
-                    arr = formula_part.split("else")[:-1]
-                    formula_part = "else".join(arr + [f' {ic_val} '])
-                else:
-                    formula_part = f'{ic_val} '
-                formula_parts[0] = formula_part
-                new_formula = f"if chemical.id == {chem.id} ".join(formula_parts)
-                print(new_formula)
-            # We do not have the chemical in the formula. We need to add it...
-            else:
-                eq_arr = eq.split("else")
-                eq_arr.insert(-2, f' {ic_val} if chemical.id == {chem.id} ')
-                new_formula = "else".join(eq_arr)
-                print(new_formula)
-            FormulaService.get(ic_par.formula.id).equation = new_formula
-            FormulaService.commit()
+        ic_comp = p.get_compartment(name=parcels_data["compartment_name"])
+        ic_param_name = 'initialConcentration'
+        ic_val = parcels_data["initial_concentration_value"]
+        unit = "g / m^3" if ic_comp.media.id in [2, 5, 7, 56, 55, 8, 9] else "g / kg" if ic_comp.media.id in [23, 24, 27, 28, 29, 31, 32, 33, 37, 39, 41, 43, 44, 45, 46, 47, 48, 49, 50, 51] else "g / L" if ic_comp.media.id in [10, 4] else ""
+        update_chemical_formula(chem, ic_comp, ic_param_name, ic_val, unit)
 
     elif field_name == "runoff_matrix_value":
         scn = ScenarioService.get(id=p.scenario.id)
@@ -614,13 +565,13 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
                         formula_part = f'{rep_val}'
                     formula_parts[0] = formula_part
                     new_formula = f"if {entity_name}.id in {{{formula_entity.id}}}".join(formula_parts)
-                    print(new_formula)
+                    # print(new_formula)
                 # We do not have the receiver compartment in the formula. We need to add it...
                 else:
                     eq_arr = eq.split("else")
                     eq_arr.insert(-2, f' ({replacing_value}) if {entity_name}.id in {{{formula_entity.id}}} ')
                     new_formula = "else".join(eq_arr)
-                    print(new_formula)
+                    # print(new_formula)
                 eq = new_formula
             FormulaService.get(sender_par.formula.id).equation = new_formula
             FormulaService.commit()
@@ -1338,6 +1289,50 @@ def geojson_to_aermod_receptors(geojson_contents):
     aermod_format = ""
     for (x, y) in receptors:
         aermod_format += f"RE DISCCART {x:.2f} {y:.2f} 0.0\n"
-    aermod_format += "END\n"
+    # aermod_format += "END\n"
 
     return aermod_format
+
+
+def update_chemical_formula(chem, comp, param_name, val, unit=None):
+    logger = make_logger("formula_update")
+
+    param = comp.parameters.get(param_name)
+    val = float(val)
+    if not param:
+        logger.info(f"No parameter [{param_name}] for compartment [{comp.name} :: {comp.id}]")
+        return
+
+    kwargs = {"requirements": f"(self.id == {comp.id})", "scenario_id": comp.volume_element.parcel.scenario.id}
+    if unit:
+        kwargs["unit"] = unit
+
+    param = get_or_create_custom_param(
+        param,
+        kwargs,
+        new_formula=True
+    )
+
+    eq = param.formula.equation
+    # We have the chemical in the formula
+    if f'chemical.id == {chem.id} ' in eq:
+        formula_parts = eq.split(f"if chemical.id == {chem.id} ")
+        formula_part = formula_parts[0]
+        if "else" in formula_part:
+            arr = formula_part.split("else")[:-1]
+            formula_part = "else".join(arr + [f' {val} '])
+        else:
+            formula_part = f'{val} '
+        formula_parts[0] = formula_part
+        new_formula = f"if chemical.id == {chem.id} ".join(formula_parts)
+
+    # We do not have the chemical in the formula. We need to add it...
+    else:
+        eq_arr = eq.split("else")
+        eq_arr.insert(-2, f' {val} if chemical.id == {chem.id} ')
+        eq_arr = [part.strip() for part in eq_arr]
+        new_formula = " else ".join(eq_arr)
+
+    logger.debug(new_formula)
+    FormulaService.get(param.formula.id).equation = new_formula
+    FormulaService.commit()
