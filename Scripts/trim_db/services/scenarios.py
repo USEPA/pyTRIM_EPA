@@ -1,4 +1,6 @@
 from typing import IO
+import numpy as np
+import pandas as pd
 from ..schema.entities.chemicals import Chemical
 from ..schema.entities.environment import Parcel
 from ..schema.utils.caching import CacheManager
@@ -26,6 +28,11 @@ class ScenarioService(GenericService[Scenario], PermissionsMixin):
 
     def get_surface_runoff(self):
         return get_scenario_surface_runoff(self.__instance)
+
+    def calculate_watershed_matrix(self):
+        self.__instance._rom = self.get_surface_runoff()
+        self.__instance._wsa = get_scenario_watershed_matrix(self.__instance, self.__instance._rom)
+        return self.__instance._rom, self.__instance._wsa
 
     def import_aermod(self, filestream: IO, for_chemical: Chemical, metadata: dict = {}):
         return import_aermod_to_scenario(self.__instance, filestream, for_chemical, metadata=metadata)
@@ -64,6 +71,77 @@ def get_scenario_surface_runoff(scen):
     return runoffs
 
 
+def get_scenario_watershed_matrix(scenario: Scenario, ro_array):
+    def compute_watershed_areas(runoff_matrix, area_parcels, parcel_type):
+        # v3 deducts area of lakes from watershed (technically the area of a lake catches rain and 
+        # delivers it to the lake and this how MC computes it. but to be consistent with the builder 
+        # formulas this version substracts lake areas from runoff area of lakes only)
+        # function to compute watershed areas by markov chain estimation. Only works if lakes runoff 100% to themselves. 
+        # Land parcel do not have watersheds and will tend to zero but lake parcel watersheds will be accurate.
+        # runoff_matrix is a square nxn matrix that must not include sinks and must include lakes in both rows and columns. 
+        # Lakes must runoff 100% to themselves.
+        # n is a large number like 200 or 300 that will enable the markov chain to reach steady state. 
+        # area_parcels is a single matrix with areas of all parcels in the same order as the rows/cols of the runoff_matrix
+
+        # New in v3: parcel_type is a list of parcel type with the same indexing as the other matrices. 
+        # Note: the transpose is required because of the arrangment of the matrix such that row are senders 
+        # and cols are receivers. When multiplying by area matrix to estimate watershed, the rows must be receivers, so transpose.
+
+        M = np.matrix(runoff_matrix)# convert to np matrix
+        M = np.nan_to_num(M)
+        M_n = np.linalg.matrix_power(M, 1000) # raise M to a large number (markov chain estimation of probabilities of endpoint of flow)
+        M_n_T = M_n.T # transpose of M_n so that it can be multiplied as a dot product with area parcels
+        
+        try:
+            indexlist=area_parcels.index
+        except:
+            indexlist=[] # if already a matrix then 
+        area_parcels = np.matrix(area_parcels)# convert to np matrix
+
+        runoff_areas = M_n_T @ area_parcels
+        try:
+            runoff_areas=pd.DataFrame(runoff_areas,index=indexlist)
+        except:
+            runoff_areas=pd.DataFrame(runoff_areas)
+
+        # new line to subtract parcel area from runoff area is parcel type is water
+        runoff_areas.loc[pd.Series(parcel_type).str.contains('water', case=False), 0] -= np.array(area_parcels[pd.Series(parcel_type).str.contains('water', case=False)]).flatten()
+        return (runoff_areas)
+
+    if not scenario.parcels:
+        return {}
+
+    # Compute watershed area using Markoff chain approach
+    # 1. get runoff fractions matrix (rom) and parcel areas as vector (pav)
+    pcl_types = [
+        "water"
+        if scenario.get_parcel(name=pn).get_compartment("Surface_water")
+        else "N/A"
+        for pn in ro_array.keys()
+    ]
+
+    pa_dict = {pp.name: pp.area.magnitude for pp in scenario.parcels}
+    rom = []
+    pav = []
+    pcl_names = []
+    for p, ro_dict in ro_array.items():
+        pav.append([pa_dict[p]])
+        pcl_names.append(p)
+        m_row = []
+        for pp, ro in ro_dict.items():
+            if pp == 'sink':
+                continue
+            m_row.append(ro)
+        rom.append(m_row)
+    pav = np.array(pav)
+    rom = np.array(rom)
+
+    # 2. Compute watershed area matrix
+    wsa_matrix = compute_watershed_areas(rom, pav, pcl_types)
+    wsa_matrix.index = pcl_names
+    return wsa_matrix[0].to_dict()
+
+
 AERMOD_UNITS = {
     'surfaceDepositionRate': 'g / day',
     'aermodAirConcentration': 'ug / m^3'
@@ -76,17 +154,29 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
     from shapely.ops import nearest_points
     from trim_core.aermod import AermodReader
     from trim_core.coordinates import CoordinateMapper
+    from trim_frontend.parcels.utils import update_chemical_formula
 
     try:
         df = AermodReader(filestream).as_dataframe()
     except Exception as e:
-        print('parse airmod lines error:', e)
-        import traceback
-        traceback.print_exc()
-        raise
+        raise Exception(f"Error parsing aermod :: {e}")
 
     # print('>>>>>>>>>> Initial load:')
     # print(df)
+
+    if "GRP" in df.columns.values:
+        unique_group_names = df["GRP"].unique()
+        if len(unique_group_names) == 1:
+            # only one group; ok to use it
+            pass
+        else:
+            if "ALL" in unique_group_names:
+                # drop all rows where "GRP" != "ALL" (tilde negates)
+                df = df.drop(df[~(df["GRP"] == "ALL")].index)
+            else:
+                raise Exception("Multiple GRP entries found; none were ALL")
+    else:
+        raise Exception("AERMOD file does not contain required 'GRP' column.")
 
     # Filter by zflag
     if 'ZFLAG' in df.columns.values:
@@ -116,7 +206,11 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
     # We will also need a user restriction to limit
     # receptors intended for TRIM modeling
     # – i.e., Cartesian grid with no overlapping receptors
-    df_aermod = df[~df['NET ID'].str.startswith('POLGRID')].copy()
+    df_aermod = df.copy()
+    if 'NET ID' in df_aermod.columns:
+        df_aermod = df[~df['NET ID'].str.startswith('POLGRID')]
+        if df_aermod.empty:
+            raise ValueError("AERMOD file has 0 rows remaining after dropping where NET ID starts with POLGRID")
 
     try:
         # Convert AERMOD X and Y to WGS84 coordinates.
@@ -138,10 +232,7 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
             df_aermod['wgs_x'] = df_aermod.X.astype('float')
             df_aermod['wgs_y'] = df_aermod.Y.astype('float')
     except Exception as e:
-        print('parse airmod wgs_x/wgs_y error:', e)
-        import traceback
-        traceback.print_exc()
-        raise
+        raise Exception(f"Error parsing aermod wgs_x/wgs_y :: {e}")
 
     # print('>>>>>>>>>> Mapped coords:')
     # print(df_aermod)
@@ -152,7 +243,7 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
         for p in parcels.values():
             if p.contains_point(x, y):
                 return p.id
-        return None
+        return np.nan
 
     def get_compartment(pcl_id, media):
         compartment = parcels[pcl_id].get_compartment(
@@ -164,18 +255,6 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
             compartment = compartment[0]
         return compartment
 
-    def get_compartment_height(pcl_id, media, default=(0 * scenario.parameters.unit_registry('m'))):
-        compartment = get_compartment(pcl_id, media)
-        if not compartment:
-            return default
-        return compartment.height
-
-    def get_compartment_volume(pcl_id, media, default=(0 * scenario.parameters.unit_registry('m^3'))):
-        compartment = get_compartment(pcl_id, media)
-        if not compartment:
-            return default
-        return compartment.volume
-
     try:
         # add parcel location to each receptor in aermod file
         df_aermod['parcel_id'] = df_aermod.apply(
@@ -186,24 +265,37 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
         df_aermod = df_aermod.dropna(
             subset=['parcel_id']
         ).reset_index(drop=True)
+        df_aermod['parcel_id'] = df_aermod['parcel_id'].astype(int)
         # add parcel areas (m^2)
         df_aermod['parcel_area'] = df_aermod.parcel_id.apply(
             lambda p_id: parcels[p_id].area.magnitude
         )
+
+        pcl_aircomp_data = {}
+        for pcl_id in df_aermod['parcel_id'].astype(int).unique():
+            aircomp = get_compartment(pcl_id, "Air")
+            if aircomp:
+                pcl_aircomp_data[pcl_id] = {"height": aircomp.height, "volume": aircomp.volume}
+            else:
+                pcl_aircomp_data[pcl_id] = {
+                    "height": (0 * scenario.parameters.unit_registry("m")),
+                    "volume": (0 * scenario.parameters.unit_registry("m^3")),
+                }
+
         df_aermod['air_compartment_height'] = df_aermod.parcel_id.apply(
-            lambda p_id: get_compartment_height(p_id, 'Air')
+            lambda p_id: pcl_aircomp_data[p_id]["height"]
         )
         df_aermod['air_compartment_volume'] = df_aermod.parcel_id.apply(
-            lambda p_id: get_compartment_volume(p_id, 'Air')
+            lambda p_id: pcl_aircomp_data[p_id]["volume"]
         )
     except Exception as e:
-        print(f"Error finding parcels corresponding to sources: {e}")
-        import traceback
-        traceback.print_exc()
-        raise
+        raise Exception(f"Error finding parcels corresponding to sources :: {e}")
 
     # print('>>>>>>>>>> Added parcel areas & compartment heights:')
     # print(df_aermod)
+
+    if df_aermod.empty:
+        raise ValueError("AERMOD file has 0 rows remaining after dropping receptors not mapped to scenario parcel locations")
 
     def get_distance_to_nearest_neighbor(from_x, from_y, neighbors_df):
         point = Point(from_x, from_y)  # make a shapely point object of current point of interest
@@ -279,10 +371,7 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
                 (aggdep['WET DEPO'] / ndays) * aggdep['parcel_area']  # (g/m^2 / day) * m^2 = g/day
             )
     except Exception as e:
-        print(f'Possible Grouping Error: {e}')
-        import traceback
-        traceback.print_exc()
-        raise
+        raise Exception(f"Possible grouping error :: {e}")
 
     # print('>>>>>>>>>> Added aggregate deposition:')
     # print(aggdep)
@@ -296,13 +385,10 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
         ]
         aermod_results: dict[int, dict[str, float]] = aggdep.set_index('parcel_id').to_dict(orient='index')
     except Exception as e:
-        print('parse airmod res_json error:', e)
-        import traceback
-        traceback.print_exc()
-        raise
+        raise Exception(f"Error parsing aermod res_json :: {e}")
 
     # print('>>>>>>>>>> Result JSON:')
-    # print(aermod_results)
+    # print(aermod_results.keys())
 
     def update_aermod_value(parcel: Parcel, target_media: str, target_param: str, aermod_val: float):
         compartment = parcel.get_compartment(
@@ -314,14 +400,7 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
         if isinstance(compartment, list):
             compartment = compartment[0]
 
-        param = compartment.parameters.get_custom(target_param)
-        # print('\t\t->', param)
-
-        if not param:
-            compartment.parameters.add(
-                target_param, formula=f'{aermod_val} if chemical.id == {for_chemical.id} else 0',
-                unit=AERMOD_UNITS[target_param]
-            )
+        update_chemical_formula(for_chemical, compartment, target_param, aermod_val, AERMOD_UNITS[target_param])
 
     try:
         chem_spec = metadata.get('chemical_species') or 'Particle'
@@ -338,14 +417,12 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
                 parcel, f'Source|Wet_{chem_spec}', 'surfaceDepositionRate',
                 vals['Wet_Deposition_Avg']
             )
-            update_aermod_value(
-                parcel, 'Air', 'aermodAirConcentration',
-                vals['Concentration_Avg']
-            )
+            if chem_spec == 'Vapor':
+                update_aermod_value(
+                    parcel, 'Air', 'aermodAirConcentration',
+                    vals['Concentration_Avg']
+                )
     except Exception as e:
-        print('parse airmod formulas error:', e)
-        import traceback
-        traceback.print_exc()
-        raise
+        raise Exception(f"Error parsing aermod formulas :: {e}")
 
     return aermod_results

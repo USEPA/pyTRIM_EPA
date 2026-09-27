@@ -20,6 +20,7 @@ from .utils import *
 from ..mirc.trim_bridge import compile_mirc_data
 from ..mirc.simulations.forms import MircSimulationForm
 from ..utils.logging import make_logger
+from ..utils.aws_stepfunction import StepfnxHelper
 from ..utils.file_io import MiscAssociatedFileVariety, associated_file_helper
 from ..parcels.utils import calculate_receptor_grid_points_for_parcel
 from trim_core.algorithms.full_model_run import run_full_model
@@ -157,6 +158,7 @@ def update_scenario(scenario_id):
             abort(403)
 
         scenario_data = request.form.to_dict()
+        logger.info(scenario_data)
 
         # Merge file data
         for field_name, file_data in request.files.to_dict().items():
@@ -648,12 +650,12 @@ def get_scenario_runoff_matrix(scenario_id):
         if not current_user.can('view', s):
             abort(403)
         start_time = time.time()
-        runoff_matrix = ScenarioService(s).get_surface_runoff()
+        ScenarioService(s).calculate_watershed_matrix()
         logger.info(f"Acquired runoff matrix in {time.time() - start_time} seconds")
+        return ApiResult({'watershed_areas': s._wsa, 'runoff_matrix': s._rom})
     except Exception as e:
         logger.error(traceback.format_exc())
         return ApiException(repr(e))
-    return ApiResult({'runoff_matrix': runoff_matrix})
 
 
 @scenario_api.route(
@@ -697,10 +699,7 @@ def get_last_results(scenario_id):
         if not current_user.can('view', s):
             abort(403)
         start_time = time.time()
-        latest_run_info = get_latest_run_info(
-            s,
-            allow_debug=(current_user.email.lower().endswith('@icf.com'))
-        )
+        latest_run_info = get_latest_run_info(s)
         logger.info(f"Acquired scenario results in {time.time() - start_time} seconds")
     except Exception as e:
         logger.error(traceback.format_exc())
@@ -778,8 +777,7 @@ def run_result_scenario(scenario_id):
                     "error": "Missing required variable to run re-architected model"
                 }
     except Exception as e:
-        print('scenario run error:', e)
-        data_resp = {"success": False, "error": e}
+        data_resp = {"success": False, "error": repr(e)}
 
     return ApiResult(data_resp)
 
@@ -791,21 +789,17 @@ def get_debug_logs(scenario_id):
     s = ScenarioService.get(scenario_id)
     if not current_user.can('view', s):
         abort(403)
-    if not current_user.email.lower().endswith('@icf.com'):
-        return ApiResult({'debug_messages': ['Not authorized']})
     try:
         if use_local_model_run():
-            debug_messages = ["Debug messages not tracked for local runs"]
+            debug_messages = [StepfnxHelper.make_log("Debug messages not tracked for local runs")]
         else:
             start_time = time.time()
-            debug_messages = fetch_output_for_step_function_execution(
-                s.latest_proc_status.execution_arn
-            )
+            debug_messages = StepfnxHelper(s.latest_proc_status.execution_arn).get_logs()
             logger.info(f"Acquired debug messages in {time.time() - start_time} seconds")
     except Exception as e:
         logger.error(traceback.format_exc())
-        return ApiResult({'debug_messages': [str(e)]})
-    return ApiResult({'debug_messages': debug_messages})
+        return ApiResult({'logs': [str(e)]})
+    return ApiResult({'logs': debug_messages})
 
 
 @scenario_api.route(
@@ -814,18 +808,14 @@ def get_debug_logs(scenario_id):
 @login_required
 def run_getflow(scenario_id):
     """
-    flow is as follows:
-    * gui_surface_runoff.html is the template for the url /scenario/{id}/edit?default_runoff_matrix_file=#surface_runoff-tab
-    * clicking "Run GetFlow" btn runs a small JavaScript function defined in that html file
-    * that function calls api.runGetFlow, defined in api.js. That packages some stuff up and hits
-      /api/scenario/{id}/run_getflow
-    * that's this function! This now kicks off a Step Function and returns the execution arn or whatever
+    Unlike runmodel, here we use ECS even when running locally. (getting a working qgis
+    install is non-trivial, but if you wanted to run local you'd need to do that, then
+    modify this section of code to do something like "run_result_scenario".
     """
     trim_env_profile = os.environ.get("TRIM_ENV_PROFILE", "local").lower()
 
-    print(f"TOM in run_getflow within routes.py, env==[{trim_env_profile}]...")
-    print(f"scenario id is [{scenario_id}] / {type(scenario_id)}")
-    print(f"data is ?!?!!?")
+    logger = make_logger('getflow_kickoff')
+    logger.info("Kicking off getflow...")
 
     s = ScenarioService.get(scenario_id)
     if not s:
@@ -833,73 +823,35 @@ def run_getflow(scenario_id):
     if not current_user.can('edit', s):
         abort(403)
 
-    print(f"scenario: {s}")
-
-    print(f"Starting/Kicking Off GetFlow Run ({datetime.now()}...")
+    logger.info(f"Scenario={s} (id={scenario_id}) :: ENV={trim_env_profile}")
     try:
-        # unlike runmodel, here we use ECS even when running locally. (getting a working qgis
-        # install is non-trivial, but if you wanted to run local you'd need to do that, then
-        # modify this section of code to do something like "run_result_scenario".
-        if True or trim_env_profile != "local":
-            sfn_client = boto3.client("stepfunctions")
-            state_machine_arn = os.environ.get("TRIM_DOCKERIZED_GETFLOW_STATEMACHINE_ARN")
-
-            print(f"arn is '{state_machine_arn}'")
-
-            if state_machine_arn is not None:
-                resp = sfn_client.start_execution(
-                    stateMachineArn=state_machine_arn,
-                    input=json.dumps({ "scenarioId": str(scenario_id), "generateFakeResults": "false" })
-                )
-                data_resp = { "executionArn": resp["executionArn"] }
-                # data_resp = { "to": "do" }
-            else:
-                data_resp = { "error": "Missing required envrionment variable to run getflow" }
-
-            print(f"Back (Kicked Off) ({datetime.now()}...")
+        state_machine_arn = os.environ.get("TRIM_DOCKERIZED_GETFLOW_STATEMACHINE_ARN")
+        if state_machine_arn is not None:
+            sfn_input = {"scenarioId": str(scenario_id), "generateFakeResults": "false"}
+            execution_arn = StepfnxHelper().start_stepfnx_execution(state_machine_arn, sfn_input)
+            data_resp = { "executionArn": execution_arn }
         else:
-            data_resp = {"not": "implemented!"}
+            data_resp = { "error": "Missing required envrionment variable to run getflow" }
     except Exception as e:
-        print('getflow kickoff exception:', e)
+        logger.warning(f"Error kicking off getflow run: {e}")
         data_resp = {"error": repr(e)}
 
     return ApiResult(data_resp)
 
 
 @scenario_api.route(
-    '/api/stepfxn_check', methods=['POST']
+    '/api/getflow_stepfxn_check', methods=['POST']
 )
 @login_required
-def check_stepfunction_status():
-    print(f"checking stepfxn status...")
-    print(request.form.to_dict())
-
+def check_getflow_status():
     execution_arn = request.form.to_dict().get("arn")
-
-    if execution_arn is None:
-        data_resp = {"error": "no execution arn supplied"}
-    else:
-        try:
-            sfn_client = boto3.client("stepfunctions")
-            resp = sfn_client.describe_execution(
-                executionArn=execution_arn
-            )
-            data_resp = {
-                "status": resp.get("status")
-            }
-
-            if resp.get("status", "").upper() == "SUCCEEDED":
-                data_resp["output"] = {}
-
-                stepfxn_output = resp.get("output")
-                print(f"RAW OUTPUT: {stepfxn_output}")
-                parsed = json.loads(stepfxn_output)
-                for key in parsed:
-                    data_resp["output"][key] = parsed[key]
-
-        except Exception as e:
-            data_resp = {"error": str(e) }
-
+    try:
+        if execution_arn is None:
+            data_resp = {"error": "no execution arn supplied"}
+        else:
+            data_resp = StepfnxHelper(execution_arn).get_stepfnx_status()
+    except Exception as e:
+        data_resp = {"error": str(e) }
     return ApiResult(data_resp)
 
 

@@ -1,1 +1,1 @@
-Date,xHour,TimeZone,AirTemperature,HorizontalWindSpeed,WindDirection,MixingHeight,Rain,IsDay
+Date,xHour,AmbientAirTemperature,HorizontalWindSpeed,WindDirection,MixingHeight,Precipitation,DaytimeIndicator

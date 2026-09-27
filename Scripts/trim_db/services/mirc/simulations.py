@@ -557,13 +557,12 @@ class MircSimulationService(GenericService[MircSimulation]):
                         percentile_id=getattr(form, attr).data
                     ))
                 if p.is_a('fish') and p.name != 'fish':
-                    f = 0
                     src = ''
+                    frac = None
                     tl35_type = form.trim_fish_tl35_compartment.data.split(' in ')[0].replace('_', ' ').lower()
                     tl4_type = form.trim_fish_tl4_compartment.data.split(' in ')[0].replace('_', ' ').lower()
                     if p.name == tl35_type:
-                        f = form.f_tl35.data
-                        src = form.f_tl35_src.data
+                        frac = form.f_tl35
                         sim.parameters.append(MircSimulationParameter(
                             name=form.C_tl35.label.text,
                             variable=f'C_{p.name.replace(" ", "_")}',
@@ -571,9 +570,18 @@ class MircSimulationService(GenericService[MircSimulation]):
                             unit=form.C_tl35_unit.data,
                             source=form.trim_fish_tl35_compartment.data
                         ))
-                    elif p.name == tl4_type:
-                        f = form.f_tl4.data
-                        src = form.f_tl4_src.data
+                        if frac.data != 0:
+                            sim.consumption_breakdowns.append(
+                                MircSimulationConsumptionBreakdown(
+                                    name=frac.label.text,
+                                    variable=frac.id,
+                                    subfood=p,
+                                    fraction=frac.data,
+                                    source=form.trim_fish_tl35_compartment.data
+                                )
+                            )
+                    if p.name == tl4_type:
+                        frac = form.f_tl4
                         sim.parameters.append(MircSimulationParameter(
                             name=form.C_tl4.label.text,
                             variable=f'C_{p.name.replace(" ", "_")}',
@@ -581,14 +589,16 @@ class MircSimulationService(GenericService[MircSimulation]):
                             unit=form.C_tl4_unit.data,
                             source=form.trim_fish_tl4_compartment.data
                         ))
-                    if f != 0:
-                        sim.consumption_breakdowns.append(
-                            MircSimulationConsumptionBreakdown(
-                                subfood=p,
-                                fraction=f,
-                                source=src
+                        if frac.data != 0:
+                            sim.consumption_breakdowns.append(
+                                MircSimulationConsumptionBreakdown(
+                                    name=frac.label.text,
+                                    variable=frac.id,
+                                    subfood=p,
+                                    fraction=frac.data,
+                                    source=form.trim_fish_tl4_compartment.data
+                                )
                             )
-                        )
 
             for param in SIMULATION_PARAMETER_ABBRS:
                 if not hasattr(form, param):
@@ -700,15 +710,14 @@ class MircSimulationService(GenericService[MircSimulation]):
             RfD = scenario.parameters.for_chemical(c).RfD.quantity
             CSF = scenario.parameters.for_chemical(c).CSF.quantity
             for age, risk in total.items():
-                if c.mutagenic:
-                    i = risk['adjusted_intake']
-                else:
-                    i = risk['intake']
-
                 if RfD:
-                    risk['hazard_quotient'] = i / RfD
+                    risk['hazard_quotient'] = risk['intake'] / RfD
+
                 if CSF and age == 'Lifetime':
-                    risk['risk_factor'] = i * CSF
+                    if c.mutagenic:
+                        risk['risk_factor'] = risk['adjusted_intake'] * CSF
+                    else:
+                        risk['risk_factor'] = risk['intake'] * CSF
 
             simulation_results = {
                 'total': {'risk': total},
@@ -727,6 +736,7 @@ class MircSimulationService(GenericService[MircSimulation]):
                 'exposureProfile': simulation.mirc_scenario.as_serializable(),
                 'importSource': simulation.trim_scenario.name or 'N/A',
                 'timestamp': simulation.timestamp,
+                'created': simulation.created.strftime('%B %d, %Y'),
                 'chemical': simulation.chemical.as_serializable(),
                 'usesAermod': len([p for p in simulation.parameters if p.variable == 'Ca' and p.value != 0]) > 0,
                 'fishPathway': 'B(S)AF' if simulation.use_baf else 'Direct',
@@ -735,7 +745,7 @@ class MircSimulationService(GenericService[MircSimulation]):
                     p.percentile.name
                     for p in simulation.percentiles
                 },
-                'other_parameters': [p.as_serializable() for p in simulation.parameters]
+                'other_parameters': [p.as_serializable() for p in (simulation.parameters + simulation.consumption_breakdowns)]
             },
             'results': simulation_results,
             'logs': logs

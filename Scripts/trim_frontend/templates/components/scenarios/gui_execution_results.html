@@ -9,6 +9,11 @@
                 >
                     Run Model
                 </button>
+                <button id="btn_cancel_model" disabled="disabled"
+                    class="comp_show_all btn btn-outline-dark py-1"
+                >
+                    Cancel
+                </button>
             </div>
             <div class="col-sm text-right">
                 <div class="btn-group" id="btn_download_dd" style="display: none;">
@@ -219,39 +224,7 @@
         </div>
         <div class="row mb-1 mt-4">
             <div class="col-sm">
-                <script language="JavaScript">
-                    function displayModelDebugging(msgs) {
-                        let debugZone = $("#model_progress_debug_zone textarea").empty();
-                        if (msgs !== undefined) {
-                            for (let i = 0 ; i < msgs.length ; i++) {
-                                let textToDisplay = typeof(msgs[i]) == "object" && "message" in msgs[i] ? msgs[i].message : msgs[i];
-                                // $("<div/>").text(textToDisplay).appendTo(debugZone);
-                                debugZone.html(debugZone.html() + textToDisplay + "\n");
-                            }
-                            debugZone.scrollTop(debugZone[0].scrollHeight - debugZone.height());
-                        } else {
-                            debugZone.html("No debug info retrieved");
-                        }
-                    }
-                </script>
-                {% if current_user.email.lower().endswith("@icf.com") %}
-                <div class="row mb-1" style="border: 1px solid">
-                    <div class="col-sm">
-                        <div class="mt-3" id="model_progress_debug_zone">
-                            <div><b>Model run debug output will appear here.</b></div>
-                            <div><b>This info only appears for @icf.com accounts.</b></div>
-                            <textarea rows=15 cols=103 aria-label="admin-debug"></textarea>
-                            <div class="mt-1 mb-2">
-                                <button type="button" id="btn-load-debug" disabled="disabled"
-                                    class="btn btn-sm btn-outline-info"
-                                >
-                                    Refresh Debug Logs
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
+                <div class="alert" id="modelrun-status"></div>
             </div>
         </div>
     </section>
@@ -358,6 +331,13 @@
     onDomLoad(function(e) {
         // Load the Visualization API and the corechart package.
         google.charts.load('current', {'packages':['corechart']});
+        google.charts.setOnLoadCallback(function() {
+            ResultsDisplay.chartsReady = true;
+            if (ResultsDisplay.pendingDraw) {
+                ResultsDisplay.pendingDraw = false;
+                ResultsDisplay.draw();
+            }
+        });
         const form = document.getElementById('model-run-result-gui');
 
         form.addEventListener('form:visible', function() {
@@ -366,9 +346,31 @@
         });
     });
 
+    function displayModelDebugging(logs) {
+        let statusArea = $("#modelrun-status");
+        statusArea.html("");
+        statusArea.removeClass('alert-warning');
+
+        if (logs && logs.length > 0) {
+            statusArea.html("<b>Model logs</b>");
+            statusArea.addClass("alert-warning");
+            let logs_str = "";
+            $(`<textarea readonly class="form-control-plaintext mt-2" id="modelrun-logs" rows="10">`).appendTo(statusArea);
+            for (let i = 0 ; i < logs.length ; i++) {
+                logs_str += `${logs[i]?.message}\n`;
+            }
+            let debugZone = $('#modelrun-logs');
+            debugZone.val(logs_str);
+            debugZone.scrollTop(debugZone[0].scrollHeight - debugZone.height());           
+        }
+    }
+
     window.ResultsDisplay = ((display) => {
         let initializedForms = false;
         let initializingForms = false;
+
+        display.chartsReady = display.chartsReady || false;
+        display.pendingDraw = display.pendingDraw || false;
 
         const noRunInfo = {
             "has_run": false,
@@ -420,6 +422,13 @@
                 btnRunModel.prop('disabled', true);
                 resetDisplay();
                 runModel();
+            });
+
+            $('#btn_cancel_model').on('click', function (e) {
+                e.preventDefault();
+                TRIM.api.clearOldResults(TRIM.store.currentScenario.id).on('load', function(rsp) {
+                    window.location.reload();
+                });
             });
 
             $('#btn_mirc_export').on('click', function (e) {
@@ -642,30 +651,35 @@
             const loadIndicator = $('p#cb_proc_vis');
 
             if (stage == 'tm') {
+                $('#btn_cancel_model').prop('disabled', false);
                 runOrDone(tmIndicator, percent);
                 setIndicator(odeIndicator, "off", 0);
                 setIndicator(writeIndicator, "off", 0);
                 setIndicator(loadIndicator, "off", 0);
             }
             else if (stage == 'ode') {
+                $('#btn_cancel_model').prop('disabled', false);
                 setIndicator(tmIndicator, "done", 100);
                 runOrDone(odeIndicator, percent);
                 setIndicator(writeIndicator, "off", 0);
                 setIndicator(loadIndicator, "off", 0);
             }
             else if (stage == 'csv') {
+                $('#btn_cancel_model').prop('disabled', false);
                 setIndicator(tmIndicator, "done", 100);
                 setIndicator(odeIndicator, "done", 100);
                 runOrDone(writeIndicator, percent);
                 setIndicator(loadIndicator, "off", 0);
             }
             else if (stage == 'fin') {
+                $('#btn_cancel_model').prop('disabled', true);
                 setIndicator(tmIndicator, "done", 100);
                 setIndicator(odeIndicator, "done", 100);
                 setIndicator(writeIndicator, "done", 100);
                 runOrDone(loadIndicator, percent);
             }
             else {
+                $('#btn_cancel_model').prop('disabled', true);
                 setIndicator(tmIndicator, "off", 0);
                 setIndicator(odeIndicator, "off", 0);
                 setIndicator(writeIndicator, "off", 0);
@@ -699,7 +713,7 @@
             LoadingScreen.show('refresh_debug_logs');
             TRIM.api.refreshDebugLogs(TRIM.store.currentScenario.id).on('load', function() {
                 try {
-                    displayModelDebugging(this.responseJSON.debug_messages || []);
+                    displayModelDebugging(this.responseJSON.logs || []);
                     console.log('Done! Got latest debug logs')
                 }
                 catch (err) {
@@ -803,6 +817,11 @@
 
         display.draw = () => {
             console.log('Redrawing display...')
+            if (!display.chartsReady) {
+                // Charts API not ready
+                display.pendingDraw = true;
+                return;
+            }
             resetDisplay();
 
             if (!TRIM.store.latestRunInfo?.has_run) {
@@ -816,7 +835,7 @@
 
             const runStats = parseRunStatus(TRIM.store.latestRunInfo.run_status);
             updateRunStatusDisplay(runStats.status, runStats.stage, runStats.percent);
-            displayModelDebugging(TRIM.store.latestRunInfo.debug_messages);
+            displayModelDebugging(TRIM.store.latestRunInfo.logs);
 
             if (!TRIM.store.latestRunInfo.run_results?.mass_results) {
                 // Nothing else to draw
@@ -831,13 +850,20 @@
 
         function runModel() {
             LoadingScreen.show('start_run');
-            TRIM.api.runModel(TRIM.store.currentScenario.id).on('load', function() {
-                // TODO: No idea why this works (locally -- stepmachine makes sense)
-                // -- the runModel endpoint doesn't return locally until finished??
-                setTimeout(function() {
+            TRIM.api.runModel(TRIM.store.currentScenario.id).on('load', function(rsp) {
+                if (this.responseJSON?.success == false) {
+                    alert("Error running model");
+                    console.error(this.responseJSON.error);
                     LoadingScreen.hide('start_run');
-                    pollForResults();
-                }, 3000);
+                }
+                else {
+                    // TODO: No idea why this works (locally -- stepmachine makes sense)
+                    // -- the runModel endpoint doesn't return locally until finished??
+                    setTimeout(function() {
+                        LoadingScreen.hide('start_run');
+                        pollForResults();
+                    }, 3000);
+                }
             });
         }
 
@@ -846,6 +872,9 @@
             TRIM.api.getLastResults(TRIM.store.currentScenario.id).on('load', function() {
                 try {
                     TRIM.store.latestRunInfo = this.responseJSON.latest_run_info || noRunInfo;
+                    if (this.responseJSON.latest_run_info) {
+                        console.log({"status": TRIM.store.latestRunInfo.status});
+                    }
                 }
                 catch (err) {
                     console.log("Error pulling latest run info\n", err);

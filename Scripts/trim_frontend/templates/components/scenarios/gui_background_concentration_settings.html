@@ -44,17 +44,19 @@
                                             </div>
                                         </div>
                                         <button class="comp_reset_all btn btn-danger" id="ic-reset-vals">Reset All to Zero</button>
-                                        <table class="compMap" style="border-collapse: collapse" cellpadding="6">
-                                            <thead>
-                                                <tr>
-                                                    <th scope="col">Parcel</th>
-                                                    <th scope="col">Volume Element</th>
-                                                    <th scope="col">Compartment</th>
-                                                    <th scope="col">Initial Concentration</th>
-                                                    <th scope="col">Unit</th>
-                                                </tr>
-                                            </thead>
-                                        </table>
+                                        <!--<div style="overflow-x: auto;">-->
+                                            <table class="compMap" style="border-collapse: collapse" cellpadding="6">
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="col">Parcel</th>
+                                                        <th scope="col">Volume Element</th>
+                                                        <th scope="col">Compartment</th>
+                                                        <th scope="col">Initial Concentration</th>
+                                                        <th scope="col">Unit</th>
+                                                    </tr>
+                                                </thead>
+                                            </table>
+                                        <!--</div>-->
                                     </div>
                                 </div>
                             </div>
@@ -125,7 +127,7 @@
                 TRIM.functions.removeTabFromFieldList(fieldset[0], i);
             });
 
-            TRIM.store.currentScenario.chemicals.map(x => x.name).forEach((sc, i) => {
+            TRIM.store.currentScenario.chemicals.map(x => x.name).sort().forEach((sc, i) => {
                 window.TRIM.functions.addTabToFieldList(fieldset[0], sc)
                 let current_index = ($("#background-conc-gui").find("span.chemInfo")).length-1
 
@@ -238,22 +240,19 @@
                 }
             });
 
-            function toggle_expand_icon(tr, dir){
-                if ($(tr).find("i.fas").length <= 0) return;
-                if (!dir) {
-                    if ($(tr).find("i.fas").attr("class").indexOf("fa-angle-right") > -1) {
-                        $(tr).find("i.fas").attr("class", "fas fa-angle-down")
-                    } else {
-                        $(tr).find("i.fas").attr("class", "fas fa-angle-right")
-                    }
-                } else {
-                    if (dir == "down") {
-                        $(tr).find("i.fas").attr("class", "fas fa-angle-down")
-                    } else {
-                        $(tr).find("i.fas").attr("class", "fas fa-angle-right")
-                    }
+            function toggle_expand_icon(tr, dir) {
+                const icon = $(tr).find("span.toggle > i.fas").first();
+                if (!icon.length) {
+                    return;
                 }
 
+                if (dir === "down") {
+                    icon.removeClass("fa-angle-right").addClass("fa-angle-down");
+                } else if (dir === "up") {
+                    icon.removeClass("fa-angle-down").addClass("fa-angle-right");
+                } else {
+                    icon.toggleClass("fa-angle-right fa-angle-down");
+                }
             }
 
             $('a[id*=_concentration_upload_button]').click(function (){
@@ -313,7 +312,7 @@
                                 const ve_find_str = "td[data-ve-name='" + p["Volume Element Name"] + "']"
                                 const comp_find_str = "td[data-comp-name='" + p["Compartment Name"] + "']"
                                 const ic_cell = $(cmap).find(pcl_find_str).next(ve_find_str).next(comp_find_str).next("td.ic")
-                                const ic_val =  Number(p["Background Concentration Value"]).toExponential()
+                                const ic_val =  Number(p["Background Concentration Value"]).toExponential(4)
                                 $(ic_cell).find("input").val(ic_val)
                                 $(ic_cell).find("label.editableCell").text(ic_val)
                             })
@@ -440,23 +439,61 @@
             });
         }
 
+        var comps_added = [];
         function initialize_compartment_map() {
-            var map_html = "<tbody>"
+            let skip_ves = ['Air', 'UpperAir'];
             let exclude = ["WetVaporSource", "DryVaporSource", "WetParticleSource", "DryParticleSource"] // + Sinks
+            comps_added = [];
+    
+            let map_html = "<tbody>";
+            let icon_html = "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span>";
             TRIM.store.currentScenario.parcels.forEach( function(e,i){
-                map_html = map_html + "<tr data-depth='0' tabindex='0' class='level0 colps'><td data-pcl-name='" + e.name + "'>" + e.name + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td><td></td></tr>"
+                map_html += `
+                <tr data-depth='0' tabindex='0' class='level0 colps'>
+                    <td colspan="2" data-pcl-name='${e.name}'>
+                        ${e.name}${icon_html} 
+                    </td>
+                    <td></td>
+                    <td class="ems"></td>
+                    <td></td>
+                    <td></td>
+                </tr>`;
                 for (ve in e.compartment_map) {
-                    if (exclude.indexOf(ve) == -1) {
-                        map_html = map_html + "<tr data-depth='1' tabindex='0' class='level1 colps'><td data-pcl-name='" + e.name + "'></td><td data-ve-name='" + ve + "'>" + ve + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
+                    if (skip_ves.indexOf(ve) > -1) {
+                        continue;
+                    }
+                    else if (exclude.indexOf(ve) == -1) {
+                        map_html += `
+                        <tr data-depth='1' tabindex='0' class='level1 colps'>
+                            <td data-pcl-name='${e.name}'></td>
+                            <td data-ve-name='${ve}'>
+                                ${ve}${icon_html} 
+                            </td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>`;
                     }
                     for (comp in e.compartment_map[ve]) {
-                        if (exclude.map(el => el + '_' + ve).indexOf(e.compartment_map[ve][comp]) > -1
-                        || exclude.indexOf(e.compartment_map[ve][comp]) > -1
-                        || e.compartment_map[ve][comp].includes("_Sink")) {
+                        let comp_name = e.compartment_map[ve][comp];
+                        if (exclude.map(el => el + '_' + ve).indexOf(comp_name) > -1
+                        || exclude.indexOf(comp_name) > -1
+                        || comp_name.includes("_Sink")) {
                             continue;
                         }
-                        if (exclude.indexOf(e.compartment_map[ve][comp]) == -1){
-                            map_html = map_html + "<tr data-depth='2' tabindex='0' class='level2 colps'><td data-pcl-name='" + e.name + "'><td data-ve-name='" + ve + "'><td class='comp' data-comp-name='" + e.compartment_map[ve][comp] + "'>" + e.compartment_map[ve][comp]+ "</td><td class='ic'><input class='editableCell' style='width: 50px; display:none'/><label class='editableCell badge badge-light'>0</label></td><td class='ic_unit'></td></tr>"
+                        if (exclude.indexOf(comp_name) == -1){
+                            comps_added.push(comp_name);
+                            map_html += `
+                            <tr data-depth='2' tabindex='0' class='level2 colps'>
+                                <td data-pcl-name='${e.name}'></td>
+                                <td data-ve-name='${ve}'></td>
+                                <td class='comp' data-comp-name='${comp_name}'>${comp_name}</td>
+                                <td class='ic form-inline'>
+                                    <input class='editableCell form-control form-control-sm w-75' style='display:none'/>
+                                    <label class='editableCell badge badge-light'>0</label>
+                                </td>
+                                <td class='ic_unit'></td>
+                            </tr>`;
                         }
                     }
                 }
@@ -479,7 +516,7 @@
                                 let ve_find_str = "td[data-ve-name='" + ve + "']"
                                 let comp_find_str = "td[data-comp-name='" + comp + "']"
                                 let ic_cell = $(cmap).find(pcl_find_str).next(ve_find_str).next(comp_find_str).next("td.ic")
-                                let ic_val =  Number(p.initialConcentrations[chem][ve][comp]['ic']).toExponential()
+                                let ic_val =  Number(p.initialConcentrations[chem][ve][comp]['ic']).toExponential(4)
                                 let ic_unit_cell = $(cmap).find(pcl_find_str).next(ve_find_str).next(comp_find_str).next("td.ic").next("td.ic_unit")
                                 let ic_unit = p.initialConcentrations[chem][ve][comp]['unit']
                                 $(ic_cell).find("input").val(ic_val)
@@ -493,15 +530,7 @@
         }
 
         function populate_comp_dd(dd_menu){
-            let comp_array = []
-            TRIM.store.currentScenario.parcels.forEach( function(e,i){
-                for (let ve in e.compartment_map) {
-                    for (let comp in e.compartment_map[ve]) {
-                        comp_array.push(e.compartment_map[ve][comp])
-                    }
-                }
-            })
-            let uniq_comp = [... new Set(comp_array)]
+            let uniq_comp = [... new Set(comps_added)]
             uniq_comp.sort().forEach(function(e) {
                 let menu_item = "<a href='#' class='dropdown-item comp-item'>" + e + "</a>"
                 $(menu_item).appendTo(dd_menu)
