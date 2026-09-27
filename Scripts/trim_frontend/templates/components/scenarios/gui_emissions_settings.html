@@ -548,8 +548,9 @@
                     })
                 }
                 finally {
-                    populate_values(this_cmap)
+                    populate_values(this_cmap);
                     LoadingScreen.hide(loadingRequest);
+                    aermodSettingsSection.closest("div.tab-pane").find("button.comp_show_nz").click();
                 }
             });
         }

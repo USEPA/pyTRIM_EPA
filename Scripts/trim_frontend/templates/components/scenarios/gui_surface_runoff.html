@@ -365,7 +365,6 @@
         $("#run_getflow").on('click', function (e) {
             let rowWithButton = $("form#surface-runoff-gui section.container div.row:eq(1)");
             let getflowStatusArea = $("#getflow-status");
-            getflowStatusArea.removeClass("alert-danger").html("");
 
             // setup the code for polling
             let executionArn = "";
@@ -383,9 +382,10 @@
             };
             toggleBtnState(true);
 
-            function loggingHtml(statusArea, logs) {
+            function loggingHtml(statusArea, statusType, logs) {
                 if (logs && logs.length > 0) {
                     let logs_str = "";
+                    statusArea.addClass(`alert-${statusType}`);
                     $(`<textarea readonly class="form-control-plaintext" id="getflow-logs" rows="8">`).appendTo(statusArea);
                     for (let i = 0 ; i < logs.length ; i++) {
                         let timestamp = new Date(logs[i].timestamp).toLocaleString();
@@ -401,9 +401,14 @@
             let keepChecking = function () {
                 TRIM.api.checkGetflowStatus(executionArn, function (success, data) {
                     console.log(data);
+
+                    getflowStatusArea.html("");
+                    getflowStatusArea.removeClass((index, className) => {
+                        return (className.match(/(^|\s)alert-\S+/g) || []).join(' ');
+                    });
+
                     if (data.status == "SUCCEEDED") {
                         getflowStatusArea.html("<b>Run complete!</b>");
-                        getflowStatusArea.addClass('alert-success');
                         clearInterval(keepCheckingId);
                         toggleBtnState(false);
 
@@ -411,7 +416,7 @@
                             .attr("href", data.output.presigned_urls[1])
                             .html(`<i class="fa fa-download mr-2"></i>Download percent flow matrix`)
                             .appendTo(getflowStatusArea);
-                        loggingHtml(getflowStatusArea, data.logs);
+                        loggingHtml(getflowStatusArea, 'success', data.logs);
                         
                         // update table
                         LoadingScreen.show('surface_runoff_loading');
@@ -423,12 +428,9 @@
                         });
                     } else if (data.status == "FAILED" || data.status == "TIMED_OUT" || data.status == "ABORTED") {
                         getflowStatusArea.html(`<b>Run status: ${data.status}</b>`);
-                        getflowStatusArea.addClass('alert-danger');
                         clearInterval(keepCheckingId);
                         toggleBtnState(false);
-
-                        // populate errors
-                        loggingHtml(getflowStatusArea, data.logs);
+                        loggingHtml(getflowStatusArea, 'danger', data.logs);
                     } else {
                         TRIM.store.currentScenario.getflow_timestamp = TRIM.store.currentScenario?.getflow_timestamp || new Date().getTime();
                         let time_elapsed = new Date().getTime() - TRIM.store.currentScenario?.getflow_timestamp;
@@ -439,6 +441,9 @@
 
                         const pad = (n) => String(n).padStart(2, '0');
                         $('#run_getflow').html(`<span><label class="lds-dual-ring mr-3"></label></span>GetFlow Running... (${pad(minutes)}:${pad(seconds)})`);
+                        
+                        getflowStatusArea.html("<b>GetFlow logs</b>");
+                        loggingHtml(getflowStatusArea, 'warning', data.logs);
                     }
                 });
             };
