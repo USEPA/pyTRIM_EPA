@@ -69,6 +69,8 @@ WORKDIR /app/pytrim_runmodel_src
 # export AWS_DEFAULT_REGION=us-east-1
 # END - AWS
 
+# Logging within the container will update in real time rather than in chunks
+ENV PYTHONUNBUFFERED=1
 
 # A) run bash (no need to install) to let us peek around by attaching
 # CMD ["bash"]
