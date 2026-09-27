@@ -207,7 +207,18 @@ class DockerEntryPoint:
             except Exception as e:
                 import traceback
                 traceback.print_exc()
-                loggy_safe(e)
+                if self.task_token:
+                    try:
+                        boto3.client('stepfunctions').send_task_failure(
+                            taskToken=self.task_token,
+                            error="ModelRunError",
+                            cause=repr(e)
+                        )
+                    except Exception as e:
+                        loggy(e)
+                sys.stdout.flush()
+                sys.stderr.flush()
+                loggy_safe(f"Model run failed: {e}")
                 data_resp = {"error": e}
 
         return data_resp

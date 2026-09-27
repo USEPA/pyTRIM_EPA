@@ -166,8 +166,8 @@ class StepfnxHelper:
         except Exception as e:
             self.logger.warning(e)
 
-        if len(rv) == 0:
-            rv.append(self.make_log("No logs yet..."))
+        #if len(rv) == 0:
+        #    rv.append(self.make_log("No logs yet..."))
         return self.sanitize_logs(rv)
 
     def sanitize_logs(self, logs):

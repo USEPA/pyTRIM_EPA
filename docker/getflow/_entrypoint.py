@@ -75,6 +75,22 @@ class DockerGetflowEntryPoint:
     def __init__(self):
         loggy(f"DockerGetflowEntryPoint.__init__()")
 
+    def task_fail(self, err_msg):
+        traceback.print_exc()
+        loggy_safe(err_msg)
+        if self.task_token:
+            try:
+                boto3.client('stepfunctions').send_task_failure(
+                    taskToken=self.task_token,
+                    error="GetflowError",
+                    cause=err_msg
+                )
+            except Exception as e:
+                loggy(f"ERROR during task_fail: {e}")
+        sys.stdout.flush()
+        sys.stderr.flush()
+        os._exit(1)
+
     def attempt_task_conclusion(self, output_data):
         loggy(f"Attemping task conclusion with '{self.task_token}' / {output_data}...")
         try:
@@ -132,14 +148,13 @@ class DockerGetflowEntryPoint:
             saved_outputs, percent_matrix_df = run_getflow_v13_for_scenario_id(scenario_id)
             loggy_safe(f"Getflow run complete, percent flow matrix generated")
         except Exception as e:
-            traceback.print_exc()
-            loggy_safe(f"Getflow run failed: {e}")
-            sys.exit(1) 
+            self.task_fail(f"Getflow run failed: {e}")
 
         qgs.exitQgis()
 
         try:
             loggy_safe("Uploading results to s3...")
+            bucket, paths, presigned_urls = None, [], []
             bucket, paths, presigned_urls = self.upload_results_to_s3(saved_outputs)
             loggy_safe("Upload complete")
         except Exception as e:
@@ -151,9 +166,7 @@ class DockerGetflowEntryPoint:
             self.update_runoff_matrix(scenario_id, percent_matrix_df)
             loggy_safe("Surface runoff matrix updated")
         except Exception as e:
-            traceback.print_exc()
-            loggy_safe(f"Failed to update surface runoff matrix with getflow results: {e}")
-            sys.exit(1) 
+            self.task_fail(f"Failed to update surface runoff matrix with getflow results: {e}")
 
         return bucket, paths, presigned_urls
 
@@ -196,12 +209,13 @@ class DockerGetflowEntryPoint:
                 errored = True
 
         if errored:
-            raise
+            raise RuntimeError("One or more uploads failed")
             #return None, None, None
         else:
             return self.storage_bucket_name, full_keys, presigned_urls
         
     def create_presigned_url(self, s3_client, bucket_name, object_name, expiration = 3600):
+        from botocore.exceptions import ClientError
         """Generate a presigned URL to share an S3 object
 
         :param bucket_name: string
@@ -217,7 +231,7 @@ class DockerGetflowEntryPoint:
                                                                 'Key': object_name},
                                                         ExpiresIn=expiration)
         except ClientError as e:
-            logging.error(e)
+            loggy(e)
             return None
 
         # The response contains the presigned URL
@@ -242,9 +256,8 @@ class DockerGetflowEntryPoint:
             else:
                 pcls[pcl.name] = pcl
 
-        reader = df.to_dict('index')
-        row_counter = 1
         precision = 4
+        reader = df.to_dict('index')
         for sender, row in reader.items():
             row_total = [round(v, precision) for v in row.values()]
             row_total = round(sum(row_total), precision)
@@ -254,10 +267,9 @@ class DockerGetflowEntryPoint:
                 for k, v in row.items():
                     if k == "parcels" or k == 'sink' or v == 0: continue
                     after = round(row_diff + Decimal(v), precision)
-                    df.at[row_counter-1, k] = float(after)
+                    df.at[sender, k] = float(after)
                     row[k] = after
                     break
-            row_counter += 1
 
         for sender, receivers in reader.items():
             loggy_safe(f"Updating for sender [{sender}]...")
