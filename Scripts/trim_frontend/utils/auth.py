@@ -155,7 +155,13 @@ class FlaskOauth:
 
                 user = self._security.datastore.find_user(email=email) or self._security.datastore.find_user(email=email.casefold())
                 if user is None:
-                    raise Exception(f"User does not exist :: [{email}]")
+                    self._app.logger.info(f"User with email [{email}] does not exist... creating")
+                    self._security.datastore.create_user(
+                        email=email, password=hash_password(oauth2_token),
+                        confirmed_at=datetime.utcnow()
+                    )
+                    self._security.datastore.commit()
+                    user = self._security.datastore.find_user(email=email)
 
                 login_user(user)
                 return redirect(url_for('scenario.view_scenarios'))

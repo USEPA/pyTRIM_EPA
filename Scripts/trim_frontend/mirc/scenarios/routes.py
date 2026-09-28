@@ -99,8 +99,12 @@ def risk_scenario_permissions(id):
     if not current_user.can('manage', ms):
         return abort(403)
 
-    users = UserService.get_all()
+    permissions = {
+        u.email: p.name
+        for u, p in MircScenarioService(ms).user_permissions().items()
+        if p is not None
+    }
 
     return render_template(
-        'mirc/exposure_profiles/permissions.html', mirc_scenario=ms, users=users
+        'mirc/exposure_profiles/permissions.html', mirc_scenario=ms, user_permissions=permissions
     )
