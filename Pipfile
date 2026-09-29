@@ -33,7 +33,7 @@ libsass = "*"
 numpy = "*"
 pandas = "*"
 pint = "*"
-psycopg2-binary = "*"
+psycopg = {version = "*", extras = ["binary"]}
 pyscss = "*"
 pyshp = "*"
 python-dotenv = "*"
