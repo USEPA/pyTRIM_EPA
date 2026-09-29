@@ -81,13 +81,11 @@
 
                             <!--Uploaded PLT file-->
                             <div class="col ml-2">
-                                <div id="deposition-overlay-current-file" style="display:none;">
-                                    <div class="">
-                                        <a id="deposition-overlay-delete-btn" href="#" class="btn btn-secondary"><i
-                                                class="fas fa-trash mr-1"></i>Delete <span
-                                                id="deposition-overlay-current-filename"
-                                                class="text-break"></span></a>
-                                    </div>
+                                <div id="deposition-overlay-current-file" class="text-right" style="display:none;">
+                                    <a id="deposition-overlay-delete-btn" href="#" class="btn btn-dark">
+                                        <i class="fas fa-trash mr-1"></i>
+                                        Delete <span id="deposition-overlay-current-filename" class="text-break"></span>
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -713,13 +711,14 @@
             }
         }
 
-        // zones are 1A-60Z with no A/B/I/O/Y/Z. case/whitespace insensitive.
-        function isValidUtmZone(z) {
-            let cleanedZone = z.trim().replaceAll(" ", "").toUpperCase();
-            const regex = /^([1-9]|[1-5][0-9]|60)([C-HJ-NP-X])$/gm;
-
-            return (regex.exec(cleanedZone) != null);
-        }
+        // UTM + hemisphere zones are 1N-60N, 1S-60S. case/whitespace insensitive.
+		// MGRS zones are 1A-60Z with no A/B/I/O/Y/Z. case/whitespace insensitive.
+		function isValidUtmZone(z) {
+			let cleanedZone = z.trim().replaceAll(" ", "").toUpperCase();
+			const regex = /^([1-9]|[1-5][0-9]|60)([NS])$/gm;
+			// const regex = /^([1-9]|[1-5][0-9]|60)([C-HJ-NP-X])$/gm; // for MGRS support
+			return (regex.exec(cleanedZone) != null);
+		}
 
         function enableParcelFileUploadUi() {
             let parcelGui = $("#parcels-gui");
@@ -748,7 +747,7 @@
                     return false;
                 } else if (coordsSystem.val() == "UTM") {
                     if (!isValidUtmZone(utmZone.val())) {
-                        alert('Please enter a valid UTM zone (e.g. 16T, 13R, etc.).');
+                        alert('Please enter a valid UTM zone (e.g. 16N, etc.).');
                         return false;
                     }
                 }
@@ -819,7 +818,7 @@
                     return false;
                 } else if (depoOverlayCoordsSystem.val() == "UTM") {
                     if (!isValidUtmZone(depoOverlayUtmZone.val())) {
-                        alert('Please enter a valid UTM zone (e.g. 16T, 13R, etc.).');
+                        alert('Please enter a valid UTM zone (e.g. 16N, etc.).');
                         return false;
                     }
                 }

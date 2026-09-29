@@ -260,11 +260,12 @@
             LoadingScreen.hide('emissions_parcels_loading');
         }
 
-
-		// zones are 1A-60Z with no A/B/I/O/Y/Z. case/whitespace insensitive.
+        // UTM + hemisphere zones are 1N-60N, 1S-60S. case/whitespace insensitive.
+		// MGRS zones are 1A-60Z with no A/B/I/O/Y/Z. case/whitespace insensitive.
 		function isValidUtmZone(z) {
 			let cleanedZone = z.trim().replaceAll(" ", "").toUpperCase();
-			const regex = /^([1-9]|[1-5][0-9]|60)([C-HJ-NP-X])$/gm;
+			const regex = /^([1-9]|[1-5][0-9]|60)([NS])$/gm;
+			// const regex = /^([1-9]|[1-5][0-9]|60)([C-HJ-NP-X])$/gm; // for MGRS support
 			return (regex.exec(cleanedZone) != null);
 		}
 
@@ -483,7 +484,7 @@
             if (proj_is_utm) {
                 utm_zone = $(utmZone).val();
                 if (!isValidUtmZone(utm_zone)) {
-                    alert('Please enter a valid UTM zone (e.g. 16T, 13R, etc.).');
+                    alert('Please enter a valid UTM zone (e.g. 16N, etc.).');
                     return false;
                 }
             }
