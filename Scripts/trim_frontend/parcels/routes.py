@@ -115,7 +115,9 @@ def update_parcel(id, scenario_id):
 
     try:
         # Get the specified parcel
-        p = ParcelService.get(id=id, scenario_id=scenario_id)
+        p = ParcelService.get(id)
+        if p.scenario.id != s.id:
+            return ApiException('Unknown Parcel')
         parcels_data = request.form.to_dict()
         # print(f"updating with {parcels_data}")
         rv = None
@@ -145,6 +147,8 @@ def delete_parcel(id, scenario_id):
     logger = make_logger('parcels_api_delete')
     try:
         p = ParcelService.get(id)
+        if p.scenario.id != s.id:
+            return ApiException('Unknown Parcel')
         # Delete Contents
         delete_parcel_contents(p)
 

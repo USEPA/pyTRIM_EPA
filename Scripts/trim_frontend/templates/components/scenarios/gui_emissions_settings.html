@@ -136,6 +136,7 @@
                 TRIM.api.getChemicals(TRIM.store.currentScenario).on('load', function () {
                     var chems = this.responseJSON.chemicals;
                     TRIM.store.currentScenario.chemicals = chems;
+                    TRIM.store.currentScenario.chem_params = this.responseJSON.chem_params;
                     populateEmissionsForm();
                 });
                 return;
@@ -170,6 +171,12 @@
                 setTimeout(function() { renderEmissions(); }, 1000);
                 return;
             }
+
+            TRIM.store.currentScenario.parcels = TRIM.store.currentScenario.parcels.map(pcl => {
+                pcl.sources = TRIM.store.currentScenario.chem_params[pcl.name].sources;
+                pcl.initialConcentrations = TRIM.store.currentScenario.chem_params[pcl.name].initialConcentrations;
+                return pcl;
+            });
 
             let fieldset = $('#chemicals-add-btn').closest("fieldset")
             chemicals = TRIM.store.currentScenario.chemicals.map(x => x.name).sort();

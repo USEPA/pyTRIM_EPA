@@ -75,6 +75,8 @@ def download_elevation_data(bbox, output_path="elevation.tif"):
     data = response.json()
     
     # Check if we got any results
+    if data.get('errors'):
+        loggy_safe(data.get('errors'))
     if not data.get('items'):
         raise Exception("No elevation data found for the specified area")
     

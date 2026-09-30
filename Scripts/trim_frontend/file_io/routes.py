@@ -105,7 +105,7 @@ def parse_aermod():
         raise ApiException("No files were uploaded")
 
     scenario_id = request.form['scenario_id']
-    scenario = ScenarioService.get(id=scenario_id)
+    scenario = ScenarioService.get(scenario_id)
     if not scenario:
         return ApiException("Unknown Scenario")
     if not current_user.can('edit', scenario):
@@ -163,7 +163,7 @@ def upload_background_conc():
     data = json.loads(request.form["file_data"])
     scenario_id = request.form["scenario_id"]
     chem_name = request.form["chemical_name"]
-    scenario = ScenarioService.get(id=scenario_id)
+    scenario = ScenarioService.get(scenario_id)
     if not scenario:
         return ApiException("Unknown Scenario")
     if not current_user.can('edit', scenario):
@@ -198,7 +198,7 @@ def upload_background_conc():
             else:
                 comp_id = comp_id[0]
 
-            comp = CompartmentService.get(id=comp_id)
+            comp = CompartmentService.get(comp_id)
 
             data[ii].setdefault("Volume Element Name", comp.volume_element.name)
 
@@ -273,7 +273,7 @@ def parse_parcel_upload():
         return stackstr
 
     scenario_id = request.form["scenario_id"]
-    scenario = ScenarioService.get(id=scenario_id)
+    scenario = ScenarioService.get(scenario_id)
     if not scenario:
         return ApiException("Unknown Scenario")
     if not current_user.can('edit', scenario):
@@ -330,9 +330,9 @@ def parse_parcel_upload():
             # process csv with format detection and normalization
             csv_rows = list(reader)
             rows_to_process = process_csv_parcels(csv_rows)
-
     except Exception:
         errors.append("Unable to open file")
+        rows_to_process = []
 
     for row in rows_to_process:
         try:
@@ -352,7 +352,7 @@ def parse_parcel_upload():
             coordinates = row_data["coordinates"]
 
             if not parcel_type:
-                parcel_type = "Land & Air"
+                raise Exception(f"No parcel type supplied for [{parcel_name}]")
 
             # TODO - reload page after upload (done; but we could do better...)
             p = ParcelService.create(name=parcel_name, description=parcel_description, scenario_id=scenario_id, vertices=coordinates)
@@ -429,7 +429,7 @@ def parse_parcel_upload():
     lines = lines.split("\r\n")
 
     if len(errors) > 0:
-        raise ApiException("; ".join(errors))
+        raise ApiException("\n".join(errors))
     else:
         return ApiResult(return_data)
 
@@ -857,7 +857,7 @@ def parse_runoff_matrix_upload():
     try:
         fpn = [f.stream for n, f in files.items()][0]
         fpn.seek(0)
-        lines = fpn.read().decode("utf-8")
+        lines = fpn.read().decode("utf-8-sig")
         reader = csv.DictReader(io.StringIO(lines))
 
         # TODO make sure all parcels are accounted for

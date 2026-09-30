@@ -185,33 +185,36 @@ def get_parameter_characteristics(param):
     }
 
 
-def get_or_create_custom_param(param_obj=None, kwargs={}, include_default_value = False, new_formula=False, no_commit=False):
+def get_or_create_custom_param(param_obj=None, opts={}, include_default_value = False, new_formula=False, no_commit=False):
     if isinstance(param_obj, CustomParameter):
         return param_obj
     
     elif isinstance(param_obj, ParameterDefinition):
-        default_kwargs = {
+        default_opts = {
             "definition_id": param_obj.id,
             "unit": param_obj.default_unit,
             "formula_id": param_obj.default_formula_id,
         }
         if include_default_value:
-            default_kwargs["value"] = param_obj.default_value
+            default_opts["value"] = param_obj.default_value
 
-        keys = set(list(kwargs.keys()) + list(default_kwargs.keys()))
+        keys = set(list(opts.keys()) + list(default_opts.keys()))
         for key in keys:
-            if key not in kwargs:
-                kwargs[key] = default_kwargs[key]
+            if key not in opts:
+                opts[key] = default_opts[key]
+
+        if 'value' in opts:
+            opts['value'] = float(opts['value'])  # explicit cast
 
     elif param_obj:
         raise Exception(f"Param type {type(param_obj)} not supported")
 
     if new_formula:
-        default_param = ParameterService.definitions.get(kwargs["definition_id"])
+        default_param = ParameterService.definitions.get(opts["definition_id"])
         new_formula_obj = FormulaService.create(equation=default_param.default_formula.equation)
-        kwargs["formula_id"] = new_formula_obj.id
+        opts["formula_id"] = new_formula_obj.id
 
-    return ParameterService.get_or_create(**kwargs, no_commit=no_commit)
+    return ParameterService.get_or_create(**opts, no_commit=no_commit)
 
 
 def update_custom_param_value(param_obj, val):

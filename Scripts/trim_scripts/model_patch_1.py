@@ -356,7 +356,7 @@ def do_formula_replacements():
         problem_formula = [f for f in FormulaService.get_all() if old in f.equation]
         for pf in problem_formula:
             new_eqn = str(pf.equation).replace(old, new)
-            FormulaService.get(id=pf.id).equation = new_eqn
+            FormulaService.get(pf.id).equation = new_eqn
             FormulaService.commit()
 
 def fix_unit():
@@ -666,7 +666,7 @@ if __name__ == '__main__':
     #     print(f'-- Unable to create Users/Roles.\n{e}')
 
     try:
-        ScenarioService.get(id=2)
+        ScenarioService.get(2)
     except Exception as e:
         print(e)
         raise

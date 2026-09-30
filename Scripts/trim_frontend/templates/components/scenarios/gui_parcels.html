@@ -1338,17 +1338,8 @@ onDomLoad(function () {
                     alert(`An error occurred during upload:\n${responseData?.message}`);
                     console.log(responseData)
                     console.log(c)
-                } else {
-                    // TODO - can we use this data to just redraw the map/table w/o a full page reload? probably!
-                    // console.log("WORKED:");
-                    // console.log(responseData);
-                    // for (let i = 0 ; i < responseData.parcels.length ; i++) {
-                    // let new_parcel = responseData.parcels[i];
-                    // console.log("NEW PARCEL: " + JSON.stringify(new_parcel));
-                    // }
-                    console.log("reload...");
-                    window.location.reload();
                 }
+                window.location.reload();
             });
             return false;
         });
