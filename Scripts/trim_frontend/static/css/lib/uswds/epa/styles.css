@@ -3174,7 +3174,7 @@ html.no-js .footer a:visited:not(.usa-button, .button)::after,
 .footer html.no-js a:visited:not(.usa-button, .button)::after,
 html.no-js .definition__tooltip a:visited:not(.usa-button, .button)::after,
 .definition__tooltip html.no-js a:visited:not(.usa-button, .button)::after {
-    background-image: url("./uswds/img/external-link--gray-2.svg") !important
+    background-image: url("../img/external-link--gray-2.svg") !important
 }
 
 .footer a:hover:not(.usa-button, .button),
@@ -3198,7 +3198,7 @@ html.no-js .footer a:active:not(.usa-button, .button)::after,
 .footer html.no-js a:active:not(.usa-button, .button)::after,
 html.no-js .definition__tooltip a:active:not(.usa-button, .button)::after,
 .definition__tooltip html.no-js a:active:not(.usa-button, .button)::after {
-    background-image: url("./uswds/img/external-link--white.svg") !important
+    background-image: url("../img/external-link--white.svg") !important
 }
 
 .usa-dark-background .box--special a:not(.usa-button, .button),
@@ -3223,7 +3223,7 @@ html.no-js .usa-dark-background .usa-summary-box__text a:link:not(.usa-button, .
 .usa-dark-background .usa-summary-box__text html.no-js a:link:not(.usa-button, .button)::after,
 html.no-js .usa-dark-background .usa-card a:link:not(.usa-button, .button)::after,
 .usa-dark-background .usa-card html.no-js a:link:not(.usa-button, .button)::after {
-    background-image: url("./uswds/img/external-link--blue-base.svg")
+    background-image: url("../img/external-link--blue-base.svg")
 }
 
 .usa-dark-background .box--special a:visited:not(.usa-button, .button),
@@ -3241,7 +3241,7 @@ html.no-js .usa-dark-background .usa-summary-box__text a:visited:not(.usa-button
 .usa-dark-background .usa-summary-box__text html.no-js a:visited:not(.usa-button, .button)::after,
 html.no-js .usa-dark-background .usa-card a:visited:not(.usa-button, .button)::after,
 .usa-dark-background .usa-card html.no-js a:visited:not(.usa-button, .button)::after {
-    background-image: url("./uswds/img/external-link--purple.svg") !important
+    background-image: url("../img/external-link--purple.svg") !important
 }
 
 .usa-dark-background .box--special a:visited:not(.usa-button, .button) span,
@@ -3278,7 +3278,7 @@ html.no-js .usa-dark-background .usa-summary-box__text a:focus:not(.usa-button, 
 .usa-dark-background .usa-summary-box__text html.no-js a:focus:not(.usa-button, .button)::after,
 html.no-js .usa-dark-background .usa-card a:focus:not(.usa-button, .button)::after,
 .usa-dark-background .usa-card html.no-js a:focus:not(.usa-button, .button)::after {
-    background-image: url("./uswds/img/external-link--blue-dark.svg")
+    background-image: url("../img/external-link--blue-dark.svg")
 }
 
 .usa-dark-background .box--special a:hover:not(.usa-button, .button) span,
@@ -3307,7 +3307,7 @@ html.no-js .usa-dark-background .usa-summary-box__text a:active:not(.usa-button,
 .usa-dark-background .usa-summary-box__text html.no-js a:active:not(.usa-button, .button)::after,
 html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::after,
 .usa-dark-background .usa-card html.no-js a:active:not(.usa-button, .button)::after {
-    background-image: url("./uswds/img/external-link--blue-dark.svg")
+    background-image: url("../img/external-link--blue-dark.svg")
 }
 
 .usa-dark-background .box--special a:active:not(.usa-button, .button) span,
@@ -3476,8 +3476,8 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
     width: auto;
     color: #1b1b1b;
     background-color: #f0f0f0;
-    background-image: url("./uswds/img/usa-icons/remove.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-    background-image: url("./uswds/img/usa-icons/remove.svg"), linear-gradient(transparent, transparent);
+    background-image: url("../img/usa-icons/remove.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+    background-image: url("../img/usa-icons/remove.svg"), linear-gradient(transparent, transparent);
     background-repeat: no-repeat;
     background-position: right 1.25rem center;
     background-size: 1.5rem;
@@ -3562,8 +3562,8 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
 .usa-accordion__button:hover {
     color: #1b1b1b;
     background-color: #dfe1e2;
-    background-image: url("./uswds/img/usa-icons/remove.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-    background-image: url("./uswds/img/usa-icons/remove.svg"), linear-gradient(transparent, transparent);
+    background-image: url("../img/usa-icons/remove.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+    background-image: url("../img/usa-icons/remove.svg"), linear-gradient(transparent, transparent);
     background-repeat: no-repeat;
     text-decoration: none
 }
@@ -3575,7 +3575,7 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
     }
 
     .usa-accordion__button::before {
-        background-image: url("./uswds/img/usa-icons/remove.svg");
+        background-image: url("../img/usa-icons/remove.svg");
         background-repeat: no-repeat;
         background-position: center center;
         background-size: 1.5rem 1.5rem;
@@ -3593,10 +3593,10 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
         .usa-accordion__button::before {
             background: none;
             background-color: ButtonText;
-            -webkit-mask-image: url("./uswds/img/usa-icons/remove.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            -webkit-mask-image: url("./uswds/img/usa-icons/remove.svg"), linear-gradient(transparent, transparent);
-            mask-image: url("./uswds/img/usa-icons/remove.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            mask-image: url("./uswds/img/usa-icons/remove.svg"), linear-gradient(transparent, transparent);
+            -webkit-mask-image: url("../img/usa-icons/remove.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            -webkit-mask-image: url("../img/usa-icons/remove.svg"), linear-gradient(transparent, transparent);
+            mask-image: url("../img/usa-icons/remove.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            mask-image: url("../img/usa-icons/remove.svg"), linear-gradient(transparent, transparent);
             -webkit-mask-position: center center;
             mask-position: center center;
             -webkit-mask-repeat: no-repeat;
@@ -3608,21 +3608,21 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
 }
 
 .usa-accordion__button[aria-expanded=false] {
-    background-image: url("./uswds/img/usa-icons/add.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-    background-image: url("./uswds/img/usa-icons/add.svg"), linear-gradient(transparent, transparent);
+    background-image: url("../img/usa-icons/add.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+    background-image: url("../img/usa-icons/add.svg"), linear-gradient(transparent, transparent);
     background-repeat: no-repeat;
     background-size: 1.5rem
 }
 
 .usa-accordion__button[aria-expanded=false]:hover {
-    background-image: url("./uswds/img/usa-icons/add.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-    background-image: url("./uswds/img/usa-icons/add.svg"), linear-gradient(transparent, transparent);
+    background-image: url("../img/usa-icons/add.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+    background-image: url("../img/usa-icons/add.svg"), linear-gradient(transparent, transparent);
     background-repeat: no-repeat
 }
 
 @media(forced-colors: active) {
     .usa-accordion__button[aria-expanded=false]::before {
-        background-image: url("./uswds/img/usa-icons/add.svg");
+        background-image: url("../img/usa-icons/add.svg");
         background-repeat: no-repeat;
         background-position: center center;
         background-size: 1.5rem 1.5rem;
@@ -3639,10 +3639,10 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
         .usa-accordion__button[aria-expanded=false]::before {
             background: none;
             background-color: ButtonText;
-            -webkit-mask-image: url("./uswds/img/usa-icons/add.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            -webkit-mask-image: url("./uswds/img/usa-icons/add.svg"), linear-gradient(transparent, transparent);
-            mask-image: url("./uswds/img/usa-icons/add.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            mask-image: url("./uswds/img/usa-icons/add.svg"), linear-gradient(transparent, transparent);
+            -webkit-mask-image: url("../img/usa-icons/add.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            -webkit-mask-image: url("../img/usa-icons/add.svg"), linear-gradient(transparent, transparent);
+            mask-image: url("../img/usa-icons/add.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            mask-image: url("../img/usa-icons/add.svg"), linear-gradient(transparent, transparent);
             -webkit-mask-position: center center;
             mask-position: center center;
             -webkit-mask-repeat: no-repeat;
@@ -3731,7 +3731,7 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
 }
 
 .usa-alert--success .usa-alert__body::before {
-    background-image: url("./uswds/img/usa-icons/check_circle.svg");
+    background-image: url("../img/usa-icons/check_circle.svg");
     background-repeat: no-repeat;
     background-position: center center;
     background-size: 2rem 2rem;
@@ -3748,10 +3748,10 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
     .usa-alert--success .usa-alert__body::before {
         background: none;
         background-color: #1b1b1b;
-        -webkit-mask-image: url("./uswds/img/usa-icons/check_circle.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-        -webkit-mask-image: url("./uswds/img/usa-icons/check_circle.svg"), linear-gradient(transparent, transparent);
-        mask-image: url("./uswds/img/usa-icons/check_circle.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-        mask-image: url("./uswds/img/usa-icons/check_circle.svg"), linear-gradient(transparent, transparent);
+        -webkit-mask-image: url("../img/usa-icons/check_circle.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+        -webkit-mask-image: url("../img/usa-icons/check_circle.svg"), linear-gradient(transparent, transparent);
+        mask-image: url("../img/usa-icons/check_circle.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+        mask-image: url("../img/usa-icons/check_circle.svg"), linear-gradient(transparent, transparent);
         -webkit-mask-position: center center;
         mask-position: center center;
         -webkit-mask-repeat: no-repeat;
@@ -3800,7 +3800,7 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
 }
 
 .usa-alert--warning .usa-alert__body::before {
-    background-image: url("./uswds/img/usa-icons/warning.svg");
+    background-image: url("../img/usa-icons/warning.svg");
     background-repeat: no-repeat;
     background-position: center center;
     background-size: 2rem 2rem;
@@ -3817,10 +3817,10 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
     .usa-alert--warning .usa-alert__body::before {
         background: none;
         background-color: #1b1b1b;
-        -webkit-mask-image: url("./uswds/img/usa-icons/warning.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-        -webkit-mask-image: url("./uswds/img/usa-icons/warning.svg"), linear-gradient(transparent, transparent);
-        mask-image: url("./uswds/img/usa-icons/warning.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-        mask-image: url("./uswds/img/usa-icons/warning.svg"), linear-gradient(transparent, transparent);
+        -webkit-mask-image: url("../img/usa-icons/warning.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+        -webkit-mask-image: url("../img/usa-icons/warning.svg"), linear-gradient(transparent, transparent);
+        mask-image: url("../img/usa-icons/warning.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+        mask-image: url("../img/usa-icons/warning.svg"), linear-gradient(transparent, transparent);
         -webkit-mask-position: center center;
         mask-position: center center;
         -webkit-mask-repeat: no-repeat;
@@ -3869,7 +3869,7 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
 }
 
 .usa-alert--error .usa-alert__body::before {
-    background-image: url("./uswds/img/usa-icons/error.svg");
+    background-image: url("../img/usa-icons/error.svg");
     background-repeat: no-repeat;
     background-position: center center;
     background-size: 2rem 2rem;
@@ -3886,10 +3886,10 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
     .usa-alert--error .usa-alert__body::before {
         background: none;
         background-color: #1b1b1b;
-        -webkit-mask-image: url("./uswds/img/usa-icons/error.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-        -webkit-mask-image: url("./uswds/img/usa-icons/error.svg"), linear-gradient(transparent, transparent);
-        mask-image: url("./uswds/img/usa-icons/error.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-        mask-image: url("./uswds/img/usa-icons/error.svg"), linear-gradient(transparent, transparent);
+        -webkit-mask-image: url("../img/usa-icons/error.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+        -webkit-mask-image: url("../img/usa-icons/error.svg"), linear-gradient(transparent, transparent);
+        mask-image: url("../img/usa-icons/error.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+        mask-image: url("../img/usa-icons/error.svg"), linear-gradient(transparent, transparent);
         -webkit-mask-position: center center;
         mask-position: center center;
         -webkit-mask-repeat: no-repeat;
@@ -3938,7 +3938,7 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
 }
 
 .usa-alert--info .usa-alert__body::before {
-    background-image: url("./uswds/img/usa-icons/info.svg");
+    background-image: url("../img/usa-icons/info.svg");
     background-repeat: no-repeat;
     background-position: center center;
     background-size: 2rem 2rem;
@@ -3955,10 +3955,10 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
     .usa-alert--info .usa-alert__body::before {
         background: none;
         background-color: #1b1b1b;
-        -webkit-mask-image: url("./uswds/img/usa-icons/info.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-        -webkit-mask-image: url("./uswds/img/usa-icons/info.svg"), linear-gradient(transparent, transparent);
-        mask-image: url("./uswds/img/usa-icons/info.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-        mask-image: url("./uswds/img/usa-icons/info.svg"), linear-gradient(transparent, transparent);
+        -webkit-mask-image: url("../img/usa-icons/info.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+        -webkit-mask-image: url("../img/usa-icons/info.svg"), linear-gradient(transparent, transparent);
+        mask-image: url("../img/usa-icons/info.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+        mask-image: url("../img/usa-icons/info.svg"), linear-gradient(transparent, transparent);
         -webkit-mask-position: center center;
         mask-position: center center;
         -webkit-mask-repeat: no-repeat;
@@ -4007,7 +4007,7 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
 }
 
 .usa-alert--emergency .usa-alert__body::before {
-    background-image: url("./uswds/img/usa-icons-bg/error--white.svg");
+    background-image: url("../img/usa-icons-bg/error--white.svg");
     background-repeat: no-repeat;
     background-position: center center;
     background-size: 2rem 2rem;
@@ -4024,10 +4024,10 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
     .usa-alert--emergency .usa-alert__body::before {
         background: none;
         background-color: #fff;
-        -webkit-mask-image: url("./uswds/img/usa-icons/error.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-        -webkit-mask-image: url("./uswds/img/usa-icons/error.svg"), linear-gradient(transparent, transparent);
-        mask-image: url("./uswds/img/usa-icons/error.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-        mask-image: url("./uswds/img/usa-icons/error.svg"), linear-gradient(transparent, transparent);
+        -webkit-mask-image: url("../img/usa-icons/error.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+        -webkit-mask-image: url("../img/usa-icons/error.svg"), linear-gradient(transparent, transparent);
+        mask-image: url("../img/usa-icons/error.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+        mask-image: url("../img/usa-icons/error.svg"), linear-gradient(transparent, transparent);
         -webkit-mask-position: center center;
         mask-position: center center;
         -webkit-mask-repeat: no-repeat;
@@ -4318,7 +4318,7 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
 }
 
 .usa-banner__header-action::after {
-    background-image: url("./uswds/img/usa-icons/expand_more.svg");
+    background-image: url("../img/usa-icons/expand_more.svg");
     background-repeat: no-repeat;
     background-position: center center;
     background-size: 1rem 1rem;
@@ -4334,10 +4334,10 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
     .usa-banner__header-action::after {
         background: none;
         background-color: #005ea2;
-        -webkit-mask-image: url("./uswds/img/usa-icons/expand_more.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-        -webkit-mask-image: url("./uswds/img/usa-icons/expand_more.svg"), linear-gradient(transparent, transparent);
-        mask-image: url("./uswds/img/usa-icons/expand_more.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-        mask-image: url("./uswds/img/usa-icons/expand_more.svg"), linear-gradient(transparent, transparent);
+        -webkit-mask-image: url("../img/usa-icons/expand_more.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+        -webkit-mask-image: url("../img/usa-icons/expand_more.svg"), linear-gradient(transparent, transparent);
+        mask-image: url("../img/usa-icons/expand_more.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+        mask-image: url("../img/usa-icons/expand_more.svg"), linear-gradient(transparent, transparent);
         -webkit-mask-position: center center;
         mask-position: center center;
         -webkit-mask-repeat: no-repeat;
@@ -4563,7 +4563,7 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
     }
 
     .usa-banner__button::after {
-        background-image: url("./uswds/img/usa-icons/expand_more.svg");
+        background-image: url("../img/usa-icons/expand_more.svg");
         background-repeat: no-repeat;
         background-position: center center;
         background-size: 1rem 1rem;
@@ -4579,10 +4579,10 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
         .usa-banner__button::after {
             background: none;
             background-color: #005ea2;
-            -webkit-mask-image: url("./uswds/img/usa-icons/expand_more.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            -webkit-mask-image: url("./uswds/img/usa-icons/expand_more.svg"), linear-gradient(transparent, transparent);
-            mask-image: url("./uswds/img/usa-icons/expand_more.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            mask-image: url("./uswds/img/usa-icons/expand_more.svg"), linear-gradient(transparent, transparent);
+            -webkit-mask-image: url("../img/usa-icons/expand_more.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            -webkit-mask-image: url("../img/usa-icons/expand_more.svg"), linear-gradient(transparent, transparent);
+            mask-image: url("../img/usa-icons/expand_more.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            mask-image: url("../img/usa-icons/expand_more.svg"), linear-gradient(transparent, transparent);
             -webkit-mask-position: center center;
             mask-position: center center;
             -webkit-mask-repeat: no-repeat;
@@ -4649,7 +4649,7 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
 
 @media all and (max-width: 39.99em) {
     .usa-banner__button[aria-expanded=true]::after {
-        background-image: url("./uswds/img/usa-icons/close.svg");
+        background-image: url("../img/usa-icons/close.svg");
         background-repeat: no-repeat;
         background-position: center center;
         background-size: 1.5rem 1.5rem;
@@ -4665,10 +4665,10 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
         .usa-banner__button[aria-expanded=true]::after {
             background: none;
             background-color: #005ea2;
-            -webkit-mask-image: url("./uswds/img/usa-icons/close.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            -webkit-mask-image: url("./uswds/img/usa-icons/close.svg"), linear-gradient(transparent, transparent);
-            mask-image: url("./uswds/img/usa-icons/close.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            mask-image: url("./uswds/img/usa-icons/close.svg"), linear-gradient(transparent, transparent);
+            -webkit-mask-image: url("../img/usa-icons/close.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            -webkit-mask-image: url("../img/usa-icons/close.svg"), linear-gradient(transparent, transparent);
+            mask-image: url("../img/usa-icons/close.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            mask-image: url("../img/usa-icons/close.svg"), linear-gradient(transparent, transparent);
             -webkit-mask-position: center center;
             mask-position: center center;
             -webkit-mask-repeat: no-repeat;
@@ -4708,7 +4708,7 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
     }
 
     .usa-banner__button[aria-expanded=true]::after {
-        background-image: url("./uswds/img/usa-icons/expand_less.svg");
+        background-image: url("../img/usa-icons/expand_less.svg");
         background-repeat: no-repeat;
         background-position: center center;
         background-size: 1rem 1rem;
@@ -4724,10 +4724,10 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
         .usa-banner__button[aria-expanded=true]::after {
             background: none;
             background-color: #005ea2;
-            -webkit-mask-image: url("./uswds/img/usa-icons/expand_less.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            -webkit-mask-image: url("./uswds/img/usa-icons/expand_less.svg"), linear-gradient(transparent, transparent);
-            mask-image: url("./uswds/img/usa-icons/expand_less.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            mask-image: url("./uswds/img/usa-icons/expand_less.svg"), linear-gradient(transparent, transparent);
+            -webkit-mask-image: url("../img/usa-icons/expand_less.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            -webkit-mask-image: url("../img/usa-icons/expand_less.svg"), linear-gradient(transparent, transparent);
+            mask-image: url("../img/usa-icons/expand_less.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            mask-image: url("../img/usa-icons/expand_less.svg"), linear-gradient(transparent, transparent);
             -webkit-mask-position: center center;
             mask-position: center center;
             -webkit-mask-repeat: no-repeat;
@@ -4943,7 +4943,7 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
 
 @media all and (max-width: 29.99em) {
     .usa-breadcrumb__list-item:nth-last-child(2) .usa-breadcrumb__link::before {
-        background-image: url("./uswds/img/usa-icons/arrow_back.svg");
+        background-image: url("../img/usa-icons/arrow_back.svg");
         background-repeat: no-repeat;
         background-position: center center;
         background-size: 2ex 2ex;
@@ -4959,10 +4959,10 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
         .usa-breadcrumb__list-item:nth-last-child(2) .usa-breadcrumb__link::before {
             background: none;
             background-color: #71767a;
-            -webkit-mask-image: url("./uswds/img/usa-icons/arrow_back.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            -webkit-mask-image: url("./uswds/img/usa-icons/arrow_back.svg"), linear-gradient(transparent, transparent);
-            mask-image: url("./uswds/img/usa-icons/arrow_back.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            mask-image: url("./uswds/img/usa-icons/arrow_back.svg"), linear-gradient(transparent, transparent);
+            -webkit-mask-image: url("../img/usa-icons/arrow_back.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            -webkit-mask-image: url("../img/usa-icons/arrow_back.svg"), linear-gradient(transparent, transparent);
+            mask-image: url("../img/usa-icons/arrow_back.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            mask-image: url("../img/usa-icons/arrow_back.svg"), linear-gradient(transparent, transparent);
             -webkit-mask-position: center center;
             mask-position: center center;
             -webkit-mask-repeat: no-repeat;
@@ -5008,7 +5008,7 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
     }
 
     .usa-breadcrumb__list-item:not(:last-child)::after {
-        background-image: url("./uswds/img/usa-icons/navigate_next.svg");
+        background-image: url("../img/usa-icons/navigate_next.svg");
         background-repeat: no-repeat;
         background-position: center center;
         background-size: 2ex 2ex;
@@ -5024,10 +5024,10 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
         .usa-breadcrumb__list-item:not(:last-child)::after {
             background: none;
             background-color: #71767a;
-            -webkit-mask-image: url("./uswds/img/usa-icons/navigate_next.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            -webkit-mask-image: url("./uswds/img/usa-icons/navigate_next.svg"), linear-gradient(transparent, transparent);
-            mask-image: url("./uswds/img/usa-icons/navigate_next.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            mask-image: url("./uswds/img/usa-icons/navigate_next.svg"), linear-gradient(transparent, transparent);
+            -webkit-mask-image: url("../img/usa-icons/navigate_next.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            -webkit-mask-image: url("../img/usa-icons/navigate_next.svg"), linear-gradient(transparent, transparent);
+            mask-image: url("../img/usa-icons/navigate_next.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            mask-image: url("../img/usa-icons/navigate_next.svg"), linear-gradient(transparent, transparent);
             -webkit-mask-position: center center;
             mask-position: center center;
             -webkit-mask-repeat: no-repeat;
@@ -5688,8 +5688,8 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
 }
 
 .usa-checklist__item.usa-checklist__item--checked::before {
-    background-image: url("./uswds/img/usa-icons-bg/check--blue-60v.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-    background-image: url("./uswds/img/usa-icons-bg/check--blue-60v.svg"), linear-gradient(transparent, transparent);
+    background-image: url("../img/usa-icons-bg/check--blue-60v.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+    background-image: url("../img/usa-icons-bg/check--blue-60v.svg"), linear-gradient(transparent, transparent);
     background-repeat: no-repeat;
     background-position: center;
     background-size: 1.5rem
@@ -8643,7 +8643,7 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
 }
 
 .usa-footer__primary-link--button::before {
-    background-image: url("./uswds/img/usa-icons/expand_more.svg");
+    background-image: url("../img/usa-icons/expand_more.svg");
     background-repeat: no-repeat;
     background-position: center center;
     background-size: 1.25rem 1.25rem;
@@ -8659,10 +8659,10 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
     .usa-footer__primary-link--button::before {
         background: none;
         background-color: currentColor;
-        -webkit-mask-image: url("./uswds/img/usa-icons/expand_more.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-        -webkit-mask-image: url("./uswds/img/usa-icons/expand_more.svg"), linear-gradient(transparent, transparent);
-        mask-image: url("./uswds/img/usa-icons/expand_more.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-        mask-image: url("./uswds/img/usa-icons/expand_more.svg"), linear-gradient(transparent, transparent);
+        -webkit-mask-image: url("../img/usa-icons/expand_more.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+        -webkit-mask-image: url("../img/usa-icons/expand_more.svg"), linear-gradient(transparent, transparent);
+        mask-image: url("../img/usa-icons/expand_more.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+        mask-image: url("../img/usa-icons/expand_more.svg"), linear-gradient(transparent, transparent);
         -webkit-mask-position: center center;
         mask-position: center center;
         -webkit-mask-repeat: no-repeat;
@@ -8707,7 +8707,7 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
 }
 
 .usa-footer__primary-link--button[aria-expanded=false]::before {
-    background-image: url("./uswds/img/usa-icons/navigate_next.svg");
+    background-image: url("../img/usa-icons/navigate_next.svg");
     background-repeat: no-repeat;
     background-position: center center;
     background-size: 1.25rem 1.25rem;
@@ -8723,10 +8723,10 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
     .usa-footer__primary-link--button[aria-expanded=false]::before {
         background: none;
         background-color: currentColor;
-        -webkit-mask-image: url("./uswds/img/usa-icons/navigate_next.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-        -webkit-mask-image: url("./uswds/img/usa-icons/navigate_next.svg"), linear-gradient(transparent, transparent);
-        mask-image: url("./uswds/img/usa-icons/navigate_next.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-        mask-image: url("./uswds/img/usa-icons/navigate_next.svg"), linear-gradient(transparent, transparent);
+        -webkit-mask-image: url("../img/usa-icons/navigate_next.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+        -webkit-mask-image: url("../img/usa-icons/navigate_next.svg"), linear-gradient(transparent, transparent);
+        mask-image: url("../img/usa-icons/navigate_next.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+        mask-image: url("../img/usa-icons/navigate_next.svg"), linear-gradient(transparent, transparent);
         -webkit-mask-position: center center;
         mask-position: center center;
         -webkit-mask-repeat: no-repeat;
@@ -9211,7 +9211,7 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
 
 @media(forced-colors: active) {
     .usa-search [type=submit]::before {
-        background-image: url("./uswds/img/usa-icons/search.svg");
+        background-image: url("../img/usa-icons/search.svg");
         background-repeat: no-repeat;
         background-position: center center;
         background-size: 1.5rem 1.5rem;
@@ -9227,10 +9227,10 @@ html.no-js .usa-dark-background .usa-card a:active:not(.usa-button, .button)::af
         .usa-search [type=submit]::before {
             background: none;
             background-color: ButtonText;
-            -webkit-mask-image: url("./uswds/img/usa-icons/search.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            -webkit-mask-image: url("./uswds/img/usa-icons/search.svg"), linear-gradient(transparent, transparent);
-            mask-image: url("./uswds/img/usa-icons/search.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            mask-image: url("./uswds/img/usa-icons/search.svg"), linear-gradient(transparent, transparent);
+            -webkit-mask-image: url("../img/usa-icons/search.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            -webkit-mask-image: url("../img/usa-icons/search.svg"), linear-gradient(transparent, transparent);
+            mask-image: url("../img/usa-icons/search.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            mask-image: url("../img/usa-icons/search.svg"), linear-gradient(transparent, transparent);
             -webkit-mask-position: center center;
             mask-position: center center;
             -webkit-mask-repeat: no-repeat;
@@ -9713,7 +9713,7 @@ input[type=search] {
 }
 
 .usa-nav__primary button[aria-expanded=false] span::after {
-    background-image: url("./uswds/img/usa-icons/add.svg");
+    background-image: url("../img/usa-icons/add.svg");
     background-repeat: no-repeat;
     background-position: center center;
     background-size: 1.25rem 1.25rem;
@@ -9729,10 +9729,10 @@ input[type=search] {
     .usa-nav__primary button[aria-expanded=false] span::after {
         background: none;
         background-color: ButtonText;
-        -webkit-mask-image: url("./uswds/img/usa-icons/add.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-        -webkit-mask-image: url("./uswds/img/usa-icons/add.svg"), linear-gradient(transparent, transparent);
-        mask-image: url("./uswds/img/usa-icons/add.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-        mask-image: url("./uswds/img/usa-icons/add.svg"), linear-gradient(transparent, transparent);
+        -webkit-mask-image: url("../img/usa-icons/add.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+        -webkit-mask-image: url("../img/usa-icons/add.svg"), linear-gradient(transparent, transparent);
+        mask-image: url("../img/usa-icons/add.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+        mask-image: url("../img/usa-icons/add.svg"), linear-gradient(transparent, transparent);
         -webkit-mask-position: center center;
         mask-position: center center;
         -webkit-mask-repeat: no-repeat;
@@ -9748,7 +9748,7 @@ input[type=search] {
 
 @media all and (min-width: 55em) {
     .usa-nav__primary button[aria-expanded=false] span::after {
-        background-image: url("./uswds/img/usa-icons/expand_more.svg");
+        background-image: url("../img/usa-icons/expand_more.svg");
         background-repeat: no-repeat;
         background-position: center center;
         background-size: 1rem 1rem;
@@ -9764,10 +9764,10 @@ input[type=search] {
         .usa-nav__primary button[aria-expanded=false] span::after {
             background: none;
             background-color: ButtonText;
-            -webkit-mask-image: url("./uswds/img/usa-icons/expand_more.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            -webkit-mask-image: url("./uswds/img/usa-icons/expand_more.svg"), linear-gradient(transparent, transparent);
-            mask-image: url("./uswds/img/usa-icons/expand_more.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            mask-image: url("./uswds/img/usa-icons/expand_more.svg"), linear-gradient(transparent, transparent);
+            -webkit-mask-image: url("../img/usa-icons/expand_more.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            -webkit-mask-image: url("../img/usa-icons/expand_more.svg"), linear-gradient(transparent, transparent);
+            mask-image: url("../img/usa-icons/expand_more.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            mask-image: url("../img/usa-icons/expand_more.svg"), linear-gradient(transparent, transparent);
             -webkit-mask-position: center center;
             mask-position: center center;
             -webkit-mask-repeat: no-repeat;
@@ -9795,7 +9795,7 @@ input[type=search] {
 }
 
 .usa-nav__primary button[aria-expanded=true] span::after {
-    background-image: url("./uswds/img/usa-icons/remove.svg");
+    background-image: url("../img/usa-icons/remove.svg");
     background-repeat: no-repeat;
     background-position: center center;
     background-size: 1.25rem 1.25rem;
@@ -9811,10 +9811,10 @@ input[type=search] {
     .usa-nav__primary button[aria-expanded=true] span::after {
         background: none;
         background-color: ButtonText;
-        -webkit-mask-image: url("./uswds/img/usa-icons/remove.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-        -webkit-mask-image: url("./uswds/img/usa-icons/remove.svg"), linear-gradient(transparent, transparent);
-        mask-image: url("./uswds/img/usa-icons/remove.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-        mask-image: url("./uswds/img/usa-icons/remove.svg"), linear-gradient(transparent, transparent);
+        -webkit-mask-image: url("../img/usa-icons/remove.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+        -webkit-mask-image: url("../img/usa-icons/remove.svg"), linear-gradient(transparent, transparent);
+        mask-image: url("../img/usa-icons/remove.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+        mask-image: url("../img/usa-icons/remove.svg"), linear-gradient(transparent, transparent);
         -webkit-mask-position: center center;
         mask-position: center center;
         -webkit-mask-repeat: no-repeat;
@@ -9845,7 +9845,7 @@ input[type=search] {
 
 @media all and (min-width: 55em)and (min-width: 55em) {
     .usa-nav__primary button[aria-expanded=true] span::after {
-        background-image: url("./uswds/img/usa-icons/expand_less.svg");
+        background-image: url("../img/usa-icons/expand_less.svg");
         background-repeat: no-repeat;
         background-position: center center;
         background-size: 1rem 1rem;
@@ -9861,10 +9861,10 @@ input[type=search] {
         .usa-nav__primary button[aria-expanded=true] span::after {
             background: none;
             background-color: ButtonText;
-            -webkit-mask-image: url("./uswds/img/usa-icons/expand_less.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            -webkit-mask-image: url("./uswds/img/usa-icons/expand_less.svg"), linear-gradient(transparent, transparent);
-            mask-image: url("./uswds/img/usa-icons/expand_less.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            mask-image: url("./uswds/img/usa-icons/expand_less.svg"), linear-gradient(transparent, transparent);
+            -webkit-mask-image: url("../img/usa-icons/expand_less.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            -webkit-mask-image: url("../img/usa-icons/expand_less.svg"), linear-gradient(transparent, transparent);
+            mask-image: url("../img/usa-icons/expand_less.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            mask-image: url("../img/usa-icons/expand_less.svg"), linear-gradient(transparent, transparent);
             -webkit-mask-position: center center;
             mask-position: center center;
             -webkit-mask-repeat: no-repeat;
@@ -10182,7 +10182,7 @@ input[type=search] {
 
 @media(forced-colors: active) {
     .usa-nav__close::before {
-        background-image: url("./uswds/img/usa-icons/close.svg");
+        background-image: url("../img/usa-icons/close.svg");
         background-repeat: no-repeat;
         background-position: center center;
         background-size: 1.25rem 1.25rem;
@@ -10198,10 +10198,10 @@ input[type=search] {
         .usa-nav__close::before {
             background: none;
             background-color: ButtonText;
-            -webkit-mask-image: url("./uswds/img/usa-icons/close.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            -webkit-mask-image: url("./uswds/img/usa-icons/close.svg"), linear-gradient(transparent, transparent);
-            mask-image: url("./uswds/img/usa-icons/close.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            mask-image: url("./uswds/img/usa-icons/close.svg"), linear-gradient(transparent, transparent);
+            -webkit-mask-image: url("../img/usa-icons/close.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            -webkit-mask-image: url("../img/usa-icons/close.svg"), linear-gradient(transparent, transparent);
+            mask-image: url("../img/usa-icons/close.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            mask-image: url("../img/usa-icons/close.svg"), linear-gradient(transparent, transparent);
             -webkit-mask-position: center center;
             mask-position: center center;
             -webkit-mask-repeat: no-repeat;
@@ -10868,7 +10868,7 @@ html.usa-js-loading .usa-nav__submenu.usa-megamenu {
     font-family: Source Sans Pro Web, "Noto Sans Arabic homepage", "Noto Sans KR homepage", "Noto Sans SC homepage", "Noto Sans BN homepage", "Noto Sans GU homepage", "Noto Sans Arabic", "Noto Sans KR", "Noto Sans SC", "Noto Sans TC", "Noto Sans BN", "Noto Sans GU", "Helvetica Neue", Helvetica, Arial, sans;
     font-size: 1.06rem;
     line-height: 1.5;
-    background-image: url("./uswds/img/hero.jpg");
+    background-image: url("../img/hero.jpg");
     background-position: center;
     background-size: cover;
     color: #fff
@@ -14414,7 +14414,7 @@ html.usa-js-loading .usa-nav__submenu.usa-megamenu {
 }
 
 .usa-site-alert--info .usa-alert .usa-alert__body::before {
-    background-image: url("./uswds/img/usa-icons/info.svg");
+    background-image: url("../img/usa-icons/info.svg");
     background-repeat: no-repeat;
     background-position: center center;
     background-size: 2rem 2rem;
@@ -14431,10 +14431,10 @@ html.usa-js-loading .usa-nav__submenu.usa-megamenu {
     .usa-site-alert--info .usa-alert .usa-alert__body::before {
         background: none;
         background-color: #1b1b1b;
-        -webkit-mask-image: url("./uswds/img/usa-icons/info.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-        -webkit-mask-image: url("./uswds/img/usa-icons/info.svg"), linear-gradient(transparent, transparent);
-        mask-image: url("./uswds/img/usa-icons/info.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-        mask-image: url("./uswds/img/usa-icons/info.svg"), linear-gradient(transparent, transparent);
+        -webkit-mask-image: url("../img/usa-icons/info.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+        -webkit-mask-image: url("../img/usa-icons/info.svg"), linear-gradient(transparent, transparent);
+        mask-image: url("../img/usa-icons/info.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+        mask-image: url("../img/usa-icons/info.svg"), linear-gradient(transparent, transparent);
         -webkit-mask-position: center center;
         mask-position: center center;
         -webkit-mask-repeat: no-repeat;
@@ -14483,7 +14483,7 @@ html.usa-js-loading .usa-nav__submenu.usa-megamenu {
 }
 
 .usa-site-alert--emergency .usa-alert .usa-alert__body::before {
-    background-image: url("./uswds/img/usa-icons-bg/error--white.svg");
+    background-image: url("../img/usa-icons-bg/error--white.svg");
     background-repeat: no-repeat;
     background-position: center center;
     background-size: 2rem 2rem;
@@ -14500,10 +14500,10 @@ html.usa-js-loading .usa-nav__submenu.usa-megamenu {
     .usa-site-alert--emergency .usa-alert .usa-alert__body::before {
         background: none;
         background-color: #fff;
-        -webkit-mask-image: url("./uswds/img/usa-icons/error.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-        -webkit-mask-image: url("./uswds/img/usa-icons/error.svg"), linear-gradient(transparent, transparent);
-        mask-image: url("./uswds/img/usa-icons/error.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-        mask-image: url("./uswds/img/usa-icons/error.svg"), linear-gradient(transparent, transparent);
+        -webkit-mask-image: url("../img/usa-icons/error.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+        -webkit-mask-image: url("../img/usa-icons/error.svg"), linear-gradient(transparent, transparent);
+        mask-image: url("../img/usa-icons/error.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+        mask-image: url("../img/usa-icons/error.svg"), linear-gradient(transparent, transparent);
         -webkit-mask-position: center center;
         mask-position: center center;
         -webkit-mask-repeat: no-repeat;
@@ -16015,8 +16015,8 @@ html.usa-js-loading .usa-nav__submenu.usa-megamenu {
 .form-item__checkbox:indeterminate+[class*=__label]::before,
 .usa-checkbox__input[data-indeterminate]+[class*=__label]::before,
 [data-indeterminate].form-item__checkbox+[class*=__label]::before {
-    background-image: url("./uswds/img/checkbox-indeterminate.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-    background-image: url("./uswds/img/checkbox-indeterminate.svg"), linear-gradient(transparent, transparent);
+    background-image: url("../img/checkbox-indeterminate.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+    background-image: url("../img/checkbox-indeterminate.svg"), linear-gradient(transparent, transparent);
     background-repeat: no-repeat;
     background-color: #005ea2;
     -webkit-box-shadow: 0 0 0 2px #005ea2;
@@ -16031,8 +16031,8 @@ html.usa-js-loading .usa-nav__submenu.usa-megamenu {
     .form-item__checkbox:indeterminate+[class*=__label]::before,
     .usa-checkbox__input[data-indeterminate]+[class*=__label]::before,
     [data-indeterminate].form-item__checkbox+[class*=__label]::before {
-        background-image: url("./uswds/img/checkbox-indeterminate-alt.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-        background-image: url("./uswds/img/checkbox-indeterminate-alt.svg"), linear-gradient(transparent, transparent);
+        background-image: url("../img/checkbox-indeterminate-alt.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+        background-image: url("../img/checkbox-indeterminate-alt.svg"), linear-gradient(transparent, transparent);
         background-repeat: no-repeat;
         background-color: SelectedItem
     }
@@ -16079,8 +16079,8 @@ html.usa-js-loading .usa-nav__submenu.usa-megamenu {
 .form-item__checkbox:checked+[class*=__label]::before,
 .usa-checkbox__input:checked:disabled+[class*=__label]::before,
 .usa-checkbox__input:checked[aria-disabled=true]+[class*=__label]::before {
-    background-image: url("./uswds/img/correct8.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-    background-image: url("./uswds/img/correct8.svg"), linear-gradient(transparent, transparent);
+    background-image: url("../img/correct8.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+    background-image: url("../img/correct8.svg"), linear-gradient(transparent, transparent);
     background-repeat: no-repeat
 }
 
@@ -16090,8 +16090,8 @@ html.usa-js-loading .usa-nav__submenu.usa-megamenu {
     .form-item__checkbox:checked+[class*=__label]::before,
     .usa-checkbox__input:checked:disabled+[class*=__label]::before,
     .usa-checkbox__input:checked[aria-disabled=true]+[class*=__label]::before {
-        background-image: url("./uswds/img/correct8-alt.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-        background-image: url("./uswds/img/correct8-alt.svg"), linear-gradient(transparent, transparent);
+        background-image: url("../img/correct8-alt.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+        background-image: url("../img/correct8-alt.svg"), linear-gradient(transparent, transparent);
         background-repeat: no-repeat
     }
 }
@@ -16212,8 +16212,8 @@ html.usa-js-loading .usa-nav__submenu.usa-megamenu {
 
 .usa-select,
 .form-item__select {
-    background-image: url("./uswds/img/usa-icons/unfold_more.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-    background-image: url("./uswds/img/usa-icons/unfold_more.svg"), linear-gradient(transparent, transparent);
+    background-image: url("../img/usa-icons/unfold_more.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+    background-image: url("../img/usa-icons/unfold_more.svg"), linear-gradient(transparent, transparent);
     background-repeat: no-repeat;
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -16355,7 +16355,7 @@ html.usa-js-loading .usa-nav__submenu.usa-megamenu {
 
 @media(forced-colors: active) {
     .usa-combo-box--pristine .usa-combo-box__clear-input {
-        background-image: url("./uswds/img/usa-icons/close.svg");
+        background-image: url("../img/usa-icons/close.svg");
         background-repeat: no-repeat;
         background-position: center center;
         background-size: 1rem 1rem;
@@ -16371,10 +16371,10 @@ html.usa-js-loading .usa-nav__submenu.usa-megamenu {
         .usa-combo-box--pristine .usa-combo-box__clear-input {
             background: none;
             background-color: ButtonText;
-            -webkit-mask-image: url("./uswds/img/usa-icons/close.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            -webkit-mask-image: url("./uswds/img/usa-icons/close.svg"), linear-gradient(transparent, transparent);
-            mask-image: url("./uswds/img/usa-icons/close.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            mask-image: url("./uswds/img/usa-icons/close.svg"), linear-gradient(transparent, transparent);
+            -webkit-mask-image: url("../img/usa-icons/close.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            -webkit-mask-image: url("../img/usa-icons/close.svg"), linear-gradient(transparent, transparent);
+            mask-image: url("../img/usa-icons/close.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            mask-image: url("../img/usa-icons/close.svg"), linear-gradient(transparent, transparent);
             -webkit-mask-position: center center;
             mask-position: center center;
             -webkit-mask-repeat: no-repeat;
@@ -16508,16 +16508,16 @@ button.usa-combo-box__clear-input[aria-disabled=true] {
 }
 
 .usa-combo-box__clear-input {
-    background-image: url("./uswds/img/usa-icons/close.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-    background-image: url("./uswds/img/usa-icons/close.svg"), linear-gradient(transparent, transparent);
+    background-image: url("../img/usa-icons/close.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+    background-image: url("../img/usa-icons/close.svg"), linear-gradient(transparent, transparent);
     background-repeat: no-repeat;
     display: none;
     right: calc(2.5em + 3px)
 }
 
 .usa-combo-box__toggle-list {
-    background-image: url("./uswds/img/usa-icons/expand_more.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-    background-image: url("./uswds/img/usa-icons/expand_more.svg"), linear-gradient(transparent, transparent);
+    background-image: url("../img/usa-icons/expand_more.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+    background-image: url("../img/usa-icons/expand_more.svg"), linear-gradient(transparent, transparent);
     background-repeat: no-repeat;
     background-size: auto 2rem;
     right: 1px
@@ -16525,7 +16525,7 @@ button.usa-combo-box__clear-input[aria-disabled=true] {
 
 @media(forced-colors: active) {
     .usa-combo-box__toggle-list {
-        background-image: url("./uswds/img/usa-icons/expand_more.svg");
+        background-image: url("../img/usa-icons/expand_more.svg");
         background-repeat: no-repeat;
         background-position: center center;
         background-size: 1rem 1rem;
@@ -16540,10 +16540,10 @@ button.usa-combo-box__clear-input[aria-disabled=true] {
         .usa-combo-box__toggle-list {
             background: none;
             background-color: ButtonText;
-            -webkit-mask-image: url("./uswds/img/usa-icons/expand_more.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            -webkit-mask-image: url("./uswds/img/usa-icons/expand_more.svg"), linear-gradient(transparent, transparent);
-            mask-image: url("./uswds/img/usa-icons/expand_more.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            mask-image: url("./uswds/img/usa-icons/expand_more.svg"), linear-gradient(transparent, transparent);
+            -webkit-mask-image: url("../img/usa-icons/expand_more.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            -webkit-mask-image: url("../img/usa-icons/expand_more.svg"), linear-gradient(transparent, transparent);
+            mask-image: url("../img/usa-icons/expand_more.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            mask-image: url("../img/usa-icons/expand_more.svg"), linear-gradient(transparent, transparent);
             -webkit-mask-position: center center;
             mask-position: center center;
             -webkit-mask-repeat: no-repeat;
@@ -16884,8 +16884,8 @@ button.usa-combo-box__clear-input[aria-disabled=true] {
 }
 
 .usa-date-picker__button {
-    background-image: url("./uswds/img/usa-icons/calendar_today.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-    background-image: url("./uswds/img/usa-icons/calendar_today.svg"), linear-gradient(transparent, transparent);
+    background-image: url("../img/usa-icons/calendar_today.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+    background-image: url("../img/usa-icons/calendar_today.svg"), linear-gradient(transparent, transparent);
     background-repeat: no-repeat;
     -ms-flex-item-align: stretch;
     align-self: stretch;
@@ -16898,7 +16898,7 @@ button.usa-combo-box__clear-input[aria-disabled=true] {
 
 @media(forced-colors: active) {
     .usa-date-picker__button {
-        background-image: url("./uswds/img/usa-icons/calendar_today.svg");
+        background-image: url("../img/usa-icons/calendar_today.svg");
         background-repeat: no-repeat;
         background-position: center center;
         background-size: 2.5rem 2.5rem;
@@ -16914,10 +16914,10 @@ button.usa-combo-box__clear-input[aria-disabled=true] {
         .usa-date-picker__button {
             background: none;
             background-color: ButtonText;
-            -webkit-mask-image: url("./uswds/img/usa-icons/calendar_today.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            -webkit-mask-image: url("./uswds/img/usa-icons/calendar_today.svg"), linear-gradient(transparent, transparent);
-            mask-image: url("./uswds/img/usa-icons/calendar_today.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            mask-image: url("./uswds/img/usa-icons/calendar_today.svg"), linear-gradient(transparent, transparent);
+            -webkit-mask-image: url("../img/usa-icons/calendar_today.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            -webkit-mask-image: url("../img/usa-icons/calendar_today.svg"), linear-gradient(transparent, transparent);
+            mask-image: url("../img/usa-icons/calendar_today.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            mask-image: url("../img/usa-icons/calendar_today.svg"), linear-gradient(transparent, transparent);
             -webkit-mask-position: center center;
             mask-position: center center;
             -webkit-mask-repeat: no-repeat;
@@ -17023,14 +17023,14 @@ button.usa-combo-box__clear-input[aria-disabled=true] {
 }
 
 .usa-date-picker__calendar__previous-year:not([disabled]) {
-    background-image: url("./uswds/img/usa-icons/navigate_far_before.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-    background-image: url("./uswds/img/usa-icons/navigate_far_before.svg"), linear-gradient(transparent, transparent);
+    background-image: url("../img/usa-icons/navigate_far_before.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+    background-image: url("../img/usa-icons/navigate_far_before.svg"), linear-gradient(transparent, transparent);
     background-repeat: no-repeat
 }
 
 @media(forced-colors: active) {
     .usa-date-picker__calendar__previous-year:not([disabled]) {
-        background-image: url("./uswds/img/usa-icons/navigate_far_before.svg");
+        background-image: url("../img/usa-icons/navigate_far_before.svg");
         background-repeat: no-repeat;
         background-position: center center;
         background-size: 2.5rem 2.5rem;
@@ -17044,10 +17044,10 @@ button.usa-combo-box__clear-input[aria-disabled=true] {
         .usa-date-picker__calendar__previous-year:not([disabled]) {
             background: none;
             background-color: ButtonText;
-            -webkit-mask-image: url("./uswds/img/usa-icons/navigate_far_before.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            -webkit-mask-image: url("./uswds/img/usa-icons/navigate_far_before.svg"), linear-gradient(transparent, transparent);
-            mask-image: url("./uswds/img/usa-icons/navigate_far_before.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            mask-image: url("./uswds/img/usa-icons/navigate_far_before.svg"), linear-gradient(transparent, transparent);
+            -webkit-mask-image: url("../img/usa-icons/navigate_far_before.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            -webkit-mask-image: url("../img/usa-icons/navigate_far_before.svg"), linear-gradient(transparent, transparent);
+            mask-image: url("../img/usa-icons/navigate_far_before.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            mask-image: url("../img/usa-icons/navigate_far_before.svg"), linear-gradient(transparent, transparent);
             -webkit-mask-position: center center;
             mask-position: center center;
             -webkit-mask-repeat: no-repeat;
@@ -17059,14 +17059,14 @@ button.usa-combo-box__clear-input[aria-disabled=true] {
 }
 
 .usa-date-picker__calendar__previous-month:not([disabled]) {
-    background-image: url("./uswds/img/usa-icons/navigate_before.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-    background-image: url("./uswds/img/usa-icons/navigate_before.svg"), linear-gradient(transparent, transparent);
+    background-image: url("../img/usa-icons/navigate_before.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+    background-image: url("../img/usa-icons/navigate_before.svg"), linear-gradient(transparent, transparent);
     background-repeat: no-repeat
 }
 
 @media(forced-colors: active) {
     .usa-date-picker__calendar__previous-month:not([disabled]) {
-        background-image: url("./uswds/img/usa-icons/navigate_before.svg");
+        background-image: url("../img/usa-icons/navigate_before.svg");
         background-repeat: no-repeat;
         background-position: center center;
         background-size: 2.5rem 2.5rem;
@@ -17080,10 +17080,10 @@ button.usa-combo-box__clear-input[aria-disabled=true] {
         .usa-date-picker__calendar__previous-month:not([disabled]) {
             background: none;
             background-color: ButtonText;
-            -webkit-mask-image: url("./uswds/img/usa-icons/navigate_before.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            -webkit-mask-image: url("./uswds/img/usa-icons/navigate_before.svg"), linear-gradient(transparent, transparent);
-            mask-image: url("./uswds/img/usa-icons/navigate_before.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            mask-image: url("./uswds/img/usa-icons/navigate_before.svg"), linear-gradient(transparent, transparent);
+            -webkit-mask-image: url("../img/usa-icons/navigate_before.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            -webkit-mask-image: url("../img/usa-icons/navigate_before.svg"), linear-gradient(transparent, transparent);
+            mask-image: url("../img/usa-icons/navigate_before.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            mask-image: url("../img/usa-icons/navigate_before.svg"), linear-gradient(transparent, transparent);
             -webkit-mask-position: center center;
             mask-position: center center;
             -webkit-mask-repeat: no-repeat;
@@ -17095,14 +17095,14 @@ button.usa-combo-box__clear-input[aria-disabled=true] {
 }
 
 .usa-date-picker__calendar__next-year:not([disabled]) {
-    background-image: url("./uswds/img/usa-icons/navigate_far_next.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-    background-image: url("./uswds/img/usa-icons/navigate_far_next.svg"), linear-gradient(transparent, transparent);
+    background-image: url("../img/usa-icons/navigate_far_next.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+    background-image: url("../img/usa-icons/navigate_far_next.svg"), linear-gradient(transparent, transparent);
     background-repeat: no-repeat
 }
 
 @media(forced-colors: active) {
     .usa-date-picker__calendar__next-year:not([disabled]) {
-        background-image: url("./uswds/img/usa-icons/navigate_far_next.svg");
+        background-image: url("../img/usa-icons/navigate_far_next.svg");
         background-repeat: no-repeat;
         background-position: center center;
         background-size: 2.5rem 2.5rem;
@@ -17116,10 +17116,10 @@ button.usa-combo-box__clear-input[aria-disabled=true] {
         .usa-date-picker__calendar__next-year:not([disabled]) {
             background: none;
             background-color: ButtonText;
-            -webkit-mask-image: url("./uswds/img/usa-icons/navigate_far_next.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            -webkit-mask-image: url("./uswds/img/usa-icons/navigate_far_next.svg"), linear-gradient(transparent, transparent);
-            mask-image: url("./uswds/img/usa-icons/navigate_far_next.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            mask-image: url("./uswds/img/usa-icons/navigate_far_next.svg"), linear-gradient(transparent, transparent);
+            -webkit-mask-image: url("../img/usa-icons/navigate_far_next.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            -webkit-mask-image: url("../img/usa-icons/navigate_far_next.svg"), linear-gradient(transparent, transparent);
+            mask-image: url("../img/usa-icons/navigate_far_next.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            mask-image: url("../img/usa-icons/navigate_far_next.svg"), linear-gradient(transparent, transparent);
             -webkit-mask-position: center center;
             mask-position: center center;
             -webkit-mask-repeat: no-repeat;
@@ -17131,14 +17131,14 @@ button.usa-combo-box__clear-input[aria-disabled=true] {
 }
 
 .usa-date-picker__calendar__next-month:not([disabled]) {
-    background-image: url("./uswds/img/usa-icons/navigate_next.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-    background-image: url("./uswds/img/usa-icons/navigate_next.svg"), linear-gradient(transparent, transparent);
+    background-image: url("../img/usa-icons/navigate_next.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+    background-image: url("../img/usa-icons/navigate_next.svg"), linear-gradient(transparent, transparent);
     background-repeat: no-repeat
 }
 
 @media(forced-colors: active) {
     .usa-date-picker__calendar__next-month:not([disabled]) {
-        background-image: url("./uswds/img/usa-icons/navigate_next.svg");
+        background-image: url("../img/usa-icons/navigate_next.svg");
         background-repeat: no-repeat;
         background-position: center center;
         background-size: 2.5rem 2.5rem;
@@ -17152,10 +17152,10 @@ button.usa-combo-box__clear-input[aria-disabled=true] {
         .usa-date-picker__calendar__next-month:not([disabled]) {
             background: none;
             background-color: ButtonText;
-            -webkit-mask-image: url("./uswds/img/usa-icons/navigate_next.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            -webkit-mask-image: url("./uswds/img/usa-icons/navigate_next.svg"), linear-gradient(transparent, transparent);
-            mask-image: url("./uswds/img/usa-icons/navigate_next.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            mask-image: url("./uswds/img/usa-icons/navigate_next.svg"), linear-gradient(transparent, transparent);
+            -webkit-mask-image: url("../img/usa-icons/navigate_next.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            -webkit-mask-image: url("../img/usa-icons/navigate_next.svg"), linear-gradient(transparent, transparent);
+            mask-image: url("../img/usa-icons/navigate_next.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            mask-image: url("../img/usa-icons/navigate_next.svg"), linear-gradient(transparent, transparent);
             -webkit-mask-position: center center;
             mask-position: center center;
             -webkit-mask-repeat: no-repeat;
@@ -17406,8 +17406,8 @@ button.usa-combo-box__clear-input[aria-disabled=true] {
 }
 
 .usa-date-picker__calendar__previous-year-chunk:not([disabled]) {
-    background-image: url("./uswds/img/usa-icons/navigate_before.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-    background-image: url("./uswds/img/usa-icons/navigate_before.svg"), linear-gradient(transparent, transparent);
+    background-image: url("../img/usa-icons/navigate_before.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+    background-image: url("../img/usa-icons/navigate_before.svg"), linear-gradient(transparent, transparent);
     background-repeat: no-repeat
 }
 
@@ -17417,7 +17417,7 @@ button.usa-combo-box__clear-input[aria-disabled=true] {
     }
 
     .usa-date-picker__calendar__previous-year-chunk:not([disabled])::after {
-        background-image: url("./uswds/img/usa-icons/navigate_before.svg");
+        background-image: url("../img/usa-icons/navigate_before.svg");
         background-repeat: no-repeat;
         background-position: center center;
         background-size: 2.5rem 2.5rem;
@@ -17433,10 +17433,10 @@ button.usa-combo-box__clear-input[aria-disabled=true] {
         .usa-date-picker__calendar__previous-year-chunk:not([disabled])::after {
             background: none;
             background-color: ButtonText;
-            -webkit-mask-image: url("./uswds/img/usa-icons/navigate_before.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            -webkit-mask-image: url("./uswds/img/usa-icons/navigate_before.svg"), linear-gradient(transparent, transparent);
-            mask-image: url("./uswds/img/usa-icons/navigate_before.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            mask-image: url("./uswds/img/usa-icons/navigate_before.svg"), linear-gradient(transparent, transparent);
+            -webkit-mask-image: url("../img/usa-icons/navigate_before.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            -webkit-mask-image: url("../img/usa-icons/navigate_before.svg"), linear-gradient(transparent, transparent);
+            mask-image: url("../img/usa-icons/navigate_before.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            mask-image: url("../img/usa-icons/navigate_before.svg"), linear-gradient(transparent, transparent);
             -webkit-mask-position: center center;
             mask-position: center center;
             -webkit-mask-repeat: no-repeat;
@@ -17453,8 +17453,8 @@ button.usa-combo-box__clear-input[aria-disabled=true] {
 }
 
 .usa-date-picker__calendar__next-year-chunk:not([disabled]) {
-    background-image: url("./uswds/img/usa-icons/navigate_next.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-    background-image: url("./uswds/img/usa-icons/navigate_next.svg"), linear-gradient(transparent, transparent);
+    background-image: url("../img/usa-icons/navigate_next.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+    background-image: url("../img/usa-icons/navigate_next.svg"), linear-gradient(transparent, transparent);
     background-repeat: no-repeat
 }
 
@@ -17464,7 +17464,7 @@ button.usa-combo-box__clear-input[aria-disabled=true] {
     }
 
     .usa-date-picker__calendar__next-year-chunk:not([disabled])::after {
-        background-image: url("./uswds/img/usa-icons/navigate_next.svg");
+        background-image: url("../img/usa-icons/navigate_next.svg");
         background-repeat: no-repeat;
         background-position: center center;
         background-size: 2.5rem 2.5rem;
@@ -17480,10 +17480,10 @@ button.usa-combo-box__clear-input[aria-disabled=true] {
         .usa-date-picker__calendar__next-year-chunk:not([disabled])::after {
             background: none;
             background-color: ButtonText;
-            -webkit-mask-image: url("./uswds/img/usa-icons/navigate_next.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            -webkit-mask-image: url("./uswds/img/usa-icons/navigate_next.svg"), linear-gradient(transparent, transparent);
-            mask-image: url("./uswds/img/usa-icons/navigate_next.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-            mask-image: url("./uswds/img/usa-icons/navigate_next.svg"), linear-gradient(transparent, transparent);
+            -webkit-mask-image: url("../img/usa-icons/navigate_next.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            -webkit-mask-image: url("../img/usa-icons/navigate_next.svg"), linear-gradient(transparent, transparent);
+            mask-image: url("../img/usa-icons/navigate_next.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+            mask-image: url("../img/usa-icons/navigate_next.svg"), linear-gradient(transparent, transparent);
             -webkit-mask-position: center center;
             mask-position: center center;
             -webkit-mask-repeat: no-repeat;
@@ -17707,8 +17707,8 @@ button.usa-combo-box__clear-input[aria-disabled=true] {
 }
 
 .usa-file-input__preview-image.is-loading {
-    background-image: url("./uswds/img/loader.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-    background-image: url("./uswds/img/loader.svg"), linear-gradient(transparent, transparent);
+    background-image: url("../img/loader.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+    background-image: url("../img/loader.svg"), linear-gradient(transparent, transparent);
     background-repeat: no-repeat;
     background-position: center center;
     background-repeat: no-repeat;
@@ -17726,32 +17726,32 @@ button.usa-combo-box__clear-input[aria-disabled=true] {
 }
 
 .usa-file-input__preview-image--pdf {
-    background-image: url("./uswds/img/file-pdf.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-    background-image: url("./uswds/img/file-pdf.svg"), linear-gradient(transparent, transparent);
+    background-image: url("../img/file-pdf.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+    background-image: url("../img/file-pdf.svg"), linear-gradient(transparent, transparent);
     background-repeat: no-repeat
 }
 
 .usa-file-input__preview-image--generic {
-    background-image: url("./uswds/img/file.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-    background-image: url("./uswds/img/file.svg"), linear-gradient(transparent, transparent);
+    background-image: url("../img/file.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+    background-image: url("../img/file.svg"), linear-gradient(transparent, transparent);
     background-repeat: no-repeat
 }
 
 .usa-file-input__preview-image--word {
-    background-image: url("./uswds/img/file-word.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-    background-image: url("./uswds/img/file-word.svg"), linear-gradient(transparent, transparent);
+    background-image: url("../img/file-word.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+    background-image: url("../img/file-word.svg"), linear-gradient(transparent, transparent);
     background-repeat: no-repeat
 }
 
 .usa-file-input__preview-image--excel {
-    background-image: url("./uswds/img/file-excel.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-    background-image: url("./uswds/img/file-excel.svg"), linear-gradient(transparent, transparent);
+    background-image: url("../img/file-excel.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+    background-image: url("../img/file-excel.svg"), linear-gradient(transparent, transparent);
     background-repeat: no-repeat
 }
 
 .usa-file-input__preview-image--video {
-    background-image: url("./uswds/img/file-video.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-    background-image: url("./uswds/img/file-video.svg"), linear-gradient(transparent, transparent);
+    background-image: url("../img/file-video.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+    background-image: url("../img/file-video.svg"), linear-gradient(transparent, transparent);
     background-repeat: no-repeat
 }
 
@@ -19033,7 +19033,7 @@ html.no-js .usa-banner:hover .usa-banner__content {
         .usa-banner__button[aria-expanded=false]::after,
         .usa-banner__button[aria-expanded=true]::after,
         .usa-banner__button[aria-expanded=true]:hover::after {
-            background: rgba(0, 0, 0, 0) url("./uswds/img/chevron.svg") no-repeat center/8px 5px;
+            background: rgba(0, 0, 0, 0) url("../img/chevron.svg") no-repeat center/8px 5px;
             -webkit-mask: none;
             mask: none
         }
@@ -20082,7 +20082,7 @@ details.details {
 }
 
 .details__summary {
-    background-image: url("./uswds/img/plus.svg");
+    background-image: url("../img/plus.svg");
     background-color: #dfe1e2;
     background-position: right 1.5rem center;
     background-repeat: no-repeat;
@@ -20104,7 +20104,7 @@ details.details {
 }
 
 [open]>.details__summary {
-    background-image: url("./uswds/img/minus.svg")
+    background-image: url("../img/minus.svg")
 }
 
 .details__summary:hover {
@@ -20605,7 +20605,7 @@ details.details {
 .box--highlight>.box__title>.box__title-link::after,
 .box--blog>.box__title>.box__title-link::after,
 .box--alert>.box__title>.box__title-link::after {
-    background-image: url("./uswds/img/external-link--white.svg") !important
+    background-image: url("../img/external-link--white.svg") !important
 }
 
 .box--rss>.box__title,
@@ -20780,7 +20780,7 @@ details.details {
 }
 
 .box--alert>.box__title>.box__title-link::after {
-    background-image: url("./uswds/img/external-link--white.svg") !important
+    background-image: url("../img/external-link--white.svg") !important
 }
 
 .box--alert>.box__image,
@@ -20804,7 +20804,7 @@ details.details {
 }
 
 .box--blog>.box__title>.box__title-link::after {
-    background-image: url("./uswds/img/external-link--gray-7.svg") !important
+    background-image: url("../img/external-link--gray-7.svg") !important
 }
 
 .box--blog>.box__image,
@@ -20845,7 +20845,7 @@ details.details {
 }
 
 .box--highlight>.box__title>.box__title-link::after {
-    background-image: url("./uswds/img/external-link--gray-7.svg") !important
+    background-image: url("../img/external-link--gray-7.svg") !important
 }
 
 .box--highlight>.box__image,
@@ -20890,7 +20890,7 @@ details.details {
 }
 
 .box--news>.box__title>.box__title-link::after {
-    background-image: url("./uswds/img/external-link--white.svg") !important
+    background-image: url("../img/external-link--white.svg") !important
 }
 
 .box--news>.box__image,
@@ -20924,7 +20924,7 @@ details.details {
 }
 
 .box--related-info>.box__title>.box__title-link::after {
-    background-image: url("./uswds/img/external-link--white.svg") !important
+    background-image: url("../img/external-link--white.svg") !important
 }
 
 .box--related-info>.box__image,
@@ -20999,7 +20999,7 @@ details.details {
 }
 
 .box--rss>.box__title>.box__title-link::after {
-    background-image: url("./uswds/img/external-link--white.svg") !important
+    background-image: url("../img/external-link--white.svg") !important
 }
 
 .box--rss>.box__image,
@@ -21468,7 +21468,7 @@ details.details {
 }
 
 .dropbutton.is-open .dropbutton__toggle-button {
-    background-image: url("./uswds/img/dropbutton-arrow-up.svg")
+    background-image: url("../img/dropbutton-arrow-up.svg")
 }
 
 .dropbutton+.dropbutton,
@@ -21524,7 +21524,7 @@ details.details {
     transition: background 200ms cubic-bezier(0.4, 0, 1, 1);
     vertical-align: top;
     white-space: normal;
-    background-image: url("./uswds/img/dropbutton-arrow-down.svg");
+    background-image: url("../img/dropbutton-arrow-down.svg");
     background-position: 50% 1rem;
     background-repeat: no-repeat;
     background-size: .75rem;
@@ -21656,7 +21656,7 @@ details.details {
 
 html.no-js .external-link::after,
 html.no-js a:where([href^="http://"], [href^="https://"], [href^="//"]):not([href$="//www.epa.gov"], [href$="//epa.gov"], [href^="http://www.epa.gov/"], [href^="https://www.epa.gov/"], [href^="http://epa.gov/"], [href^="https://epa.gov/"], [href^="//epa.gov/"], [href^="//www.epa.gov/"], [href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"], [href$="//usepa.servicenowservices.com"], [href^="http://usepa.servicenowservices.com"], [href^="https://usepa.servicenowservices.com"])::after {
-    background-image: url("./uswds/img/external-link--blue-base.svg");
+    background-image: url("../img/external-link--blue-base.svg");
     background-repeat: no-repeat;
     background-size: 100% 100%;
     content: "";
@@ -21669,7 +21669,7 @@ html.no-js a:where([href^="http://"], [href^="https://"], [href^="//"]):not([hre
 
 html.no-js .external-link:visited::after,
 html.no-js a:visited:where([href^="http://"], [href^="https://"], [href^="//"]):not([href$="//www.epa.gov"], [href$="//epa.gov"], [href^="http://www.epa.gov/"], [href^="https://www.epa.gov/"], [href^="http://epa.gov/"], [href^="https://epa.gov/"], [href^="//epa.gov/"], [href^="//www.epa.gov/"], [href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"], [href$="//usepa.servicenowservices.com"], [href^="http://usepa.servicenowservices.com"], [href^="https://usepa.servicenowservices.com"])::after {
-    background-image: url("./uswds/img/external-link--purple.svg")
+    background-image: url("../img/external-link--purple.svg")
 }
 
 html.no-js .external-link:hover::after,
@@ -21678,14 +21678,14 @@ html.no-js .external-link:focus::after,
 html.no-js a:focus:where([href^="http://"], [href^="https://"], [href^="//"]):not([href$="//www.epa.gov"], [href$="//epa.gov"], [href^="http://www.epa.gov/"], [href^="https://www.epa.gov/"], [href^="http://epa.gov/"], [href^="https://epa.gov/"], [href^="//epa.gov/"], [href^="//www.epa.gov/"], [href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"], [href$="//usepa.servicenowservices.com"], [href^="http://usepa.servicenowservices.com"], [href^="https://usepa.servicenowservices.com"])::after,
 html.no-js .external-link:active::after,
 html.no-js a:active:where([href^="http://"], [href^="https://"], [href^="//"]):not([href$="//www.epa.gov"], [href$="//epa.gov"], [href^="http://www.epa.gov/"], [href^="https://www.epa.gov/"], [href^="http://epa.gov/"], [href^="https://epa.gov/"], [href^="//epa.gov/"], [href^="//www.epa.gov/"], [href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"], [href$="//usepa.servicenowservices.com"], [href^="http://usepa.servicenowservices.com"], [href^="https://usepa.servicenowservices.com"])::after {
-    background-image: url("./uswds/img/external-link--blue-dark.svg")
+    background-image: url("../img/external-link--blue-dark.svg")
 }
 
 html.no-js .button.external-link::after,
 html.no-js a.button:where([href^="http://"], [href^="https://"], [href^="//"]):not([href$="//www.epa.gov"], [href$="//epa.gov"], [href^="http://www.epa.gov/"], [href^="https://www.epa.gov/"], [href^="http://epa.gov/"], [href^="https://epa.gov/"], [href^="//epa.gov/"], [href^="//www.epa.gov/"], [href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"], [href$="//usepa.servicenowservices.com"], [href^="http://usepa.servicenowservices.com"], [href^="https://usepa.servicenowservices.com"])::after,
 html.no-js .usa-button.external-link::after,
 html.no-js a.usa-button:where([href^="http://"], [href^="https://"], [href^="//"]):not([href$="//www.epa.gov"], [href$="//epa.gov"], [href^="http://www.epa.gov/"], [href^="https://www.epa.gov/"], [href^="http://epa.gov/"], [href^="https://epa.gov/"], [href^="//epa.gov/"], [href^="//www.epa.gov/"], [href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"], [href$="//usepa.servicenowservices.com"], [href^="http://usepa.servicenowservices.com"], [href^="https://usepa.servicenowservices.com"])::after {
-    background-image: url("./uswds/img/external-link--white.svg")
+    background-image: url("../img/external-link--white.svg")
 }
 
 html.no-js .button.external-link:visited::after,
@@ -21704,21 +21704,21 @@ html.no-js .usa-button.external-link:focus::after,
 html.no-js a.usa-button:focus:where([href^="http://"], [href^="https://"], [href^="//"]):not([href$="//www.epa.gov"], [href$="//epa.gov"], [href^="http://www.epa.gov/"], [href^="https://www.epa.gov/"], [href^="http://epa.gov/"], [href^="https://epa.gov/"], [href^="//epa.gov/"], [href^="//www.epa.gov/"], [href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"], [href$="//usepa.servicenowservices.com"], [href^="http://usepa.servicenowservices.com"], [href^="https://usepa.servicenowservices.com"])::after,
 html.no-js .usa-button.external-link:active::after,
 html.no-js a.usa-button:active:where([href^="http://"], [href^="https://"], [href^="//"]):not([href$="//www.epa.gov"], [href$="//epa.gov"], [href^="http://www.epa.gov/"], [href^="https://www.epa.gov/"], [href^="http://epa.gov/"], [href^="https://epa.gov/"], [href^="//epa.gov/"], [href^="//www.epa.gov/"], [href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"], [href$="//usepa.servicenowservices.com"], [href^="http://usepa.servicenowservices.com"], [href^="https://usepa.servicenowservices.com"])::after {
-    background-image: url("./uswds/img/external-link--white.svg")
+    background-image: url("../img/external-link--white.svg")
 }
 
 html.no-js .usa-button.usa-button--outline.external-link::after,
 html.no-js a.usa-button.usa-button--outline:where([href^="http://"], [href^="https://"], [href^="//"]):not([href$="//www.epa.gov"], [href$="//epa.gov"], [href^="http://www.epa.gov/"], [href^="https://www.epa.gov/"], [href^="http://epa.gov/"], [href^="https://epa.gov/"], [href^="//epa.gov/"], [href^="//www.epa.gov/"], [href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"], [href$="//usepa.servicenowservices.com"], [href^="http://usepa.servicenowservices.com"], [href^="https://usepa.servicenowservices.com"])::after,
 html.no-js .usa-button.usa-button--unstyled.external-link::after,
 html.no-js a.usa-button.usa-button--unstyled:where([href^="http://"], [href^="https://"], [href^="//"]):not([href$="//www.epa.gov"], [href$="//epa.gov"], [href^="http://www.epa.gov/"], [href^="https://www.epa.gov/"], [href^="http://epa.gov/"], [href^="https://epa.gov/"], [href^="//epa.gov/"], [href^="//www.epa.gov/"], [href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"], [href$="//usepa.servicenowservices.com"], [href^="http://usepa.servicenowservices.com"], [href^="https://usepa.servicenowservices.com"])::after {
-    background-image: url("./uswds/img/external-link--blue-base.svg")
+    background-image: url("../img/external-link--blue-base.svg")
 }
 
 html.no-js .usa-button.usa-button--outline.external-link:visited::after,
 html.no-js a.usa-button.usa-button--outline:visited:where([href^="http://"], [href^="https://"], [href^="//"]):not([href$="//www.epa.gov"], [href$="//epa.gov"], [href^="http://www.epa.gov/"], [href^="https://www.epa.gov/"], [href^="http://epa.gov/"], [href^="https://epa.gov/"], [href^="//epa.gov/"], [href^="//www.epa.gov/"], [href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"], [href$="//usepa.servicenowservices.com"], [href^="http://usepa.servicenowservices.com"], [href^="https://usepa.servicenowservices.com"])::after,
 html.no-js .usa-button.usa-button--unstyled.external-link:visited::after,
 html.no-js a.usa-button.usa-button--unstyled:visited:where([href^="http://"], [href^="https://"], [href^="//"]):not([href$="//www.epa.gov"], [href$="//epa.gov"], [href^="http://www.epa.gov/"], [href^="https://www.epa.gov/"], [href^="http://epa.gov/"], [href^="https://epa.gov/"], [href^="//epa.gov/"], [href^="//www.epa.gov/"], [href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"], [href$="//usepa.servicenowservices.com"], [href^="http://usepa.servicenowservices.com"], [href^="https://usepa.servicenowservices.com"])::after {
-    background-image: url("./uswds/img/external-link--purple.svg")
+    background-image: url("../img/external-link--purple.svg")
 }
 
 html.no-js .usa-button.usa-button--outline.external-link:hover::after,
@@ -21733,12 +21733,12 @@ html.no-js .usa-button.usa-button--unstyled.external-link:focus::after,
 html.no-js a.usa-button.usa-button--unstyled:focus:where([href^="http://"], [href^="https://"], [href^="//"]):not([href$="//www.epa.gov"], [href$="//epa.gov"], [href^="http://www.epa.gov/"], [href^="https://www.epa.gov/"], [href^="http://epa.gov/"], [href^="https://epa.gov/"], [href^="//epa.gov/"], [href^="//www.epa.gov/"], [href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"], [href$="//usepa.servicenowservices.com"], [href^="http://usepa.servicenowservices.com"], [href^="https://usepa.servicenowservices.com"])::after,
 html.no-js .usa-button.usa-button--unstyled.external-link:active::after,
 html.no-js a.usa-button.usa-button--unstyled:active:where([href^="http://"], [href^="https://"], [href^="//"]):not([href$="//www.epa.gov"], [href$="//epa.gov"], [href^="http://www.epa.gov/"], [href^="https://www.epa.gov/"], [href^="http://epa.gov/"], [href^="https://epa.gov/"], [href^="//epa.gov/"], [href^="//www.epa.gov/"], [href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"], [href$="//usepa.servicenowservices.com"], [href^="http://usepa.servicenowservices.com"], [href^="https://usepa.servicenowservices.com"])::after {
-    background-image: url("./uswds/img/external-link--blue-dark.svg")
+    background-image: url("../img/external-link--blue-dark.svg")
 }
 
 html.no-js .usa-button.usa-button--outline.usa-button--inverse.external-link::after,
 html.no-js a.usa-button.usa-button--outline.usa-button--inverse:where([href^="http://"], [href^="https://"], [href^="//"]):not([href$="//www.epa.gov"], [href$="//epa.gov"], [href^="http://www.epa.gov/"], [href^="https://www.epa.gov/"], [href^="http://epa.gov/"], [href^="https://epa.gov/"], [href^="//epa.gov/"], [href^="//www.epa.gov/"], [href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"], [href$="//usepa.servicenowservices.com"], [href^="http://usepa.servicenowservices.com"], [href^="https://usepa.servicenowservices.com"])::after {
-    background-image: url("./uswds/img/external-link--gray-2.svg")
+    background-image: url("../img/external-link--gray-2.svg")
 }
 
 html.no-js .usa-button.usa-button--outline.usa-button--inverse.external-link:visited::after,
@@ -21749,12 +21749,12 @@ html.no-js .usa-button.usa-button--outline.usa-button--inverse.external-link:foc
 html.no-js a.usa-button.usa-button--outline.usa-button--inverse:focus:where([href^="http://"], [href^="https://"], [href^="//"]):not([href$="//www.epa.gov"], [href$="//epa.gov"], [href^="http://www.epa.gov/"], [href^="https://www.epa.gov/"], [href^="http://epa.gov/"], [href^="https://epa.gov/"], [href^="//epa.gov/"], [href^="//www.epa.gov/"], [href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"], [href$="//usepa.servicenowservices.com"], [href^="http://usepa.servicenowservices.com"], [href^="https://usepa.servicenowservices.com"])::after,
 html.no-js .usa-button.usa-button--outline.usa-button--inverse.external-link:active::after,
 html.no-js a.usa-button.usa-button--outline.usa-button--inverse:active:where([href^="http://"], [href^="https://"], [href^="//"]):not([href$="//www.epa.gov"], [href$="//epa.gov"], [href^="http://www.epa.gov/"], [href^="https://www.epa.gov/"], [href^="http://epa.gov/"], [href^="https://epa.gov/"], [href^="//epa.gov/"], [href^="//www.epa.gov/"], [href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"], [href$="//usepa.servicenowservices.com"], [href^="http://usepa.servicenowservices.com"], [href^="https://usepa.servicenowservices.com"])::after {
-    background-image: url("./uswds/img/external-link--gray-2.svg")
+    background-image: url("../img/external-link--gray-2.svg")
 }
 
 html.no-js .usa-button.usa-button--accent-cool.external-link::after,
 html.no-js a.usa-button.usa-button--accent-cool:where([href^="http://"], [href^="https://"], [href^="//"]):not([href$="//www.epa.gov"], [href$="//epa.gov"], [href^="http://www.epa.gov/"], [href^="https://www.epa.gov/"], [href^="http://epa.gov/"], [href^="https://epa.gov/"], [href^="//epa.gov/"], [href^="//www.epa.gov/"], [href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"], [href$="//usepa.servicenowservices.com"], [href^="http://usepa.servicenowservices.com"], [href^="https://usepa.servicenowservices.com"])::after {
-    background-image: url("./uswds/img/external-link--gray-7.svg")
+    background-image: url("../img/external-link--gray-7.svg")
 }
 
 html.no-js .usa-button.usa-button--accent-cool.external-link:visited::after,
@@ -21765,11 +21765,11 @@ html.no-js .usa-button.usa-button--accent-cool.external-link:focus::after,
 html.no-js a.usa-button.usa-button--accent-cool:focus:where([href^="http://"], [href^="https://"], [href^="//"]):not([href$="//www.epa.gov"], [href$="//epa.gov"], [href^="http://www.epa.gov/"], [href^="https://www.epa.gov/"], [href^="http://epa.gov/"], [href^="https://epa.gov/"], [href^="//epa.gov/"], [href^="//www.epa.gov/"], [href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"], [href$="//usepa.servicenowservices.com"], [href^="http://usepa.servicenowservices.com"], [href^="https://usepa.servicenowservices.com"])::after,
 html.no-js .usa-button.usa-button--accent-cool.external-link:active::after,
 html.no-js a.usa-button.usa-button--accent-cool:active:where([href^="http://"], [href^="https://"], [href^="//"]):not([href$="//www.epa.gov"], [href$="//epa.gov"], [href^="http://www.epa.gov/"], [href^="https://www.epa.gov/"], [href^="http://epa.gov/"], [href^="https://epa.gov/"], [href^="//epa.gov/"], [href^="//www.epa.gov/"], [href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"], [href$="//usepa.servicenowservices.com"], [href^="http://usepa.servicenowservices.com"], [href^="https://usepa.servicenowservices.com"])::after {
-    background-image: url("./uswds/img/external-link--gray-7.svg")
+    background-image: url("../img/external-link--gray-7.svg")
 }
 
 html.no-js body a:where([href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"])::after {
-    background-image: url("./uswds/img/lock--blue-base.svg");
+    background-image: url("../img/lock--blue-base.svg");
     background-repeat: no-repeat;
     background-size: 100% 100%;
     content: "";
@@ -21781,18 +21781,18 @@ html.no-js body a:where([href$="//work.epa.gov"], [href^="http://work.epa.gov"],
 }
 
 html.no-js body a:visited:where([href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"])::after {
-    background-image: url("./uswds/img/lock--purple.svg")
+    background-image: url("../img/lock--purple.svg")
 }
 
 html.no-js body a:hover:where([href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"])::after,
 html.no-js body a:focus:where([href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"])::after,
 html.no-js body a:active:where([href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"])::after {
-    background-image: url("./uswds/img/lock--blue-dark.svg")
+    background-image: url("../img/lock--blue-dark.svg")
 }
 
 html.no-js body a.button:where([href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"])::after,
 html.no-js body a.usa-button:where([href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"])::after {
-    background-image: url("./uswds/img/lock--white.svg")
+    background-image: url("../img/lock--white.svg")
 }
 
 html.no-js body a.button:visited:where([href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"])::after,
@@ -21803,17 +21803,17 @@ html.no-js body a.usa-button:visited:where([href$="//work.epa.gov"], [href^="htt
 html.no-js body a.usa-button:hover:where([href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"])::after,
 html.no-js body a.usa-button:focus:where([href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"])::after,
 html.no-js body a.usa-button:active:where([href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"])::after {
-    background-image: url("./uswds/img/lock--white.svg")
+    background-image: url("../img/lock--white.svg")
 }
 
 html.no-js body a.usa-button.usa-button--outline:where([href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"])::after,
 html.no-js body a.usa-button.usa-button--unstyled:where([href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"])::after {
-    background-image: url("./uswds/img/lock--blue-base.svg")
+    background-image: url("../img/lock--blue-base.svg")
 }
 
 html.no-js body a.usa-button.usa-button--outline:visited:where([href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"])::after,
 html.no-js body a.usa-button.usa-button--unstyled:visited:where([href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"])::after {
-    background-image: url("./uswds/img/lock--purple.svg")
+    background-image: url("../img/lock--purple.svg")
 }
 
 html.no-js body a.usa-button.usa-button--outline:hover:where([href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"])::after,
@@ -21822,29 +21822,29 @@ html.no-js body a.usa-button.usa-button--outline:active:where([href$="//work.epa
 html.no-js body a.usa-button.usa-button--unstyled:hover:where([href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"])::after,
 html.no-js body a.usa-button.usa-button--unstyled:focus:where([href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"])::after,
 html.no-js body a.usa-button.usa-button--unstyled:active:where([href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"])::after {
-    background-image: url("./uswds/img/lock--blue-dark.svg")
+    background-image: url("../img/lock--blue-dark.svg")
 }
 
 html.no-js body a.usa-button.usa-button--outline.usa-button--inverse:where([href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"])::after {
-    background-image: url("./uswds/img/lock--gray-2.svg")
+    background-image: url("../img/lock--gray-2.svg")
 }
 
 html.no-js body a.usa-button.usa-button--outline.usa-button--inverse:visited:where([href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"])::after,
 html.no-js body a.usa-button.usa-button--outline.usa-button--inverse:hover:where([href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"])::after,
 html.no-js body a.usa-button.usa-button--outline.usa-button--inverse:focus:where([href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"])::after,
 html.no-js body a.usa-button.usa-button--outline.usa-button--inverse:active:where([href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"])::after {
-    background-image: url("./uswds/img/lock--gray-2.svg")
+    background-image: url("../img/lock--gray-2.svg")
 }
 
 html.no-js body a.usa-button.usa-button--accent-cool:where([href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"])::after {
-    background-image: url("./uswds/img/lock--gray-7.svg")
+    background-image: url("../img/lock--gray-7.svg")
 }
 
 html.no-js body a.usa-button.usa-button--accent-cool:visited:where([href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"])::after,
 html.no-js body a.usa-button.usa-button--accent-cool:hover:where([href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"])::after,
 html.no-js body a.usa-button.usa-button--accent-cool:focus:where([href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"])::after,
 html.no-js body a.usa-button.usa-button--accent-cool:active:where([href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"])::after {
-    background-image: url("./uswds/img/lock--gray-7.svg")
+    background-image: url("../img/lock--gray-7.svg")
 }
 
 a:not([href])::after {
@@ -21862,7 +21862,7 @@ html.no-js .usa-dark-background a:link:where([href^="http://"], [href^="https://
 html.no-js .external-link--inverse:link::after,
 html.no-js .usa-dark-background a:visited:where([href^="http://"], [href^="https://"], [href^="//"]):not([href$="//www.epa.gov"], [href$="//epa.gov"], [href^="http://www.epa.gov/"], [href^="https://www.epa.gov/"], [href^="http://epa.gov/"], [href^="https://epa.gov/"], [href^="//epa.gov/"], [href^="//www.epa.gov/"], [href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"], [href$="//usepa.servicenowservices.com"], [href^="http://usepa.servicenowservices.com"], [href^="https://usepa.servicenowservices.com"])::after,
 html.no-js .external-link--inverse:visited::after {
-    background-image: url("./uswds/img/external-link--gray-2.svg")
+    background-image: url("../img/external-link--gray-2.svg")
 }
 
 html.no-js .usa-dark-background a:hover:where([href^="http://"], [href^="https://"], [href^="//"]):not([href$="//www.epa.gov"], [href$="//epa.gov"], [href^="http://www.epa.gov/"], [href^="https://www.epa.gov/"], [href^="http://epa.gov/"], [href^="https://epa.gov/"], [href^="//epa.gov/"], [href^="//www.epa.gov/"], [href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"], [href$="//usepa.servicenowservices.com"], [href^="http://usepa.servicenowservices.com"], [href^="https://usepa.servicenowservices.com"]),
@@ -21880,7 +21880,7 @@ html.no-js .usa-dark-background a:focus:where([href^="http://"], [href^="https:/
 html.no-js .external-link--inverse:focus::after,
 html.no-js .usa-dark-background a:active:where([href^="http://"], [href^="https://"], [href^="//"]):not([href$="//www.epa.gov"], [href$="//epa.gov"], [href^="http://www.epa.gov/"], [href^="https://www.epa.gov/"], [href^="http://epa.gov/"], [href^="https://epa.gov/"], [href^="//epa.gov/"], [href^="//www.epa.gov/"], [href$="//work.epa.gov"], [href^="http://work.epa.gov"], [href^="https://work.epa.gov"], [href$="//intranet.epa.gov"], [href^="http://intranet.epa.gov"], [href^="https://intranet.epa.gov"], [href$="//usepa.sharepoint.com"], [href^="http://usepa.sharepoint.com"], [href^="https://usepa.sharepoint.com"], [href$="//usepa.servicenowservices.com"], [href^="http://usepa.servicenowservices.com"], [href^="https://usepa.servicenowservices.com"])::after,
 html.no-js .external-link--inverse:active::after {
-    background-image: url("./uswds/img/external-link--white.svg")
+    background-image: url("../img/external-link--white.svg")
 }
 
 .facet {
@@ -24570,7 +24570,7 @@ html.no-js .usa-alert__close {
 }
 
 .usa-site-alert--private .usa-alert .usa-alert__body::before {
-    background-image: url("./uswds/img/usa-icons/announcement.svg");
+    background-image: url("../img/usa-icons/announcement.svg");
     background-repeat: no-repeat;
     background-position: center center;
     background-size: 2rem 2rem;
@@ -24587,10 +24587,10 @@ html.no-js .usa-alert__close {
     .usa-site-alert--private .usa-alert .usa-alert__body::before {
         background: none;
         background-color: #1b1b1b;
-        -webkit-mask-image: url("./uswds/img/usa-icons/announcement.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-        -webkit-mask-image: url("./uswds/img/usa-icons/announcement.svg"), linear-gradient(transparent, transparent);
-        mask-image: url("./uswds/img/usa-icons/announcement.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
-        mask-image: url("./uswds/img/usa-icons/announcement.svg"), linear-gradient(transparent, transparent);
+        -webkit-mask-image: url("../img/usa-icons/announcement.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+        -webkit-mask-image: url("../img/usa-icons/announcement.svg"), linear-gradient(transparent, transparent);
+        mask-image: url("../img/usa-icons/announcement.svg"), -webkit-gradient(linear, left top, left bottom, from(transparent), to(transparent));
+        mask-image: url("../img/usa-icons/announcement.svg"), linear-gradient(transparent, transparent);
         -webkit-mask-position: center center;
         mask-position: center center;
         -webkit-mask-repeat: no-repeat;
@@ -24730,7 +24730,7 @@ html.no-js .usa-alert__close {
 }
 
 html.js .usa-table--sortable thead th {
-    background-image: url("./uswds/img/sort.svg");
+    background-image: url("../img/sort.svg");
     background-position: right .5rem top 50%;
     background-repeat: no-repeat;
     background-size: 1.5rem;
@@ -24739,33 +24739,33 @@ html.js .usa-table--sortable thead th {
 }
 
 html.js .usa-table--sortable thead th:hover {
-    background-image: url("./uswds/img/sort-black.svg")
+    background-image: url("../img/sort-black.svg")
 }
 
 html.js .usa-table--sortable thead th[aria-sort=ascending] {
-    background-image: url("./uswds/img/sort-up.svg")
+    background-image: url("../img/sort-up.svg")
 }
 
 html.js .usa-table--sortable thead th[aria-sort=ascending]:hover {
-    background-image: url("./uswds/img/sort-up-black.svg")
+    background-image: url("../img/sort-up-black.svg")
 }
 
 html.js .usa-table--sortable thead th[aria-sort=descending] {
-    background-image: url("./uswds/img/sort-down.svg")
+    background-image: url("../img/sort-down.svg")
 }
 
 html.js .usa-table--sortable thead th[aria-sort=descending]:hover {
-    background-image: url("./uswds/img/sort-down-black.svg")
+    background-image: url("../img/sort-down-black.svg")
 }
 
 html.js .usa-dark-background .usa-table--sortable thead th {
-    background-image: url("./uswds/img/sort-white.svg")
+    background-image: url("../img/sort-white.svg")
 }
 
 html.js .usa-dark-background .usa-table--sortable thead th:hover,
 html.js .usa-dark-background .usa-table--sortable thead th:focus,
 html.js .usa-dark-background .usa-table--sortable thead th:focus-within {
-    background-image: url("./uswds/img/sort-light-gray.svg")
+    background-image: url("../img/sort-light-gray.svg")
 }
 
 .usa-table--striped tbody th {
