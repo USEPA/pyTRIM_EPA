@@ -23,7 +23,8 @@ class ConditionalFormatter(logging.Formatter):
                 other.append(k)
             else:
                 cleaned[k] = v
-        cleaned['__other'] = str(other)
+        if other:
+            cleaned['__other'] = str(other)
         try: return json.dumps(cleaned, indent=4)
         except: return cleaned
 

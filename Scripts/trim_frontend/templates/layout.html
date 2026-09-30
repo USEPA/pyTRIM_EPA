@@ -1,14 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!--EPA favicon start -->
+    <link rel="icon" type="image/x-icon" href="https://www.epa.gov/themes/epa_theme/images/favicon.ico">
+    <meta name="msapplication-TileColor" content="#FFFFFF">
+    <meta name="msapplication-TileImage" content="https://www.epa.gov/themes/epa_theme/images/favicon-144.png">
+    <meta name="application-name" content="US EPA">
+    <meta name="msapplication-config" content="https://www.epa.gov/themes/epa_theme/images/ieconfig.xml">
+    <link rel="apple-touch-icon-precomposed" sizes="196x196" href="https://www.epa.gov/themes/epa_theme/images/favicon-196.png">
+    <link rel="apple-touch-icon-precomposed" sizes="152x152" href="https://www.epa.gov/themes/epa_theme/images/favicon-152.png">
+    <link rel="apple-touch-icon-precomposed" sizes="144x144" href="https://www.epa.gov/themes/epa_theme/images/favicon-144.png">
+    <link rel="apple-touch-icon-precomposed" sizes="120x120" href="https://www.epa.gov/themes/epa_theme/images/favicon-120.png">
+    <link rel="apple-touch-icon-precomposed" sizes="114x114" href="https://www.epa.gov/themes/epa_theme/images/favicon-114.png">
+    <link rel="apple-touch-icon-precomposed" sizes="72x72" href="https://www.epa.gov/themes/epa_theme/images/favicon-72.png">
+    <link rel="apple-touch-icon-precomposed" href="https://www.epa.gov/themes/epa_theme/images/favicon-180.png">
+    <link rel="icon" href="https://www.epa.gov/themes/epa_theme/images/favicon-32.png" sizes="32x32">
+    <!--EPA favicon end -->
+
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport"
         content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <meta name="description" content="">
-    <link rel="shortcut icon"
-        href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
           integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
           crossorigin=""/>
@@ -26,7 +40,7 @@
         {% if title %}
             {{ site_name }} | {{ title }}
         {% else %}
-            {{ site_name }}
+            {{ site_name }} | US EPA
         {% endif %}
     </title>
 

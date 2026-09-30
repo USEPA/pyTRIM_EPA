@@ -129,7 +129,7 @@ class Scenario(Model, TrackUpdatesMixin):
 
     @property
     def end_date(self):
-        sim_end = '2010-12-31'
+        sim_end = '2050-12-31'
         try:
             param_end = self.parameters.get("simulationEndDateTime")
             if param_end.value:

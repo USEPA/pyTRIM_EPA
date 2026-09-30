@@ -29,7 +29,7 @@ api.use_api_errors(external_api_r)
 @login_required
 def get_soil_data(tillage):
     logger = make_logger('external_api_call')
-    logger.info(f"Obtaining parcel soil data from USDA.gov")
+    logger.info(f"Compiling parcel soil data")
     try:
         from_url = request.referrer
         this_scenario_id = int(re.findall('/scenario/(\d+)/', from_url)[0])
@@ -356,11 +356,16 @@ class SoilData:
         tilled_results = {}
         no_till_results = {}
         parcel_vertices_names = list(parcel_dicts.keys())
+
+        logger = make_logger('external_api_call')
+        logger.info(f"Obtaining parcel soil data from USDA.gov for {len(parcel_vertices_names)} parcels")
         with ThreadPoolExecutor(max_workers=3) as t_executor:
             data_results = t_executor.map(self.get_soil_data, [{'pv': parcel_dicts[this_parcel_vertices],
                                                                 'pn': parcel_vertices_names[i]}
                                                                for i, this_parcel_vertices in enumerate(parcel_dicts)])
-        with ProcessPoolExecutor(max_workers=2) as p_executor:
+
+        logger.info("Computing parameters from results")
+        with ProcessPoolExecutor(max_workers=5) as p_executor:
             ave_results = p_executor.map(self.compute_parameters, [{'pd': data,
                                                                     'pn': parcel_vertices_names[i]}
                                                                    for i, data in enumerate(data_results)])

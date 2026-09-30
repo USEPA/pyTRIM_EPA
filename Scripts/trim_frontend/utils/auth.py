@@ -155,7 +155,13 @@ class FlaskOauth:
 
                 user = self._security.datastore.find_user(email=email) or self._security.datastore.find_user(email=email.casefold())
                 if user is None:
-                    raise Exception(f"User does not exist :: [{email}]")
+                    self._app.logger.info(f"User with email [{email}] does not exist... creating")
+                    self._security.datastore.create_user(
+                        email=email, password=hash_password(oauth2_token),
+                        confirmed_at=datetime.utcnow()
+                    )
+                    self._security.datastore.commit()
+                    user = self._security.datastore.find_user(email=email)
 
                 login_user(user)
                 return redirect(url_for('scenario.view_scenarios'))
@@ -203,6 +209,14 @@ def init_auth(app, db, bcrypt, security):
             if u is not None:
                 return u
         return None
+
+    # For EPA public, flask login needs to be disabled
+    @app.before_request
+    def disable_security_login():
+        trim_env_profile = os.getenv('TRIM_ENV_PROFILE', 'local').lower()
+        if trim_env_profile not in app.config['LOGIN_ENV_WHITELIST']:
+            if request.endpoint == 'security.login':
+                return redirect(url_for('oauth2_login', provider_name='login_gov'))
 
     # Enable oauth login
     oauth = FlaskOauth()
