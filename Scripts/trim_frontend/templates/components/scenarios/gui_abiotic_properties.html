@@ -247,6 +247,7 @@
             const airTblCols = [
                 {
                     'data': "Surface Parcel",
+                    'bSortable': false,
                     'className': 'font-weight-bold rightBorder freeze-column'
                 },
                 {
@@ -311,10 +312,12 @@
             const soilTblCols = [
                 {
                     'data': "Surface Parcel",
+                    'bSortable': false,
                     'className': 'font-weight-bold rightBorder freeze-column'
                 },
                 {
                     data: "Surface_Soil.Tillage",
+                    'bSortable': false,
                     'render': function (data, type, row) {
                         let parcel_info = create_parcel_object('tillage', row, data);
                         let this_cell_data = row.hasLand == "Yes" ? data : "N/A"
@@ -422,6 +425,7 @@
             const rootTblCols = [
                 {
                     'data': "Surface Parcel",
+                    'bSortable': false,
                     'className': 'font-weight-bold rightBorder freeze-column'
                 },
                 {
@@ -495,6 +499,7 @@
             const vadoseTblCols = [
                 {
                     'data': "Surface Parcel",
+                    'bSortable': false,
                     'className': 'font-weight-bold rightBorder freeze-column'
                 },
                 {
@@ -568,6 +573,7 @@
             const gwTblCols = [
                 {
                     'data': "Surface Parcel",
+                    'bSortable': false,
                     'className': 'font-weight-bold rightBorder freeze-column'
                 },
                 {
@@ -655,7 +661,7 @@
 
                 let data = $(this).val();
                 let $label = $(this).next("label");
-                $label.siblings("input").hide();
+                $label.siblings("input, select").hide();
                 $label.show().text(data);
 
                 let is_valid = elementIsValid($(this).parent());
@@ -716,6 +722,9 @@
                     update_data_store_callback(rsp, cell, parcel_info, param_store_key, data, old_data)
                     if (parcel_info[2].name == 'surfaceSoilThickness') {
                         getParcelByKey('id', parcel_info[0].value).surfaceSoilThickness = parseFloat(data);
+                    }
+                    else if (parcel_info[2].name == 'tillage') {
+                        getParcelByKey('id', parcel_info[0].value).soilTillage = data;
                     }
                     updateMercuryTransformRate(parcel_info)
                     LoadingScreen.hide(ls_info)

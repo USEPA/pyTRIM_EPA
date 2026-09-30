@@ -15,14 +15,13 @@
             <!-- /logout is now POST only with flask-security 5.9.0 -->
                 <li class="nav-item">
                     <form action="{{ url_for('security.logout') }}" method="post">
-                        {{ csrf_token() and '' }}
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <button type="submit" class="btn btn-link nav-link">
                             <span class="lead">
                                 <i class="fa fa-user-circle"></i>
                                 Logout
-                                
-                            </span></button>
+                            </span>
+                        </button>
                     </form>
                 </li>
             {% else %}
