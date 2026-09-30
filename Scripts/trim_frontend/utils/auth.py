@@ -210,6 +210,14 @@ def init_auth(app, db, bcrypt, security):
                 return u
         return None
 
+    # For EPA public, flask login needs to be disabled
+    @app.before_request
+    def disable_security_login():
+        trim_env_profile = os.getenv('TRIM_ENV_PROFILE', 'local').lower()
+        if trim_env_profile not in app.config['LOGIN_ENV_WHITELIST']:
+            if request.endpoint == 'security.login':
+                return redirect(url_for('oauth2_login', provider_name='login_gov'))
+
     # Enable oauth login
     oauth = FlaskOauth()
     oauth.init_app(app, security)

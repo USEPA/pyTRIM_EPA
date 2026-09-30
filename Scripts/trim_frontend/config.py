@@ -84,6 +84,10 @@ class AppConfig:
     # Request payload config
     MAX_FORM_MEMORY_SIZE = 24 * (2 ** 10) ** 2 # 24 MB
 
+    # Whitelist for usual TRIM login rather than login.gov
+    # just needs to be a substr of the environment name
+    LOGIN_ENV_WHITELIST = ['local', 'test', 'dev', 'staging']
+
     TRIM_ENV_PROFILE = os.getenv('TRIM_ENV_PROFILE', 'local')
     print(f"LOADED TRIM_ENV_PROFILE: {TRIM_ENV_PROFILE}")
 

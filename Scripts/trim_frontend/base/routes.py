@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, url_for, render_template
+from flask import Blueprint, abort, redirect, url_for, render_template, request
 from flask_security import current_user
 
 
@@ -11,7 +11,6 @@ def index():
     if current_user.is_authenticated:
         return redirect(url_for('scenario.view_scenarios'))
 
-    # os.getenv('TRIM_ENV_PROFILE', 'local')
     return get_epa_template()
     #return render_template('base/index.html', scenarios=scenarios)
 
