@@ -356,7 +356,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     try:
-        ScenarioService.get(id=2)
+        ScenarioService.get(2)
     except Exception as e:
         print(e)
         raise

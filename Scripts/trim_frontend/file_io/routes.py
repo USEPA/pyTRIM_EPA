@@ -105,7 +105,7 @@ def parse_aermod():
         raise ApiException("No files were uploaded")
 
     scenario_id = request.form['scenario_id']
-    scenario = ScenarioService.get(id=scenario_id)
+    scenario = ScenarioService.get(scenario_id)
     if not scenario:
         return ApiException("Unknown Scenario")
     if not current_user.can('edit', scenario):
@@ -163,7 +163,7 @@ def upload_background_conc():
     data = json.loads(request.form["file_data"])
     scenario_id = request.form["scenario_id"]
     chem_name = request.form["chemical_name"]
-    scenario = ScenarioService.get(id=scenario_id)
+    scenario = ScenarioService.get(scenario_id)
     if not scenario:
         return ApiException("Unknown Scenario")
     if not current_user.can('edit', scenario):
@@ -198,7 +198,7 @@ def upload_background_conc():
             else:
                 comp_id = comp_id[0]
 
-            comp = CompartmentService.get(id=comp_id)
+            comp = CompartmentService.get(comp_id)
 
             data[ii].setdefault("Volume Element Name", comp.volume_element.name)
 
@@ -273,7 +273,7 @@ def parse_parcel_upload():
         return stackstr
 
     scenario_id = request.form["scenario_id"]
-    scenario = ScenarioService.get(id=scenario_id)
+    scenario = ScenarioService.get(scenario_id)
     if not scenario:
         return ApiException("Unknown Scenario")
     if not current_user.can('edit', scenario):
@@ -330,9 +330,9 @@ def parse_parcel_upload():
             # process csv with format detection and normalization
             csv_rows = list(reader)
             rows_to_process = process_csv_parcels(csv_rows)
-
     except Exception:
         errors.append("Unable to open file")
+        rows_to_process = []
 
     for row in rows_to_process:
         try:

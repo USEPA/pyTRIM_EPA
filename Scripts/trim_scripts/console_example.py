@@ -3,7 +3,7 @@ from base import *
 """
 scenario = ScenarioService.get(name=SCENARIO_NAME) # scenario object
 
-p = ParcelService.get(id=1) # independent of scenario object
+p = ParcelService.get(1) # independent of scenario object
 
 # useful functions
 list(scenario.parcels)

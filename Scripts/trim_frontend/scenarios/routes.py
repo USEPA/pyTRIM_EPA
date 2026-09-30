@@ -49,7 +49,7 @@ def view_scenarios():
 @login_required
 def view_scenario(id):
     abort(404)  # DISABLED for now -- edit_scenario is the only relevant page
-    s = ScenarioService.get(id=id)
+    s = ScenarioService.get(id)
     if not current_user.can('view', s):
         abort(403)
     return render_template('scenarios/view_single.html', scenario=s, title=s.name)
@@ -450,7 +450,7 @@ def copy_scenario():
             # print(f'{40*"*"}\nOLD FORMULA: {old_formula}\nNEW FORMULA: {new_formula}')
             new_formula_obj = FormulaService.create(equation=new_formula)
             # assign new formula to the new parameter
-            new_par = ParameterService.get(id=new_par_id)
+            new_par = ParameterService.get(new_par_id)
             # print(f'New par: {new_par}\nNew par_id: {new_par.id}\n{40 * "*"}')
             new_par.formula_id = new_formula_obj.id
         logger.info(f'Fixed static compartment ids in parameters in {time.time() - fix_par_start_time} seconds')
