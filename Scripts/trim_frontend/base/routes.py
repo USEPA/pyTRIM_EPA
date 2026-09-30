@@ -17,15 +17,27 @@ def index():
 
 def get_epa_template():
     """
-    WIP!
-
     https://www.epa.gov/web-policies-and-procedures/procedure-complying-epagov-look-and-feel
-        Download the template
+        Download uswds: https://designsystem.digital.gov/download/
+            Save to /static/css/lib/uswds/
+            We only need the img/ assets for just a few things, can delete the other stuff
+        Download the template and move assets to /static/css/lib/uswds/epa/
 
     base.html
-        Replacing `<article>` contents with `{% include 'epa/trim_login.html' %}`
-        Remove references to pattern-lab (`themes/epa_theme/pattern-lab/patterns`)
+        Update <title>
+        Replace `<article>` contents with `{% include 'epa/trim_login.html' %}`
         Replace Google Tag Manager code
+        Update template asset paths
+            ./EPA Template _ US EPA_files/
+                becomes
+            {{ url_for('static', filename='css/lib/uswds/epa/
+        Download sprite.artifact.svg (https://www.epa.gov/themes/epa_theme/images/sprite.artifact.svg)
+            Place in uswds/epa/
+            Replace all the sprite.artifact.svg links e.g. 
+                https://www.epa.gov/themes/epa_theme/images/sprite.artifact.svg#magnifying-glass
+                    becomes
+                {{ url_for('static', filename='css/lib/uswds/epa/sprite.artifact.svg')}}#magnifying-glass
+        Remove references to pattern-lab (`themes/epa_theme/pattern-lab/patterns`)
         Remove optional meta data
         Remove certain scripts at the bottom
             <script src="/static/epa/css.escape.js.download"></script>
@@ -33,13 +45,11 @@ def get_epa_template():
             <script src="/static/epa/jquery.once.min.js.download"></script>
             Universal-Federated-Analytics-Min.js.download
             9240.js.download
-        Replace for all sprite.artifact.svg except instagram-square I have no idea why
-            https://www.epa.gov/themes/epa_theme/images/sprite.artifact.svg
-                becomes
-            {{url_for('static', filename='epa/uswds/img/sprite.svg')}}
 
-    style.css
-        Updating relative paths: font links (@font-face), images (`../images` --> `./uswds/img`)
+    uswds/epa/style.css
+        Updating relative paths, see existing:
+            font links (@font-face)
+            images (`../images` --> `../img/`)
     """
     import re
 
@@ -49,18 +59,8 @@ def get_epa_template():
     pattern = r'''\./EPA Template _ US EPA_files/([^"'?#]+)'''
     epa_template = re.sub(
         pattern,
-        lambda match: url_for('static', filename=f"epa/{match.group(1)}"),
+        lambda match: url_for('static', filename=f"css/lib/uswds/epa/{match.group(1)}"),
         epa_template,
-    )
-
-    # title
-    new_title = "TRIM | US EPA"
-    epa_template = re.sub(
-        r'(<title\b[^>]*>).*?(</title>)',
-        lambda match: f"{match.group(1)}{new_title}{match.group(2)}",
-        epa_template,
-        count=1,
-        flags=re.IGNORECASE | re.DOTALL,
     )
 
     return epa_template
