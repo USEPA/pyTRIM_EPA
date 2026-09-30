@@ -74,7 +74,7 @@ def create_app(testing=False):
 
     @app.context_processor
     def inject_template_globals():
-        return dict(site_name="TRIM")
+        return dict(site_name="webTRIM.FaTE")
 
     if not testing:
         from .utils.auth import define_superusers
