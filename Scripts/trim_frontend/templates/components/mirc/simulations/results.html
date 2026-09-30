@@ -404,7 +404,7 @@ onDomLoad(function() {
             }
             add_shortdesc("Exposure Profile: ", meta.exposureProfile?.name);
             add_shortdesc("Date Created: ", meta.created);
-            add_shortdesc("TRIM Output Date: ", (new Date(meta.timestamp)).toLocaleDateString('en-US', timeDisplayOpts));
+            add_shortdesc("Simulated Date: ", (new Date(meta.timestamp)).toLocaleDateString('en-US', timeDisplayOpts));
             if (meta.description) {
                 add_shortdesc("Notes: ", meta.description);
             }
