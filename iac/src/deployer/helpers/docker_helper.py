@@ -15,6 +15,16 @@ class DockerHelper(object):
         except:
             die("Could not create Docker client; is Docker desktop/etc. running?")
 
+    def detect_host_container_engine(self):
+        if shutil.which("podman"):
+            try:
+                result = subprocess.run(["podman", "--version"], capture_output=True, text=True)
+                if "podman" in result.stdout.lower():
+                    return "podman"
+            except Exception:
+                pass
+        return "docker"
+
     # this is the equivalent of manually running e.g.:
     #
     #       cd /Users/tfeiler/development/trim-builder/docker
@@ -149,6 +159,7 @@ class DockerHelper(object):
         # new way - multiple repos (one for "model run", one for "getflow", can add more later...)
         registry_url, ecr_username, ecr_password = self.get_login_data()
 
+        container_engine = self.detect_host_container_engine()
         parent_dir = figure_parent_dir()
         sep = os.path.sep
         config_blobs = [
@@ -158,7 +169,7 @@ class DockerHelper(object):
                 "repo_uri_output_name": "PyTrimPrivateECRModelRunRepoUri",
                 "image_tag_name": IMAGE_TAG_NAME_MODELRUN,
                 "relative_prep_script_path": "prepare_dockerized_pytrim.py",
-                "build_cmd": ["podman", "build", "--platform", "linux/amd64", "-t", IMAGE_TAG_NAME_MODELRUN, f"{parent_dir}docker"],
+                "build_cmd": [container_engine, "build", "--platform", "linux/amd64", "-t", IMAGE_TAG_NAME_MODELRUN, f"{parent_dir}docker"],
                 "temp_dir": f"{parent_dir}docker{sep}temp",
             },
             {
@@ -167,7 +178,7 @@ class DockerHelper(object):
                 "repo_uri_output_name": "PyTrimPrivateECRGetFlowRepoUri",
                 "image_tag_name": IMAGE_TAG_NAME_GETFLOW,
                 "relative_prep_script_path": f"getflow{sep}prepare_dockerized.py",
-                "build_cmd": ["podman", "build", "--platform", "linux/amd64", "-t", IMAGE_TAG_NAME_GETFLOW, "-f", f"{parent_dir}docker{sep}getflow{sep}Dockerfile_getflow", f"{parent_dir}docker{sep}getflow"],
+                "build_cmd": [container_engine, "build", "--platform", "linux/amd64", "-t", IMAGE_TAG_NAME_GETFLOW, "-f", f"{parent_dir}docker{sep}getflow{sep}Dockerfile_getflow", f"{parent_dir}docker{sep}getflow"],
                 "temp_dir": f"{parent_dir}docker{sep}getflow{sep}temp",
             },
         ]

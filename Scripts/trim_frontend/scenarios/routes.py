@@ -606,8 +606,26 @@ def get_scenario_chemicals(scenario_id):
     if not current_user.can('view', s):
         abort(403)
     chems = [c.as_serializable() for c in s.chemicals]
+
+    logger = make_logger("scenario_chemical_parameters_get")
+    start_time = time.time()
+    chem_params = {}
+    try:
+        from trim_frontend.parcels.defaults import get_source_params, get_initial_concentrations
+
+        for pcl in s.parcels:
+            chem_params[pcl.name] = {
+                **get_source_params(pcl),
+                **get_initial_concentrations(pcl),
+            }
+        ScenarioService.commit()
+    except Exception as e:
+        logger.error(traceback.format_exc())
+    logger.info(f"Acquired emissions and concentrations data in {time.time() - start_time} seconds")
+
     return ApiResult({
-        'chemicals': chems
+        'chemicals': chems,
+        'chem_params': chem_params,
     })
 
 

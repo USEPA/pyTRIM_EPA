@@ -352,7 +352,7 @@ def parse_parcel_upload():
             coordinates = row_data["coordinates"]
 
             if not parcel_type:
-                parcel_type = "Land & Air"
+                raise Exception(f"No parcel type supplied for [{parcel_name}]")
 
             # TODO - reload page after upload (done; but we could do better...)
             p = ParcelService.create(name=parcel_name, description=parcel_description, scenario_id=scenario_id, vertices=coordinates)
@@ -429,7 +429,7 @@ def parse_parcel_upload():
     lines = lines.split("\r\n")
 
     if len(errors) > 0:
-        raise ApiException("; ".join(errors))
+        raise ApiException("\n".join(errors))
     else:
         return ApiResult(return_data)
 
@@ -857,7 +857,7 @@ def parse_runoff_matrix_upload():
     try:
         fpn = [f.stream for n, f in files.items()][0]
         fpn.seek(0)
-        lines = fpn.read().decode("utf-8")
+        lines = fpn.read().decode("utf-8-sig")
         reader = csv.DictReader(io.StringIO(lines))
 
         # TODO make sure all parcels are accounted for

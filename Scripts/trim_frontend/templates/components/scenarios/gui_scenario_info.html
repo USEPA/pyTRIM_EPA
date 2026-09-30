@@ -80,19 +80,11 @@
                                     <div class="row form-inline">
                                         <div class="col-auto">
                                             <label for="new-user-email" class="mr-1">
-                                                Add User:
+                                                Add Email:
                                             </label>
                                         </div>
                                         <div class="col pl-0">
-                                            <select id="new-user-email"
-                                                class="custom-select custom-select-sm w-100"
-                                            >
-                                                {% for email in user_emails %}
-                                                    <option value="{{ email }}">
-                                                        {{ email }}
-                                                    </option>
-                                                {% endfor %}
-                                            </select>
+                                            <input type="email" id="new-user-email" class="custom-select custom-select-sm w-100" />
                                         </div>
                                     </div>
                                 </td>
@@ -217,7 +209,7 @@
                 }
             });
             $('#new-user-email').val('');
-            $('#new-user-email').val(permissionsOpts[0]);
+            $('#new-user-level').val(permissionsOpts[0]);
         }
 
         function currentPermissionsInTable() {
