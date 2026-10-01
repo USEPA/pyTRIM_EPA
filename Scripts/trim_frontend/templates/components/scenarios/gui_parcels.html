@@ -95,7 +95,7 @@
                             </div>
 
                             <!--Uploaded PLT file-->
-                            <div class="col ml-2">
+                            <div class="col-auto">
                                 <div id="deposition-overlay-current-file" class="text-right" style="display:none;">
                                     <a id="deposition-overlay-delete-btn" href="#" class="btn btn-outline-dark">
                                         <i class="fas fa-trash mr-1"></i>
@@ -310,7 +310,7 @@ onDomLoad(function () {
         errorDisplayArea.empty();
 
         let preserveShownState = receptorOverlayShowing;
-        if (receptorOverlayGroup != null) {
+        if (receptorOverlayGroup != null && mapLayers != null) {
             mapLayers.removeLayer(receptorOverlayGroup); // removes option from the layers dialog
             receptorOverlayGroup.removeFrom(map); // removes dots from the map
         }
@@ -1518,12 +1518,7 @@ onDomLoad(function () {
             LoadingScreen.hide('check_overlay_status');
 
             if (!success) {
-                if ('{{env_type}}' == 'production') {
-                    alert('An error occurred while fetching overlay data');
-                }
-                else {
-                    console.log('An error occurred while fetching overlay data');
-                }
+                alert('An error occurred while fetching overlay data');
             } else {
                 if (success) {
                     installDepositionOverlayOntoMap(responseData)
@@ -1548,12 +1543,7 @@ onDomLoad(function () {
             LoadingScreen.hide('check_aermod_receptors_file');
 
             if (!success) {
-                if ('{{env_type}}' == 'production') {
-                    alert('An error occurred while fetching aermod receptors');
-                }
-                else {
-                    console.log('An error occurred while fetching aermod receptors');
-                }
+                alert('An error occurred while fetching aermod receptors');
             } else {
                 if (success) {
                     // installDepositionOverlayOntoMap(responseData)
