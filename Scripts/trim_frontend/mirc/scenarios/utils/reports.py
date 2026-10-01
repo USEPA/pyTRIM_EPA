@@ -442,6 +442,7 @@ def get_breast_milk_chemical_parameters(scenario, chemical_id=None):
         }
         bm_props = chem_props.for_media(p)
         data.update({
+            'infant_add_equals_adult_lifetime': bm_props.infant_add_equals_adult_lifetime.value == 1,
             'AE_inf': bm_props.AE_inf.value,
             'AE_mat': bm_props.AE_mat.value,
             'f_bl': bm_props.f_bl.value,
@@ -796,7 +797,7 @@ def make_report(scenario):
         bmcps = pd.DataFrame(
             get_breast_milk_chemical_parameters(scenario)
         ).drop(
-            columns=['chemical_id', 'product_id']
+            columns=['chemical_id', 'product_id', 'infant_add_equals_adult_lifetime']
         ).rename(columns={
             'AE_inf': 'Infant Absorption Efficiency',
             'AE_mat': 'Maternal Absorption Efficiency',

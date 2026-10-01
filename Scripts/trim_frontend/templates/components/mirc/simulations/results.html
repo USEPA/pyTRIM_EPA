@@ -19,7 +19,7 @@
             <span id="mirc-results-name" class="h5 mb-0">Simulation</span>
         </div>
         <div class="row mx-0">
-            <span id="mirc-results-shortdesc">Profile, Date</span>
+            <span id="mirc-results-shortdesc" class="mt-1">Profile, Date</span>
         </div>
     </div>
     <div class="card-body">
@@ -395,20 +395,21 @@ onDomLoad(function() {
             );
             
             shortdesc = $('#mirc-results-shortdesc');
-            shortdesc.text("");
+            shortdesc.html('');
+            shortdesc = $('<div class="d-flex align-items-center" style="gap: 6px" />').appendTo(shortdesc);
             function add_shortdesc(label, text) {
-                $(`<small class="mb-1">${label}</small>`)
-                    .append(
-                        $('<span class="text-muted" />').text(text)
-                    ).append("<br/>").appendTo(shortdesc);
+                $(`<small>${label}:</small>`).appendTo(shortdesc);
+                $('<small class="badge badge-primary-accent px-2 font-weight-normal" style="line-height: 1.1em;" />').text(text).appendTo(shortdesc);
             }
-            add_shortdesc("Exposure Profile: ", meta.exposureProfile?.name);
-            add_shortdesc("Date Created: ", meta.created);
-            add_shortdesc("Simulated Date: ", (new Date(meta.timestamp)).toLocaleDateString('en-US', timeDisplayOpts));
+            add_shortdesc("Exposure Profile", meta.exposureProfile?.name);
+            add_shortdesc("Date Created", meta.created);
+            add_shortdesc("Simulated Date", (new Date(meta.timestamp)).toLocaleDateString('en-US', timeDisplayOpts));
             if (meta.description) {
-                add_shortdesc("Notes: ", meta.description);
+                var notesDiv = $('<div class="mt-1" />').appendTo(shortdesc.parent());
+                // $(`<small class="mt-1 mr-1">Notes:</small>`).appendTo(notesDiv);
+                $('<small class="text-muted" />').text(meta.description).appendTo(notesDiv);
             }
-            shortdesc.show();
+            shortdesc.parent().show();
         }
         else {
             $('#mirc-results-name').text(

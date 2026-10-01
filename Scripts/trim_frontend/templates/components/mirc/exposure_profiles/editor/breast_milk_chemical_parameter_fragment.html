@@ -1,5 +1,10 @@
 {% from 'macros/mirc/form_macros.html' import render_input, render_label %}
 
+<tr class="chemical-{{ bmcp.chemical_id.data }} infant-add-override">
+    <td>
+        {{ render_input(bmcp.infant_add_equals_adult_lifetime) }}
+    </td>
+</tr>
 <tr class="chemical-{{ bmcp.chemical_id.data }}">
     <th scope="row" class="table-secondary border-secondary align-middle text-center">
         {{ render_label(bmcp.AE_inf, hover_help=True, class="mb-0") }}

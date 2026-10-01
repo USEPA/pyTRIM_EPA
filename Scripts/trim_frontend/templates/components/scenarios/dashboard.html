@@ -34,7 +34,7 @@
         New<span class="d-none d-sm-inline"> Scenario</span>
     </button>
 </div>
-<div class="container-fluid content-row">
+<div class="container-fluid content-row px-0">
     <div class="row">
         {% for scenario in scenarios|sort(attribute='updated', reverse = True) %}
             <div class="scenario-col col-lg-4 col-md-6 py-2">
@@ -232,6 +232,13 @@
     body=modal_body, footer=modal_footer
 ) }}
 
+<style>
+    /* Even though we use btn-outline-primary (for tabbing), on hover we want the bg-light color */
+    .scenario-col .card-header a:hover {
+        background-color: #d8e0e3 !important;
+    }
+</style>
+
 {% if current_user.is_admin %}
 <style>
     /* The switch - the box around the slider */
@@ -296,12 +303,6 @@
     .slider.round:before {
       border-radius: 50%;
     }
-
-    /* Even though we use btn-outline-primary (for tabbing), on hover we want the bg-light color */
-    .scenario-col .card-header a:hover {
-        background-color: #d8e0e3 !important;
-    }
-
 </style>
 
 <script>

@@ -7,8 +7,8 @@ __all__ = ['assess_risk']
 
 
 def assess_risk(
-    scenario, product, chemical,
-    concentration=None, concentration_fat=None, concentration_aq=None,
+    scenario, product, chemical, concentration=None,
+    maternal_cumulative_ladd=None, concentration_fat=None, concentration_aq=None,
     ingestion_percentile='Pmean', body_weight_percentile='Pmean',
     logs=[]
 ):
@@ -61,6 +61,10 @@ def assess_risk(
 
     irs = pct_params.IR
 
+    infant_add_equals_adult_lifetime = chem_params.for_media(
+        product
+    ).infant_add_equals_adult_lifetime.value == 1
+
     for ir_param in irs:
         if ir_param.media is not None:
             continue
@@ -78,25 +82,30 @@ def assess_risk(
         logs.append(f"\nGot IR = {IR} for {product} for {age} in scenario")
 
         if product.name == 'breast milk':
-            if IR == 0:
-                IR = 0 * ureg('kg/day')
-            f_mbm = product_params.f_mbm.value
-            AE_inf = chem_params.for_media(product).AE_inf.value
-            BW_inf = scenario.parameters.at_percentile(
-                body_weight_percentile
-            ).at_life_stage(age).BW.quantity
-            logs.append(f"Got BW_inf = {BW_inf} for {age} in scenario")
+            if infant_add_equals_adult_lifetime:
+                logs.append(f"Assuming infant breast-milk intake is the same as maternal LADD...")
+                intake = maternal_cumulative_ladd
+            else:
+                logs.append(f"Calculating infant breast-milk intake from chemical-specific parameters...")
+                if IR == 0:
+                    IR = 0 * ureg('kg/day')
+                f_mbm = product_params.f_mbm.value
+                AE_inf = chem_params.for_media(product).AE_inf.value
+                BW_inf = scenario.parameters.at_percentile(
+                    body_weight_percentile
+                ).at_life_stage(age).BW.quantity
+                logs.append(f"Got BW_inf = {BW_inf} for {age} in scenario")
 
-            # We need to round this to make it match our old results,
-            # which always used a rounded infant bw instead of the
-            # unrounded version stored in the main bw table
-            BW_inf = round(BW_inf, 1)
-            logs.append(f"Rounded BW_inf = {BW_inf}")
+                # We need to round this to make it match our old results,
+                # which always used a rounded infant bw instead of the
+                # unrounded version stored in the main bw table
+                BW_inf = round(BW_inf, 1)
+                logs.append(f"Rounded BW_inf = {BW_inf}")
 
-            intake = get_average_daily_dose_to_nursing_infant(
-                concentration_fat, f_mbm, concentration_aq,
-                IR, AE_inf, EF, BW_inf
-            )
+                intake = get_average_daily_dose_to_nursing_infant(
+                    concentration_fat, f_mbm, concentration_aq,
+                    IR, AE_inf, EF, BW_inf
+                )
         else:
             if IR == 0:
                 IR = 0 * ureg('g/day/kg')
