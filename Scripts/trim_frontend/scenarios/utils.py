@@ -616,9 +616,10 @@ def update_soil_from_api(s, logger):
             param_map = {
                 "pH": data['ph1to1h2o_r'][idx],
                 "OrganicCarbonContent": (data['om_r'][idx] / 100) / 1.72,
-                "VolumeFraction_Liquid": data['awc_r'][idx], # water content
                 "FractionSand": data['sandtotal_r'][idx] / 100,
             }
+            if layer != "gw":
+                param_map["VolumeFraction_Liquid"] = data['awc_r'][idx] # water content
         except:
             return layer
 

@@ -4,27 +4,62 @@
     data-form-src="scenario_aquatic_form"
 >
     <section class="container px-0">
+    
+        {% call data_preamble('aquatic') %}
+        <p>Click on the table cells to edit properties. All editable cells are required.</p>
+        <p><b><u>Aquatic Food Web Properties</u></b></p>
+        <p>
+            Recommended to receive site-specific values, if available:
+            <ul>
+                <li>Standing Biomass for all listed organisms. If you enter a Standing Biomass of 0 for any organism, that organism will be removed from the modeling, and you may need to revise the Aquatic Diet Properties so that that your food web is not depending on that organism (i.e., that organism is not being consumed by another organism)</li>
+            </ul>
+        </p>
+        <p>
+            Note on typical sources of site-specific values:
+            <ul>
+                <li>
+                    Typical sources of site-specific values include state departments of fish and wildlife or natural resources, and state or local lake stewardship programs. We do not recommend that users create their own configurations of the aquatic food web unless they are specialists in aquatic ecosystems and have site-specific data. However, the model results (chemical concentrations in aquatic biota) are not very sensitive to modest changes in the configuration, though they are reasonably sensitive to overall biomass relative to size of water body. The total biomass at each trophic level must be reasonable. Biomass of algae, detritus, and benthic invertebrates can be quite high, but the total biomass at each trophic level thereafter must be less than the biomass of the lower trophic level (between 0.5 to 1 order of magnitude lower). Body weight also should increase with increasing trophic level, as a general rule of thumb.
+                </li>
+            </ul>
+        </p>
+        <p><b><u>Aquatic Diet Properties</u></b></p>
+        <p>
+            Recommended to receive site-specific values, if available:
+            <ul>
+                <li>None of them. If you enter a Standing Biomass of 0 for any organism (above in the Aquatic Food Web Properties), that organism will be removed from the modeling, and you may need to revise the Aquatic Diet Properties so that that your food web is not depending on that organism (i.e., that organism is not being consumed by another organism).</li>
+            </ul>
+        </p>
+        <p>
+            Note on aquatic diet properties:
+            <ul>
+                <li>
+                    <p>Organism definitions:</p>
+                    <ul>
+                        <li>Algae is modeled as the algal phase of surface water.</li>
+                        <li>Macrophyte include hydrilla and milfoil.</li>
+                        <li>Zooplankton include water fleas, rotifers, and protozoans.</li>
+                        <li>Benthic invertebrates include aquatic insects (e.g., nymphs of mayflies, caddisflies, dragonflies, and other species that emerge from the water when they become adults), crustaceans (e.g., amphipods, crayfish), and mollusks (e.g., snails, mussels).</li>
+                        <li>Water column herbivore include young-of-the-year minnows.</li>
+                        <li>Benthic omnivore include small catfish and rock bass.</li>
+                        <li>Water column omnivore include bluegill and white perch.</li>
+                        <li>Benthic carnivore include large catfish and sculpins.</li>
+                        <li>Water column carnivore include largemouth bass and walleye.</li>
+                    </ul>
+                </li>
+                <li>
+                    <strong>User instructions: </strong>Enter the consuming organism's mass fractions of diet of each applicable organism. Valid values are 0 to 1. The default values represent a simplified food chain that captures likely results of chemicals that bioaccumulate or biomagnify in aquatic ecosystems. We simulate 4 trophic levels in the water column and 3.5 trophic levels in the benthic system, with larger organisms feeding on smaller organisms. With the default configuration, the diets of water column biota consist only of smaller water column biota (in terms of body weight), and similarly benthic biota diets consist only of smaller benthic biota. Benthic invertebrates are not consumers of the default organisms as they feed on sediment detritus, which the model simulates using chemical partition coefficients. While benthic carnivores could be simulated to eat only benthic omnivores, the default assumption is that they also feed on benthic invertebrates due to their abundance. While this is not as health protective as the 100% benthic omnivore diet option for chemicals that strongly bioaccumulate and biomagnify, it is health protective for chemicals that strongly sorb to sediment and can biodiminish with successive steps in the food chain. Zooplankton generally feed exclusively on algae in the water column. Typical sources of site-specific values include state departments of fish and wildlife or natural resources, and state or local lake stewardship programs. We do not recommend that users create their own configurations of the aquatic food web unless they are specialists in aquatic ecosystems and have site-specific data. However, the model results (chemical concentrations in aquatic biota) are not very sensitive to modest changes in the configuration, though they are reasonably sensitive to overall biomass relative to size of water body. Freshwater fish in North America consume organisms that they can fit into their mouths whole, so larger fish eat smaller fish and not the reverse.
+                </li>
+            </ul>
+        </p>
+        {% endcall %}
+
         <div class="row">
-            <div class="col-md">
+            <div class="col-md text-center">
                 <h4 class="mt-4">Aquatic Food Web Properties</h4>
-                <div class="alert alert-warning">
-                    <h5>Note on typical sources of site-specific values:</h5>
-                    <p>
-                        Typical sources of site-specific values include state departments of fish and wildlife or natural resources, and state or local lake stewardship programs. We do not recommend that users create their own configurations of the aquatic food web unless they are specialists in aquatic ecosystems and have site-specific data. However, the model results (chemical concentrations in aquatic biota) are not very sensitive to modest changes in the configuration, though they are reasonably sensitive to overall biomass relative to size of water body. The total biomass at each trophic level must be reasonable. Biomass of algae, detritus, and benthic invertebrates can be quite high, but the total biomass at each trophic level thereafter must be less than the biomass of the lower trophic level (between 0.5 to 1 order of magnitude lower). Body weight also should increase with increasing trophic level, as a general rule of thumb.
-                    </p>
-                </div>
             </div>
         </div>
         <div class="row">
             <div class="col-md">
-                <div class="pill pill-alert col-sm">
-                    <small>
-                        <strong>
-                            <u>Click on the table cells to edit properties</u>. 
-                        </strong>
-                        <br><span style='color: firebrick;'>*</span> All editable cells are required.
-                    </small>
-                </div>
                 <table data-slot="true" data-target="AquaticTable" data-pivot="true" class="hover wrap-text" id="AquaticTable">
                     <thead>
                         <tr>
@@ -36,28 +71,8 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-md">
+            <div class="col-md text-center">
                 <h4 class="mt-4">Aquatic Diet Properties</h4>
-                <div class="alert alert-warning">
-                    <h5>Note on aquatic diet properties:</h5>
-                    <p>
-                        Organism definitions:
-                    </p>
-                    <ul style="list-style-type:circle;">
-                        <li>Algae is modeled as the algal phase of surface water.</li>
-                        <li>Macrophyte include hydrilla and milfoil.</li>
-                        <li>Zooplankton include water fleas, rotifers, and protozoans.</li>
-                        <li>Benthic invertebrates include aquatic insects (e.g., nymphs of mayflies, caddisflies, dragonflies, and other species that emerge from the water when they become adults), crustaceans (e.g., amphipods, crayfish), and mollusks (e.g., snails, mussels).</li>
-                        <li>Water column herbivore include young-of-the-year minnows.</li>
-                        <li>Benthic omnivore include small catfish and rock bass.</li>
-                        <li>Water column omnivore include bluegill and white perch.</li>
-                        <li>Benthic carnivore include large catfish and sculpins.</li>
-                        <li>Water column carnivore include largemouth bass and walleye.</li>
-                    </ul>
-                    <p>
-                        <strong> User instructions: </strong> Enter the consuming organism's mass fractions of diet of each applicable organism. Valid values are 0 to 1. The default values represent a simplified food chain that captures likely results of chemicals that bioaccumulate or biomagnify in aquatic ecosystems. We simulate 4 trophic levels in the water column and 3.5 trophic levels in the benthic system, with larger organisms feeding on smaller organisms. With the default configuration, the diets of water column biota consist only of smaller water column biota (in terms of body weight), and similarly benthic biota diets consist only of smaller benthic biota. Benthic invertebrates are not consumers of the default organisms as they feed on sediment detritus, which the model simulates using chemical partition coefficients. While benthic carnivores could be simulated to eat only benthic omnivores, the default assumption is that they also feed on benthic invertebrates due to their abundance. While this is not as health protective as the 100% benthic omnivore diet option for chemicals that strongly bioaccumulate and biomagnify, it is health protective for chemicals that strongly sorb to sediment and can biodiminish with successive steps in the food chain. Zooplankton generally feed exclusively on algae in the water column. Typical sources of site-specific values include state departments of fish and wildlife or natural resources, and state or local lake stewardship programs. We do not recommend that users create their own configurations of the aquatic food web unless they are specialists in aquatic ecosystems and have site-specific data. However, the model results (chemical concentrations in aquatic biota) are not very sensitive to modest changes in the configuration, though they are reasonably sensitive to overall biomass relative to size of water body. Freshwater fish in North America consume organisms that they can fit into their mouths whole, so larger fish eat smaller fish and not the reverse.
-                    </p>
-                </div>
             </div>
         </div>
         <div class="row">
@@ -68,31 +83,6 @@
         </div>
     </section>
 </form>
- <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="ModalLabel">Modal title</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                </div>
-                <div class="modal-footer">
-                    <a  class="btn btn-secondary" data-dismiss="modal">Close</a>
-                    <button type="button"  id="saveModalButton" class="btn btn-primary" data-dismiss="modal">Save</button>
-                </div>
-            </div>
-        </div>
- </div>
-<link rel="stylesheet" href="{{url_for('static', filename='css/form_styles.css')}}"/>
-<script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}">
-</script>
-<script src="{{ url_for('static', filename='js/lib/dataTables/jquery.dataTables.min.js') }}">
-</script>
-<script src="{{ url_for('static', filename='js/lib/dataTables/dataTables.bootstrap4.min.js') }}">
-</script>
 <script>
     onDomLoad(function() {
         //let aqTable = $('#AquaticTable').removeAttr('width').DataTable()
@@ -103,7 +93,7 @@
         }
         let Auto_calculable = []
         let diet_table_template =
-            '<h5 className="mt-4 tableTitle" ></h5>' +
+            '<h5 className="mt-4 tableTitle"></h5>' +
             '<table class="diet" className="hover">' +
             '<thead>' +
             '<tr style="border-bottom: 1px solid black;">' +
@@ -530,6 +520,7 @@
                                 })
                             })
                             $($(this_matrix)[0]).text(e.name)
+                            $($(this_matrix)[0]).css('margin-left', '40px')
                             divDietTables.append(this_matrix)
                         }
                     })

@@ -6,6 +6,33 @@
     data-form-src="scenario_erosion_form"
 >
     <section class="container px-0">
+        <div class="row mb-3">
+            <div class="col">
+                {% call data_preamble('erosion') %}
+                <p>Click on the table cells to edit properties. All editable cells are required.</p>
+                <p>A cell may appear grayed and crossed out, indicating that other fields are active and are directly used in calculating the value in that cell. If you update a value in a grayed and crossed out cell, then the other fields that can be used to calculate it will become grayed and crossed out, indicating they are no longer being used because you have provided an overriding value.</p>
+                <p>
+                    Recommended to receive site-specific values, if available:
+                    <ul>
+                        <li>Total Effective Erosion Rate. If a site-specific value for this is not available, then calculate it using Unit Soil Loss (A; calculated from Universal Soil Loss Equation (USLE) parameters if needed) and Sediment Delivery Ratio (SD).</li>
+                        <li>Note that if site-specific values for USLE parameters are not available, selecting the <b>Get USDA Soil Data</b> button will retrieve site-specific values (where available) for:</li>
+                        <ul>
+                            <li>Erodibility Index (K)</li>
+                            <li>Slope Gradient (S)</li>
+                            <li>Slope Length (L)</li>
+                            <li>Topographical Length-Slope Factor (LS)</li>
+                        </ul>
+                        <li>Note that the default values for Sediment Delivery Ratio (SD) are based on site-specific information:</li>
+                        <ul>
+                            <li>Empirical Intercept Coefficient (a) is based on parcel Area</li>
+                            <li>SD is calculated based on (a)</li>
+                            <li>Cover/Management Factor (C) is based on parcel Land Use</li>
+                        </ul>
+                    </ul>
+                </p>
+                {% endcall %}
+            </div>
+        </div>
         <div class="row mb-1">
             <div class="col-sm">
                 <div data-slot="true" data-target="erosion_input_options"></div>
@@ -44,13 +71,6 @@
         </div>
     </section>
 </form>
-<link rel="stylesheet" href="{{url_for('static', filename='css/form_styles.css')}}"/>
-<script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}">
-</script>
-<script src="{{ url_for('static', filename='js/lib/dataTables/jquery.dataTables.min.js') }}">
-</script>
-<script src="{{ url_for('static', filename='js/lib/dataTables/dataTables.bootstrap4.min.js') }}">
-</script>
 <script>
     onDomLoad(function (e) {
         $('[data-toggle="tooltip"]').tooltip()
@@ -1204,43 +1224,4 @@
         return erosion;
     })(window.ErosionForm || {});
 </script>
-<style>
-    table { 
-        white-space: nowrap;
-    }
-    .td_ER {
-        background-color: #f8caca80;
-    }
-    td.td_ASD {
-        background-color: #e9ecef80;
-    }
-    td.td_LS {
-        background-color: #fcf8e380;
-    }
-    .lds-dual-ring {
-        display: inline-block;
-        width: 12px;
-        height: 12px;
-    }
-    .lds-dual-ring:after {
-        content: " ";
-        display: block;
-        width: 16px;
-        height: 16px;
-        margin: 4px;
-        border-radius: 50%;
-        border: 2px solid #fd0000;
-        border-color: #fd0000 transparent #fd0000 transparent;
-        animation: lds-dual-ring 1.2s linear infinite;
-    }
-    @keyframes lds-dual-ring {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-</style>
 {% endblock content %}

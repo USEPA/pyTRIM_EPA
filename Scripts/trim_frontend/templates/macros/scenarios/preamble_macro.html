@@ -1,0 +1,19 @@
+{% macro data_preamble(preamble_id) %}
+<div class="pill pill-alert">
+    <a href="#{{preamble_id}}-preamble" role="button" tabindex="0" data-toggle="collapse"
+        aria-expanded="true" aria-controls="{{preamble_id}}-preamble">
+        <span data-toggle="tooltip" data-original-title="Click here for additional instructions">
+            <small>
+                <strong><u>Click here for additional instructions</u></strong>
+            </small>
+            <i class="fa fa-info-circle"></i>
+        </span>
+    </a>
+
+    <div id="{{preamble_id}}-preamble" class="collapse">
+        <small class="form-text text-muted preamble-text">            
+            {{ caller() }}
+        </small>
+    </div>
+</div>
+{% endmacro %}

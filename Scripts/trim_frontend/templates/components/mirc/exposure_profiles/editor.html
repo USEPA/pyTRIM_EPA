@@ -4,6 +4,7 @@
 {% from 'macros/mirc/scenario_selector.html' import
     render_scenario_picker
 %}
+{% from 'macros/scenarios/preamble_macro.html' import data_preamble %}
 
 {% set notes_modal_name = 'notes-form-modal' %}
 
@@ -70,6 +71,29 @@
         </a>
     </div>
 
+    <div class="mb-4">
+        {% call data_preamble('mirc_exposure_profile') %}
+        <p>
+            Required fields:
+            <ul>
+                <li>Human parameters: All parameters for all life stages, ingested products, and data percentiles you intend to use in your simulation</li>
+            </ul>
+            <ul>
+                <li>Product parameters: All parameters for all ingested products you intend to use in your simulation</li>
+            </ul>
+            <ul>
+                <li>Chemical parameters: All parameters for chemicals and ingested products you intend to use in your simulation. Chemicals receiving a value of 0 for cancer slope factor or reference dose still will be modeled, but risk and hazard quotient, respectively, will not be calculated.</li>
+            </ul>
+        </p>
+        <p>
+            Recommended to receive site-specific values, if available:
+            <ul>
+                <li>None</li>
+            </ul>
+        </p>
+        {% endcall %}
+    </div>
+    
     <nav class="pb-1">
         <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
             <a id="human-parameters-tab" role="tab" tabindex="0" class="nav-item nav-link active"
@@ -118,8 +142,7 @@
         </div>
     {% endif %}
 </form>
-<script src="{{url_for('static', filename='js/mirc.js')}}">
-</script>
+<script src="{{url_for('static', filename='js/mirc.js')}}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     function toggleCollapse() {
@@ -354,15 +377,3 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 {% endif %}
-
-<style>
-    /* Fix bs-popover arrows... */
-    .bs-popover-right > .arrow,
-    .bs-popover-auto[x-placement^="right"]>.arrow {
-        left: calc(0.5rem * -1 + 1px * -1);
-    }
-    .bs-popover-left>.arrow,
-    .bs-popover-auto[x-placement^="left"]>.arrow {
-        right: calc(0.5rem * -1 + 1px * -1);
-    }
-</style>

@@ -6,6 +6,8 @@
     {{ scenario.name }}
 </h1>
 
+{% from 'macros/scenarios/preamble_macro.html' import data_preamble %}
+
 {% set tabs = [
     {
         'id': 'general-tab',

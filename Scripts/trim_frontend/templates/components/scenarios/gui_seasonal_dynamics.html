@@ -5,6 +5,16 @@
     data-form-src="scenario_seasonal_dynamics_form"
 >
     <section class="container px-0">
+        {% call data_preamble('seasonal_dynamics') %}
+        <p>All fields are required.</p>
+        <p>
+            Recommended to receive site-specific values, if available:
+            <ul>
+                <li>All</li>
+            </ul>
+        </p>
+        {% endcall %}
+
         <div class="row">
             <div class="col-sm">
                 <h3 class="text-center">Litterfall</h3>
