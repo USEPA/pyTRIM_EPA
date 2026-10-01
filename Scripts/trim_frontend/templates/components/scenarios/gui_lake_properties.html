@@ -98,8 +98,8 @@
             </div>
             <div class="modal-body "></div>
             <div class="modal-footer">
-                <button class="btn btn-sm btn-outline-dark" id="inflow-modal-close" data-dismiss="modal">Cancel</button>
-                <button type="button"  id="inflow-modal-save" class="btn btn-sm btn-outline-secondary text-dark">
+                <button class="btn btn-sm btn-light" id="inflow-modal-close" data-dismiss="modal">Cancel</button>
+                <button type="button"  id="inflow-modal-save" class="btn btn-sm btn-secondary">
                     <i class="fas fa-save mr-1"></i> Save
                 </button>
             </div>
@@ -280,12 +280,13 @@
 
                 // Calculate External Water Inflow from Other Water Bodies
                 $('.inflow-modal-btn').on('click', (e) => {
+                    e.preventDefault();
                     let thisPcl = getParcelByKey('name', $(e.currentTarget).data('parcel'));
 
                     let body = $('#inflow-modal').find('.modal-body');
                     body.empty();
                     body.append(
-                        $(`<button class="btn btn-sm btn-outline-primary float-right" id="f-reset"
+                        $(`<button class="btn btn-sm btn-outline-dark float-right" id="f-reset"
                             data-toggle="tooltip" data-trigger="hover" title="Set all to 0">
                             <i class="fas fa-redo"></i>
                         </button>`)
@@ -505,8 +506,8 @@
             function make_autocalc_btn(pcl) {
                 let props = (pcl.surface_water.fr_autocalc === true) ? 'btn-success' : 'btn-outline-dark';
                 return `<p>
-                    <button class='btn btn-sm auto_calc ${props}' data-parcel='${pcl.name}'>
-                        <small>Auto-calculate</small>
+                    <button class="btn btn-sm small auto_calc ${props}" style="line-height: 1.2em;" data-parcel="${pcl.name}">
+                        <i class="fa fa-redo mr-1" style="font-size: 0.75rem;"></i>Auto-calculate
                     </button></p>`;
             };
 
@@ -541,7 +542,7 @@
                         let autocalc_button = "";
 
                         if (row.shortProperty == 'externalWaterInflow') {
-                            inflow_button = `<a class="inflow-modal-btn badge badge-secondary-accent ml-2" data-parcel='${e.name}'><i class="fa fa-list"></i></a>`;
+                            inflow_button = `<a class="inflow-modal-btn badge badge-secondary ml-2" style="cursor: pointer;" href="Edit Inflow" data-parcel="${e.name}"><i class="fa fa-water"></i></a>`;
                         }
                         else if (row.shortProperty == 'flush_rate') {
                             autocalc_button = make_autocalc_btn(e);

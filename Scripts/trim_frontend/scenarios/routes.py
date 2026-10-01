@@ -849,9 +849,9 @@ def run_getflow(scenario_id):
             execution_arn = StepfnxHelper().start_stepfnx_execution(state_machine_arn, sfn_input)
             data_resp = { "executionArn": execution_arn }
         else:
-            data_resp = { "error": "Missing required envrionment variable to run getflow" }
+            data_resp = { "error": "Missing required envrionment variable to run GetFlow" }
     except Exception as e:
-        logger.warning(f"Error kicking off getflow run: {e}")
+        logger.warning(f"Error kicking off GetFlow run: {e}")
         data_resp = {"error": repr(e)}
 
     return ApiResult(data_resp)

@@ -7,14 +7,14 @@
 >
     <section class="container px-0">
         <div class="row">
-            <div class="col-md-9">
+            <div class="col-auto">
                 {% call data_preamble('abiotic') %}
                 <p>Click on the table cells to edit properties. All editable cells are required.</p>
                 <p>
                     Recommended to receive site-specific values, if available:
                     <ul>
                         <li>Surface Soil Properties: pH</li>
-                        <li>Note that selecting the <b>Get data from USDA Soil DataMart</b> button 
+                        <li>Note that selecting <b>Load from USDA Soil DataMart</b> 
                             will retrieve site-specific values Fraction Sand, Organic Carbon Fraction, pH, and Water Content 
                             for the following, where available:
                             <ul>
@@ -34,7 +34,10 @@
                 {% endcall %}
             </div>
             <div class="col-md text-right">
-                <button id="abiotic-usda-soil-btn" class="btn btn-warning">Get data from USDA Soil DataMart</button>
+                <button id="abiotic-usda-soil-btn" class="btn btn-sm btn-outline-warning text-dark">
+                    <i class="fa fa-cloud-download-alt mr-1"></i>
+                    Load from USDA Soil DataMart
+                </button>
             </div>
         </div>
         <div class="row">

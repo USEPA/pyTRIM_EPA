@@ -288,7 +288,7 @@ def parse_parcel_upload():
     if coord_system == "UTM":
         try:
             zone_number, zone_letter = CoordinateMapper.decompose_utm_zone(raw_utm_zone)
-            default_utm_zone = f'{zone_number}{zone_letter}'
+            default_utm_zone = f'{zone_number}{zone_letter or ""}'
         except Exception:
             errors.append(f"Invalid default utm zone '{raw_utm_zone}' supplied.")
 

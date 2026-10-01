@@ -1,7 +1,12 @@
 {% from 'macros/mirc/form_macros.html' import render_input, render_label %}
 
+<tr class="chemical-{{ bmcp.chemical_id.data }} infant-add-override">
+    <td>
+        {{ render_input(bmcp.infant_add_equals_adult_lifetime) }}
+    </td>
+</tr>
 <tr class="chemical-{{ bmcp.chemical_id.data }}">
-    <th scope="row" class="table-primary border-primary align-middle text-center">
+    <th scope="row" class="table-secondary border-secondary align-middle text-center">
         {{ render_label(bmcp.AE_inf, hover_help=True, class="mb-0") }}
     </th>
     <td>
@@ -16,7 +21,7 @@
     </td>
 </tr>
 <tr class="chemical-{{ bmcp.chemical_id.data }}">
-    <th scope="row" class="table-primary border-primary align-middle text-center">
+    <th scope="row" class="table-secondary border-secondary align-middle text-center">
         {{ render_label(bmcp.AE_mat, hover_help=True, class="mb-0") }}
     </th>
     <td>
@@ -29,7 +34,7 @@
     </td>
 </tr>
 <tr class="chemical-{{ bmcp.chemical_id.data }}">
-    <th scope="row" class="table-primary border-primary align-middle text-center">
+    <th scope="row" class="table-secondary border-secondary align-middle text-center">
         {{ render_label(bmcp.f_bl, hover_help=True, class="mb-0") }}
     </th>
     <td>
@@ -42,7 +47,7 @@
     </td>
 </tr>
 <tr class="chemical-{{ bmcp.chemical_id.data }}">
-    <th scope="row" class="table-primary border-primary align-middle text-center">
+    <th scope="row" class="table-secondary border-secondary align-middle text-center">
         {{ render_label(bmcp.f_f, hover_help=True, class="mb-0") }}
     </th>
     <td>
@@ -55,7 +60,7 @@
     </td>
 </tr>
 <tr class="chemical-{{ bmcp.chemical_id.data }}">
-    <th scope="row" class="table-primary border-primary align-middle text-center">
+    <th scope="row" class="table-secondary border-secondary align-middle text-center">
         {{ render_label(bmcp.f_pl, hover_help=True, class="mb-0") }}
     </th>
     <td>
@@ -68,7 +73,7 @@
     </td>
 </tr>
 <tr class="chemical-{{ bmcp.chemical_id.data }}">
-    <th scope="row" class="table-primary border-primary align-middle text-center">
+    <th scope="row" class="table-secondary border-secondary align-middle text-center">
         {{ render_label(bmcp.h_bm, hover_help=True, class="mb-0") }}
     </th>
     <td>
@@ -79,7 +84,7 @@
     </td>
 </tr>
 <tr class="chemical-{{ bmcp.chemical_id.data }}">
-    <th scope="row" class="table-primary border-primary align-middle text-center">
+    <th scope="row" class="table-secondary border-secondary align-middle text-center">
         {{ render_label(bmcp.k_elim, hover_help=True, class="mb-0") }}
     </th>
     <td>
@@ -90,7 +95,7 @@
     </td>
 </tr>
 <tr class="chemical-{{ bmcp.chemical_id.data }}">
-    <th scope="row" class="table-primary border-primary align-middle text-center">
+    <th scope="row" class="table-secondary border-secondary align-middle text-center">
         {{ render_label(bmcp.k_aq_elac, hover_help=True, class="mb-0") }}
     </th>
     <td>
@@ -101,7 +106,7 @@
     </td>
 </tr>
 <tr class="chemical-{{ bmcp.chemical_id.data }}">
-    <th scope="row" class="table-primary border-primary align-middle text-center">
+    <th scope="row" class="table-secondary border-secondary align-middle text-center">
         {{ render_label(bmcp.PC_pl_aq, hover_help=True, class="mb-0") }}
     </th>
     <td>
@@ -112,7 +117,7 @@
     </td>
 </tr>
 <tr class="chemical-{{ bmcp.chemical_id.data }}">
-    <th scope="row" class="table-primary border-primary align-middle text-center">
+    <th scope="row" class="table-secondary border-secondary align-middle text-center">
         {{ render_label(bmcp.PC_rbc_pl, hover_help=True, class="mb-0") }}
     </th>
     <td>

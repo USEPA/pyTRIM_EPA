@@ -2,7 +2,7 @@
 
 <h4>
     <button type="button"
-        class="btn btn-lg btn-block px-0 text-primary text-left border-light border-top-0 border-left-0 border-right-0 rounded-0"
+        class="btn btn-lg btn-block px-0 text-secondary text-left border-light border-top-0 border-left-0 border-right-0 rounded-0"
         data-toggle="collapse" aria-expanded="true"
         data-target="#lf-collapse" aria-controls="lf-collapse"
         style="font-weight: 500;"
@@ -32,11 +32,11 @@
     <table id="loss-factor-parameters" class="table table-sm table-bordered">
         <thead>
             <tr class="text-center">
-                <th scope="col" class="table-primary border-primary">Loss Description</th>
-                <th scope="col" class="table-primary border-primary">Fraction Lost</th>
-                <th scope="col" class="table-primary border-primary">Source</th>
+                <th scope="col" class="table-secondary border-secondary">Loss Description</th>
+                <th scope="col" class="table-secondary border-secondary">Fraction Lost</th>
+                <th scope="col" class="table-secondary border-secondary">Source</th>
                 {% if not mirc_scenario.is_builtin %}
-                    <th scope="col" class="table-primary border-primary"></th>
+                    <th scope="col" class="table-secondary border-secondary"></th>
                 {% endif %}
             </tr>
         </thead>
@@ -254,9 +254,9 @@
 
             var td4 = $('<td class="text-center align-middle" />');
             var btn = $('<button type="button" />')
-                .addClass('btn py-0 px-1 text-primary border-0 rounded-circle rem-lf')
+                .addClass('btn py-0 px-1 text-secondary border-0 rounded-circle rem-lf')
                 .attr('aria-label', 'add-loss-factor');
-            $('<span />').append('<i class="fa fa-times-circle" />').appendTo(btn);
+            $('<span />').append('<i class="fa fa-times-circle text-danger" />').appendTo(btn);
             btn.appendTo(td4);
 
             tr.append(td1).append(td2).append(td3).append(td4);
