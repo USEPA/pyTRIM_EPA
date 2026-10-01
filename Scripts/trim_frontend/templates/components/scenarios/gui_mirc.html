@@ -17,7 +17,40 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body">   
+                    <div class="mb-3">
+                        {% call data_preamble('mirc_inputs') %}
+                        <p>
+                            The following fields are required for all ingested products you intend to use in your simulation:
+                            <ul>
+                                <li>Exposure Profile</li>
+                                <li>Chemical</li>
+                                <li>Body Weight Percentile</li>
+                                <li>Ingestion Rate Percentiles</li>
+                                <li>Target Date/Time</li>
+                                <li>The choice of setting or calculating fish concentrations</li>
+                                <li>The numeric values on the right side of the form (starting with Average Vapor-phase Concentration in Air)</li>
+                            </ul>
+                        </p>
+                        <p>
+                            Recommended to receive site-specific values, if available:
+                            <ul>
+                                <li>The numeric values on the right side of the form (starting with Average Vapor-phase Concentration in Air) for all ingested products you intend to use in your simulation, <i>except for:</i></li>
+                                <ul>
+                                    <li>Fraction of Airborne Chemical in Vapor Phase</li>
+                                    <li>Density of Air</li>
+                                    <li>Kd for Garden Produce</li>
+                                    <li>Kd for Livestock Feed</li>
+                                    <li>Fraction of Fish Consumption from Trophic Level 3.5</li>
+                                    <li>Fraction of Fish Consumption from Trophic Level 4</li>
+                                    <li>Fraction of Total Chemical Mass That Is Dissolved in Liquid Phase</li>
+                                </ul>
+                                <li>Note that most of the numeric values will auto-populate based on selections for corresponding compartments and trophic levels, based on other data you enter on other pages and based on outputs from the transport model</li>
+                            </ul>
+                        </p>
+                        {% endcall %}
+                    </div>    
+                    
                     {% with form = simulation_form %}
                         {% include 'components/mirc/simulations/create_form.html' %}
                     {% endwith %}

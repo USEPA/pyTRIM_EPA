@@ -5,6 +5,16 @@
     data-form-src="scenario_meteorology_form"
 >
     <section id="time-varying-values" class="container px-0">
+        {% call data_preamble('meteorology') %}
+        <p>All fields are required.</p>
+        <p>
+            Recommended to receive site-specific values, if available:
+            <ul>
+                <li>All except the Wet Deposition Interception Fractions</li>
+            </ul>
+        </p>
+        {% endcall %}
+
         <div class="row">
             <div class="col-sm">
                 <h5 class="text-center">Time-Varying Values</h5>

@@ -6,6 +6,11 @@
     data-form-src="scenario_emissions_form"
 >
     <section class="container px-0">
+        {% call data_preamble('emissions') %}
+        <p>Click on the table cells to edit properties.</p>
+        <p>At least one chemical must be selected. For each chemical, at least one compartment must receive an emission value above 0.</p>
+        {% endcall %}
+
         <div class="row mb-1">
             <div class="col-sm">
                 <div data-slot="true" data-target="chemicals">

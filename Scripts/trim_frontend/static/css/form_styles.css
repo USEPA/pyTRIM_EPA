@@ -47,6 +47,14 @@
 }
 /* spinning ring END */
 
+.preamble-text p {
+  margin-bottom: 5px;
+}
+
+.preamble-text ul {
+  margin-bottom: 2px;
+}
+
 fieldset {
     border: 1px solid;
     margin: 5px;

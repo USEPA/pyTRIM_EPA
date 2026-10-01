@@ -7,15 +7,31 @@
 >
     <section class="container px-0">
         <div class="row">
-            <div class="col-md">
-                <div class="pill pill-alert col-sm">
-                    <small>
-                        <strong>
-                            <u>Click on the table cells to edit properties</u>.
-                        </strong>
-                        <br><span style='color: firebrick;'>*</span> All editable cells are required.
-                    </small>
-                </div>
+            <div class="col-md-9">
+                {% call data_preamble('abiotic') %}
+                <p>Click on the table cells to edit properties. All editable cells are required.</p>
+                <p>
+                    Recommended to receive site-specific values, if available:
+                    <ul>
+                        <li>Surface Soil Properties: pH</li>
+                        <li>Note that selecting the <b>Get data from USDA Soil DataMart</b> button 
+                            will retrieve site-specific values Fraction Sand, Organic Carbon Fraction, pH, and Water Content 
+                            for the following, where available:
+                            <ul>
+                                <li>Surface Soil Properties</li>
+                                <li>Root Zone Properties</li>
+                                <li>Vadose Zone Properties </li>
+                                
+                            </ul>
+                            As well as site-specific values Fraction Sand, Organic Carbon Fraction, and pH 
+                            for the following, where available:
+                            <ul>
+                                <li>Groundwater Zone Properties</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </p>
+                {% endcall %}
             </div>
             <div class="col-md text-right">
                 <button id="abiotic-usda-soil-btn" class="btn btn-warning">Get data from USDA Soil DataMart</button>
