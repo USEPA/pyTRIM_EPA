@@ -4,6 +4,12 @@
     data-form-src="scenario_background_conc_form"
 >
     <section class="container px-0">
+        {% call data_preamble('background_conc') %}
+        <p>Click on the table cells to edit properties.</p>
+
+        <p>Background concentrations are not required. If you choose to use them for a chemical, then at least one compartment must receive an initial concentration value above 0.</p>
+        {% endcall %}
+
         <div class="row mb-1">
             <div class="col-sm">
                 <div data-slot="true" data-target="background_chemicals">
@@ -67,13 +73,6 @@
         </div>
     </section>
 </form>
-
-<script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}">
-</script>
-<script src="{{ url_for('static', filename='js/lib/dataTables/jquery.dataTables.min.js') }}">
-</script>
-<script src="{{ url_for('static', filename='js/lib/dataTables/dataTables.bootstrap4.min.js') }}">
-</script>
 <script>
     onDomLoad(function(e) {
         var form = document.getElementById('background-conc-gui');

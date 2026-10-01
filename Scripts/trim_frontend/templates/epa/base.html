@@ -3,6 +3,10 @@
 <html class="pattern-lab-content js" lang="en" dir="ltr" style="--scrollbar-width: 15px;">
 
 <head>
+    <!-- TRIM start -->
+    <title>{{ site_name }} | US EPA</title>
+    <!-- TRIM end -->
+
     <!-- Google Tag Manager -->
     <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0], j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src= 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f); })(window,document,'script','dataLayer','GTM-L8ZB');</script>
     <!-- End Google Tag Manager -->
@@ -13,8 +17,7 @@
     <meta name="HandheldFriendly" content="true">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
-    <title>EPA Template | US EPA</title>
-
+    
     <link rel="icon" type="image/x-icon" href="https://www.epa.gov/themes/epa_theme/images/favicon.ico">
     <meta name="msapplication-TileColor" content="#FFFFFF">
     <meta name="msapplication-TileImage" content="https://www.epa.gov/themes/epa_theme/images/favicon-144.png">
@@ -123,11 +126,11 @@
 
                         <svg class="icon l-header__search-button-icon-open" aria-hidden="true">
                             <use
-                                href="{{url_for('static', filename='epa/uswds/img/sprite.svg')}}#magnifying-glass">
+                                href="{{url_for('static', filename='css/lib/uswds/epa/sprite.artifact.svg')}}#magnifying-glass">
                             </use>
                         </svg>
                         <svg class="icon l-header__search-button-icon-close" aria-hidden="true">
-                            <use href="{{url_for('static', filename='epa/uswds/img/sprite.svg')}}#xmark"></use>
+                            <use href="{{url_for('static', filename='css/lib/uswds/epa/sprite.artifact.svg')}}#xmark"></use>
                         </svg> </button>
                     <a class="site-logo" href="https://www.epa.gov/" aria-label="Home" title="Home" rel="home">
                         <span class="site-logo__image">
@@ -278,7 +281,7 @@
 
                                 <svg class="icon usa-search__submit-icon" aria-hidden="true">
                                     <use
-                                        href="{{url_for('static', filename='epa/uswds/img/sprite.svg')}}#magnifying-glass">
+                                        href="{{url_for('static', filename='css/lib/uswds/epa/sprite.artifact.svg')}}#magnifying-glass">
                                     </use>
                                 </svg> <span class="usa-search__submit-text">Search</span>
                             </button>
@@ -301,7 +304,7 @@
 
                         <svg class="icon icon--nav-close" aria-hidden="true" role="img">
                             <title>Primary navigation</title>
-                            <use href="{{url_for('static', filename='epa/uswds/img/sprite.svg')}}#xmark"></use>
+                            <use href="{{url_for('static', filename='css/lib/uswds/epa/sprite.artifact.svg')}}#xmark"></use>
                         </svg> </button>
                     <div class="usa-nav__menu">
 
@@ -346,16 +349,13 @@
 
 
     <main id="main" class="main" role="main" tabindex="-1">
-
-
-
-
         <div class="l-page page-no-sidebar">
             <div class="l-constrain">
 
                 <article class="article">
                     {% include 'epa/trim_login.html' %}
                 </article>
+                
             </div>
         </div>
     </main>
@@ -512,7 +512,7 @@
 
                                 <svg class="icon icon--social" aria-hidden="true">
                                     <use
-                                        href="{{url_for('static', filename='epa/uswds/img/sprite.svg')}}#facebook-square">
+                                        href="{{url_for('static', filename='css/lib/uswds/epa/sprite.artifact.svg')}}#facebook-square">
                                     </use>
                                 </svg> </a>
                         </li>
@@ -521,7 +521,7 @@
 
                                 <svg class="icon icon--social" aria-hidden="true">
                                     <use
-                                        href="{{url_for('static', filename='epa/uswds/img/sprite.svg')}}#twitter-square">
+                                        href="{{url_for('static', filename='css/lib/uswds/epa/sprite.artifact.svg')}}#twitter-square">
                                     </use>
                                 </svg> </a>
                         </li>
@@ -531,7 +531,7 @@
 
                                 <svg class="icon icon--social" aria-hidden="true">
                                     <use
-                                        href="{{url_for('static', filename='epa/uswds/img/sprite.svg')}}#youtube-square">
+                                        href="{{url_for('static', filename='css/lib/uswds/epa/sprite.artifact.svg')}}#youtube-square">
                                     </use>
                                 </svg> </a>
                         </li>
@@ -540,7 +540,7 @@
 
                                 <svg class="icon icon--social" aria-hidden="true">
                                     <use
-                                        href="https://www.epa.gov/themes/epa_theme/images/sprite.artifact.svg#instagram-square">
+                                        href="{{url_for('static', filename='css/lib/uswds/epa/sprite.artifact.svg')}}#instagram-square">
                                     </use>
                                 </svg> </a>
                         </li>

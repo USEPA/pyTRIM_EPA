@@ -117,7 +117,7 @@ where A.id = M.mukey;\n\
         return response_dict
 
     @classmethod
-    def _post_query(cls, body, attempts=3):
+    def _post_query(cls, body, attempts=5):
         logger = make_logger('usda_call')
         for attempt in range(attempts):
             try:

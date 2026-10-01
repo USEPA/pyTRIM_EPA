@@ -6,16 +6,41 @@
     <section class="container px-0">
         <div class="row">
             <div class="col-md">
-                <div class="pill pill-alert col-sm">
-                    <small>
-                        <strong>
-                            <u>Click on the table cells to edit properties</u>. 
-                        </strong>
-                        <br><span style='color: firebrick;'>*</span> All editable cells are required.
-                    </small>
-                </div>
-            </div>
-            <div class="col-md text-right">
+                {% call data_preamble('water_bodies') %}
+                <p>Click on the table cells to edit properties. All editable cells are required.</p>
+                <p>
+                    Recommended to receive site-specific values, if available:
+                    <ul>
+                        <li>Water Column Properties: 
+                            <ul>
+                                <li>Water pH</li>
+                                <li>Water Temperature</li>
+                                <li>Water Depth</li>
+                                <li>Algae Density</li>
+                                <li>Organic Carbon Fraction in Suspended Sediments</li>
+                                <li>Suspended Sediment Concentration</li>
+                                <li>Flush Rate</li>
+                            </ul>
+                        </li>
+                        <li>Note that if a site-specific value for flush rate is not available, selecting the <b>Auto-calculate</b> button will calculate a flush rate based on other data you enter for your simulation on this and other pages, including ones which should be site-specific:
+                            <ul>
+                                <li>Water Depth</li>
+                                <li>Evaporation Rate</li>
+                                <li>External Water Inflow from Other Water Bodies (if applicable)</li>
+                                <li>Parcel Area</li>
+                                <li>Precipitation</li>
+                                <li>Runoff Fraction</li>
+                                <li>Groundwater Seepage Fraction</li>
+                                <li>fractions of Surface Runoff</li>
+                            </ul> 
+                        </li>
+                    </ul>
+                </p>
+                {% endcall %}
+            </div>    
+        </div>
+        <div class="row">
+            <div class="col-md text-right">        
                 <div class="custom-control custom-switch">
                     <input type="checkbox" class="custom-control-input" id="toggleData"
                         data-isactive="true" checked="checked"
@@ -24,11 +49,11 @@
                         Show/Hide Non-Interactive Data
                     </label>
                     <sup>
-                        <a href="javascript:void(0);" aria-label="Show/Hide Non-Interactive Data" title="" data-toggle="popover" data-html="true" data-placement="left" data-content="Select to show or hide properties which cannot be edited directly. These are property values which the model calculates from other property values. You have the option to see the calculated values, but you cannot change them except by changing the other property values they depend on. The help text on the non-interactive properties specifies the dependent properties, and when you click on one of the non-interactive properties then any dependent properties on this page will be highlighted in blue." data-original-title="Non-Interactive Data"><i class="fa fa-question"></i></a>
+                        <a href="javascript:void(0);" aria-label="Show/Hide Non-Interactive Data" title="" data-trigger='focus' data-toggle="popover" data-html="true" data-placement="left" data-content="Select to show or hide properties which cannot be edited directly. These are property values which the model calculates from other property values. You have the option to see the calculated values, but you cannot change them except by changing the other property values they depend on. The help text on the non-interactive properties specifies the dependent properties, and when you click on one of the non-interactive properties then any dependent properties on this page will be highlighted in blue." data-original-title="Non-Interactive Data"><i class="fa fa-question"></i></a>
                     </sup>
-                </div>
+                </div>    
             </div>
-        </div>
+        </div>        
         <div class = "row">
             <div class="col-md mt-4 text-center">
                 <h4>Water Column Properties</h4>
@@ -81,13 +106,6 @@
         </div>
     </div>
 </div>
-<link rel="stylesheet" href="{{url_for('static', filename='css/form_styles.css')}}"/>
-<script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}">
-</script>
-<script src="{{ url_for('static', filename='js/lib/dataTables/jquery.dataTables.min.js') }}">
-</script>
-<script src="{{ url_for('static', filename='js/lib/dataTables/dataTables.bootstrap4.min.js') }}">
-</script>
 <script>
     onDomLoad(function() {
         const lkTblId = '#WaterColumnTable';

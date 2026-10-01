@@ -12,10 +12,18 @@
 
         <ul class="navbar-nav navbar-right ml-auto">
             {% if current_user.is_authenticated %}
-                {{ render_nav_item(
-                    'Logout', url_for('security.logout'), icon='user-circle',
-                    title=("Logout " + current_user.get_preferred_name())
-                ) }}
+            <!-- /logout is now POST only with flask-security 5.9.0 -->
+                <li class="nav-item">
+                    <form action="{{ url_for('security.logout') }}" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-link nav-link">
+                            <span class="lead">
+                                <i class="fa fa-user-circle"></i>
+                                Logout
+                            </span>
+                        </button>
+                    </form>
+                </li>
             {% else %}
                 {% if config['OAUTH2_PROVIDERS']['login_gov']['client_id'] %}
                     {{ render_nav_item(

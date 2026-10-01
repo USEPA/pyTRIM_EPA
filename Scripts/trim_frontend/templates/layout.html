@@ -48,18 +48,16 @@
         <link rel="stylesheet" type="text/css" href="{{ ASSET_URL }}" />
     {% endassets %}
 
-    <style>
-        /* hotfix */
-        .custom-switch .custom-control-label::after {
-            top: calc(0.25rem + 2px);
-            left: calc(-2.25rem + 2px);
-            width: calc(1rem - 4px);
-            height: calc(1rem - 4px);
-            background-color: #adb5bd;
-            border-radius: .5rem;
-            transition: transform .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out
-        }
-    </style>
+    <link rel="stylesheet" href="{{url_for('static', filename='css/form_styles.css')}}"/>
+    <link rel="stylesheet" href="{{url_for('static', filename='css/table_styles.css')}}"/>
+
+    <!--We need these to run first-->
+    <script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}"></script>
+    <script src="{{url_for('static', filename='js/lib/popper.min.js')}}"></script>
+    <script src="{{url_for('static', filename='js/lib/bootstrap/bootstrap.min.js')}}"></script>
+    <script src="{{url_for('static', filename='js/lib/moment.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/lib/dataTables/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/lib/dataTables/dataTables.bootstrap4.min.js') }}"></script>
 
     {% block styles %}{% endblock %}
 </head>
@@ -82,32 +80,15 @@
     </div>
 
     {% include 'components/footer.html' %}
-
-    <script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}">
-    </script>
-    <script src="{{url_for('static', filename='js/lib/popper.min.js')}}">
-    </script>
-    <script src="{{url_for('static', filename='js/lib/bootstrap/bootstrap.min.js')}}">
-    </script>
-    <script src="{{url_for('static', filename='js/lib/moment.min.js')}}">
-    </script>
-
-    <script src="{{url_for('static', filename='js/main.js')}}">
-    </script>
-    <script src="{{url_for('static', filename='js/api.js')}}">
-    </script>
-    <script src="{{url_for('static', filename='js/table_builder.js')}}">
-    </script>
-    <script src="{{url_for('static', filename='js/table_to_csv.js')}}">
-    </script>
-    <script src="{{ url_for('static', filename='js/lib/dataTables/jquery.dataTables.min.js') }}">
-    </script>
-    <script src="{{ url_for('static', filename='js/lib/dataTables/dataTables.bootstrap4.min.js') }}">
-    </script>
-
+    
+    <!-- TRIM scripts -->
+    <script src="{{url_for('static', filename='js/main.js')}}"></script>
+    <script src="{{url_for('static', filename='js/api.js')}}"></script>
+    <script src="{{url_for('static', filename='js/table_builder.js')}}"></script>
+    <script src="{{url_for('static', filename='js/table_to_csv.js')}}"></script>
     {% include 'components/csrf_scripts.html' %}
-
     {% include 'components/api_scripts.html' %}
+    <!-- TRIM scripts END -->
 
     {% block scripts %}{% endblock %}
 </body>

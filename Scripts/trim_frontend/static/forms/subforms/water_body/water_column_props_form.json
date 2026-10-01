@@ -20,7 +20,7 @@
       "default": 298,
       "min": 5.00E-324,
       "tooltip": "K",
-      "help": "Enter the average water temperature. Valid values are > 0. The default value of 298 is from Table B-4-12 of U.S. EPA 2005 (Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities). Typical sources of site-specific values include state departments of fish and wildlife or natural resources, and state or local lake stewardship programs. See the TRIM User Guide Appendix for full reference information."
+      "help": "Enter the average water temperature. Valid values are > 0. The default value of 298 is from Table B-4-12 of U.S. EPA 2005 (Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities). Typical sources of site-specific values include state departments of fish and wildlife or natural resources, and state or local lake stewardship programs. See the webTRIM.FaTE User Guide Appendix for full reference information."
     },
     {
       "id": "mean_depth",
@@ -37,7 +37,7 @@
       "data_type": "float",
       "default": 0.0025,
       "tooltip": "g [algae wet weight]/L [water]",
-      "help": "Enter the algae density (wet weight) in the water column. Valid values are >= 0. The default value of 0.0025 is from Millard et al. 1996 (Phytoplankton photosynthesis at two index stations in Lake Ontario 1987–1992: assessment of the long-term response to phosphorus control). A typical way of calculating a site-specific value uses lake depth and total phosphorus level: (0.4*TPhos+0.2*TPhos^1.4)/WaterColumnDepth, where Tphos = average total phosphorus level (µg/L = mg/m3; not a model input parameter) and WaterColumnDepth = Water Column Depth (m; a model input parameter), as adapted from Table 2 of Peters 1996 (The role of prediction in limnology). Then, divide by Water Column Depth (m) and divide by 1,000 to obtain the correct units. See the TRIM User Guide Appendix for full reference information."
+      "help": "Enter the algae density (wet weight) in the water column. Valid values are >= 0. The default value of 0.0025 is from Millard et al. 1996 (Phytoplankton photosynthesis at two index stations in Lake Ontario 1987–1992: assessment of the long-term response to phosphorus control). A typical way of calculating a site-specific value uses lake depth and total phosphorus level: (0.4*TPhos+0.2*TPhos^1.4)/WaterColumnDepth, where Tphos = average total phosphorus level (µg/L = mg/m3; not a model input parameter) and WaterColumnDepth = Water Column Depth (m; a model input parameter), as adapted from Table 2 of Peters 1996 (The role of prediction in limnology). Then, divide by Water Column Depth (m) and divide by 1,000 to obtain the correct units. See the webTRIM.FaTE User Guide Appendix for full reference information."
     },
     {
       "id": "chloride_conc",
@@ -45,7 +45,7 @@
       "data_type": "float",
       "default": 8,
       "tooltip": "mg [chloride] / L [water]",
-      "help": "Enter the chloride ion concentration in the water column. Valid values are >= 0. The default value of 8 is from Table 1 (maximum value from streams without nearby roadways) of Kaushal et al. 2005 (Increased salinization of fresh water in the northeastern United States). Typical sources of site-specific values include the Water Quality Portal of the National Water Quality Monitoring Council (available online at: http://www.waterqualitydata.us/; includes data from U.S. Geological Survey National Water Information System and U.S. Environmental Protection Agency STORET data warehouses) and local watershed watch programs. See the TRIM User Guide Appendix for full reference information."
+      "help": "Enter the chloride ion concentration in the water column. Valid values are >= 0. The default value of 8 is from Table 1 (maximum value from streams without nearby roadways) of Kaushal et al. 2005 (Increased salinization of fresh water in the northeastern United States). Typical sources of site-specific values include the Water Quality Portal of the National Water Quality Monitoring Council (available online at: http://www.waterqualitydata.us/; includes data from U.S. Geological Survey National Water Information System and U.S. Environmental Protection Agency STORET data warehouses) and local watershed watch programs. See the webTRIM.FaTE User Guide Appendix for full reference information."
     },
     {
       "id": "chlorophyll_conc",
@@ -53,7 +53,7 @@
       "data_type": "float",
       "default": 0.0029,
       "tooltip": "mg [chlorophyll]/L [water]",
-      "help": "Enter the chlorophyll concentration in the water column. Valid values are >= 0. The default value of 0.0029 is from Table 1 (2.9 µg/L; median of average epilimnetic summer chlorophyll values from 43 North American lakes) of Nürnberg 1996 (Trophic state of clear and colored, soft- and hardwater lakes with special consideration of nutrients, anoxia, phytoplankton and fish). A typical source of site-specific values is the respective state department of environment or natural resources. See the TRIM User Guide Appendix for full reference information."
+      "help": "Enter the chlorophyll concentration in the water column. Valid values are >= 0. The default value of 0.0029 is from Table 1 (2.9 µg/L; median of average epilimnetic summer chlorophyll values from 43 North American lakes) of Nürnberg 1996 (Trophic state of clear and colored, soft- and hardwater lakes with special consideration of nutrients, anoxia, phytoplankton and fish). A typical source of site-specific values is the respective state department of environment or natural resources. See the webTRIM.FaTE User Guide Appendix for full reference information."
     },
     {
       "id": "suspended_organic_carbon",
@@ -63,7 +63,7 @@
       "min": 0,
       "max": 1,
       "tooltip": "unitless",
-      "help": "Enter the organic carbon fraction in sediments suspended in the water column. Valid values are 0 to 1. The default value of 0.02 is from Table 3 (assumed equivalent to the organic carbon fraction in sediments) of McKone et al. 2001 (Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models). For site-specific values, it is typical to assume the same value as Water Body Organic Carbon Fraction in Sediment Bed (also a model input). See the TRIM User Guide Appendix for full reference information."
+      "help": "Enter the organic carbon fraction in sediments suspended in the water column. Valid values are 0 to 1. The default value of 0.02 is from Table 3 (assumed equivalent to the organic carbon fraction in sediments) of McKone et al. 2001 (Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models). For site-specific values, it is typical to assume the same value as Water Body Organic Carbon Fraction in Sediment Bed (also a model input). See the webTRIM.FaTE User Guide Appendix for full reference information."
     },
     {
       "id": "suspended_sed_conc",
@@ -71,7 +71,7 @@
       "data_type": "float",
       "default": 0.05,
       "tooltip": "kg [sediment particles]/m<sup>3</sup> [water]",
-      "help": "Enter the concentration of suspended sediments in the water column. Valid values are >= 0. The default value of 0.05 is based on the value of 0.088 used in the CalTOX model (see Table 1 of CalEPA 1996 [The Distribution of California Landscape Variables for CalTOX]). The data from which the 0.088 average was calculated (from 14 California water quality sites) had a large standard deviation (also 0.088). Screening scenarios have shown TRIM to be sensitive to this parameter, with higher values generally leading to lower concentrations in fish. As such, we utilize a more conservative default value of 0.05 (professional judgment), but we recommend utilizing site-specific values where available. Sources of site-specific data might include the Water Quality Portal of the National Water Quality Monitoring Council (available online at: http://www.waterqualitydata.us/; includes data from U.S. Geological Survey National Water Information System and U.S. Environmental Protection Agency STORET data warehouses), state department of environment or natural resources, and state or local watershed watch or lake stewardship programs. See the TRIM User Guide for full reference information."
+      "help": "Enter the concentration of suspended sediments in the water column. Valid values are >= 0. The default value of 0.05 is based on the value of 0.088 used in the CalTOX model (see Table 1 of CalEPA 1996 [The Distribution of California Landscape Variables for CalTOX]). The data from which the 0.088 average was calculated (from 14 California water quality sites) had a large standard deviation (also 0.088). Screening scenarios have shown webTRIM.FaTE to be sensitive to this parameter, with higher values generally leading to lower concentrations in fish. As such, we utilize a more conservative default value of 0.05 (professional judgment), but we recommend utilizing site-specific values where available. Sources of site-specific data might include the Water Quality Portal of the National Water Quality Monitoring Council (available online at: http://www.waterqualitydata.us/; includes data from U.S. Geological Survey National Water Information System and U.S. Environmental Protection Agency STORET data warehouses), state department of environment or natural resources, and state or local watershed watch or lake stewardship programs. See the webTRIM.FaTE User Guide for full reference information."
     },
     {
       "id": "sed_inflow",
@@ -87,7 +87,7 @@
       "data_type": "float",
       "default": 2,
       "tooltip": "m [water]/d",
-      "help": "Enter the sediment deposition velocity in the water column. Valid values are >= 0. The default of 2 is for fine silt with a diameter of 0.005 mm and is from Section B.2.22 of U.S. EPA 1997 (Mercury study report to Congress, volume III: fate and transport of mercury in the environment). There is no typical source of site-specific values. See the TRIM User Guide Appendix for full reference information."
+      "help": "Enter the sediment deposition velocity in the water column. Valid values are >= 0. The default of 2 is for fine silt with a diameter of 0.005 mm and is from Section B.2.22 of U.S. EPA 1997 (Mercury study report to Congress, volume III: fate and transport of mercury in the environment). There is no typical source of site-specific values. See the webTRIM.FaTE User Guide Appendix for full reference information."
     },
     {
       "id": "sed_discharge_rate",
@@ -122,7 +122,7 @@
       "data_type": "float",
       "default": 0.7,
       "tooltip": "m [water]/y",
-      "help": "Enter the evaporation rate of the water body. Valid values are >= 0. The default value is 0.7, from Table 11 (approximately the value of 0.002 m/d [0.73 m/y] estimated for Wisconsin and Illinois, and similar to the value of 0.0021 m/d [0.77 m/y] estimated for many northeastern states) of McKone et al. 2001 (Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models). This reference provides values for other states that range from 0.0011 m/d [0.40 m/y] in Maine and New Hampshire to 0.007 m/d [2.6 m/y] in Arizona, which might be more appropriate for site-specific simulations. See the TRIM User Guide Appendix for full reference information."
+      "help": "Enter the evaporation rate of the water body. Valid values are >= 0. The default value is 0.7, from Table 11 (approximately the value of 0.002 m/d [0.73 m/y] estimated for Wisconsin and Illinois, and similar to the value of 0.0021 m/d [0.77 m/y] estimated for many northeastern states) of McKone et al. 2001 (Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models). This reference provides values for other states that range from 0.0011 m/d [0.40 m/y] in Maine and New Hampshire to 0.007 m/d [2.6 m/y] in Arizona, which might be more appropriate for site-specific simulations. See the webTRIM.FaTE User Guide Appendix for full reference information."
     },
     {
       "id": "evaporation_vol_rate",
@@ -184,7 +184,7 @@
       "data_type": "float",
       "default": 0,
       "tooltip": "1/day",
-      "help": "Enter the methylation rate for divalent mercury (Hg) in the water column. Valid values are ≥ 0. The default value of 0.001 is for a shallow lake with little or no anoxia, reflecting observed non-microbial rate constants in oxic waters, as reported on page B-20 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information."
+      "help": "Enter the methylation rate for divalent mercury (Hg) in the water column. Valid values are ≥ 0. The default value of 0.001 is for a shallow lake with little or no anoxia, reflecting observed non-microbial rate constants in oxic waters, as reported on page B-20 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the webTRIM.FaTE User Guide Appendix for full reference information."
     },
     {
       "id": "ReductionRate.Surface_Water",
@@ -192,7 +192,7 @@
       "data_type": "float",
       "default": 0,
       "tooltip": "1/day",
-      "help": "Enter the reduction rate for divalent mercury in the water column. Valid values are ≥ 0. The default value of 0.0075 is as discussed on pages B-18 and B-19 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information."
+      "help": "Enter the reduction rate for divalent mercury in the water column. Valid values are ≥ 0. The default value of 0.0075 is as discussed on pages B-18 and B-19 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the webTRIM.FaTE User Guide Appendix for full reference information."
     },
     {
       "id": "OxidationRate.Surface_Water",
@@ -200,7 +200,7 @@
       "data_type": "float",
       "default": 0,
       "tooltip": "1/day",
-      "help": "Enter the oxidation rate for elemental mercury in the water column. Valid values are ≥ 0. The default value of 0 is from Table B-2 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information."
+      "help": "Enter the oxidation rate for elemental mercury in the water column. Valid values are ≥ 0. The default value of 0 is from Table B-2 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the webTRIM.FaTE User Guide Appendix for full reference information."
     },
     {
       "id": "DemethylationRate.Surface_Water",
@@ -208,7 +208,7 @@
       "data_type": "float",
       "default": 0,
       "tooltip": "1/day",
-      "help": "Enter the demethylation rate for methyl mercury in the water column. Valid values are ≥ 0. The default value of 0.013 is the average of the range of maximum potential rate constants (0.001 to 0.025) from Gilmour and Henry 1991 (Mercury Methylation in Aquatic Systems Affected by Acid Deposition), as reported on page B-21 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information."
+      "help": "Enter the demethylation rate for methyl mercury in the water column. Valid values are ≥ 0. The default value of 0.013 is the average of the range of maximum potential rate constants (0.001 to 0.025) from Gilmour and Henry 1991 (Mercury Methylation in Aquatic Systems Affected by Acid Deposition), as reported on page B-21 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the webTRIM.FaTE User Guide Appendix for full reference information."
     }
   ]
 }

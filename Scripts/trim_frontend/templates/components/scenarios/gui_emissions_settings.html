@@ -6,6 +6,11 @@
     data-form-src="scenario_emissions_form"
 >
     <section class="container px-0">
+        {% call data_preamble('emissions') %}
+        <p>Click on the table cells to edit properties.</p>
+        <p>At least one chemical must be selected. For each chemical, at least one compartment must receive an emission value above 0.</p>
+        {% endcall %}
+
         <div class="row mb-1">
             <div class="col-sm">
                 <div data-slot="true" data-target="chemicals" class="d-none">
@@ -93,25 +98,6 @@
         </div>
     </section>
 </form>
-<style>
-    tr.level0 td:first-child, tr.level0 td:nth-child(2), tr.level0 td:nth-child(3) {
-        color: black;
-        background-color: lightgray;
-    }
-    tr.level1 td:nth-child(2), tr.level1 td:nth-child(3){
-        color: black;
-        background-color: darkgray;
-    }
-    tr.level2 td:nth-child(3) {
-        color: black;
-        background-color: #818181;
-    }
-    tr.level0 td:last-child, tr.level1 td:last-child, tr.level2 td:last-child{
-        color: black;
-        background-color: white;
-    }
-
-</style>
 <script>
     onDomLoad(function(e) {
         var form = document.getElementById('emissions-settings-gui');

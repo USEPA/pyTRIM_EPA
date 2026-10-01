@@ -16,7 +16,7 @@
       "data_type": "float",
       "default": 3,
       "tooltip": "(m)",
-      "help": "Enter the thickness of the groundwater layer. Valid values are > 0. The default value of 3 is from Table 3 - Thickness of the aquifer layer from McKone et al. 2001 (Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models). See the TRIM User Guide Appendix for full reference information."
+      "help": "Enter the thickness of the groundwater layer. Valid values are > 0. The default value of 3 is from Table 3 - Thickness of the aquifer layer from McKone et al. 2001 (Development and evaluation of state-specific landscape data sets for multimedia source-to-dose models). See the webTRIM.FaTE User Guide Appendix for full reference information."
     },
     {
       "id": "rho",
@@ -64,7 +64,7 @@
       "data_type": "float",
       "default": 0,
       "tooltip": "1/day",
-      "help": "Enter the methylation rate for divalent mercury (Hg) in the groundwater layer. Valid values are ≥ 0. The default value of 0.001 is the maximum potential rate in flooded soils (humus and peat) under anaerobic conditions from Porvari and Verta 1995 (Methylmercury Production in Flooded Soils: a Laboratory Study), as reported on page B-21 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information."
+      "help": "Enter the methylation rate for divalent mercury (Hg) in the groundwater layer. Valid values are ≥ 0. The default value of 0.001 is the maximum potential rate in flooded soils (humus and peat) under anaerobic conditions from Porvari and Verta 1995 (Methylmercury Production in Flooded Soils: a Laboratory Study), as reported on page B-21 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the webTRIM.FaTE User Guide Appendix for full reference information."
     },
     {
       "id": "ReductionRate_Groundwater",
@@ -72,7 +72,7 @@
       "data_type": "float",
       "default": 0,
       "tooltip": "1/day",
-      "help": "Enter the reduction rate for divalent mercury in the groundwater layer. Valid values are ≥ 0. The default value of 3.25E-06 is the value for soils at a depth of 20 cm and a water content of 10%, calculated based on information from Lindberg 1996 (Forests and the Global Biogeochemical Cycle of Mercury: The Importance of Understanding Air/Vegetation Exchange Processes), and Carpi and Lindberg 1997 (Sunlight-Mediated Emission of Elemental Mercury from Soil Amended with Municipal Sewage Sludge), as reported on page B-20 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information."
+      "help": "Enter the reduction rate for divalent mercury in the groundwater layer. Valid values are ≥ 0. The default value of 3.25E-06 is the value for soils at a depth of 20 cm and a water content of 10%, calculated based on information from Lindberg 1996 (Forests and the Global Biogeochemical Cycle of Mercury: The Importance of Understanding Air/Vegetation Exchange Processes), and Carpi and Lindberg 1997 (Sunlight-Mediated Emission of Elemental Mercury from Soil Amended with Municipal Sewage Sludge), as reported on page B-20 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the webTRIM.FaTE User Guide Appendix for full reference information."
     },
     {
       "id": "OxidationRate_Groundwater",
@@ -80,7 +80,7 @@
       "data_type": "float",
       "default": 0,
       "tooltip": "1/day",
-      "help": "Enter the oxidation rate for elemental mercury in the groundwater layer. Valid values are ≥ 0. The default value of 1E-08 is a small, non-zero value, whereas soil oxidation is shown as 0 in Table B-2 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information."
+      "help": "Enter the oxidation rate for elemental mercury in the groundwater layer. Valid values are ≥ 0. The default value of 1E-08 is a small, non-zero value, whereas soil oxidation is shown as 0 in Table B-2 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the webTRIM.FaTE User Guide Appendix for full reference information."
     },
     {
       "id": "DemethylationRate_Groundwater",
@@ -88,7 +88,7 @@
       "data_type": "float",
       "default": 0,
       "tooltip": "1/day",
-      "help": "Enter the demethylation rate for methyl mercury in the groundwater layer. Valid values are ≥ 0. The default value of 0.06 is the maximum potential rate in flooded soils (humus) under anaerobic conditions from Porvari and Verta 1995 (Methylmercury Production in Flooded Soils: a Laboratory Study), as reported on page B-22 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information."
+      "help": "Enter the demethylation rate for methyl mercury in the groundwater layer. Valid values are ≥ 0. The default value of 0.06 is the maximum potential rate in flooded soils (humus) under anaerobic conditions from Porvari and Verta 1995 (Methylmercury Production in Flooded Soils: a Laboratory Study), as reported on page B-22 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the webTRIM.FaTE User Guide Appendix for full reference information."
     }
   ]
 }

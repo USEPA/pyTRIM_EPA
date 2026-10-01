@@ -22,7 +22,7 @@
             "label": "AERMOD Deposition File",
             "data_type": "file",
             "required": true,
-            "help": "Indicate the AERMOD plotfile (.PLT) output file. It must use the same geographic extent and meteorological scenario being modeled in pyTRIM. It must contain wet and dry deposition estimates.",
+            "help": "Indicate the AERMOD plotfile (.PLT) output file. It must use the same geographic extent and meteorological scenario being modeled in webTRIM.FaTE. It must contain wet and dry deposition estimates.",
             "if_true": ["have_AERMOD_file"]
         },
         {

@@ -16,7 +16,7 @@
       "data_type": "float",
       "default": 6.15e-8,
       "tooltip": "(kg dust/m<sup>3</sup> air)",
-      "help": "Enter the concentration of dust particles in the air compartments. Valid values are >= 0. The default value of 6.15E-08 is the value used for California residential sites by version 1.5 of the CalTOX model (see Table VI of CalEPA 1993 [Parameter Values and Ranges for CalTOX]). See the TRIM User Guide Appendix for full reference information."
+      "help": "Enter the concentration of dust particles in the air compartments. Valid values are >= 0. The default value of 6.15E-08 is the value used for California residential sites by version 1.5 of the CalTOX model (see Table VI of CalEPA 1993 [Parameter Values and Ranges for CalTOX]). See the webTRIM.FaTE User Guide Appendix for full reference information."
     },
     
     {
@@ -25,7 +25,7 @@
       "data_type": "float",
       "default": 1400,
       "tooltip": "(kg/m<sup>3</sup>)",
-      "help": "Enter the density of dust particles in the air compartments. Valid values are >= 0. The default value of 1400 (1.4 g/cm3) is from Page 2 of Bidleman 1988 (Atmospheric processes). See the TRIM User Guide Appendix for full reference information."
+      "help": "Enter the density of dust particles in the air compartments. Valid values are >= 0. The default value of 1400 (1.4 g/cm3) is from Page 2 of Bidleman 1988 (Atmospheric processes). See the webTRIM.FaTE User Guide Appendix for full reference information."
     },
     {
       "id": "AirDensity",
@@ -33,14 +33,14 @@
       "data_type": "float",
       "default": 0.0012,
       "tooltip": "(g/cm<sup>3</sup>)",
-      "help": "Enter the density of air in the air compartments. Valid values are >= 0. The default value of 0.0012 (1.19E-03) is from Table B-1 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information."
+      "help": "Enter the density of air in the air compartments. Valid values are >= 0. The default value of 0.0012 (1.19E-03) is from Table B-1 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the webTRIM.FaTE User Guide Appendix for full reference information."
     },
     {
       "id": "DustParticleOrganicMatter",
       "label": "Fraction Organic Matter of Dust Particles",
       "data_type": "float",
       "default": 0.2,
-      "help": "Enter the fraction organic matter of dust particles in the air compartments. Valid values are 0 to 1. The default value of 0.2 (20%) is from page 1601 of Harner and Bidleman 1998 (Octanol-air partition coefficient for describing particle/gas partitioning of aromatic compounds in urban air). See the TRIM User Guide Appendix for full reference information."
+      "help": "Enter the fraction organic matter of dust particles in the air compartments. Valid values are 0 to 1. The default value of 0.2 (20%) is from page 1601 of Harner and Bidleman 1998 (Octanol-air partition coefficient for describing particle/gas partitioning of aromatic compounds in urban air). See the webTRIM.FaTE User Guide Appendix for full reference information."
     },
     {
       "id": "MethylationRate_Air",
@@ -64,7 +64,7 @@
       "data_type": "float",
       "default": 0,
       "tooltip": "1/day",
-      "help": "Enter the oxidation rate for elemental mercury in the air compartments. Valid values are ≥ 0. The default value of 0.00385 is the low end of the range of half-life values for elemental mercury (6 months to 2 years) from Lindquist and Rodhe 1985 (Atmospheric Mercury: A Review), as reported on page 2-7 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the TRIM User Guide Appendix for full reference information."
+      "help": "Enter the oxidation rate for elemental mercury in the air compartments. Valid values are ≥ 0. The default value of 0.00385 is the low end of the range of half-life values for elemental mercury (6 months to 2 years) from Lindquist and Rodhe 1985 (Atmospheric Mercury: A Review), as reported on page 2-7 of U.S. EPA 1997 (Mercury Study Report to Congress. Volume III: Fate and Transport of Mercury in the Environment). See the webTRIM.FaTE User Guide Appendix for full reference information."
     },
     {
       "id": "DemethylationRate_Air",

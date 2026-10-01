@@ -4,6 +4,20 @@
     data-form-src="scenario_surface_runoff_form"
 >
     <section class="container px-0">
+        <div class="row mb-3">
+            <div class="col">
+                {% call data_preamble('surface_runoff') %}
+                <p>Click on the table cells to edit properties. All editable cells are required.</p>
+                <p>
+                    Recommended to receive site-specific values, if available:
+                    <ul>
+                        <li>All</li>
+                        <li>Note that selecting the <b>Run GetFlow</b> button will retrieve site-specific values.</li>
+                    </ul>
+                </p>
+                {% endcall %}
+            </div>
+        </div>
         <div class="row">
             <div class="col-sm">
                 <div data-slot="true" data-target="default_runoff_matrix_file"></div>
@@ -63,36 +77,12 @@
         </div>
         <div class="row">
             <div class="col-md">
-                <div class="pill pill-alert col-sm">
-                    <small>
-                        <strong>
-                            <u>Click on the table cells to edit properties</u>. 
-                        </strong>
-                        <br><span style='color: firebrick;'>*</span> All editable cells are required. Sink is calculated as 1-(row sum).
-                    </small>
-                </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-md">
                 <table class="hover wrap-text" id="RunoffMatrix">
                 </table>
             </div>
         </div>
     </section>
 </form>
-<script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}">
-</script>
-<script src="{{ url_for('static', filename='js/lib/dataTables/jquery.dataTables.min.js') }}">
-</script>
-<script src="{{ url_for('static', filename='js/lib/dataTables/dataTables.bootstrap4.min.js') }}">
-</script>
-<link rel="stylesheet" href="{{url_for('static', filename='css/form_styles.css')}}"/>
-<style>
-    .text-muted {
-        color: #626262 !important;
-    }
-</style>
 <script>
     onDomLoad(function() {
         var form = document.getElementById('surface-runoff-gui');

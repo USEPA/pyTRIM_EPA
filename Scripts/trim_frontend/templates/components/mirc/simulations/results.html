@@ -399,7 +399,10 @@ onDomLoad(function() {
             shortdesc = $('<div class="d-flex align-items-center" style="gap: 6px" />').appendTo(shortdesc);
             function add_shortdesc(label, text) {
                 $(`<small>${label}:</small>`).appendTo(shortdesc);
-                $('<small class="badge badge-primary-accent px-2 font-weight-normal" style="line-height: 1.1em;" />').text(text).appendTo(shortdesc);
+                $('<small class="badge badge-dark px-2 font-weight-normal" />').css({
+                    lineHeight: '1.1em',
+                    whiteSpace: 'normal',
+                }).text(text).appendTo(shortdesc);
             }
             add_shortdesc("Exposure Profile", meta.exposureProfile?.name);
             add_shortdesc("Date Created", meta.created);
@@ -1327,20 +1330,3 @@ onDomLoad(function() {
     }
 });
 </script>
-
-<style>
-    .kpi-title {
-        min-height: 2.5em;
-        line-height: 1.25;
-    }
-
-    /* Fix bs-popover arrows... */
-    .bs-popover-right > .arrow,
-    .bs-popover-auto[x-placement^="right"]>.arrow {
-        left: calc(0.5rem * -1 + 1px * -1);
-    }
-    .bs-popover-left>.arrow,
-    .bs-popover-auto[x-placement^="left"]>.arrow {
-        right: calc(0.5rem * -1 + 1px * -1);
-    }
-</style>

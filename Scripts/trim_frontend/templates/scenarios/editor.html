@@ -6,6 +6,8 @@
     {{ scenario.name }}
 </h1>
 
+{% from 'macros/scenarios/preamble_macro.html' import data_preamble %}
+
 {% set tabs = [
     {
         'id': 'general-tab',
@@ -156,7 +158,7 @@
                                     role="tabpanel"
                                     aria-labelledby="{{ sub_tab['id'] }}-pill"
                                 >
-                                    <h3 class="text-center pb-3">{{ sub_tab['title'] }}</h3>
+                                    <h3 class="tab-header text-center pb-3">{{ sub_tab['title'] }}</h3>
                                     {% include 'components/scenarios/' + sub_tab['gui'] %}
                                 </div>
                             {% endfor %}
@@ -166,7 +168,7 @@
                                 role="tabpanel"
                                 aria-labelledby="{{ tab['id'] }}-pill"
                             >
-                                <h3 class="text-center pb-3">{{ tab['title'] }}</h3>
+                                <h3 class="tab-header text-center pb-3">{{ tab['title'] }}</h3>
                                 {% include 'components/scenarios/' + tab['gui'] %}
                             </div>
                         {% endif %}

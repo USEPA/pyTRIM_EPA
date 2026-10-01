@@ -1,5 +1,14 @@
 <form id="parcels-gui" data-async-form="true" data-form-src="scenario_parcels_form">
     <section class="container px-0">
+        {% call data_preamble('parcels') %}
+        <p>Click on the table cells to edit properties. All editable cells are required.</p>
+        <p>
+            Parcels can either be drawn on the map or loaded from an input file. 
+            For uploading .geojson files, the <span class="UpArrowBar" style="font-size: 1.5em;">⤒</span> button on the map
+            can be used in addition to the <span class="text-secondary">Load Parcels from File</span> form.
+        </p>
+        {% endcall %}
+
         <div class="accordion mb-3">
             <div id="parcelUploadHeading" class="border-bottom">
                 <h2 class="mb-0">
@@ -143,13 +152,6 @@
         </div>
         <div class="row">
             <div class="col-md">
-                <div class="pill pill-alert col-sm">
-                    <small>
-                        <strong>
-                            <u>Click on the table cells to edit properties</u>.
-                        </strong>
-                    </small>
-                </div>
                 <table data-slot="true" data-target="mapTable" class="hover wrap-text" id="mapTable"></table>
             </div>
         </div>
@@ -198,15 +200,8 @@
         </div>
     </section>
 </form>
-<link rel="stylesheet" href="{{url_for('static', filename='css/form_styles.css')}}" />
 <link rel="stylesheet" href="{{url_for('static', filename='css/custom_icons.css')}}" />
 <link rel="stylesheet" href="{{url_for('static', filename='css/lib/leaflet.measurecontrol.css')}}" />
-<script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}">
-</script>
-<script src="{{ url_for('static', filename='js/lib/dataTables/jquery.dataTables.min.js') }}">
-</script>
-<script src="{{ url_for('static', filename='js/lib/dataTables/dataTables.bootstrap4.min.js') }}">
-</script>
 <script src="{{ url_for('static', filename='js/lib/FileSaver.min.js') }}">
 </script>
 <script src="{{ url_for('static', filename='js/lib/leaflet.shpfile.js') }}">
