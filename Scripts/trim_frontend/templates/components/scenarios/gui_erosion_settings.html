@@ -44,13 +44,6 @@
         </div>
     </section>
 </form>
-<link rel="stylesheet" href="{{url_for('static', filename='css/form_styles.css')}}"/>
-<script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}">
-</script>
-<script src="{{ url_for('static', filename='js/lib/dataTables/jquery.dataTables.min.js') }}">
-</script>
-<script src="{{ url_for('static', filename='js/lib/dataTables/dataTables.bootstrap4.min.js') }}">
-</script>
 <script>
     onDomLoad(function (e) {
         $('[data-toggle="tooltip"]').tooltip()
@@ -1204,43 +1197,4 @@
         return erosion;
     })(window.ErosionForm || {});
 </script>
-<style>
-    table { 
-        white-space: nowrap;
-    }
-    .td_ER {
-        background-color: #f8caca80;
-    }
-    td.td_ASD {
-        background-color: #e9ecef80;
-    }
-    td.td_LS {
-        background-color: #fcf8e380;
-    }
-    .lds-dual-ring {
-        display: inline-block;
-        width: 12px;
-        height: 12px;
-    }
-    .lds-dual-ring:after {
-        content: " ";
-        display: block;
-        width: 16px;
-        height: 16px;
-        margin: 4px;
-        border-radius: 50%;
-        border: 2px solid #fd0000;
-        border-color: #fd0000 transparent #fd0000 transparent;
-        animation: lds-dual-ring 1.2s linear infinite;
-    }
-    @keyframes lds-dual-ring {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-</style>
 {% endblock content %}

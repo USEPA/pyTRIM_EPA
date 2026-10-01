@@ -118,8 +118,7 @@
         </div>
     {% endif %}
 </form>
-<script src="{{url_for('static', filename='js/mirc.js')}}">
-</script>
+<script src="{{url_for('static', filename='js/mirc.js')}}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     function toggleCollapse() {
@@ -354,15 +353,3 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 {% endif %}
-
-<style>
-    /* Fix bs-popover arrows... */
-    .bs-popover-right > .arrow,
-    .bs-popover-auto[x-placement^="right"]>.arrow {
-        left: calc(0.5rem * -1 + 1px * -1);
-    }
-    .bs-popover-left>.arrow,
-    .bs-popover-auto[x-placement^="left"]>.arrow {
-        right: calc(0.5rem * -1 + 1px * -1);
-    }
-</style>
