@@ -1,7 +1,7 @@
 <div class="container px-0 mb-3">
     <div class="row mx-3 justify-content-end">
         <a href="{{ url_for('mirc_scenario.view_risk_scenarios') }}"
-            class="btn btn-sm mb-1 btn-outline-secondary text-dark"
+            class="btn btn-sm mb-1 btn-outline-warning text-dark"
             target="_blank" tabindex="0"
         >
             <i class="fa fa-pencil-alt"></i>
@@ -24,6 +24,9 @@
 
 <script>
 onDomLoad(function() {
+    var form = $('#simulation-form');
+    var simulationFormModal = $('#simulation-form-modal');
+
     window.MIRC = (function(mirc) {
 
         mirc.showSimulationForm = function(withData) {
@@ -33,19 +36,17 @@ onDomLoad(function() {
                     TRIM.store.mirc_data = this.responseJSON.trim_data;
                     initSimulationForm(withData);
                     LoadingScreen.hide('loadMircData');
-                    $('#simulation-form-modal').modal('show');
+                    simulationFormModal.modal('show');
                 });
             }
             else {
                 initSimulationForm(withData);
-                $('#simulation-form-modal').modal('show');
+                simulationFormModal.modal('show');
             }
         }
 
         function initSimulationForm(withData) {
             updateSimulationTrimFields();
-
-            var form = $('#simulation-form');
 
             form.find('[name$="ingestion_percentile_preset"]').prop('checked', false);
             form.find('[name$="trim_timestamp"]').val(form.find('[name$="trim_timestamp"]').find('option:last-child').val());
@@ -72,7 +73,7 @@ onDomLoad(function() {
             if (chem != undefined) {
                 form.find('[name="chemical"]').val(chem.id);
             }
-            
+
             function getPercentile(name) {
                 return withData.meta?.percentiles[name];
             }
@@ -125,43 +126,43 @@ onDomLoad(function() {
             }
 
             var air = getParameter('Ca');
-            setSelectByText('trim_air_compartment', air.source);
+            setSelectByText('trim_air_compartment', air?.source);
 
             var water = getParameter('C_water');
-            setSelectByText('trim_water_compartment', water.source);
+            setSelectByText('trim_water_compartment', water?.source);
 
             var soil = getParameter('C_soil');
-            setSelectByText('trim_soil_human_compartment', soil.source);
+            setSelectByText('trim_soil_human_compartment', soil?.source);
 
             var root_veg = getParameter('C_root_veg');
-            setSelectByText('trim_soil_garden_compartment', root_veg.source);
+            setSelectByText('trim_soil_garden_compartment', root_veg?.source);
 
             var livestock = getParameter('Cs_s');
-            setSelectByText('trim_soil_livestock_compartment', livestock.source);
+            setSelectByText('trim_soil_livestock_compartment', livestock?.source);
 
             var feed = getParameter('Cs_root_zone');
-            setSelectByText('trim_soil_root_compartment', feed.source);
+            setSelectByText('trim_soil_root_compartment', feed?.source);
 
             var drdp = getParameter('Drdp');
-            setSelectByText('trim_soil_drdp_compartment', drdp.source);
+            setSelectByText('trim_soil_drdp_compartment', drdp?.source);
 
             var drwp = getParameter('Drwp');
-            setSelectByText('trim_soil_drwp_compartment', drwp.source);
+            setSelectByText('trim_soil_drwp_compartment', drwp?.source);
 
             var fishPathway = withData.meta?.fishPathway;
             if ((fishPathway || '').toLowerCase() == 'direct') {
                 form.find('[name="fish_factor"][value="direct"]').prop('checked', true).change();
                 var tl35 = getParameter('tl35');
-                setSelectByText('trim_fish_tl35_compartment', tl35.source);
+                setSelectByText('trim_fish_tl35_compartment', tl35?.source);
                 var tl4 = getParameter('tl4');
-                setSelectByText('trim_fish_tl4_compartment', tl4.source);
+                setSelectByText('trim_fish_tl4_compartment', tl4?.source);
             }
             else {
                 form.find('[name="fish_factor"][value="baf"]').prop('checked', true).change();
                 var sed = getParameter('C_sed');
-                setSelectByText('trim_sed_compartment', sed.source);
+                setSelectByText('trim_sed_compartment', sed?.source);
                 var surf = getParameter('C_surf_water');
-                setSelectByText('trim_surf_compartment', surf.source);
+                setSelectByText('trim_surf_compartment', surf?.source);
             }
         }
 
@@ -619,18 +620,7 @@ onDomLoad(function() {
 
                             var cardHeader = $('<div class="card-header p-0 bg-transparent" />').appendTo(card);
 
-                            // var actions = $('<div class="float-right" />').appendTo(cardHeader);
-                            // var cloneBtn = $('<a href="#clone-simulation" class="simulation-btn ml-2 text-dark" title="Clone" />')
-                            //     .data({'action': 'clone', 'simulation_id': sim.id})
-                            //     .append($('<i class="fa fa-clone" />'))
-                            //     .appendTo(actions);
-                            // var deleteBtn = $('<a href="#delete-simulation" class="simulation-btn ml-2 text-danger" title="Delete" />')
-                            //     .data({'action': 'delete', 'simulation_id': sim.id})
-                            //     .append($('<i class="fa fa-trash" />'))
-                            //     .appendTo(actions);
-
-                            // d-block h5 mb-0 px-3 py-2 text-dark text-decoration-none
-                            var title = $('<a href="#" class="simulation-btn d-block btn btn-lg btn-outline-light text-left text-dark rounded-0 border-0" title="View Simulation" />')
+                            var title = $('<a href="#" class="simulation-btn d-block btn btn-lg btn-outline-light text-dark text-left rounded-0 border-0" title="View Simulation" />')
                                 .data({'action': 'view', 'simulation_id': sim.id})
                                 .appendTo(cardHeader);
 
@@ -643,7 +633,8 @@ onDomLoad(function() {
                             var cardCol = $('<div class="col" />').appendTo(cardRow);
                             $('<small class="mb-1">Exposure Profile: </small>')
                                 .append(
-                                    $(`<a href="${profileViewUrl.replace('/0', '/' + sim.exposureProfile.id)}" target="_blank" tabindex="0" />`)
+                                    $(`<a href="${profileViewUrl.replace('/0', '/' + sim.exposureProfile.id)}" target="_blank" class="text-secondary" tabindex="0" />`)
+                                        .css({fontWeight: 500})
                                         .text(sim.exposureProfile.name)
                                 )
                                 .appendTo(cardCol);
@@ -651,7 +642,7 @@ onDomLoad(function() {
                             cardRow = $('<div class="row p-0" />').appendTo(cardBody);
                             cardCol = $('<div class="col" />').appendTo(cardRow);
                             $('<small class="mb-0" />')
-                                .html(`Primary Pathway (LADD): <span class="${sim.primaryPathway ? 'text-danger' : 'text-muted'}">${sim.primaryPathway || 'None'}</span>`)
+                                .html(`Primary Pathway (LADD): <span class="${sim.primaryPathway ? 'text-danger' : 'text-muted'}" style="font-weight: 500;">${sim.primaryPathway || 'None'}</span>`)
                                 .appendTo(cardCol);
 
                             cardRow = $('<div class="row p-0" />').appendTo(cardBody);
@@ -764,6 +755,16 @@ onDomLoad(function() {
 
     $('#submit-simulation-form').click(function(e) {
         e.preventDefault();
+        if (!form[0].checkValidity()) {
+            return;
+        }
+        var tl35 = $('#f_tl35');
+        var tl4 = $('#f_tl4');
+        if (parseFloat(tl35.val()) + parseFloat(tl4.val()) != 1) {
+            tl4[0].setCustomValidity('Consumption fractions must sum to 1.');
+            tl4[0].reportValidity();
+            return;
+        }
         LoadingScreen.show('saveSimulation');
         window.MIRC.submitSimulationForm() // defined in gui_simulation_form.html
             .done(function(data) {
@@ -776,6 +777,7 @@ onDomLoad(function() {
                 }
             })
             .always(function() {
+                simulationFormModal.modal('hide');
                 LoadingScreen.hide('saveSimulation');
             });
     });

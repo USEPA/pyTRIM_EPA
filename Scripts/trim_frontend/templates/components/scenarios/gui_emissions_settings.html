@@ -8,7 +8,7 @@
     <section class="container px-0">
         <div class="row mb-1">
             <div class="col-sm">
-                <div data-slot="true" data-target="chemicals">
+                <div data-slot="true" data-target="chemicals" class="d-none">
                     <div class="row mb-1">
                         <div class="col-sm">
                             <h5>Chemical Name:</h5><h6><span class="chemInfo"></span></h6>
@@ -54,11 +54,11 @@
                                     <div class="col-sm">
                                         <!-- <div data-slot="true" data-target="location"></div>
                                     </div> -->
-                                        <button class="comp_show_all btn btn-warning">Show All</button>
-                                        <button class="comp_hide_all btn btn-warning">Hide All</button>
-                                        <button class="comp_show_nz btn btn-outline-success">Show Non-Zero</button>
+                                        <button class="comp_show_all btn btn-secondary">Show All</button>
+                                        <button class="comp_hide_all btn btn-secondary">Hide All</button>
+                                        <button class="comp_show_nz btn btn-outline-dark">Show Non-Zero</button>
                                         <div class="dropdown d-inline">
-                                            <button class="btn_show_emission_comp btn btn-outline-success dropdown-toggle" type="button" data-toggle="dropdown">
+                                            <button class="btn_show_emission_comp btn btn-outline-dark dropdown-toggle" type="button" data-toggle="dropdown">
                                                 Show Compartment
                                             </button>
                                             <div class="dropdown-menu">
@@ -144,7 +144,7 @@
             $(form).find("a[id*=_emission_upload_button]").attr({
                 'tabindex': '0',
                 'role': 'link'
-            });
+            }).removeClass('btn-secondary').addClass('btn-outline-dark').css('cursor', 'pointer');
             console.log('populated emissions form!')
             LoadingScreen.hide('emissions_loading');
         }

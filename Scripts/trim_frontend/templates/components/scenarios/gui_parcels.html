@@ -3,9 +3,12 @@
         <div class="accordion mb-3">
             <div id="parcelUploadHeading" class="border-bottom">
                 <h2 class="mb-0">
-                    <button class="btn btn-link btn-block text-right text-decoration-none" type="button"
-                        data-toggle="collapse" data-target="#parcelUploadForm" aria-expanded="false"
-                        aria-controls="parcelUploadForm">
+                    {# "btn-secondary bg-transparent border-0 text-secondary" allows a nice border on tabbing #}
+                    <button type="button"
+                        class="btn btn-block btn-secondary bg-transparent border-0 text-secondary text-right"
+                        data-toggle="collapse" data-target="#parcelUploadForm"
+                         aria-expanded="false" aria-controls="parcelUploadForm"
+                    >
                         <i class="fa fa-chevron-down mr-2"></i>Load Parcels from File
                     </button>
                 </h2>
@@ -47,9 +50,12 @@
         <div class="accordion mb-3">
             <div id="depositionOverlayHeading" class="border-bottom">
                 <h2 class="mb-0">
-                    <button class="btn btn-link btn-block text-right text-decoration-none" type="button"
-                        data-toggle="collapse" data-target="#depositionOverlayForm" aria-expanded="false"
-                        aria-controls="depositionOverlayForm">
+                    {# "btn-secondary bg-transparent border-0 text-secondary" allows a nice border on tabbing #}
+                    <button type="button"
+                        class="btn btn-block btn-secondary bg-transparent border-0 text-secondary text-right"
+                        data-toggle="collapse" data-target="#depositionOverlayForm"
+                        aria-expanded="false" aria-controls="depositionOverlayForm"
+                    >
                         <i class="fa fa-chevron-down mr-2"></i>Deposition Overlay
                     </button>
                 </h2>
@@ -82,7 +88,7 @@
                             <!--Uploaded PLT file-->
                             <div class="col ml-2">
                                 <div id="deposition-overlay-current-file" class="text-right" style="display:none;">
-                                    <a id="deposition-overlay-delete-btn" href="#" class="btn btn-dark">
+                                    <a id="deposition-overlay-delete-btn" href="#" class="btn btn-outline-dark">
                                         <i class="fas fa-trash mr-1"></i>
                                         Delete <span id="deposition-overlay-current-filename" class="text-break"></span>
                                     </a>
@@ -148,8 +154,8 @@
             </div>
         </div>
         <div class="row">
-            <fieldset class="mt-2">
-                <legend>AERMOD Receptors</legend>
+            <fieldset class="mt-2 px-3 rounded-lg">
+                <legend class="text-center">AERMOD Receptors</legend>
                 <div class="row mb-1">
                     <div class="col-sm">
                         <p>
@@ -167,18 +173,23 @@
                             right of the page
                             and again turn on the display in the map’s basemap selection box.
                         </p>
-                        <a id="generate_aermod_receptors_btn" role="link" style="cursor:pointer" tabindex="0"
-                            class="btn btn-secondary">Generate AERMOD Receptors</a>
+                        <div class="text-center mb-1">
+                            <a id="generate_aermod_receptors_btn" role="link" style="cursor: pointer;" tabindex="0"
+                                class="btn btn-secondary"
+                            >
+                                Generate AERMOD Receptors
+                            </a>
+                        </div>
                     </div>
                 </div>
-                <div class="row mb-1 mt-3" id="aermod-receptors-current-file" style="display: none;">
-                    <div class="errors">
-                    </div>
-                    <div class="col-sm">
-                        <a id="aermod-receptors-download-geojson-btn" target="_blank" href="#" class="btn btn-dark">
+                <div class="row mb-2 mt-2" id="aermod-receptors-current-file" style="display: none;">
+                    <div class="col-sm text-center">
+                        <div class="errors mb-1">
+                        </div>
+                        <a id="aermod-receptors-download-geojson-btn" target="_blank" href="#" class="btn btn-outline-dark">
                             <i class="fas fa-download mr-1"></i>Download geojson
                         </a>
-                        <a id="aermod-receptors-download-aermod-btn" target="_blank" href="#" class="btn btn-dark">
+                        <a id="aermod-receptors-download-aermod-btn" target="_blank" href="#" class="btn btn-outline-dark">
                             <i class="fas fa-download mr-1"></i>Download AERMOD input
                         </a>
                     </div>
@@ -256,6 +267,7 @@ onDomLoad(function () {
             LoadingScreen.show('parcel_gui_loading');
         }
         console.log('parcels gui visible')
+        loadOverlay();
         populateParcelsGui();
     });
 
@@ -334,7 +346,7 @@ onDomLoad(function () {
                     }
                 });
 
-                mapLayers.addOverlay(receptorOverlayGroup, "AERMOD Receptors");
+                mapLayers?.addOverlay(receptorOverlayGroup, "AERMOD Receptors");
             }
             else {
                 // I don't think this'll ever actually happen
@@ -434,7 +446,7 @@ onDomLoad(function () {
                     depositionOverlayGroup.addTo(map); // preselects it in the layers control!
                 });
 
-                mapLayers.addOverlay(depositionOverlayGroup, "Deposition");
+                mapLayers?.addOverlay(depositionOverlayGroup, "Deposition");
             } else {
                 $("#dep-file-errors").closest('.row').show();
                 $("<b/>").html(`Errors with ${responseData.file_metadata?.original_file_name}`).appendTo(errorDisplayArea);
@@ -1296,21 +1308,47 @@ onDomLoad(function () {
         depoOverlayCoordsSystem.on('change', onUploadCoordinateSystemChanged);
         onUploadCoordinateSystemChanged();
 
-        parcelUploader.on('click', function () {
-            let parcelFileData = parcelFile.prop('files')[0];
+        function uploadGeoJSON(file) {
+            // setting up the reader
+            var reader = new FileReader();
+            reader.readAsText(file, 'UTF-8');
 
-            if (parcelFileData == undefined) {
-                alert('Please select a file to upload.');
-                return false;
-            } else if (coordsSystem.val() == "UTM") {
-                if (!isValidUtmZone(utmZone.val())) {
-                    alert('Please enter a valid UTM zone (e.g. 16N, etc.).');
-                    return false;
-                }
+            // here we tell the reader what to do when it's done reading...
+            reader.onload = readerEvent => {
+                var fileContent = readerEvent.target.result; // this is the content!
+                shapesJson = JSON.parse(fileContent);
+
+                let fieldData = [{
+                    "type": "input",
+                    "name": "geojson",
+                    "value": JSON.stringify(shapesJson["features"])
+                }];
+
+                fieldData.push({
+                    "type": "input",
+                    "name": "scenario_id",
+                    "value": TRIM.store.currentScenario.id
+                });
+
+                LoadingScreen.show('upload_parcel_geojson');
+                TRIM.api.uploadParcelFile(fieldData, function (success, responseData, c) {
+                    LoadingScreen.hide('upload_parcel_geojson');
+
+                    if (!success) {
+                        //alert('An error occurred during upload.');
+                        alert(responseData?.message)
+                        console.log(responseData)
+                        console.log(c)
+                    } else {
+                        console.log("reload...");
+                        window.location.reload();
+                    }
+                });
             }
+        }
 
-            // if we made it here, we're good to submit to server
-            let fieldData = [parcelFile.get(0)];
+        function uploadCSV(file, coordsSystem, utmZone) {
+            let fieldData = [file];
 
             fieldData.push({
                 "type": "input",
@@ -1321,13 +1359,13 @@ onDomLoad(function () {
             fieldData.push({
                 "type": "input",
                 "name": "coord_system",
-                "value": coordsSystem.val()
+                "value": coordsSystem
             });
 
             fieldData.push({
                 "type": "input",
                 "name": "utm_zone",
-                "value": coordsSystem.val() == "UTM" ? utmZone.val() : "n/a"
+                "value": coordsSystem == "UTM" ? utmZone : "n/a"
             });
 
             LoadingScreen.show('upload_parcel_csv');
@@ -1341,7 +1379,44 @@ onDomLoad(function () {
                 }
                 window.location.reload();
             });
+        }
+
+        parcelUploader.on('click', function (e) {
+            e.preventDefault();
+
+            // getting a hold of the file reference
+            let parcelFileData = parcelFile.get(0);
+
+            if (parcelFileData == undefined) {
+                alert('Please select a file to upload.');
+                return false;
+            }
+            else if (coordsSystem.val() == "UTM") {
+                if (!isValidUtmZone(utmZone.val())) {
+                    alert('Please enter a valid UTM zone (e.g. 16N, etc.).');
+                    return false;
+                }
+            }
+
+            const file = parcelFileData.files[0]
+
+            // if we made it here, we're good to submit to server
+            if (file.name.toLowerCase().split('.').pop() == "geojson") {
+                uploadGeoJSON(file);
+            }
+            else if (file.name.toLowerCase().split('.').pop() == 'csv') {
+                uploadCSV(parcelFileData, coordsSystem.val(), utmZone.val());
+            }
+            else {
+                parcelFile[0].setCustomValidity('Invalid file type: must be CSV or GEOJSON.');
+                parcelFile[0].reportValidity();
+            }
+
             return false;
+        });
+
+        parcelFile.on('change', function() {
+            this.setCustomValidity(''); // clear custom error
         });
 
         overlayDeleter.on('click', function () {
@@ -1425,6 +1500,9 @@ onDomLoad(function () {
     }
 
     function drawAllParcels() {
+        if (map == null) {
+            return;
+        }
         TRIM.forms.populate(form, TRIM.store.currentScenario);
         if (DREW_MAP) {
             return;
@@ -1440,6 +1518,7 @@ onDomLoad(function () {
             setTimeout(loadOverlay, 1000);
             return;
         }
+        setTimeout(function () { map?.invalidateSize() }, 1000);
         TRIM.api.checkMiscScenarioFile(TRIM.store.currentScenario.id, "deposition_overlay", function (success, responseData) {
             LoadingScreen.hide('check_overlay_status');
 
@@ -1466,10 +1545,6 @@ onDomLoad(function () {
         catch (err) {
             console.log(TRIM.store.currentScenario.parcels, err);
         }
-    });
-
-    document.body.addEventListener('parcels:ready', function () {
-        loadOverlay();
     });
 
     document.body.addEventListener('parcels:ready', function () {
@@ -1960,10 +2035,6 @@ onDomLoad(function () {
         });
         return myRows
     }
-
-    $(window).on('load', function () {
-        setTimeout(function () { map.invalidateSize() }, 2000)
-    })
 
     function enableFieldUpdates() {
         var gui = $('#parcels-gui');

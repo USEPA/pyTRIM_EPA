@@ -17,7 +17,7 @@
             </div>
             <div class="col-sm text-right">
                 <div class="btn-group" id="btn_download_dd" style="display: none;">
-                    <button class="btn btn-secondary dropdown-toggle"
+                    <button class="btn btn-dark py-1 dropdown-toggle"
                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
                     >
                         <span class="mr-1">
@@ -37,7 +37,7 @@
                             Transfer Matrix
                         </a>
                         {% endif %}
-                        <a id="btn_mirc_export" href="mirc-export" class="dropdown-item">
+                        <a id="btn_mirc_export" href="mirc-export" class="dropdown-item" style="display: none !important;">
                             JSON Data for MIRC
                         </a>
                     </div>
@@ -100,7 +100,7 @@
                 <div class="row">
                     <div class="col-sm">
                         <div id="plt_type" class="dropdown d-inline w-100">
-                            <button class="btn btn-outline-success dropdown-toggle w-100" data-toggle="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle w-100" data-toggle="dropdown">
                                 Plot Type
                             </button>
                             <div class="dropdown-menu" style="cursor: pointer;">
@@ -119,7 +119,7 @@
                 <div class="row">
                     <div class="col-sm">
                         <div id="plt_comp" class="dropdown d-inline w-100">
-                            <button class="btn btn-outline-success dropdown-toggle w-100" data-toggle="dropdown" selected="selected">
+                            <button class="btn btn-outline-secondary dropdown-toggle w-100" data-toggle="dropdown" selected="selected">
                                 Compartment
                             </button>
                             <div class="dropdown-menu px-1">
@@ -131,7 +131,7 @@
                             </div>
                         </div>
                         <div id="plt_ve" class="dropdown w-100" style="display: none;">
-                            <button class="btn btn-outline-success dropdown-toggle w-100" data-toggle="dropdown" selected="selected">
+                            <button class="btn btn-outline-secondary dropdown-toggle w-100" data-toggle="dropdown" selected="selected">
                                 Volume Element
                             </button>
                             <div class="dropdown-menu px-1">
@@ -150,7 +150,7 @@
                 <div class="row">
                     <div class="col-sm">
                         <div id="plt_chem" class="dropdown d-inline w-100">
-                            <button class="btn btn-outline-success dropdown-toggle w-100" data-toggle="dropdown">
+                            <button class="btn btn-outline-secondary dropdown-toggle w-100" data-toggle="dropdown">
                                 Chemical
                             </button>
                             <div class="dropdown-menu" style="cursor: pointer;">
@@ -506,7 +506,9 @@
                 $("#div_comp_pill").find("h5").each((i,e)=> existing_sel_comps.push($(e).text().trim()))
                 let this_comp = $(this).text().trim()
                 if (existing_sel_comps.indexOf(this_comp) == -1) {
-                    $("#div_comp_pill").append(`<h5 class="d-inline ml-2"><span class="badge badge-warning">${$(this).text()}</span></h5>`)
+                    $("#div_comp_pill").append(
+                        `<h5 class="d-inline ml-2"><span class="badge badge-primary-accent py-1 px-2" style="font-size: 0.8rem; font-weight: 500;">${$(this).text()}</span></h5>`
+                    );
                     $(this).css("background-color","coral")
                 } else {
                     $(this).css("background-color","transparent")
@@ -530,7 +532,7 @@
                 $("#div_ve_pill").find("h5").each((i,e)=> existing_sel_ves.push($(e).text().trim()))
                 let this_ve = $(this).text().trim()
                 if (existing_sel_ves.indexOf(this_ve) == -1) {
-                    $("#div_ve_pill").append(`<h5 class="d-inline ml-2"><span class="badge badge-warning">${$(this).text()}</span></h5>`)
+                    $("#div_ve_pill").append(`<h5 class="d-inline ml-2"><span class="badge badge-primary-accent py-1 px-2" style="font-size: 0.8rem; font-weight: 500;">${$(this).text()}</span></h5>`)
                     $(this).css("background-color","coral")
                 } else {
                     $(this).css("background-color","transparent")

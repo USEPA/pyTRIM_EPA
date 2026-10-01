@@ -25,10 +25,13 @@
                 </div>
             </div>-->
             <div class="col-md">
-                <div class="row">
+                <div class="row mt-2">
                     <div class="col-md align-content-center justify-content-center">
                         <div class="text-center">
-                            <a href="#" id="export_runoff_matrix" class="btn btn-warning" style="cursor: pointer;"><i class="fa fa-file-download"></i>&nbsp;Export Matrix</a>
+                            <a href="#" id="export_runoff_matrix" class="btn btn-sm btn-dark" style="cursor: pointer;">
+                                <i class="fa fa-file-download mr-1"></i>
+                                Export Matrix
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -37,22 +40,25 @@
                 <div class="row">
                     <div class="col-md align-content-center justify-content-center">
                         <div class="text-center">
-                            <button id="run_getflow" class="btn btn-warning">Run GetFlow</button>
+                            <button id="run_getflow" class="btn btn-sm btn-outline-warning text-dark">
+                                <i class="fa fa-water mr-2"></i>
+                                Run GetFlow
+                            </button>
                         </div>
                     </div>
                 </div>
-                <div class="row">
+                <div class="row mt-1">
                     <div class="col-md">
-                        <div class="text-center">
+                        <div class="text-center text-dark">
                             <small>Auto-calculate runoff values and populate the matrix below</small>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="row">
+        <div id="getflow-status" class="row mt-2" style="display: none;">
             <div class="col-md">
-                <div class="alert" id="getflow-status"></div>
+                <div class="alert"></div>
             </div>
         </div>
         <div class="row">
@@ -364,7 +370,8 @@
 
         $("#run_getflow").on('click', function (e) {
             let rowWithButton = $("form#surface-runoff-gui section.container div.row:eq(1)");
-            let getflowStatusArea = $("#getflow-status");
+            let getflowStatusRow = $("#getflow-status").hide();
+            let getflowStatusAlert = getflowStatusRow.find('.alert');
 
             // setup the code for polling
             let executionArn = "";
@@ -374,26 +381,30 @@
             function toggleBtnState(disable) {
                 $(e.target).attr('disabled', disable);
                 if (disable) {
-                    $(e.target).html(`<span><label class="lds-dual-ring mr-3"></label></span>Starting GetFlow...`);
+                    $(e.target).html(`<i class="lds-dual-ring mr-3" style="margin-top: -2px;"></i>Starting GetFlow...`);
                 }
                 else {
-                    $(e.target).html('Run GetFlow');
+                    $(e.target).html('<i class="fa fa-water mr-2"></i>Run GetFlow');
                 }
             };
             toggleBtnState(true);
 
-            function loggingHtml(statusArea, statusType, logs) {
+            function loggingHtml(statusType, logs) {
                 if (logs && logs.length > 0) {
                     let logs_str = "";
-                    statusArea.addClass(`alert-${statusType}`);
-                    $(`<textarea readonly class="form-control-plaintext mt-2" id="getflow-logs" rows="8">`).appendTo(statusArea);
+                    getflowStatusAlert.addClass(`alert-${statusType}`);
                     for (let i = 0 ; i < logs.length ; i++) {
                         let timestamp = new Date(logs[i].timestamp).toLocaleString();
                         logs_str += `[${timestamp}] ${logs[i]?.message}\n`;
                     }
-                    let debugZone = $('#getflow-logs');
-                    debugZone.val(logs_str);
-                    debugZone.scrollTop(debugZone[0].scrollHeight - debugZone.height());                   
+                    getflowStatusRow.hide();
+                    let debugZone = $(`<textarea readonly class="form-control-plaintext mt-2" id="getflow-logs" rows="8">`)
+                        .appendTo(getflowStatusAlert)
+                        .val(logs_str);
+                    if (logs_str.length) {
+                        getflowStatusRow.show();
+                        debugZone.scrollTop(debugZone[0].scrollHeight - debugZone.height());
+                    }
                 }
             }
 
@@ -402,21 +413,21 @@
                 TRIM.api.checkGetflowStatus(executionArn, function (success, data) {
                     console.log(data);
 
-                    getflowStatusArea.html("");
-                    getflowStatusArea.removeClass((index, className) => {
+                    getflowStatusAlert.html("");
+                    getflowStatusAlert.removeClass((index, className) => {
                         return (className.match(/(^|\s)alert-\S+/g) || []).join(' ');
                     });
 
                     if (data.status == "SUCCEEDED") {
-                        getflowStatusArea.html("<b>Run complete!</b>");
+                        getflowStatusAlert.html("<b>Run complete!</b>");
                         clearInterval(keepCheckingId);
                         toggleBtnState(false);
 
-                        $("<a/>").addClass('ml-3 btn btn-link text-dark')
+                        $("<a/>").addClass('ml-3 btn btn-link text-dark float-right')
                             .attr("href", data.output.presigned_urls[1])
                             .html(`<i class="fa fa-download mr-2"></i>Download percent flow matrix`)
-                            .appendTo(getflowStatusArea);
-                        loggingHtml(getflowStatusArea, 'success', data.logs);
+                            .appendTo(getflowStatusAlert);
+                        loggingHtml('success', data.logs);
                         
                         // update table
                         LoadingScreen.show('surface_runoff_loading');
@@ -426,12 +437,14 @@
                             TRIM.forms.populate(form, TRIM.store.currentScenario.runoff_matrix);
                             renderRunoffForm();
                         });
-                    } else if (data.status == "FAILED" || data.status == "TIMED_OUT" || data.status == "ABORTED") {
-                        getflowStatusArea.html(`<b>Run status: ${data.status}</b>`);
+                    }
+                    else if (data.status == "FAILED" || data.status == "TIMED_OUT" || data.status == "ABORTED") {
+                        getflowStatusAlert.html(`<b>Run status: ${data.status}</b>`);
                         clearInterval(keepCheckingId);
                         toggleBtnState(false);
-                        loggingHtml(getflowStatusArea, 'danger', data.logs);
-                    } else {
+                        loggingHtml('danger', data.logs);
+                    }
+                    else {
                         TRIM.store.currentScenario.getflow_timestamp = TRIM.store.currentScenario?.getflow_timestamp || new Date().getTime();
                         let time_elapsed = new Date().getTime() - TRIM.store.currentScenario?.getflow_timestamp;
                         let seconds = Math.floor(time_elapsed / 1000);
@@ -440,26 +453,28 @@
                         minutes = minutes % 60;
 
                         const pad = (n) => String(n).padStart(2, '0');
-                        $('#run_getflow').html(`<span><label class="lds-dual-ring mr-3"></label></span>GetFlow Running... (${pad(minutes)}:${pad(seconds)})`);
+                        $('#run_getflow').html(`<i class="lds-dual-ring mr-3" style="margin-top: -2px;"></i>GetFlow Running... (${pad(minutes)}:${pad(seconds)})`);
                         
                         if (data.logs && data.logs.length > 0) {
-                            getflowStatusArea.html("<b>GetFlow logs</b>");
+                            getflowStatusAlert.html("<b>GetFlow logs</b>");
                         }
-                        loggingHtml(getflowStatusArea, 'warning', data.logs);
+                        loggingHtml('warning', data.logs);
                     }
                 });
             };
 
             console.log("getflow kickoff (gui_surface_runoff.html)!");
             TRIM.api.runGetFlow(TRIM.store.currentScenario.id, function (success, data) {
-                console.log(data);
+                // console.log(data)
                 executionArn = data["executionArn"];
-                console.log("start polling for '" + executionArn + "'");
+                // console.log("start polling for '" + executionArn + "'")
+                console.log('start polling getflow ...') // don't log the actual ARN in production
 
                 if (data.error) {
-                    getflowStatusArea.addClass("alert-danger");
-                    getflowStatusArea.html(`<b>Error starting Getflow:</b> ${data.error}`);
+                    getflowStatusAlert.addClass("alert-danger");
+                    getflowStatusAlert.html(`<b>Error starting Getflow:</b> ${data.error}`);
                     toggleBtnState(false);
+                    getflowStatusRow.show();
                     return;
                 }
                 keepCheckingId = setInterval(keepChecking, 15000);

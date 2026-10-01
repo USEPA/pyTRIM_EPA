@@ -1,4 +1,9 @@
 // Theme colors
+$epa-green:     #4d8055;
+$epa-yellow:    #ffbe2e;
+$epa-blue:      #005ea2;
+$epa-dark-blue: #1a4480;
+
 $icf-orange:    #f29934;
 $icf-brown:     #9f4912;
 $icf-teal:      #00afaa;
@@ -15,10 +20,10 @@ $dark-508c: darken($icf-dark-gray, 20%);
 
 
 $theme-colors: (
-  'primary': $icf-brown,
-  'secondary': $icf-orange,
-  'primary-accent': $icf-dark-teal,
-  'secondary-accent': $icf-teal,
+  'primary': $epa-green,
+  'secondary': $epa-blue,
+  'primary-accent': $epa-dark-blue,
+  'secondary-accent': $epa-blue,
   'success': $success-508c,
   'danger': $danger-508c,
   'info': $info-508c,
@@ -27,8 +32,22 @@ $theme-colors: (
 );
 
 $body-bg: rgba($icf-gray, 0.05);
+
 $navbar-light-color: $dark-508c;
+$navbar-dark-color: $icf-gray;
+
 $nav-tabs-link-active-bg: #fff;
+
+$link-color: $epa-blue;
+$link-active-color: $epa-dark-blue;
+
+$nav-tabs-link-active-color: $epa-dark-blue;
+
+$dropdown-link-active-bg: $epa-blue;
+$dropdown-link-active-color: #fff;
+
+$custom-control-indicator-checked-bg: $epa-blue;
+
 
 $enable-rounded: true;
 

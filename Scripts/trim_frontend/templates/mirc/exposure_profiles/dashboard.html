@@ -10,20 +10,20 @@
 <div class="row">
     {% for scenario in builtin_scenarios|sort(attribute='name') %}
         <div class="col-lg-3 col-md-4 col-sm-6 py-2">
-            <div class="card border-primary scenario-card">
+            <div class="card border-secondary rounded-0 scenario-card">
                 <div class="card-header">
                     <a href="{{ url_for('mirc_scenario.view_risk_scenario', id=scenario.id) }}"
-                        class="text-primary float-right"
+                        class="text-secondary float-right"
                     >
                         <i class="fa fa-eye" role="img" title="View {{ scenario.name }}"></i>
                     </a>
                     <h5 class="card-title mb-0">{{ scenario.name }}</h5>
                 </div>
                 {% if scenario.notes or scenario.parent %}
-                    <div class="card-body">
+                    <div class="card-body small">
                         {% if scenario.parent %}
                             <p class="card-text mb-1">
-                                Inherits From: <span class="text-primary font-weight-bold">{{ scenario.parent.name }}</span>
+                                Inherits From: <span class="text-secondary font-weight-bold">{{ scenario.parent.name }}</span>
                             </p>
                         {% endif %}
                         {% if scenario.notes %}
@@ -58,10 +58,10 @@
 <div class="row">
     {% for scenario in custom_scenarios|sort(attribute='updated', reverse=True) %}
         <div class="col-lg-3 col-md-4 col-sm-6 py-2">
-            <div class="card border-primary scenario-card custom-scenario-card">
+            <div class="card border-secondary rounded-0 scenario-card custom-scenario-card">
                 <div class="card-header">
                     <a href="{{ url_for('mirc_scenario.view_risk_scenario', id=scenario.id) }}"
-                        class="text-primary float-right"
+                        class="text-secondary float-right"
                     >
                         {% if not current_user.can('edit', scenario) %}
                             <i class="fa fa-eye" role="img" title="View {{ scenario.name }}"></i>
@@ -72,10 +72,10 @@
                     <h5 class="card-title mb-0">{{ scenario.name }}</h5>
                 </div>
                 {% if scenario.notes or scenario.parent %}
-                    <div class="card-body">
+                    <div class="card-body small">
                         {% if scenario.parent %}
                             <p class="card-text mb-1">
-                                Inherits From: <span class="text-primary font-weight-bold">{{ scenario.parent.name }}</span>
+                                Inherits From: <span class="text-secondary font-weight-bold">{{ scenario.parent.name }}</span>
                             </p>
                         {% endif %}
                         {% if scenario.notes %}

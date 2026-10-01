@@ -8,7 +8,7 @@
 
     {% if current_user.has_role('superuser') %}
         <div class="float-right">
-            <a class="badge badge-primary-accent p-2"
+            <a class="badge badge-warning p-2"
                 href="{{ url_for('admin.index') }}" target="_blank">
                 Admin Panel
             </a>

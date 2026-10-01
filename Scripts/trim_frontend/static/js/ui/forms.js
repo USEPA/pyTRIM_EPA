@@ -321,7 +321,7 @@ window.TRIM = (function(trim) {
         var addBtn = document.createElement('a');
         addBtn.id = fieldListDef.id + '-add-btn';
         addBtn.href = '#add';
-        addBtn.className = 'nav-link py-1 px-2 border-primary border rounded';
+        addBtn.className = 'nav-link btn-sm py-1 px-2 border-secondary text-secondary border rounded';
         addBtn.title = 'Add';
         addBtn.setAttribute('data-fieldlist-add', 'true');
         addBtn.innerHTML = '<i class="fa fa-plus"></i>&nbsp;Add';

@@ -27,9 +27,9 @@
                 default=form.mirc_scenario.data, allow_none=False
             ) }}
             {{ render_feedback(form.mirc_scenario) }}
-            <div class="form-text">
+            <div class="form-text mb-1">
                 <small>
-                    <a href="{{ url_for('mirc_scenario.view_risk_scenarios') }}" target="_blank" tabindex="0">
+                    <a href="{{ url_for('mirc_scenario.view_risk_scenarios') }}" target="_blank" class="text-secondary" tabindex="0">
                         <i class="fa fa-edit mr-1"></i>
                         Create or Edit Exposure Profiles
                     </a>
@@ -552,6 +552,7 @@ onDomLoad(function() {
 
         // Handle change to numeric inputs
         form.on('change', 'input', function(e) {
+            this.setCustomValidity(''); // clear custom error
             var me = $(this);
             var g = me.closest('.form-group');
             g.find('.src-info').val('custom');

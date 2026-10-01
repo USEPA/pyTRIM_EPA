@@ -213,7 +213,7 @@ window.LoadingScreen = (function(loader) {
         var spinnerSize = '6rem';
         var spinnerWidth = '0.75em';
         var spinner = document.createElement('div');
-        spinner.className = 'spinner-border text-primary';
+        spinner.className = 'spinner-border text-secondary';
         spinner.setAttribute('role', 'status');
         spinner.style.borderWidth = spinnerWidth;
         spinner.style.width = spinnerSize;
