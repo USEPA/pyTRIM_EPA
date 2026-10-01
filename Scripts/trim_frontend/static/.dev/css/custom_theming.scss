@@ -20,10 +20,19 @@ $dark-508c: darken($icf-dark-gray, 20%);
 
 
 $theme-colors: (
+  // ------------------------------------
+  // ICF THEME
+//   'primary': $icf-dark-teal,
+//   'secondary': $icf-brown,
+//   'primary-accent': $icf-brown,
+//   'secondary-accent': $icf-brown,
+  // ------------------------------------
+  // EPA THEME
   'primary': $epa-green,
   'secondary': $epa-blue,
   'primary-accent': $epa-dark-blue,
   'secondary-accent': $epa-blue,
+  // ------------------------------------
   'success': $success-508c,
   'danger': $danger-508c,
   'info': $info-508c,
@@ -38,6 +47,10 @@ $navbar-dark-color: $icf-gray;
 
 $nav-tabs-link-active-bg: #fff;
 
+// ===============================================
+// ADDITIONAL EPA THEMING
+// -----------------------------------------------
+
 $link-color: $epa-blue;
 $link-active-color: $epa-dark-blue;
 
@@ -47,6 +60,10 @@ $dropdown-link-active-bg: $epa-blue;
 $dropdown-link-active-color: #fff;
 
 $custom-control-indicator-checked-bg: $epa-blue;
+
+// -----------------------------------------------
+// END ADDITIONAL EPA THEMING
+// ===============================================
 
 
 $enable-rounded: true;
