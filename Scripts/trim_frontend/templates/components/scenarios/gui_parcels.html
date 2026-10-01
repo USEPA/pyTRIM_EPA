@@ -231,6 +231,7 @@ onDomLoad(function () {
 
     var map = null;
     var mapLayers = null;
+    var shapes = null;
 
     var parcels = L.layerGroup();
 
@@ -998,7 +999,7 @@ onDomLoad(function () {
         */
 
         // CREATING A NEW PARCEL //
-        var shapes = L.geoJSON()
+        shapes = L.geoJSON()
 
         map.on('pm:create', ({ layer }) => {
             map.pm.setGlobalOptions({ snapSegment: getSmartSnapSetting("segments") });
