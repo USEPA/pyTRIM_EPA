@@ -596,22 +596,33 @@ def get_initial_concentrations(pcl):
 
 
 def get_source_params(pcl):
+    skip_ves = ['Air', 'UpperAir']
+    skip_comps = ['Degradation_Reaction_Sink', 'Soil_Advection_Sink', 'Flush_Rate_Sink']
+
     source_params = {}
     for chem in pcl.scenario.chemicals:
         chem_name = chem.name
         if chem_name not in source_params:
             source_params[chem_name] = {}
+        
         for ve in pcl.volume_elements:
             ve_name = ve.name
-            if ve_name not in source_params[chem_name]:
+            if ve_name in skip_ves:
+                continue
+            elif ve_name not in source_params[chem_name]:
                 source_params[chem_name][ve_name] = {}
+            
             for comp in ve.compartments:
+                if comp.name in skip_comps:
+                    continue
+
                 deposition_rate = comp.surfaceDepositionRate(chemical=chem)  # slow ...
                 try:
                     deposition_rate = deposition_rate.magnitude
                 except Exception:
                     pass
                 source_params[chem_name][ve_name][comp.name] = deposition_rate
+
     return {'sources': source_params}
 
 
