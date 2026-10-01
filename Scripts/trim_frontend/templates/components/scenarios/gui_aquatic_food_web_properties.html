@@ -83,24 +83,6 @@
         </div>
     </section>
 </form>
- <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="ModalLabel">Modal title</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                </div>
-                <div class="modal-footer">
-                    <a  class="btn btn-secondary" data-dismiss="modal">Close</a>
-                    <button type="button"  id="saveModalButton" class="btn btn-primary" data-dismiss="modal">Save</button>
-                </div>
-            </div>
-        </div>
- </div>
 <script>
     onDomLoad(function() {
         //let aqTable = $('#AquaticTable').removeAttr('width').DataTable()
@@ -111,7 +93,7 @@
         }
         let Auto_calculable = []
         let diet_table_template =
-            '<h5 className="mt-4 tableTitle" ></h5>' +
+            '<h5 className="mt-4 tableTitle"></h5>' +
             '<table class="diet" className="hover">' +
             '<thead>' +
             '<tr style="border-bottom: 1px solid black;">' +
@@ -538,6 +520,7 @@
                                 })
                             })
                             $($(this_matrix)[0]).text(e.name)
+                            $($(this_matrix)[0]).css('margin-left', '40px')
                             divDietTables.append(this_matrix)
                         }
                     })
