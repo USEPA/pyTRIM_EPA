@@ -513,7 +513,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
         update_chemical_formula(chem, ic_comp, ic_param_name, ic_val, unit)
 
     elif field_name == "runoff_matrix_value":
-        scn = ScenarioService.get(id=p.scenario.id)
+        scn = ScenarioService.get(p.scenario.id)
         sender_parcel_name = parcels_data["sender"].replace("ro_", "")
         receivers = parcels_data["receiver"].split(",")
         values = parcels_data["ro_value"].split(",")
@@ -1157,7 +1157,7 @@ def update_tillage_formula_media(till_media_name):
                     fl[f.id].append((idl, re.sub(old_id_replace_regex, f'{old_id} , {new_id}', idl)))
 
     for fid, fv in fl.items():
-        f = FormulaService.get(id=fid)
+        f = FormulaService.get(fid)
         nf = f.equation
         for ids in fv:
             nf = nf.replace(f'media.id in {{{ids[0]}}}', f'media.id in {{{ids[1]}}}')

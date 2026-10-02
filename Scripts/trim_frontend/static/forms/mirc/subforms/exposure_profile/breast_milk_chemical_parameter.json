@@ -13,6 +13,12 @@
             "readonly": true
         },
         {
+            "id": "infant_add_equals_adult_lifetime",
+            "label": "Set infant chemical dose from breast milk equal to the mother's chemical dose from all sources (i.e., adult total average daily dose)",
+            "data_type": "boolean",
+            "default": false
+        },
+        {
             "id": "AE_inf",
             "label": "Infant Absorption Efficiency",
             "data_type": "float",

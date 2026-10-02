@@ -22,7 +22,7 @@
             "label": "AERMOD Deposition File",
             "data_type": "file",
             "required": true,
-            "help": "Indicate the AERMOD plotfile (.PLT) output file. It must use the same geographic extent and meteorological scenario being modeled in pyTRIM. It must contain wet and dry deposition estimates.",
+            "help": "Indicate the AERMOD plotfile (.PLT) output file. It must use the same geographic extent and meteorological scenario being modeled in webTRIM.FaTE. It must contain wet and dry deposition estimates.",
             "if_true": ["have_AERMOD_file"]
         },
         {
@@ -41,7 +41,7 @@
             "label": "UTM Zone",
             "data_type": "string",
             "required": true,
-            "help": "Enter the UTM zone number/letter for the coordinate values in your PLT file; e.g., \"16T\".",
+            "help": "Enter the UTM zone number + hemisphere designator (N/S) for the coordinate values in your PLT file; e.g., \"16N\".",
             "if_true": ["have_AERMOD_file"]
         },
         {

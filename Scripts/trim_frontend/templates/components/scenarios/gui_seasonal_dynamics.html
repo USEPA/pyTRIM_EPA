@@ -5,6 +5,16 @@
     data-form-src="scenario_seasonal_dynamics_form"
 >
     <section class="container px-0">
+        {% call data_preamble('seasonal_dynamics') %}
+        <p>All fields are required.</p>
+        <p>
+            Recommended to receive site-specific values, if available:
+            <ul>
+                <li>All</li>
+            </ul>
+        </p>
+        {% endcall %}
+
         <div class="row">
             <div class="col-sm">
                 <h3 class="text-center">Litterfall</h3>
@@ -232,7 +242,7 @@
                 $(this_text_lf).add(this_text_ae).blur(function () {
                     submit_seasonal_dyn_value(this)
                 })
-            })
+            });
             $('#coniferous_forest_litterfall_time_varying').parent().hide();
             $('#coniferous_forest_allowexchange_time_varying').parent().hide();
             console.log('populated seasonal form!')

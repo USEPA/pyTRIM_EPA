@@ -4,6 +4,12 @@
     data-form-src="scenario_background_conc_form"
 >
     <section class="container px-0">
+        {% call data_preamble('background_conc') %}
+        <p>Click on the table cells to edit properties.</p>
+
+        <p>Background concentrations are not required. If you choose to use them for a chemical, then at least one compartment must receive an initial concentration value above 0.</p>
+        {% endcall %}
+
         <div class="row mb-1">
             <div class="col-sm">
                 <div data-slot="true" data-target="background_chemicals">
@@ -33,11 +39,11 @@
                                 </div>
                                 <div class="row mb-1">
                                     <div class="col-sm">
-                                        <button class="comp_show_all btn btn-warning">Show All</button>
-                                        <button class="comp_hide_all btn btn-warning">Hide All</button>
-                                        <button class="comp_show_nz btn btn-outline-success">Show Non-Zero</button>
+                                        <button class="comp_show_all btn btn-secondary">Show All</button>
+                                        <button class="comp_hide_all btn btn-secondary">Hide All</button>
+                                        <button class="comp_show_nz btn btn-outline-dark">Show Non-Zero</button>
                                         <div class="dropdown d-inline">
-                                            <button class="btn_show_comp btn btn-outline-success dropdown-toggle" type="button" data-toggle="dropdown">
+                                            <button class="btn_show_comp btn btn-outline-dark dropdown-toggle" type="button" data-toggle="dropdown">
                                                 Show Compartment
                                             </button>
                                             <div class="dropdown-menu">
@@ -67,13 +73,6 @@
         </div>
     </section>
 </form>
-
-<script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}">
-</script>
-<script src="{{ url_for('static', filename='js/lib/dataTables/jquery.dataTables.min.js') }}">
-</script>
-<script src="{{ url_for('static', filename='js/lib/dataTables/dataTables.bootstrap4.min.js') }}">
-</script>
 <script>
     onDomLoad(function(e) {
         var form = document.getElementById('background-conc-gui');
@@ -100,6 +99,7 @@
                 TRIM.api.getChemicals(TRIM.store.currentScenario).on('load', function () {
                     var chems = this.responseJSON.chemicals;
                     TRIM.store.currentScenario.chemicals = chems;
+                    TRIM.store.currentScenario.chem_params = this.responseJSON.chem_params;
                     loadChemicals();
                 });
                 return;
@@ -108,16 +108,22 @@
             $(form).find("a[id*=_concentration_upload_button]").attr({
                 'tabindex': '0',
                 'role': 'link'
-            });
+            }).removeClass('btn-secondary').addClass('btn-outline-secondary').css('cursor', 'pointer');
         }
 
         function updateBackgroundConcentrations() {
-            if (!TRIM.store.currentScenario || !TRIM.store.currentScenario.parcels) {
+            if (!TRIM.store.currentScenario.parcels || !TRIM.store.currentScenario.chemicals) {
                 // Parcels haven't loaded yet; wait a bit and try again
                 setTimeout(function() { updateBackgroundConcentrations(); }, 1000);
                 return;
             }
 
+            TRIM.store.currentScenario.parcels = TRIM.store.currentScenario.parcels.map(pcl => {
+                pcl.sources = TRIM.store.currentScenario.chem_params[pcl.name].sources;
+                pcl.initialConcentrations = TRIM.store.currentScenario.chem_params[pcl.name].initialConcentrations;
+                return pcl;
+            });
+            
             let fieldset = $('#background_chemicals-add-btn').closest("fieldset")
             $('#background_chemicals-add-btn').hide()
 

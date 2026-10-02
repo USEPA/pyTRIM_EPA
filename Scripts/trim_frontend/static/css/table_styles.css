@@ -1,0 +1,114 @@
+/* 
+    background concentrations, summary of properties
+*/
+.ems {
+    background-color: white !important;
+}
+
+tr.level0 td:first-child, tr.level0 td:nth-child(2), tr.level0 td:nth-child(3) {
+    color: black;
+    background-color: lightgray;
+}
+tr.level1 td:nth-child(2), tr.level1 td:nth-child(3){
+    color: black;
+    background-color: darkgray;
+}
+tr.level2 td:nth-child(3) {
+    color: black;
+    background-color: #818181;
+}
+tr.level0 td:last-child, tr.level1 td:last-child, tr.level2 td:last-child{
+    color: black;
+    background-color: white;
+}
+/* 
+    background concentrations, summary of properties END
+*/
+
+/* erosion */
+table[data-target^="erosion"] { 
+    white-space: nowrap;
+}
+table[data-target^="erosion"] .td_ER {
+    background-color: #f8caca80;
+}
+table[data-target^="erosion"] td.td_ASD {
+    background-color: #e9ecef80;
+}
+table[data-target^="erosion"] td.td_LS {
+    background-color: #fcf8e380;
+}
+/* erosion END */
+
+/* datatable formatting */
+td.rightBorder {
+    text-align: right;
+    border-right: 1px solid black;
+    padding: 10px
+}
+td.rightBorder-pivoted {
+    border-right: 1px solid black;
+    padding: 10px
+}
+td.freeze-column, th.freeze-column {
+    position: sticky;
+    left: 0;
+    background-color: white; /* to cover other cells when scrolling */
+    z-index: 1; /* to ensure the column stays on top */
+}
+
+table.diet{
+    border:solid 1px;
+    margin: 20px auto;
+}
+
+th.rotated {
+    height: 220px;
+    white-space: nowrap;
+}
+
+th.rotated > div {
+    transform: translate(0px, 75px)
+    rotate(270deg);
+    width: 50px;
+}
+
+th.rotated > div > span {
+  padding: 10px 0px;
+}
+
+/* For dataTables with dynamic cols */
+table.wrap-text {
+  table-layout: fixed;
+  width: 100%;
+}
+
+table.wrap-text th {
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+table.wrap-text td {
+  /* box-sizing: border-box; */
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+
+.wrap-text-scrollbody {
+  overflow-x: auto;
+  overflow-y: auto;
+  width: 100% !important;
+}
+
+.wrap-text-scrollhead {
+  width: 100% !important;
+}
+
+.wrap-text table {
+  width: 100% !important;
+  min-width: 100% !important;
+}
+
+/* datatable formatting END */

@@ -29,7 +29,7 @@
 			"ec2": [
 				{
 					"name": "weekday_startup",
-					"cron_expression": "0 9 * * MON-FRI",
+					"cron_expression": "0 8 * * MON-FRI",
 					"capacity": 1
 				},
 				{

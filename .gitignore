@@ -23,3 +23,5 @@ __pycache__
 unsynced/
 !/dev.json
 /.idea/
+/.vscode/
+/env/

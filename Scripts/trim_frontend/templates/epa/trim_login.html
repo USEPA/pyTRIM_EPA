@@ -1,0 +1,21 @@
+<div class="row" style="min-height: 50vh;">
+    <div class="col">
+        <div class="text-center">
+            <h1 class="page-title">{{ site_name }}</h1>
+            
+            <p>
+                <a href="{{url_for('oauth2_login', provider_name='login_gov')}}"
+                    class="usa-button usa-button--outline">Sign in with Login.gov</a>
+            </p>
+
+            {% if config["TRIM_ENV_PROFILE"] in config['LOGIN_ENV_WHITELIST'] %}
+            <p>or</p>
+
+            <p>
+                Please <a class="usa-link" rel="noreferrer"
+                    href="{{ url_for('security.login') }}">log in with {{ site_name }}</a> to continue.
+            </p>
+            {% endif %}
+        </div>
+    </div>
+</div>

@@ -4,6 +4,7 @@
 {% from 'macros/mirc/scenario_selector.html' import
     render_scenario_picker
 %}
+{% from 'macros/scenarios/preamble_macro.html' import data_preamble %}
 
 {% set notes_modal_name = 'notes-form-modal' %}
 
@@ -27,7 +28,7 @@
         {% if not mirc_scenario.is_builtin and current_user.can('manage', mirc_scenario) %}
             <div class="ml-auto">
                 <a href="{{ url_for('mirc_scenario.risk_scenario_permissions', id=mirc_scenario.id) }}"
-                    class="btn btn-outline-primary mr-1"
+                    class="btn btn-sm btn-outline-warning text-dark mr-1"
                 >
                     <i class="fa fa-users"></i>&nbsp;
                     Grant/Revoke Access
@@ -38,9 +39,9 @@
                     href="{{
                         url_for('mirc_scenario_api.delete_risk_scenario', id=mirc_scenario.id)
                     }}"
-                    class="btn btn-outline-danger"
+                    class="btn btn-sm btn-outline-danger"
                 >
-                    <i class="fa fa-times mx-1"></i>&nbsp;
+                    <i class="fa fa-times ml-1"></i>&nbsp;
                     Delete
                 </a>
             </div>
@@ -70,6 +71,29 @@
         </a>
     </div>
 
+    <div class="mb-4">
+        {% call data_preamble('mirc_exposure_profile') %}
+        <p>
+            Required fields:
+            <ul>
+                <li>Human parameters: All parameters for all life stages, ingested products, and data percentiles you intend to use in your simulation</li>
+            </ul>
+            <ul>
+                <li>Product parameters: All parameters for all ingested products you intend to use in your simulation</li>
+            </ul>
+            <ul>
+                <li>Chemical parameters: All parameters for chemicals and ingested products you intend to use in your simulation. Chemicals receiving a value of 0 for cancer slope factor or reference dose still will be modeled, but risk and hazard quotient, respectively, will not be calculated.</li>
+            </ul>
+        </p>
+        <p>
+            Recommended to receive site-specific values, if available:
+            <ul>
+                <li>None</li>
+            </ul>
+        </p>
+        {% endcall %}
+    </div>
+    
     <nav class="pb-1">
         <div class="nav nav-tabs nav-fill" id="nav-tab" role="tablist">
             <a id="human-parameters-tab" role="tab" tabindex="0" class="nav-item nav-link active"
@@ -118,8 +142,7 @@
         </div>
     {% endif %}
 </form>
-<script src="{{url_for('static', filename='js/mirc.js')}}">
-</script>
+<script src="{{url_for('static', filename='js/mirc.js')}}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     function toggleCollapse() {
@@ -266,7 +289,7 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener('DOMContentLoaded', function() {
     $('body').on('click', '#delete-btn', function(e) {
         e.preventDefault();
-        if (confirm("Are you sure you want to delete this scenario?\nThis action cannot be undone!")) {
+        if (confirm("Are you sure you want to delete this exposure profile?\nThis action cannot be undone!")) {
             LoadingScreen.show('deleteScenario');
             $.ajax({
                 url: this.getAttribute('href'),
@@ -292,7 +315,7 @@ document.addEventListener('DOMContentLoaded', function() {
 {% set modal_footer %}
     <div class="text-right">
         <button class="btn btn-light" id="close-notes">Cancel</button>
-        <button class="btn btn-primary" id="save-notes">Done</button>
+        <button class="btn btn-secondary" id="save-notes">Done</button>
     </div>
 {% endset %}
 {{ render_modal(
@@ -354,15 +377,3 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 {% endif %}
-
-<style>
-    /* Fix bs-popover arrows... */
-    .bs-popover-right > .arrow,
-    .bs-popover-auto[x-placement^="right"]>.arrow {
-        left: calc(0.5rem * -1 + 1px * -1);
-    }
-    .bs-popover-left>.arrow,
-    .bs-popover-auto[x-placement^="left"]>.arrow {
-        right: calc(0.5rem * -1 + 1px * -1);
-    }
-</style>

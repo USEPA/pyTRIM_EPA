@@ -7,18 +7,37 @@
 >
     <section class="container px-0">
         <div class="row">
-            <div class="col-md">
-                <div class="pill pill-alert col-sm">
-                    <small>
-                        <strong>
-                            <u>Click on the table cells to edit properties</u>.
-                        </strong>
-                        <br><span style='color: firebrick;'>*</span> All editable cells are required.
-                    </small>
-                </div>
+            <div class="col-auto">
+                {% call data_preamble('abiotic') %}
+                <p>Click on the table cells to edit properties. All editable cells are required.</p>
+                <p>
+                    Recommended to receive site-specific values, if available:
+                    <ul>
+                        <li>Surface Soil Properties: pH</li>
+                        <li>Note that selecting <b>Load from USDA Soil DataMart</b> 
+                            will retrieve site-specific values Fraction Sand, Organic Carbon Fraction, pH, and Water Content 
+                            for the following, where available:
+                            <ul>
+                                <li>Surface Soil Properties</li>
+                                <li>Root Zone Properties</li>
+                                <li>Vadose Zone Properties </li>
+                                
+                            </ul>
+                            As well as site-specific values Fraction Sand, Organic Carbon Fraction, and pH 
+                            for the following, where available:
+                            <ul>
+                                <li>Groundwater Zone Properties</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </p>
+                {% endcall %}
             </div>
             <div class="col-md text-right">
-                <button id="abiotic-usda-soil-btn" class="btn btn-warning">Get data from USDA Soil DataMart</button>
+                <button id="abiotic-usda-soil-btn" class="btn btn-sm btn-outline-warning text-dark">
+                    <i class="fa fa-cloud-download-alt mr-1"></i>
+                    Load from USDA Soil DataMart
+                </button>
             </div>
         </div>
         <div class="row">
@@ -90,13 +109,6 @@
         </div>
     </section>
 </form>
-<link rel="stylesheet" href="{{url_for('static', filename='css/form_styles.css')}}"/>
-<script src="{{url_for('static', filename='js/lib/jquery-3.4.1.min.js')}}">
-</script>
-<script src="{{ url_for('static', filename='js/lib/dataTables/jquery.dataTables.min.js') }}">
-</script>
-<script src="{{ url_for('static', filename='js/lib/dataTables/dataTables.bootstrap4.min.js') }}">
-</script>
 <script>
     onDomLoad(function() {
         var form = document.getElementById('abiotic-props-gui');
@@ -247,6 +259,7 @@
             const airTblCols = [
                 {
                     'data': "Surface Parcel",
+                    'bSortable': false,
                     'className': 'font-weight-bold rightBorder freeze-column'
                 },
                 {
@@ -311,10 +324,12 @@
             const soilTblCols = [
                 {
                     'data': "Surface Parcel",
+                    'bSortable': false,
                     'className': 'font-weight-bold rightBorder freeze-column'
                 },
                 {
                     data: "Surface_Soil.Tillage",
+                    'bSortable': false,
                     'render': function (data, type, row) {
                         let parcel_info = create_parcel_object('tillage', row, data);
                         let this_cell_data = row.hasLand == "Yes" ? data : "N/A"
@@ -422,6 +437,7 @@
             const rootTblCols = [
                 {
                     'data': "Surface Parcel",
+                    'bSortable': false,
                     'className': 'font-weight-bold rightBorder freeze-column'
                 },
                 {
@@ -495,6 +511,7 @@
             const vadoseTblCols = [
                 {
                     'data': "Surface Parcel",
+                    'bSortable': false,
                     'className': 'font-weight-bold rightBorder freeze-column'
                 },
                 {
@@ -568,6 +585,7 @@
             const gwTblCols = [
                 {
                     'data': "Surface Parcel",
+                    'bSortable': false,
                     'className': 'font-weight-bold rightBorder freeze-column'
                 },
                 {
@@ -655,7 +673,7 @@
 
                 let data = $(this).val();
                 let $label = $(this).next("label");
-                $label.siblings("input").hide();
+                $label.siblings("input, select").hide();
                 $label.show().text(data);
 
                 let is_valid = elementIsValid($(this).parent());
@@ -716,6 +734,9 @@
                     update_data_store_callback(rsp, cell, parcel_info, param_store_key, data, old_data)
                     if (parcel_info[2].name == 'surfaceSoilThickness') {
                         getParcelByKey('id', parcel_info[0].value).surfaceSoilThickness = parseFloat(data);
+                    }
+                    else if (parcel_info[2].name == 'tillage') {
+                        getParcelByKey('id', parcel_info[0].value).soilTillage = data;
                     }
                     updateMercuryTransformRate(parcel_info)
                     LoadingScreen.hide(ls_info)

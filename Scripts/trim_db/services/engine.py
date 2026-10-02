@@ -76,7 +76,7 @@ def get_env_db_uri():
         if engine == 'mysql':
             engine = 'mysql+pymysql'
         elif engine == 'postgres':
-            engine = 'postgresql+psycopg2'
+            engine = 'postgresql+psycopg'
 
         if db_schema:
             db_schema = f'?options=-csearch_path={db_schema}'

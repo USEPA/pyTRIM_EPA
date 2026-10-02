@@ -1,33 +1,71 @@
+/* hotfix for input toggle */
+.custom-switch .custom-control-label::after {
+    top: calc(0.25rem + 2px);
+    left: calc(-2.25rem + 2px);
+    width: calc(1rem - 4px);
+    height: calc(1rem - 4px);
+    background-color: #adb5bd;
+    border-radius: .5rem;
+    transition: transform .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out
+}
+
+.popover { 
+  z-index: 1080; /* Above Bootstrap's tooltip (1070) */
+}
+
+/* fix bootstrap tooltip conflicts */
+.tooltip.show {
+    pointer-events: none !important;
+}
+
+/* spinning ring */
+.lds-dual-ring {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin-left: -0.25em;
+    margin-bottom: 0.35em;
+}
+.lds-dual-ring:after {
+    content: " ";
+    display: block;
+    width: 16px;
+    height: 16px;
+    margin: 4px;
+    border-radius: 50%;
+    border: 2px solid #fd0000;
+    border-color: #fd0000 transparent #fd0000 transparent;
+    animation: lds-dual-ring 1.2s linear infinite;
+}
+@keyframes lds-dual-ring {
+  0% {
+      transform: rotate(0deg);
+  }
+  100% {
+      transform: rotate(360deg);
+  }
+}
+/* spinning ring END */
+
+.preamble-text p {
+  margin-bottom: 5px;
+}
+
+.preamble-text ul {
+  margin-bottom: 2px;
+}
+
 fieldset {
     border: 1px solid;
     margin: 5px;
     padding: 5px;
 }
+
 legend {
     width: inherit;
     padding: 2px;
 }
-.popover { 
-  z-index: 1080; /* Above Bootstrap's tooltip (1070) */
-} 
-/* table {
-    white-space: nowrap;
-} */
-td.rightBorder {
-    text-align: right;
-    border-right: 1px solid black;
-    padding: 10px
-}
-td.rightBorder-pivoted {
-    border-right: 1px solid black;
-    padding: 10px
-}
-td.freeze-column, th.freeze-column {
-    position: sticky;
-    left: 0;
-    background-color: white; /* to cover other cells when scrolling */
-    z-index: 1; /* to ensure the column stays on top */
-}
+
 .parcelMultiselect {
   width: 100%;
 }
@@ -68,61 +106,6 @@ td.freeze-column, th.freeze-column {
 
 .parcelSelectOptions label:hover {
   background-color: #1e90ff;
-}
-
-table.diet{
-    border:solid 1px;
-    margin: 20px auto;
-}
-
-th.rotated {
-    height: 220px;
-    white-space: nowrap;
-}
-
-th.rotated > div {
-    transform: translate(0px, 75px)
-    rotate(270deg);
-    width: 50px;
-}
-
-th.rotated > div > span {
-  padding: 10px 0px;
-}
-
-/* For dataTables with dynamic cols */
-
-table.wrap-text {
-  table-layout: fixed;
-  width: 100%;
-}
-
-table.wrap-text th {
-  white-space: normal;
-  word-break: normal;
-  overflow-wrap: break-word;
-}
-
-table.wrap-text td {
-  /* box-sizing: border-box; */
-  white-space: normal;
-  word-break: normal;
-  overflow-wrap: anywhere;
-}
-
-.wrap-text-scrollbody {
-  overflow-x: auto;
-  overflow-y: auto;
-  width: 100% !important;
-}
-
-.wrap-text-scrollhead {
-  width: 100% !important;
-}
-
-.wrap-text table {
-  width: 100% !important;
-  min-width: 100% !important;
 }
 
 /*Legend specific*/
@@ -168,4 +151,10 @@ table.wrap-text td {
 #deposition-overlay-current-file .errors {
 	color: red;
 	margin-left: 20px;
+}
+
+/* MIRC */
+.kpi-title {
+    min-height: 2.5em;
+    line-height: 1.25;
 }

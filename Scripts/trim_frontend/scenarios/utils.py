@@ -1,11 +1,13 @@
 import boto3
 import json
 import time
+import traceback
 from datetime import datetime
 import os
 import pandas as pd
 import numpy as np
 from pathlib import Path
+from flask_api import ApiException
 from trim_frontend.external_API.routes import SoilData, get_soil_boundaries
 from trim_db.schema import CustomParameter, ParameterDefinition
 from trim_db.services import *
@@ -312,7 +314,11 @@ def handle_scenario_update(s, scenario_data):
                 s.chemicals.append(chem)
 
     elif field_name == "soil_api":
-        update_soil_from_api(s, logger)
+        try:
+            update_soil_from_api(s, logger)
+        except Exception as e:
+            logger.error(f"Failed to complete USDA soil update: {traceback.format_exc()}")
+            raise ApiException(f"Error handling USDA API request: {e}")
 
     ScenarioService.update(s)
 
@@ -605,12 +611,17 @@ def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
 def update_soil_from_api(s, logger):
     def calculate_layer_vals(pcl, data, layer):
         idx = [k for k,v in data['layer'].items() if v == layer][0]
-        param_map = {
-            "pH": data['ph1to1h2o_r'][idx],
-            "OrganicCarbonContent": (data['om_r'][idx] / 100) / 1.72,
-            "VolumeFraction_Liquid": data['awc_r'][idx], # water content
-            "FractionSand": data['sandtotal_r'][idx] / 100,
-        }
+
+        try:
+            param_map = {
+                "pH": data['ph1to1h2o_r'][idx],
+                "OrganicCarbonContent": (data['om_r'][idx] / 100) / 1.72,
+                "FractionSand": data['sandtotal_r'][idx] / 100,
+            }
+            if layer != "gw":
+                param_map["VolumeFraction_Liquid"] = data['awc_r'][idx] # water content
+        except:
+            return layer
 
         comp = None
         if layer == "surface":
@@ -619,6 +630,8 @@ def update_soil_from_api(s, logger):
             comp = pcl.get_compartment("Soil_Root_Zone")
         elif layer == "vadose":
             comp = pcl.get_compartment("Soil_Vadose_Zone")
+        elif layer == "gw":
+            comp = pcl.get_compartment("Groundwater")
 
         if not comp: # water / air parcels
             return
@@ -631,7 +644,6 @@ def update_soil_from_api(s, logger):
             )
             update_custom_param_value(param, val)
 
-    logger.info("Obtaining parcel soil data from USDA.gov")
     if not s.parcels:
         return
     
@@ -651,10 +663,15 @@ def update_soil_from_api(s, logger):
         logger.info(f"Calculating layer values for [{pcl_name}]")
         pcl = ParcelService.get(name=pcl_name, scenario_id=s.id)
         if is_tilled:
-            soil_data = json.loads(sd.scenario_tilled_results[pcl_name])
+            soil_data = json.loads(sd.scenario_tilled_results.get(pcl_name, {}))
         else:
-            soil_data = json.loads(sd.scenario_no_till_results[pcl_name])
+            soil_data = json.loads(sd.scenario_no_till_results.get(pcl_name, {}))
+
+        if not soil_data:
+            logger.info(f"No soil data found, skipping...")
+            continue
 
         calculate_layer_vals(pcl, soil_data, "surface")
         calculate_layer_vals(pcl, soil_data, "root")
         calculate_layer_vals(pcl, soil_data, "vadose")
+        calculate_layer_vals(pcl, soil_data, "gw")

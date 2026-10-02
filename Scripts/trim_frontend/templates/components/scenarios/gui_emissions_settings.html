@@ -6,9 +6,14 @@
     data-form-src="scenario_emissions_form"
 >
     <section class="container px-0">
+        {% call data_preamble('emissions') %}
+        <p>Click on the table cells to edit properties.</p>
+        <p>At least one chemical must be selected. For each chemical, at least one compartment must receive an emission value above 0.</p>
+        {% endcall %}
+
         <div class="row mb-1">
             <div class="col-sm">
-                <div data-slot="true" data-target="chemicals">
+                <div data-slot="true" data-target="chemicals" class="d-none">
                     <div class="row mb-1">
                         <div class="col-sm">
                             <h5>Chemical Name:</h5><h6><span class="chemInfo"></span></h6>
@@ -54,11 +59,11 @@
                                     <div class="col-sm">
                                         <!-- <div data-slot="true" data-target="location"></div>
                                     </div> -->
-                                        <button class="comp_show_all btn btn-warning">Show All</button>
-                                        <button class="comp_hide_all btn btn-warning">Hide All</button>
-                                        <button class="comp_show_nz btn btn-outline-success">Show Non-Zero</button>
+                                        <button class="comp_show_all btn btn-secondary">Show All</button>
+                                        <button class="comp_hide_all btn btn-secondary">Hide All</button>
+                                        <button class="comp_show_nz btn btn-outline-dark">Show Non-Zero</button>
                                         <div class="dropdown d-inline">
-                                            <button class="btn_show_emission_comp btn btn-outline-success dropdown-toggle" type="button" data-toggle="dropdown">
+                                            <button class="btn_show_emission_comp btn btn-outline-dark dropdown-toggle" type="button" data-toggle="dropdown">
                                                 Show Compartment
                                             </button>
                                             <div class="dropdown-menu">
@@ -93,25 +98,6 @@
         </div>
     </section>
 </form>
-<style>
-    tr.level0 td:first-child, tr.level0 td:nth-child(2), tr.level0 td:nth-child(3) {
-        color: black;
-        background-color: lightgray;
-    }
-    tr.level1 td:nth-child(2), tr.level1 td:nth-child(3){
-        color: black;
-        background-color: darkgray;
-    }
-    tr.level2 td:nth-child(3) {
-        color: black;
-        background-color: #818181;
-    }
-    tr.level0 td:last-child, tr.level1 td:last-child, tr.level2 td:last-child{
-        color: black;
-        background-color: white;
-    }
-
-</style>
 <script>
     onDomLoad(function(e) {
         var form = document.getElementById('emissions-settings-gui');
@@ -136,6 +122,7 @@
                 TRIM.api.getChemicals(TRIM.store.currentScenario).on('load', function () {
                     var chems = this.responseJSON.chemicals;
                     TRIM.store.currentScenario.chemicals = chems;
+                    TRIM.store.currentScenario.chem_params = this.responseJSON.chem_params;
                     populateEmissionsForm();
                 });
                 return;
@@ -143,7 +130,7 @@
             $(form).find("a[id*=_emission_upload_button]").attr({
                 'tabindex': '0',
                 'role': 'link'
-            });
+            }).removeClass('btn-secondary').addClass('btn-outline-dark').css('cursor', 'pointer');
             console.log('populated emissions form!')
             LoadingScreen.hide('emissions_loading');
         }
@@ -170,6 +157,12 @@
                 setTimeout(function() { renderEmissions(); }, 1000);
                 return;
             }
+
+            TRIM.store.currentScenario.parcels = TRIM.store.currentScenario.parcels.map(pcl => {
+                pcl.sources = TRIM.store.currentScenario.chem_params[pcl.name].sources;
+                pcl.initialConcentrations = TRIM.store.currentScenario.chem_params[pcl.name].initialConcentrations;
+                return pcl;
+            });
 
             let fieldset = $('#chemicals-add-btn').closest("fieldset")
             chemicals = TRIM.store.currentScenario.chemicals.map(x => x.name).sort();
@@ -260,11 +253,12 @@
             LoadingScreen.hide('emissions_parcels_loading');
         }
 
-
-		// zones are 1A-60Z with no A/B/I/O/Y/Z. case/whitespace insensitive.
+        // UTM + hemisphere zones are 1N-60N, 1S-60S. case/whitespace insensitive.
+		// MGRS zones are 1A-60Z with no A/B/I/O/Y/Z. case/whitespace insensitive.
 		function isValidUtmZone(z) {
 			let cleanedZone = z.trim().replaceAll(" ", "").toUpperCase();
-			const regex = /^([1-9]|[1-5][0-9]|60)([C-HJ-NP-X])$/gm;
+			const regex = /^([1-9]|[1-5][0-9]|60)([NS])$/gm;
+			// const regex = /^([1-9]|[1-5][0-9]|60)([C-HJ-NP-X])$/gm; // for MGRS support
 			return (regex.exec(cleanedZone) != null);
 		}
 
@@ -483,7 +477,7 @@
             if (proj_is_utm) {
                 utm_zone = $(utmZone).val();
                 if (!isValidUtmZone(utm_zone)) {
-                    alert('Please enter a valid UTM zone (e.g. 16T, 13R, etc.).');
+                    alert('Please enter a valid UTM zone (e.g. 16N, etc.).');
                     return false;
                 }
             }

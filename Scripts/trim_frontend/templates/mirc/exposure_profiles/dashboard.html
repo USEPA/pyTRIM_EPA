@@ -10,20 +10,20 @@
 <div class="row">
     {% for scenario in builtin_scenarios|sort(attribute='name') %}
         <div class="col-lg-3 col-md-4 col-sm-6 py-2">
-            <div class="card border-primary scenario-card">
-                <div class="card-header">
-                    <a href="{{ url_for('mirc_scenario.view_risk_scenario', id=scenario.id) }}"
-                        class="text-primary float-right"
-                    >
-                        <i class="fa fa-eye" role="img" title="View {{ scenario.name }}"></i>
+            <div class="card border-secondary rounded-0 scenario-card">
+                <div class="card-header p-0 border-secondary">
+                    <a href="{{ url_for('mirc_scenario.view_risk_scenario', id=scenario.id) }}" title="View {{ scenario.name }}"
+                        class="d-block btn btn-lg btn-outline-secondary text-left rounded-0 border-0" style="color: #212529;"
+                    > {# We make this btn-outline-secondary so it shows a nice border when tabbing onto it; we want a light bg on hover though, so see the css below... #}
+                        <i class="fa fa-eye float-right ml-1 py-2" style="font-size: 1rem;"></i>
+                        <span>{{ scenario.name }}</span>
                     </a>
-                    <h5 class="card-title mb-0">{{ scenario.name }}</h5>
                 </div>
                 {% if scenario.notes or scenario.parent %}
-                    <div class="card-body">
+                    <div class="card-body small">
                         {% if scenario.parent %}
                             <p class="card-text mb-1">
-                                Inherits From: <span class="text-primary font-weight-bold">{{ scenario.parent.name }}</span>
+                                Inherits From: <span class="text-secondary font-weight-bold">{{ scenario.parent.name }}</span>
                             </p>
                         {% endif %}
                         {% if scenario.notes %}
@@ -58,24 +58,25 @@
 <div class="row">
     {% for scenario in custom_scenarios|sort(attribute='updated', reverse=True) %}
         <div class="col-lg-3 col-md-4 col-sm-6 py-2">
-            <div class="card border-primary scenario-card custom-scenario-card">
-                <div class="card-header">
-                    <a href="{{ url_for('mirc_scenario.view_risk_scenario', id=scenario.id) }}"
-                        class="text-primary float-right"
-                    >
+            <div class="card border-secondary rounded-0 scenario-card custom-scenario-card">
+                <div class="card-header p-0 border-secondary">
+                    <a href="{{ url_for('mirc_scenario.view_risk_scenario', id=scenario.id) }}" title="View {{ scenario.name }}"
+                        class="d-block btn btn-lg btn-outline-secondary text-left rounded-0 border-0" style="color: #212529;"
+                    > {# We make this btn-outline-secondary so it shows a nice border when tabbing onto it; we want a light bg on hover though, so see the css below... #}
+
                         {% if not current_user.can('edit', scenario) %}
-                            <i class="fa fa-eye" role="img" title="View {{ scenario.name }}"></i>
+                            <i class="fa fa-eye float-right ml-1 py-2" style="font-size: 1rem;"></i>
                         {% else %}
-                            <i class="fa fa-edit" role="img" title="Edit {{ scenario.name }}"></i>
+                            <i class="fa fa-edit float-right ml-1 py-2" style="font-size: 1rem;"></i>
                         {% endif %}
+                        <span>{{ scenario.name }}</span>
                     </a>
-                    <h5 class="card-title mb-0">{{ scenario.name }}</h5>
                 </div>
                 {% if scenario.notes or scenario.parent %}
-                    <div class="card-body">
+                    <div class="card-body small">
                         {% if scenario.parent %}
                             <p class="card-text mb-1">
-                                Inherits From: <span class="text-primary font-weight-bold">{{ scenario.parent.name }}</span>
+                                Inherits From: <span class="text-secondary font-weight-bold">{{ scenario.parent.name }}</span>
                             </p>
                         {% endif %}
                         {% if scenario.notes %}
@@ -100,6 +101,18 @@
     </div>
 </div>
 
+{% include 'components/mirc/exposure_profiles/create_modal.html' %}
+
+<style>
+    /* Even though we use btn-outline-primary (for tabbing), on hover we want the bg-light color */
+    .scenario-card .card-header a:hover {
+        background-color: #d8e0e3 !important;
+    }
+</style>
+
+{% endblock content %}
+
+{% block scripts %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         if (!$('.custom-scenario-card').length) {
@@ -108,9 +121,4 @@
     });
 </script>
 
-{% include 'components/mirc/exposure_profiles/create_modal.html' %}
-
-{% endblock content %}
-
-{% block scripts %}
 {% endblock scripts %}

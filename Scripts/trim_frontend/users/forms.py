@@ -1,7 +1,7 @@
 from flask_security.forms import LoginForm, \
     ForgotPasswordForm, RegisterForm, ConfirmRegisterForm, \
     PasswordConfirmFormMixin, ResetPasswordForm, \
-    ChangePasswordForm, PasswordField, get_form_field_label
+    ChangePasswordForm, PasswordField
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired, Length, Regexp
@@ -56,7 +56,7 @@ class UserRegisterForm(OrderableForm, UserInfoMixin,
         'password', 'password_confirm', '*'
     )
     password = PasswordField(
-        get_form_field_label('password'),
+        'Password',
         validators=strong_pwd_validators
     )
 
@@ -73,7 +73,7 @@ class UserConfirmRegisterForm(
         'password', 'password_confirm', '*'
     )
     password = PasswordField(
-        get_form_field_label('password'),
+        'Password',
         validators=strong_pwd_validators
     )
 
@@ -81,7 +81,7 @@ class UserConfirmRegisterForm(
 class UserResetPasswordForm(OrderableForm, ResetPasswordForm):
     field_order = ('password', 'password_confirm', '*')
     password = PasswordField(
-        get_form_field_label('password'),
+        'Password',
         validators=strong_pwd_validators
     )
 
@@ -91,7 +91,7 @@ class UserChangePasswordForm(OrderableForm, ChangePasswordForm):
         'password', 'new_password', 'new_password_confirm', '*'
     )
     new_password = PasswordField(
-        get_form_field_label('new_password'),
+        "New Password",
         validators=strong_pwd_validators
     )
 

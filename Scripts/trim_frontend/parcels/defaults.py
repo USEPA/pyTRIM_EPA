@@ -11,9 +11,7 @@ from trim_db.services import *
 def serialize_parcel(pcl: Parcel):
     general_params = get_general_params(pcl)
     water_params = get_water_params(pcl, general_params['parcelType'])
-    source_params = get_source_params(pcl)
     soil_abiotic_params = get_soil_abiotic_params(pcl)
-    initial_conc = get_initial_concentrations(pcl)
 
     try:
         cdv = pcl.get_compartment("DryVaporSource")
@@ -26,7 +24,9 @@ def serialize_parcel(pcl: Parcel):
         pcl.volume_elements.sort(key=lambda ve: ve.name)
     except:
         pass
-    
+
+    # sources/initialConcentrations are now called separately in
+    # get_scenario_chemicals when needed
     s = {
         'id': pcl.id,
         'name': pcl.name,
@@ -37,9 +37,7 @@ def serialize_parcel(pcl: Parcel):
         'compartment_map': {ve.name: [c.name for c in ve.compartments] for ve in pcl.volume_elements},
         **general_params,
         **water_params,
-        **source_params,
         **soil_abiotic_params,
-        **initial_conc
     }
     try:
         s['mercury_transformation_rates'] = (

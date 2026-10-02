@@ -1,7 +1,7 @@
 {% from 'macros/mirc/form_macros.html' import render_input, render_label %}
 
 <tr class="chemical-{{ cp.chemical_id.data }}">
-    <th scope="row" class="table-primary border-primary align-middle text-center">
+    <th scope="row" class="table-secondary border-secondary align-middle text-center">
         {{ render_label(cp.Fw, hover_help=True, class="mb-0") }}
     </th>
     <td>
@@ -16,7 +16,7 @@
     </td>
 </tr>
 <tr class="chemical-{{ cp.chemical_id.data }}">
-    <th scope="row" class="table-primary border-primary align-middle text-center">
+    <th scope="row" class="table-secondary border-secondary align-middle text-center">
         {{ render_label(cp.soil_adjustment, hover_help=True, class="mb-0") }}
     </th>
     <td>
@@ -29,7 +29,7 @@
     </td>
 </tr>
 <tr class="chemical-{{ cp.chemical_id.data }}">
-    <th scope="row" class="table-primary border-primary align-middle text-center">
+    <th scope="row" class="table-secondary border-secondary align-middle text-center">
         {{ render_label(cp.CSF, hover_help=True, class="mb-0") }}
     </th>
     <td>
@@ -40,7 +40,7 @@
     </td>
 </tr>
 <tr class="chemical-{{ cp.chemical_id.data }}">
-    <th scope="row" class="table-primary border-primary align-middle text-center">
+    <th scope="row" class="table-secondary border-secondary align-middle text-center">
         {{ render_label(cp.RfD, hover_help=True, class="mb-0") }}
     </th>
     <td>
