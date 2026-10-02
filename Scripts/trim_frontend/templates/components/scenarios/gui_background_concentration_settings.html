@@ -387,7 +387,16 @@
                     $label.show().text(data)
 
                     parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                    TRIM.api.updateParcel(TRIM.store.currentScenario.id, parcel_info)
+                    console.log(parcel_info)          
+                    TRIM.api.updateParcel(TRIM.store.currentScenario.id, parcel_info).on('load', (rsp)=>{
+                        let chem_name = parcel_info[parcel_info.findIndex(e => e.type == 'data' & e.name == 'chemical_name')].value
+                        let ve_name = parcel_info[parcel_info.findIndex(e => e.type == 'data' & e.name == 've_name')].value
+                        let comp_name = parcel_info[parcel_info.findIndex(e => e.type == 'data' & e.name == 'compartment_name')].value
+
+                        let pcl = parcel_info[parcel_info.findIndex(e => e.name == 'id')].value;
+                        pcl = getParcelByKey('id', pcl);
+                        pcl['initialConcentrations'][chem_name][ve_name][comp_name].ic = data;
+                    });
                 } else {
                     return
                 }

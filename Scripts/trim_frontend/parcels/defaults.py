@@ -579,7 +579,7 @@ def get_water_params(pcl, parcel_type):
 
 
 def get_initial_concentrations(pcl):
-    skip_ves = ['Air', 'UpperAir', "WetVaporSource", "DryVaporSource", "WetParticleSource", "DryParticleSource"]
+    skip_ves = ["Air", "UpperAir", "WetVaporSource", "DryVaporSource", "WetParticleSource", "DryParticleSource"]
     skip_comps_with = "_Sink"
 
     ic_params = {}
@@ -587,14 +587,14 @@ def get_initial_concentrations(pcl):
         chem_name = chem.name
         if chem_name not in ic_params:
             ic_params[chem_name] = {}
-        
+
         for ve in pcl.volume_elements:
             ve_name = ve.name
             if ve_name in skip_ves:
                 continue
             elif ve_name not in ic_params[chem_name]:
                 ic_params[chem_name][ve_name] = {}
-            
+
             for comp in ve.compartments:
                 if skip_comps_with in comp.name:
                     continue
@@ -610,9 +610,8 @@ def get_initial_concentrations(pcl):
     return {'initialConcentrations': ic_params}
 
 
-
 def get_source_params(pcl):
-    skip_ves = ['Air', 'UpperAir']
+    skip_ves = ["Air", "UpperAir"]
     skip_comps_with = "_Sink"
 
     source_params = {}
@@ -620,14 +619,14 @@ def get_source_params(pcl):
         chem_name = chem.name
         if chem_name not in source_params:
             source_params[chem_name] = {}
-        
+
         for ve in pcl.volume_elements:
             ve_name = ve.name
             if ve_name in skip_ves:
                 continue
             elif ve_name not in source_params[chem_name]:
                 source_params[chem_name][ve_name] = {}
-            
+
             for comp in ve.compartments:
                 if skip_comps_with in comp.name:
                     continue
