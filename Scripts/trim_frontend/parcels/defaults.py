@@ -579,25 +579,41 @@ def get_water_params(pcl, parcel_type):
 
 
 def get_initial_concentrations(pcl):
-    chem_objs = {c for c in pcl.scenario.chemicals}
-    chems = {c.name: {} for c in pcl.scenario.chemicals}
-    initial_conc = {"initialConcentrations": chems}
-    for chem in chem_objs:
-        for comp in pcl.compartments:
-            unit = "g / m^3" if comp.media.id in [2, 5, 7, 56, 55, 8, 9] else "g / kg" if comp.media.id in [23, 24, 27, 28, 29, 31, 32, 33, 37, 39, 41, 43, 44, 45, 46, 47, 48, 49, 50, 51] else "g / L" if comp.media.id in [10, 4] else ""
-            spd = initial_conc["initialConcentrations"][chem.name].get(comp.volume_element.name)
-            # Ultimately we need to use initialConcentrationConverted but we need to solve the unit incomaptibility issue.
-            if spd:
-                spd.setdefault(comp.name, {'ic': comp.initialConcentration(chem).magnitude, 'unit': unit})
-            else:
-                initial_conc["initialConcentrations"][chem.name].setdefault(comp.volume_element.name, {
-                    comp.name: {'ic': comp.initialConcentration(chem).magnitude, 'unit': unit}})
-    return initial_conc
+    skip_ves = ['Air', 'UpperAir', "WetVaporSource", "DryVaporSource", "WetParticleSource", "DryParticleSource"]
+    skip_comps_with = "_Sink"
+
+    ic_params = {}
+    for chem in pcl.scenario.chemicals:
+        chem_name = chem.name
+        if chem_name not in ic_params:
+            ic_params[chem_name] = {}
+        
+        for ve in pcl.volume_elements:
+            ve_name = ve.name
+            if ve_name in skip_ves:
+                continue
+            elif ve_name not in ic_params[chem_name]:
+                ic_params[chem_name][ve_name] = {}
+            
+            for comp in ve.compartments:
+                if skip_comps_with in comp.name:
+                    continue
+
+                unit = "g / m^3" if comp.media.id in [2, 5, 7, 56, 55, 8, 9] else "g / kg" if comp.media.id in [23, 24, 27, 28, 29, 31, 32, 33, 37, 39, 41, 43, 44, 45, 46, 47, 48, 49, 50, 51] else "g / L" if comp.media.id in [10, 4] else ""
+                ic_rate = comp.initialConcentration(chemical=chem)  # slow ...
+                try:
+                    ic_rate = ic_rate.magnitude
+                except Exception:
+                    pass
+                ic_params[chem_name][ve_name][comp.name] = {'ic': ic_rate, 'unit': unit}
+
+    return {'initialConcentrations': ic_params}
+
 
 
 def get_source_params(pcl):
     skip_ves = ['Air', 'UpperAir']
-    skip_comps = ['Degradation_Reaction_Sink', 'Soil_Advection_Sink', 'Flush_Rate_Sink']
+    skip_comps_with = "_Sink"
 
     source_params = {}
     for chem in pcl.scenario.chemicals:
@@ -613,7 +629,7 @@ def get_source_params(pcl):
                 source_params[chem_name][ve_name] = {}
             
             for comp in ve.compartments:
-                if comp.name in skip_comps:
+                if skip_comps_with in comp.name:
                     continue
 
                 deposition_rate = comp.surfaceDepositionRate(chemical=chem)  # slow ...
