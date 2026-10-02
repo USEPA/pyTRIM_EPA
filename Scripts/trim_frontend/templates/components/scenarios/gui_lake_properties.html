@@ -542,7 +542,9 @@
                         let autocalc_button = "";
 
                         if (row.shortProperty == 'externalWaterInflow') {
-                            inflow_button = `<a class="inflow-modal-btn badge badge-secondary ml-2" style="cursor: pointer;" href="Edit Inflow" data-parcel="${e.name}"><i class="fa fa-water"></i></a>`;
+                            inflow_button = `<a class="inflow-modal-btn badge badge-secondary ml-2" title="Edit External Water Inflow" style="cursor: pointer;" href="Edit Inflow" data-parcel="${e.name}">
+                                <i class="fa fa-water"></i>
+                            </a>`;
                         }
                         else if (row.shortProperty == 'flush_rate') {
                             autocalc_button = make_autocalc_btn(e);

@@ -2,16 +2,16 @@
 <form id="permissions-form" action="{{ update_url }}" method="POST" class="mt-3 mb-4">
     <div class="row form-inline mb-3">
         <div class="col-auto">
-            <label for="new-user-email" class="mr-1">Add Email:</label>
+            <label for="new-user-email" name="new-user-email-label" class="mr-1">Add Email:</label>
         </div>
         <div>
             <input type="email" id="new-user-email" class="custom-select custom-select-sm" />
-            <select id="new-user-level" class="custom-select custom-select-sm">
+            <select id="new-user-level" class="custom-select custom-select-sm" aria-labelledby="new-user-level">
                 <option value="view">view</option>
                 <option value="edit">edit</option>
                 <option value="manage">manage</option>
             </select>
-            <a href="#add" id="add-mirc-user-btn" class="btn btn-sm btn-outline-primary ml-1">
+            <a href="#add" id="add-mirc-user-btn" title="Add user to exposure profile" class="btn btn-sm btn-outline-primary ml-1">
                 <i class="fa fa-plus"></i>
             </a>
         </div>
@@ -62,12 +62,14 @@ document.addEventListener("DOMContentLoaded", function() {
             if (readonly) {
                 i.disabled = true;
             }
+            i.setAttribute('tabindex', '0');
             d.appendChild(i);
 
             var l = document.createElement('label');
             l.className = 'custom-control-label';
             l.htmlFor = 'access_level-' + idx + '-' + val;
             l.innerText = lbl;
+            l.setAttribute('tabindex', '0');
             d.appendChild(l);
 
             return d;
@@ -91,6 +93,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         i.type = 'text';
                         i.readOnly = true;
                         i.className = 'form-control-plaintext p-0';
+                        i.setAttribute('title', data);
                         i.setAttribute('value', data);
                         i.value = data;
 

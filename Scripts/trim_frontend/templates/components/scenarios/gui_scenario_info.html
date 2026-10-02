@@ -269,10 +269,14 @@
             if (ENABLED_FORM) {
                 return;
             }
+            // 508c patch
+            $('#scenario-info-gui').find("label[for='description']").attr('for', 'scenario_description');
+            $('#scenario-info-gui').find("textarea#description").attr('id', 'scenario_description');
+
             var startDate = $('#simulation_start_date');
             var endDate = $('#simulation_end_date');
             var scenarioName = $('#scenario-info-gui').find("input#name")
-            var scenarioDesc = $('#scenario-info-gui').find("textarea#description")
+            var scenarioDesc = $('#scenario-info-gui').find("textarea#scenario_description")
             startDate.on('change', calculateDateRange);
             endDate.on('change', calculateDateRange);
             startDate.change();
@@ -285,7 +289,10 @@
         });
 
         function get_form_data(elem) {
-            let param_name = $(elem).attr("name")
+            let param_name = $(elem).attr("name");
+            if (param_name == "scenario_description")
+                param_name = "description";
+            
             let param_info = [
                 {
                     'type': 'data',
@@ -302,7 +309,7 @@
                 }
             ]
             let param_data = ""
-            if ($(elem).attr('type') == "date" || $(elem).attr('name') == "name" || $(elem).attr('name') == "description") {
+            if ($(elem).attr('type') == "date" || param_name == "name" || param_name == "description") {
                 param_data = $(elem).val()
             }
             param_info[param_info.findIndex(e => e.type == 'input')].value = param_data;

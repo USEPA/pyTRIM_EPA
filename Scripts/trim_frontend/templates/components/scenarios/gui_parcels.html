@@ -1259,6 +1259,10 @@ onDomLoad(function () {
 
         INITIALIZED_MAP = true;
         INITIALIZING_MAP = false;
+
+        // Leaflet button 508c
+        $("a.leaflet-control-zoom-in, a.leaflet-control-zoom-out").attr("tabindex", "0");
+        $("a[class^='leaflet']").attr("aria-label", "Leaflet map button");
     }
 
     function onUploadCoordinateSystemChanged() {
@@ -1978,10 +1982,6 @@ onDomLoad(function () {
 
     $('#parcel_file_fields_div').hide()
     enableFieldUpdates();
-
-    // Leaflet button 508c
-    $("a.leaflet-control-zoom-in, a.leaflet-control-zoom-out").attr("tabindex", "0");
-    $("a[class^='leaflet']").attr("aria-label", "Leaflet map button");
 
     function update_data(this_table_id) {
         let new_table_data = get_Data_from_table(this_table_id)
