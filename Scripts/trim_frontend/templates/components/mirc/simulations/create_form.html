@@ -27,9 +27,9 @@
                 default=form.mirc_scenario.data, allow_none=False
             ) }}
             {{ render_feedback(form.mirc_scenario) }}
-            <div class="form-text">
+            <div class="form-text mb-1">
                 <small>
-                    <a href="{{ url_for('mirc_scenario.view_risk_scenarios') }}" target="_blank" tabindex="0">
+                    <a href="{{ url_for('mirc_scenario.view_risk_scenarios') }}" target="_blank" class="text-secondary" tabindex="0">
                         <i class="fa fa-edit mr-1"></i>
                         Create or Edit Exposure Profiles
                     </a>
@@ -552,6 +552,7 @@ onDomLoad(function() {
 
         // Handle change to numeric inputs
         form.on('change', 'input', function(e) {
+            this.setCustomValidity(''); // clear custom error
             var me = $(this);
             var g = me.closest('.form-group');
             g.find('.src-info').val('custom');
@@ -734,6 +735,7 @@ onDomLoad(function() {
     initFormEvents(form);
 
     window.MIRC.submitSimulationForm = function() {
+
         form.find('input, textarea').removeClass('is-invalid');
         form.find('.invalid-feedback').html('');
 
@@ -792,6 +794,10 @@ onDomLoad(function() {
 
     form.submit(function(e) {
         e.preventDefault();
+
+        // 508c stuff
+        $("#simulation-form-modal #mirc_simulation_description").attr("id", "description");
+        $("#simulation-form-modal #mirc_simulation_chemical").attr("id", "chemical");
         window.MIRC.submitSimulationForm();
     });
 
@@ -801,6 +807,11 @@ onDomLoad(function() {
             form[0].reportValidity();
         }
     });
+
+    // 508c stuff
+    $("#simulation-form-modal #description").attr("id", "mirc_simulation_description");
+    $("#simulation-form-modal #chemical").attr("id", "mirc_simulation_chemical");
+    $("#simulation-form-modal label[for='chemical']").attr("for", "mirc_simulation_chemical");
 });
 
 </script>

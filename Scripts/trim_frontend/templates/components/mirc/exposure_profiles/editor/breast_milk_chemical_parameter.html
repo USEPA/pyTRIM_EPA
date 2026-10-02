@@ -2,7 +2,7 @@
 
 <h4>
     <button type="button"
-        class="btn btn-lg btn-block px-0 text-primary text-left border-light border-top-0 border-left-0 border-right-0 rounded-0"
+        class="btn btn-lg btn-block px-0 text-secondary text-left border-light border-top-0 border-left-0 border-right-0 rounded-0"
         data-toggle="collapse" aria-expanded="true"
         data-target="#bmcp-collapse" aria-controls="bmcp-collapse"
         style="font-weight: 500;"
@@ -26,6 +26,20 @@
                 {% endfor %}
             </select>
         </div>
+        <div class="col-sm d-flex align-items-center justify-content-end">
+            <div class="custom-control custom-checkbox form-check-inline">
+                <input type="checkbox" id="infant_add_override" name="infant_add_override"
+                    class="custom-control-input"
+                />
+                <label class="custom-control-label" for="infant_add_override">
+                    Set infant chemical dose from breast milk equal to
+                    the mother's chemical dose from all sources
+                    <!-- <span class="badge badge-warning ml-1" title="This will disable all other Chemical/Breast Milk Parameters">
+                        <i class="fa fa-exclamation-triangle"></i>
+                    </span> -->
+                </label>
+            </div>
+        </div>
     </div>
 
     <div class="table-responsive">
@@ -33,14 +47,14 @@
         <thead>
             <tr class="text-center">
                 <th scope="col"
-                    class="border-top-0 border-left-0 border-primary align-middle"
+                    class="border-top-0 border-left-0 border-secondary align-middle"
                 >
                     Parameter
                 </th>
-                <th scope="col" class="table-primary border-primary align-middle">
+                <th scope="col" class="table-secondary border-secondary align-middle">
                     Value
                 </th>
-                <th scope="col" class="table-primary border-primary align-middle">
+                <th scope="col" class="table-secondary border-secondary align-middle">
                     Unit
                 </th>
             </tr>
@@ -59,6 +73,26 @@
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         var tbl = $('#breast-milk-chemical-parameters tbody');
+        var infantADDOverrideCheck = $('#infant_add_override');
+
+        function syncInfantADDOverride(chemFilter, setHidden) {
+            tbl.closest('.table-responsive').show();
+
+            var hiddenInput = tbl.find('tr' + chemFilter + '.infant-add-override input[type="checkbox"]');
+            var visibleInput = infantADDOverrideCheck;
+
+            if (setHidden === true) {
+                hiddenInput.prop('checked', visibleInput.prop('checked'));
+            }
+            else {
+                visibleInput.prop('checked', hiddenInput.prop('checked'));
+            }
+
+            if (visibleInput.prop('checked')) {
+                tbl.closest('.table-responsive').hide();
+            }
+        }
+
         $('#breast-milk-chemical-filter').change(function() {
             var c = $(this).val();
 
@@ -86,6 +120,11 @@
                     tbl.append(data);
                     rows = tbl.find('tr').hide();
                     rows.filter(filter).show();
+                    // Handle infant override checkboxes
+                tbl.closest('.table-responsive').show();
+                    rows.filter('.infant-add-override').hide();
+                    rows.filter('.infant-add-override').find('input[type="checkbox"][checked]').prop('checked', true);
+                    syncInfantADDOverride(filter);
                     // Enable popups
                     $('[data-toggle="popover"]').popover();
                 }).always(function() {
@@ -95,8 +134,21 @@
             else {
                 rows.hide();
                 relevant.show();
+                // Handle infant override checkboxes
+                rows.filter('.infant-add-override').hide();
+                syncInfantADDOverride(filter);
             }
         }).change();
+
+        infantADDOverrideCheck.on('change', function() {
+            tbl.closest('.table-responsive').show();
+            var trs = tbl.find('tr:visible');
+            if (!trs.length) {
+                return;
+            }
+            var filter = Array.from(trs[0].classList).filter(x => x.indexOf('chemical-') == 0)[0];
+            syncInfantADDOverride('.' + filter, true);
+        });
     });
     </script>
 </div>

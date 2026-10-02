@@ -19,7 +19,7 @@
             <span id="mirc-results-name" class="h5 mb-0">Simulation</span>
         </div>
         <div class="row mx-0">
-            <span id="mirc-results-shortdesc">Profile, Date</span>
+            <span id="mirc-results-shortdesc" class="mt-1">Profile, Date</span>
         </div>
     </div>
     <div class="card-body">
@@ -97,6 +97,7 @@
                         class="btn-block font-weight-bold py-2 px-3 text-decoration-none"
                         aria-expanded="False" aria-controls="logCollapse"
                         data-toggle="collapse"
+                        role="button" tabindex="0"
                     >
                         Logs
                     </a>
@@ -113,7 +114,7 @@
     </div>
 </div>
 
-<div id="simulation-desc-modal" class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-hidden="true">
+<div id="simulation-desc-modal" class="modal fade" data-backdrop="static" data-keyboard="false" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
@@ -395,20 +396,24 @@ onDomLoad(function() {
             );
             
             shortdesc = $('#mirc-results-shortdesc');
-            shortdesc.text("");
+            shortdesc.html('');
+            shortdesc = $('<div class="d-flex align-items-center" style="gap: 6px" />').appendTo(shortdesc);
             function add_shortdesc(label, text) {
-                $(`<small class="mb-1">${label}</small>`)
-                    .append(
-                        $('<span class="text-muted" />').text(text)
-                    ).append("<br/>").appendTo(shortdesc);
+                $(`<small>${label}:</small>`).appendTo(shortdesc);
+                $('<small class="badge badge-dark px-2 font-weight-normal" />').css({
+                    lineHeight: '1.1em',
+                    whiteSpace: 'normal',
+                }).text(text).appendTo(shortdesc);
             }
-            add_shortdesc("Exposure Profile: ", meta.exposureProfile?.name);
-            add_shortdesc("Date Created: ", meta.created);
-            add_shortdesc("TRIM Output Date: ", (new Date(meta.timestamp)).toLocaleDateString('en-US', timeDisplayOpts));
+            add_shortdesc("Exposure Profile", meta.exposureProfile?.name);
+            add_shortdesc("Date Created", meta.created);
+            add_shortdesc("Simulated Date", (new Date(meta.timestamp)).toLocaleDateString('en-US', timeDisplayOpts));
             if (meta.description) {
-                add_shortdesc("Notes: ", meta.description);
+                var notesDiv = $('<div class="mt-1" />').appendTo(shortdesc.parent());
+                // $(`<small class="mt-1 mr-1">Notes:</small>`).appendTo(notesDiv);
+                $('<small class="text-muted" />').text(meta.description).appendTo(notesDiv);
             }
-            shortdesc.show();
+            shortdesc.parent().show();
         }
         else {
             $('#mirc-results-name').text(

@@ -87,8 +87,12 @@ def get_updated_parameter(
 
     print(f'Changed {parameter} ({parameter_name}) -> {val} {unit}, "{notes}"')
 
-    if val is None:
-        val = 0  # Blanks need to be saved as 0
+    if val is None:  # Blanks need to be saved as 0
+        val = 0
+    elif val is True:  # Booleans need to be saved as 0/1
+        val = 1
+    elif val is False:
+        val = 0
 
     if (
         not hasattr(parameter, 'scenario')

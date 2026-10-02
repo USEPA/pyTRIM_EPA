@@ -39,12 +39,15 @@ def get_epa_template():
                 {{ url_for('static', filename='css/lib/uswds/epa/sprite.artifact.svg')}}#magnifying-glass
         Remove references to pattern-lab (`themes/epa_theme/pattern-lab/patterns`)
         Remove optional meta data
-        Remove certain scripts at the bottom
-            <script src="/static/epa/css.escape.js.download"></script>
-            <script src="/static/epa/es6-promise.auto.min.js.download"></script>
-            <script src="/static/epa/jquery.once.min.js.download"></script>
-            Universal-Federated-Analytics-Min.js.download
-            9240.js.download
+        Keep the following scripts, remove the .download extension
+            jquery.min.js
+            once.min.js
+            drupalSettingsLoader.js
+            drupal.js
+            drupal.init.js
+            common.min.js
+            scripts.min.js
+            header-search.min.js
 
     uswds/epa/style.css
         Updating relative paths, see existing:

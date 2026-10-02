@@ -1,7 +1,7 @@
 {% from 'macros/mirc/form_macros.html' import render_input, render_label %}
 
 <tr class="plant-{{ pp.product_id.data }}">
-    <th scope="row" class="table-primary border-primary align-middle text-center">
+    <th scope="row" class="table-secondary border-secondary align-middle text-center">
         {{ render_label(pp.MAF, hover_help=True, class="mb-0") }}
     </th>
     <td>
@@ -20,7 +20,7 @@
     'protected' in pp.product.data
 ) %}
 <tr class="plant-{{ pp.product_id.data }}">
-    <th scope="row" class="table-primary border-primary align-middle text-center">
+    <th scope="row" class="table-secondary border-secondary align-middle text-center">
         {{ render_label(pp.Rp, hover_help=True, class="mb-0") }}
     </th>
     {% if not protected %}
@@ -39,7 +39,7 @@
     {% endif %}
 </tr>
 <tr class="plant-{{ pp.product_id.data }}">
-    <th scope="row" class="table-primary border-primary align-middle text-center">
+    <th scope="row" class="table-secondary border-secondary align-middle text-center">
         {{ render_label(pp.kp, hover_help=True, class="mb-0") }}
     </th>
     {% if not protected %}
@@ -52,7 +52,7 @@
     {% endif %}
 </tr>
 <tr class="plant-{{ pp.product_id.data }}">
-    <th scope="row" class="table-primary border-primary align-middle text-center">
+    <th scope="row" class="table-secondary border-secondary align-middle text-center">
         {{ render_label(pp.Tp, hover_help=True, class="mb-0") }}
     </th>
     {% if not protected %}
@@ -65,7 +65,7 @@
     {% endif %}
 </tr>
 <tr class="plant-{{ pp.product_id.data }}">
-    <th scope="row" class="table-primary border-primary align-middle text-center">
+    <th scope="row" class="table-secondary border-secondary align-middle text-center">
         {{ render_label(pp.Yp, hover_help=True, class="mb-0") }}
     </th>
     {% if not protected %}

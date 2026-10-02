@@ -39,11 +39,11 @@
                                 </div>
                                 <div class="row mb-1">
                                     <div class="col-sm">
-                                        <button class="comp_show_all btn btn-warning">Show All</button>
-                                        <button class="comp_hide_all btn btn-warning">Hide All</button>
-                                        <button class="comp_show_nz btn btn-outline-success">Show Non-Zero</button>
+                                        <button class="comp_show_all btn btn-secondary">Show All</button>
+                                        <button class="comp_hide_all btn btn-secondary">Hide All</button>
+                                        <button class="comp_show_nz btn btn-outline-dark">Show Non-Zero</button>
                                         <div class="dropdown d-inline">
-                                            <button class="btn_show_comp btn btn-outline-success dropdown-toggle" type="button" data-toggle="dropdown">
+                                            <button class="btn_show_comp btn btn-outline-dark dropdown-toggle" type="button" data-toggle="dropdown">
                                                 Show Compartment
                                             </button>
                                             <div class="dropdown-menu">
@@ -108,7 +108,7 @@
             $(form).find("a[id*=_concentration_upload_button]").attr({
                 'tabindex': '0',
                 'role': 'link'
-            });
+            }).removeClass('btn-secondary').addClass('btn-outline-secondary').css('cursor', 'pointer');
         }
 
         function updateBackgroundConcentrations() {

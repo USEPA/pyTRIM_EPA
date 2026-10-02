@@ -408,6 +408,15 @@ class MircScenarioService(GenericService[MircScenario], PermissionsMixin):
         for param in form.breast_milk_chemical_parameters:
             updated = get_updated_parameter(
                 scenario, param,
+                'infant_add_equals_adult_lifetime', 'set infant add equal to adult ladd',
+                chemical=int(param.chemical_id.data),
+                media=bm.id,
+                value_name='infant_add_equals_adult_lifetime', unit_name=None,
+                with_notes=False
+            )
+            update_parameter(updated)
+            updated = get_updated_parameter(
+                scenario, param,
                 'AE_inf', 'infant absorption efficiency',
                 chemical=int(param.chemical_id.data),
                 media=bm.id,
@@ -798,6 +807,7 @@ class MircSimulationService(GenericService[MircSimulation]):
             risk_data = assess_risk(
                 scenario=scenario,
                 product=product, chemical=simulation.chemical,
+                maternal_cumulative_ladd=maternal_cumulative_ladd,
                 concentration_fat=c_fat, concentration_aq=c_aq,
                 ingestion_percentile=irp,
                 logs=logs

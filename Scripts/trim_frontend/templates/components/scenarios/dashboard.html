@@ -19,7 +19,7 @@
     </div>
     {% endif %}
     <a href="{{ url_for('mirc_scenario.view_risk_scenarios') }}"
-        class="btn btn-sm btn-outline-secondary text-dark mb-1 mr-1 py-1"
+        class="btn btn-sm btn-outline-warning text-dark mb-1 mr-1 py-1"
         target="_blank" tabindex="0"
     >
         <i class="fa fa-edit"></i>
@@ -34,15 +34,15 @@
         New<span class="d-none d-sm-inline"> Scenario</span>
     </button>
 </div>
-<div class="container-fluid content-row">
+<div class="container-fluid content-row px-0">
     <div class="row">
         {% for scenario in scenarios|sort(attribute='updated', reverse = True) %}
             <div class="scenario-col col-lg-4 col-md-6 py-2">
-                <div class="card h-100 rounded-0 border-primary shadow">
-                    <div class="card-header p-0 bg-transparent border-primary">
+                <div class="card h-100 rounded-0 border-secondary shadow">
+                    <div class="card-header p-0 bg-transparent border-secondary">
                         <a href="{{ url_for('scenario.edit_scenario', id=scenario.id) }}" title="View {{ scenario.name }}"
-                            class="d-block btn btn-lg btn-outline-primary text-left rounded-0 border-0" style="color: #212529;"
-                        > {# We make this btn-outline-primary so it shows a nice border when tabbing onto it; we want a light bg on hover though, so see the css below... #}
+                            class="d-block btn btn-lg btn-outline-secondary text-left rounded-0 border-0" style="color: #212529;"
+                        > {# We make this btn-outline-secondary so it shows a nice border when tabbing onto it; we want a light bg on hover though, so see the css below... #}
                             <i class="fa fa-eye float-right ml-1 py-2" style="font-size: 1rem;"></i>
                             <span>{{ scenario.name }}</span>
                         </a>
@@ -121,7 +121,7 @@
                                         <input name="user_id" value="{{logged_in_user.id}}" type="hidden" />
                                         <input name="scenario_id" value="{{scenario.id}}" type="hidden" />
                                         <input name="scenario_name" value="{{scenario.name}}" type="hidden" />
-                                        <button type="submit" class="btn btn-block btn-sm py-2 btn-outline-secondary border-0 rounded-0 text-dark"
+                                        <button type="submit" class="btn btn-block btn-sm py-2 btn-outline-dark border-0 rounded-0"
                                             title="Copy Scenario"
                                         >
                                             <i class="fa fa-copy mr-1"></i>Copy
@@ -187,7 +187,7 @@
     <button type="button" class="btn btn-light" data-dismiss="modal">
         Cancel
     </button>
-    <button type="button" id="create-scenario-btn" class="btn btn-primary">
+    <button type="button" id="create-scenario-btn" class="btn btn-secondary">
         Create
     </button>
     <script>
@@ -232,7 +232,6 @@
     body=modal_body, footer=modal_footer
 ) }}
 
-{% if current_user.is_admin %}
 <style>
     /* Even though we use btn-outline-primary (for tabbing), on hover we want the bg-light color */
     .scenario-col .card-header a:hover {
@@ -240,6 +239,7 @@
     }
 </style>
 
+{% if current_user.is_admin %}
 <script>
     onDomLoad(function() {
         $('.admin-access-only').closest('div.scenario-col').hide(); // hide by default
