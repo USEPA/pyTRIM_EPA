@@ -868,6 +868,15 @@
                 return;
             }
 
+            (function checkForUSDA() {
+                metadata = TRIM.store.currentScenario.metadata
+                if (metadata?.abiotic_usda) {
+                    $('#abiotic-usda-soil-btn')
+                        .removeClass('btn-outline-warning text-dark')
+                        .addClass('btn-success');
+                }
+            })();
+
             function getPropOrDefault(pcl, propName, defaultName) {
                 const v = pcl[propName];
                 if (v === null || v === "") {

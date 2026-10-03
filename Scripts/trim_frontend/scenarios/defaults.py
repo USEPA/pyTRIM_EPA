@@ -9,6 +9,12 @@ def serialize_scenario(scen: Scenario):
         erosion_source = scen.erosionRateCalcSource
     except Exception:
         erosion_source = 1
+
+    try:
+        metadata = scen.parameters.get('metadata').source
+    except:
+        metadata = {}
+
     s = {
         'id': scen.id,
         'name': scen.name,
@@ -17,7 +23,8 @@ def serialize_scenario(scen: Scenario):
         'simulation_end_date': scen.end_date,
         'has_chemicals': len(list(scen.chemicals)) > 0,
         'has_parcels': len(list(scen.parcels)) > 0,
-        'erosionRateSource': erosion_source
+        'erosionRateSource': erosion_source,
+        'metadata': metadata
     }
     return s
    

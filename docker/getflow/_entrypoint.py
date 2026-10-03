@@ -60,7 +60,7 @@ os.environ["SQLALCHEMY_DATABASE_URI"] = (
 # loggy(f"ENVIRONMENT (end):")
 
 from getflow import run_getflow_v13, run_getflow_v13_for_scenario_id
-from trim_db import ScenarioService
+from trim_db import ScenarioService, ParameterService
 from trim_frontend import create_app
 
 
@@ -284,6 +284,10 @@ class DockerGetflowEntryPoint:
                 "ro_value": ",".join(receive_vals)
             }
             handle_parcel_update(sender, payload)
+        
+        metadata = ScenarioService(scn).get_metadata()
+        metadata["has_getflow"] = True
+        ParameterService.commit()
 
     def launch(self):
         loggy(f"DockerGetflowEntryPoint.launch()")

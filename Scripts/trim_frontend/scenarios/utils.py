@@ -316,6 +316,10 @@ def handle_scenario_update(s, scenario_data):
     elif field_name == "soil_api":
         try:
             update_soil_from_api(s, logger)
+
+            metadata = ScenarioService(s).get_metadata()
+            metadata["abiotic_usda"] = True
+            ParameterService.commit()
         except Exception as e:
             logger.error(f"Failed to complete USDA soil update: {traceback.format_exc()}")
             raise ApiException(f"Error handling USDA API request: {e}")

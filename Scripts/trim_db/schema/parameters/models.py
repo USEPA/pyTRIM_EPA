@@ -1,4 +1,7 @@
 import sqlalchemy as sa
+from sqlalchemy.ext.mutable import MutableDict
+from sqlalchemy.dialects.postgresql import JSONB
+
 from ..utils.base import Model
 from ..utils.caching import CacheManager
 from ..utils.serialize import register_serializer
@@ -369,6 +372,8 @@ class CustomParameter(Model):
     scenario = sa.orm.relationship(
         'Scenario', backref=sa.orm.backref('custom_params', lazy='dynamic')
     )
+
+    source = sa.Column(MutableDict.as_mutable(JSONB))
 
     @property
     def domain(self):

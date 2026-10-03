@@ -425,6 +425,7 @@
                             var sd = this.responseJSON.runoff_matrix;
                             TRIM.store.currentScenario.runoff_matrix = sd;
                             TRIM.forms.populate(form, TRIM.store.currentScenario.runoff_matrix);
+                            TRIM.store.currentScenario.metadata.has_getflow = true;
                             renderRunoffForm();
                         });
                     }
@@ -483,6 +484,15 @@
                 setTimeout(function() { updateRunoffData(); }, 1000);
                 return;
             }
+
+            (function checkForGetflow() {
+                metadata = TRIM.store.currentScenario.metadata
+                if (metadata?.has_getflow) {
+                    $('#run_getflow')
+                        .removeClass('btn-outline-warning text-dark')
+                        .addClass('btn-success');
+                }
+            })();
 
             let runoff_matrix = TRIM.store.currentScenario.runoff_matrix
             let runoff_data = []

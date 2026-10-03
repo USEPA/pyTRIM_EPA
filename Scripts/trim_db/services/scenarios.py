@@ -26,6 +26,17 @@ class ScenarioService(GenericService[Scenario], PermissionsMixin):
         }
         return users
 
+    def get_metadata(self):
+        from trim_db.services.parameters import get_or_create_custom_param
+
+        scn = self.__instance
+        metadata = scn.parameters.get("metadata")
+        metadata = get_or_create_custom_param(
+            metadata,
+            {"scenario_id": scn.id},
+        )
+        return metadata.source
+
     def get_surface_runoff(self):
         return get_scenario_surface_runoff(self.__instance)
 
