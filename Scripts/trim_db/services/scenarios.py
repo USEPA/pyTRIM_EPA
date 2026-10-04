@@ -6,7 +6,7 @@ from ..schema.entities.environment import Parcel
 from ..schema.utils.caching import CacheManager
 from ..schema.scenarios.models import *
 from .generic import GenericService, PermissionsMixin
-from .parameters import parameterize
+from .parameters import ParameterService, parameterize
 from .users import UserService
 
 __all__ = ['ScenarioService']
@@ -442,5 +442,16 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
                 )
     except Exception as e:
         raise Exception(f"Error parsing aermod formulas :: {e}")
+
+    try:
+        scn_metadata = ScenarioService.get_metadata(scenario)
+        if "emissions" not in scn_metadata:
+            scn_metadata["emissions"] = {}
+        scn_metadata["emissions"] |= {
+            f"{for_chemical.name}_{chem_spec}": metadata["filename"]
+        }
+        ParameterService.commit()
+    except Exception as e:
+        print(f"Error updating emissions aermod metadata: {e}")
 
     return aermod_results

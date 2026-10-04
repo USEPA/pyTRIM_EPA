@@ -142,6 +142,7 @@ def parse_aermod():
             fpn,
             for_chemical=chem,
             metadata={
+                'filename': fileField.filename,
                 'coordinate_system': coord_sys,
                 'utm_zone': utm_zone,
                 'zflag_restriction': zflag_restriction,

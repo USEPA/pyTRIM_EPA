@@ -204,8 +204,7 @@
                 const heading = $(this).find('label:contains("Static Value") sup');
                 if (field_file && heading.length) {
                     const [field, file] = field_file;
-                    $(
-                        `<span class="met-file-icon" data-toggle="tooltip" 
+                    $(`<span class="met-file-icon" data-toggle="tooltip" 
                         data-original-title="Value comes from ${file}">
                             <i class="fa fa-file ml-1 text-success"></i>
                         </span>`

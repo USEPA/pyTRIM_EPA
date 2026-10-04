@@ -75,7 +75,7 @@ window.TRIM = (function(trim) {
             url: url.replace('/0/', '/' + scenario.id + '/')
         }).on('load', function() {
             if (this.responseJSON) {
-                TRIM.store.currentScenario.metadata = this.responseJSON;
+                TRIM.store.currentScenario.metadata = structuredClone(this.responseJSON);
                 callback();
             } else {
                 console.error(this);
