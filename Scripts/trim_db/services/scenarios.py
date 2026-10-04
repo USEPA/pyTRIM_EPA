@@ -18,6 +18,24 @@ class ScenarioService(GenericService[Scenario], PermissionsMixin):
     def __init__(self, model, *args, **kwargs):
         self.__instance = model
 
+    @classmethod
+    def get_metadata(cls, id_or_model=None):
+        from trim_db.services.parameters import get_or_create_custom_param
+
+        if isinstance(id_or_model, int):
+            scn = ScenarioService.get(id_or_model)
+        else:
+            scn = id_or_model
+
+        try:
+            metadata = get_or_create_custom_param(
+                scn.parameters.get("metadata"),
+                {"scenario_id": scn.id},
+            )
+            return metadata.source
+        except:
+            raise Exception(f"Unable to fetch metadata for {scn}")
+
     def user_permissions(self):
         scenario = self.__instance
         users = {
@@ -25,17 +43,6 @@ class ScenarioService(GenericService[Scenario], PermissionsMixin):
             for u in UserService.get_all() if u.can('view', scenario, ignore_superuser=True)
         }
         return users
-
-    def get_metadata(self):
-        from trim_db.services.parameters import get_or_create_custom_param
-
-        scn = self.__instance
-        metadata = scn.parameters.get("metadata")
-        metadata = get_or_create_custom_param(
-            metadata,
-            {"scenario_id": scn.id},
-        )
-        return metadata.source
 
     def get_surface_runoff(self):
         return get_scenario_surface_runoff(self.__instance)

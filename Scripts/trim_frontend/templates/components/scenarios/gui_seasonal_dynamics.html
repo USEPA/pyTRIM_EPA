@@ -200,6 +200,7 @@
 
             if (TRIM.store.currentScenario.seasonal_dynamics) {
                 TRIM.forms.populate(form, TRIM.store.currentScenario.seasonal_dynamics);
+                checkForExistingFileUploads();
                 renderSeasonalForm();
             }
             else {
@@ -211,6 +212,29 @@
                 return;
             }
 
+        }
+
+        function checkForExistingFileUploads() {
+            const metadata = TRIM.store.currentScenario.metadata;
+            $(form).find('.sd-file-icon').remove();
+
+            $(form).find('.sd_subsection [data-slot="true"][data-target]').each(function () {
+                const field = $(this).attr('data-target');
+                const field_file = Object.entries(TRIM.store.currentScenario.metadata)
+                    .find(entry => entry[0].startsWith(`seasonal_${field}`));
+
+                const heading = $(this).find('label:contains("Static Value") sup');
+                if (field_file && heading.length) {
+                    const [field, file] = field_file;
+                    $(`<span class="sd-file-icon" data-toggle="tooltip" 
+                        data-original-title="Value comes from ${file}">
+                            <i class="fa fa-file ml-1 text-success"></i>
+                        </span>`
+                    ).insertAfter(heading);
+                }
+            });
+
+            $(form).find('.sd-file-icon').tooltip();   
         }
 
         function renderSeasonalForm() {
@@ -306,32 +330,40 @@
             return param_info;
         }
 
-        function submit_seasonal_dyn_value(elem) {
+        function submit_seasonal_dyn_value(elem, filename) {
             let param_info = get_form_data(elem)
-            if (elementIsValid($(elem).parent())){
-                LoadingScreen.show('loading_results');
-                let resp = TRIM.api.updateScenario(param_info).on('load',function(){
-                    let val_resp = this.responseJSON
-                    LoadingScreen.hide('loading_results');
-                    console.log(val_resp)
-                    if (val_resp?.success === false) {
-                        return;
-                    }
-                    else if (val_resp) {
-                        let val = val_resp[Object.keys(val_resp)[0]]
-                        let lb_static_val = $(elem).closest('div.form-group').find("div.wt_avg_val")
-                        if (lb_static_val.length > 0) {
-                            lb_static_val.text(`Time-weighted average from file: ${val}`)
-                        } else {
-                            let lb_static_val = `<div class="wt_avg_val mt-2 text-muted">Time-weighted Average: ${val}</div>`
-                            $(elem).closest('div.form-group').append(lb_static_val)
-                        }
-                    }
-                    delete TRIM.store.currentScenario.seasonal_dynamics;
-                })
-            } else {
-                return
+            if (!elementIsValid($(elem).parent())){
+                return;
             }
+
+            if (filename) {
+                param_info.push({ 'type': 'input', 'name': 'filename', 'value': filename });
+            }
+
+            LoadingScreen.show('loading_results');
+            let resp = TRIM.api.updateScenario(param_info).on('load',function(){
+                let val_resp = this.responseJSON
+                LoadingScreen.hide('loading_results');
+                console.log(val_resp)
+                if (val_resp?.success === false) {
+                    alert(val_resp.message);
+                    return;
+                } else {
+                    TRIM.api.updateScenarioMetadata(TRIM.store.currentScenario, checkForExistingFileUploads);
+                }
+                
+                if (val_resp) {
+                    let val = val_resp[Object.keys(val_resp)[0]]
+                    let lb_static_val = $(elem).closest('div.form-group').find("div.wt_avg_val")
+                    if (lb_static_val.length > 0) {
+                        lb_static_val.text(`Time-weighted average from file: ${val}`)
+                    } else {
+                        let lb_static_val = `<div class="wt_avg_val mt-2 text-muted">Time-weighted Average: ${val}</div>`
+                        $(elem).closest('div.form-group').append(lb_static_val)
+                    }
+                }
+                delete TRIM.store.currentScenario.seasonal_dynamics;
+            })
         }
 
         function enableFieldUpdates(this_subsection) {
@@ -387,13 +419,18 @@
                 TRIM.store.fileData.remove(fileKey);
                 TRIM.api.parseFiles(this).on('load', function() {
                     try {
-                        var data = JSON.parse(this.responseText);
-                        if (data.files && data.files[myName]) {
-                            var myData = data.files[myName];
-                            // Make sure the file has the column with name "Date"
-                            if (ErrorValidation.tsFileHasDateColumn(me.closest("div").siblings("label"),  myData.file_data)) {
-                                TRIM.store.fileData.add(fileKey, myData);
-                                updateFields(me);
+                        if (this.responseJSON?.success === false) {
+                            alert(this.responseJSON.message);
+                        }
+                        else {
+                            var data = JSON.parse(this.responseText);
+                            if (data.files && data.files[myName]) {
+                                var myData = data.files[myName];
+                                // Make sure the file has the column with name "Date"
+                                if (ErrorValidation.tsFileHasDateColumn(me.closest("div").siblings("label"),  myData.file_data)) {
+                                    TRIM.store.fileData.add(fileKey, myData);
+                                    updateFields(me);
+                                }
                             }
                         }
                     }
@@ -446,7 +483,7 @@
                 });
                 TRIM.store.fileData.add(`seasonal_${sel.attr('name')}`, this_sel_data);
 
-                submit_seasonal_dyn_value(sel);
+                submit_seasonal_dyn_value(sel, data?.filename);
             })
         }
     });

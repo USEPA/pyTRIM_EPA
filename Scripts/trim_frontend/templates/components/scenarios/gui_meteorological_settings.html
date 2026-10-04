@@ -41,7 +41,7 @@
                 </div>
             </div>
         </div>
-        
+        <!--<i class="fa fa-file text-success" data-toggle="tooltip" title="!!"></i>-->
         <div data-slot="true" data-target="ambient_air">
             {{ dimensionally_varying_subform(
                 is_varying_field='time_varying',
@@ -179,6 +179,7 @@
 
             if (TRIM.store.currentScenario.meteorology) {
                 TRIM.forms.populate(form, TRIM.store.currentScenario.meteorology);
+                checkForExistingFileUploads();
                 renderWetDep();
             }
             else {
@@ -191,6 +192,27 @@
             }
             console.log('populated met form!')
             LoadingScreen.hide('met_info_loading');
+        }
+
+        function checkForExistingFileUploads() {
+            $(form).find('.met-file-icon').remove();
+            $(form).find('div[data-slot="true"][data-target]').each(function () {
+                const field = $(this).attr('data-target');
+                const field_file = Object.entries(TRIM.store.currentScenario.metadata)
+                    .find(entry => entry[0].startsWith(`meteo_${field}`));
+
+                const heading = $(this).find('label:contains("Static Value") sup');
+                if (field_file && heading.length) {
+                    const [field, file] = field_file;
+                    $(
+                        `<span class="met-file-icon" data-toggle="tooltip" 
+                        data-original-title="Value comes from ${file}">
+                            <i class="fa fa-file ml-1 text-success"></i>
+                        </span>`
+                    ).insertAfter(heading);
+                }
+            });
+            $('[data-toggle="tooltip"]').tooltip();
         }
 
         // Render Wet Deposition Interception Fractions
@@ -325,7 +347,7 @@
             return param_info;
         }
 
-        function submit_meteo_value(elem, is_sfc=false) {
+        function submit_meteo_value(elem, filename) {
             const param_info = get_form_data(elem)
             if ($(elem).get(0).tagName == "INPUT") {
                 ErrorValidation.isPositiveValue(elem, $(elem).parent());
@@ -339,25 +361,24 @@
             if (!elementIsValid($(elem).parent())) {
                 return;
             }
-            if (is_sfc) {
-                param_info.push({
-                    'type': 'data',
-                    'name': 'field',
-                    'value': 'is_sfc'
-                });
-                param_info.push({
-                    'type': 'input',
-                    'name': 'is_sfc',
-                    'value': is_sfc
-                });
+            if (filename) {
+                param_info.push({ 'type': 'input', 'name': 'filename', 'value': filename });
+
+                let is_sfc = filename.endsWith(".sfc");
+                param_info.push({ 'type': 'input', 'name': 'is_sfc', 'value': is_sfc });
             }
+            console.log(param_info);
             LoadingScreen.show("meteo_update_value")
             const resp = TRIM.api.updateScenario(param_info).on('load', function(rsp) {
                 const val_resp = this.responseJSON
                 LoadingScreen.hide("meteo_update_value");
                 if (val_resp?.success === false) {
+                    alert(val_resp.message);
                     return;
+                } else {
+                    TRIM.api.updateScenarioMetadata(TRIM.store.currentScenario, checkForExistingFileUploads);
                 }
+
                 if (val_resp) {
                     const val = parseFloat(val_resp[Object.keys(val_resp)[0]]);
                     let lb_static_val = $(elem).closest('div.form-group').find("div.wt_avg_val")
@@ -440,11 +461,16 @@
                 TRIM.store.fileData.remove(fileKey);
                 TRIM.api.uploadMetFile(TRIM.store.currentScenario.id, this).on('load', function() {
                     try {
-                        var data = JSON.parse(this.responseText);
-                        if (data.files && data.files[myName]) {
-                            var myData = data.files[myName];
-                            TRIM.store.fileData.add(fileKey, myData);
-                            updateFields(me.closest('section'));
+                        if (this.responseJSON?.success === false) {
+                            alert(this.responseJSON.message);
+                        }
+                        else {
+                            var data = JSON.parse(this.responseText);
+                            if (data.files && data.files[myName]) {
+                                var myData = data.files[myName];
+                                TRIM.store.fileData.add(fileKey, myData);
+                                updateFields(me.closest('section'));
+                            }
                         }
                     }
                     catch (err) {
@@ -473,7 +499,7 @@
 
                 TRIM.store.fileData.add(`meteo_${sel.attr('name')}`, data.file_data[selected_val]);
 
-                submit_meteo_value(sel, extension.endsWith(".sfc"))
+                submit_meteo_value(sel, extension)
             })
 
             var staticPrecip = $('#precipitation_static_value_rate');

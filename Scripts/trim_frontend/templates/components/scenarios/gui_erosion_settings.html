@@ -292,8 +292,7 @@
                     }
                     else {
                         updateUsdaSoilData(JSON.parse(this.responseText));
-                        TRIM.store.currentScenario.metadata.erosion_usda = true;
-                        checkForUSDA();
+                        TRIM.api.updateScenarioMetadata(TRIM.store.currentScenario, checkForUSDA);
                     }
                     
                     usdaBtn.find('.lds-dual-ring').remove();

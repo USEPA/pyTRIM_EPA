@@ -182,13 +182,13 @@ def update_scenario(scenario_id):
         except Exception as e:
             print(f"exception while updating scenario {s} with {scenario_data}:\n")
             print(traceback.format_exc())
-            return ApiException(repr(e))
+            raise ApiException(f"Error updating scenario: {repr(e)}")
 
         if rv is not None:
             return ApiResult(rv)
     except Exception as e:
         logger.error(traceback.format_exc())
-        return ApiException(repr(e))
+        raise ApiException(repr(e))
     return "success"
 
 
@@ -593,6 +593,18 @@ def delete_scenario():
         ScenarioService.commit()
 
     return redirect(request.referrer)
+
+
+@scenario_api.route('/api/scenario/<int:scenario_id>/metadata/', methods=['GET'])
+@login_required
+def get_scenario_metadata(scenario_id):
+    s = ScenarioService.get(scenario_id)
+    if not current_user.can('view', s):
+        abort(403)
+    try:
+        return ApiResult(ScenarioService.get_metadata(s))
+    except Exception as e:
+        raise ApiException(f"Error fetching scenario metadata for {s}: {e}")
 
 
 @scenario_api.route(

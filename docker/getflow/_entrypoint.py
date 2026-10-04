@@ -285,7 +285,7 @@ class DockerGetflowEntryPoint:
             }
             handle_parcel_update(sender, payload)
         
-        metadata = ScenarioService(scn).get_metadata()
+        metadata = ScenarioService.get_metadata(scn)
         metadata["has_getflow"] = True
         ParameterService.commit()
 

@@ -71,8 +71,7 @@ def get_soil_data(tillage):
 
     # assuming this endpoint is only used by erosion
     # abiotic usda uses the SoilData class directly
-    scn = ScenarioService.get(this_scenario_id)
-    metadata = ScenarioService(scn).get_metadata()
+    metadata = ScenarioService.get_metadata(this_scenario_id)
     metadata["erosion_usda"] = True
     ParameterService.commit()
     

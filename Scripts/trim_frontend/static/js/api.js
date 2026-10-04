@@ -69,6 +69,20 @@ window.TRIM = (function(trim) {
         });
     }
 
+    api.updateScenarioMetadata = function(scenario, callback) {
+        var url = api.getUrl('scenario_api.get_scenario_metadata');
+        return AJAX.call({
+            url: url.replace('/0/', '/' + scenario.id + '/')
+        }).on('load', function() {
+            if (this.responseJSON) {
+                TRIM.store.currentScenario.metadata = this.responseJSON;
+                callback();
+            } else {
+                console.error(this);
+            }
+        });
+    }
+
     api.getMeteorology = function(scenario) {
         var url = api.getUrl('scenario_api.get_scenario_met_data');
         return AJAX.call({

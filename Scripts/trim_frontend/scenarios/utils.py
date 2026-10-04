@@ -259,6 +259,15 @@ def handle_scenario_update(s, scenario_data):
         if "_precipitation_" in field_name:
             update_dynamic_params(s)
 
+        # update meteo metadata
+        metadata = ScenarioService.get_metadata(s)
+        met_key = field_name.replace("_static_value", "").replace("_field_name_TS", "")
+        if scenario_data.get("filename"):
+            metadata[met_key] = scenario_data.get("filename")
+        elif met_key in metadata.keys():
+            del metadata[met_key]
+        ParameterService.commit()
+
     elif field_name.startswith("seasonal_"):  # Data from the seasonal dynamics tab
         param_media = param_map["seasonal"].get(field_name)[0]
         param_name = param_map["seasonal"].get(field_name)[1]
@@ -277,6 +286,15 @@ def handle_scenario_update(s, scenario_data):
                 ret_val = meteo_wgt_avg_value_from_timeseries(param_data, ret_type)
                 if ret_type != "None":
                     update_assumed_all_comp_fixed_params(s, comp_list, param_name, ret_val[ret_type_name])
+
+        # update seasonal dynamics metadata
+        metadata = ScenarioService.get_metadata(s)
+        sd_key = field_name.replace("_static_value", "").replace("_field_name_TS", "")
+        if scenario_data.get("filename"):
+            metadata[sd_key] = scenario_data.get("filename")
+        elif sd_key in metadata.keys():
+            del metadata[sd_key]
+        ParameterService.commit()
 
     elif field_name == "simulation_start_date" or field_name == "simulation_end_date":
         date_parts = scenario_data[field_name].split("-")
@@ -317,7 +335,7 @@ def handle_scenario_update(s, scenario_data):
         try:
             update_soil_from_api(s, logger)
 
-            metadata = ScenarioService(s).get_metadata()
+            metadata = ScenarioService.get_metadata(s)
             metadata["abiotic_usda"] = True
             ParameterService.commit()
         except Exception as e:
