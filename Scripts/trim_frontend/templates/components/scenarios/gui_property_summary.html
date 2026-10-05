@@ -7,7 +7,7 @@
             <div class="col-sm">
                 <h3> General Properties </h3>
                 <button hidden class="scenario_hide_all comp_hide_all btn btn-warning">Hide All</button>
-                <a hidden class="btn btn-outline-dark" id="export-user-inputs" style="cursor: pointer;"
+                <a class="btn btn-outline-dark" id="export-user-inputs" style="cursor: pointer;"
                     tabindex="0" role="link">
                     <i class="fa fa-file-download"></i>&nbsp;Export All User Inputs
                 </a>
@@ -544,7 +544,7 @@
 
         $(form).on('click', "#export-user-inputs", (e) => {
             TRIM.api.exportScenarioUserInputs(TRIM.store.currentScenario.id).on('load', (rsp) => {
-                console.log(rsp)
+                console.log(rsp);
             });
         });
     });

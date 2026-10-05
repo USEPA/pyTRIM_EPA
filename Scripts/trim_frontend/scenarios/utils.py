@@ -243,9 +243,124 @@ def export_user_inputs(scn, logger):
         return api.FileResult(filepath)
     """
 
-    
-    scn_json = scn.as_serializable()
-    print(scn_json)
+    from trim_frontend.scenarios.defaults import get_met_data, get_seasonal_dynamics
+    from trim_frontend.parcels.defaults import get_source_params, get_initial_concentrations
+
+    scn_inputs = {}
+
+    logger.info("Getting general info...")
+    general_info_tab = {
+        "Scenario Name": scn.name,
+        "Scenario Description": scn.description,
+        "First Day of Simulation": scn.start_date,
+        "Last Day of Simulation": scn.end_date
+    }
+
+    logger.info("Getting parcels...")
+    scn_parcels = {}
+    for pcl in scn.parcels:
+        scn_parcels[pcl.name] = pcl.as_serializable()
+        scn_parcels[pcl.name] |= {
+            **get_source_params(pcl),
+            **get_initial_concentrations(pcl),
+        }
+
+    parcels_tab = []
+    for pcl_data in scn_parcels.values():
+        parcels_tab.append(
+            {
+                "Parcel Name": pcl_data["name"],
+                "Description": pcl_data["description"],
+                "Area": pcl_data["area"],
+                "Parcel Type": pcl_data["parcelType"],
+                "Land Use": pcl_data["landUse"],
+                "Farm Food Chain": pcl_data["hasFarmFoodChain"],
+                "Fish Food Web": pcl_data["hasFishFoodWeb"],
+                "Wetland": pcl_data["hasWetland"],
+                "Receptor Spacing (m)": pcl_data["receptor_spacing"]
+            }
+        )
+
+    # For each chemical we want a row of
+    # [parcel, volume element, compartment, emission]
+    logger.info("Getting emissions...")
+    emissions_tab = {chem.name: [] for chem in scn.chemicals}
+    for pcl_name, pcl_data in scn_parcels.items():
+        sources = pcl_data["sources"]
+
+        for chem, volume_elements in sources.items():
+            for ve, comps in volume_elements.items():
+                for comp, val in comps.items():
+                    emissions_tab[chem].append(
+                        [pcl_name, ve, comp, val]
+                    )
+
+    logger.info("Getting meteorology...")
+    met_data = get_met_data(scn)
+    _wet_dep = lambda key: (
+        met_data["wet_dep_interception"][key] if met_data["wet_dep_interception"][key] != -1 else "None"
+    )
+    meteorology_tab = {
+        "Ambient Air Temperature (K)": met_data["ambient_air_static_value"],
+        "Horizontal Wind Speed (m/s)": met_data["wind_speed_static_value"],
+        "Wind Direction (deg)": met_data["wind_direction_static_value"],
+        "Mixing Height (m)": met_data["mixing_height_static_value"],
+        "Daytime Indicator": met_data["daytime_indicator_static_value"],
+        "Precipitation": met_data["precipitation_static_value_rate"],
+        # Wet Deposition Interception Fractions
+        "Static Value for Coniferous Forest": _wet_dep("wet_dep_interception_frac_coniferous_leaf"),
+        "Static Value for Grasses/Herbs": _wet_dep('wet_dep_interception_frac_grass_leaf'),
+        "Static Value for Deciduous Forest": _wet_dep('wet_dep_interception_frac_deciduous_leaf'),
+        "Static Value for Agriculture": _wet_dep('wet_dep_interception_frac_agriculture_leaf')
+    }
+
+    logger.info("Getting seasonal dynamics...")
+    sd_data = get_seasonal_dynamics(scn)
+    seasonal_dynamics_tab = {
+        "Litterfall": {
+            "Coniferous Forest": sd_data["litterfall_coniferous"],
+            "Deciduous Forest": sd_data["litterfall_deciduous"],
+            "Grasses/Herbs": sd_data["litterfall_grass"],
+            "Agriculture": sd_data["litterfall_agriculture"]
+        },
+        "Allow Exchange": {
+            "Coniferous Forest": sd_data["allow_exchange_coniferous"],
+            "Deciduous Forest": sd_data["allow_exchange_deciduous"],
+            "Grasses/Herbs": sd_data["allow_exchange_grass"],
+            "Agriculture": sd_data["allow_exchange_agriculture"]
+        }
+    }
+
+    logger.info("Getting abiotic media...")
+    surface_precipitation = []
+    air_properties = []
+    surface_soil_properties = []
+    root_soil_properties = []
+    vadose_zone_properties = []
+    groundwater_zone_properties = []
+
+    for pcl_name, _d in scn_parcels.items():
+        surface_precipitation.append({
+            "Parcel Name": pcl_name,
+            "Evapotranspiration Fractions": _d["evapotrans_frac"],
+            "Groundwater Seepage Fractions": _d["seepage_frac"],
+            "Runoff Fractions": _d["runoff_fraction"],
+        })
+
+        air_properties.append({
+            "Parcel Name": pcl_name,
+            "Dust Particle Concentration": _d["dustLoad"],
+            "Density of Dust Particles": _d["dustDensity"],
+            "Density of Air": _d["airDensity"],
+            "Fraction Organic Matter of Dust Particles": _d["fractionOrganicMatterOnParticulates"]
+        })
+
+        surface_soil_properties.append({
+            "Parcel Name": pcl_name,
+        })
+
+    from pprint import pprint
+    pprint(seasonal_dynamics_tab)
 
 
 def handle_scenario_update(s, scenario_data):
