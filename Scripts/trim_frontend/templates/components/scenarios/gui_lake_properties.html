@@ -531,8 +531,7 @@
                             'type': 'input',
                             'name': String(row.shortProperty),
                             'value': data
-                        }]
-                        parcel_info = JSON.stringify(parcel_info)                        
+                        }]                     
                         let this_cell_data = !isNaN(Number(data)) && String(data).length > 6 ? Number.parseFloat(data).toExponential(4) : data;
                         let this_cell_prop = row.isEditable ? 'editableCell badge badge-light' : 'nonEditableCell text-muted';
                         let min = row.min !== undefined ? " min='" + row.min + "' " : "";
@@ -541,7 +540,7 @@
                         let inflow_button = "";
                         let autocalc_button = "";
 
-                        if (row.shortProperty == 'externalWaterInflow') {
+                        if (row.shortProperty == 'externalWaterInflow' && waterParcels?.filter(x => x.name != e.name).length) {
                             inflow_button = `<a class="inflow-modal-btn badge badge-secondary ml-2" style="cursor: pointer;" href="Edit Inflow" data-parcel="${e.name}"><i class="fa fa-water"></i></a>`;
                         }
                         else if (row.shortProperty == 'flush_rate') {
@@ -549,7 +548,7 @@
                         }
 
                         return `<input class='editableCell form-control form-control-sm' type='text' style='display:none'
-                                    data-parcelinfo='${parcel_info}' value='${data}' ${min} ${max} />
+                                    data-parcelinfo='${JSON.stringify(parcel_info) }' value='${data}' ${min} ${max} />
                                 <label class='${this_cell_prop}'>${this_cell_data}</label>
                                 ${autocalc_button} ${inflow_button}`;
                     }

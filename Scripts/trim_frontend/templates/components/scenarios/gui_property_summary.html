@@ -3,72 +3,75 @@
     data-form-src="scenario_property_summary_form"
 >
     <section class="container px-0">
-        <div class="row mb-3">
+        <div class="props-row row mb-3">
             <div class="col-sm">
-                <h3 class="m-0"> General Properties </h3>
-                <button hidden class="scenario_hide_all comp_hide_all btn btn-warning">Hide All</button>
-                <div class="border-right border-dark" style="overflow-x: auto;">
-                    <table class="scenarioMap" style="border-collapse: collapse" cellpadding="6">
-                        <thead>
-                            <tr>
-                                <th scope="col">Entity</th>
-                                <th scope="col">Property</th>
-                                <th scope="col">Property Value</th>
-                            </tr>
-                        </thead>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <div class="row mb-3">
-            <div class="col-sm">
-                <h3> Chemical Properties </h3>
-                <button class="chem_show_all btn btn-secondary">Show All</button>
-                <button class="chem_hide_all btn btn-secondary">Hide All</button>
-                <button class="chem_show_nz btn btn-outline-dark">Show Non-Zero</button>
-                <div class="border-right border-dark" style="overflow-x: auto;">
-                    <table class="chemMap" style="border-collapse: collapse" cellpadding="6">
-                        <thead>
-                            <tr>
-                                <th scope="col">Chemical</th>
-                                <th scope="col">Entity</th>
-                                <th scope="col">Property</th>
-                                <th scope="col">Property Value</th>
-                                <th scope="col">Property Unit</th>
-                            </tr>
-                        </thead>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <div class="row mb-3">
-            <div class="col-sm">
-                <h3> Environment Properties </h3>
-                <button class="comp_show_all btn btn-secondary">Show All</button>
-                <button class="comp_hide_all btn btn-secondary">Hide All</button>
-                <button class="comp_show_nz btn btn-outline-dark">Show Non-Zero</button>
-                <div class="dropdown d-inline">
-                    <button class="btn_show_comp btn btn-outline-dark dropdown-toggle btn-character-limit" 
-                            id="show-env-props" type="button" data-toggle="dropdown">
-                        Show Property
-                    </button>
-                    <div class="dropdown-menu">
+                <h3 class="m-0">General Properties</h3>
+                <div class="tree-grid-responsive my-2">
+                    <div class="general-props-tree tree-grid" role="treegrid" aria-label="Chemical properties">
+                        <div class="tree-row tree-row-header" role="row">
+                            <div class="tree-cell" role="columnheader">Property</div>
+                            <div class="tree-cell text-left" role="columnheader">Value</div>
+                        </div>
                     </div>
                 </div>
-                <div class="border-right border-dark" style="overflow-x: auto;">
-                    <table class="compMap" style="border-collapse: collapse" cellpadding="6">
-                        <thead>
-                            <tr>
-                                <th scope="col">Parcel</th>
-                                <th scope="col">Entity</th>
-                                <th scope="col">Property</th>
-                                <th scope="col">Property Value</th>
-                                <th scope="col">Property Unit</th>
-                            </tr>
-                        </thead>
-                    </table>
+            </div>
+        </div>
+
+        <div class="props-row row mb-3">
+            <div class="col-sm">
+                <div class="d-flex justify-content-between">
+                    <h3>Chemical Properties</h3>
+                    <div>
+                        <button type="button" class="tree_grid_show_all btn btn-sm btn-secondary" data-show="false">
+                            Show All
+                        </button>
+                        <button type="button" class="tree_grid_show_nz btn btn-sm btn-outline-dark">
+                            Show Non-Zero
+                        </button>
+                    </div>
+                </div>
+
+                <div class="tree-grid-responsive my-2">
+                    <div class="chemical-props-tree tree-grid" role="treegrid" aria-label="Chemical properties" style="--data-col-width: 280px;">
+                        <div class="tree-row tree-row-header" role="row">
+                            <div class="tree-cell" role="columnheader">Property</div>
+                            <div class="tree-cell text-left" role="columnheader">Value</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="props-row row mb-3">
+            <div class="col-sm">
+                <div class="d-flex justify-content-between">
+                    <h3>Environment Properties</h3>
+                    <div>
+                        <button type="button" class="tree_grid_show_all btn btn-sm btn-secondary" data-show="false">
+                            Show All
+                        </button>
+                        <button type="button" class="tree_grid_show_nz btn btn-sm btn-outline-dark">
+                            Show Non-Zero
+                        </button>
+                        <div class="dropdown d-inline">
+                            <button type="button" class="tree_grid_show_prop btn btn-sm btn-outline-dark dropdown-toggle btn-character-limit" 
+                                id="show-env-props" type="button" data-toggle="dropdown"
+                            >
+                                Show Property
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-right">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tree-grid-responsive my-2">
+                    <div class="compartment-props-tree tree-grid" role="treegrid" aria-label="Environment properties">
+                        <div class="tree-row tree-row-header" role="row">
+                            <div class="tree-cell" role="columnheader">Property</div>
+                            <div class="tree-cell text-left" role="columnheader">Value</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -77,31 +80,6 @@
 <script>
     onDomLoad(function(e) {
         var form = document.getElementById('property-summary-gui');
-
-        // var chemPropsReadyEvent = document.createEvent('Event');
-        // chemPropsReadyEvent.initEvent('chemProps:ready', true, true);
-        // // console.log('loading chemical properties')
-        // function loadChemProps(force) {
-        //     force = force || false;
-        //     if (TRIM.store.currentScenario.chemical_properties && !force) {
-        //         document.body.dispatchEvent(chemPropsReadyEvent);
-        //         return
-        //     }
-        //     LoadingScreen.show('loading_chem_props');
-        //     TRIM.api.getChemicalProperties('{{ scenario.id }}').on('load', function () {
-        //         TRIM.store.currentScenario.chemical_properties = this.responseJSON;
-        //         document.body.dispatchEvent(chemPropsReadyEvent);
-        //         LoadingScreen.hide('loading_chem_props');
-        //     });
-        // }
-
-        // form.addEventListener('form:visible', function() {
-        //     console.log('property summary form visible')
-        //     LoadingScreen.show('property_summary_loading');
-        //     document.body.addEventListener('parcels:ready', loadChemProps());
-        //     document.body.addEventListener('chemProps:ready', updateSummaryFields());
-        //     TRIM.refreshParcels();
-        // });
 
         form.addEventListener('form:visible', function() {
             console.log('property summary form visible')
@@ -115,432 +93,344 @@
             document.body.removeEventListener('parcels:ready', updateSummaryFields);
             document.body.addEventListener('parcels:ready', updateSummaryFields);
             TRIM.refreshParcels();
+            
+            attachGlobalEventHandlers();
         });
 
+        function attachGlobalEventHandlers() {
+            const gui = $(form);
+
+            gui.find('.tree_grid_show_all').on('click', function(e) {
+                e.preventDefault();
+                showAll($(this).closest('.props-row').find('.tree-grid'));
+            });
+
+            gui.find('.tree_grid_show_nz').on('click', function(e) {
+                e.preventDefault();
+                showNonZero($(this).closest('.props-row').find('.tree-grid'));
+            });
+
+            gui.on('click', "a.dropdown-item.prop-select-item", function (e) {
+                e.preventDefault();
+                const me = $(e.target);
+                const tree = me.closest('.props-row').find('.tree-grid');
+                showPropValues(tree, me.text());
+            });
+        }
+
         function updateSummaryFields() {
-            if (!TRIM.store.currentScenario
-            || !TRIM.store.currentScenario.parcels
-            || !TRIM.store.currentScenario.chemical_properties
-            || !TRIM.store.currentScenario.meteorology) {
+            if (
+                !TRIM.store.currentScenario
+                || !TRIM.store.currentScenario.parcels
+                || !TRIM.store.currentScenario.chemical_properties
+                || !TRIM.store.currentScenario.meteorology
+            ) {
                 // Parcels haven't loaded yet; wait a bit and try again
                 setTimeout(function() { updateSummaryFields(); }, 1000);
                 return;
             }
 
-            $($("#property-summary-gui").find("table.compMap")[0]).find("tbody").text("");
-            $(initialize_compartment_map()).insertAfter($($("#property-summary-gui").find("table.compMap")[0]).find("thead"))
-            $($("#property-summary-gui").find("table.scenarioMap")[0]).find("tbody").text("");
-            $($("#property-summary-gui").find("table.chemMap")[0]).find("tbody").text("");
-            $($("#property-summary-gui").find("table.compMap")[0]).find("tbody").text("");
-            let gen_map_html = initialize_project_map("general")
-            $(gen_map_html).insertAfter($($("#property-summary-gui").find("table.scenarioMap")[0]).find("thead"))
-            let chem_map_html = initialize_project_map("chem")
-            $(chem_map_html).insertAfter($($("#property-summary-gui").find("table.chemMap")[0]).find("thead"))
-            let env_map_html = initialize_project_map("env")
-            $(env_map_html).insertAfter($($("#property-summary-gui").find("table.compMap")[0]).find("thead"))
+            buildGeneralPropsTree();
+            buildChemicalPropsTree();
+            buildCompartmentPropsTree();
 
-            let dd_menu = $("#property-summary-gui #show-env-props").siblings("div.dropdown-menu");
-            populate_props_dd(dd_menu);
-
-            $('tr.colps').on('click', function() {
-                toggle_expand_icon(this, null)
-                var findChildren = function(tr) {
-                    var depth = tr.data('depth');
-                    return tr.nextUntil($('tr').filter(function(i,e) {
-                        return $(e).data('depth') <= depth;
-                    }));
-                };
-
-                let this_depth = $(this).data('depth')
-                var children = findChildren($(this));
-                if ($(children).is(':visible')) {
-                    $(children).hide();
-                } else {
-                    let next_level = this_depth + 1;
-                    let next_child = $(children).filter(function(i,e) {
-                        return $(e).data('depth') == next_level;
-                    });
-                    $(next_child).show()
-                }
-            });
-
-            $('tr.colps').on('keydown', (e) => {
-                if (e.key === 'Enter' || e.which === 13) {
-                    $(e.target).click();
-                }
-            });
-
-            $('button.chem_show_all').on('click', function(e) {
-                e.preventDefault()
-                let this_table =$(this).closest("div[role=tabpanel]").find("table.chemMap")
-                $(this_table).find("tr.colps").show();
-                $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "down"))
-                $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "down"))
-            });
-            $('button.comp_show_all').on('click', function(e) {
-                e.preventDefault()
-                let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap")
-                $(this_table).find("tr.colps").show();
-                $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "down"))
-                $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "down"))
-                $(this).closest("div").find("button.btn_show_comp").text("Show Property")
-            });
-
-            $('button.scenario_hide_all').on('click', function(e) {
-                let this_table =$(this).closest("div[role=tabpanel]").find("table.scenarioMap")
-                $(this_table).find("tr.colps:not([data-depth='0'])").hide();
-                $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "up"))
-                $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "up"))
-            });
-            $('button.chem_hide_all').on('click', function(e) {
-                e.preventDefault()
-                let this_table =$(this).closest("div[role=tabpanel]").find("table.chemMap")
-                $(this_table).find("tr.colps:not([data-depth='0'])").hide();
-                $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "up"))
-                $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "up"))
-            });
-            $('button.comp_hide_all').on('click', function(e) {
-                e.preventDefault()
-                let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap")
-                $(this_table).find("tr.colps:not([data-depth='0'])").hide();
-                $(this_table).find("tr.colps.level0").each((i,tr) => toggle_expand_icon(tr, "up"))
-                $(this_table).find("tr.colps.level1").each((i,tr) => toggle_expand_icon(tr, "up"))
-                $(this).closest("div").find("button.btn_show_comp").text("Show Property")
-            });
-
-            $('button.comp_show_nz').on('click', function(e) {
-                e.preventDefault()
-                let this_table =$(this).closest("div[role=tabpanel]").find("table.compMap");
-                $('button.comp_hide_all').trigger('click');
-                let non_zeros = $(this_table).find("tr.colps.level2").filter((i,e) => $(e).find("td.ems").text() > 0);
-                $(non_zeros).show()
-                $(non_zeros).prev("tr.level1").show()
-                $(this).closest("div").find("button.btn_show_comp").text("Show Property")
-            });
-            $('button.chem_show_nz').on('click', function(e) {
-                e.preventDefault()
-                let this_table =$(this).closest("div[role=tabpanel]").find("table.chemMap");
-                $('button.chem_hide_all').trigger('click');
-                let non_zeros = $(this_table).find("tr.colps.level2").filter((i,e) => $(e).find("td.ems").text() > 0);
-                $(non_zeros).show()
-                $(non_zeros).prev("tr.level1").show()
-            });
-
-            $(document).ready(function() {
-                $('button.scenario_hide_all').trigger('click');
-                $('button.chem_hide_all').trigger('click');
-                $('button.comp_hide_all').trigger('click');
-            });
-
-            function toggle_expand_icon(tr, dir){
-                if ($(tr).find("i.fas").length <= 0) return;
-                if (!dir) {
-                    if ($(tr).find("i.fas").attr("class").indexOf("fa-angle-right") > -1) {
-                        $(tr).find("i.fas").attr("class", "fas fa-angle-down")
-                    } else {
-                        $(tr).find("i.fas").attr("class", "fas fa-angle-right")
-                    }
-                } else {
-                    if (dir == "down") {
-                        $(tr).find("i.fas").attr("class", "fas fa-angle-down")
-                    } else {
-                        $(tr).find("i.fas").attr("class", "fas fa-angle-right")
-                    }
-                }
-
-            }
-
-            $('label.editableCell').click(function () {
-                $(this).siblings("input").show()
-                $(this).siblings("input").focus()
-                $(this).hide();
-            });
-
-            $('input.editableCell').blur(function () {
-                if (!$("#summary-tab-pill").hasClass("active")) {
-                    return;
-                }
-
-                ErrorValidation.isPositiveValue(this);
-                let parcel_name = $(this).closest("tr.level2")
-                let parcel_info = [{
-                    'type': 'data',
-                    'name': 'id',
-                    'value': "parcel_name"
-                },{
-                    'type': 'data',
-                    'name': 'chemical',
-                    'value': "chemical_name"
-                },{
-                    'type': 'input',
-                    'name': 'compartment_name',
-                    'value': $(this).val()
-                }]
-                if (parcel_info) {
-                    submit_new_value(this, parcel_info);
-                }
-            })
-
-            function submit_new_value(elem, parcel_info) {
-                if (elementIsValid($(elem).parent())){
-                    let data = $(elem).val() == "" ? 0 : $(elem).val()
-                    let $label = $(elem).next("label.editableCell")
-                    $label.siblings("input").hide()
-                    $label.show().text(data)
-
-                    parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                    // TRIM.api.updateParcel(parcel_info)
-                } else {
-                    return
-                }
-            }
-
-            $("[data-toggle=popover]").popover();
             console.log('populated property summary form!')
             LoadingScreen.hide('property_summary_loading');
         }
 
-        var entities = {'Parcel':'Parcel', 'Compartment':'Compartment', 'Volume Element':'Volume Element'}
-        function initialize_compartment_map(spec) {
-            let parcels = TRIM.store.currentScenario.parcels;
-            var map_html = "<tbody>"
-            parcels.forEach( function(e,i){
-                map_html = map_html + "<tr data-depth='0' class='level0 colps'><td>" + e.name + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
-                for (ve in entities) {
-                    map_html = map_html + "<tr data-depth='1' class='level1 colps'><td></td><td>" + ve + "&nbsp;<span class='toggle colps'><i class='fas fa-angle-down'></i>&nbsp;</span></td><td></td><td></td></tr>"
-                    for (comp in e.compartment_map[ve]) {
-                        map_html = map_html + "<tr data-depth='2' class='level2 colps'><td></td><td></td><td class='comp'>" + e.compartment_map[ve][comp] + "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='editableCell badge badge-light'>0</label></td></tr>"
+        function buildPropsTree(tree, propsMap, options) {
+            options = options || {};
+            const levels = options.levels || 2;
+
+            tree.find('.tree-row:not(.tree-row-header)').remove();
+
+            const collapseBtnClass = 'tree-row-collapse btn btn-block bg-transparent border-0 rounded-0 text-left text-body font-weight-bold';
+
+            let treeHTML = '<div>';
+            for (const header in propsMap) {
+                if (levels == 2) {
+                    treeHTML += `
+                        <div class="tree-row" role="row" aria-level="1" aria-expanded="true">
+                            <div class="tree-cell p-0" role="gridcell">
+                                <button type="button" class="${collapseBtnClass} btn-primary" aria-label="Collapse ${header} properties">
+                                    <i class="fas fa-angle-down mr-1"></i>
+                                    <span>${header} Properties</span>
+                                </button>
+                            </div>
+                            <div class="tree-cell text-left" role="gridcell"></div>
+                        </div>`;
+                    for (const prop in propsMap[header]) {
+                        const val = propsMap[header][prop];
+                        treeHTML += `
+                            <div class="tree-row tree-level-1 font-weight-normal" role="row" aria-level="2" aria-expanded="true">
+                                <div class="tree-cell" role="gridcell">
+                                    <span class="prop-name">${prop}</span>
+                                </div>
+                                <div class="tree-cell text-left prop-val" role="gridcell" data-numeric="${val}">${val}</div>
+                            </div>`;
                     }
                 }
-            })
-            map_html += "</tbody>"
-            return map_html
-        }
-
-        var env_props_added = [];
-        var chem_props_added = [];
-        function initialize_project_map(type) {
-            env_props_added = [];
-            chem_props_added = [];
-
-            let scenario = TRIM.store.currentScenario
-            var map_html = "<tbody>"
-            let scenario_map = {
-                "Simulation": {
-                    "simulation_start_date": scenario['simulation_start_date'],
-                    "simulation_end_date": scenario['simulation_end_date'],
-                    "erosionRateSource": "Option " + scenario['erosionRateSource']
-                },
-                "Scenario": {
-                    "name": scenario['name'],
-                    "description": scenario['description'],
-                    "precipitation rate": scenario.parcels[0]?.precip_rate
-                }
-            }
-
-            let chem_map = TRIM.store.currentScenario.chemical_properties;
-            let env_map = {}
-
-            for (const [prc_ind, entity_name] of Object.entries(scenario.parcels)){
-                let prc_name =  scenario.parcels[prc_ind].name
-                env_map[prc_name] = {
-                    "Parcel": {
-                        "Parcel Type": {'value': scenario.parcels[prc_ind].parcelType, 'unit': '-', 'fieldname': ''},
-                        "Has Air": {'value': scenario.parcels[prc_ind].hasAir, 'unit': '-', 'fieldname': ''},
-                        "Has Land": {'value': scenario.parcels[prc_ind].hasLand, 'unit': '-', 'fieldname': ''},
-                        "Has Water": {'value': scenario.parcels[prc_ind].hasWater, 'unit': '-', 'fieldname': ''},
-                        "Has Wetland": {'value': scenario.parcels[prc_ind].hasWetland, 'unit': '-', 'fieldname': ''},
-                        "Has Farm Food Chain": {'value': scenario.parcels[prc_ind].hasFarmFoodChain, 'unit': '-', 'fieldname': ''},
-                        "Has Fish Food Web": {'value': scenario.parcels[prc_ind].hasFishFoodWeb, 'unit': '-', 'fieldname': ''},
-                        "Land Use": {'value': scenario.parcels[prc_ind].landUse, 'unit': '-', 'fieldname': ''},
-                        "Soil Tillage": {'value': scenario.parcels[prc_ind].soilTillage, 'unit': '-', 'fieldname': ''},
-                        "Air Density": {'value': scenario.parcels[prc_ind].airDensity, 'unit': 'g/cm<sup>3</sup>', 'fieldname': ''},
-                        "Area": {'value': scenario.parcels[prc_ind].area, 'unit': 'm<sup>2</sup>', 'fieldname': ''},
-                    },
-                    "Compartment":{
-                        "(Air) Air Density": {'value': scenario.parcels[prc_ind].airDensity, 'unit': 'g/cm<sup>3</sup>', 'fieldname': ''},
-                        "(Air) Dust Density": {'value': scenario.parcels[prc_ind].dustDensity, 'unit': 'kg[dust particles]/m<sup>3</sup>[dust particles]', 'fieldname': ''},
-                        "(Air) Dust Load": {'value': scenario.parcels[prc_ind].dustLoad, 'unit': 'kg[dust particles]/m<sup>3</sup>[air compartment]', 'fieldname': ''},
-                        "(Air) Fraction Organic Matter of Dust Particles ": {'value': scenario.parcels[prc_ind].fractionOrganicMatterOnParticulates, 'unit': '-', 'fieldname': ''},
-                        "(Surface Soil) Evapotranspiration Fraction": {'value': scenario.parcels[prc_ind].evapotrans_frac, 'unit': '-', 'fieldname': ''},
-                        "(Surface Soil) Precipitation Runoff Fraction": {'value': scenario.parcels[prc_ind].runoff_fraction, 'unit': '-', 'fieldname': ''},
-                        "(Surface Soil) Precipitation Seepage Fraction": {'value': scenario.parcels[prc_ind].seepage_frac, 'unit': '-', 'fieldname': ''},
-                        "(Surface Soil) Total Erosion Rate": {'value': scenario.parcels[prc_ind].totalErosionRate, 'unit': 'kg/m<sup>2</sup>/day', 'fieldname': ''},
-                        "(Surface Water) Biomass of Benthic Carnivore": {'value': scenario.parcels[prc_ind].aquatic_biomass?.Benthic_Carnivore ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
-                        "(Surface Water) Biomass of Benthic Invertebrate": {'value': scenario.parcels[prc_ind].aquatic_biomass?.Benthic_Invertebrate ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
-                        "(Surface Water) Biomass of Benthic Omnivore": {'value': scenario.parcels[prc_ind].aquatic_biomass?.Benthic_Omnivore ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
-                        "(Surface Water) Biomass of Macrophyte": {'value': scenario.parcels[prc_ind].aquatic_biomass?.Macrophyte ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
-                        "(Surface Water) Biomass of Water Column Carnivore": {'value': scenario.parcels[prc_ind].aquatic_biomass?.Water_Column_Carnivore ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
-                        "(Surface Water) Biomass of Water Column Herbivore": {'value': scenario.parcels[prc_ind].aquatic_biomass?.Water_Column_Herbivore ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
-                        "(Surface Water) Biomass of Water Column Omnivore": {'value': scenario.parcels[prc_ind].aquatic_biomass?.Water_Column_Omnivore ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
-                        "(Surface Water) Biomass of Zooplankton": {'value': scenario.parcels[prc_ind].aquatic_biomass?.Zooplankton ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
-                        "(Surface Water) Body Weight of Benthic Carnivore": {'value': scenario.parcels[prc_ind].aquatic_bw?.Benthic_Carnivore ?? '-', 'unit': 'kg', 'fieldname':''},
-                        "(Surface Water) Body Weight of Benthic Invertebrate": {'value': scenario.parcels[prc_ind].aquatic_bw?.Benthic_Invertebrate ?? '-', 'unit': 'kg', 'fieldname':''},
-                        "(Surface Water) Body Weight of Benthic Omnivore": {'value': scenario.parcels[prc_ind].aquatic_bw?.Benthic_Omnivore ?? '-', 'unit': 'kg', 'fieldname':''},
-                        "(Surface Water) Body Weight of Macrophyte": {'value': scenario.parcels[prc_ind].aquatic_bw?.Macrophyte ?? '-', 'unit': 'kg', 'fieldname':''},
-                        "(Surface Water) Body Weight of Water Column Carnivore": {'value': scenario.parcels[prc_ind].aquatic_bw?.Water_Column_Carnivore ?? '-', 'unit': 'kg', 'fieldname':''},
-                        "(Surface Water) Body Weight of Water Column Herbivore": {'value': scenario.parcels[prc_ind].aquatic_bw?.Water_Column_Herbivore ?? '-', 'unit': 'kg', 'fieldname':''},
-                        "(Surface Water) Body Weight of Water Column Omnivore": {'value': scenario.parcels[prc_ind].aquatic_bw?.Water_Column_Omnivore ?? '-', 'unit': 'kg', 'fieldname':''},
-                        "(Surface Water) Water Column pH": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.water_ph ?? '-', 'unit': '-', 'fieldname':''},
-                        "(Surface Water) Water Column Temperature": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.water_temp ?? '-', 'unit': 'K', 'fieldname':''},
-                        "(Surface Water) Water Column Mean Depth": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.mean_depth ?? '-', 'unit': 'm', 'fieldname':''},
-                        "(Surface Water) Algae Density": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.algae_density ?? '-', 'unit': 'g[algae]/m<sup>3</sup>[algae]', 'fieldname':''},
-                        "(Surface Water) Chloride Concentration": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.chloride_conc ?? '-', 'unit': 'mg/L', 'fieldname':''},
-                        "(Surface Water) Chlorophyll Concentration": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.chlorophyll_conc ?? '-', 'unit': 'mg/L', 'fieldname':''},
-                        "(Surface Water) Water Column Organic Carbon Fraction in Suspended Sediments": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.suspended_organic_carbon ?? '-', 'unit': '', 'fieldname':''},
-                        "(Surface Water) Water Column Suspended Sediment Concentration": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.suspended_sed_conc ?? '-', 'unit': 'kg[sediment particles]/m<sup>3</sup>[water]', 'fieldname':''},
-                        "(Surface Water) Water Column External Sediment Inflow from Other Water Bodies": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.sed_inflow ?? '-', 'unit': 'kg[sediment particles]/day', 'fieldname':''},
-                        "(Surface Water) Water Column Sediment Deposition Velocity": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.sed_deposition_vel ?? '-', 'unit': 'm[water]/day', 'fieldname':''},
-                        "(Surface Water) Water Column Flush Rate": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.flush_rate ?? '-', 'unit': 'year<sup>-1</sup>', 'fieldname':''},
-                        "(Surface Water) Water Column Evaporation Rate": {'value': scenario.parcels[prc_ind].surface_water?.wc_props.evaporation_rate ?? '-', 'unit': 'm[water]/year', 'fieldname':''},
-                        "(Sediment) Sediment Bed Density": {'value': scenario.parcels[prc_ind].surface_water?.sed_props.bed_density ?? '-', 'unit': 'kg[sediment particles]/m<sup>3</sup>[sediment particles]', 'fieldname':''},
-                        "(Sediment) Sediment Bed pH": {'value': scenario.parcels[prc_ind].surface_water?.sed_props.bed_pH ?? '-', 'unit': '-', 'fieldname':''},
-                        "(Sediment) Organic Carbon Fraction in Sediment Bed": {'value': scenario.parcels[prc_ind].surface_water?.sed_props.organic_carbon_frac ?? '-', 'unit': '-', 'fieldname':''},
-                        "(Sediment) Sediment Bed Porosity": {'value': scenario.parcels[prc_ind].surface_water?.sed_props.bed_porosity ?? '-', 'unit': '-', 'fieldname':''},
-                        "(Surface Soil) Boundary Layer Thickness Above Surface Soil": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.AirSoilBoundaryThickness ?? '-', 'unit': 'm', 'fieldname':''},
-                        "(Surface Soil) Average Vertical Velocity of Water (Percolation)": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.AverageVerticalVelocity ?? '-', 'unit': 'm/day', 'fieldname':''},
-                        "(Surface Soil) Fraction Sand": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.FractionSand ?? '-', 'unit': '-', 'fieldname':''},
-                        "(Surface Soil) Fraction of Area Available for Erosion": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.FractionofAreaAvailableforErosion ?? '-', 'unit': 'm<sup>2</sup>[area available]/m<sup>2</sup>[total]', 'fieldname':''},
-                        "(Surface Soil) Fraction of Area Available for Runoff": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.FractionofAreaAvailableforRunoff ?? '-', 'unit': 'm<sup>2</sup>[area available]/m<sup>2</sup>[total]', 'fieldname':''},
-                        "(Surface Soil) Fraction of Area Available for Vertical Diffusion": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.FractionofAreaAvailableforVerticalDiffusion ?? '-', 'unit': 'm<sup>2</sup>[area available]/m<sup>2</sup>[total]', 'fieldname':''},
-                        "(Surface Soil) Organic Carbon Fraction": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.OrganicCarbonContent ?? '-', 'unit': '-', 'fieldname':''},
-                        "(Surface Soil) Total Runoff Rate": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.TotalRunoffRate ?? '-', 'unit': 'm<sup>3</sup>[water]/m<sup>2</sup>/day', 'fieldname':''},
-                        "(Surface Soil) Water Content": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.VolumeFraction_Liquid ?? '-', 'unit': 'm<sup>3</sup>[water]/m<sup>3</sup>[compartment]', 'fieldname':''},
-                        "(Surface Soil) Air Content": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.VolumeFraction_Vapor ?? '-', 'unit': 'm<sup>3</sup>[air]/m<sup>3</sup>[compartment]', 'fieldname':''},
-                        "(Surface Soil) Density of Soil Solids (Dry Weight)": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.rho ?? '-', 'unit': 'kg[soil]/m<sup>3</sup>[soil]', 'fieldname':''},
-                        "(Surface Soil) pH": {'value': scenario.parcels[prc_ind].soil_params.Soil_Surface?.pH ?? '-', 'unit': '-', 'fieldname':''},
-                        "(Root Soil) Average Vertical Velocity of Water (Percolation)": {'value': scenario.parcels[prc_ind].soil_params.Soil_Root_Zone?.AverageVerticalVelocity ?? '-', 'unit': 'm/day', 'fieldname':''},
-                        "(Root Soil) Fraction Sand": {'value': scenario.parcels[prc_ind].soil_params.Soil_Root_Zone?.FractionSand ?? '-', 'unit': '-', 'fieldname':''},
-                        "(Root Soil) Organic Carbon Fraction": {'value': scenario.parcels[prc_ind].soil_params.Soil_Root_Zone?.OrganicCarbonContent ?? '-', 'unit': '-', 'fieldname':''},
-                        "(Root Soil) Water Content": {'value': scenario.parcels[prc_ind].soil_params.Soil_Root_Zone?.VolumeFraction_Liquid ?? '-', 'unit': 'm<sup>3</sup>[water]/m<sup>3</sup>[compartment]', 'fieldname':''},
-                        "(Root Soil) Air Content": {'value': scenario.parcels[prc_ind].soil_params.Soil_Root_Zone?.VolumeFraction_Vapor ?? '-', 'unit': 'm<sup>3</sup>[air]/m<sup>3</sup>[compartment]', 'fieldname':''},
-                        "(Root Soil) Density of Soil Solids (Dry Weight)": {'value': scenario.parcels[prc_ind].soil_params.Soil_Root_Zone?.rho ?? '-', 'unit': 'kg[soil]/m<sup>3</sup>[soil]', 'fieldname':''},
-                        "(Root Soil) pH": {'value': scenario.parcels[prc_ind].soil_params.Soil_Root_Zone?.pH ?? '-', 'unit': '-', 'fieldname':''},
-                        "(Vadose Zone) Average Vertical Velocity of Water (Percolation)": {'value': scenario.parcels[prc_ind].soil_params.Soil_Vadose_Zone?.AverageVerticalVelocity ?? '-', 'unit': 'm/day', 'fieldname':''},
-                        "(Vadose Zone) Fraction Sand": {'value': scenario.parcels[prc_ind].soil_params.Soil_Vadose_Zone?.FractionSand ?? '-', 'unit': '-', 'fieldname':''},
-                        "(Vadose Zone) Organic Carbon Fraction": {'value': scenario.parcels[prc_ind].soil_params.Soil_Vadose_Zone?.OrganicCarbonContent ?? '-', 'unit': '-', 'fieldname':''},
-                        "(Vadose Zone) Water Content": {'value': scenario.parcels[prc_ind].soil_params.Soil_Vadose_Zone?.VolumeFraction_Liquid ?? '-', 'unit': 'm<sup>3</sup>[water]/m<sup>3</sup>[compartment]', 'fieldname':''},
-                        "(Vadose Zone) Air Content": {'value': scenario.parcels[prc_ind].soil_params.Soil_Vadose_Zone?.VolumeFraction_Vapor ?? '-', 'unit': 'm<sup>3</sup>[air]/m<sup>3</sup>[compartment]', 'fieldname':''},
-                        "(Vadose Zone) Density of Soil Solids (Dry Weight)": {'value': scenario.parcels[prc_ind].soil_params.Soil_Vadose_Zone?.rho ?? '-', 'unit': 'kg[soil]/m<sup>3</sup>[soil]', 'fieldname':''},
-                        "(Vadose Zone) pH": {'value': scenario.parcels[prc_ind].soil_params.Soil_Vadose_Zone?.pH ?? '-', 'unit': '-', 'fieldname':''},
-                        "(Groundwater Zone) Fraction Sand": {'value': scenario.parcels[prc_ind].soil_params.Groundwater?.FractionSand ?? '-', 'unit': '-', 'fieldname':''},
-                        "(Groundwater Zone) Organic Carbon Fraction": {'value': scenario.parcels[prc_ind].soil_params.Groundwater?.OrganicCarbonContent ?? '-', 'unit': '-', 'fieldname':''},
-                        "(Groundwater Zone) Porosity": {'value': scenario.parcels[prc_ind].soil_params.Groundwater?.Porosity ?? '-', 'unit': 'm<sup>3</sup>[total pore space]/m<sup>3</sup>[compartment]', 'fieldname':''},
-                        "(Groundwater Zone) Density of Solid Material in Aquifer": {'value': scenario.parcels[prc_ind].soil_params.Groundwater?.rho ?? '-', 'unit': 'kg[soil]/m<sup>3</sup>[soil]', 'fieldname':''},
-                        "(Groundwater Zone) pH": {'value': scenario.parcels[prc_ind].soil_params.Groundwater?.pH ?? '-', 'unit': '-', 'fieldname':''},
-                    },
-                    "Volume Element": {
-                        "(Air) Air Height": {'value': scenario.meteorology.mixing_height_static_value, 'unit': 'm', 'fieldname': ''},
-                        "(Surface Soil) Thickness": {'value': scenario.parcels[prc_ind].surfaceSoilThickness, 'unit': 'm', 'fieldname': ''},
-                        "(Vadose Soil) Thickness": {'value': scenario.parcels[prc_ind].vadoseSoilThickness, 'unit': 'm', 'fieldname': ''},
-                        "(Root Soil) Thickness": {'value': scenario.parcels[prc_ind].rootSoilThickness, 'unit': 'm', 'fieldname': ''},
-                        "(Groundwater Zone) Thickness": {'value': scenario.parcels[prc_ind].groundwaterZoneThickness, 'unit': 'm', 'fieldname': ''},
-                    }
-                }
-            }
-
-            let map = {}
-            if (type == "general") {
-                map = scenario_map
-            } else if (type == "chem") {
-                map = chem_map
-            } else if (type == "env") {
-                map = env_map
-            }
-            // try {
-            //     scenario_map["Scenario"] = Object.assign({}, scenario_map["Scenario"], scenario['meteorology'])
-            // }
-            // catch {}
-            // try {
-            //     scenario_map["Scenario"] = Object.assign({}, scenario_map["Scenario"], scenario['meteorology']['wet_dep_interception'])
-            // }
-            // catch {}
-            // try {
-            //     scenario_map["Scenario"] = Object.assign({}, scenario_map["Scenario"], scenario['seasonal_dynamics'])
-            // }
-            // catch {}
-            if (type == "general") {
-                for (const [entity_key, entity_value] of Object.entries(map)) {
-                    map_html = map_html + "<tr data-depth='0' tabindex='0' class='level0 colps'><td>"
-                        + entity_key +
-                        "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td></tr>"
-
-                    for (const [property_key, property_value] of Object.entries(entity_value)) {
-                        map_html = map_html + "<tr data-depth='1' tabindex='0' class='level1 colps'><td></td><td class='comp'>" 
-                            + property_key + 
-                            "</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted' style='color:black;'>"
-                            + property_value +
-                            "</label></td><td></td></tr>"
-                    }
-                }
-            } else if (type == "env" || type == "chem"){
-                let prop_style = "style='max-width:20rem;text-wrap: wrap;'";
-                let prop_value_style = "style='max-width:10rem;text-wrap: no-wrap;overflow:hidden;'";
-                let prop_unit_style = "style='max-width:10rem;text-wrap: wrap;'";
-
-                for (const [entity_key, entity_value] of Object.entries(map)) {
-                    map_html = map_html + "<tr data-depth='0' tabindex='0' class='level0 colps'><td>"
-                        + entity_key +
-                        "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td><td></td><td></td></tr>"
-
-                    for (const [cat_key, cat_value] of Object.entries(entity_value)) {
-                        map_html = map_html + "<tr data-depth='1' tabindex='0' class='level1 colps'><td></td><td class='comp'>"
-                            + cat_key +
-                            "&nbsp;<span class='toggle colps'><i class='fas fa-angle-right'></i>&nbsp;</span></td><td></td><td></td><td></td></tr>"
-
-                        for (const [property_key, property_value] of Object.entries(cat_value)) {
-                            if (type == "env") {
-                                env_props_added.push(property_key);
-                            }
-                            else {
-                                chem_props_added.push(property_key);
-                            }
-
-                            let prop_value = property_value.value;
-                            if (prop_value?.length > 18) { // turn into a link with a popup
-                                let title = property_key;
-                                let note = property_value.value.replace(/\"/g, '&quot;');
-                                prop_value = `
-                                    <a href="javascript:void(0);" data-toggle="popover" data-html="true" data-trigger="focus" data-original-title="${title}" data-content="${note}">
-                                        ${property_value.value.replace(/\"/g, '&quot;')}
-                                    </a>
-                                `;
-                            }
-
-                            map_html = map_html + `<tr data-depth='2' tabindex='0' class='level2 colps'><td></td><td></td><td class='comp' ${prop_style}>`
-                                + property_key +
-                                `</td><td class='ems'><input class='editableCell' style='width: 50px; display:none'/><label class='noneditableCell text-muted' ${prop_value_style}>`
-                                + (prop_value == null ? '-' : prop_value) +
-                                `</label></td><td ${prop_unit_style}>`
-                                + (property_value.unit || '').replace(/\[.*?\]/g, '') +
-                                "</td></tr>"
+                else {
+                    treeHTML += `
+                        <div class="tree-row" role="row" aria-level="1" aria-expanded="true">
+                            <div class="tree-cell p-0" role="gridcell">
+                                <button type="button" class="${collapseBtnClass} btn-primary" aria-label="Collapse ${header} properties">
+                                    <i class="fas fa-angle-down mr-1"></i>
+                                    <span>${header}</span>
+                                </button>
+                            </div>
+                            <div class="tree-cell text-left" role="gridcell"></div>
+                        </div>`;
+                    for (const subheader in propsMap[header]) {
+                        treeHTML += `
+                            <div class="tree-row tree-level-1" role="row" aria-level="2" aria-expanded="true">
+                                <div class="tree-cell p-0" role="gridcell">
+                                    <button type="button" class="${collapseBtnClass} btn-secondary" aria-label="Collapse ${subheader} properties">
+                                        <i class="fas fa-angle-down mr-1"></i>
+                                        <span>${subheader} Properties</span>
+                                    </button>
+                                </div>
+                                <div class="tree-cell text-left" role="gridcell"></div>
+                            </div>`;
+                        let propBadge = '';
+                        if (options.badgeFromLevel != undefined) {
+                            const badgeLvl = options.badgeFromLevel;
+                            propBadge = `
+                                <span class="badge badge-pill badge-${badgeLvl == 1 ? 'primary' : 'secondary'} ml-1" style="line-height: 1.2em;">
+                                    ${badgeLvl == 1 ? header : subheader}
+                                </span>`;
+                        }
+                        for (const prop in propsMap[header][subheader]) {
+                            const val = propsMap[header][subheader][prop];
+                            const nameText = val.name ? val.name : (val.fieldname ? val.fieldname : prop);
+                            const valText = val.value == null ? '-' : val.value;
+                            const unitText = (val.unit == null || val.unit == '-' ? '' : ' ' + val.unit).replace(/\[.*?\]/g, '');
+                            treeHTML += `
+                                <div class="tree-row tree-level-2 font-weight-normal" role="row" aria-level="3" aria-expanded="true">
+                                    <div class="tree-cell" role="gridcell">
+                                        <span class="prop-name">${nameText}</span>${propBadge}
+                                    </div>
+                                    <div class="tree-cell text-left prop-val" role="gridcell" data-numeric="${valText}">${valText}${unitText}</div>
+                                </div>`;
                         }
                     }
                 }
             }
-
-            map_html += "</tbody>"
-            return map_html        
+            treeHTML += '</div>';
+            $(treeHTML).children().appendTo(tree);
+            showAll(tree, false);
         }
 
-        function populate_props_dd(dd_menu){
-            let uniq_comp = [... new Set(env_props_added)]
-            uniq_comp.sort().forEach(function(e) {
-                let menu_item = "<a href='#' class='dropdown-item comp-item'>" + e + "</a>"
-                $(menu_item).appendTo(dd_menu)
-            })
-            $("a.dropdown-item.comp-item").on("click",function (e){
-                e.preventDefault()
-                let this_table = $('#property-summary-gui table.compMap');
-                let this_dd_btn = $(this).closest("div.dropdown").find("button.btn_show_comp")
-                $('button.comp_hide_all').trigger('click');
-                let only_comps = $(this_table).find("tr.colps.level2").filter((i,tr) => $(tr).find("td.comp").text() == $(this).text());
+        function buildGeneralPropsTree() {
+            const tree = $('.general-props-tree');
+            const scenario = TRIM.store.currentScenario;
+            const propsMap = {
+                "Simulation": {
+                    "Start Date": scenario['simulation_start_date'],
+                    "End Date": scenario['simulation_end_date'],
+                    "Erosion Rate Source": "Option " + scenario['erosionRateSource']
+                },
+                "Scenario": {
+                    // "Name": scenario['name'],
+                    // "Description": scenario['description'],
+                    "Precipitation Rate": scenario.parcels[0]?.precip_rate
+                }
+            };
+            buildPropsTree(tree, propsMap);
+        }
 
-                $(only_comps).show()
-                $(this_dd_btn).text($(this).text())
+        function buildChemicalPropsTree() {
+            const tree = $('.chemical-props-tree');
+            buildPropsTree(tree, TRIM.store.currentScenario.chemical_properties, {levels: 3, badgeFromLevel: 1});
+        }
 
-                $(only_comps).prev("tr.level1").show()
-            })
+        function buildCompartmentPropsTree() {
+            const tree = $('.compartment-props-tree');
+            const envMap = buildEnvMap();
+            buildPropsTree(tree, envMap, {levels: 3, badgeFromLevel: 1});
+            const envProps = [];
+            for (const pcl in envMap) {
+                for (const propType in envMap[pcl]) {
+                    for (const prop in envMap[pcl][propType]) {
+                        envProps.push(prop);
+                    }
+                }
+                break;
+            }
+            populatePropsDropdown($("#show-env-props").siblings(".dropdown-menu"), envProps);
+        }
+
+        function buildEnvMap() {
+            const scenario = TRIM.store.currentScenario;
+            const envMap = {};
+            for (const pcl of scenario.parcels){
+                let prc_name =  pcl.name
+                envMap[prc_name] = {
+                    "Parcel": {
+                        "Parcel Type": {'value': pcl.parcelType, 'unit': '-', 'fieldname': ''},
+                        "Has Air": {'value': pcl.hasAir, 'unit': '-', 'fieldname': ''},
+                        "Has Land": {'value': pcl.hasLand, 'unit': '-', 'fieldname': ''},
+                        "Has Water": {'value': pcl.hasWater, 'unit': '-', 'fieldname': ''},
+                        "Has Wetland": {'value': pcl.hasWetland, 'unit': '-', 'fieldname': ''},
+                        "Has Farm Food Chain": {'value': pcl.hasFarmFoodChain, 'unit': '-', 'fieldname': ''},
+                        "Has Fish Food Web": {'value': pcl.hasFishFoodWeb, 'unit': '-', 'fieldname': ''},
+                        "Land Use": {'value': pcl.landUse, 'unit': '-', 'fieldname': ''},
+                        "Soil Tillage": {'value': pcl.soilTillage, 'unit': '-', 'fieldname': ''},
+                        "Air Density": {'value': pcl.airDensity, 'unit': 'g/cm<sup>3</sup>', 'fieldname': ''},
+                        "Area": {'value': pcl.area, 'unit': 'm<sup>2</sup>', 'fieldname': ''},
+                    },
+                    "Compartment":{
+                        "(Air) Air Density": {'value': pcl.airDensity, 'unit': 'g/cm<sup>3</sup>', 'fieldname': ''},
+                        "(Air) Dust Density": {'value': pcl.dustDensity, 'unit': 'kg[dust particles]/m<sup>3</sup>[dust particles]', 'fieldname': ''},
+                        "(Air) Dust Load": {'value': pcl.dustLoad, 'unit': 'kg[dust particles]/m<sup>3</sup>[air compartment]', 'fieldname': ''},
+                        "(Air) Fraction Organic Matter of Dust Particles ": {'value': pcl.fractionOrganicMatterOnParticulates, 'unit': '-', 'fieldname': ''},
+                        "(Surface Soil) Evapotranspiration Fraction": {'value': pcl.evapotrans_frac, 'unit': '-', 'fieldname': ''},
+                        "(Surface Soil) Precipitation Runoff Fraction": {'value': pcl.runoff_fraction, 'unit': '-', 'fieldname': ''},
+                        "(Surface Soil) Precipitation Seepage Fraction": {'value': pcl.seepage_frac, 'unit': '-', 'fieldname': ''},
+                        "(Surface Soil) Total Erosion Rate": {'value': pcl.totalErosionRate, 'unit': 'kg/m<sup>2</sup>/day', 'fieldname': ''},
+                        "(Surface Water) Biomass of Benthic Carnivore": {'value': pcl.aquatic_biomass?.Benthic_Carnivore ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
+                        "(Surface Water) Biomass of Benthic Invertebrate": {'value': pcl.aquatic_biomass?.Benthic_Invertebrate ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
+                        "(Surface Water) Biomass of Benthic Omnivore": {'value': pcl.aquatic_biomass?.Benthic_Omnivore ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
+                        "(Surface Water) Biomass of Macrophyte": {'value': pcl.aquatic_biomass?.Macrophyte ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
+                        "(Surface Water) Biomass of Water Column Carnivore": {'value': pcl.aquatic_biomass?.Water_Column_Carnivore ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
+                        "(Surface Water) Biomass of Water Column Herbivore": {'value': pcl.aquatic_biomass?.Water_Column_Herbivore ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
+                        "(Surface Water) Biomass of Water Column Omnivore": {'value': pcl.aquatic_biomass?.Water_Column_Omnivore ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
+                        "(Surface Water) Biomass of Zooplankton": {'value': pcl.aquatic_biomass?.Zooplankton ?? '-', 'unit': 'kg/m<sup>2</sup>', 'fieldname':''},
+                        "(Surface Water) Body Weight of Benthic Carnivore": {'value': pcl.aquatic_bw?.Benthic_Carnivore ?? '-', 'unit': 'kg', 'fieldname':''},
+                        "(Surface Water) Body Weight of Benthic Invertebrate": {'value': pcl.aquatic_bw?.Benthic_Invertebrate ?? '-', 'unit': 'kg', 'fieldname':''},
+                        "(Surface Water) Body Weight of Benthic Omnivore": {'value': pcl.aquatic_bw?.Benthic_Omnivore ?? '-', 'unit': 'kg', 'fieldname':''},
+                        "(Surface Water) Body Weight of Macrophyte": {'value': pcl.aquatic_bw?.Macrophyte ?? '-', 'unit': 'kg', 'fieldname':''},
+                        "(Surface Water) Body Weight of Water Column Carnivore": {'value': pcl.aquatic_bw?.Water_Column_Carnivore ?? '-', 'unit': 'kg', 'fieldname':''},
+                        "(Surface Water) Body Weight of Water Column Herbivore": {'value': pcl.aquatic_bw?.Water_Column_Herbivore ?? '-', 'unit': 'kg', 'fieldname':''},
+                        "(Surface Water) Body Weight of Water Column Omnivore": {'value': pcl.aquatic_bw?.Water_Column_Omnivore ?? '-', 'unit': 'kg', 'fieldname':''},
+                        "(Surface Water) Water Column pH": {'value': pcl.surface_water?.wc_props.water_ph ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Surface Water) Water Column Temperature": {'value': pcl.surface_water?.wc_props.water_temp ?? '-', 'unit': 'K', 'fieldname':''},
+                        "(Surface Water) Water Column Mean Depth": {'value': pcl.surface_water?.wc_props.mean_depth ?? '-', 'unit': 'm', 'fieldname':''},
+                        "(Surface Water) Algae Density": {'value': pcl.surface_water?.wc_props.algae_density ?? '-', 'unit': 'g[algae]/m<sup>3</sup>[algae]', 'fieldname':''},
+                        "(Surface Water) Chloride Concentration": {'value': pcl.surface_water?.wc_props.chloride_conc ?? '-', 'unit': 'mg/L', 'fieldname':''},
+                        "(Surface Water) Chlorophyll Concentration": {'value': pcl.surface_water?.wc_props.chlorophyll_conc ?? '-', 'unit': 'mg/L', 'fieldname':''},
+                        "(Surface Water) Water Column Organic Carbon Fraction in Suspended Sediments": {'value': pcl.surface_water?.wc_props.suspended_organic_carbon ?? '-', 'unit': '', 'fieldname':''},
+                        "(Surface Water) Water Column Suspended Sediment Concentration": {'value': pcl.surface_water?.wc_props.suspended_sed_conc ?? '-', 'unit': 'kg[sediment particles]/m<sup>3</sup>[water]', 'fieldname':''},
+                        "(Surface Water) Water Column External Sediment Inflow from Other Water Bodies": {'value': pcl.surface_water?.wc_props.sed_inflow ?? '-', 'unit': 'kg[sediment particles]/day', 'fieldname':''},
+                        "(Surface Water) Water Column Sediment Deposition Velocity": {'value': pcl.surface_water?.wc_props.sed_deposition_vel ?? '-', 'unit': 'm[water]/day', 'fieldname':''},
+                        "(Surface Water) Water Column Flush Rate": {'value': pcl.surface_water?.wc_props.flush_rate ?? '-', 'unit': 'year<sup>-1</sup>', 'fieldname':''},
+                        "(Surface Water) Water Column Evaporation Rate": {'value': pcl.surface_water?.wc_props.evaporation_rate ?? '-', 'unit': 'm[water]/year', 'fieldname':''},
+                        "(Sediment) Sediment Bed Density": {'value': pcl.surface_water?.sed_props.bed_density ?? '-', 'unit': 'kg[sediment particles]/m<sup>3</sup>[sediment particles]', 'fieldname':''},
+                        "(Sediment) Sediment Bed pH": {'value': pcl.surface_water?.sed_props.bed_pH ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Sediment) Organic Carbon Fraction in Sediment Bed": {'value': pcl.surface_water?.sed_props.organic_carbon_frac ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Sediment) Sediment Bed Porosity": {'value': pcl.surface_water?.sed_props.bed_porosity ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Surface Soil) Boundary Layer Thickness Above Surface Soil": {'value': pcl.soil_params.Soil_Surface?.AirSoilBoundaryThickness ?? '-', 'unit': 'm', 'fieldname':''},
+                        "(Surface Soil) Average Vertical Velocity of Water (Percolation)": {'value': pcl.soil_params.Soil_Surface?.AverageVerticalVelocity ?? '-', 'unit': 'm/day', 'fieldname':''},
+                        "(Surface Soil) Fraction Sand": {'value': pcl.soil_params.Soil_Surface?.FractionSand ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Surface Soil) Fraction of Area Available for Erosion": {'value': pcl.soil_params.Soil_Surface?.FractionofAreaAvailableforErosion ?? '-', 'unit': 'm<sup>2</sup>[area available]/m<sup>2</sup>[total]', 'fieldname':''},
+                        "(Surface Soil) Fraction of Area Available for Runoff": {'value': pcl.soil_params.Soil_Surface?.FractionofAreaAvailableforRunoff ?? '-', 'unit': 'm<sup>2</sup>[area available]/m<sup>2</sup>[total]', 'fieldname':''},
+                        "(Surface Soil) Fraction of Area Available for Vertical Diffusion": {'value': pcl.soil_params.Soil_Surface?.FractionofAreaAvailableforVerticalDiffusion ?? '-', 'unit': 'm<sup>2</sup>[area available]/m<sup>2</sup>[total]', 'fieldname':''},
+                        "(Surface Soil) Organic Carbon Fraction": {'value': pcl.soil_params.Soil_Surface?.OrganicCarbonContent ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Surface Soil) Total Runoff Rate": {'value': pcl.soil_params.Soil_Surface?.TotalRunoffRate ?? '-', 'unit': 'm<sup>3</sup>[water]/m<sup>2</sup>/day', 'fieldname':''},
+                        "(Surface Soil) Water Content": {'value': pcl.soil_params.Soil_Surface?.VolumeFraction_Liquid ?? '-', 'unit': 'm<sup>3</sup>[water]/m<sup>3</sup>[compartment]', 'fieldname':''},
+                        "(Surface Soil) Air Content": {'value': pcl.soil_params.Soil_Surface?.VolumeFraction_Vapor ?? '-', 'unit': 'm<sup>3</sup>[air]/m<sup>3</sup>[compartment]', 'fieldname':''},
+                        "(Surface Soil) Density of Soil Solids (Dry Weight)": {'value': pcl.soil_params.Soil_Surface?.rho ?? '-', 'unit': 'kg[soil]/m<sup>3</sup>[soil]', 'fieldname':''},
+                        "(Surface Soil) pH": {'value': pcl.soil_params.Soil_Surface?.pH ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Root Soil) Average Vertical Velocity of Water (Percolation)": {'value': pcl.soil_params.Soil_Root_Zone?.AverageVerticalVelocity ?? '-', 'unit': 'm/day', 'fieldname':''},
+                        "(Root Soil) Fraction Sand": {'value': pcl.soil_params.Soil_Root_Zone?.FractionSand ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Root Soil) Organic Carbon Fraction": {'value': pcl.soil_params.Soil_Root_Zone?.OrganicCarbonContent ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Root Soil) Water Content": {'value': pcl.soil_params.Soil_Root_Zone?.VolumeFraction_Liquid ?? '-', 'unit': 'm<sup>3</sup>[water]/m<sup>3</sup>[compartment]', 'fieldname':''},
+                        "(Root Soil) Air Content": {'value': pcl.soil_params.Soil_Root_Zone?.VolumeFraction_Vapor ?? '-', 'unit': 'm<sup>3</sup>[air]/m<sup>3</sup>[compartment]', 'fieldname':''},
+                        "(Root Soil) Density of Soil Solids (Dry Weight)": {'value': pcl.soil_params.Soil_Root_Zone?.rho ?? '-', 'unit': 'kg[soil]/m<sup>3</sup>[soil]', 'fieldname':''},
+                        "(Root Soil) pH": {'value': pcl.soil_params.Soil_Root_Zone?.pH ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Vadose Zone) Average Vertical Velocity of Water (Percolation)": {'value': pcl.soil_params.Soil_Vadose_Zone?.AverageVerticalVelocity ?? '-', 'unit': 'm/day', 'fieldname':''},
+                        "(Vadose Zone) Fraction Sand": {'value': pcl.soil_params.Soil_Vadose_Zone?.FractionSand ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Vadose Zone) Organic Carbon Fraction": {'value': pcl.soil_params.Soil_Vadose_Zone?.OrganicCarbonContent ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Vadose Zone) Water Content": {'value': pcl.soil_params.Soil_Vadose_Zone?.VolumeFraction_Liquid ?? '-', 'unit': 'm<sup>3</sup>[water]/m<sup>3</sup>[compartment]', 'fieldname':''},
+                        "(Vadose Zone) Air Content": {'value': pcl.soil_params.Soil_Vadose_Zone?.VolumeFraction_Vapor ?? '-', 'unit': 'm<sup>3</sup>[air]/m<sup>3</sup>[compartment]', 'fieldname':''},
+                        "(Vadose Zone) Density of Soil Solids (Dry Weight)": {'value': pcl.soil_params.Soil_Vadose_Zone?.rho ?? '-', 'unit': 'kg[soil]/m<sup>3</sup>[soil]', 'fieldname':''},
+                        "(Vadose Zone) pH": {'value': pcl.soil_params.Soil_Vadose_Zone?.pH ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Groundwater Zone) Fraction Sand": {'value': pcl.soil_params.Groundwater?.FractionSand ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Groundwater Zone) Organic Carbon Fraction": {'value': pcl.soil_params.Groundwater?.OrganicCarbonContent ?? '-', 'unit': '-', 'fieldname':''},
+                        "(Groundwater Zone) Porosity": {'value': pcl.soil_params.Groundwater?.Porosity ?? '-', 'unit': 'm<sup>3</sup>[total pore space]/m<sup>3</sup>[compartment]', 'fieldname':''},
+                        "(Groundwater Zone) Density of Solid Material in Aquifer": {'value': pcl.soil_params.Groundwater?.rho ?? '-', 'unit': 'kg[soil]/m<sup>3</sup>[soil]', 'fieldname':''},
+                        "(Groundwater Zone) pH": {'value': pcl.soil_params.Groundwater?.pH ?? '-', 'unit': '-', 'fieldname':''},
+                    },
+                    "Volume Element": {
+                        "(Air) Air Height": {'value': scenario.meteorology.mixing_height_static_value, 'unit': 'm', 'fieldname': ''},
+                        "(Surface Soil) Thickness": {'value': pcl.surfaceSoilThickness, 'unit': 'm', 'fieldname': ''},
+                        "(Vadose Soil) Thickness": {'value': pcl.vadoseSoilThickness, 'unit': 'm', 'fieldname': ''},
+                        "(Root Soil) Thickness": {'value': pcl.rootSoilThickness, 'unit': 'm', 'fieldname': ''},
+                        "(Groundwater Zone) Thickness": {'value': pcl.groundwaterZoneThickness, 'unit': 'm', 'fieldname': ''},
+                    }
+                }
+            }
+            return envMap;
+        }
+
+        function toggleTreeGrid(tree, doOpen) {
+            tree[0].dispatchEvent(new CustomEvent('tree-grid:toggle-all', {
+                bubbles: true,
+                detail: {
+                    doOpen: doOpen
+                }
+            }));
+        }
+
+        function toggleTreeGridRows(rows, doOpen) {
+            rows.each(function() {
+                this.dispatchEvent(new CustomEvent('tree-grid:toggle', {
+                    bubbles: true,
+                    detail: {
+                        doOpen: doOpen,
+                        skipChildren: true,
+                    }
+                }));
+            });
+        }
+
+        function updateShowPropText(tree, txt) {
+            tree.closest('.props-row').find('.tree_grid_show_prop').text(txt);
+        }
+
+        function resetShowPropText(tree) {
+            updateShowPropText(tree, 'Show Property');
+        }
+
+        function showAll(tree, doShow) {
+            const btn = tree.closest('.props-row').find('.tree_grid_show_all');
+            if (doShow === true || (btn.data('show') == 'true' && doShow !== false)) {
+                btn.data('show', 'false').text('Hide All');
+                toggleTreeGrid(tree, true);
+            }
+            else {
+                btn.data('show', 'true').text('Show All');
+                toggleTreeGrid(tree, false);
+            }
+            resetShowPropText(tree);
+        }
+
+        function showByFilter(tree, filterFunc) {
+            showAll(tree, false); // close others first
+            toggleTreeGridRows(tree.find('.tree-row[aria-level]').filter(filterFunc), true);
+            resetShowPropText(tree);
+        }
+
+        function showNonZero(tree) {
+            showByFilter(tree, (i, el) => {
+                const val = $(el).find('.prop-val').data('numeric');
+                return (
+                    val > 0 || (val && parseInt(val) == NaN && val != '-')
+                )
+            });
+        }
+
+        function showPropValues(tree, propName) {
+            showByFilter(tree, (i, el) => $(el).find('.prop-name').text() == propName);
+            updateShowPropText(tree, propName);
+        }
+
+        function populatePropsDropdown(dropdownMenu, propList){
+            const uniqueEntries = [... new Set(propList)];
+            uniqueEntries.sort().forEach(function(e) {
+                $("<a href='#' class='dropdown-item prop-select-item'>" + e + "</a>")
+                    .appendTo(dropdownMenu);
+            });
         }
     });
 </script>

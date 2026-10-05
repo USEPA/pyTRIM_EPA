@@ -1,0 +1,69 @@
+.tree-grid {
+    --header-col-width: minmax(250px, 1fr);
+    --data-cols: 1;
+    --data-col-width: 210px;
+
+    .tree-row {
+        display: grid;
+        grid-template-columns: 
+            var(--header-col-width)
+            repeat(var(--data-cols), var(--data-col-width));
+        align-items: center;
+        min-height: 44px;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+        border-bottom: 1px solid $border-color;
+        font-weight: 700;
+
+        &:hover {
+            background: lighten($card-cap-bg, 30%);
+        }
+
+        &.tree-row-header {
+            min-height: 38px;
+            color: $text-muted;
+            font-size: .78rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+
+            &:hover {
+                background: unset
+            }
+
+            // Make sure header cells have bg and border on overflow
+            padding: 0;
+            border-bottom: unset;
+            .tree-cell {
+                background: $card-cap-bg;
+                border-bottom: 1px solid $border-color;
+                &:first-child {
+                    padding-left: 0.6rem;
+                }
+                &:last-child {
+                    padding-right: 0.6rem;
+                }
+            }
+        }
+
+        .tree-cell {
+            padding: 0.6rem 0.75rem;
+        }
+
+        &.tree-level-1 .tree-cell:first-child {
+            margin-left: 2.25rem;
+        }
+
+        &.tree-level-2 {
+            font-weight: unset;
+
+            .tree-cell:first-child {
+                margin-left: 4.5rem;
+            }
+        }
+    }
+
+    .tree-grid-responsive & {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+}
