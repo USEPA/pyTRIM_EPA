@@ -1069,6 +1069,7 @@ onDomLoad(function () {
             // WRITE TO DATABASE
             // TRIM.api.createParcels('{{ scenario.id }}', shapes.features.reverse()[0])
             TRIM.api.createParcels('{{ scenario.id }}', parcel.toGeoJSON()).on('load', function () {
+                LoadingScreen.hide('create_parcel');
                 let resp = JSON.parse(this.responseText)
                 if (resp) {
                     let new_parcel = resp['parcel']
@@ -1093,7 +1094,6 @@ onDomLoad(function () {
                 }
                 // TRIM.refreshParcels();
                 requires_reload = true;
-                LoadingScreen.hide('create_parcel');
             })
         };
 
@@ -1962,6 +1962,9 @@ onDomLoad(function () {
                 if (success) {
                     renderAermodDownloadUi(responseData);
                 }
+                else {
+                    alert("Error during AERMOD download: " + responseData?.message)
+                }
                 LoadingScreen.hide('generating_aermod_receptors');
             });
         });
@@ -2080,6 +2083,9 @@ onDomLoad(function () {
                         TRIM.store.fileData.add(fileKey, myData);
                     }
                     updateFields();
+                }
+                catch (err) {
+                    alert(err);
                 }
                 finally {
                     TRIM.refreshParcels();

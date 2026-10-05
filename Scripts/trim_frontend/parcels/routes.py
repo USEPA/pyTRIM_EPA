@@ -55,7 +55,7 @@ def create_parcel(scenario_id):
         media = LAND_USE_TYPES
     except Exception as e:
         logger.error(traceback.format_exc())
-        return ApiException(repr(e))
+        return ApiException(f"Unable to create parcel: {e}")
 
     return ApiResult({'parcel': p.as_serializable(), 'media': media})
 
@@ -67,10 +67,11 @@ def create_parcel(scenario_id):
 def get_parcels(scenario_id):
     s = ScenarioService.get(scenario_id)
     if not s:
-        return ApiException("Unknown Scenario")
+        raise ApiException("Unknown Scenario")
     if not current_user.can('view', s):
         abort(403)
     logger = make_logger('parcels_api_get')
+
     try:
         p = ParcelService.get_all(scenario_id=scenario_id)
         m = LAND_USE_TYPES
@@ -93,7 +94,9 @@ def get_parcels(scenario_id):
             logger.info(f"Acquired all parcels in {time.time() - total_start} seconds")
     except Exception as e:
         logger.error(traceback.format_exc())
-        return ApiException(repr(e))
+        err = ApiException(f"Unable to fetch parcels: {e}")
+        err.value |= {"parcels": [], "media": None}
+        raise err
 
     return ApiResult({
         'parcels': parcels,
@@ -108,31 +111,25 @@ def get_parcels(scenario_id):
 def update_parcel(id, scenario_id):
     s = ScenarioService.get(scenario_id)
     if not s:
-        return ApiException("Unknown Scenario")
+        raise ApiException("Unknown Scenario")
     if not current_user.can('edit', s):
         abort(403)
     logger = make_logger('parcels_api_update')
 
     try:
-        # Get the specified parcel
         p = ParcelService.get(id)
         if p.scenario.id != s.id:
-            return ApiException('Unknown Parcel')
+            raise ApiException('Unknown Parcel')
         parcels_data = request.form.to_dict()
-        # print(f"updating with {parcels_data}")
+
         rv = None
-        try:
-            rv = handle_parcel_update(p, parcels_data)
-        except Exception as e:
-            print(f"exception while updating parcel {p} with {parcels_data}:\n")
-            print(traceback.format_exc())
-            return ApiException(repr(e))
+        rv = handle_parcel_update(p, parcels_data)
 
         if rv is not None:
             return rv
     except Exception as e:
         logger.error(traceback.format_exc())
-        return ApiException(repr(e))
+        return ApiException(f"Unable to update parcel: {e}")
     return ApiResult({'message': 'success'})
 
 
@@ -159,6 +156,6 @@ def delete_parcel(id, scenario_id):
         ParcelService.commit()
     except Exception as e:
         logger.error(traceback.format_exc())
-        return ApiException(repr(e))
+        return ApiException(f"Unable to delete parcel: {e}")
 
     return "success"

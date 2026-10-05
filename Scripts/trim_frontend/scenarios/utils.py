@@ -200,6 +200,54 @@ def get_runmodel_results(execution_arn):
     return sfn_results
 
 
+def export_user_inputs(scn, logger):
+    """
+    with tempfile.TemporaryDirectory() as tmpdir:
+        n = f'{trim_scenario.name}_Risk_Simulations.xlsx'
+        n = n.replace('/', '_').replace('\\', '_')
+        n = n.replace('(', '_').replace(')', ')')
+        n = n.replace(',', '-').replace(';', '-')
+        n = n.replace(' ', '_')
+        filepath = os.path.join(tmpdir, n)
+        with pd.ExcelWriter(filepath) as writer:
+            for simulation in trim_scenario.mirc_simulations:
+                try:
+                    results = MircSimulationService(simulation).run_pathways()
+                except Exception:
+                    import traceback
+                    traceback.print_exc()
+                    continue
+
+                try:
+                    report = make_report(results)
+                except Exception:
+                    import traceback
+                    traceback.print_exc()
+                    continue
+
+                if not isinstance(report, list):
+                    report = [report]
+
+                base_sheet_name = f'({simulation.name.replace("Simulation", "").strip()}) {simulation.chemical.name}'
+                for i, df in enumerate(report, start=1):
+                    if i > 1:
+                        sheet_name = f'{base_sheet_name} (Metadata)'
+                    else:
+                        sheet_name = base_sheet_name
+                    try:
+                        df.to_excel(writer, sheet_name=sheet_name[:31], index=False, header=(i < 2))
+                    except Exception:
+                        import traceback
+                        traceback.print_exc()
+
+        return api.FileResult(filepath)
+    """
+
+    
+    scn_json = scn.as_serializable()
+    print(scn_json)
+
+
 def handle_scenario_update(s, scenario_data):
     logger = make_logger('handle_scenario_update')
 
@@ -259,6 +307,15 @@ def handle_scenario_update(s, scenario_data):
         if "_precipitation_" in field_name:
             update_dynamic_params(s)
 
+        # update meteo metadata
+        metadata = ScenarioService.get_metadata(s)
+        met_key = field_name.replace("_static_value", "").replace("_field_name_TS", "")
+        if scenario_data.get("filename"):
+            metadata[met_key] = scenario_data.get("filename")
+        elif met_key in metadata.keys():
+            del metadata[met_key]
+        ParameterService.commit()
+
     elif field_name.startswith("seasonal_"):  # Data from the seasonal dynamics tab
         param_media = param_map["seasonal"].get(field_name)[0]
         param_name = param_map["seasonal"].get(field_name)[1]
@@ -277,6 +334,15 @@ def handle_scenario_update(s, scenario_data):
                 ret_val = meteo_wgt_avg_value_from_timeseries(param_data, ret_type)
                 if ret_type != "None":
                     update_assumed_all_comp_fixed_params(s, comp_list, param_name, ret_val[ret_type_name])
+
+        # update seasonal dynamics metadata
+        metadata = ScenarioService.get_metadata(s)
+        sd_key = field_name.replace("_static_value", "").replace("_field_name_TS", "")
+        if scenario_data.get("filename"):
+            metadata[sd_key] = scenario_data.get("filename")
+        elif sd_key in metadata.keys():
+            del metadata[sd_key]
+        ParameterService.commit()
 
     elif field_name == "simulation_start_date" or field_name == "simulation_end_date":
         date_parts = scenario_data[field_name].split("-")
@@ -316,6 +382,10 @@ def handle_scenario_update(s, scenario_data):
     elif field_name == "soil_api":
         try:
             update_soil_from_api(s, logger)
+
+            metadata = ScenarioService.get_metadata(s)
+            metadata["abiotic_usda"] = True
+            ParameterService.commit()
         except Exception as e:
             logger.error(f"Failed to complete USDA soil update: {traceback.format_exc()}")
             raise ApiException(f"Error handling USDA API request: {e}")
@@ -652,6 +722,10 @@ def update_soil_from_api(s, logger):
     parcel_tillage = {}
     for this_p in s.parcels:
         this_parcel_data = this_p.as_serializable()
+        parcel_type = this_parcel_data.get("parcelType")
+        if "Water" in parcel_type or parcel_type == "Air Only":
+            continue
+
         parcels[this_parcel_data['name']] = [(t[1], t[0]) for t in this_parcel_data['vertices']]
         parcel_layers[this_parcel_data['name']] = get_soil_boundaries(this_p)
         parcel_tillage[this_parcel_data['name']] = (this_parcel_data['soilTillage'] == 'Yes')
