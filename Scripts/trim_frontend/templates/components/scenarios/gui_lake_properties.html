@@ -159,7 +159,7 @@
             let tblHandle = table_type == "lake" ? lkTable : sdTable
             let tblId = table_type == "lake" ? lkTblId : sedTblId
             
-            let scrollBody = $(tblId + '_wrapper').find('.dataTables_scrollBody');
+            let scrollBody = $(tblId + '_wrapper').find('.dt-scroll-body');
             let scrollTop = scrollBody.length > 0 ? scrollBody.scrollTop() : 0;
             
             tblHandle.clear().draw();
@@ -190,16 +190,16 @@
                 initComplete: function (settings, json) {
                     // $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                     this.api().columns().header().to$().attr('scope', 'col');
-                    $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
-                    $(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
-                    $(".dataTables_scrollHead").addClass('wrap-text-scrollhead');
+                    $(".dt-scroll-body").css({"max-height": "500px", "height": "100%"});
+                    $(".dt-scroll-body").addClass('wrap-text-scrollbody');
+                    $(".dt-scroll-head").addClass('wrap-text-scrollhead');
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
 
                     if (scrollTop > 0) {
                         //using setTimeout to ensure DOM is fully rendered
                         setTimeout(function() {
-                            let newScrollBody = $(tblId + '_wrapper').find('.dataTables_scrollBody');
+                            let newScrollBody = $(tblId + '_wrapper').find('.dt-scroll-body');
                             if (newScrollBody.length > 0) {
                                 newScrollBody.scrollTop(scrollTop);
                             }

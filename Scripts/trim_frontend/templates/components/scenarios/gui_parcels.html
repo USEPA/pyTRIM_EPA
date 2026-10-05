@@ -1860,9 +1860,9 @@ onDomLoad(function () {
             columns: setDynamicColumnWidths(tblId, map_cols, shapes.features),
             initComplete: function (settings, json) {
                 // $("#mapTable").wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
-                $(".dataTables_scrollBody").css({ "max-height": "500px", "height": "100%" });
-                $(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
-                $(".dataTables_scrollHead").addClass('wrap-text-scrollhead');
+                $(".dt-scroll-body").css({ "max-height": "500px", "height": "100%" });
+                $(".dt-scroll-body").addClass('wrap-text-scrollbody');
+                $(".dt-scroll-head").addClass('wrap-text-scrollhead');
 
                 $('table[aria-describedby="mapTable_info"]').removeAttr("aria-describedby");
                 this.api().columns().header().to$().attr('scope', 'col');

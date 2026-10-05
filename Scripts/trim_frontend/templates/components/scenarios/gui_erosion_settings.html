@@ -949,9 +949,9 @@
 
             function globalDrawCallback(tbl) {
                 // General table formatting / features
-                tbl.find(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
-                tbl.find(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
-                tbl.find(".dataTables_scrollHead").addClass('wrap-text-scrollhead');
+                tbl.find(".dt-scroll-body").css({"max-height": "500px", "height": "100%"});
+                tbl.find(".dt-scroll-body").addClass('wrap-text-scrollbody');
+                tbl.find(".dt-scroll-head").addClass('wrap-text-scrollhead');
                 
                 tbl.removeClass("wrap-text"); // dynamic cols a bit buggy with erosion opts 2/3
 
@@ -995,10 +995,10 @@
                 });
 
                 if (tbl[0].getBoundingClientRect().height < 500) {
-                    tbl.closest('.dataTables_scrollBody')[0].style.height = null;
+                    tbl.closest('.dt-scroll-body')[0].style.height = null;
                 }
                 else {
-                    tbl.closest('.dataTables_scrollBody')[0].style.height = '500px';
+                    tbl.closest('.dt-scroll-body')[0].style.height = '500px';
                 }
             }
 
