@@ -914,6 +914,25 @@ def export_for_mirc(scenario_id):
     return ApiResult(trim_data)
 
 
+@scenario_api.route('/api/scenario/<int:scenario_id>/export/user-inputs', methods=['GET'])
+@login_required
+def export_scenario_user_inputs(scenario_id):
+    scen = ScenarioService.get(scenario_id)
+    if not scen:
+        return ApiException("Unknown Scenario")
+    if not current_user.can('view', scen):
+        abort(403)
+
+    logger = make_logger('scenario_exporter')
+    try:
+        user_data = export_user_inputs(scen, logger)
+    except Exception as e:  
+        logger.error(traceback.format_exc())
+        raise ApiException(f"Error exporting user inputs: {e}")
+
+    return ApiResult({})
+
+
 @scenario_api.route(
     '/api/scenario/<int:scenario_id>/run_receptor_generation', methods=['POST']
 )

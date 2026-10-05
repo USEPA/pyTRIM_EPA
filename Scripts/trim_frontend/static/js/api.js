@@ -69,6 +69,14 @@ window.TRIM = (function(trim) {
         });
     }
 
+    api.exportScenarioUserInputs = function(scenario_id) {
+        var url = api.getUrl('scenario_api.export_scenario_user_inputs').replace('/0', '/' + scenario_id);
+        return AJAX.call({
+            method: 'GET',
+            url: url
+        });
+    }
+
     api.updateScenarioMetadata = function(scenario, callback) {
         var url = api.getUrl('scenario_api.get_scenario_metadata');
         return AJAX.call({
@@ -76,7 +84,8 @@ window.TRIM = (function(trim) {
         }).on('load', function() {
             if (this.responseJSON) {
                 TRIM.store.currentScenario.metadata = structuredClone(this.responseJSON);
-                callback();
+                if (callback) 
+                    callback();
             } else {
                 console.error(this);
             }

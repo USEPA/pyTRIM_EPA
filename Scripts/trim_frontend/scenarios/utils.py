@@ -200,6 +200,54 @@ def get_runmodel_results(execution_arn):
     return sfn_results
 
 
+def export_user_inputs(scn, logger):
+    """
+    with tempfile.TemporaryDirectory() as tmpdir:
+        n = f'{trim_scenario.name}_Risk_Simulations.xlsx'
+        n = n.replace('/', '_').replace('\\', '_')
+        n = n.replace('(', '_').replace(')', ')')
+        n = n.replace(',', '-').replace(';', '-')
+        n = n.replace(' ', '_')
+        filepath = os.path.join(tmpdir, n)
+        with pd.ExcelWriter(filepath) as writer:
+            for simulation in trim_scenario.mirc_simulations:
+                try:
+                    results = MircSimulationService(simulation).run_pathways()
+                except Exception:
+                    import traceback
+                    traceback.print_exc()
+                    continue
+
+                try:
+                    report = make_report(results)
+                except Exception:
+                    import traceback
+                    traceback.print_exc()
+                    continue
+
+                if not isinstance(report, list):
+                    report = [report]
+
+                base_sheet_name = f'({simulation.name.replace("Simulation", "").strip()}) {simulation.chemical.name}'
+                for i, df in enumerate(report, start=1):
+                    if i > 1:
+                        sheet_name = f'{base_sheet_name} (Metadata)'
+                    else:
+                        sheet_name = base_sheet_name
+                    try:
+                        df.to_excel(writer, sheet_name=sheet_name[:31], index=False, header=(i < 2))
+                    except Exception:
+                        import traceback
+                        traceback.print_exc()
+
+        return api.FileResult(filepath)
+    """
+
+    
+    scn_json = scn.as_serializable()
+    print(scn_json)
+
+
 def handle_scenario_update(s, scenario_data):
     logger = make_logger('handle_scenario_update')
 
