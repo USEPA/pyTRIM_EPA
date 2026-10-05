@@ -388,7 +388,7 @@
                         logs_str += `[${timestamp}] ${logs[i]?.message}\n`;
                     }
                     getflowStatusRow.hide();
-                    let debugZone = $(`<textarea readonly class="form-control-plaintext mt-2" id="getflow-logs" rows="8">`)
+                    let debugZone = $(`<textarea readonly class="form-control-plaintext mt-2" id="getflow-logs" aria-label="GetFlow logs" rows="8">`)
                         .appendTo(getflowStatusAlert)
                         .val(logs_str);
                     if (logs_str.length) {

@@ -258,7 +258,7 @@
             statusArea.html("<b>Model logs</b>");
             statusArea.addClass("alert-warning");
             let logs_str = "";
-            $(`<textarea readonly class="form-control-plaintext mt-2" id="modelrun-logs" rows="10">`).appendTo(statusArea);
+            $(`<textarea readonly class="form-control-plaintext mt-2" id="modelrun-logs" aria-label="Model logs" rows="10">`).appendTo(statusArea);
             for (let i = 0 ; i < logs.length ; i++) {
                 logs_str += `${logs[i]?.message}\n`;
             }
