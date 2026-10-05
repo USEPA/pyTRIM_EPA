@@ -349,7 +349,7 @@
             TRIM.api.uploadSurfaceRunoffMatrixFile(fieldData, function(success,responseData,c) {
                 LoadingScreen.hide('upload_matrix_csv');
                 if (!success) {
-                    alert('An error occurred during upload:\n' + responseData.message);
+                    alert('An error occurred during upload: ' + responseData?.message);
                     matrixImport.value = "";
                 } else {
                     console.log("reload...");

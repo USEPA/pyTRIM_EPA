@@ -287,16 +287,15 @@
                 usdaBtn.prepend("<span class='lds-dual-ring mr-2'>");
                 usdaBtn.prop('disabled', true);
                 TRIM.api.getSoilData('notill').on('load', function() {
-                    if (this?.responseJSON?.success === false) {
-                        alert(this.responseJSON.message);
-                    }
-                    else {
+                    try{
                         updateUsdaSoilData(JSON.parse(this.responseText));
                         TRIM.api.updateScenarioMetadata(TRIM.store.currentScenario, checkForUSDA);
+                    } catch (err) {
+                        console.error(err)
+                    } finally {
+                        usdaBtn.find('.lds-dual-ring').remove();
+                        usdaBtn.attr('disabled', false);
                     }
-                    
-                    usdaBtn.find('.lds-dual-ring').remove();
-                    usdaBtn.attr('disabled', false);
                 });
             }
 

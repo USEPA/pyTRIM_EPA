@@ -352,7 +352,10 @@
                     TRIM.api.updateParcel(TRIM.store.currentScenario.id, parcel_info).on('load', (rsp)=>{
                         LoadingScreen.hide('external_water_inflow');
                         try {
-                            pcl.surface_water= rsp.target.responseJSON;
+                            if (rsp.target.responseJSON?.success === false) {
+                                return;
+                            }
+                            pcl.surface_water = rsp.target.responseJSON;
                             updateLakeProps();
                         } catch (err) {
                             console.error(err);

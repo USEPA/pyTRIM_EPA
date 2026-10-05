@@ -99,7 +99,10 @@ function update_data_store_callback(rsp, el, this_parcel_info, this_param_store_
 // An ajax handler
 window.AJAX = (function(ajax) {
 
-    ajax.alertErrs = false;
+    // The return doesn't always use ApiResult or ApiException
+    // but this will catch everything without a callback!
+    ajax.alertErrs = true;
+    ajax.alertStack = new Map();
 
     ajax.call = function(opts) {
 
@@ -143,8 +146,24 @@ window.AJAX = (function(ajax) {
 
             if (callback !== undefined) { callback(false, parsedResponseData); }
             else {
-                if (this.alertErrs) { alert(parsedResponseData?.message); }
-                console.log(parsedResponseData);
+                if (this.alertErrs) {
+                    // If we send a bunch of the same request at once we don't want to
+                    // spam alerts if something goes wrong
+                    const message = parsedResponseData?.message
+                        || (typeof parsedResponseData === 'string' ? parsedResponseData : 'Request failed');
+                    const key = `${request.status}:${message}`;
+                    const existingTimer = ajax.alertStack.get(key);
+
+                    if (existingTimer) {
+                        clearTimeout(existingTimer);
+                    } else {
+                        alert(`ERROR (${request.status})\n${message}`);
+                    }
+
+                    const timer = setTimeout(() => ajax.alertStack.delete(key), 3000);
+                    ajax.alertStack.set(key, timer);
+                }
+                console.error(parsedResponseData);
             }
           }
           else if (request.readyState === 4) {

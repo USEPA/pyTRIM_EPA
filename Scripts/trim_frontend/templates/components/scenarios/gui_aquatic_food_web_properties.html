@@ -299,7 +299,6 @@
                 TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', (rsp)=>{
                     LoadingScreen.hide('submit_mass');
                     if (rsp?.target?.responseJSON?.message !== 'success') {
-                        console.log(rsp.target.responseJSON);
                         return;
                     }
                     let col_idx = $(elem).closest('td').index();

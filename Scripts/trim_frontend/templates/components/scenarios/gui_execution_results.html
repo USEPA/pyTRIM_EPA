@@ -757,8 +757,6 @@
             LoadingScreen.show('start_run');
             TRIM.api.runModel(TRIM.store.currentScenario.id).on('load', function(rsp) {
                 if (this.responseJSON?.success == false) {
-                    alert("Error running model");
-                    console.error(this.responseJSON.error);
                     LoadingScreen.hide('start_run');
                 }
                 else {

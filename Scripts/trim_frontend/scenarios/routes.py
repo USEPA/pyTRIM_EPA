@@ -143,7 +143,7 @@ def get_scenario(id):
         logger.info(f"Acquired scenario in {time.time() - start_time} seconds")
     except Exception as e:
         logger.error(traceback.format_exc())
-        return ApiException(repr(e))
+        return ApiException(f"{e}")
     return ApiResult({'scenario': s})
 
 
@@ -174,21 +174,14 @@ def update_scenario(scenario_id):
                 file_data = file_bytes.decode('utf-8')
             scenario_data[field_name] = file_data
 
-        # print(f"updating with {scenario_data}")
-
         rv = None
-        try:
-            rv = handle_scenario_update(s, scenario_data)
-        except Exception as e:
-            print(f"exception while updating scenario {s} with {scenario_data}:\n")
-            print(traceback.format_exc())
-            raise ApiException(f"Error updating scenario: {repr(e)}")
+        rv = handle_scenario_update(s, scenario_data)
 
         if rv is not None:
             return ApiResult(rv)
     except Exception as e:
         logger.error(traceback.format_exc())
-        raise ApiException(repr(e))
+        raise ApiException(f"Error updating scenario: {e}")
     return "success"
 
 
@@ -588,7 +581,7 @@ def delete_scenario():
         # ScenarioService.commit()
     except Exception as e:
         print(e)
-        print("Failed to delete scenario...")
+        raise ApiException(f"Failed to delete scenario {s}: {e}")
     finally:
         ScenarioService.commit()
 
@@ -633,6 +626,10 @@ def get_scenario_chemicals(scenario_id):
         ScenarioService.commit()
     except Exception as e:
         logger.error(traceback.format_exc())
+        err = ApiException(f"Failed to get scenario chemical data: {e}")
+        err.value |= {"chemicals": chems, "chem_params": chem_params}
+        raise err
+
     logger.info(f"Acquired emissions and concentrations data in {time.time() - start_time} seconds")
 
     return ApiResult({
@@ -652,8 +649,10 @@ def get_scenario_met_data(scenario_id):
     try:
         met = get_met_data(s)
     except Exception as e:
-        logger.info(e)
-        met = {}
+        logger.error(traceback.format_exc())
+        err = ApiException(f"Unable to fetch meteorology data: {e}")
+        err.value |= {'meteorology': {}}
+        raise err
     logger.info(f"Acquired meteorology in {time.time() - start_time} seconds")
     return ApiResult({'meteorology': met})
 
@@ -666,9 +665,15 @@ def get_scenario_seasonal_dynamics(scenario_id):
     if not current_user.can('view', s):
         abort(403)
     start_time = time.time()
-    met = get_seasonal_dynamics(s)
+    try:
+        sd = get_seasonal_dynamics(s)
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        err = ApiException(f"Unable to fetch seasonal dynamics data: {e}")
+        err.value |= {'seasonal_dynamics': {}}
+        raise err
     logger.info(f"Acquired seasonal dynamics in {time.time() - start_time} seconds")
-    return ApiResult({'seasonal_dynamics': met})
+    return ApiResult({'seasonal_dynamics': sd})
 
 
 @scenario_api.route('/api/scenario/<int:scenario_id>/runoff_matrix/', methods=['GET'])
@@ -685,7 +690,9 @@ def get_scenario_runoff_matrix(scenario_id):
         return ApiResult({'watershed_areas': s._wsa, 'runoff_matrix': s._rom})
     except Exception as e:
         logger.error(traceback.format_exc())
-        return ApiException(repr(e))
+        err = ApiException(f"Error getting surface runoff matrix: {e}")
+        err.value |= {'watershed_areas': {}, 'runoff_matrix': []}
+        raise err
 
 
 @scenario_api.route(
@@ -716,7 +723,7 @@ def get_parameters(scenario_id):
         ScenarioService.commit() # required because of session update
     except Exception as e:
         logger.error(traceback.format_exc())
-        return ApiException(repr(e))
+        return ApiException(f"{e}")
     return ApiResult({'parameters': r})
 
 
@@ -733,7 +740,7 @@ def get_last_results(scenario_id):
         logger.info(f"Acquired scenario results in {time.time() - start_time} seconds")
     except Exception as e:
         logger.error(traceback.format_exc())
-        return ApiException(repr(e))
+        return ApiException(f"{e}")
     return ApiResult({'latest_run_info': latest_run_info})
 
 
@@ -751,8 +758,8 @@ def clear_old_result(scenario_id):
             scn.proc_status.remove(scn.latest_proc_status)
             ScenarioService.commit()
     except Exception as e:
-        print(f'problem deleting {e}')
-        return ApiException(f"Problem deleting {repr(e)}")
+        traceback.print_exc()
+        raise ApiException(f"Problem deleting run: {e}")
 
     print(f"Model Result deleted for {scn.name}")
     ScenarioService.commit()
@@ -807,7 +814,7 @@ def run_result_scenario(scenario_id):
                     "error": "Missing required variable to run re-architected model"
                 }
     except Exception as e:
-        data_resp = {"success": False, "error": repr(e)}
+        raise ApiException(f"Error running model: {e}")
 
     return ApiResult(data_resp)
 
@@ -863,8 +870,8 @@ def run_getflow(scenario_id):
         else:
             data_resp = { "error": "Missing required envrionment variable to run GetFlow" }
     except Exception as e:
-        logger.warning(f"Error kicking off GetFlow run: {e}")
-        data_resp = {"error": repr(e)}
+        logger.warning(f"Error kicking off GetFlow run: {traceback.format_exc()}")
+        data_resp = {"error": str(e)}
 
     return ApiResult(data_resp)
 
@@ -881,6 +888,7 @@ def check_getflow_status():
         else:
             data_resp = StepfnxHelper(execution_arn).get_stepfnx_status()
     except Exception as e:
+        traceback.print_exc()
         data_resp = {"error": str(e) }
     return ApiResult(data_resp)
 
@@ -939,7 +947,7 @@ def run_receptor_generation(scenario_id):
         data_resp = upload_data
     except Exception as e:
         traceback.print_exc()
-        return ApiException(repr(e))
+        return ApiException(f"{e}")
 
     return ApiResult(data_resp)
 
@@ -1003,40 +1011,6 @@ def get_chemical_properties(scenario_id):
             for k, val in restriction.items():
                 opts[k] = serialize_value(val, param)
 
-    def get_by_compartment(param, chem, fn=None):
-        prop_name = get_prop_name(param)
-        var_name = param.variable_name
-        chem_name = chem.name
-        for comp in comps:
-            scope = f'Compartment [{comp.media.name}]'
-            if (
-                chem_name in chem_properties
-                and scope in chem_properties[chem_name]
-                and prop_name in chem_properties[chem_name][scope]
-            ):
-                continue
-            try:
-                if fn is None:
-                    comp_fn = comp.parameters.evaluate(var_name)
-                    if isinstance(comp_fn, types.FunctionType):
-                        try:
-                            val = comp_fn(chem)
-                        except Exception as e:
-                            # print('\t-', e)
-                            continue
-                    else:
-                        val = comp_fn
-                else:
-                    val = fn(comp)
-                # print('\t>', val)
-                add_prop(
-                    chem_name, scope, param, val,
-                    restriction={comp.standard_name: val}
-                )
-            except Exception as e:
-                # print('\t-', e)
-                pass
-
     def is_recursive(param):
         if param.formula is None:
             return False
@@ -1062,9 +1036,6 @@ def get_chemical_properties(scenario_id):
                         f'Chemical Parameter "{param_name}" is recursively defined!'
                     )
                     if param_name == 'initialConcentration':
-                        # DISABLED FOR NOW - SEE BELOW
-                        # logger.warning(f'Using compartment "{param_name}" instead ...')
-                        # get_by_compartment(param, chem)
                         pass
                     else:
                         logger.warning(f'Skipping parameter "{param_name}" ...')
@@ -1087,9 +1058,7 @@ def get_chemical_properties(scenario_id):
                     except Exception as e:
                         # print('\t-', e)
                         pass
-                    # DISABLED FOR NOW - MAYBE LATER?
-                    # - we want to figure out a way to display the formulas (too?)
-                    # get_by_compartment(param, chem, fn=val)
     except Exception as e:
         import traceback; traceback.print_exc()
+        raise ApiException(f"Error fetching chemical properties: {e}")
     return ApiResult(chem_properties)

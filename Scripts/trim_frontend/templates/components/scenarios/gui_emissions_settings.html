@@ -561,11 +561,6 @@
             const this_cmap = aermodSettingsSection.closest("div.tab-pane").find("table.compMap");
             TRIM.api.parseAERMODFile(field_data).on('load', function() {
                 try {
-                    if (this.responseJSON?.success === false){
-                        alert(`Error handling AERMOD file: ${this.responseJSON?.message}`);
-                        throw new Error(this.responseJSON?.message);
-                    }
-
                     let src_data = JSON.parse(this.responseText);
                     let this_spec = species.val();
                     parcels.forEach(function(p, i) {  

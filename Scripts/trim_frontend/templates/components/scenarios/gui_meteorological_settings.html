@@ -372,12 +372,10 @@
                 const val_resp = this.responseJSON
                 LoadingScreen.hide("meteo_update_value");
                 if (val_resp?.success === false) {
-                    alert(val_resp.message);
                     return;
-                } else {
-                    TRIM.api.updateScenarioMetadata(TRIM.store.currentScenario, checkForExistingFileUploads);
                 }
-
+                TRIM.api.updateScenarioMetadata(TRIM.store.currentScenario, checkForExistingFileUploads);
+                
                 if (val_resp) {
                     const val = parseFloat(val_resp[Object.keys(val_resp)[0]]);
                     let lb_static_val = $(elem).closest('div.form-group').find("div.wt_avg_val")
@@ -460,20 +458,15 @@
                 TRIM.store.fileData.remove(fileKey);
                 TRIM.api.uploadMetFile(TRIM.store.currentScenario.id, this).on('load', function() {
                     try {
-                        if (this.responseJSON?.success === false) {
-                            alert(this.responseJSON.message);
-                        }
-                        else {
-                            var data = JSON.parse(this.responseText);
-                            if (data.files && data.files[myName]) {
-                                var myData = data.files[myName];
-                                TRIM.store.fileData.add(fileKey, myData);
-                                updateFields(me.closest('section'));
-                            }
-                        }
+                        var data = JSON.parse(this.responseText);
+                        if (data.files && data.files[myName]) {
+                            var myData = data.files[myName];
+                            TRIM.store.fileData.add(fileKey, myData);
+                            updateFields(me.closest('section'));
+                        }              
                     }
                     catch (err) {
-                        alert(err);
+                        console.error(err);
                     }
                     finally {
                         LoadingScreen.hide(loadingRequest);

@@ -346,11 +346,9 @@
                 LoadingScreen.hide('loading_results');
                 console.log(val_resp)
                 if (val_resp?.success === false) {
-                    alert(val_resp.message);
                     return;
-                } else {
-                    TRIM.api.updateScenarioMetadata(TRIM.store.currentScenario, checkForExistingFileUploads);
                 }
+                TRIM.api.updateScenarioMetadata(TRIM.store.currentScenario, checkForExistingFileUploads);
                 
                 if (val_resp) {
                     let val = val_resp[Object.keys(val_resp)[0]]
@@ -419,23 +417,18 @@
                 TRIM.store.fileData.remove(fileKey);
                 TRIM.api.parseFiles(this).on('load', function() {
                     try {
-                        if (this.responseJSON?.success === false) {
-                            alert(this.responseJSON.message);
-                        }
-                        else {
-                            var data = JSON.parse(this.responseText);
-                            if (data.files && data.files[myName]) {
-                                var myData = data.files[myName];
-                                // Make sure the file has the column with name "Date"
-                                if (ErrorValidation.tsFileHasDateColumn(me.closest("div").siblings("label"),  myData.file_data)) {
-                                    TRIM.store.fileData.add(fileKey, myData);
-                                    updateFields(me);
-                                }
+                        var data = JSON.parse(this.responseText);
+                        if (data.files && data.files[myName]) {
+                            var myData = data.files[myName];
+                            // Make sure the file has the column with name "Date"
+                            if (ErrorValidation.tsFileHasDateColumn(me.closest("div").siblings("label"),  myData.file_data)) {
+                                TRIM.store.fileData.add(fileKey, myData);
+                                updateFields(me);
                             }
                         }
                     }
                     catch (err) {
-                        alert(err);
+                        console.error(err);
                     }
                     finally {
                         LoadingScreen.hide(loadingRequest);

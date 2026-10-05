@@ -41,6 +41,10 @@ def get_soil_data(tillage):
         parcel_layers = {}
         for this_p in p:
             this_parcel_data = this_p.as_serializable()
+            parcel_type = this_parcel_data.get("parcelType")
+            if "Water" in parcel_type or parcel_type == "Air Only":
+                continue
+
             parcels[this_parcel_data['name']] = [(t[1], t[0]) for t in this_parcel_data['vertices']]
             parcel_layers[this_parcel_data['name']] = get_soil_boundaries(this_p)
 
@@ -59,7 +63,7 @@ def get_soil_data(tillage):
         # tilled_soil_data_json = usle_r_data.insert_rusle_into_soil_data(r_usle_data_json, tilled_soil_data_json)
     except Exception as e:
         logger.error(traceback.format_exc())
-        raise ApiException(f"Error handling USDA API request: {repr(e)}")
+        raise ApiException(f"Error handling USDA API request: {e}")
 
     if tillage == "till":
         result_soil_data_json = ApiResult(tilled_soil_data_json)

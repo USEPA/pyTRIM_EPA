@@ -153,7 +153,7 @@ def parse_aermod():
     except Exception as e:
         import traceback
         traceback.print_exc()
-        raise
+        raise ApiException(f"{e}")
 
     return ApiResult({'aermod_results': aermod_results})
 
@@ -913,7 +913,7 @@ def parse_runoff_matrix_upload():
                 
     except Exception as e:
         print(traceback.format_exc())
-        return ApiException(traceback.format_exc())
+        raise ApiException(f"{e}")
     return ApiResult({'matrix_result': "success"})
 
 root = os.path.dirname(os.path.abspath(__file__))

@@ -674,6 +674,10 @@ def update_soil_from_api(s, logger):
     parcel_tillage = {}
     for this_p in s.parcels:
         this_parcel_data = this_p.as_serializable()
+        parcel_type = this_parcel_data.get("parcelType")
+        if "Water" in parcel_type or parcel_type == "Air Only":
+            continue
+
         parcels[this_parcel_data['name']] = [(t[1], t[0]) for t in this_parcel_data['vertices']]
         parcel_layers[this_parcel_data['name']] = get_soil_boundaries(this_p)
         parcel_tillage[this_parcel_data['name']] = (this_parcel_data['soilTillage'] == 'Yes')
