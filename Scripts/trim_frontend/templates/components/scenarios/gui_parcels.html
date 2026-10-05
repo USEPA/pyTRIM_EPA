@@ -231,6 +231,7 @@ onDomLoad(function () {
 
     var map = null;
     var mapLayers = null;
+    var shapes = null;
 
     var parcels = L.layerGroup();
 
@@ -998,7 +999,7 @@ onDomLoad(function () {
         */
 
         // CREATING A NEW PARCEL //
-        var shapes = L.geoJSON()
+        shapes = L.geoJSON()
 
         map.on('pm:create', ({ layer }) => {
             map.pm.setGlobalOptions({ snapSegment: getSmartSnapSetting("segments") });
@@ -1068,6 +1069,7 @@ onDomLoad(function () {
             // WRITE TO DATABASE
             // TRIM.api.createParcels('{{ scenario.id }}', shapes.features.reverse()[0])
             TRIM.api.createParcels('{{ scenario.id }}', parcel.toGeoJSON()).on('load', function () {
+                LoadingScreen.hide('create_parcel');
                 let resp = JSON.parse(this.responseText)
                 if (resp) {
                     let new_parcel = resp['parcel']
@@ -1092,7 +1094,6 @@ onDomLoad(function () {
                 }
                 // TRIM.refreshParcels();
                 requires_reload = true;
-                LoadingScreen.hide('create_parcel');
             })
         };
 
@@ -1258,6 +1259,10 @@ onDomLoad(function () {
 
         INITIALIZED_MAP = true;
         INITIALIZING_MAP = false;
+
+        // Leaflet button 508c
+        $("a.leaflet-control-zoom-in, a.leaflet-control-zoom-out").attr("tabindex", "0");
+        $("a[class^='leaflet']").attr("aria-label", "Leaflet map button");
     }
 
     function onUploadCoordinateSystemChanged() {
@@ -1957,6 +1962,9 @@ onDomLoad(function () {
                 if (success) {
                     renderAermodDownloadUi(responseData);
                 }
+                else {
+                    alert("Error during AERMOD download: " + responseData?.message)
+                }
                 LoadingScreen.hide('generating_aermod_receptors');
             });
         });
@@ -1977,10 +1985,6 @@ onDomLoad(function () {
 
     $('#parcel_file_fields_div').hide()
     enableFieldUpdates();
-
-    // Leaflet button 508c
-    $("a.leaflet-control-zoom-in, a.leaflet-control-zoom-out").attr("tabindex", "0");
-    $("a[class^='leaflet']").attr("aria-label", "Leaflet map button");
 
     function update_data(this_table_id) {
         let new_table_data = get_Data_from_table(this_table_id)
@@ -2079,6 +2083,9 @@ onDomLoad(function () {
                         TRIM.store.fileData.add(fileKey, myData);
                     }
                     updateFields();
+                }
+                catch (err) {
+                    alert(err);
                 }
                 finally {
                     TRIM.refreshParcels();

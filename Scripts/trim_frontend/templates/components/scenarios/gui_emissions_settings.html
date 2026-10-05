@@ -278,6 +278,9 @@
                 'role': 'link'
             }).removeClass('btn-secondary').addClass('btn-outline-dark').css('cursor', 'pointer');
 
+            // indicate previously uploaded files
+            checkForFileUpload();
+
             // make sure first tab is open
             $('#chemicals-0-pill').click();
             LoadingScreen.hide('emissions_rendering');
@@ -609,6 +612,40 @@
             });
         }
 
+        function checkForFileUpload() {
+            const metadata = TRIM.store.currentScenario.metadata?.emissions || {};
+            const fileUploadHtml = (title, file_text) => {
+                return $(`
+                <span class="emissions-file-icon" data-toggle="tooltip" title="${title}">
+                    <span class="position-relative d-inline-block ml-1">
+                        <i class="fa fa-file text-success"></i>
+                        <span style="position:absolute; top:50%; left:50%; transform:translate(-50%,-40%); color:white; font-size:9px; font-weight:bold; pointer-events:none;">
+                            ${file_text}
+                        </span>
+                    </span>
+                </span>`);
+            }
+
+            gui.find('.emissions-file-icon').remove();
+            gui.find('.tab-pane').each(function () {
+                const tab = $(this);
+                const chem = (tab.data('tab-name') || '').trim();
+                const particulateFile = metadata[`${chem}_Particle`];
+                const vaporFile = metadata[`${chem}_Vapor`];
+
+                const chemTitle = tab.find('.chemInfo');
+                if (vaporFile) {
+                    const tHelp = `Vapor values come from ${vaporFile}`;
+                    fileUploadHtml(tHelp, "V").appendTo(chemTitle);
+                }
+                if (particulateFile) {
+                    const tHelp = `Particle values come from ${particulateFile}`;
+                    fileUploadHtml(tHelp, "P").appendTo(chemTitle);
+                }
+            });
+            $('[data-toggle="tooltip"]').tooltip();
+        }
+
         function uploadAermodFile(aermodSettingsSection) {
             const fileElem = aermodSettingsSection.find('[type="file"]');
             const coordsSystem = aermodSettingsSection.find("select[id*=_upload_coordinates_system]");
@@ -659,6 +696,7 @@
                         pcl.sources[this_chem][`Dry${this_spec}Source`][`Dry${this_spec}Source`] = dryval
                         pcl.sources[this_chem][`Wet${this_spec}Source`][`Wet${this_spec}Source`] = wetval
                     });
+                    TRIM.api.updateScenarioMetadata(TRIM.store.currentScenario, checkForFileUpload);
                 }
                 catch (err) {
                     console.error("An error occurred:", err.message)

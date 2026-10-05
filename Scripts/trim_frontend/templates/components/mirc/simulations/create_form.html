@@ -735,6 +735,7 @@ onDomLoad(function() {
     initFormEvents(form);
 
     window.MIRC.submitSimulationForm = function() {
+
         form.find('input, textarea').removeClass('is-invalid');
         form.find('.invalid-feedback').html('');
 
@@ -793,6 +794,10 @@ onDomLoad(function() {
 
     form.submit(function(e) {
         e.preventDefault();
+
+        // 508c stuff
+        $("#simulation-form-modal #mirc_simulation_description").attr("id", "description");
+        $("#simulation-form-modal #mirc_simulation_chemical").attr("id", "chemical");
         window.MIRC.submitSimulationForm();
     });
 
@@ -802,6 +807,11 @@ onDomLoad(function() {
             form[0].reportValidity();
         }
     });
+
+    // 508c stuff
+    $("#simulation-form-modal #description").attr("id", "mirc_simulation_description");
+    $("#simulation-form-modal #chemical").attr("id", "mirc_simulation_chemical");
+    $("#simulation-form-modal label[for='chemical']").attr("for", "mirc_simulation_chemical");
 });
 
 </script>

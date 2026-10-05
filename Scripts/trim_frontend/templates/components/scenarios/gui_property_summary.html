@@ -6,6 +6,11 @@
         <div class="props-row row mb-3">
             <div class="col-sm">
                 <h3 class="m-0">General Properties</h3>
+                <a hidden="hidden" class="btn btn-outline-dark" id="export-user-inputs" style="cursor: pointer;"
+                    tabindex="0" role="link"
+                >
+                    <i class="fa fa-file-download mr-1"></i>Export All User Inputs
+                </a>
                 <div class="tree-grid-responsive my-2">
                     <div class="general-props-tree tree-grid" role="treegrid" aria-label="Chemical properties">
                         <div class="tree-row tree-row-header" role="row">
@@ -84,6 +89,7 @@
         form.addEventListener('form:visible', function() {
             console.log('property summary form visible')
             LoadingScreen.show('property_summary_loading');
+            TRIM.api.updateScenarioMetadata(TRIM.store.currentScenario);
             TRIM.api.getChemicalProperties('{{ scenario.id }}').on('load', function () {
                 TRIM.store.currentScenario.chemical_properties = this.responseJSON
             });
@@ -116,6 +122,12 @@
                 const tree = me.closest('.props-row').find('.tree-grid');
                 showPropValues(tree, me.text());
             });
+
+            gui.on('click', "#export-user-inputs", (e) => {
+                TRIM.api.exportScenarioUserInputs(TRIM.store.currentScenario.id).on('load', (rsp) => {
+                    console.log(rsp)
+                });
+            });
         }
 
         function updateSummaryFields() {
@@ -141,6 +153,7 @@
         function buildPropsTree(tree, propsMap, options) {
             options = options || {};
             const levels = options.levels || 2;
+            const appendPropertiesTitle = options.appendPropertiesTitle !== false;
 
             tree.find('.tree-row:not(.tree-row-header)').remove();
 
@@ -154,7 +167,7 @@
                             <div class="tree-cell p-0" role="gridcell">
                                 <button type="button" class="${collapseBtnClass} btn-primary" aria-label="Collapse ${header} properties">
                                     <i class="fas fa-angle-down mr-1"></i>
-                                    <span>${header} Properties</span>
+                                    <span>${header}${appendPropertiesTitle ? ' Properties' : ''}</span>
                                 </button>
                             </div>
                             <div class="tree-cell text-left" role="gridcell"></div>
@@ -187,7 +200,7 @@
                                 <div class="tree-cell p-0" role="gridcell">
                                     <button type="button" class="${collapseBtnClass} btn-secondary" aria-label="Collapse ${subheader} properties">
                                         <i class="fas fa-angle-down mr-1"></i>
-                                        <span>${subheader} Properties</span>
+                                        <span>${subheader} ${appendPropertiesTitle ? ' Properties' : ''}</span>
                                     </button>
                                 </div>
                                 <div class="tree-cell text-left" role="gridcell"></div>
@@ -223,20 +236,41 @@
 
         function buildGeneralPropsTree() {
             const tree = $('.general-props-tree');
+
             const scenario = TRIM.store.currentScenario;
+
+            const scn_metadata = scenario.metadata
+            let scn_files = scn_metadata["emissions"] || {};
+            scn_files = {...scn_files, ...Object.fromEntries(
+                Object.entries(scn_metadata)
+                    .filter(([key]) => key.startsWith("meteo"))
+            )};
+            scn_files = {...scn_files, ...Object.fromEntries(
+                Object.entries(scn_metadata)
+                    .filter(([key]) => key.startsWith("seasonal"))
+            )};
+
             const propsMap = {
-                "Simulation": {
+                "Simulation Properties": {
                     "Start Date": scenario['simulation_start_date'],
                     "End Date": scenario['simulation_end_date'],
                     "Erosion Rate Source": "Option " + scenario['erosionRateSource']
                 },
-                "Scenario": {
+                "Scenario Properties": {
                     // "Name": scenario['name'],
                     // "Description": scenario['description'],
                     "Precipitation Rate": scenario.parcels[0]?.precip_rate
+                },
+                "API Usage": {
+                    "GetFlow": scn_metadata["has_getflow"] ? 'Yes' : 'No',
+                    "Abiotic Media USDA": scn_metadata["abiotic_usda"] ? 'Yes' : 'No',
+                    "Erosion USDA": scn_metadata["erosion_usda"] ? 'Yes' : 'No'
                 }
             };
-            buildPropsTree(tree, propsMap);
+            if (!$.isEmptyObject(scn_files)) {
+                propsMap['File Uploads'] = scn_files;
+            }
+            buildPropsTree(tree, propsMap, {appendPropertiesTitle: false});
         }
 
         function buildChemicalPropsTree() {
@@ -432,5 +466,11 @@
                     .appendTo(dropdownMenu);
             });
         }
+
+        $(form).on('click', "#export-user-inputs", (e) => {
+            TRIM.api.exportScenarioUserInputs(TRIM.store.currentScenario.id).on('load', (rsp) => {
+                console.log(rsp)
+            });
+        });
     });
 </script>

@@ -15,7 +15,7 @@ from trim_frontend import api
 from ..utils.logging import make_logger
 from .helpers import UsdaApi, UsleClimateApi, convert_to_geojson
 from pyproj import CRS, Transformer
-from trim_db import ParcelService
+from trim_db import ScenarioService, ParcelService, ParameterService
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 
 
@@ -41,6 +41,10 @@ def get_soil_data(tillage):
         parcel_layers = {}
         for this_p in p:
             this_parcel_data = this_p.as_serializable()
+            parcel_type = this_parcel_data.get("parcelType")
+            if "Water" in parcel_type or parcel_type == "Air Only":
+                continue
+
             parcels[this_parcel_data['name']] = [(t[1], t[0]) for t in this_parcel_data['vertices']]
             parcel_layers[this_parcel_data['name']] = get_soil_boundaries(this_p)
 
@@ -50,14 +54,16 @@ def get_soil_data(tillage):
         no_till_soil_data_json = sd.scenario_no_till_results
         tilled_soil_data_json = sd.scenario_tilled_results
 
-        usle_r_data = UsleRData()
-        climate_data_file = ""
-        r_usle_data_json = usle_r_data.run(parcels, climate_data_file)
+        # requires QGIS
+        # usle_r_data = UsleRData()
+        # climate_data_file = ""
+        # r_usle_data_json = usle_r_data.run(parcels, climate_data_file)
 
-        no_till_soil_data_json = usle_r_data.insert_rusle_into_soil_data(r_usle_data_json, no_till_soil_data_json)
-        tilled_soil_data_json = usle_r_data.insert_rusle_into_soil_data(r_usle_data_json, tilled_soil_data_json)
+        # no_till_soil_data_json = usle_r_data.insert_rusle_into_soil_data(r_usle_data_json, no_till_soil_data_json)
+        # tilled_soil_data_json = usle_r_data.insert_rusle_into_soil_data(r_usle_data_json, tilled_soil_data_json)
     except Exception as e:
         logger.error(traceback.format_exc())
+        raise ApiException(f"Error handling USDA API request: {e}")
 
     if tillage == "till":
         result_soil_data_json = ApiResult(tilled_soil_data_json)
@@ -66,6 +72,13 @@ def get_soil_data(tillage):
     elif tillage == "both":
         result_soil_data_json = {"tilled_data": tilled_soil_data_json,
                                  "no_till_data": no_till_soil_data_json}
+
+    # assuming this endpoint is only used by erosion
+    # abiotic usda uses the SoilData class directly
+    metadata = ScenarioService.get_metadata(this_scenario_id)
+    metadata["erosion_usda"] = True
+    ParameterService.commit()
+    
     return result_soil_data_json
 
 

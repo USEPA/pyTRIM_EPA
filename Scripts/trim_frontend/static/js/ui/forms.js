@@ -527,6 +527,10 @@ window.TRIM = (function(trim) {
         newPill.setAttribute('data-pill-id', values.length);
         newPill.style.display = '';
         newPill.getElementsByTagName('a')[0].className += ' active';
+
+        // 508c stuff
+        $(newPill.getElementsByTagName('a')[0]).attr('role', 'button').attr('tabindex', '0');
+
         if (custom_label) {
             $(newPill).find("a.nav-link").text(custom_label)
         }

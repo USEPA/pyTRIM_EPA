@@ -90,7 +90,7 @@
         </div>
     </section>
 </form>
-<div class="modal fade" id="inflow-modal" tabindex="-1" role="dialog" aria-labelledby="ModalLabel" aria-hidden="true">
+<div class="modal fade" id="inflow-modal" tabindex="-1" role="dialog" aria-labelledby="inflow-modal" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -287,7 +287,7 @@
                     body.empty();
                     body.append(
                         $(`<button class="btn btn-sm btn-outline-dark float-right" id="f-reset"
-                            data-toggle="tooltip" data-trigger="hover" title="Set all to 0">
+                            data-toggle="tooltip" data-trigger="hover" aria-label="Set all fractions to 0" title="Set all to 0">
                             <i class="fas fa-redo"></i>
                         </button>`)
                     );
@@ -352,7 +352,10 @@
                     TRIM.api.updateParcel(TRIM.store.currentScenario.id, parcel_info).on('load', (rsp)=>{
                         LoadingScreen.hide('external_water_inflow');
                         try {
-                            pcl.surface_water= rsp.target.responseJSON;
+                            if (rsp.target.responseJSON?.success === false) {
+                                return;
+                            }
+                            pcl.surface_water = rsp.target.responseJSON;
                             updateLakeProps();
                         } catch (err) {
                             console.error(err);
@@ -541,7 +544,9 @@
                         let autocalc_button = "";
 
                         if (row.shortProperty == 'externalWaterInflow' && waterParcels?.filter(x => x.name != e.name).length) {
-                            inflow_button = `<a class="inflow-modal-btn badge badge-secondary ml-2" style="cursor: pointer;" href="Edit Inflow" data-parcel="${e.name}"><i class="fa fa-water"></i></a>`;
+                            inflow_button = `<a class="inflow-modal-btn badge badge-secondary ml-2" title="Edit External Water Inflow" style="cursor: pointer;" href="edit-inflow" data-parcel="${e.name}">
+                                <i class="fa fa-water"></i>
+                            </a>`;
                         }
                         else if (row.shortProperty == 'flush_rate') {
                             autocalc_button = make_autocalc_btn(e);

@@ -349,7 +349,7 @@
             TRIM.api.uploadSurfaceRunoffMatrixFile(fieldData, function(success,responseData,c) {
                 LoadingScreen.hide('upload_matrix_csv');
                 if (!success) {
-                    alert('An error occurred during upload:\n' + responseData.message);
+                    alert('An error occurred during upload: ' + responseData?.message);
                     matrixImport.value = "";
                 } else {
                     console.log("reload...");
@@ -388,7 +388,7 @@
                         logs_str += `[${timestamp}] ${logs[i]?.message}\n`;
                     }
                     getflowStatusRow.hide();
-                    let debugZone = $(`<textarea readonly class="form-control-plaintext mt-2" id="getflow-logs" rows="8">`)
+                    let debugZone = $(`<textarea readonly class="form-control-plaintext mt-2" id="getflow-logs" aria-label="GetFlow logs" rows="8">`)
                         .appendTo(getflowStatusAlert)
                         .val(logs_str);
                     if (logs_str.length) {
@@ -425,6 +425,7 @@
                             var sd = this.responseJSON.runoff_matrix;
                             TRIM.store.currentScenario.runoff_matrix = sd;
                             TRIM.forms.populate(form, TRIM.store.currentScenario.runoff_matrix);
+                            TRIM.store.currentScenario.metadata.has_getflow = true;
                             renderRunoffForm();
                         });
                     }
@@ -483,6 +484,15 @@
                 setTimeout(function() { updateRunoffData(); }, 1000);
                 return;
             }
+
+            (function checkForGetflow() {
+                metadata = TRIM.store.currentScenario.metadata
+                if (metadata?.has_getflow) {
+                    $('#run_getflow')
+                        .removeClass('btn-outline-warning text-dark')
+                        .addClass('btn-success');
+                }
+            })();
 
             let runoff_matrix = TRIM.store.currentScenario.runoff_matrix
             let runoff_data = []

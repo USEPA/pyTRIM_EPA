@@ -158,6 +158,8 @@
                 // Double-clicking is a hacky but workable way to do this
                 // and make sure we maintain some semblance of sort order
                 mySect.find(`table[data-target^="erosionTable_opt"] th:first`).click().click();
+
+                checkForUSDA();
             }
 
             /////////////////////////////////////////////
@@ -274,17 +276,26 @@
             const usdaBtn = $('#SoilData_btn_opt3');
             usdaBtn.on('click', (e) => getUsdaSoilData());
 
+            function checkForUSDA() {
+                metadata = TRIM.store.currentScenario.metadata
+                if (metadata?.erosion_usda) {
+                    $('#SoilData_btn_opt3').removeClass('btn-outline-warning text-dark').addClass('btn-success');
+                }
+            };
+
             function getUsdaSoilData() {
                 usdaBtn.prepend("<span class='lds-dual-ring mr-2'>");
                 usdaBtn.prop('disabled', true);
                 TRIM.api.getSoilData('notill').on('load', function() {
-                    updateUsdaSoilData(JSON.parse(this.responseText));
-                    usdaBtn.find('.lds-dual-ring').remove();
-                    usdaBtn.attr('disabled', false);
-                    // Refreshing the page seems to be causing issues with save?
-                    //setTimeout(() => {
-                    //$('#save-btn').click();
-                    //}, 1000);
+                    try{
+                        updateUsdaSoilData(JSON.parse(this.responseText));
+                        TRIM.api.updateScenarioMetadata(TRIM.store.currentScenario, checkForUSDA);
+                    } catch (err) {
+                        console.error(err)
+                    } finally {
+                        usdaBtn.find('.lds-dual-ring').remove();
+                        usdaBtn.attr('disabled', false);
+                    }
                 });
             }
 
