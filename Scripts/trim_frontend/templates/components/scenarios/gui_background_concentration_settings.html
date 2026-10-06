@@ -468,9 +468,10 @@
                 const chemName = pclInfo.filter(e => e.type == 'data' & e.name == 'chemical_name')[0].value;
                 const veName = pclInfo.filter(e => e.type == 'data' & e.name == 've_name')[0].value;
                 const compName = pclInfo.filter(e => e.type == 'data' & e.name == 'compartment_name')[0].value;
-                const paramStoreKey =  `initialConcentrations.${chemName}.${veName}`;
-                pclInfo.filter(e => e.type == 'data' & e.name == 'field')[0].value = 'ic';
-                update_data_store_callback(rsp, elem, pclInfo, paramStoreKey, data, oldData);
+
+                let pcl = pclInfo[pclInfo.findIndex(e => e.name == 'id')].value;
+                pcl = getParcelByKey('id', pcl);
+                pcl['initialConcentrations'][chemName][veName][compName].ic = data;
             });
         }
 
