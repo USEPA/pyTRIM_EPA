@@ -61,7 +61,6 @@ trim-builder/
 │   └── src/
 │       ├── deployer/               # AWS deployment driver
 │       └── cloudformation/         # CloudFormation templates
-├── Input_Files/                    # Sample input data
 └── Documentation/                  # Project documentation & notes
 ```
 
