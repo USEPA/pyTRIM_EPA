@@ -532,7 +532,9 @@ def make_report(scenario):
             'rate': 'Ingestion Rate (IR)',
             'unit': 'IR Unit',
             'notes': 'Notes'
-        })
+        }).drop(
+            columns=['Notes']
+        )
         return irs
 
     def make_bw_report():
@@ -546,7 +548,9 @@ def make_report(scenario):
             'value': 'Value',
             'unit': 'Unit',
             'notes': 'Notes'
-        })
+        }).drop(
+            columns=['Notes']
+        )
         return bws
 
     def make_hfp_report():
@@ -618,7 +622,9 @@ def make_report(scenario):
             'rate': 'Ingestion Rate (IR)',
             'unit': 'IR Unit',
             'notes': 'Notes'
-        })
+        }).drop(
+            columns=['Notes']
+        )
         return animal_irs
 
     def make_bmp_report():
@@ -665,7 +671,9 @@ def make_report(scenario):
             'loss_description': 'Loss Description',
             'fraction_lost': 'Fraction Lost',
             'source': 'Source'
-        })
+        }).drop(
+            columns=['Source']
+        )
         return lfs
 
     def make_cp_report():
@@ -708,7 +716,9 @@ def make_report(scenario):
             'life_stage': 'Life Stage',
             'value': 'Value',
             'notes': 'Notes'
-        })
+        }).drop(
+            columns=['Notes']
+        )
         return mafs
 
     def make_baf_report():
@@ -722,7 +732,9 @@ def make_report(scenario):
             'value': 'Value',
             'unit': 'Unit',
             'notes': 'Notes'
-        })
+        }).drop(
+            columns=['Notes']
+        )
         return bafs
 
     def make_pcp_report():
@@ -752,8 +764,7 @@ def make_report(scenario):
             'product': 'Plant',
             'variable_1': 'Parameter Name',
             'value_1': 'Value',
-            'value_2': 'Unit',
-            'notes': 'Notes'
+            'value_2': 'Unit'
         })
         pcps.Plant = pcps.Plant.str.title()
         return pcps
@@ -785,8 +796,7 @@ def make_report(scenario):
             'product': 'Animal',
             'variable_1': 'Parameter Name',
             'value_1': 'Value',
-            'value_2': 'Unit',
-            'notes': 'Notes'
+            'value_2': 'Unit'
         }).dropna(
             how='all', subset=['Value', 'Unit']
         )
@@ -831,8 +841,7 @@ def make_report(scenario):
             'chemical': 'Chemical',
             'variable_1': 'Parameter Name',
             'value_1': 'Value',
-            'value_2': 'Unit',
-            'notes': 'Notes'
+            'value_2': 'Unit'
         })
         return bmcps
 

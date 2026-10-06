@@ -2,7 +2,7 @@
 
 <tr class="chemical-{{ bmcp.chemical_id.data }} infant-add-override">
     <td>
-        {{ render_input(bmcp.infant_add_equals_adult_lifetime) }}
+        {{ render_input(bmcp.infant_add_equals_adult_lifetime, force_disabled=scenario.is_builtin) }}
     </td>
 </tr>
 <tr class="chemical-{{ bmcp.chemical_id.data }}">

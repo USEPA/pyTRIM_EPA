@@ -30,6 +30,7 @@
             <div class="custom-control custom-checkbox form-check-inline">
                 <input type="checkbox" id="infant_add_override" name="infant_add_override"
                     class="custom-control-input"
+                    {% if mirc_scenario.is_builtin %}disabled="disabled"{% endif %}
                 />
                 <label class="custom-control-label" for="infant_add_override">
                     Set infant chemical dose from breast milk equal to
