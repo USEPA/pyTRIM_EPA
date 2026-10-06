@@ -159,6 +159,12 @@
                 // and make sure we maintain some semblance of sort order
                 mySect.find(`table[data-target^="erosionTable_opt"] th:first`).click().click();
 
+                const tbls = $('table[id^="erosionTable_opt"]');
+                for (const tbl of tbls) {
+                    const dt = $(tbl).DataTable();
+                    dt.columns.adjust();
+                }
+
                 checkForUSDA();
             }
 
@@ -948,15 +954,22 @@
             }
 
             function globalDrawCallback(tbl) {
+                let tblWrapper = $(tbl).parent().parent("div.dt-scroll");
+
                 // General table formatting / features
-                tbl.find(".dt-scroll-body").css({"max-height": "500px", "height": "100%"});
-                tbl.find(".dt-scroll-body").addClass('wrap-text-scrollbody');
-                tbl.find(".dt-scroll-head").addClass('wrap-text-scrollhead');
+                tblWrapper.find(".dt-scroll-body").css({"max-height": "500px", "height": "100%"});
+                tblWrapper.find(".dt-scroll-body").addClass('wrap-text-scrollbody');
+                tblWrapper.find(".dt-scroll-head").addClass('wrap-text-scrollhead');
                 
                 tbl.removeClass("wrap-text"); // dynamic cols a bit buggy with erosion opts 2/3
 
-                tbl.find("[data-toggle=popover]").popover();
-                tbl.find('[data-toggle="tooltip"]').tooltip();
+                // Fix for wrap, before data-toggle init
+                tblWrapper.find('.dt-column-title').each(function(idx) {
+                    wrapIcon($(this));
+                });
+
+                tblWrapper.find("[data-toggle=popover]").popover();
+                tblWrapper.find('[data-toggle="tooltip"]').tooltip();
 
                 const dt = tbl.DataTable();
 
@@ -1011,7 +1024,7 @@
                 tbl.DataTable({
                     destroy: true,
                     data: tblData,
-                    ordering: true,
+                    ordering: false,
                     paging: false,
                     bFilter: false,
                     info: false,

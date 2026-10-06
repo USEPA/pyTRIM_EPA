@@ -1630,6 +1630,7 @@ onDomLoad(function () {
         map_cols = [
             {
                 data: "properties.name",
+                'bWidth': '15rem',
                 render: function (data, type, row) {
                     return "<input class='editableCell form-control form-control-sm' type='text' value='" + data + "' style='display:none'>" +
                         "<label>" + data + "</label>"
@@ -1638,6 +1639,7 @@ onDomLoad(function () {
             },
             {
                 data: "properties.desc",
+                'bWidth': '5rem',
                 render: function (data, type, row) {
                     let parcel_info = [{
                         'type': 'data',
@@ -1659,12 +1661,14 @@ onDomLoad(function () {
             },
             {
                 data: "properties.area",
+                'bWidth': '8rem',
                 render: function (data, type, row) {
                     return "<label>" + (data / 1E6).toFixed(5) + "</label>"
                 }
             },
             {
                 data: "properties.parceltype",
+                'bWidth': '8rem',
                 render: function (data, type, row) {
                     let parcel_info = [{
                         'type': 'data',
@@ -1796,6 +1800,7 @@ onDomLoad(function () {
             },
             {
                 data: "properties.wetland",
+                'bWidth': '8rem',
                 render: function (data, type, row) {
                     let parcel_info = [{
                         'type': 'data',

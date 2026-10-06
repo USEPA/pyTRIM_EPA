@@ -124,6 +124,12 @@
         let roTable = null;
         function TableRedraw_RO(table_data, cols) {
             let tblId = "#RunoffMatrix";
+
+            const dtColumns = setDynamicColumnWidths(tblId, cols, table_data);
+            dtColumns.forEach((column, index) => {
+                column.width = index === 0 ? "12rem" : "8rem";
+            });
+
             roTable =  $(tblId).dataTable({
                 destroy: true,
                 data : table_data,
@@ -135,7 +141,7 @@
                 scrollX: true,
                 scrollY: 500,
                 bAutoWidth: false,
-                columns: setDynamicColumnWidths(tblId, cols, table_data),
+                columns: dtColumns,
                 fnCreatedRow: function (row, data, index) {
                     $(row).attr("data-rsval","1")
                     $(row).attr("data-entity","run off fractions")
@@ -149,11 +155,9 @@
                     $(".dt-scroll-head").addClass('wrap-text-scrollhead');
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
-                    // let first_row = $($("#RunoffMatrix").find("tr")[1])
-                    // $('#ROHead').closest("table").find("th").each((i, e)=>{
-                    //     let col_width = $($(first_row).find("td")[i]).width()
-                    //     $(e).width(col_width)
-                    // })
+
+                    $(".dt-column-title").css({"overflow-wrap": "anywhere"});
+                    this.api().columns.adjust();
                 }
             });
 

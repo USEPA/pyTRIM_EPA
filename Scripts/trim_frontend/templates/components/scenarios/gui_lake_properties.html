@@ -196,6 +196,8 @@
                     $('[data-toggle="tooltip"]').tooltip()
                     $('[data-toggle="popover"]').popover()
 
+                    $(".dt-column-title").css({"overflow-wrap": "anywhere"});
+
                     if (scrollTop > 0) {
                         //using setTimeout to ensure DOM is fully rendered
                         setTimeout(function() {
