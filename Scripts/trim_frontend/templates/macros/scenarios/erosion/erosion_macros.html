@@ -77,34 +77,46 @@
 
     <div>
         {% if optionNum == 1 %}
-        <div id="tableDiv_opt1" class="col-md">
-            <div class="mb-3">
+        <div class="row">
+            <div id="tableDiv_opt1" class="col-md mb-3">
                 <a class="btn btn-sm btn-dark float-right export-erosion-table" style="cursor: pointer;"
                     tabindex="0" role="link">
                     <i class="fa fa-file-download"></i>&nbsp;Export Current Settings
                 </a>
             </div>
-            <table data-slot="true" data-target="erosionTable_opt1" class="hover wrap-text" id="erosionTable_opt1"></table>
+        </div>
+        <div class="row">
+            <div class="col">
+                <table data-slot="true" data-target="erosionTable_opt1" class="hover wrap-text" id="erosionTable_opt1"></table>
+            </div>
         </div>
         {% elif optionNum == 2 %}
-        <div id="tableDiv_opt2" class="col-md">
-            <div class="mb-3">
+        <div class="row">
+            <div id="tableDiv_opt2" class="col-md mb-3">            
                 <a class="btn btn-sm btn-dark float-right export-erosion-table" style="cursor: pointer;"
                     tabindex="0" role="link">
                     <i class="fa fa-file-download"></i>&nbsp;Export Current Settings
                 </a>
             </div>
-            <table data-slot="true" data-target="erosionTable_opt2" class="hover wrap-text" id="erosionTable_opt2"></table>
+        </div>
+        <div class="row">
+            <div class="col">
+                <table data-slot="true" data-target="erosionTable_opt2" class="hover wrap-text" id="erosionTable_opt2"></table>
+            </div>
         </div>
         {% else %}
-        <div id="tableDiv_opt3" class="col-md">
-            <div class="mb-3">
+        <div class="row">
+            <div id="tableDiv_opt3" class="col-md mb-3">
                 <a class="btn btn-sm btn-dark float-right export-erosion-table" style="cursor: pointer;"
                     tabindex="0" role="link">
                     <i class="fa fa-file-download"></i>&nbsp;Export Current Settings
                 </a>
             </div>
-            <table data-slot="true" data-target="erosionTable_opt3" class="hover wrap-text" id="erosionTable_opt3"></table>
+        </div>
+        <div class="row">
+            <div class="col">
+                <table data-slot="true" data-target="erosionTable_opt3" class="hover wrap-text" id="erosionTable_opt3"></table>
+            </div>
         </div>
         {% endif %}
     </div>

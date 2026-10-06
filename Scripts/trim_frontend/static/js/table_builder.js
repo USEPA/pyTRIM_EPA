@@ -16,6 +16,47 @@ function scientific(val) { // to scientific notation
     return new Intl.NumberFormat('en-US', {notation: "scientific"}).format(parseFloat(val));
 }
 
+
+function abiotic_DT($tableId, table_data, _columns, callback) {
+    function columnAdjustments(dt) {
+        dt.api().columns().header().to$().attr('scope', 'col');
+
+        $('.dataTable tr').attr('role', 'row')
+
+        $('.dt-scroll-body').css({"max-height": "500px", "height": "100%"});
+        $(".dt-scroll-body").addClass('wrap-text-scrollbody');
+        $(".dt-scroll-head").addClass('wrap-text-scrollhead');
+        $('[data-toggle="tooltip"]').tooltip()
+        $('[data-toggle="popover"]').popover()
+    }
+
+    let apTable = $($tableId).removeAttr('width').dataTable({
+        data: table_data,
+        paging: false,
+        bFilter: false,
+        info: false,
+        autoWidth: false,
+        scrollX: true,
+        scrollY: 500,
+        bDestroy: true,
+        fnCreatedRow: function (row, data, index) {
+            $(row).find("td.rightBorder").addClass("freeze-column")
+        },
+        columns: setDynamicColumnWidths($tableId, _columns, table_data),
+        initComplete: function (settings, json) {
+            columnAdjustments(this);
+
+            if (callback) {
+                callback($tableId, this);
+            }
+            //$($tableId).DataTable().columns.adjust();
+        }
+    });
+
+    return apTable;
+}
+
+
 function getMaxContentLength(headerText, col, dataRows, maxWidth) {
     // remove html tags from header
     let maxLen = headerText.replace(/<[^>]*>/g, '').trim().length;

@@ -1630,6 +1630,7 @@ onDomLoad(function () {
         map_cols = [
             {
                 data: "properties.name",
+                'bWidth': '15rem',
                 render: function (data, type, row) {
                     return "<input class='editableCell form-control form-control-sm' type='text' value='" + data + "' style='display:none'>" +
                         "<label>" + data + "</label>"
@@ -1638,6 +1639,7 @@ onDomLoad(function () {
             },
             {
                 data: "properties.desc",
+                'bWidth': '5rem',
                 render: function (data, type, row) {
                     let parcel_info = [{
                         'type': 'data',
@@ -1659,12 +1661,14 @@ onDomLoad(function () {
             },
             {
                 data: "properties.area",
+                'bWidth': '8rem',
                 render: function (data, type, row) {
                     return "<label>" + (data / 1E6).toFixed(5) + "</label>"
                 }
             },
             {
                 data: "properties.parceltype",
+                'bWidth': '8rem',
                 render: function (data, type, row) {
                     let parcel_info = [{
                         'type': 'data',
@@ -1796,6 +1800,7 @@ onDomLoad(function () {
             },
             {
                 data: "properties.wetland",
+                'bWidth': '8rem',
                 render: function (data, type, row) {
                     let parcel_info = [{
                         'type': 'data',
@@ -1860,9 +1865,9 @@ onDomLoad(function () {
             columns: setDynamicColumnWidths(tblId, map_cols, shapes.features),
             initComplete: function (settings, json) {
                 // $("#mapTable").wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
-                $(".dataTables_scrollBody").css({ "max-height": "500px", "height": "100%" });
-                $(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
-                $(".dataTables_scrollHead").addClass('wrap-text-scrollhead');
+                $(".dt-scroll-body").css({ "max-height": "500px", "height": "100%" });
+                $(".dt-scroll-body").addClass('wrap-text-scrollbody');
+                $(".dt-scroll-head").addClass('wrap-text-scrollhead');
 
                 $('table[aria-describedby="mapTable_info"]').removeAttr("aria-describedby");
                 this.api().columns().header().to$().attr('scope', 'col');
