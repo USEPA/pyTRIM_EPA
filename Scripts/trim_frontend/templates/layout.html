@@ -33,9 +33,11 @@
 	<script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@latest/dist/leaflet-geoman.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css"/>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.2/css/jquery.dataTables.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.css">
     <script src="https://cdn.jsdelivr.net/npm/leaflet-easybutton@2/src/easy-button.js"></script>
+    
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/lib/datatables/dataTables.bootstrap4.min.css') }}">
+
     <title>
         {% if title %}
             {{ site_name }} | {{ title }}
@@ -56,7 +58,7 @@
     <script src="{{url_for('static', filename='js/lib/popper.min.js')}}"></script>
     <script src="{{url_for('static', filename='js/lib/bootstrap/bootstrap.min.js')}}"></script>
     <script src="{{url_for('static', filename='js/lib/moment.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/lib/dataTables/jquery.dataTables.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/lib/dataTables/dataTables.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/lib/dataTables/dataTables.bootstrap4.min.js') }}"></script>
 
     {% block styles %}{% endblock %}

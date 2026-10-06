@@ -227,9 +227,9 @@
                     initComplete: function (settings, json) {
                         // $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
                         this.api().columns().header().to$().attr('scope', 'col');
-                        $(".dataTables_scrollBody").css({"max-height": "500px", "height": "100%"});
-                        $(".dataTables_scrollBody").addClass('wrap-text-scrollbody');
-                        $(".dataTables_scrollHead").addClass('wrap-text-scrollhead');
+                        $(".dt-scroll-body").css({"max-height": "500px", "height": "100%"});
+                        $(".dt-scroll-body").addClass('wrap-text-scrollbody');
+                        $(".dt-scroll-head").addClass('wrap-text-scrollhead');
                         $('#aquatic-food-web-props-gui [data-toggle="popover"]').parent('sup').each(function () {
                             const $label = $(this).siblings('label').first();
                             if ($label.length) {
@@ -238,6 +238,8 @@
                         });
                         $('[data-toggle="tooltip"]').tooltip()
                         $('[data-toggle="popover"]').popover()
+
+                        $(".dt-column-title").css({"overflow-wrap": "anywhere"});
                     },
                     language: {
                         emptyTable: 'No data available in table'

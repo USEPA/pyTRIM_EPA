@@ -38,23 +38,35 @@ table[data-target^="erosion"] td.td_ASD {
 table[data-target^="erosion"] td.td_LS {
     background-color: #fcf8e380;
 }
+
+table[data-target^="erosion"] th {
+    text-align: center;
+}
 /* erosion END */
 
 /* datatable formatting */
+table.dataTable th,
+table.dataTable td {
+    padding-left: 18px;
+    padding-right: 18px;
+}
+
 td.rightBorder {
     text-align: right;
-    border-right: 1px solid black;
     padding: 10px
 }
 td.rightBorder-pivoted {
-    border-right: 1px solid black;
     padding: 10px
 }
 td.freeze-column, th.freeze-column {
     position: sticky;
     left: 0;
-    background-color: white; /* to cover other cells when scrolling */
-    z-index: 1; /* to ensure the column stays on top */
+    background-color: white;
+    z-index: 1;
+}
+
+td.freeze-column {
+    box-shadow: inset -1px 0 0 black;
 }
 
 table.diet{
@@ -100,6 +112,9 @@ table.wrap-text td {
   overflow-x: auto;
   overflow-y: auto;
   width: 100% !important;
+
+  border-top: 1px solid #000 !important;
+  border-bottom: 1px solid #000 !important;
 }
 
 .wrap-text-scrollhead {
