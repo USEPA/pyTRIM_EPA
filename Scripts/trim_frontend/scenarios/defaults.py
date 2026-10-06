@@ -11,7 +11,8 @@ def serialize_scenario(scen: Scenario):
         erosion_source = 1
 
     try:
-        metadata = scen.parameters.get('metadata').source
+        from trim_db.services import ScenarioService
+        metadata = ScenarioService.get_metadata(scen)
     except:
         metadata = {}
 
