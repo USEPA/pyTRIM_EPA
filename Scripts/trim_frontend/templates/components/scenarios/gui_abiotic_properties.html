@@ -568,29 +568,9 @@
 
             addMercuryCols(gw_tblId, gwTblCols, render_function_soil, 'Groundwater');
 
-            gw_apTable =  $(gw_tblId).removeAttr('width').dataTable({
-                destroy: true,
-                data: table_data,
-                paging: false,
-                bFilter: false,
-                info: false,
-                scrollX: true,
-                scrollY: 500,
-                bAutoWidth: false,
-                fnCreatedRow: function (row, data, index) {
-                    $(row).find("td.rightBorder").addClass("freeze-column")
-                },
-                columns: setDynamicColumnWidths(gw_tblId, gwTblCols, table_data),
-                initComplete: function (settings, json) {
-                    // $(gw_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
-                    $(".dt-scroll-body").css({"max-height": "500px", "height": "100%"});
-                    $(".dt-scroll-body").addClass('wrap-text-scrollbody');
-                    $(".dt-scroll-head").addClass('wrap-text-scrollhead');
-                    appendHeaderOptions(this, skip_columns=["Parcel Name"]);
-                    $('[data-toggle="tooltip"]').tooltip()
-                    $('[data-toggle="popover"]').popover()
-                }
-            });
+            gw_apTable = abiotic_DT(gw_tblId, table_data, gwTblCols, (thisTable, dt) => {
+                appendHeaderOptions(dt, skip_columns=["Parcel Name"]);
+            })
 
             let sort_order = "asc"
             $('.sortClass').click(function(e){
@@ -636,6 +616,11 @@
                     submit_abiotic_cell(focusTblId, this, data);
                 }
             })
+
+            $('#abiotic-props-gui [data-toggle="tooltip"]').tooltip();
+            $('#abiotic-props-gui [data-toggle="popover"]').popover();
+
+            updateDataTable508c($('#abiotic-props-gui'));
         }
 
         function create_parcel_object(id, row, data, comp_name=undefined){

@@ -1869,8 +1869,9 @@ onDomLoad(function () {
                 $(".dt-scroll-body").addClass('wrap-text-scrollbody');
                 $(".dt-scroll-head").addClass('wrap-text-scrollhead');
 
-                $('table[aria-describedby="mapTable_info"]').removeAttr("aria-describedby");
-                this.api().columns().header().to$().attr('scope', 'col');
+                // 508c
+                updateDataTable508c($('#parcels-gui'));
+                $('[aria-describedby="mapTable_info"]').removeAttr("aria-describedby");
 
                 $("[data-toggle=popover]").popover();
                 $('[data-toggle="tooltip"]').tooltip();

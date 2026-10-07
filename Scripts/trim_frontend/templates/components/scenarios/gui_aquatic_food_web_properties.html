@@ -236,10 +236,12 @@
                                 $(this).appendTo($label);
                             }
                         });
-                        $('[data-toggle="tooltip"]').tooltip()
-                        $('[data-toggle="popover"]').popover()
+                        $('#aquatic-food-web-props-gui [data-toggle="tooltip"]').tooltip()
+                        $('#aquatic-food-web-props-gui [data-toggle="popover"]').popover()
 
                         $(".dt-column-title").css({"overflow-wrap": "anywhere"});
+
+                        updateDataTable508c($('#aquatic-food-web-props-gui'));
                     },
                     language: {
                         emptyTable: 'No data available in table'

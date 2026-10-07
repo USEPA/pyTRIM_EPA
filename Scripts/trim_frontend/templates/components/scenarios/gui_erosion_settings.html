@@ -1036,7 +1036,8 @@
                         $(row).attr('data-parcel-id', data.parcel_id);
                     },
                     initComplete: function (settings, json) {
-                        this.api().columns().header().to$().attr('scope', 'col');
+                        updateDataTable508c($('#erosion-settings-gui'));
+                        $('[aria-describedby^="erosionTable_"]').removeAttr("aria-describedby");
                     },
                     drawCallback: (settings) => {
                         globalDrawCallback(tbl);

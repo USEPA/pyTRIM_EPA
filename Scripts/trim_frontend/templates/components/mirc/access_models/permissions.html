@@ -20,8 +20,8 @@
     <table class="table table-striped">
         <thead>
             <tr class="headers">
-                <th>User</th>
-                <th>Access Level</th>
+                <th scope="col">User</th>
+                <th scope="col">Access Level</th>
             </tr>
         </thead>
         <tbody>
@@ -80,6 +80,7 @@ document.addEventListener("DOMContentLoaded", function() {
             destroy: true, // override previous initialization
             dom: 'tp', // only show the table and paging controls
             data: data,
+            paging: false,
             order: [[0, 'asc']],
             columns: [
                 {

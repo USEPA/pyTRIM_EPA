@@ -148,16 +148,14 @@
                     $(row).find("td.rightBorder").addClass("freeze-column")
                 },
                 initComplete: function (settings, json) {
-                    // $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
-                    this.api().columns().header().to$().attr('scope', 'col');
                     $(".dt-scroll-body").css({"max-height": "500px", "height": "100%"});
                     $(".dt-scroll-body").addClass('wrap-text-scrollbody');
                     $(".dt-scroll-head").addClass('wrap-text-scrollhead');
-                    $('[data-toggle="tooltip"]').tooltip()
-                    $('[data-toggle="popover"]').popover()
 
                     $(".dt-column-title").css({"overflow-wrap": "anywhere"});
                     this.api().columns.adjust();
+
+                    updateDataTable508c($("#surface-runoff-gui"))
                 }
             });
 
@@ -503,14 +501,7 @@
             // Define row headers as sender parcel names
             let columns = [{
                 'data': 'sender',
-                'title': '<table><tbody><tr id="ROHead">' +
-                    '<td style="border-bottom: 0px; padding: 0px">receiver <i class="fa fa-arrow-right"></i></td>' +
-                    '<td style="border-bottom: 0px; padding: 0px"></td>' +
-                    '</tr>' +
-                    '<tr>' +
-                    '<td style="border-bottom: 0px; padding: 0px">sender <i class="fa fa-arrow-down"></i></td>' +
-                    '<td style="border-bottom: 0px; padding: 0px"></td>' +
-                    '</tr></tbody></table>',
+                'title': `receiver <i class="fa fa-arrow-right"></i></br>sender <i class="fa fa-arrow-down"></i>`,
                 'bSortable': false,
                 'className': 'font-weight-bold rightBorder freeze-column runoff-matrix-corner-header'
             }]

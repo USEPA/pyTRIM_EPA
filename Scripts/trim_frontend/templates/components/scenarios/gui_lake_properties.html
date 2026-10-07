@@ -188,13 +188,12 @@
                 },
                 columns: setDynamicColumnWidths(tblId, get_pivoted_columns(tblId), table_data),
                 initComplete: function (settings, json) {
-                    // $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
-                    this.api().columns().header().to$().attr('scope', 'col');
                     $(".dt-scroll-body").css({"max-height": "500px", "height": "100%"});
                     $(".dt-scroll-body").addClass('wrap-text-scrollbody');
                     $(".dt-scroll-head").addClass('wrap-text-scrollhead');
-                    $('[data-toggle="tooltip"]').tooltip()
-                    $('[data-toggle="popover"]').popover()
+                    
+                    $('#lake-props-gui [data-toggle="tooltip"]').tooltip()
+                    $('#lake-props-gui [data-toggle="popover"]').popover()
 
                     $(".dt-column-title").css({"overflow-wrap": "anywhere"});
 
@@ -207,6 +206,8 @@
                             }
                         }, 0);
                     }
+
+                    updateDataTable508c($('#lake-props-gui'));
                 }
             });
 
