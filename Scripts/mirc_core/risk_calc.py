@@ -1,6 +1,5 @@
 from .equations import *
 from .utils import log_vals
-from trim_db.schema import MircLifeStage as LifeStage
 
 
 __all__ = ['assess_risk']
@@ -145,9 +144,11 @@ def assess_risk(
         adaf = chem_params.at_life_stage(age).ADAF.quantity
         adafs[age.name] = adaf
 
+    from trim_db import MircLifeStageService as LifeStageService  # Avoid circular import
+
     ages = {
         ls.name: ls.duration * ureg(ls.duration_unit)
-        for ls in LifeStage.query.all()
+        for ls in LifeStageService.get_all()
         if ls.name != 'Pregnant Mother'
     }
     lifespan = max(70 * ureg('year'), sum(ages.values()))

@@ -678,43 +678,52 @@ class MircSimulationService(GenericService[MircSimulation]):
         else:
             bw = Pmean
 
+        def sum_risks(breakdown):
+            intake_unit = scenario.parameters.unit_registry('mg/day/kg')
+            total = {}
+            for product, results in breakdown.items():
+                if 'risk' not in results or not results['risk']:
+                    continue
+                for age, risk_data in results['risk'].items():
+                    # Add intake
+                    if age not in total:
+                        total[age] = {'intake': 0 * intake_unit}
+                    total[age]['intake'] += (risk_data.get('intake') or 0)
+                    # Add adjusted intake
+                    adj = risk_data.get('adjusted_intake')
+                    if adj is None:
+                        continue
+                    if 'adjusted_intake' not in total[age]:
+                        total[age]['adjusted_intake'] = 0 * intake_unit
+                    total[age]['adjusted_intake'] += adj
+            return total
+
         try:
             simulation_breakdown = {
                 p.name.replace(' ', '_'): self._run_single_pathway(p, bw, logs)
                 for p in products
             }
 
+            total = sum_risks(simulation_breakdown)
+
             if with_breast_milk:
-                cumulative_ladd = 0
-                # loop to computed cumulative LADD
-                # that is used to estimate BM concentrations
-                for product, result in simulation_breakdown.items():
-                    r = result['risk']
-                    life_risk = r['Lifetime']
-                    if life_risk:
-                        cumulative_ladd += life_risk.get('intake', 0)
+                # Maternal cumulative Lifetime ADD is used to estimate BM concentrations
+                try:
+                    maternal_cumulative_ladd = total['Lifetime']['intake']
+                except KeyError:
+                    maternal_cumulative_ladd = 0 * scenario.parameters.unit_registry('mg/day/kg')
 
                 simulation_breakdown[bm.name.replace(' ', '_')] = self._run_single_pathway(
-                    bm, bw, logs, maternal_cumulative_ladd=cumulative_ladd
+                    bm, bw, logs, maternal_cumulative_ladd=maternal_cumulative_ladd
                 )
 
-            total = {}
-            for product, results in simulation_breakdown.items():
-                if not results.get('risk'):
-                    continue
-                for age, risk_data in results['risk'].items():
-                    if not total.get(age):
-                        ureg = scenario.parameters.unit_registry
-                        total[age] = {
-                            'intake': 0 * ureg('mg/day/kg')
-                        }
-                    total[age]['intake'] += (risk_data.get('intake') or 0)
-                    adj = risk_data.get('adjusted_intake')
-                    if adj is not None:
-                        if not total[age].get('adjusted_intake'):
-                            ureg = scenario.parameters.unit_registry
-                            total[age]['adjusted_intake'] = 0 * ureg('mg/day/kg')
-                        total[age]['adjusted_intake'] += adj
+                # Recalculate total *including* breast milk
+                total = sum_risks(simulation_breakdown)
+
+            logs.append('Calculating total risk ...')
+
+            for age, risk in total.items():
+                logs.append(f'Calculated {c} total intake for {age}: {risk["intake"]} ...')
 
             RfD = scenario.parameters.for_chemical(c).RfD.quantity
             CSF = scenario.parameters.for_chemical(c).CSF.quantity
@@ -733,6 +742,7 @@ class MircSimulationService(GenericService[MircSimulation]):
                 **simulation_breakdown
             }
         except Exception as e:
+            import traceback; traceback.print_exc()
             simulation_results = {
                 'error': str(e)
             }
@@ -776,7 +786,8 @@ class MircSimulationService(GenericService[MircSimulation]):
             c_fat, c_aq = calculate_c_product(
                 scenario=scenario, product=product, chemical=simulation.chemical,
                 simulation=simulation,
-                maternal_cumulative_ladd=maternal_cumulative_ladd
+                maternal_cumulative_ladd=maternal_cumulative_ladd,
+                logs=logs
             )
 
             if c_fat is None or c_aq is None:

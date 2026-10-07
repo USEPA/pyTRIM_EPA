@@ -57,10 +57,7 @@
                         <th scope="col" rowspan="2" style="display: none;">Fixed</th>
                         <th scope="col" rowspan="2">Product</th>
                         <th scope="col" rowspan="2">Concentration</th>
-                        <th scope="col" rowspan="2" class="cursor-default" title="Concentration Units">
-                            Units
-                        </th>
-                        <th scope="col" colspan="4" class="text-center p-0">
+                        <th scope="col" colspan="3" class="text-center p-0" data-dt-order="disable">
                             <select id="breakout-age"
                                 name="breakout-age"
                                 title="Age picker"
@@ -73,16 +70,13 @@
                     </tr>
                     <tr class="headers">
                         <th scope="col" title="Average Daily Dose">ADD</th>
-                        <th scope="col" class="cursor-default" title="Average Daily Dose Units">
-                            ADD Units
-                        </th>
                         <th scope="col" title="Hazard Quotient">HQ</th>
                         <th scope="col">Cancer Risk</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td colspan="10" class="text-center table-light">
+                        <td colspan="6" class="text-center table-light">
                             Loading Assessment results ...
                         </td>
                     </tr>
@@ -358,6 +352,9 @@ onDomLoad(function() {
         if (parseFloat(sci) == 0) {
             return '0';
         }
+        if (isNaN(sci)) {
+            return 'N/A';
+        }
         return sci;
     }
     function round(number, decimals) {
@@ -554,8 +551,32 @@ onDomLoad(function() {
         return name;
     }
 
+    var dt = null;
+
     function updateTable(simulation) {
         var results = simulation.results;
+
+        var sortedAges = Object.keys(results.total.risk).sort((a, b) => {
+            if (a.indexOf('Lifetime') == 0) {
+                return 1; // Lifetime comes after everything
+            }
+            if (a.indexOf('Adult') == 0) {
+                return b.indexOf('Lifetime') == 0 ? -1 : 1; // Adult comes after everything except Lifetime
+            }
+            if (a.indexOf('Child') == 0) {
+                if (a.indexOf('<') > -1) {
+                    return -1; // Child<* comes before anything
+                }
+                if (b.indexOf('Child') < 0) {
+                    return -1; // Child* comes before anything that isn't Child*
+                }
+                // Else check if Child[a] is younger than Child[b]
+                var aAgeStart = parseInt(a.split(' ')[1].split('-')[0]);
+                var bAgeStart = parseInt(b.split(' ')[1].split('-')[0])
+                return aAgeStart < bAgeStart ? -1 : 1;
+            }
+            return 0; // else no opinion
+        });
 
         function formatChildRow(data) {
             var t = document.createElement('table');
@@ -574,28 +595,19 @@ onDomLoad(function() {
             tr.appendChild(th);
 
             th = document.createElement('th');
-            th.colSpan = 2;
+            th.style.textAlign = 'right';
             th.innerText = 'ADD';
-            /*if (data.chemical.mutagenic) {
-                th.innerText = 'Base ADD';
-            }*/
             th.title = 'Average Daily Dose';
             tr.appendChild(th);
 
-            /*if (data.chemical.mutagenic) {
-                th = document.createElement('th');
-                th.colSpan = 2;
-                th.innerText = 'Adjusted ADD';
-                th.title = 'Adjusted Average Daily Dose';
-                tr.appendChild(th);
-            }*/
-
             th = document.createElement('th');
+            th.style.textAlign = 'right';
             th.innerText = 'HQ';
             th.title = 'Hazard Quotient';
             tr.appendChild(th);
 
             th = document.createElement('th');
+            th.style.textAlign = 'right';
             th.innerText = 'Cancer Risk';
             tr.appendChild(th);
 
@@ -605,10 +617,13 @@ onDomLoad(function() {
             var tb = document.createElement('tbody');
             t.appendChild(tb);
 
-            $.each(data.risk, function(age, riskData) {
+            $.each(sortedAges, function(i, age) {
+                var riskData = data.risk[age];
+
                 var tr = document.createElement('tr');
 
                 var td = document.createElement('td');
+                td.style.whiteSpace = 'nowrap';
                 td.innerText = age;
                 tr.appendChild(td);
 
@@ -618,29 +633,14 @@ onDomLoad(function() {
                 }
                 td = document.createElement('td');
                 td.style.whiteSpace = 'nowrap';
-                td.innerText = asScientific(i.value, 4);
+                td.style.textAlign = 'right';
+                td.innerHTML = `${asScientific(i.value, 4)} <small>${simplifyUnit(i.unit, true)}</small>`;
                 tr.appendChild(td);
-                td = document.createElement('td');
-                td.innerText = simplifyUnit(i.unit, true);
-                tr.appendChild(td);
-
-                /*if (data.chemical.mutagenic) {
-                    var adj = riskData.adjusted_intake;
-                    if (adj == null) {
-                        i = {value: NaN, unit: ''};
-                    }
-                    td = document.createElement('td');
-                    td.style.whiteSpace = 'nowrap';
-                    td.innerText = asScientific(adj.value, 4);
-                    tr.appendChild(td);
-                    td = document.createElement('td');
-                    td.innerText = simplifyUnit(adj.unit, true);
-                    tr.appendChild(td);
-                }*/
 
                 var hq = riskData.hazard_quotient;
                 td = document.createElement('td');
                 td.style.whiteSpace = 'nowrap';
+                td.style.textAlign = 'right';
                 if (hq == null) {
                     td.innerText = 'N/A';
                 }
@@ -653,6 +653,7 @@ onDomLoad(function() {
                 var r = riskData.risk_factor;
                 td = document.createElement('td');
                 td.style.whiteSpace = 'nowrap';
+                td.style.textAlign = 'right';
                 if (r == null) {
                     td.innerText = 'N/A';
                 }
@@ -682,12 +683,10 @@ onDomLoad(function() {
             });
         });
 
-        // Remove any old headers
-        tbl.find('thead tr').each(function() {
-            if (this.className != 'headers') {
-                $(this).remove();
-            }
-        });
+        // Reset table
+        if (dt != null) {
+            dt.clear();
+        }
 
         if (!data.length) {
             return;
@@ -697,203 +696,204 @@ onDomLoad(function() {
         var ageSelect = $('#breakout-age');
 
         // Initialize base data
-        var dt = tbl.DataTable({
-            destroy: true, // override previous initialization
-            dom: 't', // only show the table
-            data: data,
-            paging: false,
-            aaSortingFixed: [[0, 'desc']],
-            order: [[1, 'asc']],
-            columns: [
-                {
-                    title: 'Fixed',
-                    data: 'fixed',
-                    orderable: false,
-                    visible: false
+        if (dt == null) {
+            dt = tbl.DataTable({
+                destroy: true, // override previous initialization
+                dom: 't', // only show the table
+                data: [],
+                paging: false,
+                orderFixed: [[0, 'desc']], // Total row is always at top
+                order: [[1, 'asc']], // Default sort is by product
+                language: {
+                    emptyTable: 'No Results',
+                    zeroRecords: 'No Matching Results'
                 },
-                {
-                    title: 'Product',
-                    data: 'product',
-                    className: 'cursor-pointer',
-                    render: function(data, type, row, meta) {
-                        var d = document.createElement('div');
-                        d.className = 'd-flex';
-                        d.setAttribute("tabindex", "0");
-                        d.innerText = standardProductName(data);
+                columns: [
+                    {
+                        title: 'Fixed',
+                        data: 'fixed',
+                        orderable: false,
+                        visible: false
+                    },
+                    {
+                        title: 'Product',
+                        data: 'product',
+                        className: 'text-nowrap cursor-pointer',
+                        render: function(data, type, row, meta) {
+                            var d = document.createElement('div');
+                            d.className = 'd-flex';
+                            d.style.gap = '6px';
+                            d.setAttribute("tabindex", "0");
+                            d.innerText = standardProductName(data);
 
-                        if (row.risk != null) {
-                            var fa = document.createElement('i');
-                            fa.className = 'ml-auto mt-1 fa fa-plus-circle';
-                            d.appendChild(fa);
-                        }
+                            if (row.risk != null) {
+                                var fa = document.createElement('i');
+                                fa.className = 'ml-auto mt-1 fa fa-plus-circle';
+                                d.appendChild(fa);
+                            }
 
-                        return d.outerHTML;
+                            return d.outerHTML;
+                        }
+                    },
+                    {
+                        title: 'Concentration',
+                        data: 'concentration',
+                        className: 'text-nowrap text-right',
+                        render: function(data, type, row, meta) {
+                            if (type == 'sort' || type == 'type') {
+                                if (data == undefined) {
+                                    return NaN;
+                                }
+                                if (row.product == 'breast_milk') {
+                                    if (data.value == 0 && row.risk?.[ageSelect.val()].intake.value != 0) {
+                                        return NaN;
+                                    }
+                                }
+                                return data.value;
+                            }
+                            if (data == undefined) {
+                                return 'N/A';
+                            }
+                            if (row.product == 'breast_milk') {
+                                if (data.value == 0 && row.risk?.[ageSelect.val()].intake.value != 0) {
+                                    return '-';
+                                }
+                            }
+                            var v = asScientific(data.value, 4);
+                            var u = simplifyUnit(data.unit);
+                            return `${v} <small>${u}</small>`;
+                        }
+                    },
+                    {
+                        title: 'ADD',
+                        data: 'risk',
+                        className: 'text-nowrap text-right',
+                        render: function(data, type, row, meta) {
+                            if (type == 'sort' || type == 'type') {
+                                if (data == undefined || $.isEmptyObject(data)) {
+                                    return NaN;
+                                }
+                                return data[ageSelect.val()].intake.value;
+                            }
+                            if (data == undefined || $.isEmptyObject(data)) {
+                                return '';
+                            }
+                            var add = data[ageSelect.val()].intake;
+                            var v = asScientific(add.value, 4);
+                            var u = simplifyUnit(add.unit, true);
+                            return `${v} <small>${u}</small>`;
+                        }
+                    },
+                    {
+                        title: 'HQ',
+                        data: 'risk',
+                        className: 'text-nowrap text-right',
+                        render: function(data, type, row, meta) {
+                            if (type == 'sort' || type == 'type') {
+                                if (data == undefined || $.isEmptyObject(data)) {
+                                    return NaN;
+                                }
+                                var hq = data[ageSelect.val()].hazard_quotient;
+                                if (hq == null) {
+                                    return NaN;
+                                }
+                                return hq;
+                            }
+                            if (data == undefined || $.isEmptyObject(data)) {
+                                return '';
+                            }
+                            var hq = data[ageSelect.val()].hazard_quotient;
+                            if (hq == null) {
+                                return 'N/A';
+                            }
+                            return asScientific(hq, 4);
+                        }
+                    },
+                    {
+                        title: 'Cancer Risk',
+                        data: 'risk',
+                        className: 'text-nowrap text-right',
+                        render: function(data, type, row, meta) {
+                            if (type == 'sort' || type == 'type') {
+                                if (data == undefined || $.isEmptyObject(data)) {
+                                    return NaN;
+                                }
+                                var risk = data[ageSelect.val()].risk_factor
+                                if (risk == null) {
+                                    return NaN;
+                                }
+                                return risk;
+                            }
+                            if (data == undefined || $.isEmptyObject(data)) {
+                                return '';
+                            }
+                            var risk = data[ageSelect.val()].risk_factor;
+                            if (risk == null) {
+                                return 'N/A';
+                            }
+                            return asScientific(risk, 4);
+                        }
                     }
-                },
-                {
-                    title: 'Concentration',
-                    data: 'concentration',
-                    className: 'white-space-nowrap text-right',
-                    render: function(data, type, row, meta) {
-                        if (data == undefined) {
-                            return 'N/A';
-                        }
-                        return asScientific(data.value, 4);
-                    }
-                },
-                {
-                    title: 'Units',
-                    data: 'concentration',
-                    orderable: false,
-                    render: function(data, type, row, meta) {
-                        if (data == undefined) {
-                            return '';
-                        }
-                        var u = simplifyUnit(data.unit);
-                        // if (u) {
-                        //     if (row.product == 'soil') {
-                        //         u += ' dry weight';
-                        //     }
-                        //     else if (row.product != 'water') {
-                        //         u += ' wet weight';
-                        //     }
-                        // }
-                        return u;
-                    }
-                },
-                {
-                    title: 'ADD',
-                    data: 'risk',
-                    className: 'white-space-nowrap text-right',
-                    render: function(data, type, row, meta) {
-                        if (data == undefined || $.isEmptyObject(data)) {
-                            return '';
-                        }
-                        var add = data[ageSelect.val()].intake;
-                        /*if (data[ageSelect.val()].adjusted_intake) {
-                            add = data[ageSelect.val()].adjusted_intake;
-                        }*/
-                        return asScientific(add.value, 4);
-                    }
-                },
-                {
-                    title: 'ADD Units',
-                    data: 'risk',
-                    orderable: false,
-                    render: function(data, type, row, meta) {
-                        if (data == undefined || $.isEmptyObject(data)) {
-                            return '';
-                        }
-                        var add = data[ageSelect.val()].intake;
-                        /*if (data[ageSelect.val()].adjusted_intake) {
-                            add = data[ageSelect.val()].adjusted_intake;
-                        }*/
-                        return simplifyUnit(add.unit, true);
-                    }
-                },
-                {
-                    title: 'HQ',
-                    data: 'risk',
-                    className: 'white-space-nowrap text-right',
-                    render: function(data, type, row, meta) {
-                        if (data == undefined || $.isEmptyObject(data)) {
-                            return '';
-                        }
-                        var hq = data[ageSelect.val()].hazard_quotient;
-                        if (hq == null) {
-                            return 'N/A';
-                        }
-                        return asScientific(hq, 4);
-                    }
-                },
-                {
-                    title: 'Cancer Risk',
-                    data: 'risk',
-                    className: 'white-space-nowrap text-right',
-                    render: function(data, type, row, meta) {
-                        if (data == undefined || $.isEmptyObject(data)) {
-                            return '';
-                        }
-                        var risk = data[ageSelect.val()].risk_factor;
-                        if (risk == null) {
-                            return 'N/A';
-                        }
-                        return asScientific(risk, 4);
-                    }
-                }
-            ]
-        });
+                ]
+            });
+        }
+        dt.rows.add(data).draw();
 
         // Initialize breakout options
         ageSelect.empty();
-        var sortedAges = Object.keys(results.total.risk).sort((a, b) => {
-            if (a.indexOf('Lifetime') == 0) {
-                return 1; // Lifetime comes after everything
-            }
-            if (a.indexOf('Adult') == 0) {
-                return b.indexOf('Lifetime') == 0 ? -1 : 1; // Adult comes after everything except Lifetime
-            }
-            if (a.indexOf('Child') == 0) {
-                if (a.indexOf('<') > -1) {
-                    return -1; // Child<* comes before anything
-                }
-                if (b.indexOf('Child') < 0) {
-                    return -1; // Child* comes before anything that isn't Child*
-                }
-                // Else check if Child[a] is younger than Child[b]
-                var aAgeStart = parseInt(a.split(' ')[1].split('-')[0]);
-                var bAgeStart = parseInt(b.split(' ')[1].split('-')[0])
-                return aAgeStart < bAgeStart ? -1 : 1;
-            }
-            return 0; // else no opinion
-        });
         $.each(sortedAges, function(i, age) {
             var etc = results.total.risk[age];
             ageSelect.append($('<option />').val(age).text(age));
         });
-        ageSelect.val('Lifetime').off('change').change(function() {
+        ageSelect.val('Lifetime').off('change').change(function(e) {
+            e.stopPropagation();
             dt.rows().invalidate('data');
             dt.draw();
             updateChart(simulation, this.value);
         });
 
         // Initialize filter fields
-        var tr = $('<tr />');
-        tbl.find('thead').append(tr);
-        tr.append('<th style="display: none;" /><th /><th /><th /><th /><th /><th /><th />')
-            .find('th').each(function(i) {
-                var th = $(this);
-                th.addClass('p-0');
-                th.attr("scope", "col");
-                th.html('<input type="text" class="form-control form-control-sm" placeholder="filter" />');
+        if (!tbl.find('thead .filters').length) {
+            var tr = $('<tr class="filters" />');
+            tbl.find('thead').append(tr);
+            tr.append('<th style="display: none;" /><th /><th /><th /><th /><th />')
+                .find('th').each(function(i) {
+                    var th = $(this);
+                    th.addClass('p-0');
+                    th.attr("scope", "col");
+                    th.html('<input type="text" class="form-control form-control-sm" placeholder="filter" />');
 
-                var last = undefined;
-                $('input', this).on('keyup change', function () {
-                    var s = this.value;
-                    if (last !== s) {
-                        last = s;
-                        dt.draw();
-                    }
+                    var last = undefined;
+                    $('input', this).on('keyup change', function () {
+                        var s = this.value;
+                        if (last !== s) {
+                            last = s;
+                            dt.draw();
+                        }
+                    });
                 });
-            });
-        $.fn.dataTable.ext.search.push(
-            function(settings, searchData, index, rowData, counter) {
-                if (rowData.fixed) {
-                    return true;
+            $.fn.dataTable.ext.search.push(
+                function(settings, searchData, index, rowData, counter) {
+                    if (rowData.fixed) {
+                        return true;
+                    }
+
+                    var include = true;
+                    $('thead input[placeholder="filter"]').each(function(i) {
+                        var s = this.value.toLowerCase();
+                        if (searchData[i].toLowerCase().indexOf(s) < 0) {
+                            include = false;
+                            return false;
+                        }
+                    });
+
+                    return include;
                 }
-
-                var include = true;
-                $('thead input[placeholder="filter"]').each(function(i) {
-                    var s = this.value.toLowerCase();
-                    if (searchData[i].toLowerCase().indexOf(s) < 0) {
-                        include = false;
-                        return false;
-                    }
-                });
-
-                return include;
-            }
-        );
+            );
+        }
+        else {
+            tbl.find('thead .filters input').val('').change();
+        }
 
         // Initialize child rows
         tbl.off('click keydown', 'td.cursor-pointer');
@@ -919,7 +919,7 @@ onDomLoad(function() {
                 row.child(formatChildRow(row.data())).show();
             }
         });
-        
+
         tbl.find('thead').css('background', 'rgba(0, 0, 0, 0.05)');
 
         tbl.find('tbody tr').each(function() {
@@ -928,6 +928,7 @@ onDomLoad(function() {
                 tr.addClass('font-weight-bold');
                 tr.css('background', 'rgb(241, 105, 19, 0.35)');
                 tr.find('td').css('border-bottom-width', '2px');
+                tr.find('td small').addClass('font-weight-bold');
                 return false;
             }
         });
