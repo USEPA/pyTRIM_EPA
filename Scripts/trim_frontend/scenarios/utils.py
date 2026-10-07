@@ -359,6 +359,7 @@ def handle_scenario_update(s, scenario_data):
 
     elif field_name == "chemical": # emission settings, add/remove chemicals from a scenario
         opt = scenario_data["operation"]
+        emissions_metadata = ScenarioService.get_metadata(s).get("emissions", {})
 
         # group all mercuries
         if 'Mercury' in scenario_data["chemical"] and opt in ['add', 'remove']:
@@ -376,6 +377,13 @@ def handle_scenario_update(s, scenario_data):
             elif chem in s.chemicals and opt == 'remove':
                 reset_emissions_and_concentrations(s, chem)
                 s.chemicals.remove(chem)
+
+                # update scenario file tracking metadata
+                for _e in list(emissions_metadata.keys()):
+                    if f"{chem.name}_" in _e:
+                        del emissions_metadata[_e]
+                ScenarioService.get_metadata(s)["emissions"] = emissions_metadata
+                ParameterService.commit()
             elif chem not in s.chemicals and opt == 'add':
                 s.chemicals.append(chem)
 
