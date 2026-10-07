@@ -1,3 +1,4 @@
+import enum
 import sqlalchemy as sa
 from ..parameters.managers import ParameterManager
 from ...utils.base import Model
@@ -5,7 +6,7 @@ from ...utils.serialize import register_serializer
 
 
 __all__ = [
-    'MircProduct', 'MircLifeStage', 'MircPercentile'
+    'MircProduct', 'MircLifeStage', 'AgeOrder', 'MircPercentile'
 ]
 
 
@@ -102,11 +103,27 @@ def _ts_product(p: MircProduct):
     return serial
 
 
+class AgeOrder(enum.Enum):
+    CHILD_LESS_THAN_1 = 0
+    CHILD_1_2 = 10
+    CHILD_3_5 = 20
+    CHILD_6_11 = 30
+    CHILD_12_19 = 40
+    ADULT = 50
+    PREGNANT_MOTHER = 55
+
+
 class MircLifeStage(NamedModelMixin, Model):
     """Represents an age group (i.e., "Adult").
     """
     duration = sa.Column(sa.Float())
     duration_unit = sa.Column(sa.String(255))
+
+    @property
+    def sort_order(self):
+        norm_name = self.name.upper()
+        norm_name = norm_name.replace(' ', '_').replace('-', '_').replace('<', 'LESS_THAN_')
+        return AgeOrder[norm_name].value
 
 
 @register_serializer(MircLifeStage)
@@ -115,7 +132,8 @@ def _ts_life_stage(ls: MircLifeStage):
         'id': ls.id,
         'name': ls.name,
         'duration': ls.duration,
-        'duration_unit': ls.duration_unit
+        'duration_unit': ls.duration_unit,
+        'sort_order': ls.sort_order
     }
 
 
