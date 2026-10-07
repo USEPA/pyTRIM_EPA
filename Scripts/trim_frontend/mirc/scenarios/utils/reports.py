@@ -29,7 +29,7 @@ def get_ages(age_id=None):
         ages = MircLifeStageService.get_all()
     else:
         ages = [MircLifeStageService.get(age_id)]
-    return list(sorted(ages, key=lambda x: MircLifeStageService.as_orderable(x)))
+    return list(sorted(ages, key=lambda x: x.sort_order))
 
 
 def get_percentiles(percentile_id=None, include_no_percentile=False):
