@@ -615,12 +615,12 @@
         function checkForFileUpload() {
             const metadata = TRIM.store.currentScenario.metadata?.emissions || {};
             const fileUploadHtml = (title, file_text) => {
-                let color_508c = "#767676"
                 return $(`
                 <span class="emissions-file-icon" data-toggle="tooltip" title="${title}">
                     <span class="position-relative d-inline-block ml-1">
                         <i class="fa fa-file text-success"></i>
-                        <span style="position:absolute; top:50%; left:50%; transform:translate(-50%,-40%); color:${color_508c}; font-size:9px; font-weight:bold; pointer-events:none;">
+                        <span style="position:absolute; top:50%; left:50%; transform:translate(-50%,-40%); pointer-events:none;
+                        color:white; font-size:12px; font-weight:bold;" class="bg-success">
                             ${file_text}
                         </span>
                     </span>
