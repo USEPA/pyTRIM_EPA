@@ -3,6 +3,7 @@
 
 # Ignore outputs
 **/Output_Files/*
+/docker/**/temp/
 
 # Ignore executables
 **/*.exe

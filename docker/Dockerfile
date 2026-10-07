@@ -30,7 +30,7 @@ ARG PYTRIM_BUILD_PLATFORM="linux/amd64"
 # FROM python:3.11-alpine as builder
 # FROM --platform=linux/amd64 python:3.11-alpine AS builder
 # FROM --platform=${PYTRIM_BUILD_PLATFORM} python:3.11-alpine
-FROM --platform=${PYTRIM_BUILD_PLATFORM} qgis/qgis
+FROM --platform=${PYTRIM_BUILD_PLATFORM} qgis/qgis:4.2-trixie
 
 # Set environment variables for QGIS
 ENV QGIS_PREFIX_PATH=/usr
@@ -45,10 +45,11 @@ COPY requirements.txt /tmp/requirements.txt
 RUN python3 -m venv /app/runmodel_venv
 
 # get a working setuptools
-RUN /app/runmodel_venv/bin/pip install --upgrade setuptools
+RUN /app/runmodel_venv/bin/pip install --upgrade pip setuptools
 
 # need git for flask-api
-RUN apt-get update && apt-get install -y git
+RUN apt-get update && apt-get upgrade -y && apt-get install -y git \
+    && rm -rf /var/lib/apt/lists/*
 
 # install TRIM specific packages
 RUN /app/runmodel_venv/bin/pip install -r /tmp/requirements.txt

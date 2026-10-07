@@ -7,7 +7,7 @@ ARG PYTRIM_GETFLOW_BUILD_PLATFORM="linux/amd64"
 # start with QGIS image
 # FROM qgis/qgis
 # FROM --platform=linux/amd64 qgis/qgis
-FROM --platform=${PYTRIM_GETFLOW_BUILD_PLATFORM} qgis/qgis:4.2
+FROM --platform=${PYTRIM_GETFLOW_BUILD_PLATFORM} qgis/qgis:4.2-trixie
 
 # Set environment variables for QGIS
 ENV QGIS_PREFIX_PATH=/usr
@@ -28,18 +28,14 @@ WORKDIR /app
 COPY requirements.txt /tmp/requirements.txt
 RUN python3 -m venv /app/getflow_venv
 
-# need git for flask-api
-RUN apt-get update && apt-get install -y git
+RUN /app/getflow_venv/bin/pip install --upgrade pip
+
+# need git for flask-api; unzip + saga needed for processing plugins
+RUN apt-get update && apt-get upgrade -y \
+      && apt-get install -y git unzip saga \
+      && rm -rf /var/lib/apt/lists/*
 
 RUN /app/getflow_venv/bin/pip install -r /tmp/requirements.txt
-
-# don't need this normally - but useful if we want to connect and mess around...
-# RUN apt install -y vim
-
-# saga needed for one of the processing plugins
-# apt-get install saga
-RUN apt install -y unzip
-RUN apt install -y saga
 
 
 # copy getflow src, supporting .tif, etc. in;
