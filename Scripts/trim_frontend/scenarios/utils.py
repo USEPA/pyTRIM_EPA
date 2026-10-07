@@ -615,6 +615,9 @@ def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
         # Ignored hour resolution.
         df_met['DT'] = list(pd.to_datetime(df_met[['Year', 'Month', 'Day']], errors='coerce'))
 
+    if len(df_met) == 0:
+        raise ValueError("0 rows remaining after filtering for out of bounds data")
+
     df_met.sort_values(by='DT', inplace=True)
     df_met['date_delta'] = (df_met['DT'] - df_met['DT'].min()) / np.timedelta64(1, 'D')
     df_met['time_delta'] = df_met['date_delta'].diff()
