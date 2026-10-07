@@ -381,7 +381,7 @@ def handle_scenario_update(s, scenario_data):
 
     elif field_name == "soil_api":
         try:
-            update_soil_from_api(s, logger)
+            ret_val = update_soil_from_api(s, logger)
 
             metadata = ScenarioService.get_metadata(s)
             metadata["abiotic_usda"] = True
@@ -732,7 +732,8 @@ def update_soil_from_api(s, logger):
 
     sd = SoilData(vert_dict=parcels, pcl_layers=parcel_layers)
     sd.run()
-    
+
+    errors = []
     for pcl_name, is_tilled in parcel_tillage.items():
         logger.info(f"Calculating layer values for [{pcl_name}]")
         pcl = ParcelService.get(name=pcl_name, scenario_id=s.id)
@@ -743,9 +744,12 @@ def update_soil_from_api(s, logger):
 
         if not soil_data:
             logger.info(f"No soil data found, skipping...")
+            errors.append(f"No soil data retrieved for parcel {pcl_name}")
             continue
 
         calculate_layer_vals(pcl, soil_data, "surface")
         calculate_layer_vals(pcl, soil_data, "root")
         calculate_layer_vals(pcl, soil_data, "vadose")
         calculate_layer_vals(pcl, soil_data, "gw")
+
+    return "\n".join(errors)

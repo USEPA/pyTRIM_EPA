@@ -49,6 +49,18 @@ function calculateDateDistance(start, end, funcs) {
     return diff;
 }
 
+// where start should be initialized as new Date().getTime()
+function timeElapsedStr(start_time) {
+    let time_elapsed = new Date().getTime() - start_time;
+    let seconds = Math.floor(time_elapsed / 1000);
+    let minutes = Math.floor(seconds / 60);
+    seconds = seconds % 60;
+    minutes = minutes % 60;
+    
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${pad(minutes)}:${pad(seconds)}`;
+}
+
 // does not refresh parcels
 function getParcelByKey(key, val) {
     return TRIM.store.currentScenario.parcels.filter(e=>e[key]==val)[0]

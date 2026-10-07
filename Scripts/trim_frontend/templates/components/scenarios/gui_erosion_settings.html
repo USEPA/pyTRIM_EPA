@@ -289,11 +289,24 @@
                 }
             };
 
+            function handleUsdaPolling() {
+                let timeStr = timeElapsedStr(TRIM.store.currentScenario.erosion_usda_timestamp);
+                
+                if (!usdaBtn.prop('disabled')) {
+                    usdaBtn.prop('disabled', true);
+                } 
+                usdaBtn.text(`Loading USDA Soil Data... (${timeStr})`);
+                usdaBtn.prepend("<span class='lds-dual-ring mr-3'>");
+            }
+
             function getUsdaSoilData() {
-                usdaBtn.prepend("<span class='lds-dual-ring mr-2'>");
-                usdaBtn.prop('disabled', true);
+                TRIM.store.currentScenario.erosion_usda_timestamp = new Date().getTime();
+                handleUsdaPolling();
+                TRIM.store.currentScenario.erosion_usda_interval_id = setInterval(handleUsdaPolling, 3000);
+
                 TRIM.api.getSoilData('notill').on('load', function() {
                     try{
+                        clearInterval(TRIM.store.currentScenario.erosion_usda_interval_id);
                         updateUsdaSoilData(JSON.parse(this.responseText));
                         TRIM.api.updateScenarioMetadata(TRIM.store.currentScenario, checkForUSDA);
                     } catch (err) {
@@ -301,6 +314,7 @@
                     } finally {
                         usdaBtn.find('.lds-dual-ring').remove();
                         usdaBtn.attr('disabled', false);
+                        usdaBtn.html(`<i class="fa fa-cloud-download-alt mr-1"></i>Load USDA Soil Data`);
                     }
                 });
             }

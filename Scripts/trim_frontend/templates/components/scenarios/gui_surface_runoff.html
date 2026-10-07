@@ -439,14 +439,8 @@
                     }
                     else {
                         TRIM.store.currentScenario.getflow_timestamp = TRIM.store.currentScenario?.getflow_timestamp || new Date().getTime();
-                        let time_elapsed = new Date().getTime() - TRIM.store.currentScenario?.getflow_timestamp;
-                        let seconds = Math.floor(time_elapsed / 1000);
-                        let minutes = Math.floor(seconds / 60);
-                        seconds = seconds % 60;
-                        minutes = minutes % 60;
-
-                        const pad = (n) => String(n).padStart(2, '0');
-                        $('#run_getflow').html(`<i class="lds-dual-ring mr-3" style="margin-top: -2px;"></i>GetFlow Running... (${pad(minutes)}:${pad(seconds)})`);
+                        let timeStr = timeElapsedStr(TRIM.store.currentScenario.getflow_timestamp);
+                        $('#run_getflow').html(`<i class="lds-dual-ring mr-3" style="margin-top: -2px;"></i>GetFlow Running... (${timeStr})`);
                         
                         if (data.logs && data.logs.length > 0) {
                             getflowStatusAlert.html("<b>GetFlow logs</b>");
