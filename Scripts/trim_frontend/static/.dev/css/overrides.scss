@@ -22,14 +22,14 @@ button.btn-character-limit {
   text-overflow: ellipsis;
 }
 
-/* (MIRC) Fix bs-popover arrows... */
+/* Fix bs-popover arrows... */
 .bs-popover-right > .arrow,
 .bs-popover-auto[x-placement^="right"]>.arrow {
-    left: calc(0.5rem * -1 + 1px * -1);
+    left: calc(0.5rem * -1 - 1px);
 }
 .bs-popover-left>.arrow,
 .bs-popover-auto[x-placement^="left"]>.arrow {
-    right: calc(0.5rem * -1 + 1px * -1);
+    right: calc(0.5rem * -1 - 1px);
 }
 
 // Responsive borders

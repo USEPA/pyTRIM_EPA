@@ -161,11 +161,89 @@ def make_report(data):
         'Fish Calculation': data['meta']['fishPathway'],
         'Includes AERMOD Data?': data['meta']['usesAermod']
     }
+    
+    def add_percentile(name):
+        if 'percentiles' not in data['meta']:
+            return
+        pct = data['meta']['percentiles'].get(name)
+        if pct is None:
+            return
+
+        if name == 'body_weight':
+            metadata['Body Weight Percentile'] = pct
+        else:
+            name = name.replace('_', ' ').title()
+            metadata[f'{name} Ingestion Rate Percentile'] = pct
+
+    def get_input(name):
+        if 'other_parameters' not in data['meta']:
+            return None
+        param = [x for x in data['meta']['other_parameters'] if x['variable_name'] == name]
+        if not param:
+            return None
+        return param[0]
+
+    def add_input(name):
+        param = get_input(name)
+        if param is None:
+            return
+
+        name = param['full_name'] or param['variable_name']
+        name = name.replace('<sup>', '^').replace('</sup>', '')
+        name = name.replace('&mu;', 'u')
+
+        metadata[f'{name} Value'] = param['value']
+        metadata[f'{name} Source'] = param['source']
+
+    def find_fish(trophic_level):
+        if 'other_parameters' not in data['meta']:
+            return None
+        param = [
+            x for x in data['meta']['other_parameters']
+            if x['full_name'].startswith(f'Average Concentration in Trophic Level {trophic_level}')
+        ]
+        if not param:
+            return None
+        return param[0]
+
+    add_percentile('body_weight')
+    if (data['meta']['usesAermod']):
+        add_input('Ca')
+        add_input('Fv')
+        add_input('rho_a')
+    add_input('C_water')
+    add_input('C_soil')
+    add_input('C_root_veg')
+    add_input('Kd')
+    add_input('Cs_s')
+    add_input('Cs_root_zone')
+    add_input('Kd_feed')
+    add_input('Drdp')
+    add_input('Drwp')
+    if (data['meta']['fishPathway'].lower() == 'direct'):
+        fish_param = find_fish(3.5)
+        if fish_param:
+            add_input(fish_param['variable_name'])
+            add_input('f_tl35')
+        fish_param = find_fish(4)
+        if fish_param:
+            add_input(fish_param['variable_name'])
+            add_input('f_tl4')
+    else:
+        add_input('C_sed')
+        add_input('f_tl35')
+        add_input('C_surf_water')
+        add_input('FMD')
+        add_input('f_tl4')
+    if 'percentiles' in data['meta']:
+        for pct in data['meta']['percentiles']:
+            if pct not in ['body_weight', 'breast_milk']:
+                add_percentile(pct)
 
     df_meta = pd.DataFrame({
         '': list(metadata.keys()),
         'Value': list(metadata.values())
     })
-    print(df_meta)
+    # print(df_meta)
 
     return [df, df_meta]

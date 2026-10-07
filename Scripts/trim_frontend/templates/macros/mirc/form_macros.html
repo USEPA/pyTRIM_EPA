@@ -59,55 +59,55 @@
 
 {% set default_input_class = "form-control form-control-sm" %}
 
-{% macro render_input(field, class=None, style=None, with_help=True) %}
+{% macro render_input(field, class=None, style=None, with_help=True, force_disabled=False) %}
     {% if field.type == 'BooleanField' %}
-        {{ render_checkbox(field, class=class, style=style, with_help=with_help) }}
+        {{ render_checkbox(field, class=class, style=style, with_help=with_help, force_disabled=force_disabled) }}
     {% elif field.type == 'RadioField' %}
-        {{ render_radio_list(field, class=class, style=style) }}
+        {{ render_radio_list(field, class=class, style=style, force_disabled=force_disabled) }}
     {% elif field.type == 'FileField' %}
-        {{ render_file_field(field) }}
+        {{ render_file_field(field, force_disabled=force_disabled) }}
     {% else %}
         {% set class = (class or '') %}
         {% if 'form-control' not in class %}
             {% set class = class + ' ' + default_input_class %}
         {% endif %}
         {% set style = style or "max-width: 100%;" %}
-        {{ field(class=class, style=style, aria_label="parameter-field") }}
+        {{ field(class=class, style=style, aria_label="parameter-field", disabled=force_disabled) }}
     {% endif %}
 {% endmacro %}
 
 {% set default_checkbox_class = "custom-control custom-checkbox form-check-inline" %}
-{% macro render_checkbox(field, class=None, style=None, with_help=True) %}
+{% macro render_checkbox(field, class=None, style=None, with_help=True, force_disabled=False) %}
     {% set class = (class or '') + ' ' + default_checkbox_class %}
     <div class="{{ class }}">
-        {{ field(class="custom-control-input") }}
+        {{ field(class="custom-control-input", disabled=force_disabled) }}
         {{ field.label(class="custom-control-label") }}
     </div>
 {% endmacro %}
 
 {% set default_radio_class = "custom-control custom-radio" %}
-{% macro render_radio(field, class=None, style=None) %}
+{% macro render_radio(field, class=None, style=None, force_disabled=False) %}
     {% set class = (class or '') + ' ' + default_radio_class %}
     <div class="{{ class }}">
-        {{ field(class="custom-control-input") }}
+        {{ field(class="custom-control-input", disabled=force_disabled) }}
         {{ field.label(class="custom-control-label") }}
     </div>
 {% endmacro %}
 
-{% macro render_radio_list(field, class=None, style=None) %}
+{% macro render_radio_list(field, class=None, style=None, force_disabled=False) %}
     <div>
         {% for opt in field %}
-            {{ render_radio(opt, class=class, style=style) }}
+            {{ render_radio(opt, class=class, style=style, force_disabled=force_disabled) }}
         {% endfor %}
     </div>
 {% endmacro %}
 
 {% set default_file_class = "custom-file" %}
-{% macro render_file_field(field, class=None, style=None) %}
+{% macro render_file_field(field, class=None, style=None, force_disabled=False) %}
     {% set class = class or default_file_class %}
     {% set style = style or "max-width: 100%;" %}
     <div class="{{ class }}">
-        {{ field(class="custom-file-input", style=style) }}
+        {{ field(class="custom-file-input", style=style, disabled=force_disabled) }}
         <label class="custom-file-label form-control-sm" for="{{ field.name }}">
             Choose file
         </label>
