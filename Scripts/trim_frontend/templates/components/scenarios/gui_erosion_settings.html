@@ -1063,7 +1063,13 @@
         function validateField(tbl, fieldName, rowIndexOrInput) {
             function getInputEl(rowIndex) {
                 const dt = tbl.DataTable();
-                return $(dt.cell(rowIndex, fieldName + ':name').node()).find('input')[0];
+                // Convert position (0..n-1) to the internal DataTables row index
+                const rowIdx = dt.rows().indexes()[rowIndexOrInput];
+                if (rowIdx === undefined) {
+                    return undefined;
+                }
+                const node = dt.cell(rowIdx, fieldName + ':name').node();
+                return node ? $(node).find('input')[0] : undefined;
             }
 
             const el = typeof(rowIndexOrInput) == 'number' ? getInputEl(rowIndexOrInput) : rowIndexOrInput;

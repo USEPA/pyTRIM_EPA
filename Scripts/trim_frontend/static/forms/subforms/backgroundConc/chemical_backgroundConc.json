@@ -5,7 +5,7 @@
             "id": "have_input_file",
             "label": "Use concentration values from input file",
             "data_type": "boolean",
-            "default": true,
+            "default": false,
             "help": "Check this box to use initial concentration values from an input file."
         },
         {
