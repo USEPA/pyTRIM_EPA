@@ -388,6 +388,8 @@ def handle_scenario_update(s, scenario_data):
                 s.chemicals.append(chem)
 
     elif field_name == "soil_api":
+        logger.error("Somehow this is being updated on login??")
+        logger.error(scenario_data)
         try:
             ret_val = update_soil_from_api(s, logger)
 
