@@ -70,6 +70,7 @@ class FlaskOauth:
                 'state': session['oauth2_state'],
             }
 
+            self._app.logger.info("Starting OIDC authorization...")
             return redirect(provider['authorize_url'] + '?' + urlencode(query_args))
 
     def get_client_secret(self, secret_id):
