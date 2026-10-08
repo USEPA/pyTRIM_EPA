@@ -1,6 +1,10 @@
-from typing import IO
 import numpy as np
 import pandas as pd
+from shapely import MultiPoint, Point
+from shapely.ops import nearest_points
+from typing import IO
+from trim_core.aermod import AermodReader
+from trim_core.coordinates import CoordinateMapper
 from ..schema.entities.chemicals import Chemical
 from ..schema.entities.environment import Parcel
 from ..schema.utils.caching import CacheManager
@@ -161,19 +165,22 @@ def get_scenario_watershed_matrix(scenario: Scenario, ro_array):
 
 
 AERMOD_UNITS = {
+    'NUM HRS': 'hour',
+    'AVERAGE CONC': 'ug / m^3',
+    'DRY DEPO': 'g / m^2',
+    'WET DEPO': 'g / m^2',
+
     'surfaceDepositionRate': 'g / day',
     'aermodAirConcentration': 'ug / m^3'
 }
 
 
 def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: Chemical, metadata: dict = {}):
-    import pandas as pd
-    from shapely import MultiPoint, Point
-    from shapely.ops import nearest_points
-    from trim_core.aermod import AermodReader
-    from trim_core.coordinates import CoordinateMapper
     from trim_frontend.parcels.utils import update_chemical_formula
 
+    # =====================
+    # Read Raw File
+    # ---------------------
     try:
         df = AermodReader(filestream).as_dataframe()
     except Exception as e:
@@ -182,6 +189,9 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
     # print('>>>>>>>>>> Initial load:')
     # print(df)
 
+    # =====================
+    # Check GRP is valid
+    # ---------------------
     if "GRP" in df.columns.values:
         unique_group_names = df["GRP"].unique()
         if len(unique_group_names) == 1:
@@ -196,7 +206,9 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
     else:
         raise Exception("AERMOD file does not contain required 'GRP' column.")
 
+    # =====================
     # Filter by zflag
+    # ---------------------
     if 'ZFLAG' in df.columns.values:
         zflag_restriction = metadata.get('zflag_restriction')
         if zflag_restriction is not None:
@@ -215,23 +227,29 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
     # print('>>>>>>>>>> ZFLAG filtered:')
     # print(df)
 
-    # drop collocated X,Y receptors while keeping the lowest elevation point
+    # ==============================================================
+    # Drop collocated X,Y receptors, keep lowest elevation point
+    # --------------------------------------------------------------
     df = df.sort_values(['X', 'Y', 'ZELEV']).drop_duplicates(
         ['X', 'Y'], keep='first'
     )
 
-    # remove if NET ID = POLGRID. This does not always work.
-    # We will also need a user restriction to limit
-    # receptors intended for TRIM modeling
-    # – i.e., Cartesian grid with no overlapping receptors
+    # ==============================
+    # Remove if NET ID = POLGRID
+    # ------------------------------
+    # This does not always work. We will also need a user restriction to limit
+    # receptors intended for TRIM modeling – i.e., Cartesian grid with no
+    # overlapping receptors
     df_aermod = df.copy()
     if 'NET ID' in df_aermod.columns:
         df_aermod = df[~df['NET ID'].str.startswith('POLGRID')]
         if df_aermod.empty:
             raise ValueError("AERMOD file has 0 rows remaining after dropping where NET ID starts with POLGRID")
 
+    # ================================================
+    # Convert AERMOD X and Y to WGS84 coordinates.
+    # ------------------------------------------------
     try:
-        # Convert AERMOD X and Y to WGS84 coordinates.
         coord_sys = metadata.get('coordinate_system') or ''
         if coord_sys.upper() == 'UTM':
             utm_zone = metadata['utm_zone']
@@ -246,20 +264,37 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
                 lambda z: coord_mapper.translate(float(z.X), float(z.Y))[1],
                 axis=1
             )
-        else:
+            df_aermod['utm_x'] = df_aermod.X.astype('float')
+            df_aermod['utm_y'] = df_aermod.Y.astype('float')
+
+        else:  # assume WGS
+            coord_mapper = CoordinateMapper('WGS84_LONGLAT', 'UTM')
+            df_aermod['utm_x'] = df_aermod.apply(
+                lambda z: coord_mapper.translate(float(z.X), float(z.Y))[0],
+                axis=1
+            )
+            df_aermod['utm_y'] = df_aermod.apply(
+                lambda z: coord_mapper.translate(float(z.X), float(z.Y))[1],
+                axis=1
+            )
             df_aermod['wgs_x'] = df_aermod.X.astype('float')
             df_aermod['wgs_y'] = df_aermod.Y.astype('float')
+
     except Exception as e:
-        raise Exception(f"Error parsing aermod wgs_x/wgs_y :: {e}")
+        raise Exception(f"Error parsing AERMOD WGS<->UTM :: {e}")
 
     # print('>>>>>>>>>> Mapped coords:')
     # print(df_aermod)
 
+
+    # ================================================
+    # Map receptors to parcels
+    # ------------------------------------------------
     parcels: dict[int, Parcel] = {p.id: p for p in scenario.parcels}
 
-    def get_containing_parcel_id(x, y):
+    def get_containing_parcel_id(wgs_x, wgs_y):
         for p in parcels.values():
-            if p.contains_point(x, y):
+            if p.contains_point(wgs_x, wgs_y):
                 return p.id
         return np.nan
 
@@ -286,60 +321,75 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
         df_aermod['parcel_id'] = df_aermod['parcel_id'].astype(int)
         # add parcel areas (m^2)
         df_aermod['parcel_area'] = df_aermod.parcel_id.apply(
-            lambda p_id: parcels[p_id].area.magnitude
-        )
-
-        pcl_aircomp_data = {}
-        for pcl_id in df_aermod['parcel_id'].astype(int).unique():
-            aircomp = get_compartment(pcl_id, "Air")
-            if aircomp:
-                pcl_aircomp_data[pcl_id] = {"height": aircomp.height, "volume": aircomp.volume}
-            else:
-                pcl_aircomp_data[pcl_id] = {
-                    "height": (0 * scenario.parameters.unit_registry("m")),
-                    "volume": (0 * scenario.parameters.unit_registry("m^3")),
-                }
-
-        df_aermod['air_compartment_height'] = df_aermod.parcel_id.apply(
-            lambda p_id: pcl_aircomp_data[p_id]["height"]
-        )
-        df_aermod['air_compartment_volume'] = df_aermod.parcel_id.apply(
-            lambda p_id: pcl_aircomp_data[p_id]["volume"]
+            lambda p_id: parcels[p_id].area.magnitude  # m^2
         )
     except Exception as e:
         raise Exception(f"Error finding parcels corresponding to sources :: {e}")
 
-    # print('>>>>>>>>>> Added parcel areas & compartment heights:')
+    # print('>>>>>>>>>> Added parcel ids and areas:')
     # print(df_aermod)
 
     if df_aermod.empty:
         raise ValueError("AERMOD file has 0 rows remaining after dropping receptors not mapped to scenario parcel locations")
 
-    def get_distance_to_nearest_neighbor(from_x, from_y, neighbors_df):
-        point = Point(from_x, from_y)  # make a shapely point object of current point of interest
+    # =====================================
+    # Add air compartment-specific data
+    # -------------------------------------
+    try:
+        pcl_aircomp_data = {}
+        for pcl_id in df_aermod['parcel_id'].astype(int).unique():
+            aircomp = get_compartment(pcl_id, "Air")
+            if aircomp:
+                pcl_aircomp_data[pcl_id] = {
+                    "height": aircomp.height.magnitude,  # m
+                    "volume": aircomp.volume.magnitude  # m^3
+                }
+            else:
+                pcl_aircomp_data[pcl_id] = {
+                    "height": 0,  # m
+                    "volume": 0  # m^3
+                }
+        df_aermod['air_compartment_height'] = df_aermod.parcel_id.apply(  # m
+            lambda p_id: pcl_aircomp_data[p_id]["height"]
+        )
+        df_aermod['air_compartment_volume'] = df_aermod.parcel_id.apply(  # m^3
+            lambda p_id: pcl_aircomp_data[p_id]["volume"]
+        )
+    except Exception as e:
+        raise Exception(f"Error joining AERMOD data with air compartments :: {e}")
+
+    # print('>>>>>>>>>> Added air compartment height & volume:')
+    # print(df_aermod)
+
+    # =====================
+    # Calculate flux
+    # ---------------------
+
+    def get_distance_to_nearest_neighbor(from_utm_x, from_utm_y, neighbors_df) -> float:
+        point = Point(from_utm_x, from_utm_y)  # make a shapely point object of current point of interest
         other_points = MultiPoint([
-            Point(x, y) for x, y in zip(neighbors_df.X, neighbors_df.Y)
-            if (x != from_x or y != from_y)
+            Point(x, y) for x, y in zip(neighbors_df.utm_x, neighbors_df.utm_y)
+            if (x != from_utm_x or y != from_utm_y)
         ])
         nearest_point = nearest_points(point, other_points)
-        dist = point.distance(nearest_point[1])  # distance of point of interest to nearest neighbor
-        return dist
+        dist = point.distance(nearest_point[1])  # distance of point of interest to nearest neighbor (m)
+        return dist  # m
 
     try:
         # compute number of days of cumulative
-        ndays = df_aermod['NUM HRS'].loc[1] / 24
+        ndays = df_aermod['NUM HRS'].loc[1] / 24  # hour -> day
         spacing = metadata.get('spacing')
         if spacing == 'Non-Uniform':
             # Compute weighted average of receptors in the parcel
             # using distance of influence of each receptor as weight
-            # First, compute distance to nearest receptor
+            # First, compute distance to nearest receptor (m)
             df_all_coords = pd.DataFrame({
-                'X': df_aermod.wgs_x,
-                'Y': df_aermod.wgs_y
+                'utm_x': df_aermod.utm_x,
+                'utm_y': df_aermod.utm_y
             })
             df_aermod['spacing'] = df_aermod.apply(
-                lambda z: get_distance_to_nearest_neighbor(
-                    from_x=z.wgs_x, from_y=z.wgs_y, neighbors_df=df_all_coords
+                lambda receptor: get_distance_to_nearest_neighbor(  # m
+                    from_utm_x=receptor.utm_x, from_utm_y=receptor.utm_y, neighbors_df=df_all_coords
                 ),
                 axis=1
             )
@@ -347,15 +397,15 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
             dft = df_aermod.copy()  # temp df
             # area of influence of the receptor computed as a square
             # with side equal to distance of nearest receptor
-            dft['rep_area'] = (dft['spacing']) ** 2
+            dft['rep_area'] = (dft['spacing']) ** 2  # m^2
             # first step of weighting by area of influence
             # Calculate (ug) for each receptor volume (m^3)
             dft['weighted_conc'] = dft['AVERAGE CONC'] * dft['rep_area'] * dft['air_compartment_height']  # ug/m^3 * (m^2 * m) = ug
             # Calculate (g) for each receptor area (m^2)
             dft['weighted_dry_depo'] = dft['DRY DEPO'] * dft['rep_area']  # g/m^2 * m^2 = g
             dft['weighted_wet_depo'] = dft['WET DEPO'] * dft['rep_area']  # g/m^2 * m^2 = g
-            # Sum (ug)/(g) by parcel
-            aggdep = dft.groupby(['parcel_id', 'parcel_area', 'air_compartment_height'])[[
+            # Sum by parcel
+            aggdep = dft.groupby(['parcel_id', 'parcel_area', 'air_compartment_height', 'air_compartment_volume'])[[
                 'weighted_conc', 'weighted_dry_depo', 'weighted_wet_depo',
                 'spacing', 'rep_area'
             ]].sum().reset_index()
@@ -370,16 +420,14 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
             aggdep['agg_wet_depo'] = (
                 aggdep['weighted_wet_depo'] / ndays  # g / day
             )
-        else:
-            # Assume uniform spacing
+
+        else:  # Assume uniform spacing
             # Compute flat averages of all receptors in the parcel
             # Calculate average for each parcel (g/m^2)
             aggdep = df_aermod.groupby(['parcel_id', 'parcel_area', 'air_compartment_height'])[[
                 'AVERAGE CONC', 'DRY DEPO', 'WET DEPO'
             ]].mean().reset_index()
-            aggdep['agg_conc'] = (
-                aggdep['AVERAGE CONC']  # ug/m^3
-            )
+            aggdep['agg_conc'] = aggdep['AVERAGE CONC']  # ug/m^3
             # Calculate flux by correcting (g/m^2)
             # by number of days in AERMOD modeling period
             aggdep['agg_dry_depo'] = (
@@ -388,11 +436,16 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
             aggdep['agg_wet_depo'] = (
                 (aggdep['WET DEPO'] / ndays) * aggdep['parcel_area']  # (g/m^2 / day) * m^2 = g/day
             )
+
     except Exception as e:
-        raise Exception(f"Possible grouping error :: {e}")
+        raise Exception(f"Error aggregating data for flux calculation :: {e}")
 
     # print('>>>>>>>>>> Added aggregate deposition:')
     # print(aggdep)
+
+    # =====================
+    # Create results dict
+    # ---------------------
 
     try:
         aggdep = aggdep[[
@@ -408,6 +461,10 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
     # print('>>>>>>>>>> Result JSON:')
     # print(aermod_results.keys())
 
+    # ====================================
+    # Update DB values with AERMOD data
+    # ------------------------------------
+
     def update_aermod_value(parcel: Parcel, target_media: str, target_param: str, aermod_val: float):
         compartment = parcel.get_compartment(
             media=target_media, or_child=False
@@ -418,6 +475,7 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
         if isinstance(compartment, list):
             compartment = compartment[0]
 
+        # print(f'Updating formula: {for_chemical}, {compartment}, {target_param}, {aermod_val}, {AERMOD_UNITS[target_param]}')
         update_chemical_formula(for_chemical, compartment, target_param, aermod_val, AERMOD_UNITS[target_param])
 
     try:
@@ -442,6 +500,10 @@ def import_aermod_to_scenario(scenario: Scenario, filestream: IO, for_chemical: 
                 )
     except Exception as e:
         raise Exception(f"Error parsing aermod formulas :: {e}")
+
+    # =================================
+    # Add file to Scenario metadata
+    # ---------------------------------
 
     try:
         scn_metadata = ScenarioService.get_metadata(scenario)

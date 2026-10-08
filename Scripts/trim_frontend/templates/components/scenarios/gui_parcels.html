@@ -535,7 +535,6 @@ onDomLoad(function () {
             attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community'
         });
 
-
         var Esri_WorldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
             attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
         });
@@ -796,6 +795,102 @@ onDomLoad(function () {
             format: 'image/png'
         });
 
+        const CoordinateSearchControl = L.Control.extend({
+            options: { position: 'topleft' },
+
+            onAdd: function(map) {
+                const container = L.DomUtil.create(
+                    'div',
+                    'leaflet-bar leaflet-control coordinate-search card'
+                );
+                container.innerHTML = `
+                    <div class="coord-search-content card-body p-0" style="overflow-auto">
+                        <div class="input-group">
+                            <div class="">
+                                <button type="button" id="coord-jump" class="btn p-0 border-right"
+                                    style="font-size: unset;"
+                                    title="Jump to lat/lon..."
+                                >
+                                    <i class="fa fa-crosshairs"></i>
+                                </button>
+                            </div>
+                            <input type="text" id="coord-input" class="form-control form-control-sm border-0 border-left"
+                                placeholder="Lat, Lon" title="Example: 47.405,-92.937"
+                                aria-describedby="coord-jump"
+                                style="font-size: 0.8rem; display: none;"
+                            />
+                        </div>
+                    </div>
+                `;
+                // prevent map dragging when interacting
+                L.DomEvent.disableClickPropagation(container);
+                L.DomEvent.disableScrollPropagation(container);
+                return container;
+            }
+        });
+
+        map.addControl(new CoordinateSearchControl());
+
+        const jumpBtn = $('#coord-jump');
+        const jumpField = $('#coord-input');
+        const jumpForm = jumpBtn.closest('.card-body')
+        jumpForm.closest('.card').css({
+            'margin-right': '12px'
+        });
+        jumpBtn.click(function() {
+            if (!jumpForm.data('is-open')) {
+                jumpForm.data('is-open', true);
+                jumpBtn.closest('div').addClass('input-group-prepend');
+                jumpField.show().focus();
+                jumpBtn.html('Go');
+            }
+            else {
+                const latLon = jumpField.val().trim().split(',');
+                if (latLon.length !== 2) {
+                    jumpField[0].setCustomValidity('Must be: latitude,longitude');
+                    jumpField[0].reportValidity();
+                    return;
+                }
+                const lat = parseFloat(latLon[0]);
+                const lon = parseFloat(latLon[1]);
+                if (
+                    isNaN(lat) || isNaN(lon) ||
+                    lat < -90 || lat > 90 || lon < -180 || lon > 180
+                ) {
+                    jumpField[0].setCustomValidity('Invalid coordinates');
+                    jumpField[0].reportValidity();
+                    return;
+                }
+                jumpToCoordinates(lat, lon);
+                jumpField.hide();
+                jumpField.val('');
+                jumpBtn.closest('div').removeClass('input-group-prepend');
+                jumpBtn.html('<i class="fa fa-crosshairs"></i>');
+                jumpForm.data('is-open', false);
+            }
+        });
+        jumpField.change(function(e) {
+            this.setCustomValidity(''); // clear custom error
+        });
+
+        function jumpToCoordinates(lat, lon) {
+            const jumpMarker = L.marker([lat, lon])
+                .addTo(map)
+                .bindPopup(
+                    `${lat.toFixed(5)}, ${lon.toFixed(5)}`
+                )
+                .openPopup();
+            setTimeout(() => {
+                try {
+                    map.removeLayer(jumpMarker);
+                }
+                catch (err) {
+                    // nothing to do
+                }
+            }, 1150);
+            map.setView([lat, lon], 13); // do the actual jump
+        }
+
         map.pm.addControls({
             position: 'topleft',
             drawMarker: false,
@@ -882,121 +977,14 @@ onDomLoad(function () {
             }
         }
 
-        map.on('pm:drawstart', function (e) {
-            var layer = e.workingLayer;
-
-            /*
-            // not used anymore; was used when we had implemented "disable snap to segments after first vertex placed". That's
-            // since been abandoned in favor of providing controls to let users toggle vertex/segment snapping manually.
-                layer.on('pm:vertexadded', function(e) {
-                // e includes the new vertex, it's marker
-                // the index in the coordinates array
-                // the working layer and shape
-
-                    // map.pm.setGlobalOptions({ snapSegment: false });
-                });
-            */
-
-            /*
-            layer.on('pm:snap', function(e) {
-                if (e.layerInteractedWith.feature !== undefined) {
-                    console.log("DEBUGME DRAWING snap (to " + e.layerInteractedWith.feature.properties.name + ")!");
-                } else {
-                    console.log("DEBUGME DRAWING snap (to myself)!");
-                }
-                // console.log(e);
-            });
-            */
-        });
-
-        map.pm.enableDraw(
-            'Polygon', {
-            snappable: true,
-            snapSegment: getSmartSnapSetting("segments"),
-            snapVertex: getSmartSnapSetting("vertices"),
-            allowSelfIntersection: false
-        }
-        );
-
-        // experimental function -- can we check/warn about gaps/overlap? The snap changes help
-        /*
-        function checkVerticesDebug(parcelName) {
-            console.log("checkVerticesDebug '" + parcelName + "'");
-            let p = null;
-            let otherParcels = [];
-            for (let i = 0 ; i < TRIM.store.currentScenario.parcels.length ; i++) {
-                if (TRIM.store.currentScenario.parcels[i].name == parcelName) {
-                    p = TRIM.store.currentScenario.parcels[i];
-                } else {
-                    otherParcels.push(TRIM.store.currentScenario.parcels[i]);
-                }
-            }
-
-            if (p != null) {
-                console.log("check: " + JSON.stringify(p.vertices));
-                for (let i = 0 ; i < p.vertices.length - 1 ; i++) {
-                    let v = p.vertices[i];
-
-                    if (i == 0) {
-                        let lastV = p.vertices[p.vertices.length - 1];
-                        if (v[0] == lastV[0] && v[1] == lastV[1]) {
-                            console.log("polygon looks closed...");
-                        } else {
-                            console.log("polygon looks not closed!");
-                        }
-                    }
-
-                    console.log("consider point [" + i + "]: " + v);
-                    let matchFound = false;
-                    for (let otherParcelIdx = 0 ; !matchFound && otherParcelIdx < otherParcels.length ; otherParcelIdx++) {
-                        let otherP = otherParcels[otherParcelIdx];
-                        console.log("  compare against vertices of '" + otherP.name + "'...");
-
-                        for (let k = 0 ; !matchFound && k < otherP.vertices.length - 1 ; k++) {
-                            let otherV = otherP.vertices[k];
-                            console.log("    compare against vertex [" + k + "]: " + otherV);
-                            if (v[0] == otherV[0] && v[1] == otherV[1]) {
-                                console.log("EXACT VERTEX MATCH!!!!!!");
-                                matchFound = true;
-                            }
-                        }
-                    }
-
-                    if (!matchFound) {
-                        console.log("no vertex match found; now let's try lines...");
-                        for (let otherParcelIdx = 0 ; !matchFound && otherParcelIdx < otherParcels.length ; otherParcelIdx++) {
-                            let otherP = otherParcels[otherParcelIdx];
-                            console.log("  compare against lines of '" + otherP.name + "'...");
-
-                            for (let k = 0 ; !matchFound && k < otherP.vertices.length - 1 ; k++) {
-                                let otherStartVertex = otherP.vertices[k];
-                                let otherEndVertex = otherP.vertices[k+1];
-                                console.log("    compare against line [" + k + "]: " + otherStartVertex + " -> " + otherEndVertex);
-                                let pt = turf.point(v);
-                                let line = turf.lineString([otherStartVertex, otherEndVertex]);
-                                let isPointOnLine = turf.booleanPointOnLine( pt, line, { epsilon: 5e-8 });
-
-                                if (isPointOnLine) {
-                                    console.log("SEGMENT MATCH!!!!!!");
-                                    matchFound = true;
-                                } else {
-                                    if (turf.booleanPointOnLine( pt, line, { epsilon: 0.25 })) {
-                                        console.log("SECOND LEVEL CHECK MATCH!");
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (!matchFound) {
-                        console.log("STILL NO MATCH AFTER CHECKING LINES...");
-                    }
-                }
-            } else {
-                console.log("couldnt find it...");
-            }
-        };
-        */
+        // map.pm.enableDraw(
+        //     'Polygon', {
+        //     snappable: true,
+        //     snapSegment: getSmartSnapSetting("segments"),
+        //     snapVertex: getSmartSnapSetting("vertices"),
+        //     allowSelfIntersection: false
+        // }
+        // );
 
         // CREATING A NEW PARCEL //
         shapes = L.geoJSON()
@@ -1557,7 +1545,6 @@ onDomLoad(function () {
             }
         });
     });
-
 
     function retrieveSavedParcels() {
         parcels.clearLayers();
