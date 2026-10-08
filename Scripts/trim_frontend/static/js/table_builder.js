@@ -19,15 +19,9 @@ function scientific(val) { // to scientific notation
 
 function abiotic_DT($tableId, table_data, _columns, callback) {
     function columnAdjustments(dt) {
-        dt.api().columns().header().to$().attr('scope', 'col');
-
-        $('.dataTable tr').attr('role', 'row')
-
         $('.dt-scroll-body').css({"max-height": "500px", "height": "100%"});
         $(".dt-scroll-body").addClass('wrap-text-scrollbody');
         $(".dt-scroll-head").addClass('wrap-text-scrollhead');
-        $('[data-toggle="tooltip"]').tooltip()
-        $('[data-toggle="popover"]').popover()
     }
 
     let apTable = $($tableId).removeAttr('width').dataTable({
@@ -54,6 +48,13 @@ function abiotic_DT($tableId, table_data, _columns, callback) {
     });
 
     return apTable;
+}
+
+function updateDataTable508c($form) {
+    $form.find('div[role="table"]').removeAttr('role')
+    $form.find('table').attr("role", "table")
+    $form.find('table th').attr("role", "columnheader")
+    $form.find('table tr').attr("role", "row")
 }
 
 

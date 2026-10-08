@@ -15,7 +15,7 @@
                     <ul>
                         <li>Surface Soil Properties: pH</li>
                         <li>Note that selecting <b>Load from USDA Soil DataMart</b> 
-                            will retrieve site-specific values Fraction Sand, Organic Carbon Fraction, pH, and Water Content 
+                            will retrieve site-specific values of Fraction Sand, Organic Carbon Fraction, pH, and Water Content 
                             for the following, where available:
                             <ul>
                                 <li>Surface Soil Properties</li>
@@ -23,7 +23,7 @@
                                 <li>Vadose Zone Properties </li>
                                 
                             </ul>
-                            As well as site-specific values Fraction Sand, Organic Carbon Fraction, and pH 
+                            As well as site-specific values of Fraction Sand, Organic Carbon Fraction, and pH 
                             for the following, where available:
                             <ul>
                                 <li>Groundwater Zone Properties</li>
@@ -568,29 +568,9 @@
 
             addMercuryCols(gw_tblId, gwTblCols, render_function_soil, 'Groundwater');
 
-            gw_apTable =  $(gw_tblId).removeAttr('width').dataTable({
-                destroy: true,
-                data: table_data,
-                paging: false,
-                bFilter: false,
-                info: false,
-                scrollX: true,
-                scrollY: 500,
-                bAutoWidth: false,
-                fnCreatedRow: function (row, data, index) {
-                    $(row).find("td.rightBorder").addClass("freeze-column")
-                },
-                columns: setDynamicColumnWidths(gw_tblId, gwTblCols, table_data),
-                initComplete: function (settings, json) {
-                    // $(gw_tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
-                    $(".dt-scroll-body").css({"max-height": "500px", "height": "100%"});
-                    $(".dt-scroll-body").addClass('wrap-text-scrollbody');
-                    $(".dt-scroll-head").addClass('wrap-text-scrollhead');
-                    appendHeaderOptions(this, skip_columns=["Parcel Name"]);
-                    $('[data-toggle="tooltip"]').tooltip()
-                    $('[data-toggle="popover"]').popover()
-                }
-            });
+            gw_apTable = abiotic_DT(gw_tblId, table_data, gwTblCols, (thisTable, dt) => {
+                appendHeaderOptions(dt, skip_columns=["Parcel Name"]);
+            })
 
             let sort_order = "asc"
             $('.sortClass').click(function(e){
@@ -636,6 +616,11 @@
                     submit_abiotic_cell(focusTblId, this, data);
                 }
             })
+
+            $('#abiotic-props-gui [data-toggle="tooltip"]').tooltip();
+            $('#abiotic-props-gui [data-toggle="popover"]').popover();
+
+            updateDataTable508c($('#abiotic-props-gui'));
         }
 
         function create_parcel_object(id, row, data, comp_name=undefined){
@@ -755,9 +740,24 @@
             })
         }
 
+        function handleUsdaPolling() {
+            let timeStr = timeElapsedStr(TRIM.store.currentScenario.abiotic_usda_timestamp);
+
+            const usdaBtn = $("#abiotic-usda-soil-btn");
+            if (!usdaBtn.prop('disabled')) {
+                usdaBtn.prop('disabled', true);
+            } 
+            usdaBtn.text(`Loading from USDA Soil DataMart... (${timeStr})`);
+            usdaBtn.prepend("<span class='lds-dual-ring mr-3'>");
+        }
+
         $("#abiotic-usda-soil-btn").on('click', (e) => {
             e.preventDefault();
-            LoadingScreen.show("update_soil_data")
+
+            TRIM.store.currentScenario.abiotic_usda_timestamp = new Date().getTime();
+            handleUsdaPolling();
+            TRIM.store.currentScenario.abiotic_usda_interval_id = setInterval(handleUsdaPolling, 3000);
+
             scenario_info = [{
                 'type': 'data',
                 'name': 'id',
@@ -772,7 +772,10 @@
                 'value': true
             }]
             TRIM.api.updateScenario(scenario_info).on('load', function() {
-                LoadingScreen.hide('update_soil_data');
+                if (this.responseJSON) {
+                    alert(this.responseJSON);
+                }
+                clearInterval(TRIM.store.currentScenario.abiotic_usda_interval_id);
                 setTimeout(() => {
                     $('#save-btn').click();
                 }, 1000);

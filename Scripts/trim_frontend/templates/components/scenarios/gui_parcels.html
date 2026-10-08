@@ -1,7 +1,7 @@
 <form id="parcels-gui" data-async-form="true" data-form-src="scenario_parcels_form">
     <section class="container px-0">
         {% call data_preamble('parcels') %}
-        <p>Click on the table cells to edit properties. All editable cells are required.</p>
+        <p>Click on the table cells to edit properties. All editable cells (as well as fields indicated by <span style="color: firebrick;">*</span>) are required.</p>
         <p>
             Parcels can either be drawn on the map or loaded from an input file. 
             For uploading .geojson files, the <span class="UpArrowBar" style="font-size: 1.5em;">⤒</span> button on the map
@@ -1630,7 +1630,7 @@ onDomLoad(function () {
         map_cols = [
             {
                 data: "properties.name",
-                'bWidth': '15rem',
+                'bWidth': '12rem',
                 render: function (data, type, row) {
                     return "<input class='editableCell form-control form-control-sm' type='text' value='" + data + "' style='display:none'>" +
                         "<label>" + data + "</label>"
@@ -1639,7 +1639,7 @@ onDomLoad(function () {
             },
             {
                 data: "properties.desc",
-                'bWidth': '5rem',
+                'bWidth': '8rem',
                 render: function (data, type, row) {
                     let parcel_info = [{
                         'type': 'data',
@@ -1869,8 +1869,9 @@ onDomLoad(function () {
                 $(".dt-scroll-body").addClass('wrap-text-scrollbody');
                 $(".dt-scroll-head").addClass('wrap-text-scrollhead');
 
-                $('table[aria-describedby="mapTable_info"]').removeAttr("aria-describedby");
-                this.api().columns().header().to$().attr('scope', 'col');
+                // 508c
+                updateDataTable508c($('#parcels-gui'));
+                $('[aria-describedby="mapTable_info"]').removeAttr("aria-describedby");
 
                 $("[data-toggle=popover]").popover();
                 $('[data-toggle="tooltip"]').tooltip();

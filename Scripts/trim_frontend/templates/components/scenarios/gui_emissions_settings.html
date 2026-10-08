@@ -7,6 +7,7 @@
 >
     <section class="container px-0">
         {% call data_preamble('emissions') %}
+        <p>Fields indicated by <span style="color: firebrick;">*</span> are required.</p>
         <p>Click on the table cells to edit properties.</p>
         <p>At least one chemical must be selected. For each chemical, at least one compartment must receive an emission value above 0.</p>
         {% endcall %}
@@ -619,7 +620,8 @@
                 <span class="emissions-file-icon" data-toggle="tooltip" title="${title}">
                     <span class="position-relative d-inline-block ml-1">
                         <i class="fa fa-file text-success"></i>
-                        <span style="position:absolute; top:50%; left:50%; transform:translate(-50%,-40%); color:white; font-size:9px; font-weight:bold; pointer-events:none;">
+                        <span style="position:absolute; top:50%; left:50%; transform:translate(-50%,-40%); pointer-events:none;
+                        color:white; font-size:12px; font-weight:bold;" class="bg-success">
                             ${file_text}
                         </span>
                     </span>

@@ -359,6 +359,7 @@ def handle_scenario_update(s, scenario_data):
 
     elif field_name == "chemical": # emission settings, add/remove chemicals from a scenario
         opt = scenario_data["operation"]
+        emissions_metadata = ScenarioService.get_metadata(s).get("emissions", {})
 
         # group all mercuries
         if 'Mercury' in scenario_data["chemical"] and opt in ['add', 'remove']:
@@ -376,12 +377,19 @@ def handle_scenario_update(s, scenario_data):
             elif chem in s.chemicals and opt == 'remove':
                 reset_emissions_and_concentrations(s, chem)
                 s.chemicals.remove(chem)
+
+                # update scenario file tracking metadata
+                for _e in list(emissions_metadata.keys()):
+                    if f"{chem.name}_" in _e:
+                        del emissions_metadata[_e]
+                ScenarioService.get_metadata(s)["emissions"] = emissions_metadata
+                ParameterService.commit()
             elif chem not in s.chemicals and opt == 'add':
                 s.chemicals.append(chem)
 
     elif field_name == "soil_api":
         try:
-            update_soil_from_api(s, logger)
+            ret_val = update_soil_from_api(s, logger)
 
             metadata = ScenarioService.get_metadata(s)
             metadata["abiotic_usda"] = True
@@ -615,6 +623,9 @@ def meteo_wgt_avg_value_from_timeseries(par_dat, param_type):
         # Ignored hour resolution.
         df_met['DT'] = list(pd.to_datetime(df_met[['Year', 'Month', 'Day']], errors='coerce'))
 
+    if len(df_met) == 0:
+        raise ValueError("0 rows remaining after filtering for out of bounds data")
+
     df_met.sort_values(by='DT', inplace=True)
     df_met['date_delta'] = (df_met['DT'] - df_met['DT'].min()) / np.timedelta64(1, 'D')
     df_met['time_delta'] = df_met['date_delta'].diff()
@@ -732,7 +743,8 @@ def update_soil_from_api(s, logger):
 
     sd = SoilData(vert_dict=parcels, pcl_layers=parcel_layers)
     sd.run()
-    
+
+    errors = []
     for pcl_name, is_tilled in parcel_tillage.items():
         logger.info(f"Calculating layer values for [{pcl_name}]")
         pcl = ParcelService.get(name=pcl_name, scenario_id=s.id)
@@ -743,9 +755,12 @@ def update_soil_from_api(s, logger):
 
         if not soil_data:
             logger.info(f"No soil data found, skipping...")
+            errors.append(f"No soil data retrieved for parcel {pcl_name}")
             continue
 
         calculate_layer_vals(pcl, soil_data, "surface")
         calculate_layer_vals(pcl, soil_data, "root")
         calculate_layer_vals(pcl, soil_data, "vadose")
         calculate_layer_vals(pcl, soil_data, "gw")
+
+    return "\n".join(errors)

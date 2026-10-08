@@ -65,14 +65,14 @@
                             <p>Organism definitions:</p>
                             <ul>
                                 <li>Algae is modeled as the algal phase of surface water.</li>
-                                <li>Macrophyte include hydrilla and milfoil.</li>
-                                <li>Zooplankton include water fleas, rotifers, and protozoans.</li>
-                                <li>Benthic invertebrates include aquatic insects (e.g., nymphs of mayflies, caddisflies, dragonflies, and other species that emerge from the water when they become adults), crustaceans (e.g., amphipods, crayfish), and mollusks (e.g., snails, mussels).</li>
-                                <li>Water column herbivore include young-of-the-year minnows.</li>
-                                <li>Benthic omnivore include small catfish and rock bass.</li>
-                                <li>Water column omnivore include bluegill and white perch.</li>
-                                <li>Benthic carnivore include large catfish and sculpins.</li>
-                                <li>Water column carnivore include largemouth bass and walleye.</li>
+                                <li>Examples of macrophytes would be hydrilla and milfoil.</li>
+                                <li>Examples of zooplankton would be water fleas, rotifers, and protozoans.</li>
+                                <li>Examples of benthic invertebrates would be aquatic insects (e.g., nymphs of mayflies, caddisflies, dragonflies, and other species that emerge from the water when they become adults), crustaceans (e.g., amphipods, crayfish), and mollusks (e.g., snails, mussels).</li>
+                                <li>An example of water column herbivores would be young-of-the-year minnows.</li>
+                                <li>Examples of benthic omnivores would be small catfish and sculpins.</li>
+                                <li>Examples of water column omnivores would be bluegill and white perch.</li>
+                                <li>Examples of benthic carnivores would be large catfish and sculpins.</li>
+                                <li>Examples of water column carnivores would be largemouth bass and walleye.</li>
                             </ul>
                         </li>
                         <li>
@@ -236,10 +236,12 @@
                                 $(this).appendTo($label);
                             }
                         });
-                        $('[data-toggle="tooltip"]').tooltip()
-                        $('[data-toggle="popover"]').popover()
+                        $('#aquatic-food-web-props-gui [data-toggle="tooltip"]').tooltip()
+                        $('#aquatic-food-web-props-gui [data-toggle="popover"]').popover()
 
-                        $(".dt-column-title").css({"overflow-wrap": "anywhere"});
+                        $("#aquatic-food-web-props-gui .dt-column-title").css({"overflow-wrap": "anywhere"});
+
+                        updateDataTable508c($('#aquatic-food-web-props-gui'));
                     },
                     language: {
                         emptyTable: 'No data available in table'

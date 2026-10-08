@@ -3,6 +3,8 @@
 -- schema
 -- SET search_path TO trim;
 
+BEGIN TRANSACTION;
+
 CREATE TABLE alembic_version (
     version_num VARCHAR(32) NOT NULL, 
     CONSTRAINT alembic_version_pkc PRIMARY KEY (version_num)
@@ -242,7 +244,7 @@ CREATE TABLE mirc_scenario (
     is_builtin BOOLEAN NOT NULL, 
     notes VARCHAR(800), 
     parent_id INTEGER,  
-    FOREIGN KEY(parent_id) REFERENCES mirc_scenario (id), 
+    FOREIGN KEY(parent_id) REFERENCES mirc_scenario (id)
 );
 
 CREATE TABLE mirc_scenario_permissions (
@@ -362,3 +364,5 @@ CREATE TABLE mirc_simulation_percentile (
 );
 
 INSERT INTO alembic_version (version_num) VALUES ('e5524555573a');
+
+COMMIT;

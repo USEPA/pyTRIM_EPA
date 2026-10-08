@@ -70,6 +70,7 @@ class FlaskOauth:
                 'state': session['oauth2_state'],
             }
 
+            self._app.logger.info("Starting OIDC authorization...")
             return redirect(provider['authorize_url'] + '?' + urlencode(query_args))
 
     def get_client_secret(self, secret_id):
@@ -120,6 +121,8 @@ class FlaskOauth:
                 return redirect(url_for('scenario.view_scenarios'))
 
             try:
+                self._app.logger.info("Start of OIDC callback")
+
                 if request.args['state'] != session.get('oauth2_state'):
                     raise Exception("State did not match stored session")
 
@@ -163,6 +166,7 @@ class FlaskOauth:
                     self._security.datastore.commit()
                     user = self._security.datastore.find_user(email=email)
 
+                self._app.logger.info(f"Logging in...")
                 login_user(user)
                 return redirect(url_for('scenario.view_scenarios'))
             except Exception as e:

@@ -9,7 +9,7 @@
         <div class="row mb-3">
             <div class="col">
                 {% call data_preamble('erosion') %}
-                <p>Click on the table cells to edit properties. All editable cells are required.</p>
+                <p>Click on the table cells to edit properties. All editable cells (as well as fields indicated by <span style="color: firebrick;">*</span>) are required.</p> 
                 <p>A cell may appear grayed and crossed out, indicating that other fields are active and are directly used in calculating the value in that cell. If you update a value in a grayed and crossed out cell, then the other fields that can be used to calculate it will become grayed and crossed out, indicating they are no longer being used because you have provided an overriding value.</p>
                 <p>
                     Recommended to receive site-specific values, if available:
@@ -289,11 +289,24 @@
                 }
             };
 
+            function handleUsdaPolling() {
+                let timeStr = timeElapsedStr(TRIM.store.currentScenario.erosion_usda_timestamp);
+                
+                if (!usdaBtn.prop('disabled')) {
+                    usdaBtn.prop('disabled', true);
+                } 
+                usdaBtn.text(`Loading USDA Soil Data... (${timeStr})`);
+                usdaBtn.prepend("<span class='lds-dual-ring mr-3'>");
+            }
+
             function getUsdaSoilData() {
-                usdaBtn.prepend("<span class='lds-dual-ring mr-2'>");
-                usdaBtn.prop('disabled', true);
+                TRIM.store.currentScenario.erosion_usda_timestamp = new Date().getTime();
+                handleUsdaPolling();
+                TRIM.store.currentScenario.erosion_usda_interval_id = setInterval(handleUsdaPolling, 3000);
+
                 TRIM.api.getSoilData('notill').on('load', function() {
                     try{
+                        clearInterval(TRIM.store.currentScenario.erosion_usda_interval_id);
                         updateUsdaSoilData(JSON.parse(this.responseText));
                         TRIM.api.updateScenarioMetadata(TRIM.store.currentScenario, checkForUSDA);
                     } catch (err) {
@@ -301,6 +314,7 @@
                     } finally {
                         usdaBtn.find('.lds-dual-ring').remove();
                         usdaBtn.attr('disabled', false);
+                        usdaBtn.html(`<i class="fa fa-cloud-download-alt mr-1"></i>Load USDA Soil Data`);
                     }
                 });
             }
@@ -1036,7 +1050,8 @@
                         $(row).attr('data-parcel-id', data.parcel_id);
                     },
                     initComplete: function (settings, json) {
-                        this.api().columns().header().to$().attr('scope', 'col');
+                        updateDataTable508c($('#erosion-settings-gui'));
+                        $('[aria-describedby^="erosionTable_"]').removeAttr("aria-describedby");
                     },
                     drawCallback: (settings) => {
                         globalDrawCallback(tbl);

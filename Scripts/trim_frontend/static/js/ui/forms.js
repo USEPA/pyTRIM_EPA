@@ -561,6 +561,10 @@ window.TRIM = (function(trim) {
 
         var remBtn = newTab.querySelector(
             '[data-fieldlist-rem][href="#remove-' + newTab.id + '"]');
+
+        remBtn.setAttribute("role", "button");
+        remBtn.setAttribute("tabindex", "0");
+
         var minEntries = fieldset.getAttribute('data-min-entries');
         if (values.length >= parseInt(minEntries)) {
             remBtn.parentElement.style.display = '';

@@ -148,16 +148,14 @@
                     $(row).find("td.rightBorder").addClass("freeze-column")
                 },
                 initComplete: function (settings, json) {
-                    // $(tblId).wrap("<div style='overflow:auto; width: 100%; position:relative;'></div>");
-                    this.api().columns().header().to$().attr('scope', 'col');
                     $(".dt-scroll-body").css({"max-height": "500px", "height": "100%"});
                     $(".dt-scroll-body").addClass('wrap-text-scrollbody');
                     $(".dt-scroll-head").addClass('wrap-text-scrollhead');
-                    $('[data-toggle="tooltip"]').tooltip()
-                    $('[data-toggle="popover"]').popover()
 
-                    $(".dt-column-title").css({"overflow-wrap": "anywhere"});
+                    $("#surface-runoff-gui .dt-column-title").css({"overflow-wrap": "anywhere"});
                     this.api().columns.adjust();
+
+                    updateDataTable508c($("#surface-runoff-gui"))
                 }
             });
 
@@ -441,14 +439,8 @@
                     }
                     else {
                         TRIM.store.currentScenario.getflow_timestamp = TRIM.store.currentScenario?.getflow_timestamp || new Date().getTime();
-                        let time_elapsed = new Date().getTime() - TRIM.store.currentScenario?.getflow_timestamp;
-                        let seconds = Math.floor(time_elapsed / 1000);
-                        let minutes = Math.floor(seconds / 60);
-                        seconds = seconds % 60;
-                        minutes = minutes % 60;
-
-                        const pad = (n) => String(n).padStart(2, '0');
-                        $('#run_getflow').html(`<i class="lds-dual-ring mr-3" style="margin-top: -2px;"></i>GetFlow Running... (${pad(minutes)}:${pad(seconds)})`);
+                        let timeStr = timeElapsedStr(TRIM.store.currentScenario.getflow_timestamp);
+                        $('#run_getflow').html(`<i class="lds-dual-ring mr-3" style="margin-top: -2px;"></i>GetFlow Running... (${timeStr})`);
                         
                         if (data.logs && data.logs.length > 0) {
                             getflowStatusAlert.html("<b>GetFlow logs</b>");
@@ -503,14 +495,7 @@
             // Define row headers as sender parcel names
             let columns = [{
                 'data': 'sender',
-                'title': '<table><tbody><tr id="ROHead">' +
-                    '<td style="border-bottom: 0px; padding: 0px">receiver <i class="fa fa-arrow-right"></i></td>' +
-                    '<td style="border-bottom: 0px; padding: 0px"></td>' +
-                    '</tr>' +
-                    '<tr>' +
-                    '<td style="border-bottom: 0px; padding: 0px">sender <i class="fa fa-arrow-down"></i></td>' +
-                    '<td style="border-bottom: 0px; padding: 0px"></td>' +
-                    '</tr></tbody></table>',
+                'title': `receiver <i class="fa fa-arrow-right"></i></br>sender <i class="fa fa-arrow-down"></i>`,
                 'bSortable': false,
                 'className': 'font-weight-bold rightBorder freeze-column runoff-matrix-corner-header'
             }]

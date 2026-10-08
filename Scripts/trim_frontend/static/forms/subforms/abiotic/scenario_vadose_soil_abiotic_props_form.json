@@ -46,9 +46,9 @@
       "id": "FractionSand",
       "label": "Fraction Sand",
       "data_type": "float",
-      "default": 0.25,
+      "default": 0.35,
       "tooltip": "unitless",
-      "help": "Enter the fraction of the soil layer that is sand. Valid values are 0 to 1. The default value of 0.25 is professional judgment. Typical sources of site-specific values include the U.S. Department of Agriculture's Web Soil Survey (Soil Survey Staff, Natural Resources Conservation Service, United States Department of Agriculture. Web Soil Survey. Available online at https://websoilsurvey.nrcs.usda.gov/.)."
+      "help": "Enter the fraction of the soil layer that is sand. Valid values are 0 to 1. The default value of 0.35 is professional judgment. Typical sources of site-specific values include the U.S. Department of Agriculture's Web Soil Survey (Soil Survey Staff, Natural Resources Conservation Service, United States Department of Agriculture. Web Soil Survey. Available online at https://websoilsurvey.nrcs.usda.gov/.)."
     },
     {
       "id": "OrganicCarbonContent",
