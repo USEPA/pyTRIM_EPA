@@ -1164,6 +1164,7 @@ onDomLoad(function () {
             function (btn, map) {
                 var input = document.createElement('input');
                 input.type = 'file';
+                input.accept = ".geojson";
 
                 input.onchange = e => {
 
