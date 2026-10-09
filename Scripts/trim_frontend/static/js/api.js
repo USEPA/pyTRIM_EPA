@@ -347,8 +347,15 @@ window.TRIM = (function(trim) {
         });
     };
 
-    api.getParcels = function(scenarioId) {
+    api.getParcels = function(scenarioId, pclFilter) {
         var url = api.getUrl('parcels_api.get');
+
+        if (Array.isArray(pclFilter) && pclFilter.length) {
+            pclFilter = pclFilter.join(",");
+            var qry = `&parcels=${encodeURIComponent(pclFilter)}`;
+            url += (url.indexOf('?') === -1 ? '?' : '&') + qry;
+        }
+
         return AJAX.call({
             url: url.replace('/0/', '/' + scenarioId + '/')
         });

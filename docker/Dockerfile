@@ -30,7 +30,7 @@ ARG PYTRIM_BUILD_PLATFORM="linux/amd64"
 # FROM python:3.11-alpine as builder
 # FROM --platform=linux/amd64 python:3.11-alpine AS builder
 # FROM --platform=${PYTRIM_BUILD_PLATFORM} python:3.11-alpine
-FROM --platform=${PYTRIM_BUILD_PLATFORM} qgis/qgis:4.2-trixie
+FROM --platform=${PYTRIM_BUILD_PLATFORM} qgis/qgis:4.2-questing
 
 # Set environment variables for QGIS
 ENV QGIS_PREFIX_PATH=/usr
@@ -54,8 +54,9 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y git \
 # install TRIM specific packages
 RUN /app/runmodel_venv/bin/pip install -r /tmp/requirements.txt
 
-# don't need this normally - but useful if we want to connect and mess around...
-# RUN apt install -y vim
+# pip is not needed at runtime; dropping it removes its vendored libs
+RUN /app/runmodel_venv/bin/pip uninstall -y pip
+
 
 # copy Trim source code in
 COPY temp/ /app/pytrim_runmodel_src/

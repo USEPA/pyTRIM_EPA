@@ -237,7 +237,7 @@ onDomLoad(function () {
 
     var parcelsReadyEvent = document.createEvent('Event');
     parcelsReadyEvent.initEvent('parcels:ready', true, true);
-    TRIM.refreshParcels = function (force) {
+    TRIM.refreshParcels = function (force, withFilter) {
         // console.log("refreshing parcels (" + force + ")...");
 
         force = force || false;
@@ -247,10 +247,19 @@ onDomLoad(function () {
         }
         LoadingScreen.show('refreshing_parcels');
         DREW_MAP = false;
-        TRIM.api.getParcels('{{ scenario.id }}').on('load', function () {
+        TRIM.api.getParcels('{{ scenario.id }}', withFilter).on('load', function () {
             var parcelData = JSON.parse(this.responseText);
-            TRIM.store.currentScenario.parcels = parcelData.parcels;
-            TRIM.store.currentScenario.standardMedia = parcelData.media;
+
+            // only update for filtered parcels
+            if (force && withFilter !== undefined) {
+                for (const pcl of parcelData.parcels) {
+                    const thisPcl = getParcelByKey('name', pcl.name);
+                    Object.assign(thisPcl, pcl);
+                }
+            } else {
+                TRIM.store.currentScenario.parcels = parcelData.parcels;
+                TRIM.store.currentScenario.standardMedia = parcelData.media;
+            }
             document.body.dispatchEvent(parcelsReadyEvent);
             LoadingScreen.hide('refreshing_parcels');
         });

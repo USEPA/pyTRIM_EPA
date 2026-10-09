@@ -7,7 +7,7 @@ ARG PYTRIM_GETFLOW_BUILD_PLATFORM="linux/amd64"
 # start with QGIS image
 # FROM qgis/qgis
 # FROM --platform=linux/amd64 qgis/qgis
-FROM --platform=${PYTRIM_GETFLOW_BUILD_PLATFORM} qgis/qgis:4.2-trixie
+FROM --platform=${PYTRIM_GETFLOW_BUILD_PLATFORM} qgis/qgis:4.2-questing
 
 # Set environment variables for QGIS
 ENV QGIS_PREFIX_PATH=/usr
@@ -36,6 +36,9 @@ RUN apt-get update && apt-get upgrade -y \
       && rm -rf /var/lib/apt/lists/*
 
 RUN /app/getflow_venv/bin/pip install -r /tmp/requirements.txt
+
+# pip is not needed at runtime; dropping it removes its vendored libs
+RUN /app/getflow_venv/bin/pip uninstall -y pip
 
 
 # copy getflow src, supporting .tif, etc. in;
