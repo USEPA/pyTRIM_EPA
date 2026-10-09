@@ -121,9 +121,17 @@ def update_parcel(id, scenario_id):
         if p.scenario.id != s.id:
             raise ApiException('Unknown Parcel')
         parcels_data = request.form.to_dict()
+        fields = request.form.getlist('field') or []  # Can set more than one field
 
         rv = None
-        rv = handle_parcel_update(p, parcels_data)
+        if len(fields) == 1:
+            rv = handle_parcel_update(p, parcels_data)
+        else:
+            rv = {}
+            for field_name in fields:
+                field_data = {**parcels_data, 'field': field_name}
+                rv[field_name] = handle_parcel_update(p, field_data)
+            rv = ApiResult({'message': 'success', **rv})
 
         if rv is not None:
             return rv

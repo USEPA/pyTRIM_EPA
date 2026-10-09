@@ -577,7 +577,7 @@
                 };
                 // check if displayed values are correct and update NaNs if not
                 // (can get unsynced if an equation is partially filled in -- e.g., a=# but b=NaN)
-                recalculateErosionRate(2, pclOpt2Data, activeField2, false);
+                recalculateErosionRate(2, pclOpt2Data, activeField2);
                 data2.push(pclOpt2Data);
 
                 ////////////////////////
@@ -652,7 +652,7 @@
                 };
                 // check if displayed values are correct and update NaNs if not
                 // (can get unsynced if an equation is partially filled in -- e.g., S=# but L=NaN)
-                recalculateErosionRate(3, pclOpt3Data, activeField3, false);
+                recalculateErosionRate(3, pclOpt3Data, activeField3);
                 data3.push(pclOpt3Data);
             }
 
@@ -988,34 +988,48 @@
                 const dt = tbl.DataTable();
 
                 // Editable cell handlers
+                let currentVal = null; // track the current value being edited
+
                 tbl.find('label.editableCell').on('click', (e) => {
                     const me = $(e.target);
-                    me.prev('input').show().focus();
+                    const inputField = me.prev('input');
+                    inputField.show().focus();
+                    currentVal = inputField.val();
                     me.hide();
                 });
+
                 tbl.find('input.editableCell').on('blur', (e) => {
                     const me = $(e.target);
                     if (!me.parent()) {
                         return; // something went wrong, I'm not in the DOM!
                     }
-                    const myVal = me.val();
+                    // Get the table row data
                     const myRow = dt.row(me.closest('tr'));
                     const rowData = myRow.data();
-                    // Update the table data
                     const fieldName = dt.column(me.closest('td')).dataSrc();
-                    rowData[fieldName] = myVal;
-                    // Update active fields
-                    const optionNum = tbl[0].id.split('_opt').pop();
-                    rowData.active = calculateActiveValues(optionNum, fieldName);
-                    // Check if the new value is valid
-                    if (validateField(tbl, fieldName, me[0])) {
-                        // If valid, recalculate the row ER ...
-                        recalculateErosionRate(optionNum, rowData, fieldName);
-                        // ... then submit to the DB
-                        updateDB(rowData, fieldName, optionNum);
+                    // Get the updated value
+                    const myVal = me.val();
+                    if (currentVal == myVal) {
+                        console.log(`No change to ${fieldName}; moving on`)
                     }
-                    // Always save total erosion
-                    saveErosionRates(tbl);
+                    else {
+                        // Update the table data
+                        rowData[fieldName] = myVal;
+                        // Update active fields
+                        const optionNum = tbl[0].id.split('_opt').pop();
+                        rowData.active = calculateActiveValues(optionNum, fieldName);
+                        // Check if the new value is valid
+                        if (validateField(tbl, fieldName, me[0])) {
+                            // If valid, recalculate the row ER ...
+                            const updatedFields = recalculateErosionRate(optionNum, rowData, fieldName);
+                            // ... then submit to the DB
+                            updateDB(rowData, fieldName, optionNum, updatedFields);
+                        }
+                        // Always save total erosion
+                        saveErosionRates(tbl, rowData.parcel_id);
+                    }
+                    // Unset currentVal
+                    currentVal = null;
                     // Redraw the table
                     myRow.data(rowData);
                     dt.draw(false);
@@ -1121,58 +1135,77 @@
             return active;
         }
 
-        function updateDB(data, fieldName, optionNum, markActive) {
-            const paramName = `erosion${optionNum}-` + ABBR_TO_PARAM[fieldName];
-            const valPostData = {id: data.parcel_id};
+        function makeDbParamName(fieldName, optionNum) {
+            return `erosion${optionNum}-${ABBR_TO_PARAM[fieldName]}`;
+        }
+
+        function updateDB(data, fieldName, optionNum, includeFields) {
+            const paramName = makeDbParamName(fieldName, optionNum);
+            const valPostData = {
+                id: data.parcel_id
+            };
+            let message = `Updating DB with active field "${fieldName}"`;
+            if (includeFields.length) {
+                message += `, with cascading updates for ["${includeFields.join('", "')}"]`;
+            }
+            console.log(message)
             valPostData[paramName] = data[fieldName] == null ? '' : data[fieldName];
-            valPostData['is_active'] = markActive == undefined ? true : markActive === true;
+            valPostData[`${paramName}-active`] = true;
+            for (const otherFieldName of (includeFields || [])) {
+                valPostData[makeDbParamName(otherFieldName, optionNum)] = data[otherFieldName] == null ? '' : data[otherFieldName];
+            }
             TRIM.api.updateParameter('parcel', valPostData);
         }
 
-        function recalculateErosionRate(optionNum, data, fromField, saveData) {
+        function recalculateErosionRate(optionNum, data, fromField) {
+            function valueMatches(oldVal, newVal) {
+                return oldVal == newVal || (oldVal == undefined && isNaN(newVal));
+            }
+
+            const updatedFields = [];
+
             function recalculateSD() {
                 console.log('auto-recalculating SD')
                 const sd = VAL_FUNCS.SD(data.a, data.b, data.Area);
-                data.SD = isNaN(sd) ? undefined : sd;
-                if (saveData !== false) {
-                    updateDB(data, 'SD', optionNum, false);
+                if (!valueMatches(data.SD, sd)) {
+                    data.SD = isNaN(sd) ? undefined : sd;
+                    updatedFields.push('SD');
+                    recalculateER();
                 }
-                recalculateER();
             }
 
             function recalculateLS() {
                 console.log('auto-recalculating LS')
                 const ls = VAL_FUNCS.LS(data.L, data.S);
-                data.LS = isNaN(ls) ? undefined : ls;
-                if (saveData !== false) {
-                    updateDB(data, 'LS', optionNum, false);
+                if (!valueMatches(data.LS, ls)) {
+                    data.LS = isNaN(ls) ? undefined : ls;
+                    updatedFields.push('LS');
+                    recalculateA();
                 }
-                recalculateA();
             }
 
             function recalculateA() {
                 console.log('auto-recalculating A')
                 const a = VAL_FUNCS.A(data.R, data.K, data.LS, data.C, data.P);
-                data.A = isNaN(a) ? undefined : a;
-                if (saveData !== false) {
-                    updateDB(data, 'A', optionNum, false);
+                if (!valueMatches(data.A, a)) {
+                    data.A = isNaN(a) ? undefined : a;
+                    updatedFields.push('A');
+                    recalculateER();
                 }
-                recalculateER();
             }
 
             function recalculateER() {
                 console.log('auto-recalculating ER')
-                fieldName = 'Total Effective Erosion Rate'
-                if (data['Land Use'] == 'Water' || data['Land Use'] == 'Impervious') {
-                    data[fieldName] = 0;
+                fieldName = 'Total Effective Erosion Rate';
+                let er = 0;
+                if (data['Land Use'] != 'Water' && data['Land Use'] != 'Impervious') {
+                    er = VAL_FUNCS.ER(data.A, data.SD);
                 }
-                else {
-                    const er = VAL_FUNCS.ER(data.A, data.SD);
+                if (!valueMatches(data[fieldName], er)) {
                     data[fieldName] = isNaN(er) ? undefined : er;
+                    updatedFields.push('Total Effective Erosion Rate');
                 }
-                if (saveData !== false) {
-                    updateDB(data, fieldName, optionNum, false);
-                }
+                updatedFields.push('Total Effective Erosion Rate');
             }
 
             if (optionNum == 2) {
@@ -1197,6 +1230,8 @@
                     recalculateER();
                 }
             }
+
+            return updatedFields;
         }
 
         function updateAllErosionData(tbl, data, fromField, alsoSaveFields) {
@@ -1205,7 +1240,7 @@
             for (let i = 0; i < data.length; i++) {
                 const rowData = data[i];
                 rowData.active = calculateActiveValues(optionNum, fromField);
-                recalculateErosionRate(optionNum, rowData, fromField, false);
+                recalculateErosionRate(optionNum, rowData, fromField);
             }
             const dt = tbl.DataTable();
             dt.rows().remove();
@@ -1215,36 +1250,37 @@
             for (let i = 0; i < data.length; i++) {
                 const rowData = data[i];
 
-                if (validateField(tbl, fromField, i)) {
-                    // If valid, submit to the DB
-                    updateDB(rowData, fromField, optionNum);
-                }
-                else {
+                if (!validateField(tbl, fromField, i)) {
                     console.log('Invalid field! ' + fromField);
                 }
+                const validOtherFields = [];
                 if (alsoSaveFields !== undefined) {
                     for (fieldName of alsoSaveFields) {
                         if (validateField(tbl, fieldName, i)) {
-                            // If valid, submit to the DB
-                            updateDB(rowData, fieldName, optionNum, false);
+                            validOtherFields.push(fieldName);
                         }
                         else {
                             console.log('Invalid field! ' + fieldName);
                         }
                     }
                 }
+                // If valid, submit to the DB
+                updateDB(rowData, fromField, optionNum, validOtherFields);
             }
 
             // Update the saved total effective erosion rates
             saveErosionRates(tbl);
         }
 
-        function saveErosionRates(tbl) { // updates the saved totalErosionRate
+        function saveErosionRates(tbl, parcelId) { // updates the saved totalErosionRate
             LoadingScreen.show('saving_erosion_rates');
             const updates = [];
             const data = parseErosionData(tbl);
             for (let i = 0; i < data.length; i++) {
                 const rowData = data[i];
+                if (parcelId != undefined && rowData.parcel_id != parcelId) {
+                    continue;
+                }
                 const effectiveErosionRate = rowData[fieldAbbrToName.ER];
                 if (!validateField(tbl, fieldAbbrToName.ER, i)) {
                     // mark the error (done by validateField) and move on
