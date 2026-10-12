@@ -73,6 +73,10 @@ def get_parcels(scenario_id):
     logger = make_logger('parcels_api_get')
 
     try:
+        pcl_filter = request.args.get("parcels", [])
+        if pcl_filter:
+            pcl_filter = pcl_filter.split(",")
+
         p = ParcelService.get_all(scenario_id=scenario_id)
         m = LAND_USE_TYPES
         parcels = []
@@ -85,6 +89,9 @@ def get_parcels(scenario_id):
 
             total_start = time.time()
             for this_p in p:
+                if pcl_filter and this_p.name not in pcl_filter:
+                    continue
+
                 start_time = time.time()
                 parcels.append(this_p.as_serializable())
                 if isinstance(parcels[-1], str):
