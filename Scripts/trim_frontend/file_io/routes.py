@@ -19,6 +19,7 @@ from trim_db.services.entities import ParcelService
 from trim_frontend import api
 from ..scenarios.utils import meteo_wgt_avg_value_from_timeseries
 from ..parcels.utils import delete_parcel_contents, get_canonical_land_use_type, get_canonical_parcel_type, get_ve_defaults_for_parcel_type, handle_parcel_update, initialize_parcel_contents
+from ..parcels.defaults import CONCENTRATION_UNITS
 from ..utils.data_structures import calculate_list_depth
 from ..utils.file_io import csv_to_df, associated_file_helper, convert_sfc_to_meteo, parse_sfc_file_as_dataframe
 from ..utils.forms import assemble_json_form
@@ -214,7 +215,7 @@ def upload_background_conc():
 
                 # check the unit and see if we can convert to default if we have one that is different from default unit
                 input_unit = d['Unit']
-                default_unit = "g / m^3" if comp.media.id in [2, 5, 7, 56, 55, 8, 9] else "g / kg" if comp.media.id in [23, 24, 27, 28, 29, 31, 32, 33, 37, 39, 41, 43, 44, 45, 46, 47, 48, 49, 50, 51] else "g / L" if comp.media.id in [10, 4] else ""
+                default_unit = CONCENTRATION_UNITS(comp.media.name)
                 try:
                     input_val = float(val) * ureg(input_unit)
                     conv_val = input_val.to(default_unit)
