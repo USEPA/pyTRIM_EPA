@@ -990,7 +990,7 @@
                 // Editable cell handlers
                 let currentVal = null; // track the current value being edited
 
-                tbl.find('label.editableCell').on('click', (e) => {
+                tbl.find('label.editableCell').off('click').on('click', (e) => {
                     const me = $(e.target);
                     const inputField = me.prev('input');
                     inputField.show().focus();
@@ -998,7 +998,7 @@
                     me.hide();
                 });
 
-                tbl.find('input.editableCell').on('blur', (e) => {
+                tbl.find('input.editableCell').off('blur').on('blur', (e) => {
                     const me = $(e.target);
                     if (!me.parent()) {
                         return; // something went wrong, I'm not in the DOM!
@@ -1078,11 +1078,11 @@
             function getInputEl(rowIndex) {
                 const dt = tbl.DataTable();
                 // Convert position (0..n-1) to the internal DataTables row index
-                const rowIdx = dt.rows().indexes()[rowIndexOrInput];
-                if (rowIdx === undefined) {
+                rowIndex = dt.rows().indexes()[rowIndex];
+                if (rowIndex === undefined) {
                     return undefined;
                 }
-                const node = dt.cell(rowIdx, fieldName + ':name').node();
+                const node = dt.cell(rowIndex, fieldName + ':name').node();
                 return node ? $(node).find('input')[0] : undefined;
             }
 
