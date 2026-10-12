@@ -25,14 +25,16 @@ from .defaults import \
 from .forms import ScenarioParcelsForm
 
 
-def handle_parcel_update(p:Parcel, parcels_data:dict):
+def handle_parcel_update(p: Parcel, parcels_data: dict):
     logger = make_logger('handle_parcel_update')
 
     land_use = get_land_use(p)
 
-    logger.info(f"Update for {p} (id={p.id})")
-    logger.info(parcels_data)
-    logger.info(f"land_use == '{land_use}'\n")
+    logger.info(
+        f"Update for {p} (id={p.id}):"
+        f"\n{json.dumps(parcels_data, indent=2)}"
+        f"\nland_use == '{land_use}'"
+    )
 
     air_params = {
         'dustLoad': "DustLoad",
@@ -268,29 +270,22 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
             requirements=make_self_requirements(p), # parcel id
         )
         val = parcels_data[field_name]
-        has_value = (str(val) == '0' or (val or ''))
-        if has_value:
-            # has value; update the param
-            param.value = parcels_data[field_name]
-            ParameterService.update(param)
+        if field_name.endswith('-active'):
+            if (str(val).lower() in ['1', 'true']):
+                # is active
+                param.value = 1
+                ParameterService.update(param)
+            else:
+                # inactive, delete this param
+                ParameterService.delete(param)
         else:
-            # no value; delete the param
-            ParameterService.delete(param)
-
-        if has_value and (str(parcels_data.get('is_active')).lower() == 'true'):
-            # Create/update the specified parameter active flag
-            param_def = ParameterService.definitions.get_or_create(
-                variable_name=f'{field_name}-active',
-                full_name=f'{field_name}-active',
-                domain=ParameterService.domains.get(name='Scenario')
-            )
-            param = ParameterService.get_or_create(
-                definition_id=param_def.id,
-                scenario_id=p.scenario_id,
-                requirements=make_self_requirements(p), # parcel id
-            )
-            param.value = 1
-            ParameterService.update(param)
+            if (str(val) == '0' or (val or '')):
+                # has value; update the param
+                param.value = parcels_data[field_name]
+                ParameterService.update(param)
+            else:
+                # no value; delete the param
+                ParameterService.delete(param)
 
     elif field_name in air_params:
         par_name = air_params[field_name]
@@ -334,19 +329,7 @@ def handle_parcel_update(p:Parcel, parcels_data:dict):
 
     elif field_name in fraction_params:
         soil_comp = p.get_compartment("Soil_Surface")
-        # data_name = field_name if field_name == "GroundwaterSeepageFractions" else "RunoffFractions"
-        # seepage_frac_val = float(parcels_data[data_name]) if data_name == "GroundwaterSeepageFractions" else 1-float(parcels_data[data_name])
-        # runoff_frac_val = 1 - seepage_frac_val
-        # watershed_area = (
-        #         soil_comp.area
-        #         * soil_comp.FractionofAreaAvailableforRunoff
-        # ).magnitude
-        # evapotranspiration_frac_val = parcels_data["EvapotranspirationFractions"]
-        # seepage_frac_val = parcels_data["GroundwaterSeepageFractions"]
-        # runoff_frac_val = parcels_data["RunoffFractions"]
         frac_val = float(parcels_data[field_name])
-        # for par_name, par_val in {"TotalRunoffRate": total_runoff_val, "GroundwaterSeepageFraction": seepage_frac_val,
-        #                           "EvapotranspirationFraction": evapotranspiration_frac_val}.items():
         par_name = fraction_params[field_name]
         par_val = frac_val
         par = get_or_create_custom_param(
@@ -707,6 +690,7 @@ def initialize_parcel_contents(new_parcel, vol_elem_defaults=None):
     ParameterService.commit()
 
     update_dynamic_params(new_parcel.scenario, skip_existing=True)
+
 
 # This is for parameters of new compartments whose default value cannot be used
 # and will need custom parameters defined
