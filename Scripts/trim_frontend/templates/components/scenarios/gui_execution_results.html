@@ -192,30 +192,31 @@
                         </div>
                     </div>
                     <div id="units-warning" class="text-danger mt-1" style="display: none;">
-                        <div>
-                            <span class="font-weight-bold">Warning:</span>
-                            when plotting concentrations, note that different compartment types
+                        <div class="alert alert-secondary small">
+                            <p>When plotting concentrations, note that different compartment types
                             track concentration in different units. Be careful not to combine plots
                             with different units! The default units for each compartment type
-                            are listed below.
+                            are listed below.</p>                        
+
+                            <ul class="mb-0">
+                                <li>
+                                    <b>Soils: </b>µg / g
+                                    <ul class="pl-4"><li><b>Vadose: </b> g / g</li></ul>
+                                </li>
+                                <li>
+                                    <b>Aquatic Organisms &amp; Flora: </b>mg / kg
+                                </li>
+                                <li>
+                                    <b>Sediment: </b>µg / g
+                                </li>
+                                <li>
+                                    <b>Surface Water: </b>mg / L
+                                </li>
+                                <li>
+                                    <b>Groundwater: </b>g / L
+                                </li>
+                            </ul>
                         </div>
-                        <ul class="text-dark mb-0">
-                            <li>
-                                <span class="font-weight-bold">Soils: </span>g / g
-                            </li>
-                            <li>
-                                <span class="font-weight-bold">Aquatic Organisms &amp; Flora: </span>mg / kg
-                            </li>
-                            <li>
-                                <span class="font-weight-bold">Sediment: </span>µg / g
-                            </li>
-                            <li>
-                                <span class="font-weight-bold">Surface Water: </span>mg / L
-                            </li>
-                            <li>
-                                <span class="font-weight-bold">Groundwater: </span>g / L
-                            </li>
-                        </ul>
                     </div>
                     <div id="plot_div">
                     </div>
