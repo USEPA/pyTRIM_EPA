@@ -469,13 +469,13 @@ onDomLoad(function() {
             const waterSrc = getVal('trim_water_compartment');
             const water = getCompartment(waterSrc);
             if (water) {
-            try{
-                setField('C_water', water.properties[chem].C?.[dt]?.value, waterSrc);
-            } catch(err) {
-                console.log(e)
+                try {
+                    setField('C_water', water.properties[chem].C?.[dt]?.value, waterSrc);
+                }
+                catch(err) {
+                    console.log(e)
 
-            }
-                
+                }
             }
             else {
                 setField('C_water', 0);
@@ -484,7 +484,11 @@ onDomLoad(function() {
             const humanSrc = getVal('trim_soil_human_compartment');
             const human = getCompartment(humanSrc);
             if (human) {
-                setField('C_soil', human.properties[chem].C?.[dt]?.value, humanSrc);
+                setField(
+                    'C_soil', human.properties[chem].C?.[dt]?.value, humanSrc,
+                    // Convert ug/kg to mg/kg
+                    function (x) { return (x / 1000); }
+                );
             }
             else {
                 setField('C_soil', 0);
@@ -494,7 +498,10 @@ onDomLoad(function() {
             const veg = getCompartment(vegSrc);
             if (veg) {
                 const vegProps = veg.properties;
-                setField('C_root_veg', vegProps[chem].C?.[dt]?.value, vegSrc);
+                setField('C_root_veg', vegProps[chem].C?.[dt]?.value, vegSrc,
+                    // Convert ug/kg to mg/kg
+                    function (x) { return (x / 1000); }
+                );
                 setField('Kd', vegProps[chem].Kd.value, vegSrc);
             }
             else {
@@ -505,7 +512,10 @@ onDomLoad(function() {
             const livestockSrc = getVal('trim_soil_livestock_compartment');
             const livestock = getCompartment(livestockSrc);
             if (human) {
-                setField('Cs_s', livestock.properties[chem].C?.[dt]?.value, livestockSrc);
+                setField('Cs_s', livestock.properties[chem].C?.[dt]?.value, livestockSrc,
+                    // Convert ug/kg to mg/kg
+                    function (x) { return (x / 1000); }
+                );
             }
             else {
                 setField('Cs_s', 0);
@@ -515,7 +525,10 @@ onDomLoad(function() {
             const root = getCompartment(rootSrc);
             if (root) {
                 const rootProps = root.properties;
-                setField('Cs_root_zone', rootProps[chem].C?.[dt]?.value, rootSrc);
+                setField('Cs_root_zone', rootProps[chem].C?.[dt]?.value, rootSrc,
+                    // Convert ug/kg to mg/kg
+                    function (x) { return (x / 1000); }
+                );
                 setField('Kd_feed', rootProps[chem].Kd.value, rootSrc);
             }
             else {
@@ -570,7 +583,10 @@ onDomLoad(function() {
             const sedSrc = getVal('trim_sed_compartment');
             const sed = getCompartment(sedSrc);
             if (sed) {
-                setField('C_sed', sed.properties[chem].C?.[dt]?.value, sedSrc);
+                setField('C_sed', sed.properties[chem].C?.[dt]?.value, sedSrc,
+                    // Convert ug/kg to mg/kg
+                    function (x) { return (x / 1000); }
+                );
             }
             else {
                 setField('C_sed', 0);
