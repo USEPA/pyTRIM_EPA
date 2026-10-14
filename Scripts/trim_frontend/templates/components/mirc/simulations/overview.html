@@ -484,11 +484,7 @@ onDomLoad(function() {
             const humanSrc = getVal('trim_soil_human_compartment');
             const human = getCompartment(humanSrc);
             if (human) {
-                setField(
-                    'C_soil', human.properties[chem].C?.[dt]?.value, humanSrc,
-                    // Convert ug/kg to mg/kg
-                    function (x) { return (x / 1000); }
-                );
+                setField('C_soil', human.properties[chem].C?.[dt]?.value, humanSrc);
             }
             else {
                 setField('C_soil', 0);
@@ -498,10 +494,7 @@ onDomLoad(function() {
             const veg = getCompartment(vegSrc);
             if (veg) {
                 const vegProps = veg.properties;
-                setField('C_root_veg', vegProps[chem].C?.[dt]?.value, vegSrc,
-                    // Convert ug/kg to mg/kg
-                    function (x) { return (x / 1000); }
-                );
+                setField('C_root_veg', vegProps[chem].C?.[dt]?.value, vegSrc);
                 setField('Kd', vegProps[chem].Kd.value, vegSrc);
             }
             else {
@@ -512,10 +505,7 @@ onDomLoad(function() {
             const livestockSrc = getVal('trim_soil_livestock_compartment');
             const livestock = getCompartment(livestockSrc);
             if (human) {
-                setField('Cs_s', livestock.properties[chem].C?.[dt]?.value, livestockSrc,
-                    // Convert ug/kg to mg/kg
-                    function (x) { return (x / 1000); }
-                );
+                setField('Cs_s', livestock.properties[chem].C?.[dt]?.value, livestockSrc);
             }
             else {
                 setField('Cs_s', 0);
@@ -525,10 +515,7 @@ onDomLoad(function() {
             const root = getCompartment(rootSrc);
             if (root) {
                 const rootProps = root.properties;
-                setField('Cs_root_zone', rootProps[chem].C?.[dt]?.value, rootSrc,
-                    // Convert ug/kg to mg/kg
-                    function (x) { return (x / 1000); }
-                );
+                setField('Cs_root_zone', rootProps[chem].C?.[dt]?.value, rootSrc);
                 setField('Kd_feed', rootProps[chem].Kd.value, rootSrc);
             }
             else {
@@ -583,10 +570,7 @@ onDomLoad(function() {
             const sedSrc = getVal('trim_sed_compartment');
             const sed = getCompartment(sedSrc);
             if (sed) {
-                setField('C_sed', sed.properties[chem].C?.[dt]?.value, sedSrc,
-                    // Convert ug/kg to mg/kg
-                    function (x) { return (x / 1000); }
-                );
+                setField('C_sed', sed.properties[chem].C?.[dt]?.value, sedSrc);
             }
             else {
                 setField('C_sed', 0);
