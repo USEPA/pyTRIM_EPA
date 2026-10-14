@@ -599,7 +599,7 @@ def get_initial_concentrations(pcl):
                 if skip_comps_with in comp.name:
                     continue
 
-                unit = "g / m^3" if comp.media.id in [2, 5, 7, 56, 55, 8, 9] else "g / kg" if comp.media.id in [23, 24, 27, 28, 29, 31, 32, 33, 37, 39, 41, 43, 44, 45, 46, 47, 48, 49, 50, 51] else "g / L" if comp.media.id in [10, 4] else ""
+                unit = CONCENTRATION_UNITS(comp.media.name)
                 ic_rate = comp.initialConcentration(chemical=chem)  # slow ...
                 try:
                     ic_rate = ic_rate.magnitude
@@ -1166,3 +1166,68 @@ EROSION_DEFAULTS = {
     'LS': 1.5,
     'P': 1
 }
+
+
+CONCENTRATION_UNITS = lambda media: (
+    "g / m^3"
+    if media in ["Air", "Sediment", "Surface_Soil", "Root_Zone", "Vadose_Zone", "Tilled_Soil", "Untilled_Soil"]
+    else (
+        "g / kg"
+        if media
+        in [
+            "Macrophyte",
+            "Plankton",
+            "Water_Column_Herbivore",
+            "Water_Column_Omnivore",
+            "Water_Column_Carnivore",
+            "Benthic_Invertebrate",
+            "Benthic_Omnivore",
+            "Benthic_Carnivore",
+            "Agriculture_Leaf",
+            "Coniferous_Leaf",
+            "Deciduous_Leaf",
+            "Grass_Leaf",
+            "Agriculture_Leaf_Particle",
+            "Coniferous_Leaf_Particle",
+            "Deciduous_Leaf_Particle",
+            "Grass_Leaf_Particle",
+            "Agriculture_Root",
+            "Grass_Root",
+            "Agriculture_Stem",
+            "Grass_Stem",
+        ]
+        else "g / L" if media in ["Surface_Water", "Groundwater"] else ""
+    )
+)
+
+# CONCENTRATION_UNITS = lambda media: (
+#     "g / m^3"
+#     if media in ["Air", "Sediment", "Surface_Soil", "Root_Zone", "Vadose_Zone", "Tilled_Soil", "Untilled_Soil"]
+#     else (
+#         "g / kg"
+#         if media
+#         in [
+#             "Macrophyte",
+#             "Plankton",
+#             "Water_Column_Herbivore",
+#             "Water_Column_Omnivore",
+#             "Water_Column_Carnivore",
+#             "Benthic_Invertebrate",
+#             "Benthic_Omnivore",
+#             "Benthic_Carnivore",
+#             "Agriculture_Leaf",
+#             "Coniferous_Leaf",
+#             "Deciduous_Leaf",
+#             "Grass_Leaf",
+#             "Agriculture_Leaf_Particle",
+#             "Coniferous_Leaf_Particle",
+#             "Deciduous_Leaf_Particle",
+#             "Grass_Leaf_Particle",
+#             "Agriculture_Root",
+#             "Grass_Root",
+#             "Agriculture_Stem",
+#             "Grass_Stem",
+#         ]
+#         else "g / L" if media in ["Surface_Water", "Groundwater"] else ""
+#     )
+# )

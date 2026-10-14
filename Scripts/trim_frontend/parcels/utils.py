@@ -21,7 +21,7 @@ from .defaults import \
     LAND_USE_TYPES, AQUATIC_DIET, Land_Parcel_VolElem_defaults, \
     Water_Parcel_VolElem_defaults, Wet_Dry_Source_VolElem_defaults, \
     EROSION_DEFAULTS, make_self_requirements, \
-    SURFACE_SOIL_SPECIFIC_MEDIA_PARAMS
+    SURFACE_SOIL_SPECIFIC_MEDIA_PARAMS, CONCENTRATION_UNITS
 from .forms import ScenarioParcelsForm
 
 
@@ -492,7 +492,7 @@ def handle_parcel_update(p: Parcel, parcels_data: dict):
         ic_comp = p.get_compartment(name=parcels_data["compartment_name"])
         ic_param_name = 'initialConcentration'
         ic_val = parcels_data["initial_concentration_value"]
-        unit = "g / m^3" if ic_comp.media.id in [2, 5, 7, 56, 55, 8, 9] else "g / kg" if ic_comp.media.id in [23, 24, 27, 28, 29, 31, 32, 33, 37, 39, 41, 43, 44, 45, 46, 47, 48, 49, 50, 51] else "g / L" if ic_comp.media.id in [10, 4] else ""
+        unit = CONCENTRATION_UNITS(ic_comp.media.name)
         update_chemical_formula(chem, ic_comp, ic_param_name, ic_val, unit)
 
     elif field_name == "runoff_matrix_value":

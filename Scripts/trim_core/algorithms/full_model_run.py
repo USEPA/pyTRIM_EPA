@@ -163,6 +163,10 @@ def make_transition_matrix(scenario):
                     cou = str(cof.units)
                     cof = cof.magnitude
 
+            # g/g is dimensionless but we still want this displayed for the user
+            if is_soil and not cou:
+                cou = "g / g"
+
             # denominator in concentration calculation
             if comp.media.isa("Surface_Water") or comp.media.isa("Groundwater"):
                 # note that denom must be in L
