@@ -1178,35 +1178,40 @@ onDomLoad(function () {
 
                         // here we tell the reader what to do when it's done reading...
                         reader.onload = readerEvent => {
-                            var fileContent = readerEvent.target.result; // this is the content!
-                            shapesJson = JSON.parse(fileContent);
+                            try {
+                                var fileContent = readerEvent.target.result; // this is the content!
+                                shapesJson = JSON.parse(fileContent);
 
-                            let fieldData = [{
-                                "type": "input",
-                                "name": "geojson",
-                                "value": JSON.stringify(shapesJson["features"])
-                            }];
+                                let fieldData = [{
+                                    "type": "input",
+                                    "name": "geojson",
+                                    "value": JSON.stringify(shapesJson["features"])
+                                }];
 
-                            fieldData.push({
-                                "type": "input",
-                                "name": "scenario_id",
-                                "value": TRIM.store.currentScenario.id
-                            });
+                                fieldData.push({
+                                    "type": "input",
+                                    "name": "scenario_id",
+                                    "value": TRIM.store.currentScenario.id
+                                });
 
-                            LoadingScreen.show('upload_parcel_geojson');
-                            TRIM.api.uploadParcelFile(fieldData, function (success, responseData, c) {
-                                LoadingScreen.hide('upload_parcel_geojson');
+                                LoadingScreen.show('upload_parcel_geojson');
+                                TRIM.api.uploadParcelFile(fieldData, function (success, responseData, c) {
+                                    LoadingScreen.hide('upload_parcel_geojson');
 
-                                if (!success) {
-                                    //alert('An error occurred during upload.');
-                                    alert(responseData?.message)
-                                    console.log(responseData)
-                                    console.log(c)
-                                } else {
-                                    console.log("reload...");
-                                    window.location.reload();
-                                }
-                            });
+                                    if (!success) {
+                                        //alert('An error occurred during upload.');
+                                        alert(responseData?.message)
+                                        console.log(responseData)
+                                        console.log(c)
+                                    } else {
+                                        console.log("reload...");
+                                        window.location.reload();
+                                    }
+                                });
+                            } catch (err) {
+                                alert(`Failed to read .geojson: ${err}`);
+                                throw new Error("Failed to read .geojson");
+                            }
                         }
                     }
                     else if (file.name.split('.').pop() == "shp") {
@@ -1314,35 +1319,41 @@ onDomLoad(function () {
 
             // here we tell the reader what to do when it's done reading...
             reader.onload = readerEvent => {
-                var fileContent = readerEvent.target.result; // this is the content!
-                shapesJson = JSON.parse(fileContent);
+                try {
+                    var fileContent = readerEvent.target.result; // this is the content!
+                    shapesJson = JSON.parse(fileContent);
 
-                let fieldData = [{
-                    "type": "input",
-                    "name": "geojson",
-                    "value": JSON.stringify(shapesJson["features"])
-                }];
+                    let fieldData = [{
+                        "type": "input",
+                        "name": "geojson",
+                        "value": JSON.stringify(shapesJson["features"])
+                    }];
 
-                fieldData.push({
-                    "type": "input",
-                    "name": "scenario_id",
-                    "value": TRIM.store.currentScenario.id
-                });
+                    fieldData.push({
+                        "type": "input",
+                        "name": "scenario_id",
+                        "value": TRIM.store.currentScenario.id
+                    });
 
-                LoadingScreen.show('upload_parcel_geojson');
-                TRIM.api.uploadParcelFile(fieldData, function (success, responseData, c) {
-                    LoadingScreen.hide('upload_parcel_geojson');
+                    LoadingScreen.show('upload_parcel_geojson');
+                    TRIM.api.uploadParcelFile(fieldData, function (success, responseData, c) {
+                        LoadingScreen.hide('upload_parcel_geojson');
 
-                    if (!success) {
-                        //alert('An error occurred during upload.');
-                        alert(responseData?.message)
-                        console.log(responseData)
-                        console.log(c)
-                    } else {
-                        console.log("reload...");
-                        window.location.reload();
-                    }
-                });
+                        if (!success) {
+                            //alert('An error occurred during upload.');
+                            alert(responseData?.message)
+                            console.log(responseData)
+                            console.log(c)
+                        } else {
+                            console.log("reload...");
+                            window.location.reload();
+                        }
+                    });
+                }
+                catch (err) {
+                    alert(`Failed to read .geojson: ${err}`);
+                    throw new Error("Failed to read .geojson");
+                }
             }
         }
 
