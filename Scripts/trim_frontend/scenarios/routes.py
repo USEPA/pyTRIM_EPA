@@ -903,9 +903,10 @@ def export_for_mirc(scenario_id):
         abort(403)
 
     logger = make_logger('mirc_exporter')
+    start = time.time()
     try:
-        latest_model_run = scen.latest_proc_status
-        trim_data = compile_mirc_data(scen, latest_model_run, logger)
+        trim_data = compile_mirc_data(scen, logger)
+        logger.info(f"Compiled MIRC data in {time.time() - start} seconds")
     except Exception as e:  
         logger.error(e)
         traceback.print_exc()

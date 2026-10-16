@@ -469,13 +469,13 @@ onDomLoad(function() {
             const waterSrc = getVal('trim_water_compartment');
             const water = getCompartment(waterSrc);
             if (water) {
-            try{
-                setField('C_water', water.properties[chem].C?.[dt]?.value, waterSrc);
-            } catch(err) {
-                console.log(e)
+                try {
+                    setField('C_water', water.properties[chem].C?.[dt]?.value, waterSrc);
+                }
+                catch(err) {
+                    console.log(e)
 
-            }
-                
+                }
             }
             else {
                 setField('C_water', 0);

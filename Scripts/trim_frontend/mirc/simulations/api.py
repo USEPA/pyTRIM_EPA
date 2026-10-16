@@ -1,7 +1,8 @@
 import os
 import pandas as pd
 import tempfile
-from flask import request, abort
+import time
+from flask import request, abort, current_app
 from flask_security import login_required, current_user
 from werkzeug.datastructures import MultiDict
 from trim_db.services import ScenarioService, MircSimulationService
@@ -92,6 +93,7 @@ def get_simulations(trim_scenario_id):
 
             return api.FileResult(filepath)
 
+    start = time.time()
     sims = []
     for sim in trim_scenario.mirc_simulations:
         s = sim.as_serializable()
@@ -109,6 +111,7 @@ def get_simulations(trim_scenario_id):
             import traceback; traceback.print_exc()
             pass
         sims.append(s)
+    current_app.logger.info(f"Acquired MIRC simulations in {time.time() - start} seconds")
 
     return api.Result({
         'simulations': sims
@@ -133,10 +136,13 @@ def get_results(trim_scenario_id, simulation_id):
 
     simulation = simulation[0]
 
+    start = time.time()
     try:
         results = MircSimulationService(simulation).run_pathways()
+        current_app.logger.info(f"Acquired MIRC simulation in {time.time() - start} seconds")
     except Exception:
         import traceback
+        current_app.logger.info(f"MIRC simulation errored out after {time.time() - start} seconds")
         traceback.print_exc()
         raise
 
