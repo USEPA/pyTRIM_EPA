@@ -332,8 +332,8 @@ def parse_parcel_upload():
             # process csv with format detection and normalization
             csv_rows = list(reader)
             rows_to_process = process_csv_parcels(csv_rows)
-    except Exception:
-        errors.append("Unable to open file")
+    except Exception as e:
+        errors.append(f"Error reading file: {e}")
         rows_to_process = []
 
     for row in rows_to_process:
@@ -496,7 +496,7 @@ def parse_met_file():
 
                 fields = list(df.columns.values)
                 entries = len(df.index)
-                print(f'NUMBER OF ENTRIES IS {entries} ')
+                logger.info(f'NUMBER OF ENTRIES IS {entries} ')
                 if entries < 1:
                     raise AssertionError(
                         'No entries were found matching the scenario timeframe of'
@@ -515,7 +515,7 @@ def parse_met_file():
                     othercol = [col for col_grp in met_columns for col in col_grp
                                 if col_grp != metcol and col in df.columns]
                     df_met = df.drop(columns=othercol)
-                    print(f'Calculating timeseries average for {metcol}')
+                    logger.info(f'Calculating timeseries average for {metcol}')
 
                     try:
                         met_fields |= meteo_wgt_avg_value_from_timeseries(df_met, met_type)
@@ -675,8 +675,8 @@ def get_parcel_row_csv(row, coord_system, utm_zone):
     # now fixed_coords is definitely nested3 lists of long/lat pairs
 
     return {
-        "parcel_name": row.get("ParcelName"),
-        "parcel_type": get_canonical_parcel_type(row.get("ParcelType")),
+        "parcel_name": row["ParcelName"],
+        "parcel_type": get_canonical_parcel_type(row["ParcelType"]),
         "parcel_description": row.get("Description", ""),
         "land_use": get_canonical_land_use_type(row.get("LandUse", "")),
         "hasFarmFoodChain": "Yes" if has_farm_food_chain else "No",
@@ -727,7 +727,7 @@ def aggregate_parcel_vertices_from_csv(csv_rows):
     parcels = OrderedDict()
     
     for row in csv_rows:
-        parcel_name = row.get('ParcelName')
+        parcel_name = row['ParcelName']
         
         if not parcel_name or parcel_name.strip() == '':
             continue
@@ -735,7 +735,7 @@ def aggregate_parcel_vertices_from_csv(csv_rows):
         if parcel_name not in parcels:
             parcels[parcel_name] = {
                 'ParcelName': parcel_name,
-                'ParcelType': row.get('ParcelType', ''),
+                'ParcelType': row['ParcelType'],
                 'LandUse': row.get('LandUse', ''),
                 'FarmFoodChain': row.get('FarmFoodChain', ''),
                 'FishFoodWeb': row.get('FishFoodWeb', ''),
@@ -745,8 +745,8 @@ def aggregate_parcel_vertices_from_csv(csv_rows):
                 'vertices': []
             }
         
-        x_coord = row.get('Xcoordinate')
-        y_coord = row.get('Ycoordinate')
+        x_coord = row['Xcoordinate']
+        y_coord = row['Ycoordinate']
         
         
         if x_coord is not None and y_coord is not None and x_coord != '' and y_coord != '':
@@ -754,7 +754,7 @@ def aggregate_parcel_vertices_from_csv(csv_rows):
                 # [x, y] pair
                 parcels[parcel_name]['vertices'].append([float(x_coord), float(y_coord)])
             except (ValueError, TypeError) as e:
-                print(f"Warning: Invalid coordinates for {parcel_name}: x={x_coord}, y={y_coord} - {e}")
+                raise ValueError(f"Warning: Invalid coordinates for {parcel_name}: x={x_coord}, y={y_coord} - {e}")
         
         print(f'checking if the info for parcel is saved correctly : {parcels}')
     result = []
@@ -775,7 +775,7 @@ def normalize_single_row_parcels(csv_rows):
     result = []
     
     for row in csv_rows:
-        parcel_name = row.get('ParcelName')
+        parcel_name = row['ParcelName']
         
         if not parcel_name or parcel_name.strip() == '':
             continue
@@ -798,7 +798,7 @@ def normalize_single_row_parcels(csv_rows):
         
         normalized = {
             'ParcelName': parcel_name,
-            'ParcelType': row.get("ParcelType"),
+            'ParcelType': row["ParcelType"],
             'LandUse': row.get('LandUse', ''),
             'FarmFoodChain': row.get('FarmFoodChain', ''),
             'FishFoodWeb': row.get('FishFoodWeb', ''),
@@ -832,8 +832,8 @@ def process_csv_parcels(csv_rows):
 def get_parcel_row_geojson(row):
     props = row["properties"]
     return {
-        "parcel_name": props.get("name").strip(),
-        "parcel_type": props.get("parceltype").strip(),
+        "parcel_name": props["name"].strip(),
+        "parcel_type": props["parceltype"].strip(),
         "parcel_description": props.get("desc", " "),
         "land_use": props["landuse"].get("lu").strip(),
         "hasFarmFoodChain": props.get("farmfoodchain").strip(),
