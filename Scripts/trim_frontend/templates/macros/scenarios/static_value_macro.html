@@ -22,7 +22,7 @@
         $("#{{table_id}} > tbody > tr").each((i, e) => {
             let cell = $(e).find("td").eq(selected_header).find("input.editableCell");
             let cell_lbl = cell.siblings("label.editableCell");
-            if (cell.length && cell_lbl.length && input_val) {
+            if (cell.length && cell_lbl.length && Number.isFinite(input_val)) {
                 cell_lbl.click();
                 cell.val(input_val).blur();
             }

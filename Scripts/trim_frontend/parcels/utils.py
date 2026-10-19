@@ -30,11 +30,8 @@ def handle_parcel_update(p: Parcel, parcels_data: dict):
 
     land_use = get_land_use(p)
 
-    logger.info(
-        f"Update for {p} (id={p.id}):"
-        f"\n{json.dumps(parcels_data, indent=2)}"
-        f"\nland_use == '{land_use}'"
-    )
+    logger.info(f"Update for {p} (id={p.id}; land_use='{land_use}'):")
+    logger.info(parcels_data)
 
     air_params = {
         'dustLoad': "DustLoad",
@@ -327,28 +324,27 @@ def handle_parcel_update(p: Parcel, parcels_data: dict):
                     update_custom_param_value(par, 0)
         ParameterService.commit()
 
-    elif field_name in fraction_params:
+    elif field_name == "spatiallyVaryingRow": 
         soil_comp = p.get_compartment("Soil_Surface")
-        frac_val = float(parcels_data[field_name])
-        par_name = fraction_params[field_name]
-        par_val = frac_val
-        par = get_or_create_custom_param(
-            soil_comp.parameters.get(par_name),
-            {
-                "requirements": f"(self.id == {soil_comp.id})",
-                "scenario_id": p.scenario.id,
-            },
-            no_commit=True
-        )
-        update_custom_param_value(par, par_val)
+        row_data = json.loads(parcels_data[field_name])
+        for name, val in row_data.items():
+            par_name = fraction_params[name]
+            par = get_or_create_custom_param(
+                soil_comp.parameters.get(par_name),
+                {
+                    "requirements": f"(self.id == {soil_comp.id})",
+                    "scenario_id": p.scenario.id,
+                },
+                no_commit=True
+            )
+            update_custom_param_value(par, float(val))
 
-        if field_name == "RunoffFractions":
-            update_dynamic_params(p.scenario)
-            ParcelService.update(p)
-            return ApiResult(json.dumps({
-                'message': 'success',
-                'TotalRunoffRate': soil_comp.TotalRunoffRate.magnitude
-            }))
+        update_dynamic_params(p.scenario)
+        ParcelService.update(p)
+        return ApiResult({
+            'message': 'success',
+            'TotalRunoffRate': soil_comp.TotalRunoffRate.magnitude
+        })
 
     elif field_name in misc_water_params:
         par_name = misc_water_params[field_name]

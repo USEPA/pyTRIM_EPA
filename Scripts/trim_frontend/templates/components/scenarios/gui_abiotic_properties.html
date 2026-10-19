@@ -656,23 +656,29 @@
         function submit_abiotic_cell(focusTblId, cell, data) {
             let parcel_info = $(cell).data('parcelinfo')
             if (parcel_info) {
-                let ls_info = "Abiotic_Prop_update"
-                LoadingScreen.show(ls_info)
                 let old_data = parcel_info[parcel_info.findIndex(e => e.type == 'input')].value
                 parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data
-                let param_store_key = "soil_params"
-                TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', (rsp)=>{
-                    update_data_store_callback(rsp, cell, parcel_info, param_store_key, data, old_data)
-                    if (parcel_info[2].name == 'surfaceSoilThickness') {
-                        getParcelByKey('id', parcel_info[0].value).surfaceSoilThickness = parseFloat(data);
-                    }
-                    else if (parcel_info[2].name == 'tillage') {
-                        getParcelByKey('id', parcel_info[0].value).soilTillage = data;
-                    }
-                    updateMercuryTransformRate(parcel_info)
-                    LoadingScreen.hide(ls_info)
+
+                let uuid = crypto.randomUUID();
+                LoadingScreen.show(`Abiotic_Prop_update_${uuid}`);
+                TRIM.api.updateParcel(TRIM.store.currentScenario.id, parcel_info).on('load', (rsp)=>{
+                    try {
+                        update_data_store_callback(rsp, cell, parcel_info, "soil_params", data, old_data)
+                        if (parcel_info[2].name == 'surfaceSoilThickness') {
+                            getParcelByKey('id', parcel_info[0].value).surfaceSoilThickness = parseFloat(data);
+                        }
+                        else if (parcel_info[2].name == 'tillage') {
+                            getParcelByKey('id', parcel_info[0].value).soilTillage = data;
+                        }
+                        updateMercuryTransformRate(parcel_info);
+                    } catch (err) {
+                        console.error(err);
+                    } finally {
+                        LoadingScreen.hide(`Abiotic_Prop_update_${uuid}`);
+                        table_data = get_Data_from_table(`#${focusTblId}`);
+                    }                    
                 })
-                table_data = get_Data_from_table(`#${focusTblId}`)
+                
             }
         }
 
@@ -708,36 +714,51 @@
         }
 
         function submit_spatially_varying_row(focusTblId, cell, data) {
+            let parcel_batch = [
+                {"type": "data", "name": "id", "value": -1},
+                {"type": "data", "name": "field", "value": "spatiallyVaryingRow"},
+                {"type": "input", "name": "spatiallyVaryingRow", "value": {}}
+            ];
+
             $(cell).parents("tr").find("input.editableCell").each((i,f)=>{
                 let parcel_info = $(f).data('parcelinfo');
                 if (parcel_info) {
-                    let ls_info = 'submit_sv_val'
-                    LoadingScreen.show(ls_info);
-                    let old_data = parcel_info[parcel_info.findIndex(e => e.type == 'input')].value
                     if (f == cell) {
-                        parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = data;
+                        parcel_info[parcel_info.findIndex(e => e.type == 'input')].value = Number(data);
                     }
-                    TRIM.api.updateParcel('{{ scenario.id }}', parcel_info).on('load', (rsp)=>{
-                        if (rsp.target.status === 200) {
-                            let field = parcel_info[2];
-                            let pcl = getParcelByKey('id', parcel_info[0].value);
-                            if (field.name == "EvapotranspirationFractions") {
-                                pcl.evapotrans_frac = Number(field.value);
-                            }
-                            else if (field.name == "GroundwaterSeepageFractions") {
-                                pcl.seepage_frac = Number(field.value);
-                            }
-                            else if (field.name == "RunoffFractions") {
-                                pcl.runoff_fraction = Number(field.value);
-                                pcl.soil_params.Soil_Surface.TotalRunoffRate = JSON.parse(rsp.target.responseJSON).TotalRunoffRate;
-                                updateAbioticData();
-                            }
-                        }
-                        LoadingScreen.hide(ls_info);
-                    })
+
+                    // set parcel ID, append data
+                    parcel_batch[0].value = parcel_info[parcel_info.findIndex(e => e.name == 'id')].value;
+
+                    let cell_name = parcel_info[parcel_info.findIndex(e => e.type == 'input')].name;
+                    let cell_value = parcel_info[parcel_info.findIndex(e => e.type == 'input')].value;
+                    parcel_batch[2].value[cell_name] = cell_value;                   
+                }
+            });
+
+            console.log(parcel_batch);
+            parcel_batch[2].value = JSON.stringify(parcel_batch[2].value);
+
+            let uuid = crypto.randomUUID(); // For batch updates
+            LoadingScreen.show(`submit_sv_val_${uuid}`);
+            TRIM.api.updateParcel(TRIM.store.currentScenario.id, parcel_batch).on('load', (rsp)=>{
+                try {
+                    let row_data = JSON.parse(parcel_batch[2].value);
+                    let pcl = getParcelByKey('id', parcel_batch[0].value);
+
+                    pcl.evapotrans_frac = Number(row_data["EvapotranspirationFractions"]);
+                    pcl.seepage_frac = Number(row_data["GroundwaterSeepageFractions"]);
+                    pcl.runoff_fraction = Number(row_data["RunoffFractions"]);
+
+                    pcl.soil_params.Soil_Surface.TotalRunoffRate = rsp.target.responseJSON.TotalRunoffRate;
+                    updateAbioticData();
+                } catch (err) {
+                    console.error(err);
+                } finally {
+                    LoadingScreen.hide(`submit_sv_val_${uuid}`);
                     table_data = get_Data_from_table(`#${focusTblId}`);
                 }
-            })
+            });
         }
 
         function handleUsdaPolling() {
