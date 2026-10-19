@@ -420,7 +420,7 @@ def reset_emissions_and_concentrations(s, chem, ic_reset=False):
                 update_chemical_formula(chem, comp, param_name, 0)
 
 
-def update_dynamic_params(scen, skip_existing=False):
+def update_dynamic_params(scen_or_pcl, skip_existing=False):
     def update_param(param, comp, val):
         if isinstance(param, ParameterDefinition):
             get_or_create_custom_param(
@@ -438,15 +438,27 @@ def update_dynamic_params(scen, skip_existing=False):
             param.value = val
             ParameterService.commit()
 
-    for comp in scen.compartments:
-        # AverageVerticalVelocity
-        if comp.name in ["Soil_Surface", "Soil_Root_Zone", "Soil_Vadose_Zone"]:
-            avg_vertical_velocity = comp.parameters.get('AverageVerticalVelocity')
-            val = round(0.2 * scen.Rain.magnitude, 5)
-            update_param(avg_vertical_velocity, comp, val)
+    if isinstance(scen_or_pcl, Scenario):
+        scen = scen_or_pcl
+        soil_comps = (
+            scen.get_compartment(media="Surface_Soil")
+            + scen.get_compartment(media="Root_Zone")
+            + scen.get_compartment(media="Vadose_Zone")
+        )
+    else: # assume parcel
+        scen = scen_or_pcl.scenario
+        soil_comps = [
+            scen_or_pcl.get_compartment(name="Soil_Surface"),
+            scen_or_pcl.get_compartment(name="Soil_Root_Zone"),
+            scen_or_pcl.get_compartment(name="Soil_Vadose_Zone"),
+        ]
 
-        # TotalRunoffRate
-        if comp.name in ["Soil_Surface"]:
+    for comp in soil_comps:
+        avg_vertical_velocity = comp.parameters.get('AverageVerticalVelocity')
+        val = round(0.2 * scen.Rain.magnitude, 5)
+        update_param(avg_vertical_velocity, comp, val)
+
+        if comp.name == "Soil_Surface":
             total_runoff_rate = comp.parameters.get('TotalRunoffRate')
             val = comp.PrecipitationRunoffFraction * scen.Rain.magnitude
             update_param(total_runoff_rate, comp, val)

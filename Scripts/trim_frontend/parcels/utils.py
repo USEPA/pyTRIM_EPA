@@ -324,7 +324,7 @@ def handle_parcel_update(p: Parcel, parcels_data: dict):
                     update_custom_param_value(par, 0)
         ParameterService.commit()
 
-    elif field_name == "spatiallyVaryingRow": 
+    elif field_name == "spatiallyVaryingRow":
         soil_comp = p.get_compartment("Soil_Surface")
         row_data = json.loads(parcels_data[field_name])
         for name, val in row_data.items():
@@ -337,9 +337,15 @@ def handle_parcel_update(p: Parcel, parcels_data: dict):
                 },
                 no_commit=True
             )
-            update_custom_param_value(par, float(val))
 
-        update_dynamic_params(p.scenario)
+            if par.value != float(val):
+                update_custom_param_value(par, float(val))
+                if name == "RunoffFractions":
+                    try:
+                        update_dynamic_params(p)
+                    except Exception as e:
+                        logger.warning(f"Error updaing dynamic params: {e}")
+
         ParcelService.update(p)
         return ApiResult({
             'message': 'success',
