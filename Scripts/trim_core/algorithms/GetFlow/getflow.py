@@ -4,6 +4,9 @@ import json
 import math
 import requests
 import os
+import gc
+import tempfile
+from pathlib import Path, PurePosixPath
 import numpy as np
 import pandas as pd
 from qgis import processing
@@ -21,6 +24,90 @@ def loggy_safe(msg):
     print(msg)
 
 TEMP_PARCEL_NAME_COL = 'title' # actual TRIM parcels have a "title", not a "name"!
+
+
+class LoggingProcessingFeedback(QgsProcessingFeedback):
+    def __init__(self):
+        super().__init__()
+
+    # def setProgress(self, progress: float):
+    #    loggy_safe(f"[PROC_PROGRESS] {progress:.1f}%")
+
+    def pushInfo(self, info: str):
+        if info.strip():
+            loggy_safe(f"[PROC_INFO] {info}")
+
+    # def pushConsoleInfo(self, info: str):
+    #     loggy_safe(f"[PROC_CONSOLE] {info}")
+
+    def pushCommandInfo(self, info: str):
+        loggy_safe(f"[PROC_COMMAND] {info}")
+
+    def pushWarning(self, warning: str):
+        loggy_safe(f"[PROC_WARNING] {warning}")
+
+    def reportError(self, error: str, fatal: bool = False):
+        message = str(error)
+        if "SetColorTable() only supported for Byte or UInt16 bands" in message:
+            return
+        else:
+            loggy_safe(f"[PROC_ERROR] (fatal={fatal}): {message}")
+
+    @staticmethod
+    def rasterDiagnostics(layer, name):
+        if layer is None or not layer.isValid():
+            loggy_safe(f"{name}: INVALID layer")
+            return False
+
+        width, height = layer.width(), layer.height()
+        cells = width * height
+        loggy_safe(
+            f"{name}: {width}x{height} pixels ({cells:,} total), "
+            f"CRS={layer.crs().authid()}, extent={layer.extent().toString()}, "
+            f"cell={layer.rasterUnitsPerPixelX()}x{layer.rasterUnitsPerPixelY()}"
+        )
+
+        # A bounded sample helps distinguish an all-NoData raster from one
+        # that has data. It is not an exact NoData percentage.
+        try:
+            stats = layer.dataProvider().bandStatistics(1, QgsRasterBandStats.All, layer.extent(), 100000)
+            loggy_safe(
+                f"{name} sampled stats: valid samples={stats.elementCount}, "
+                f"min={stats.minimumValue}, max={stats.maximumValue}"
+            )
+            if stats.elementCount == 0:
+                loggy_safe(f"{name}: sample found no valid pixels")
+        except Exception as e:
+            loggy_safe(f"{name}: statistics check failed: {e}")
+
+        if width <= 0 or height <= 0:
+            loggy_safe(f"{name} is invalid or has zero dimensions")
+
+
+qgs_proc_logging = LoggingProcessingFeedback()
+
+def clear_mem(raster_layer):
+    """
+    Clear out layers and files after they're no longer needed
+    to save space for larger parcels
+    """
+    try:
+        loggy_safe(f"Cleaning up raster layer {raster_layer.name()}...")
+        raster_path = raster_layer.source().split("|", 1)[0]
+        QgsProject.instance().removeMapLayer(raster_layer.id())
+        del raster_layer
+        gc.collect()
+
+        for suffix in ("", ".aux.xml", ".tfw", ".ovr"):
+            try:
+                os.remove(raster_path + suffix)
+            except FileNotFoundError:
+                pass
+            except OSError as exc:
+                loggy_safe(f"Could not remove temporary raster {raster_path}{suffix}: {exc}")
+    except Exception as e:
+        loggy_safe(f"Failed to delete: {e}")
+        
 
 ### START: Samuel's USGS_API_TNM.py functions
 
@@ -79,16 +166,24 @@ def download_elevation_data(bbox, output_path="elevation.tif"):
         loggy_safe(data.get('errors'))
     if not data.get('items'):
         raise Exception("No elevation data found for the specified area")
-    
-    # Get the download URL for the first item
-    download_url = data['items'][0]['downloadURL']
-    
-    # Download the elevation data
-    loggy_safe(f"Downloading elevation data from {download_url}")
-    response = requests.get(download_url, stream=True)
-    
-    if response.status_code != 200:
-        raise Exception(f"Download failed with status code {response.status_code}")
+
+    # Multiple of each tile; use most recent publication and drop dupes by bbox
+    latest_by_bbox = {}
+    for tile in data['items']:
+        tile_pub_date = tile['publicationDate']
+
+        tile_bbox = tuple(
+            int(tile['boundingBox'][coord])
+            for coord in ('minX', 'maxX', 'minY', 'maxY')
+        )
+        tile_bbox = str(tile_bbox)
+
+        current = latest_by_bbox.get(tile_bbox)
+        if current is None or tile_pub_date > current['publicationDate']:
+            latest_by_bbox[tile_bbox] = tile
+
+    elevation_tiles = list(latest_by_bbox.values())
+
 
     def convert_bytes(num):
         """
@@ -99,25 +194,73 @@ def download_elevation_data(bbox, output_path="elevation.tif"):
                 return "%3.1f %s" % (num, x)
             num /= 1024.0
 
-    # Save the file
-    with open(output_path, 'wb') as f:
-        looper = 0
-        then = None
-        for chunk in response.iter_content(chunk_size=8192):
-            looper += 1
-            if looper % 1000 == 0:
-                curr_file_info = os.stat(output_path)
-                curr_size = convert_bytes(curr_file_info.st_size)
-                now = time.perf_counter_ns()
-                if then is not None:
-                    difference = f"{now - then}ns"
-                else:
-                    difference = "initial"
-                loggy_safe(f"[{difference}] streaming response iteration {looper}; {output_path} now {curr_size}...")
-                then = now
-            f.write(chunk)
-    
-    loggy_safe(f"Elevation data saved to {output_path}")
+
+    with tempfile.TemporaryDirectory("getflow_dem") as tmpdir:
+        tile_paths = []
+
+        for i, tile in enumerate(elevation_tiles):
+            loggy_safe(f"Downloading tile [{tile['title']}] ({i+1}/{len(elevation_tiles)})")
+
+            # Get the download URL for current elevation tile
+            download_url = tile['downloadURL']
+            filepath = Path(tmpdir, PurePosixPath(download_url).name)
+
+            # Download the elevation data
+            response = requests.get(download_url, stream=True)
+
+            if response.status_code != 200:
+                loggy_safe(f"Download failed with status code {response.status_code}, skipping...")
+                continue
+
+            # Save the file
+            with open(filepath, 'wb') as f:
+                looper = 0
+                then = None
+                for chunk in response.iter_content(chunk_size=8192):
+                    looper += 1
+                    if looper % 1000 == 0:
+                        curr_file_info = os.stat(filepath)
+                        curr_size = convert_bytes(curr_file_info.st_size)
+                        now = time.perf_counter_ns()
+                        if then is not None:
+                            difference = f"{now - then}ns"
+                        else:
+                            difference = "initial"
+                        loggy_safe(f"[{difference}] streaming response iteration {looper}; {filepath.name} now {curr_size}...")
+                        then = now
+                    f.write(chunk)
+
+            tile_paths.append(str(filepath))
+
+        # Merge the tiles together
+        loggy_safe("Merging tiles with GDAL")
+        vrt_path = str(Path(tmpdir, "elevation_mosaic.vrt"))
+
+        vrt_result = processing.run("gdal:buildvirtualraster", {
+            "INPUT": tile_paths,
+            "RESOLUTION": 0,
+            "SEPARATE": False,
+            "PROJ_DIFFERENCE": False,
+            "ADD_ALPHA": False,
+            "ASSIGN_CRS": None,
+            "RESAMPLING": 0,
+            "SRC_NODATA": "",
+            "OUTPUT": vrt_path,
+        }, feedback=qgs_proc_logging)
+
+        translate_params = {
+            "INPUT": vrt_result["OUTPUT"],
+            "TARGET_CRS": None,
+            "NODATA": None,
+            "COPY_SUBDATASETS": False,
+            "OPTIONS": "TILED=YES|COMPRESS=DEFLATE|BIGTIFF=IF_SAFER",
+            "EXTRA": "",
+            "DATA_TYPE": 0,
+            "OUTPUT": output_path,
+        }
+        processing.run("gdal:translate", translate_params, feedback=qgs_proc_logging)
+        loggy_safe(f"Done!")
+
     return output_path
 
 ### END: Samuel's USGS_API_TNM.py functions
@@ -362,7 +505,7 @@ def run_getflow_v13(parcels):
         'DISSOLVE': True,
         'OUTPUT': 'memory:'
     }
-    buffer_result = processing.run("native:buffer", buffer_params)
+    buffer_result = processing.run("native:buffer", buffer_params, feedback=qgs_proc_logging)
     buffered_parcels = buffer_result['OUTPUT']  # Use the layer directly
     QgsProject.instance().addMapLayer(buffered_parcels)
 
@@ -392,31 +535,13 @@ def run_getflow_v13(parcels):
         'OUTPUT': 'TEMPORARY_OUTPUT'
     }
 
-    result = processing.run("gdal:cliprasterbymasklayer", clip_params)
+    result = processing.run("gdal:cliprasterbymasklayer", clip_params, feedback=qgs_proc_logging)
     ClippedRaster = QgsRasterLayer(result['OUTPUT'], "ClippedRaster")
+    LoggingProcessingFeedback.rasterDiagnostics(ClippedRaster, "ClippedRaster")
     QgsProject.instance().addMapLayer(ClippedRaster)
 
-
-    # TEST START - dump out QgsRasterLayer
-    """
-    print(f"raster width: {ClippedRaster.width()}")
-
-    def dump_raster_layer_to_file(rl, filename, coord_system = "EPSG:4326"):
-        if (type(rl) is str):
-            import sys
-            print(f"whoops, did you pass in the path and not the actual RasterLayer?")
-            sys.exit(1)
-
-        pipe = QgsRasterPipe()
-        pipe.set(rl.dataProvider().clone())
-        file_writer = QgsRasterFileWriter(filename)
-        file_writer.writeRaster(pipe, rl.width(),rl.height(), rl.extent(), QgsCoordinateReferenceSystem(coord_system))
-        print(f"wrote file to '{filename}'")
-
-    dump_raster_layer_to_file(dem, "/app/pytrim_getflow_src/demDebug.tif")
-    dump_raster_layer_to_file(ClippedRaster, "/app/pytrim_getflow_src/ClippedRasterDebug.tif")
-    """
-    # TEST END - dump out QgsRasterLayer
+    clear_mem(dem)
+    Path(dem_raster_layer).unlink(missing_ok=True)
 
 
     print(f"TIBSV13 step 3...")
@@ -435,17 +560,19 @@ def run_getflow_v13(parcels):
         'power':2,
         'cells':8,
         'output':'TEMPORARY_OUTPUT',
-        'uncertainty':'TEMPORARY_OUTPUT',
+        'uncertainty': None, # 'TEMPORARY_OUTPUT',
         'GRASS_REGION_PARAMETER':None,
         'GRASS_REGION_CELLSIZE_PARAMETER':0,
         'GRASS_RASTER_FORMAT_OPT':'',
         'GRASS_RASTER_FORMAT_META':''
     }
 
-    results =  processing.run("grass7:r.fill.stats", proc_params)
+    results =  processing.run("grass7:r.fill.stats", proc_params, feedback=qgs_proc_logging)
+    clear_mem(ClippedRaster)
 
     FILLED_DEM = results['output']
     FILLED_DEM = QgsRasterLayer(FILLED_DEM, "FILLED_DEM")
+    LoggingProcessingFeedback.rasterDiagnostics(FILLED_DEM, "FILLED_DEM")
     QgsProject.instance().addMapLayer(FILLED_DEM)
 
     proc_params = {
@@ -465,30 +592,39 @@ def run_getflow_v13(parcels):
         '-b': False,
         'accumulation': 'TEMPORARY_OUTPUT',
         'drainage': 'TEMPORARY_OUTPUT',
-        'basin': 'TEMPORARY_OUTPUT',
-        'stream': 'TEMPORARY_OUTPUT',
-        'half_basin': 'TEMPORARY_OUTPUT',
-        'length_slope': 'TEMPORARY_OUTPUT',
-        'slope_steepness': 'TEMPORARY_OUTPUT',
-        'tci': 'TEMPORARY_OUTPUT',
-        'spi': 'TEMPORARY_OUTPUT',
+        'basin': None, # 'TEMPORARY_OUTPUT',
+        'stream': None, # 'TEMPORARY_OUTPUT',
+        'half_basin': None, # 'TEMPORARY_OUTPUT',
+        'length_slope': None, # 'TEMPORARY_OUTPUT',
+        'slope_steepness': None, # 'TEMPORARY_OUTPUT',
+        'tci': None, # 'TEMPORARY_OUTPUT',
+        'spi': None, # 'TEMPORARY_OUTPUT',
         'GRASS_REGION_PARAMETER': None,
         'GRASS_REGION_CELLSIZE_PARAMETER': 0,
         'GRASS_RASTER_FORMAT_OPT': '',
         'GRASS_RASTER_FORMAT_META': ''
     }
 
-    results = processing.run("grass7:r.watershed", proc_params)
+    results = processing.run("grass7:r.watershed", proc_params, feedback=qgs_proc_logging)
+    clear_mem(FILLED_DEM)
+
+    # Don't think this is used, just taking up space
+    """
     STREAM = results['stream']
     STREAM = QgsRasterLayer(STREAM, "STREAM")
+    LoggingProcessingFeedback.rasterDiagnostics(STREAM, "STREAM")
     QgsProject.instance().addMapLayer(STREAM)
-
+    """
+    
     DRAINAGE = results['drainage']
     DRAINAGE = QgsRasterLayer(DRAINAGE, "DRAINAGE")
+    LoggingProcessingFeedback.rasterDiagnostics(DRAINAGE, "DRAINAGE")
     QgsProject.instance().addMapLayer(DRAINAGE)
-
+   
+    
     ACCUMULATION = results['accumulation']
     ACCUMULATION = QgsRasterLayer(ACCUMULATION, "ACCUMULATION")
+    LoggingProcessingFeedback.rasterDiagnostics(ACCUMULATION, "ACCUMULATION")
     QgsProject.instance().addMapLayer(ACCUMULATION)
 
     # Create an absolute value version of the accumulation raster using Raster Calculator
@@ -501,8 +637,9 @@ def run_getflow_v13(parcels):
         'OUTPUT': 'TEMPORARY_OUTPUT'
     }
 
-    abs_result = processing.run("qgis:rastercalculator", abs_acc_params)
+    abs_result = processing.run("qgis:rastercalculator", abs_acc_params, feedback=qgs_proc_logging)
     ABS_ACCUMULATION = QgsRasterLayer(abs_result['OUTPUT'], "ABS_ACCUMULATION")
+    LoggingProcessingFeedback.rasterDiagnostics(ABS_ACCUMULATION, "ABS_ACCUMULATION")
     QgsProject.instance().addMapLayer(ABS_ACCUMULATION)
 
     print(f"TIBSV13 build_parcel_flow_matrix...")

@@ -51,7 +51,6 @@ class StepfnxHelper:
 
         exec_rsp = self.sfn_client.describe_execution(executionArn=self.execution_arn)
         self.status = exec_rsp.get("status", "").upper()
-        self.logs = self.get_logs()
 
         if self.status == "SUCCEEDED":
             _output = exec_rsp.get("output", "{}")
@@ -61,7 +60,7 @@ class StepfnxHelper:
         elif self.task_failed():
             self.status = "FAILED"
 
-        return {"status": self.status, "output": self.output, "logs": self.logs}
+        return {"status": self.status, "output": self.output, "logs": self.get_logs()}
 
     def fetch_task_metadata(self):
         # task information

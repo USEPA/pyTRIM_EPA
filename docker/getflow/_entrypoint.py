@@ -324,7 +324,7 @@ class DockerGetflowEntryPoint:
                 "presigned_urls": presigned_urls
             })
 
-        loggy_safe(f"Getflow run complete! Surface runoff matrix updated for {scen} ({self.scenario_id})")
+            loggy_safe(f"Getflow run complete! Surface runoff matrix updated for {scen} ({self.scenario_id})")
 
 if __name__ == "__main__":
     ep = DockerGetflowEntryPoint()
