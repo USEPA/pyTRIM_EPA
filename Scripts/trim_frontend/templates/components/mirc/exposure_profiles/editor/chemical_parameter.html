@@ -14,6 +14,15 @@
 </h4>
 
 <div id="cp-collapse" class="collapse show">
+    <div class="row my-3">
+        <div class="col">
+            {% call data_preamble('cp') %}
+            <p>If you are developing a custom exposure profile, enter the listed parameter values (and units, where needed) for each chemical relevant to your assessment. Use the dropdown menu to select the chemical. Fraction Wet Deposition and Soil Bioavailability are unitless. For Cancer Slope Factor we recommend the default units of “(mg/kg/day)^-1”. For Reference Dose we recommend the default units of “mg/kg/day”.</p>
+            <p>The default values used in the RTR Screening and RTR Site-Specific exposure profiles are discussed in the User Guide Appendix and originate from a variety of sources: EPA sources (Integrated Risk Information System, National Air Toxics Assessment, Estimated Order of Potential Potencies of Selected PAH Based on Mouse Skin Carcinogenesis, and Health Effects Assessment Summary Tables), the California EPA’s Air Toxics Hot Spots documentation, and the World Health Organization’s toxic equivalency factors.</p>
+            <p>We have no suggestions for sources of site-specific values.</p>
+            {% endcall %}
+        </div>
+    </div>
     <div class="form-row mb-3">
         <div class="col-sm-auto">
             <label for="chemical-filter">

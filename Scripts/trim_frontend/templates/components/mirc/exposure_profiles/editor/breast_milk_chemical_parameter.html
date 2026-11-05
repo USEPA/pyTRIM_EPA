@@ -15,6 +15,15 @@
 </h4>
 
 <div id="bmcp-collapse" class="collapse show">
+    <div class="row my-3">
+        <div class="col">
+            {% call data_preamble('bmcp') %}
+            <p>If you are developing a custom exposure profile, enter the listed parameter values (and units, where needed) for each chemical relevant to your assessment. Use the dropdown menu to select the chemical. Infant Absorption Efficiency, Maternal Absorption Efficiency, Fraction in Maternal Blood, and Fraction in Maternal Plasma are unitless, as are Blood-Milk Partition Coefficient (as g milk/g plasma) and Blood Cell-Plasma Partition Coefficient (as mL whole blood/mL red blood cells). For the other parameters, we recommend the following default units: Half-Life in Blood = “day”, Non-Lactating Elimination Rate = “day^-1”, and Lactating Elimination Rate = “day^-1”. Note that the following parameters are required only for hydrophilic chemicals: Fraction in Maternal Blood, Fraction in Maternal Plasma, Lactating Elimination Rate, Blood-Milk Partition Coefficient, and Blood Cell-Plasma Partition Coefficient. Note that the following parameter is required only for lipophilic chemicals: Fraction in Maternal Fat.</p>
+            <p>The default values used in the RTR Screening and RTR Site-Specific exposure profiles exist only for dioxins/furans and methylmercury. However, for methylmercury, one parameter (Fraction in Maternal Plasma) is missing an empirical value, which will cause the calculation of infant exposure to return 0. In this case, you have the option to set infant methylmercury dose from breast milk consumption equal to the mother’s methylmercury dose from all sources.</p>
+            <p>We have no suggestions for sources of site-specific values.</p>
+            {% endcall %}
+        </div>
+    </div>
     <div class="form-row mb-3">
         <div class="col-sm-auto">
             <label for="breast-milk-chemical-filter">

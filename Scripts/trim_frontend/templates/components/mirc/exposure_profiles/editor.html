@@ -145,7 +145,10 @@
 <script src="{{url_for('static', filename='js/mirc.js')}}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    function toggleCollapse() {
+    function toggleCollapse(evt) {
+        if (evt.target !== this ) {
+            return;
+        }
         var controller = $('[aria-controls="' + this.id + '"]');
         var chevron = controller.find('i');
         chevron.toggleClass('fa-eye');
@@ -154,6 +157,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     $('.collapse').on('show.bs.collapse', toggleCollapse);
     $('.collapse').on('hide.bs.collapse', toggleCollapse);
+
+    $('[data-toggle="tooltip"]').tooltip();
 
     // Make tabs linkable in url
     (function enableHashTabs() {

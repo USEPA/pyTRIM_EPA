@@ -14,6 +14,15 @@
 </h4>
 
 <div id="bw-collapse" class="collapse show">
+    <div class="row my-3">
+        <div class="col">
+            {% call data_preamble('bw') %}
+            <p>If you are developing a custom exposure profile, enter body wights for each combination of life stage and percentile of body weight relevant to your assessment. Use the dropdown menus to select life stage and units of measure.</p>
+            <p>The default values used in the RTR Screening and RTR Site-Specific exposure profiles are discussed in the User Guide Appendix. Most of the default values originate from the EPA’s Exposure Factors Handbook.</p>
+            <p>Site-specific values may come from surveys of residents of your study area or representative individuals.</p>
+            {% endcall %}
+        </div>
+    </div>
     <div class="form-row mb-3">
         <div class="col-sm-2">
             <label for="body-weight-age-filter">

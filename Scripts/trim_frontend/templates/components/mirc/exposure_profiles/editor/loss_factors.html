@@ -15,6 +15,15 @@
 </h4>
 
 <div id="lf-collapse" class="collapse show">
+    <div class="row my-3">
+        <div class="col">
+            {% call data_preamble('lf') %}
+            <p>If you are developing a custom exposure profile, enter one or more loss factors (fraction of product mass lost) where appropriate for each product relevant to your assessment. Use the dropdown menu to select the product. Enter your own custom Loss Description for the first loss factor, and enter the corresponding Fraction Lost. If needed, select the + button to add another row and enter information for a second loss factor (and so on for additional loss factors).</p>
+            <p>The default values used in the RTR Screening and RTR Site-Specific exposure profiles are discussed in the User Guide Appendix. The first loss factor (used for produce, beef, pork, and poultry) corresponds to cooking, paring, and preparation loss. For fruits, this includes losses from draining cooked forms. For vegetables, this includes losses due to paring, trimming, flowering the stalk, thawing, draining, scraping, shelling, slicing, husking, chopping, and dicing and gains from the addition of water, fat, or other ingredients. For meats, this includes dripping and volatile losses during cooking. The second loss factor (used for exposed fruit, root [root vegetables], beef, pork, and poultry) corresponds to net post-cooking loss. For fruits, this includes losses from removal of skin or peel, core or pit, stems or caps, seeds and defects; it may also include losses from removal of drained liquids from canned or frozen forms. For vegetables, this includes losses from draining or removal of skin. For meats, this includes losses from cutting, shrinkage, excess fat, bones, scraps, and juices. The default values originate from the EPA’s Exposure Factors Handbook. Default loss factors are not used for the other products.</p>
+            <p>Site-specific values may come from surveys of local food preparation habits.</p>
+            {% endcall %}
+        </div>
+    </div>
     <div class="form-row mb-3">
         <div class="col-sm-2">
             <label for="lf-product-filter">

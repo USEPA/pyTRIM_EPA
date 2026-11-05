@@ -14,6 +14,15 @@
 </h4>
 
 <div id="air-collapse" class="collapse show">
+    <div class="row my-3">
+        <div class="col">
+            {% call data_preamble('air') %}
+            <p>If you are developing a custom exposure profile, enter local livestock’s product ingestion rates and fraction contaminated of local ingested products, for each product relevant to your assessment. Use the dropdown menu to select the consuming animal, where beef refers to beef cattle, dairy refers to dairy cattle, poultry and eggs both refer to chickens, and pork refers to swine. Enter ingestion rates and the units of measure under Quantity and Unit. We recommend using the default units of “kg/day”. Ingestion rates are for products from inside the study area. Also enter values under Fraction Contaminated, which is the fraction of consumed product contaminated with the target chemical.</p>
+            <p>The default values used in the RTR Screening and RTR Site-Specific exposure profiles are discussed in the User Guide Appendix. The default values for ingestion rate originate from the EPA’s Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities. It is assumed that chickens do not consume forage or silage, and swine do not consume forage. Values for fraction contaminated are assumed to be 1.0 since the products are assumed to come from inside the simulated study area.</p>
+            <p>Site-specific values may come from surveys of local farming.</p>
+            {% endcall %}
+        </div>
+    </div>
     <div class="form-row mb-3">
         <div class="col-sm-2">
             <label for="animal-ir-consumer-filter">

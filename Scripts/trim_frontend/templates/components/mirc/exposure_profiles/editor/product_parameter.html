@@ -15,6 +15,15 @@
 </h4>
 
 <div id="pp-collapse" class="collapse show">
+    <div class="row my-3">
+        <div class="col">
+            {% call data_preamble('pp') %}
+            <p>If you are developing a custom exposure profile, enter an exposure frequency (the number of days per year that people consume a contaminated product) for each product relevant to your assessment. Use the dropdown menu to select the product.</p>
+            <p>The default values used in the RTR Screening and RTR Site-Specific exposure profiles are discussed in the User Guide Appendix and originate from the EPA’s Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities, except for infant breast feeding which is assumed to be a full year of exposure.</p>
+            <p>Site-specific values may come from surveys of residents of your study area or representative individuals.</p>
+            {% endcall %}
+        </div>
+    </div>
     <div class="form-row mb-3">
         <div class="col-sm-2">
             <label for="product-filter">

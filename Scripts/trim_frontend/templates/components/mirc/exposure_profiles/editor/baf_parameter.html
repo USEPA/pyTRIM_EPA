@@ -15,6 +15,15 @@
 </h4>
 
 <div id="baf-collapse" class="collapse show">
+    <div class="row my-3">
+        <div class="col">
+            {% call data_preamble('baf') %}
+            <p>If you are developing a custom exposure profile and wish to use a bio-accumulation approach to calculating chemical concentrations in aquatic biota (currently required for arsenic, though it can be used for any chemical), enter the bio-accumulation values for each biota. Use the dropdown menu to select the chemical. “BSAF” next to the biota name in the Aquatic Type column refers to using chemical concentrations in sediment to estimate chemical bio-accumulation in benthic organisms, while “BAF” refers to using chemical concentrations in the water column to estimate chemical bio-accumulation in water column organisms. We recommend using the default units of “kg /kg” for BSAFs and “L/kg” for BAFs.</p> 
+            <p>The default values (which exist only for arsenic) used in the RTR Screening and RTR Site-Specific exposure profiles are discussed in the User Guide Appendix and originate from journal papers as well as reports from the EPA and the U.S. Department of Energy.</p> 
+            <p>We have no suggestions for sources of site-specific values.</p>  
+            {% endcall %}
+        </div>
+    </div>
     <div class="form-row mb-3">
         <div class="col-sm-auto">
             <label for="baf-chemical-filter">

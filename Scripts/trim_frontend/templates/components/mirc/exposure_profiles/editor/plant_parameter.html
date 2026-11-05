@@ -14,6 +14,15 @@
 </h4>
 
 <div id="plant-collapse" class="collapse show">
+    <div class="row my-3">
+        <div class="col">
+            {% call data_preamble('plant') %}
+            <p>If you are developing a custom exposure profile, enter the listed parameter values (and units, where needed) for each product relevant to your assessment. Use the dropdown menu to select the product. Moisture Adjustment Factor and Interception Fraction are unitless. For Surface Loss Coefficient we recommend using the default units of “year^-1”. For Exposure Length we recommend using the default units of “year”. For Standing Biomass we recommend using the default units of “kg/m^2” (where kg refers to dry weight).</p>
+            <p>The default values used in the RTR Screening and RTR Site-Specific exposure profiles are discussed in the User Guide Appendix and originate from the EPA’s Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities or the EPA’s Data Collection for the Hazardous Waste Identification Rule.</p>
+            <p>Site-specific values may come from surveys of local farming and gardening.</p>
+            {% endcall %}
+        </div>
+    </div>
     <div class="form-row mb-3">
         <div class="col-sm-2">
             <label for="plant-filter">

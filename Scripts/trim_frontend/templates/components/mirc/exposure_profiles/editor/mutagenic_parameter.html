@@ -15,6 +15,14 @@
 </h4>
 
 <div id="mutagenic-collapse" class="collapse show">
+    <div class="row my-3">
+        <div class="col">
+            {% call data_preamble('mutagenic') %}
+            <p>If you are developing a custom exposure profile, enter mutagenic adjustment factors if appropriate for chemicals and life stages relevant to your assessment. Use the dropdown menu to select the chemical. Mutagenic adjustment factors are used to adjust lifetime cancer risk calculations to account for greater susceptibility to carcinogens acting through a mutagenic mode of action in early life stages.</p>
+            <p>The default values used in the RTR Screening and RTR Site-Specific exposure profiles are discussed in the User Guide Appendix and originate from the EPA’s Guidance on Selecting Age Groups for Monitoring and Assessing Childhood Exposures to Environmental Contaminants. The default factors are used only for POM.</p>
+            {% endcall %}
+        </div>
+    </div>
     <div class="form-row mb-3">
         <div class="col-sm-2">
             <label for="mutagenic-chemical-filter">

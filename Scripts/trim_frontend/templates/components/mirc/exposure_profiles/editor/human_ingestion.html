@@ -14,6 +14,15 @@
 </h4>
 
 <div id="hir-collapse" class="collapse show">
+    <div class="row my-3">
+        <div class="col">
+            {% call data_preamble('hir') %}
+            <p>If you are developing a custom exposure profile, enter local population’s product ingestion rates and fraction contaminated of local ingested products, for each combination of life stage, product, and percentile of ingestion rate relevant to your assessment. Use the dropdown menus to select life stage and percentile (Pmean is the average ingestion rate, P05 is the 5th percentile, P10 is the 10th percentile, and so on). Enter ingestion rates and the units of measure under Quantity and Units. We recommend using the default units of “g/day/kg” (grams per day per kilogram body weight) for most of the products, except “mL/day” for water, “mg/day” for soil, “kg/day” for breast milk, and “g/day” for fish. Ingestion rates are for products from inside the study area (i.e., home-produced farm and garden products, self-caught local fish, and local surface water and soil) and correspond to consumers only (i.e., not the general population which has a mix of consumers and non-consumers). Also enter values under Fraction Contaminated, which is the fraction of consumed product contaminated with the target chemical.</p>
+            <p>The default values used in the RTR Screening and RTR Site-Specific exposure profiles are discussed in the User Guide Appendix. Most of the default values for ingestion rate originate from the EPA’s Exposure Factors Handbook, the EPA’s analysis of the USDA’s Continuing Survey of Food Intakes by Individuals, or the EPA’s Estimated Per Capita Fish Consumption documentation. Values for fraction contaminated are assumed to be 1.0 since the products are assumed to come from inside the simulated study area.</p>    
+            <p>Site-specific values may come from surveys of residents of your study area or representative individuals.</p>
+            {% endcall %}
+        </div>
+    </div>
     <div class="form-row mb-3">
         <div class="col-sm-2">
             <label for="human-ir-age-filter">

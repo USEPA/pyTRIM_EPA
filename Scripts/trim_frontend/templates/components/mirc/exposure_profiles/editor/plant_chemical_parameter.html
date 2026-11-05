@@ -15,6 +15,15 @@
 </h4>
 
 <div id="pcp-collapse" class="collapse show">
+    <div class="row my-3">
+        <div class="col">
+            {% call data_preamble('pcp') %}
+            <p>If you are developing a custom exposure profile, enter the listed parameter values (and units, where needed) for each combination of chemical and product relevant to your assessment. Use the dropdown menus to select the chemical and the product. Plant-Soil Bioconcentration Factor is unitless as [mg chemical/g dry weight plant]/[mg chemical/g soil]. Empirical Correction Factor is unitless. Air-Plant Biotransfer Factor is unitless as [mg chemical/g dry weight plant]/[mg chemical/g air]. For Root Concentration Factor we recommend the default units of “L/kg”, meaning L soil pore water per kg root dry weight.</p>
+            <p>The default values used in the RTR Screening and RTR Site-Specific exposure profiles are discussed in the User Guide Appendix and originate from the EPA’s Human Health Risk Assessment Protocol for Hazardous Waste Combustion Facilities.</p>
+            <p>We have no suggestions for sources of site-specific values.</p>
+            {% endcall %}
+        </div>
+    </div>
     <div class="form-row mb-3">
         <div class="col-sm-auto">
             <label for="cp-chemical-filter">

@@ -15,6 +15,15 @@
 </h4>
 
 <div id="acp-collapse" class="collapse show">
+    <div class="row my-3">
+        <div class="col">
+            {% call data_preamble('acp') %}
+            <p>If you are developing a custom exposure profile, enter the listed parameter values (and units, where needed) for each combination of chemical and product relevant to your assessment. Use the dropdown menus to select the chemical and the product. Soil Bioavailbility Factor is unitless and does not apply to fish. Metabolism Factor is unitless and applies only to mammal products (beef, dairy, and pork). Fish Cooking Adjustment Factor is unitless. For Biotransfer Factor, which applies to livestock products (beef, pork, poultry, eggs, and dairy), we recommend the default units of “day/kg” where kg is the fresh-weight tissue.</p>
+            <p>The default values used in the RTR Screening and RTR Site-Specific exposure profiles are discussed in the User Guide Appendix and originate from several EPA products and journal papers.</p>
+            <p>We have no suggestions for sources of site-specific values.</p>
+            {% endcall %}
+        </div>
+    </div>
     <div class="form-row mb-3">
         <div class="col-sm-auto">
             <label for="ca-chemical-filter">

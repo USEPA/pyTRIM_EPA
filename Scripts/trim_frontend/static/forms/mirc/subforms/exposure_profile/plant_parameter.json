@@ -39,7 +39,7 @@
             "min": 0,
             "step": "any",
             "allow_empty": true,
-            "help": "The fraction of each food product consumed that is contaminated by the chemical at a level consistent with environmental concentrations in the area of concern"
+            "help": "The measure of the amount of chemical on the plant surface (above-ground exposed produce or animal forage and silage) lost to natural physical processes (e.g., wind, water) over time."
         },
         {
             "id": "kp_unit",

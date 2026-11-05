@@ -13,7 +13,16 @@
     </button>
 </h4>
 
-<div id="bm-collapse" class="collapse show">    
+<div id="bm-collapse" class="collapse show">   
+    <div class="row my-3">
+        <div class="col">
+            {% call data_preamble('bm') %}
+            <p>If you are developing a custom exposure profile, enter the listed parameter values (and units, where needed) for each parameter. Fraction Fat, Fraction of Maternal Weight in Fat, and Fraction of Maternal Weight in Plasma are all unitless. For Maternal Exposure Duration we recommend using the default units of “day”.</p>
+            <p>The default values used in the RTR Screening and RTR Site-Specific exposure profiles are discussed in the User Guide Appendix and originate from the EPA’s Exposure Factors Handbook or their Methodology for Assessing Health Risks Associated with Multiple Pathways of Exposure to Combustor Emissions, while the default value for Maternal Exposure Duration is the half-life of dioxins/furans minus 1 year of nursing.</p>
+            <p>We have no suggestions for sources of site-specific values.</p>
+            {% endcall %}
+        </div>
+    </div> 
     <div class="table-responsive">
     <table id="breast-milk-parameters" class="table table-sm table-bordered">
         <thead>
