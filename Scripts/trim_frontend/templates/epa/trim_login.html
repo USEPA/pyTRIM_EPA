@@ -8,6 +8,15 @@
                     class="usa-button usa-button--outline">Sign in with Login.gov</a>
             </p>
 
+            <p>
+                Access to webTRIM.FaTE requires a Login.gov account approved by EPA. 
+                <a class="usa-link" rel="noreferrer" 
+                    href="{{ url_for('static', filename='templates/RequestingAccessTowebTRIMFaTE.pdf') }}"
+                    title="Click here for instructions">
+                    Learn more about getting access.
+                </a>
+            </p>
+
             {% if config["TRIM_ENV_PROFILE"] in config['LOGIN_ENV_WHITELIST'] %}
             <p>or</p>
 
