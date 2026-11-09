@@ -1693,7 +1693,9 @@ onDomLoad(function () {
                         'value': data
                     }]
                     parcel_info = JSON.stringify(parcel_info)
-                    var parcel_types = ["Air Only", "Water Only", "Land Only", "Land & Air", "Water & Air"]
+                    // At the moment there's no point in having "Air Only" parcels
+                    // with a different shape than "Land Only" and "Water Only"
+                    var parcel_types = ["Land & Air", "Water & Air"]
                     var $select = $("<select class='editableCell form-control form-control-sm parceltype_ddl' name='select' style='display:none'></select>", {})
                     $.each(parcel_types, function (k, v) {
                         var $option = $("<option></option>",
